@@ -349,7 +349,7 @@ module.exports = {
                     // ==========================
 
                     //Hack to compile Glob files. Don´t call this function!
-                    function ಠ_ಠ() {
+                    function ಠ_ಠ_() {
                         // require('./../../extensions/*/browser/*.js', {mode: 'expand'});
                         // require('./../../extensions/*/browser/*/*.js', {mode: 'expand'});
 

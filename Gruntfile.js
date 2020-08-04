@@ -171,8 +171,8 @@ module.exports = function (grunt) {
                 },
                 options: {
                     transform: [['babelify', {
-                        presets: [['es2015'], ['react'], ['stage-0']],
-                        plugins: ["transform-object-rest-spread"]
+                        presets: ["@babel/preset-env", "@babel/preset-react"],
+                        plugins: ["@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread"]
                     }], 'require-globify', 'windowify', 'envify', ['browserify-css', { global: true }]]
                 }
             },
@@ -186,8 +186,8 @@ module.exports = function (grunt) {
                         fullPaths: true
                     },
                     transform: [['babelify', {
-                        presets: [['es2015'], ['react'], ['stage-0']],
-                        plugins: ["transform-object-rest-spread"]
+                        presets: ["@babel/preset-env", "@babel/preset-react"],
+                        plugins: ["@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread"]
                     }], 'require-globify', 'windowify', 'envify', ['browserify-css', { global: true }]]
                 }
             },
@@ -200,8 +200,8 @@ module.exports = function (grunt) {
                         'urls-to-cache': './browser/service-worker/cache.production.js'
                     },
                     transform: [['babelify', {
-                        presets: [['es2015'], ['react'], ['stage-0']],
-                        plugins: ["transform-object-rest-spread"]
+                        presets: ["@babel/preset-env", "@babel/preset-react"],
+                        plugins: ["@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread"]
                     }], 'require-globify']
                 }
             },
@@ -214,8 +214,8 @@ module.exports = function (grunt) {
                         'urls-to-cache': './browser/service-worker/cache.development.js'
                     },
                     transform: [['babelify', {
-                        presets: [['es2015'], ['react'], ['stage-0']],
-                        plugins: ["transform-object-rest-spread"]
+                        presets: ["@babel/preset-env", "@babel/preset-react"],
+                        plugins: ["@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread"]
                     }], 'require-globify']
                 }
             },
@@ -229,8 +229,8 @@ module.exports = function (grunt) {
                         fullPaths: true
                     },
                     transform: [['babelify', {
-                        presets: [['es2015'], ['react'], ['stage-0']],
-                        plugins: ["transform-object-rest-spread"]
+                        presets: ["@babel/preset-env", "@babel/preset-react"],
+                        plugins: ["@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread"]
                     }], 'require-globify', 'windowify', 'envify', ['browserify-css', { global: true }]],
                     watch: true,
                     keepAlive: true
