@@ -286,7 +286,7 @@ module.exports = {
                             setViewOnSelect: false,
                             responsive: false,
                             callCustomOnload: false,
-                            checkBox: true,
+                            checkBox: !simple,
                             height: 300,
                             locale: window._vidiLocale.replace("_", "-"),
                             template: template,
