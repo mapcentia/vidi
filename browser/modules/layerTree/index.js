@@ -1314,7 +1314,7 @@ module.exports = {
         if (layerDescription.meta) {
             try {
                 let preParsedMeta = JSON.parse(layerDescription.meta);
-                if (typeof preParsedMeta == 'object' && preParsedMeta instanceof Object && !(preParsedMeta instanceof Array)) {
+                if (typeof preParsedMeta === 'object' && preParsedMeta instanceof Object && !(preParsedMeta instanceof Array)) {
                     parsedMeta = preParsedMeta;
                 }
             } catch (e) {
@@ -1735,6 +1735,28 @@ module.exports = {
      * @returns {Array}
      */
     getParentLayerFilters(layerKey) {
+        let parentLayers = [];
+        let activeLayers = _self.getActiveLayers();
+        activeLayers.map(activeLayerName => {
+            let layerMeta = meta.getMetaByKey(layerTreeUtils.stripPrefix(activeLayerName), false);
+            if (layerMeta.children && Array.isArray(layerMeta.children)) {
+                layerMeta.children.map(child => {
+                    if (child.rel === layerKey) {
+                        let activeFiltersForParentLayer = _self.getActiveLayerFilters(layerTreeUtils.stripPrefix(activeLayerName));
+                        if (activeFiltersForParentLayer && activeFiltersForParentLayer.length > 0) {
+                            activeFiltersForParentLayer.map(filter => {
+                                parentLayers.push(`${child.child_column} IN (SELECT ${child.parent_column} FROM ${layerTreeUtils.stripPrefix(activeLayerName)} WHERE ${filter})`);
+                            });
+                        }
+                    }
+                });
+            }
+        });
+
+        return parentLayers;
+    },
+
+    getParentLayerKey(layerKey) {
         let parentLayers = [];
         let activeLayers = _self.getActiveLayers();
         activeLayers.map(activeLayerName => {
@@ -2459,6 +2481,7 @@ module.exports = {
             let layerKeyWithGeom = layerKey + "." + layer.f_geometry_column;
             let lockedLayer = (layer.authentication === "Read/write" ? " <i class=\"fa fa-lock gc2-session-lock\" aria-hidden=\"true\"></i>" : "");
             let layerTypeSelector = ``;
+            let parentLayerKeys = [];
             if (layer.meta) {
                 parsedMeta = _self.parseLayerMeta(layer);
                 if (parsedMeta) {
@@ -2473,6 +2496,19 @@ module.exports = {
                     if (`meta_desc` in parsedMeta) {
                         displayInfo = (parsedMeta.meta_desc || layer.f_table_abstract) ? `visible` : `hidden`;
                     }
+                    console.log("meta.getMetaDataLatestLoaded().data", meta.getMetaDataLatestLoaded().data)
+                    meta.getMetaDataLatestLoaded().data.forEach(e => {
+                        let m = JSON.parse(e?.meta)?.referenced_by;
+                        let referencedBy = m && m !== "" ? JSON.parse(m) : null;
+                        if (referencedBy) {
+                            referencedBy.forEach(ref => {
+                                if (ref.rel === layerKey) {
+                                    parentLayerKeys.push(e.f_table_title || e.f_table_schema + "." + e.f_table_name)
+                                }
+                            })
+                        }
+
+                    })
                 }
             }
             if (!singleTypeLayer) {
@@ -2486,7 +2522,7 @@ module.exports = {
             }
 
             let layerControlRecord = $(markupGeneratorInstance.getLayerControlRecord(layerKeyWithGeom, layerKey, layerIsActive,
-                layer, defaultLayerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo, subgroupId !== false, moduleState, disableCheckBox));
+                layer, defaultLayerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo, subgroupId !== false, moduleState, disableCheckBox, parentLayerKeys));
 
             // Callback for selecting specific layer type to enable (layer type dropdown)
             $(layerControlRecord).find('[class^="js-layer-type-selector"]').on('click', (e, data) => {
