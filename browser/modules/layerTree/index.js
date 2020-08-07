@@ -446,6 +446,7 @@ module.exports = {
                                     hideFilters();
                                 }
                             } catch (e) {
+                                console.error(e)
                                 hideFilters();
                             }
                         }
@@ -606,6 +607,7 @@ module.exports = {
      * @param filters
      */
     applyFilters: (filters) => {
+        console.log("filters", filters)
         moduleState.arbitraryFilters = filters;
     },
 
@@ -1115,13 +1117,13 @@ module.exports = {
                             }
 
                         } catch (e) {
-                            console.log(e);
+                            console.error(e);
                         }
 
                     });
 
                 } catch (e) {
-                    console.log(e);
+                    console.error(e);
                 }
 
             });
@@ -1691,7 +1693,6 @@ module.exports = {
                 func(feature, layer, layerKey, sqlQuery, moduleState.vectorStores[LAYER.VECTOR + ':' + layerKey], cloud.get().map);
             } catch (e) {
                 console.info("Error in click function for: " + layerKey);
-                console.error(e.message);
             }
         }
 
@@ -1708,7 +1709,6 @@ module.exports = {
             }
         } catch (e) {
             console.info("Error in pop-up template for: " + layerKey);
-            console.error(e.message);
         }
 
 
@@ -1791,6 +1791,7 @@ module.exports = {
                     let parsedPredefinedFiltersLocal = JSON.parse(predefinedFiltersRaw);
                     parsedPredefinedFilters = parsedPredefinedFiltersLocal;
                 } catch (e) {
+                    console.error(e)
                 }
                 let appliedPredefinedFilters = {};
                 appliedPredefinedFilters[tableName] = [];
@@ -2175,8 +2176,7 @@ module.exports = {
                         let func = Function('"use strict";return (' + pointToLayer + ')')();
                         _self.setPointToLayer(LAYER.VECTOR + ':' + layerKey, func);
                     } catch (e) {
-                        console.info("Error in point-to-layer function for: " + layerKey);
-                        console.error(e.message);
+                        console.error("Error in point-to-layer function for: " + layerKey);
                     }
                 }
 
@@ -2186,8 +2186,7 @@ module.exports = {
                         let func = Function('"use strict";return (' + vectorStyle + ')')();
                         _self.setStyle(LAYER.VECTOR + ':' + layerKey, func);
                     } catch (e) {
-                        console.info("Error in style function for: " + layerKey);
-                        console.error(e.message);
+                        console.error("Error in style function for: " + layerKey);
                     }
 
                 }
