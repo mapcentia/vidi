@@ -1569,3 +1569,6 @@ td.rdtYear:hover {
 .leaflet-edit-move {
   opacity: 50%;
 }
+.table.table-hover tr {
+  cursor: pointer;
+}
