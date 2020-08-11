@@ -2497,7 +2497,6 @@ module.exports = {
                     if (`meta_desc` in parsedMeta) {
                         displayInfo = (parsedMeta.meta_desc || layer.f_table_abstract) ? `visible` : `hidden`;
                     }
-                    console.log("meta.getMetaDataLatestLoaded().data", meta.getMetaDataLatestLoaded().data)
                     meta.getMetaDataLatestLoaded().data.forEach(e => {
                         let m = JSON.parse(e?.meta)?.referenced_by;
                         let referencedBy = m && m !== "" ? JSON.parse(m) : null;
