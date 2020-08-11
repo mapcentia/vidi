@@ -143,14 +143,15 @@ router.post('/api/extension/downloadForespoergsel', function (req, response) {
         return     
     }
 
-    // Get contents of each type as a starting point. drop multis to simple geometries in database
+    // Get contents of each type as a starting point.
     //TODO: add crs toggle here
     let getChain = []
     let layers = ['lines','points','polygons','graveforespoergsel']
     
-    // Define how to get features
+    // Define how to get features - might dump, idk
     layers.forEach(t => {
-        let q = 'SELECT *, ST_AsText(the_geom) as the_geom_wkt FROM '+ s.screenName+'.'+TABLEPREFIX+t+' where forespnummer = '+ b.forespNummer
+        //let q = 'SELECT *, ST_AsText(the_geom) as the_geom_wkt FROM '+ s.screenName+'.'+TABLEPREFIX+t+' where forespnummer = '+ b.forespNummer
+        let q = 'SELECT *, ST_AsText((ST_Dump('+ s.screenName+'.'+TABLEPREFIX+t+'.the_geom)).geom) as the_geom_wkt FROM '+ s.screenName+'.'+TABLEPREFIX+t+' where forespnummer = '+ b.forespNummer
         getChain.push(SQLAPI(q, req))
     })
 
@@ -165,9 +166,11 @@ router.post('/api/extension/downloadForespoergsel', function (req, response) {
                 if (f.features.length > 0) {
                     // Because SQLAPI is an idiot, handle it this way
                     f.features.forEach(s => {
-                        console.log(s)
+                        //console.log(s)
                         try {
                             let feat = {}
+                            //console.log(s.properties.the_geom_wkt)
+                            //console.log(wkt.parse(s.properties.the_geom_wkt))
                             feat.geometry = wkt.parse(s.properties.the_geom_wkt)
                             feat.properties = s.properties
                             delete feat.properties.the_geom_wkt
@@ -184,6 +187,7 @@ router.post('/api/extension/downloadForespoergsel', function (req, response) {
             // Handle formats, must all end in a Buffer
             var base64, ext, contentType, payload
             switch(b.format) {
+
                 case 'geojson':
                     try {
                         // just return what we got from DB
@@ -192,10 +196,13 @@ router.post('/api/extension/downloadForespoergsel', function (req, response) {
                         ext = 'geojson'
                         contentType = 'application/json'
                     } catch (error) {
-                        response.status(500).json({error:error})
+                        response.status(500).json({error:'Der skete en fejl da vi prøvede at danne GeoJSON-fil'})
                         return
                     }
                     break;
+
+                // TODO: Try with OGRE?
+
                 default:
                     response.status(500).json({error:"Format ikke understøttet: '"+b.format})
                     return     
