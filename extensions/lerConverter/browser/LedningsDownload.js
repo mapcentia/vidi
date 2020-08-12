@@ -86,7 +86,7 @@ class LedningsDownload extends React.Component {
         .then( r => r.json())
         .then( d => {
             console.log(d)
-            let urlBlob = "data:" + d.mimetype + ";base64," + d.base64
+            let urlBlob = "data:" + d.mime + ";base64," + d.base64
 
             //build blob
             fetch(urlBlob)

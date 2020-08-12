@@ -118,7 +118,7 @@ var buildSQLArray = function(features, table, geom_col, crs, timestamp) {
  */
 router.post('/api/extension/downloadForespoergsel', function (req, response) {
 
-    //console.table(req.body)
+    console.table(req.body)
     let b = req.body
     //console.table(req.session)
     let s = req.session
@@ -151,6 +151,8 @@ router.post('/api/extension/downloadForespoergsel', function (req, response) {
     // Define how to get features - might dump, idk
     layers.forEach(t => {
         //let q = 'SELECT *, ST_AsText(the_geom) as the_geom_wkt FROM '+ s.screenName+'.'+TABLEPREFIX+t+' where forespnummer = '+ b.forespNummer
+
+        // Dump to simples from DB
         let q = 'SELECT *, ST_AsText((ST_Dump('+ s.screenName+'.'+TABLEPREFIX+t+'.the_geom)).geom) as the_geom_wkt FROM '+ s.screenName+'.'+TABLEPREFIX+t+' where forespnummer = '+ b.forespNummer
         getChain.push(SQLAPI(q, req))
     })
@@ -182,39 +184,53 @@ router.post('/api/extension/downloadForespoergsel', function (req, response) {
                 }
             })
             let fc = {type: "FeatureCollection", features: returnArray} //this is base output. with null's
-            let fn = 'Ledningspakke_'+String(b.forespNummer)+'_'+b.format+'.'
+            //let fn = 'Ledningspakke_'+String(b.forespNummer)+'_'+b.format+'.'
+            let fn = 'Ledningspakke_'+String(b.forespNummer)+'.'
 
             // Handle formats, must all end in a Buffer
-            var base64, ext, contentType, payload
+            var base64, payload
+
+            // Convert FC to base64 for services
+            base64 = JSON.stringify(fc)
+            base64 = new Buffer.from(base64).toString("base64")
+
+            let translate = []
+
             switch(b.format) {
-
                 case 'geojson':
-                    try {
-                        // just return what we got from DB
-                        base64 = JSON.stringify(fc)
-                        base64 = new Buffer.from(base64).toString("base64")
-                        ext = 'geojson'
-                        contentType = 'application/json'
-                    } catch (error) {
-                        response.status(500).json({error:'Der skete en fejl da vi prøvede at danne GeoJSON-fil'})
-                        return
-                    }
+                    // Pass straight through
+                    translate.push(DONOTHING('application/json','geojson',base64))
+                    break;  
+                case 'shp':
+                    // Run geolambda
+                    translate.push(GEOLAMBDA(String(b.forespNummer),'ESRI Shapefile',base64))
                     break;
-
-                // TODO: Try with OGRE?
 
                 default:
                     response.status(500).json({error:"Format ikke understøttet: '"+b.format})
-                    return     
+                    return                        
             }
 
-            // headers and return
-            payload = {
-                base64: base64,
-                filename: fn+ext,
-                mimetype: contentType
-            }
-            response.status(200).json(payload)
+            // who dis?
+            console.log(translate)
+
+            // resolve translation and return
+            Promise.all(translate)
+            .then(r => {
+                //console.log(r[0])
+                payload = {
+                    // We're doin an .all so the r is an array
+                    base64: r[0].base64,
+                    filename: fn+r[0].ext,
+                    mime: r[0].mime
+                }
+                console.log(payload)
+                response.status(200).json(payload)
+            })
+            .catch(r => {
+                // if translate went wrong
+                response.status(500).json(r)
+            })
         })
         .catch(r => {
             // if SQL went wrong
@@ -446,7 +462,7 @@ router.post('/api/extension/upsertForespoergsel', function (req, response) {
 });
 
 /**
- * Endpoint for upserting features from LER 
+ * Endpoint for upserting Status from LER 
  */
 router.post('/api/extension/upsertStatus', function (req, response) {
     response.setHeader('Content-Type', 'application/json');
@@ -483,8 +499,6 @@ router.post('/api/extension/upsertStatus', function (req, response) {
 
 });
 
-
-
 // Use FeatureAPI
 function FeatureAPI(req, featurecollection, table, crs) {
     var userstr = userString(req)
@@ -519,7 +533,7 @@ function FeatureAPI(req, featurecollection, table, crs) {
             reject(error)
         })
     });
-}
+};
 
 // Use SQLAPI
 function SQLAPI(q, req) {
@@ -539,16 +553,82 @@ function SQLAPI(q, req) {
 
     // Return new promise 
     return new Promise(function(resolve, reject) {
-        console.log(q.substring(0,175))
+        //console.log(q.substring(0,175))
         fetch(url, options)
         .then(r => r.json())
         .then(data => {
             // if message is present, is error
             if (data.hasOwnProperty('message') ){
+                //console.log(data.message)
+                reject(data)
+            } else {
+                //console.log('Success: '+ data.success+' - Q: '+q.substring(0,60))
+                resolve(data)
+            }
+        })
+        .catch(error => {
+            reject(error)
+        })
+    });
+};
+
+// Do nothing - promise
+function DONOTHING(contentType, ext, base64) {
+    return new Promise(function(resolve, reject) {
+        returnObject = {
+            'mime': contentType,
+            'ext': ext,
+            'base64': base64
+        }
+        resolve(returnObject)
+    }); 
+}
+
+// Use GEOLAMBDA
+function GEOLAMBDA(layername, format, data64) {
+    // hit geolambda function
+    var url = 'https://lskze93j56.execute-api.eu-central-1.amazonaws.com/default/geolambda'
+    var key = '9OMEn0zKMn6oznXcuO8lE5ALP6sRgtbv3dTg6ZUz'
+
+    var postData = {
+        'parameters': {
+            'source_epsg': 7416, //params?
+            'target_epsg': 7416, //params?
+            'target_format': format,
+            'target_layername': layername
+        },
+        'data64': data64
+    }
+    postData = JSON.stringify(postData)
+
+    //console.log(postData)
+
+    var options = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': Buffer.byteLength(postData),
+            'x-api-key': key
+        },
+        body: postData
+    };
+
+    console.log(options)
+
+    // Return new promise 
+    return new Promise(function(resolve, reject) {
+        fetch(url, options)
+        .then(r => {
+            console.log(r)
+            return r.json()
+        })
+        .then(data => {
+            console.log(data)
+            // if message is present, is error
+            if (data.hasOwnProperty('message') ){
                 console.log(data.message)
                 reject(data)
             } else {
-                console.log('Success: '+ data.success+' - Q: '+q.substring(0,60))
                 resolve(data)
             }
         })
