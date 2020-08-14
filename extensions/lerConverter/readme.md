@@ -7,9 +7,11 @@ For at imødekomme behovet for format-konvertering og plot er der udarbejdet det
 
 Herunder er kort demo af grund-funktionaliteten.
 
+## Krav
 
+For at kunne benytte sig af funktionaliteten i denne extension kræver det flg. extensions er loaded:
 
-
+* session
 
 
 ## Opsætning

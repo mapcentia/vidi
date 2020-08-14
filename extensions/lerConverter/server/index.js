@@ -185,7 +185,7 @@ router.post('/api/extension/downloadForespoergsel', function (req, response) {
             })
             let fc = {type: "FeatureCollection", features: returnArray} //this is base output. with null's
             //let fn = 'Ledningspakke_'+String(b.forespNummer)+'_'+b.format+'.'
-            let fn = 'Ledningspakke_'+String(b.forespNummer)+'.'
+            let fn = 'Graveassistent_Ledningspakke_'+String(b.forespNummer)+'.'
 
             // Handle formats, must all end in a Buffer
             var base64, payload
@@ -211,9 +211,6 @@ router.post('/api/extension/downloadForespoergsel', function (req, response) {
                     return                        
             }
 
-            // who dis?
-            console.log(translate)
-
             // resolve translation and return
             Promise.all(translate)
             .then(r => {
@@ -224,7 +221,7 @@ router.post('/api/extension/downloadForespoergsel', function (req, response) {
                     filename: fn+r[0].ext,
                     mime: r[0].mime
                 }
-                console.log(payload)
+                //console.log(payload)
                 response.status(200).json(payload)
             })
             .catch(r => {
@@ -261,7 +258,7 @@ router.post('/api/extension/getForespoergselOption', function (req, response) {
     }
 
     // Go ahead with the logic
-    let q = 'SELECT forespnummer, bemaerkning FROM '+ s.screenName+'.'+TABLEPREFIX+'graveforespoergsel ORDER by forespnummer DESC '
+    let q = "SELECT forespnummer, bemaerkning, svar_uploadtime FROM "+ s.screenName+'.'+TABLEPREFIX+"graveforespoergsel where svar_uploadtime > now() - INTERVAL '30 days' ORDER by forespnummer DESC"
     try {
         SQLAPI(q, req)
         .then(r => {
@@ -613,17 +610,17 @@ function GEOLAMBDA(layername, format, data64) {
         body: postData
     };
 
-    console.log(options)
+    //console.log(options)
 
     // Return new promise 
     return new Promise(function(resolve, reject) {
         fetch(url, options)
         .then(r => {
-            console.log(r)
+            //console.log(r)
             return r.json()
         })
         .then(data => {
-            console.log(data)
+            //console.log(data)
             // if message is present, is error
             if (data.hasOwnProperty('message') ){
                 console.log(data.message)

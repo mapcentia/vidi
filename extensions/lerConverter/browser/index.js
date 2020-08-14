@@ -167,17 +167,16 @@ module.exports = {
             },
 
             "Plugin Tooltip": {
-                "da_DK": "Upload ledningspakke",
-                "en_US": "Upload packet"
-            },
-
-            "Activate": {
-                "da_DK": "Aktiver",
-                "en_US": "Activate"
+                "da_DK": "LER 2.0 Graveassistent",
+                "en_US": "LER 2.0 Graveassistant"
             },
             "MissingLogin": {
                 "da_DK": "NB: Du skal være logget ind for at kunne bruge funktionen",
                 "en_US": "Please log in to use this function"                 
+            },
+            "Login": {
+                "da_DK": "Log ind",
+                "en_US": "Log in"                 
             },
         };
 
@@ -665,6 +664,7 @@ module.exports = {
                     .then(r => r.json())
                     .then(obj => me.setState({authed: obj.status.authenticated},() =>{
                         // Get foresp. if we really logged in.
+                        // TODO: check we're in the right schema!
                         if (me.state.authed) {
                             me.populateForespoergselOption() //
                         }
@@ -846,6 +846,10 @@ module.exports = {
                 .catch(e => console.log(e))
             }
 
+            clickLogin() {
+                document.getElementById('session').click()
+            }
+
             /**
              * Renders component
              */
@@ -927,7 +931,7 @@ module.exports = {
                                         value={s.foresp}
                                         onChange={_self.handleForespSelectChange.bind(this)}
                                       >
-                                        {s.forespOptions.map(f => <MenuItem key={f.forespnummer} value={f.forespnummer}>{f.forespnummer+': '+f.bemaerkning}</MenuItem>)}
+                                        {s.forespOptions.map(f => <MenuItem key={f.forespnummer} value={f.forespnummer}>{f.forespnummer+': '+f.bemaerkning+' (Uploaded: '+f.svar_uploadtime+')'}</MenuItem>)}
                                       </Select>
                                     </FormControl>
                                     <div>
@@ -961,7 +965,15 @@ module.exports = {
                                 <div id="lerConverter-feature-login" className="alert alert-info" role="alert">
                                     {__("MissingLogin")}
                                 </div>
-                                <p>Her skal være en knap der starter session med: document.getElementById("session").click()</p>
+                                <Button
+                                    onClick={() => this.clickLogin()}
+                                    color="primary"
+                                    size="large"
+                                    variant="contained"
+                                    style={{marginRight: "auto", marginLeft: "auto", display: "block"}}
+                                   >
+                                  {__("Login")}
+                                </Button>
                             </div>
                         </div>
                     )

@@ -41,7 +41,7 @@ class LedningsDownload extends React.Component {
                 {
                     format: 'geojson',
                     formatTitle: 'GeoJSON',
-                    formatDesc: 'Bla Bla 2',
+                    formatDesc: 'GeoJSON er et åbent format. Brug blandt andet QGIS til at åbne filen.',
                     formatProduct: 'Man får bla bla 3'
                 }
             ]
