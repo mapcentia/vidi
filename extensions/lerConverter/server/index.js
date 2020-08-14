@@ -464,7 +464,7 @@ router.post('/api/extension/upsertForespoergsel', function (req, response) {
 router.post('/api/extension/upsertStatus', function (req, response) {
     response.setHeader('Content-Type', 'application/json');
 
-    console.table(req.body)
+    //console.table(req.body)
     let b = req.body
     //console.table(req.session)
     let s = req.session
@@ -483,13 +483,11 @@ router.post('/api/extension/upsertStatus', function (req, response) {
     }
 
     // Build featurecollection
-    
-    console.log(b.Ledningsejerliste.Ledningsejer)
-    var ledningsejer = b.Ledningsejerliste.Ledningsejer
+    var ejere = b.Ledningsejerliste
     var fc = {}
     var f = []
 
-    ledningsejer.forEach(l =>{
+    ejere.forEach(l =>{
         console.log(l)
     })
 
