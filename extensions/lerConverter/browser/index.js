@@ -178,6 +178,18 @@ module.exports = {
                 "da_DK": "Log ind",
                 "en_US": "Log in"                 
             },
+            "backbutton": {
+                "da_DK": "Tilbage",
+                "en_US": "Go Back"                 
+            },
+            "uploadtime": {
+                "da_DK": "Ledningspakke uploaded",
+                "en_US": "'Ledningspakke' uploaded at"                 
+            },
+            "uploadmessage": {
+                "da_DK": "Træk og slip din ledningspakke her, eller klik for at vælg filen fra din computer",
+                "en_US": "Drag and drop your 'ledningspakke' here, or click to select from drive."                 
+            },
         };
 
         /**
@@ -685,13 +697,15 @@ module.exports = {
 
             }
 
+            // serves as state reset
             onBackClickHandler() {
                 const _self = this
                 _self.setState({
                     done: false,
                     loading: false,
                     ledningsejer: [],
-                    foresp: ''
+                    foresp: '',
+                    svarUploadTime: ''
                 }, () => {
                     _self.populateForespoergselOption() // On back click, populate select with new foresp
                     clearFilters()
@@ -720,7 +734,8 @@ module.exports = {
                     progressText: 'Læser ledningspakkke',
                     ejerliste: [],
                     isError: false,
-                    errorList: []
+                    errorList: [],
+                    svarUploadTime: ''
                 })
 
                 newZip.loadAsync(zipblob)
@@ -842,6 +857,8 @@ module.exports = {
                     applyFilter(buildFilter(f.forespnummer))
 
                     // TODO: CHANGE STATUS
+                    // TODO: SET SVAR_UPLOADTIME IN STATE
+                    _self.setState({svarUploadTime: d[0].properties.svar_uploadtime})
                 })
                 .catch(e => console.log(e))
             }
@@ -880,7 +897,7 @@ module.exports = {
                                         errorlist={s.errorList}
                                         />
                                         {s.isError === true ? 
-                                        <Button size="large" color="default" style={margin} onClick={_self.onBackClickHandler.bind(this)} ><ArrowBackIcon fontSize="small" /> Tilbage</Button> : ''}
+                                        <Button size="large" color="default" style={margin} onClick={_self.onBackClickHandler.bind(this)} ><ArrowBackIcon fontSize="small" /> {__("BackButton")}</Button> : ''}
                                     </div>
                                 </div>
                             </div>
@@ -890,6 +907,7 @@ module.exports = {
                         return (
                             <div role="tabpanel">
                                 <div className="form-group">
+                                {__("uploadtime")+': '+s.svarUploadTime}
                                     <div style={{display: 'flex'}}>
                                         <Button
                                         size="large" color="default" variant="contained" style={margin}
@@ -897,7 +915,7 @@ module.exports = {
                                         >
                                            <ArrowBackIcon
                                            fontSize="small"
-                                           /> Tilbage
+                                           /> {__("backbutton")}
                                         </Button>
                                         <LedningsDownload style={margin} 
                                         size="large" color="default" variant="contained"
@@ -943,14 +961,14 @@ module.exports = {
                                         onDrop={_self.onDrop.bind(this)}
                                         style={{
                                             width: '80%',
-                                            height: '120px',
+                                            height: '160px',
                                             padding: '50px',
                                             border: '1px green dashed',
                                             margin: '20px auto 20px auto',
                                             textAlign: 'center'
                                         }}
                                         >
-                                            <p>Smid din ledningspakke her, eller vælg filen</p>
+                                            <p>{__("uploadmessage")}</p>
                                         </Dropzone>
                                     </div>
                                 </div>
