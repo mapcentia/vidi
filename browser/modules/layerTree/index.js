@@ -1910,10 +1910,12 @@ module.exports = {
             }
         }
 
-        if (typeof filterComp[layerKey] !== "object" && typeof moduleState.editorFilters[tableName] === "object" && moduleState.editorFilters[tableName].length > 0) {
+        // Used when refreshing browser and editor filter has to be applied before filter-component is rendered
+        if (typeof filterComp[layerKey] !== "object" && typeof moduleState.editorFiltersActive[tableName] === "boolean" && moduleState.editorFiltersActive[tableName] === true && typeof moduleState.editorFilters[tableName] === "object" && moduleState.editorFilters[tableName].length > 0) {
+            console.log("Applying editor filter from state");
             return moduleState.editorFilters[tableName];
         }
-
+        // Used when using filter-component is rendered and editor filter is set
         if (typeof filterComp[layerKey] === "object" && typeof moduleState.editorFiltersActive[tableName] === "boolean" && moduleState.editorFiltersActive[tableName] === true && moduleState.editorFilters[tableName].length > 0) {
             return moduleState.editorFilters[tableName];
         }
@@ -2495,7 +2497,6 @@ module.exports = {
                     if (`meta_desc` in parsedMeta) {
                         displayInfo = (parsedMeta.meta_desc || layer.f_table_abstract) ? `visible` : `hidden`;
                     }
-                    console.log("meta.getMetaDataLatestLoaded().data", meta.getMetaDataLatestLoaded().data)
                     meta.getMetaDataLatestLoaded().data.forEach(e => {
                         let m = JSON.parse(e?.meta)?.referenced_by;
                         let referencedBy = m && m !== "" ? JSON.parse(m) : null;
