@@ -748,7 +748,7 @@ geocloud = (function () {
             urlArray = [url];
 
             if ('mapRequestProxy' in defaults && defaults.mapRequestProxy !== false) {
-                url = defaults.mapRequestProxy + '?request=' + encodeURIComponent(url);
+                url = defaults.mapRequestProxy + '?request=' + url;
             }
         } else {
             url = defaults.host + "/mapcache/" + defaults.db + "/wms";
