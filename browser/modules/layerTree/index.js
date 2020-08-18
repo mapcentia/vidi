@@ -2806,6 +2806,7 @@ module.exports = {
                                     editorFilters={localEditorFilters}
                                     editorFiltersActive={localEditorFiltersActive}
                                     isFilterImmutable={isFilterImmutable}
+                                    db={db}
                                 />, document.getElementById(componentContainerId));
                             $(layerContainer).find('.js-layer-settings-filters').hide(0);
 

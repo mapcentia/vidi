@@ -34,7 +34,7 @@ class AutocompleteControl extends React.Component {
             this.setState({"currentField": field});
             let sql = btoa(`SELECT distinct(${this.props.field}) FROM ${this.props.layerKey}`);
             $.ajax({
-                url: '/api/sql/nt',
+                url: '/api/sql/' + this.props.db,
                 contentType: 'application/x-www-form-urlencoded',
                 scriptCharset: "utf-8",
                 dataType: 'json',

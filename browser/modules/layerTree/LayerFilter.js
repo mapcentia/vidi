@@ -422,7 +422,7 @@ class VectorLayerFilter extends React.Component {
 
                 if (STRING_TYPES.indexOf(type) !== -1 && fieldconf && fieldconf[column.fieldname] && fieldconf[column.fieldname].autocomplete) {
                     control = (
-                        <AutocompleteControl id={id} value={column.value} layerKey={layerKey} field={column.fieldname} restriction={column.restriction} onChange={changeHandler}/>);
+                        <AutocompleteControl id={id} value={column.value} layerKey={layerKey} field={column.fieldname} restriction={column.restriction} db={this.props.db}  onChange={changeHandler}/>);
                 } else if (STRING_TYPES.indexOf(type) !== -1) {
                     control = (
                         <StringControl id={id} value={column.value} restriction={column.restriction} onChange={changeHandler}/>);
