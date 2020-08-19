@@ -2498,16 +2498,19 @@ module.exports = {
                         displayInfo = (parsedMeta.meta_desc || layer.f_table_abstract) ? `visible` : `hidden`;
                     }
                     meta.getMetaDataLatestLoaded().data.forEach(e => {
-                        let m = JSON.parse(e?.meta)?.referenced_by;
-                        let referencedBy = m && m !== "" ? JSON.parse(m) : null;
-                        if (referencedBy) {
-                            referencedBy.forEach(ref => {
-                                if (ref.rel === layerKey) {
-                                    parentLayerKeys.push(e.f_table_title || e.f_table_schema + "." + e.f_table_name)
-                                }
-                            })
+                        try {
+                            let m = JSON.parse(e?.meta)?.referenced_by;
+                            let referencedBy = m && m !== "" ? JSON.parse(m) : null;
+                            if (referencedBy) {
+                                referencedBy.forEach(ref => {
+                                    if (ref.rel === layerKey) {
+                                        parentLayerKeys.push(e.f_table_title || e.f_table_schema + "." + e.f_table_name)
+                                    }
+                                })
+                            }
+                        } catch (err) {
+                            console.error("Invalid JSON in referenced_by for layer key: " + e.f_table_schema  + "." + e.f_table_name);
                         }
-
                     })
                 }
             }
