@@ -21,12 +21,13 @@
                 var history = targetDiv.getAttribute("data-vidi-history") || "";
                 var useSchema = targetDiv.getAttribute("data-vidi-use-schema") === "true";
                 var useConfig = targetDiv.getAttribute("data-vidi-use-config") === "true";
+                var configHost = targetDiv.getAttribute("data-vidi-host") || null;
                 try {
                     var obj = JSON.parse(atob(token));
                 } catch (e) {
                     alert("Could not parse token");
                 }
-                var host = obj.host + ""; // Port ?
+                var host = (configHost || obj.host) + ""; // Port ?
                 var id = obj.id;
                 var database = obj.database;
                 var schema = obj.schema !== undefined && useSchema ? obj.schema + "/" : "";
