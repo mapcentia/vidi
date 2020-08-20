@@ -1705,12 +1705,19 @@ module.exports = {
         try {
             let tmpl = sqlQuery.getVectorTemplate(layerKey);
             if (tmpl) {
+                // Convert Markdown in text fields
+                let metaDataKeys = meta.getMetaDataKeys();
+                for (const property in  metaDataKeys[layerKey].fields) {
+                    if (metaDataKeys[layerKey].fields[property].type === "text") {
+                        properties[property] = marked(properties[property]);
+                    }
+                }
+                properties.text1 = marked(properties.text1);
                 renderedText = Handlebars.compile(tmpl)(properties);
             }
         } catch (e) {
             console.info("Error in pop-up template for: " + layerKey);
         }
-
 
         if (typeof parsedMeta.info_element_selector !== "undefined" && parsedMeta.info_element_selector !== "" && renderedText !== null) {
             $(parsedMeta.info_element_selector).html(renderedText)
