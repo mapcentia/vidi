@@ -7,6 +7,7 @@
 'use strict';
 
 /* Import big-brains*/
+import { v4 as uuidv4 } from 'uuid';
 import Dropzone from 'react-dropzone';
 import JSZip from 'jszip';
 import LedningsEjerStatusTable from "./LedningsEjerStatusTable";
@@ -522,7 +523,8 @@ module.exports = {
 
                 }
 
-                var pushForespoergsel = function (obj) {
+                var pushForespoergsel = function (obj, statusKey) {
+                    obj['statusKey'] = statusKey
                     let opts = {
                         headers: {
                             'Accept': 'application/json',
@@ -558,7 +560,7 @@ module.exports = {
                                         CVR: l.CVR,
                                         Navn: l.Navn
                                     }
-                                    ejere.push(obj)
+                                    ejere.push(lc(obj))
                                 })
                             } else {
                                 let obj = {
@@ -567,7 +569,7 @@ module.exports = {
                                     CVR: l.CVR,
                                     Navn: l.Navn
                                 }
-                                ejere.push(obj)
+                                ejere.push(lc(obj))
                             }
                         })
                     } catch (error) {
@@ -580,10 +582,10 @@ module.exports = {
                     });
                 }
 
-                var pushStatus = function (obj, forespNummer) {
+                var pushStatus = function (obj, statusKey) {
                     let postData = {
                         Ledningsejerliste: obj,
-                        forespNummer: forespNummer
+                        statusKey: statusKey
                     }
                     let opts = {
                         headers: {
@@ -671,6 +673,7 @@ module.exports = {
                         continue;
                     }
                 };
+
                 var clearFilters = function () {
                     // clear filters from layers that might be on! - then reload
                     console.log('lerConverter - cleaning filters for reload')
@@ -681,6 +684,7 @@ module.exports = {
                     // apply filter
                     applyFilter(filter);
                 };
+
 
 
                 /**
@@ -775,9 +779,9 @@ module.exports = {
                             _self.setState({
                                 done: false,
                                 loading: false,
-                                ledningsejer: [],
                                 foresp: '',
-                                svarUploadTime: ''
+                                svarUploadTime: '',
+                                ejerliste: [],
                             }, () => {
                                 _self.populateForespoergselOption() // On back click, populate select with new foresp
                                 clearFilters()
@@ -815,6 +819,8 @@ module.exports = {
                                 svarUploadTime: ''
                             })
 
+                            var statusKey = uuidv4()
+
                             newZip.loadAsync(zipblob)
                                 .then(function (zip) {
                                     /* Load Status - 'LedningsejerStatusListe.xml', set state */
@@ -827,7 +833,7 @@ module.exports = {
                                         .then(fileData => parsetoJSON(fileData))
                                         .then(jsObj => parseStatus(jsObj))
                                         .then(parsed => {
-                                            pushStatus(parsed)
+                                            pushStatus(parsed, statusKey)
                                                 .then(r => {
                                                     //console.log(r)
                                                     let wait = 5000
@@ -876,7 +882,7 @@ module.exports = {
                                         .then(fileData => parsetoJSON(fileData))
                                         .then(jsObj => parseConsolidated(jsObj))
                                         .then(parsed => {
-                                            pushForespoergsel(parsed)
+                                            pushForespoergsel(parsed, statusKey)
                                                 .then(r => {
                                                     //console.log(r)
                                                     let wait = 5000
@@ -964,6 +970,33 @@ module.exports = {
                                 .catch(e => console.log(e))
                         }
 
+                        getStatus(statuskey) {
+                            var _self = this
+                            let opts = {
+                                headers: {
+                                    'Accept': 'application/json',
+                                    'Content-Type': 'application/json'
+                                },
+                                method: 'POST',
+                                body: JSON.stringify({
+                                    statusKey: statuskey
+                                })
+                            }
+                            // Do async job
+                            fetch(gc2host + '/api/extension/getStatus', opts)
+                                .then(r => r.json())
+                                .then(d => {
+                                    let a = []
+                                    d.forEach(f =>{
+                                        a.push(f.properties)
+                                    }) 
+                                    _self.setState({
+                                        ejerliste: a
+                                    })
+                                })
+                                .catch(e => console.log(e))
+                        }
+
                         /**
                          * Reads extents and status of saved foresp
                          * @param {*} forespNummer 
@@ -987,8 +1020,9 @@ module.exports = {
                                     //console.log(d);
 
                                     // Zoom to location
-                                    //TODO: this has to be better for sorting then status is incomming!
+                                    // this has to be better for sorting then status is incomming!
                                     let f = d[0].properties;
+                                    //console.log(d)
                                     let bounds = [
                                         [
                                             f.ymin, f.xmin
@@ -999,12 +1033,13 @@ module.exports = {
                                     ];
                                     cloud.get().map.fitBounds(bounds)
                                     // Apply filter
+                                    _self.getStatus(f.statuskey)
                                     applyFilter(buildFilter(f.forespnummer))
 
-                                    // TODO: CHANGE STATUS
+
                                     //SET SVAR_UPLOADTIME IN STATE
                                     _self.setState({
-                                        svarUploadTime: d[0].properties.svar_uploadtime
+                                        svarUploadTime: f.svar_uploadtime
                                     })
                                 })
                                 .catch(e => console.log(e))
