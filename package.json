@@ -130,7 +130,7 @@
     "moment": "^2.27.0",
     "mustache": "^2.3.0",
     "mutationobserver-shim": "^0.3.7",
-    "nouislider": "^14.5.0",
+    "nouislider": "^8.5.1",
     "pdf-merge": "^1.2.0",
     "pg-escape": "^0.2.0",
     "plotly.js": "^1.54.5",
