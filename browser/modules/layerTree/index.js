@@ -1705,12 +1705,19 @@ module.exports = {
         try {
             let tmpl = sqlQuery.getVectorTemplate(layerKey);
             if (tmpl) {
+                // Convert Markdown in text fields
+                let metaDataKeys = meta.getMetaDataKeys();
+                for (const property in  metaDataKeys[layerKey].fields) {
+                    if (metaDataKeys[layerKey].fields[property].type === "text") {
+                        properties[property] = marked(properties[property]);
+                    }
+                }
+                properties.text1 = marked(properties.text1);
                 renderedText = Handlebars.compile(tmpl)(properties);
             }
         } catch (e) {
             console.info("Error in pop-up template for: " + layerKey);
         }
-
 
         if (typeof parsedMeta.info_element_selector !== "undefined" && parsedMeta.info_element_selector !== "" && renderedText !== null) {
             $(parsedMeta.info_element_selector).html(renderedText)
@@ -2498,16 +2505,19 @@ module.exports = {
                         displayInfo = (parsedMeta.meta_desc || layer.f_table_abstract) ? `visible` : `hidden`;
                     }
                     meta.getMetaDataLatestLoaded().data.forEach(e => {
-                        let m = JSON.parse(e?.meta)?.referenced_by;
-                        let referencedBy = m && m !== "" ? JSON.parse(m) : null;
-                        if (referencedBy) {
-                            referencedBy.forEach(ref => {
-                                if (ref.rel === layerKey) {
-                                    parentLayerKeys.push(e.f_table_title || e.f_table_schema + "." + e.f_table_name)
-                                }
-                            })
+                        try {
+                            let m = JSON.parse(e?.meta)?.referenced_by;
+                            let referencedBy = m && m !== "" ? JSON.parse(m) : null;
+                            if (referencedBy) {
+                                referencedBy.forEach(ref => {
+                                    if (ref.rel === layerKey) {
+                                        parentLayerKeys.push(e.f_table_title || e.f_table_schema + "." + e.f_table_name)
+                                    }
+                                })
+                            }
+                        } catch (err) {
+                            console.error("Invalid JSON in referenced_by for layer key: " + e.f_table_schema  + "." + e.f_table_name);
                         }
-
                     })
                 }
             }
@@ -2806,6 +2816,7 @@ module.exports = {
                                     editorFilters={localEditorFilters}
                                     editorFiltersActive={localEditorFiltersActive}
                                     isFilterImmutable={isFilterImmutable}
+                                    db={db}
                                 />, document.getElementById(componentContainerId));
                             $(layerContainer).find('.js-layer-settings-filters').hide(0);
 
