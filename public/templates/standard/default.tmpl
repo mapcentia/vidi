@@ -9,17 +9,6 @@
     <div id="container">
         <div id="map"></div>
     </div>
-    <div id="click-for-info-slide" class="slide-left fade-then-dragging">
-        <div class="modal-header">
-            <button type="button" class="close" aria-hidden="true">×</button>
-            <h3 class="modal-title"></h3>
-        </div>
-        <div id="click-for-info-slide-wrapper">
-            <div class="modal-body">
-                <div id="alternative-info-container"></div>
-            </div>
-        </div>
-    </div>
 </div>
 
 <!-- About Modal -->
@@ -169,16 +158,14 @@
                         <!-- Tab panes -->
                         <div class="tab-content main-content">
                             <div role="tabpanel" class="tab-pane active" id="search-content">
+                                <div class="help-btn" onclick="javascript:createAlert($(this), '{{Search places}}')">
+                                    <i class="material-icons help-btn">help_outline</i></div>
+                                <div></div>
                                 <div id="place-search">
-                                    <div class="help-btn" onclick="javascript:createAlert($(this), '{{Search places}}')">
-                                        <i class="material-icons help-btn">help_outline</i></div>
-                                    <div></div>
                                     <div class="places">
-                                        <div class="btn-group">
-                                            <input id="custom-search" class="custom-search typeahead" type="text"
-                                                   placeholder="{{Address}}">
-                                            <span id="searchclear" class="glyphicon glyphicon-remove-circle"></span>
-                                        </div>
+                                        <input id="custom-search" class="custom-search typeahead" type="text"
+                                               placeholder="{{Address}}">
+                                        <span id="searchclear" class="glyphicon glyphicon-remove-circle"></span>
                                     </div>
                                 </div>
                             </div>
@@ -203,6 +190,7 @@
                                         <ul class="nav nav-tabs" id="info-tab"></ul>
                                         <div class="tab-content" id="info-pane"></div>
                                     </div>
+                                    <div id="alternative-info-container" class="alternative-info-container-right"></div>
                                 </div>
                                 <table id="dtable" data-show-toggle="true"></table>
 
@@ -471,6 +459,12 @@
                                             <input id="print-sticky" type="checkbox">{{Sticky}}
                                         </label>
                                     </div>
+                                    <button id="add-print-box-btn" class="btn btn-xs">
+                                        {{Add new box}}
+                                    </button>
+                                    <button id="remove-print-box-btn" class="btn btn-xs">
+                                        {{Remove last box}}
+                                    </button>
                                 </div>
                                 <div>
                                     <form class="form-horizontal" id="print-form" role="form" data-toggle="validator">

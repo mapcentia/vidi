@@ -75,7 +75,6 @@ module.exports = {
         "No drawings in the map": "Ingen tegninger i kortet",
         "Click map to place circle marker": "Click map to place circle marker",
 
-        "circlemarker": "circlemarker",
         "polygon": "polygon",
         "rectangle": "rectangle",
         "polyline": "polyline",
@@ -109,6 +108,8 @@ module.exports = {
         "Comment": "Comment",
         "The comment will be placed on the PDF": "The comment will be placed on the PDF",
         "Sticky": "Sticky",
+        "Add new box": "Add new box",
+        "Remove last box": "Remove last box",
 
         "Draw a line": "Draw a line",
         "Draw an area": "Draw an area",
@@ -218,6 +219,8 @@ module.exports = {
         "Refresh existing cache for layer": "Refresh existing cache for layer",
         "Dynamic layer is cached only within the last requested bounding box": "Dynamic layer is cached only within the last requested bounding box",
         "Apply": "Apply",
+        "Reset filter": "Reset filter",
+        "Filter editor": "Filter editor",
 
         // Base layers
         "Side-by-side mode": "Side-by-side mode",

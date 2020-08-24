@@ -28,9 +28,6 @@ var legend;
 
 var metaDataKeys;
 
-var showdown = require('showdown');
-var converter = new showdown.Converter();
-
 /**
  *
  * @returns {*}
@@ -58,54 +55,9 @@ module.exports = {
             $(id + " .expand-more").show();
         });
 
-        let map = cloud.get().map, showInfo = function (e) {
-            let t = ($(this).data('gc2-id')), html,
-                meta = metaDataKeys[t] ? $.parseJSON(metaDataKeys[t].meta) : null,
-                name = metaDataKeys[t] ? metaDataKeys[t].f_table_name : null,
-                title = metaDataKeys[t] ? metaDataKeys[t].f_table_title : null,
-                abstract = metaDataKeys[t] ? metaDataKeys[t].f_table_abstract : null;
-
-            html = (meta !== null
-                && typeof meta.meta_desc !== "undefined"
-                && meta.meta_desc !== "") ?
-                converter.makeHtml(meta.meta_desc) : abstract;
-
-            moment.locale('da');
-
-            for (let key in  metaDataKeys[t]) {
-                if (metaDataKeys[t].hasOwnProperty(key)) {
-                    console.log(key + " -> " + metaDataKeys[t][key]);
-                    if (key === "lastmodified") {
-                        metaDataKeys[t][key] = moment(metaDataKeys[t][key]).format('LLLL');
-                    }
-                }
-            }
-
-            html = html ? Mustache.render(html, metaDataKeys[t]) : "";
-            $("#info-modal-top.slide-left").show();
-            $("#info-modal-top.slide-left").animate({left: "0"}, 200);
-            $("#info-modal-top .modal-title").html(title || name);
-            $("#info-modal-top .modal-body").html(html + '<div id="info-modal-legend" class="legend"></div>');
-            legend.init([t], "#info-modal-legend");
-            e.stopPropagation();
-        };
+        let map = cloud.get().map;
 
         metaDataKeys = meta.getMetaDataKeys();
-
-        // Unbind default
-        $(document).unbindArrive(".info-label");
-
-        // Set custom
-        $(document).arrive('.info-label', function () {
-            $(this).on("click", showInfo);
-        });
-
-        $('.info-label').on("click", showInfo);
-
-        $("#btn-about").on("click", function (e) {
-            $("#about-modal").modal({});
-
-        });
 
         $("#burger-btn").on("click", function () {
             $("#layer-slide.slide-left").animate({
@@ -149,7 +101,14 @@ module.exports = {
             measurements.toggleMeasurements(true);
         });
 
-        $("#locate-btn").append($(".leaflet-control-locate"));
+        $(`#find-me-btn`).click(() => {
+            let lc = cloud.getLc();
+            lc.stop();
+            lc.start();
+            setTimeout(() => {
+                lc.stop();
+            }, 5000);
+        });
 
     }
 };

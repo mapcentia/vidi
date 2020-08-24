@@ -20,7 +20,7 @@ describe('Static PNG API', () => {
             }
         }));
 
-        const url = `${helpers.API_URL}/static/aleksandrshumilov/public?filter=${buff.toString('base64')}&width=600&height=600`;
+        const url = `${helpers.API_URL}/static/test/public?filter=${buff.toString('base64')}&width=600&height=600`;
         request({
             method: `GET`,
             url

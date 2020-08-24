@@ -10,6 +10,7 @@
  *
  */
 var cloud;
+var lc;
 
 module.exports = {
 
@@ -68,47 +69,17 @@ module.exports = {
         /**
          *
          */
-        L.control.locate({
+        lc =L.control.locate({
             position: 'topright',
             strings: {
                 title: __("Find me")
             },
-            icon: "fa fa-location-arrow",
-            iconLoading: "fa fa-circle-o-notch fa-spin",
             keepCurrentZoomLevel: true,
             drawCircle: false,
             locateOptions: {
                 enableHighAccuracy: true
             }
         }).addTo(map);
-
-        /**
-         *
-         */
-            // var graphicScale = L.control.graphicScale({
-            //       doubleLine: false,
-            //       fill: 'hollow',
-            //       showSubunits: false,
-            //       position: "bottomleft"
-            //   }).addTo(map);
-            //
-            //   /**
-            //    *
-            //    * @type {div}
-            //    */
-            //   var scaleText = L.DomUtil.create('div', 'scaleText');
-            //   graphicScale._container.insertBefore(scaleText, graphicScale._container.firstChild);
-            //
-            //   /**
-            //    *
-            //    */
-            //   var styleChoices = scaleText.querySelectorAll('.choice');
-            //
-            //   for (var i = 0; i < styleChoices.length; i++) {
-            //       styleChoices[i].addEventListener('click', function (e) {
-            //           graphicScale._setStyle({fill: e.currentTarget.innerHTML});
-            //       });
-            //   }
 
         var localization;
         if (window._vidiLocale === "da_DK") {
@@ -117,32 +88,6 @@ module.exports = {
         if (window._vidiLocale === "en_US") {
             localization = "en";
         }
-
-        /*
-        var measureControl = new L.Control.Measure({
-            position: 'topright',
-            primaryLengthUnit: 'kilometers',
-            secondaryLengthUnit: 'meters',
-            primaryAreaUnit: 'hectares',
-            secondaryAreaUnit: 'sqmeters',
-            localization: localization,
-            units: {
-                meters: {
-                    factor: 1,
-                    display: 'meters',
-                    decimals: 1
-                },
-                sqmeters: {
-                    factor: 1,
-                    display: 'sqmeters',
-                    decimals: 1
-                }
-            }
-
-
-        });
-        measureControl.addTo(map);
-        */
 
         L.Edit.Poly = L.Edit.Poly.extend({
             options: {
@@ -169,6 +114,10 @@ module.exports = {
      */
     get: function () {
         return cloud;
+    },
+
+    getLc: function() {
+        return lc;
     },
 
     iconSmall: new L.DivIcon({

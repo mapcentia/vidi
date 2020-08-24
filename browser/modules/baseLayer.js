@@ -360,9 +360,18 @@ module.exports = module.exports = {
                 $("#base-layer-list").find('.info-label').on('click', e => {
                     let rawHtml = $(e.target).attr(`data-baselayer-info`);
                     let layerName = $(e.target).attr(`data-baselayer-name`);
+
+                    // Right slide in default.tmpl
                     $("#info-modal.slide-right").css("right", "0");
                     $("#info-modal .modal-title").html(layerName);
                     $("#info-modal .modal-body").html(rawHtml);
+
+                    // Left slide in embed.tmpl
+                    $("#info-modal-top.slide-left").show();
+                    $("#info-modal-top.slide-left").animate({left: "0"}, 200);
+                    $("#info-modal-top .modal-title").html(layerName);
+                    $("#info-modal-top .modal-body").html(rawHtml);
+
                     e.stopPropagation();
                 });
 

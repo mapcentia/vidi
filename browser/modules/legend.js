@@ -41,7 +41,7 @@ module.exports = module.exports = {
     },
     init: function (layerArr, el) {
         return new Promise(function (resolve, reject) {
-            let metaDataKeys = meta.getMetaDataKeys(), visibleLayers = _layers.getLayers(";"), checked, layerName, param = ``;
+            let metaDataKeys = meta.getMetaDataKeys(), visibleLayers = _layers.getLayers(";"), checked, layerName, param = ``, layers;
 
             // No layers visible
             if (metaDataKeys.length === 0) {

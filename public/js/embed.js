@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2019 MapCentia ApS
+ * @copyright  2013-2020 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -19,18 +19,24 @@
                 var tmpl = targetDiv.getAttribute("data-vidi-tmpl") || "embed.tmpl";
                 var search = targetDiv.getAttribute("data-vidi-search") || "";
                 var history = targetDiv.getAttribute("data-vidi-history") || "";
+                var useSchema = targetDiv.getAttribute("data-vidi-use-schema") === "true";
+                var useConfig = targetDiv.getAttribute("data-vidi-use-config") === "true";
+                var configHost = targetDiv.getAttribute("data-vidi-host") || null;
                 try {
                     var obj = JSON.parse(atob(token));
                 } catch (e) {
                     alert("Could not parse token");
                 }
-                var host = obj.host + ""; // Port ?
+                var host = (configHost || obj.host) + ""; // Port ?
                 var id = obj.id;
                 var database = obj.database;
+                var schema = obj.schema !== undefined && useSchema ? obj.schema + "/" : "";
+                var config = obj.config !== undefined && useConfig ? obj.config : "";
+                var src = host + "/app/" + database + "/" + schema + "?config=" + config + "&state=" + id + "&tmpl=" + tmpl + "&s=" + search + "&his=" + history;
                 var iframe = document.createElement("iframe");
                 iframe.setAttribute("style", "width:" + width + ";height:" + height + ";border: 1px solid rgba(0,0,0,0.1)");
                 iframe.setAttribute("allowfullscreen", "");
-                iframe.setAttribute("src", host + "/app/" + database + "/?state=" + id + "&tmpl=" + tmpl + "&s=" + search + "&his=" + history);
+                iframe.setAttribute("src", src);
                 targetDiv.appendChild(iframe);
             } else {
                 setTimeout(poll, 100);

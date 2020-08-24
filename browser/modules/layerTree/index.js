@@ -33,6 +33,7 @@ var ReactDOM = require('react-dom');
 
 import moment from 'moment';
 import noUiSlider from 'nouislider';
+import mustache from 'mustache';
 
 import LayerFilter from './LayerFilter';
 import LoadStrategyToggle from './LoadStrategyToggle';
@@ -131,12 +132,7 @@ let moduleState = {
     editorFiltersActive: {}
 };
 
-/**
- *
- * @type {showdown.Converter}
- */
-const showdown = require('showdown');
-const converter = new showdown.Converter();
+const marked = require('marked');
 
 let filterComp = {};
 let lastFilter;
@@ -450,6 +446,7 @@ module.exports = {
                                     hideFilters();
                                 }
                             } catch (e) {
+                                console.error(e)
                                 hideFilters();
                             }
                         }
@@ -610,6 +607,7 @@ module.exports = {
      * @param filters
      */
     applyFilters: (filters) => {
+        console.log("filters", filters)
         moduleState.arbitraryFilters = filters;
     },
 
@@ -1081,8 +1079,12 @@ module.exports = {
 
                                         if (`serviceWorker` in navigator) {
                                             if (navigator.serviceWorker.controller) {
+                                                // Service worker is registered
                                                 setOfflineModeSettingsForCache().then(resolve);
                                             } else {
+                                                // Service worker is NOT registered but don't wait
+                                                turnOnActiveLayersAndFinishBuilding().then(resolve);
+
                                                 backboneEvents.get().once(`ready:serviceWorker`, () => {
                                                     setTimeout(() => {
                                                         if (`serviceWorker` in navigator && navigator.serviceWorker.controller) {
@@ -1094,6 +1096,7 @@ module.exports = {
                                                 });
                                             }
                                         } else {
+                                            // Browser doesn't support service workers
                                             turnOnActiveLayersAndFinishBuilding().then(resolve);
                                         }
                                     }, 1000);
@@ -1114,13 +1117,13 @@ module.exports = {
                             }
 
                         } catch (e) {
-                            console.log(e);
+                            console.error(e);
                         }
 
                     });
 
                 } catch (e) {
-                    console.log(e);
+                    console.error(e);
                 }
 
             });
@@ -1313,7 +1316,7 @@ module.exports = {
         if (layerDescription.meta) {
             try {
                 let preParsedMeta = JSON.parse(layerDescription.meta);
-                if (typeof preParsedMeta == 'object' && preParsedMeta instanceof Object && !(preParsedMeta instanceof Array)) {
+                if (typeof preParsedMeta === 'object' && preParsedMeta instanceof Object && !(preParsedMeta instanceof Array)) {
                     parsedMeta = preParsedMeta;
                 }
             } catch (e) {
@@ -1690,21 +1693,31 @@ module.exports = {
                 func(feature, layer, layerKey, sqlQuery, moduleState.vectorStores[LAYER.VECTOR + ':' + layerKey], cloud.get().map);
             } catch (e) {
                 console.info("Error in click function for: " + layerKey);
-                console.error(e.message);
             }
         }
 
         let renderedText = null;
+        Handlebars.registerHelper('breaklines', function (text) {
+            text = Handlebars.Utils.escapeExpression(text);
+            text = text.replace(/(\r\n|\n|\r)/gm, '<br>');
+            return new Handlebars.SafeString(text);
+        });
         try {
             let tmpl = sqlQuery.getVectorTemplate(layerKey);
             if (tmpl) {
+                // Convert Markdown in text fields
+                let metaDataKeys = meta.getMetaDataKeys();
+                for (const property in  metaDataKeys[layerKey].fields) {
+                    if (metaDataKeys[layerKey].fields[property].type === "text") {
+                        properties[property] = marked(properties[property]);
+                    }
+                }
+                properties.text1 = marked(properties.text1);
                 renderedText = Handlebars.compile(tmpl)(properties);
             }
         } catch (e) {
             console.info("Error in pop-up template for: " + layerKey);
-            console.error(e.message);
         }
-
 
         if (typeof parsedMeta.info_element_selector !== "undefined" && parsedMeta.info_element_selector !== "" && renderedText !== null) {
             $(parsedMeta.info_element_selector).html(renderedText)
@@ -1729,6 +1742,28 @@ module.exports = {
      * @returns {Array}
      */
     getParentLayerFilters(layerKey) {
+        let parentLayers = [];
+        let activeLayers = _self.getActiveLayers();
+        activeLayers.map(activeLayerName => {
+            let layerMeta = meta.getMetaByKey(layerTreeUtils.stripPrefix(activeLayerName), false);
+            if (layerMeta.children && Array.isArray(layerMeta.children)) {
+                layerMeta.children.map(child => {
+                    if (child.rel === layerKey) {
+                        let activeFiltersForParentLayer = _self.getActiveLayerFilters(layerTreeUtils.stripPrefix(activeLayerName));
+                        if (activeFiltersForParentLayer && activeFiltersForParentLayer.length > 0) {
+                            activeFiltersForParentLayer.map(filter => {
+                                parentLayers.push(`${child.child_column} IN (SELECT ${child.parent_column} FROM ${layerTreeUtils.stripPrefix(activeLayerName)} WHERE ${filter})`);
+                            });
+                        }
+                    }
+                });
+            }
+        });
+
+        return parentLayers;
+    },
+
+    getParentLayerKey(layerKey) {
         let parentLayers = [];
         let activeLayers = _self.getActiveLayers();
         activeLayers.map(activeLayerName => {
@@ -1785,6 +1820,7 @@ module.exports = {
                     let parsedPredefinedFiltersLocal = JSON.parse(predefinedFiltersRaw);
                     parsedPredefinedFilters = parsedPredefinedFiltersLocal;
                 } catch (e) {
+                    console.error(e)
                 }
                 let appliedPredefinedFilters = {};
                 appliedPredefinedFilters[tableName] = [];
@@ -1822,7 +1858,7 @@ module.exports = {
                                         break;
                                     case `date`:
                                     case `timestamp with time zone`:
-                                    case `timestamp with timeout zone`:
+                                    case `timestamp without time zone`:
                                         if (EXPRESSIONS_FOR_DATES.indexOf(column.expression) === -1) {
                                             throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layerDescription.fields[key].type} type)`);
                                         }
@@ -1832,6 +1868,7 @@ module.exports = {
                                     case `text`:
                                     case `string`:
                                     case `character`:
+                                    case `uuid`:
                                     case `character varying`:
                                         if (EXPRESSIONS_FOR_STRINGS.indexOf(column.expression) === -1) {
                                             throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layerDescription.fields[key].type} type)`);
@@ -1880,10 +1917,12 @@ module.exports = {
             }
         }
 
-        if (typeof filterComp[layerKey] !== "object" && typeof moduleState.editorFilters[tableName] === "object" && moduleState.editorFilters[tableName].length > 0) {
+        // Used when refreshing browser and editor filter has to be applied before filter-component is rendered
+        if (typeof filterComp[layerKey] !== "object" && typeof moduleState.editorFiltersActive[tableName] === "boolean" && moduleState.editorFiltersActive[tableName] === true && typeof moduleState.editorFilters[tableName] === "object" && moduleState.editorFilters[tableName].length > 0) {
+            console.log("Applying editor filter from state");
             return moduleState.editorFilters[tableName];
         }
-
+        // Used when using filter-component is rendered and editor filter is set
         if (typeof filterComp[layerKey] === "object" && typeof moduleState.editorFiltersActive[tableName] === "boolean" && moduleState.editorFiltersActive[tableName] === true && moduleState.editorFilters[tableName].length > 0) {
             return moduleState.editorFilters[tableName];
         }
@@ -2168,8 +2207,7 @@ module.exports = {
                         let func = Function('"use strict";return (' + pointToLayer + ')')();
                         _self.setPointToLayer(LAYER.VECTOR + ':' + layerKey, func);
                     } catch (e) {
-                        console.info("Error in point-to-layer function for: " + layerKey);
-                        console.error(e.message);
+                        console.error("Error in point-to-layer function for: " + layerKey);
                     }
                 }
 
@@ -2179,8 +2217,7 @@ module.exports = {
                         let func = Function('"use strict";return (' + vectorStyle + ')')();
                         _self.setStyle(LAYER.VECTOR + ':' + layerKey, func);
                     } catch (e) {
-                        console.info("Error in style function for: " + layerKey);
-                        console.error(e.message);
+                        console.error("Error in style function for: " + layerKey);
                     }
 
                 }
@@ -2452,6 +2489,7 @@ module.exports = {
             let layerKeyWithGeom = layerKey + "." + layer.f_geometry_column;
             let lockedLayer = (layer.authentication === "Read/write" ? " <i class=\"fa fa-lock gc2-session-lock\" aria-hidden=\"true\"></i>" : "");
             let layerTypeSelector = ``;
+            let parentLayerKeys = [];
             if (layer.meta) {
                 parsedMeta = _self.parseLayerMeta(layer);
                 if (parsedMeta) {
@@ -2466,6 +2504,21 @@ module.exports = {
                     if (`meta_desc` in parsedMeta) {
                         displayInfo = (parsedMeta.meta_desc || layer.f_table_abstract) ? `visible` : `hidden`;
                     }
+                    meta.getMetaDataLatestLoaded().data.forEach(e => {
+                        try {
+                            let m = JSON.parse(e?.meta)?.referenced_by;
+                            let referencedBy = m && m !== "" ? JSON.parse(m) : null;
+                            if (referencedBy) {
+                                referencedBy.forEach(ref => {
+                                    if (ref.rel === layerKey) {
+                                        parentLayerKeys.push(e.f_table_title || e.f_table_schema + "." + e.f_table_name)
+                                    }
+                                })
+                            }
+                        } catch (err) {
+                            console.error("Invalid JSON in referenced_by for layer key: " + e.f_table_schema  + "." + e.f_table_name);
+                        }
+                    })
                 }
             }
             if (!singleTypeLayer) {
@@ -2479,7 +2532,7 @@ module.exports = {
             }
 
             let layerControlRecord = $(markupGeneratorInstance.getLayerControlRecord(layerKeyWithGeom, layerKey, layerIsActive,
-                layer, defaultLayerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo, subgroupId !== false, moduleState, disableCheckBox));
+                layer, defaultLayerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo, subgroupId !== false, moduleState, disableCheckBox, parentLayerKeys));
 
             // Callback for selecting specific layer type to enable (layer type dropdown)
             $(layerControlRecord).find('[class^="js-layer-type-selector"]').on('click', (e, data) => {
@@ -2549,15 +2602,23 @@ module.exports = {
                 html = (parsedMeta !== null
                     && typeof parsedMeta.meta_desc !== "undefined"
                     && parsedMeta.meta_desc !== "") ?
-                    converter.makeHtml(parsedMeta.meta_desc) : abstract;
+                    marked(parsedMeta.meta_desc) : abstract;
 
                 moment.locale('da');
 
-                html = html ? Mustache.render(html, parsedMeta) : "";
+                html = html ? mustache.render(html, parsedMeta) : "";
 
+                // Right slide in default.tmpl
                 $("#info-modal.slide-right").css("right", "0");
                 $("#info-modal .modal-title").html(title || name);
                 $("#info-modal .modal-body").html(html + '<div id="info-modal-legend" class="legend"></div>');
+
+                // Left slide in embed.tmpl
+                $("#info-modal-top.slide-left").show();
+                $("#info-modal-top.slide-left").animate({left: "0"}, 200);
+                $("#info-modal-top .modal-title").html(title || name);
+                $("#info-modal-top .modal-body").html(html + '<div id="info-modal-legend" class="legend"></div>');
+
                 legend.init([`${layer.f_table_schema}.${layer.f_table_name}`], "#info-modal-legend");
                 e.stopPropagation();
             });
@@ -2755,6 +2816,7 @@ module.exports = {
                                     editorFilters={localEditorFilters}
                                     editorFiltersActive={localEditorFiltersActive}
                                     isFilterImmutable={isFilterImmutable}
+                                    db={db}
                                 />, document.getElementById(componentContainerId));
                             $(layerContainer).find('.js-layer-settings-filters').hide(0);
 

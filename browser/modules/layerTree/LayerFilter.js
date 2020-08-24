@@ -5,10 +5,7 @@
  */
 
 import React from 'react';
-import AceEditor from 'react-ace';
 import PropTypes from 'prop-types';
-import "brace/mode/json";
-import "brace/theme/textmate";
 import {
     validateFilters,
     MATCHES,
@@ -18,14 +15,21 @@ import {
     EXPRESSIONS_FOR_BOOLEANS,
     EXPRESSIONS
 } from './filterUtils';
-import {StringControl, NumberControl, BooleanControl, DatetimeControl, DateControl} from './controls';
+import {
+    StringControl,
+    NumberControl,
+    BooleanControl,
+    DatetimeControl,
+    DateControl,
+    AutocompleteControl
+} from './controls';
 
 /**
  * Layer filter component
  */
 const SELECT_WIDTH = `50px`;
 
-const STRING_TYPES = [`text`, `string`, `character`, `character varying`];
+const STRING_TYPES = [`text`, `string`, `character`, `character varying`, `uuid`];
 const NUMBER_TYPES = [`smallint`, `bigint`, `integer`, `double precision`, `numeric`, `decimal`, 'real'];
 const DATE_TYPES = [`date`];
 const DATETIME_TYPES = [`timestamp`, `timestamp with time zone`, `timestamp without time zone`];
@@ -87,7 +91,8 @@ class VectorLayerFilter extends React.Component {
                     arbitraryFilters.columns.push({
                         fieldname: item.field,
                         expression: item.operator,
-                        value: ``
+                        value: ``,
+                        restriction: this.props.layer.fields[item.field].restriction || false
                     });
                 }
             });
@@ -231,13 +236,16 @@ class VectorLayerFilter extends React.Component {
         }
         for (let key in this.state.layer.fields) {
             let field = this.state.layer.fields[key];
-            let alias = null;
-            if (fieldconf && typeof fieldconf[key] === "object" && typeof fieldconf[key]["alias"] !== "undefined") {
-                alias = fieldconf[key]["alias"];
-            }
-            if (ALLOWED_TYPES_IN_FILTER.indexOf(field.type) !== -1) {
-                columnOptions.push(<option key={`field_` + layerKey + `_` + columnIndex} value={key}>{alias || key}</option>);
-                columnIndex++;
+            if ((fieldconf === null || fieldconf[key] === undefined) || (typeof fieldconf[key]["filter"] !== "undefined" && fieldconf[key]["filter"] !== true)) {
+                let alias = null;
+                if (fieldconf && typeof fieldconf[key] === "object" && typeof fieldconf[key]["alias"] !== "undefined") {
+                    alias = fieldconf[key]["alias"];
+                }
+                if (ALLOWED_TYPES_IN_FILTER.indexOf(field.type) !== -1) {
+                    columnOptions.push(
+                        <option key={`field_` + layerKey + `_` + columnIndex} value={key}>{alias || key}</option>);
+                    columnIndex++;
+                }
             }
         }
 
@@ -308,19 +316,6 @@ class VectorLayerFilter extends React.Component {
         });
     }
 
-    handleEditorFiltersChange(value) {
-        let parsedValue;
-        try {
-            parsedValue = JSON.parse(value);
-        } catch (e) {
-            parsedValue = null;
-        }
-        this.props.onChangeEditor({
-            layerKey: (this.props.layer.f_table_schema + `.` + this.props.layer.f_table_name),
-            filters: parsedValue || null
-        });
-
-    }
 
     applyEditor() {
         this.props.onApplyEditor({
@@ -339,7 +334,10 @@ class VectorLayerFilter extends React.Component {
     handleReset() {
         let props = this.props;
         let arbitraryFilters = props.arbitraryFilters || {};
-        let resetArbitraryFilters = {match: (props.layerMeta && `default_match` in props.layerMeta && MATCHES.indexOf(props.layerMeta.default_match) > -1 ? props.layerMeta.default_match : MATCHES[0]), columns: []};
+        let resetArbitraryFilters = {
+            match: (props.layerMeta && `default_match` in props.layerMeta && MATCHES.indexOf(props.layerMeta.default_match) > -1 ? props.layerMeta.default_match : MATCHES[0]),
+            columns: []
+        };
         if (props.presetFilters.length === 0) {
             resetArbitraryFilters.columns.push(DUMMY_RULE);
         } else {
@@ -359,7 +357,7 @@ class VectorLayerFilter extends React.Component {
 
     render() {
         let allRulesAreValid = true;
-        let layerKey = this.state.layer.f_table_name + '.' + this.state.layer.f_table_schema;
+        let layerKey = this.state.layer.f_table_schema + '.' + this.state.layer.f_table_name;
 
         let matchSelectorOptions = [];
         MATCHES.map((match, index) => {
@@ -414,7 +412,18 @@ class VectorLayerFilter extends React.Component {
                     this.changeValue(value, index);
                 };
 
-                if (STRING_TYPES.indexOf(type) !== -1) {
+                let fieldconf = null;
+                if (this.state.layer.fieldconf) {
+                    try {
+                        fieldconf = JSON.parse(this.state.layer.fieldconf)
+                    } catch (e) {
+                    }
+                }
+
+                if (STRING_TYPES.indexOf(type) !== -1 && fieldconf && fieldconf[column.fieldname] && fieldconf[column.fieldname].autocomplete) {
+                    control = (
+                        <AutocompleteControl id={id} value={column.value} layerKey={layerKey} field={column.fieldname} restriction={column.restriction} db={this.props.db}  onChange={changeHandler}/>);
+                } else if (STRING_TYPES.indexOf(type) !== -1) {
                     control = (
                         <StringControl id={id} value={column.value} restriction={column.restriction} onChange={changeHandler}/>);
                 } else if (NUMBER_TYPES.indexOf(type) !== -1) {
@@ -480,7 +489,10 @@ class VectorLayerFilter extends React.Component {
 
             let childrenInfoMarkup = childrenInfo();
             return (
-                <div className="js-arbitrary-filters" style={this.state.editorFiltersActive ? {pointerEvents: "none", opacity: "0.2"} : {}}>
+                <div className="js-arbitrary-filters" style={this.state.editorFiltersActive ? {
+                    pointerEvents: "none",
+                    opacity: "0.2"
+                } : {}}>
                     {childrenInfoMarkup}
                     <div className="form-group" style={{display: this.props.isFilterImmutable ? "none" : "inline"}}>
                         <p>{__(`Match`)} {matchSelector} {__(`of the following`)}</p>
@@ -509,7 +521,10 @@ class VectorLayerFilter extends React.Component {
             this.state.predefinedFilters.map((item, index) => {
                 let filterIsActive = (this.state.disabledPredefinedFilters.indexOf(item.name) === -1);
                 predefinedFiltersTab.push(
-                    <div key={`tile_filter_` + index} style={this.state.editorFiltersActive ? {pointerEvents: "none", opacity: "0.2"} : {}}>
+                    <div key={`tile_filter_` + index} style={this.state.editorFiltersActive ? {
+                        pointerEvents: "none",
+                        opacity: "0.2"
+                    } : {}}>
                         <div style={{display: `inline-block`}}>
                             <div className="checkbox">
                                 <label>
@@ -524,58 +539,69 @@ class VectorLayerFilter extends React.Component {
                             </div>
                         </div>
                         <div style={{display: `inline-block`}}>
-                            <span>{item.name} ({item.value})</span>
+                            <span>{item.name}</span>
                         </div>
                     </div>
                 );
             });
 
             return (<div className="js-predefined-filters">{predefinedFiltersTab}</div>);
-        }
+        };
 
         /**
          * Builds the WHERE field
          */
-        const buildWhereClauseField = (props) => {
+        const buildWhereClauseField = () => {
+            const handleChange = (event) => {
+                let parsedValue;
+                try {
+                    parsedValue = JSON.parse(event.target.value);
+                } catch (e) {
+                    parsedValue = null;
+                    return;
+                }
+                this.setState({"editorFilters": parsedValue});
+                this.props.onChangeEditor({
+                    layerKey: (this.props.layer.f_table_schema + `.` + this.props.layer.f_table_name),
+                    filters: parsedValue || null
+                });
+            };
             return (
-                <div style={{marginTop: "25px", display: this.props.isFilterImmutable ? "none" : "inline"}}>
+                <div className="where-clause-field" style={{
+                    marginTop: "25px",
+                    display: this.props.isFilterImmutable ? "none" : "inline"
+                }}>
                     <div style={!this.state.editorFiltersActive ? {pointerEvents: "none", opacity: "0.2"} : {}}>
                         <div style={{marginLeft: "10px", marginRight: "10px"}}>
-                            <AceEditor
-                                mode="json"
-                                theme="textmate"
-                                onChange={(value) => {
-                                    this.handleEditorFiltersChange(value)
-                                }}
+                            <textarea
+                                style={{"width": "100%", " boxSizing": "border-box", "height": "26px"}}
+                                onChange={handleChange}
                                 name={`editor_filter_` + (this.props.layer.f_table_schema + `.` + this.props.layer.f_table_name)}
                                 value={JSON.stringify(
                                     this.state.editorFilters
                                 )}
-                                width="100%"
-                                height="40px"
-                                maxLines={2}
-                                showPrintMargin={false}
-                                autoScrollEditorIntoView={true}
-                                highlightActiveLine={true}
-                                showGutter={false}
-                                editorProps={{$blockScrolling: true}}/>
+                            />
                         </div>
                     </div>
                     <div>
                         <label>
-                            <input type="checkbox" checked={this.state.editorFiltersActive} onChange={this.activateEditor.bind(this)}/>
+                            <input type="checkbox" checked={this.state.editorFiltersActive} onChange={this.activateEditor.bind(this)}/> {__(`Filter editor`)}
                         </label>
-                        <button style={!this.state.editorFiltersActive ? {pointerEvents: "none", opacity: "0.2"} : {}} type="button" className="btn btn-xs btn-success" onClick={this.applyEditor.bind(this)}>
+                        <button style={!this.state.editorFiltersActive ? {
+                            pointerEvents: "none",
+                            opacity: "0.2"
+                        } : {}} type="button" className="btn btn-xs btn-success" onClick={this.applyEditor.bind(this)}>
                             <i className="fa fa-check"></i> {__(`Apply`)}
                         </button>
                     </div>
                 </div>
             )
-        }
+        };
 
         const buildResetButton = (props) => {
-            return (<button className="btn btn-xs btn-danger" onClick={this.handleReset.bind(this)}><i className="fa fa-reply"></i> {__(`Reset filter`)}</button>)
-        }
+            return (<button className="btn btn-xs btn-danger" onClick={this.handleReset.bind(this)}>
+                <i className="fa fa-reply"></i> {__(`Reset filter`)}</button>)
+        };
 
         let activeFiltersTab = false;
         let tabControl = false;
