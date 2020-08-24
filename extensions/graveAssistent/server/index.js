@@ -22,7 +22,7 @@ moment.locale("da_DK");
 
 var BACKEND = config.backend;
 
-var TABLEPREFIX = 'lerkonvert_'
+var TABLEPREFIX = 'graveassistent_'
 
 // Days from 19000101 to 19700101
 const DAYSSINCE = 25569

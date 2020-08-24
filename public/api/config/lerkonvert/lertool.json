@@ -11,14 +11,14 @@
   ],
   "enabledExtensions": [
     "session",
-    "lerConverter"
+    "graveAssistent"
   ],
   "searchConfig": {
     "komkode": [
       "846"
     ]
   },
-  "activateMainTab": "lerConverter",
+  "activateMainTab": "graveAssistent",
   "enabledSearch": "danish",
   "extensionConfig": {
     "session": {

@@ -55,7 +55,7 @@ var layerTree = require('./../../../browser/modules/layerTree');
  *
  * @type {string}
  */
-var exId = "lerConverter";
+var exId = "graveAssistent";
 
 /**
  *
@@ -643,7 +643,7 @@ module.exports = {
 
                 var applyFilter = function (filter) {
                     for (let layerKey in filter) {
-                        console.log('lerConverter - Apply filter to ' + layerKey)
+                        console.log('graveAssistent - Apply filter to ' + layerKey)
 
                         //Make sure layer is on
                         //TODO tænd laget hvis det ikke allerede er tændt! - skal være tændt før man kan ApplyFilter
@@ -678,7 +678,7 @@ module.exports = {
 
                 var clearFilters = function () {
                     // clear filters from layers that might be on! - then reload
-                    console.log('lerConverter - cleaning filters for reload')
+                    console.log('graveAssistent - cleaning filters for reload')
 
                     //Buildfilter with no value for "clear" value
                     var filter = buildFilter()
@@ -692,7 +692,7 @@ module.exports = {
                 /**
                  *
                  */
-                class LerConverter extends React.Component {
+                class GraveAssistent extends React.Component {
                     constructor(props) {
                         super(props);
 
@@ -725,7 +725,7 @@ module.exports = {
 
                         // Activates module
                         backboneEvents.get().on(`on:${exId}`, () => {
-                            console.log('Starting lerConverter')
+                            console.log('Starting graveAssistent')
                             me.setState({
                                 active: true
                             });
@@ -735,7 +735,7 @@ module.exports = {
 
                         // Deactivates module
                         backboneEvents.get().on(`off:${exId} off:all reset:all`, () => {
-                            console.log('Stopping lerConverter')
+                            console.log('Stopping graveAssistent')
                             me.setState({
                                 active: false
                             });
@@ -942,7 +942,7 @@ module.exports = {
                             });
                             //console.log(DClayers)
                         } catch (error) {
-                            console.info('lerConverter - Kunne ikke finde lag med korrekt tag')
+                            console.info('graveAssistent - Kunne ikke finde lag med korrekt tag')
 
                         }
 
@@ -1148,7 +1148,7 @@ module.exports = {
                                         }
                                         /> < /
                                         div > <
-                                        div id = "lerConverter-feature-ledningsejerliste" >
+                                        div id = "graveAssistent-feature-ledningsejerliste" >
                                         <
                                         LedningsEjerStatusTable statusliste = {
                                             s.ejerliste
@@ -1163,16 +1163,16 @@ module.exports = {
                                     return (
                                         <div role = "tabpanel" >
                                             <div className = "form-group">
-                                                <div id = "lerConverter-feature-select-container" style = {{width: '80%',margin: '10px auto 10px auto'}}>
+                                                <div id = "graveAssistent-feature-select-container" style = {{width: '80%',margin: '10px auto 10px auto'}}>
                                                     <FormControl style = {{width: '100%',padding: '20px'}}>
-                                                        <InputLabel id = "lerConverter-feature-select-label"> Vælg eksisterende forespørgsel </InputLabel>
-                                                        <Select id = "lerConverter-feature-select" value = {s.foresp} onChange = {_self.handleForespSelectChange.bind(this)}>
+                                                        <InputLabel id = "graveAssistent-feature-select-label"> Vælg eksisterende forespørgsel </InputLabel>
+                                                        <Select id = "graveAssistent-feature-select" value = {s.foresp} onChange = {_self.handleForespSelectChange.bind(this)}>
                                                             {s.forespOptions.map(f => <MenuItem key = {f.forespnummer} value = {f.forespnummer}> {f.forespnummer + ': ' + f.bemaerkning + ' (Uploaded: ' + f.svar_uploadtime + ')'} </MenuItem>)}
                                                         </Select>
                                                     </FormControl>
                                                     <div><p>Eller</p></div>
                                                 </div>
-                                                <div id = "lerConverter-feature-dropzone">
+                                                <div id = "graveAssistent-feature-dropzone">
                                                     <Dropzone onDrop = {_self.onDrop.bind(this)} style = {{width: '80%',height: '160px',padding: '50px',border: '1px green dashed',margin: '20px auto 20px auto',textAlign: 'center'}}>
                                                         <p>{__("uploadmessage")}</p>
                                                     </Dropzone>
@@ -1189,7 +1189,7 @@ module.exports = {
                                             <
                                             div className = "form-group" >
                                             <
-                                            div id = "lerConverter-feature-login"
+                                            div id = "graveAssistent-feature-login"
                                             className = "alert alert-info"
                                             role = "alert" > {
                                                 __("MissingLogin")
@@ -1226,7 +1226,7 @@ module.exports = {
                             //==============
                             try {
                                 ReactDOM.render( <
-                                    LerConverter / > ,
+                                    GraveAssistent / > ,
                                     document.getElementById(exId)
                                 );
                             } catch (e) {

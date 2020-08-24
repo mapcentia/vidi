@@ -667,7 +667,7 @@ module.exports = {
                 "documentCreate": ["index"]
             },
             {
-                "lerConverter": ["index"]
+                "graveAssistent": ["index"]
             },
             {
                 "MapGOMenu": ["index", "reportRender", "infoClick", "controller"]
@@ -684,7 +684,7 @@ module.exports = {
                 "documentCreate": ["index"]
             },
             {
-                "lerConverter": ["index"]
+                "graveAssistent": ["index"]
             },
             {
                 "MapGOMenu": ["index"]

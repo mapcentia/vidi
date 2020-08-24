@@ -97,7 +97,7 @@ class LedningsEjerStatusTable extends React.Component {
                         <TableBody>
                     {this.props.statusliste.map(ejer =>{ 
                         return (
-                        <TableRow key={'lerConverter-feature-ledningsejerliste-status-'+ejer.CVR+ejer.indberetningsnr}>
+                        <TableRow key={'graveAssistent-feature-ledningsejerliste-status-'+ejer.CVR+ejer.indberetningsnr}>
                             <TableCell align="center" style={{ fontSize: FS }}>{statusIcon(ejer.status)}</TableCell>
                             <TableCell align="right" style={{ fontSize: FS }}>{ejer.indberetningsnr}</TableCell>
                             <TableCell align="left" style={{ fontSize: FS }}>{ejer.status}</TableCell>

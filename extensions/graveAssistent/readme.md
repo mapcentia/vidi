@@ -1,4 +1,4 @@
-# lerConverter
+# LER Grave Assistent
 
 For at imødekomme behovet for format-konvertering og plot er der udarbejdet dette plugin der håndterer "ledningspakker" fra LER 2.0
 
@@ -17,4 +17,6 @@ For at kunne benytte sig af funktionaliteten i denne extension kræver det flg. 
 ## Opsætning
 
 ### GC2
+
+Der kigges i tabeller som er prefixed med: `graveassistent_`. I det schema som har samme navn som brugeren.
 
