@@ -170,13 +170,25 @@ module.exports = function (grunt) {
                     'public/js/bundle.js': ['browser/index.js'],
                 },
                 options: {
+                    transform: [['babelify', {
+                        presets: ["@babel/preset-env", "@babel/preset-react"],
+                        plugins: ["@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread"]
+                    }], 'require-globify', 'windowify', 'envify', ['browserify-css', { global: true }]]
+                }
+            },
+            debug: {
+                files: {
+                    'public/js/bundle.js': ['browser/index.js'],
+                },
+                options: {
                     browserifyOptions: {
-                        debug: false
+                        debug: true,
+                        fullPaths: true
                     },
                     transform: [['babelify', {
-                        presets: [['es2015'], ['react'], ['stage-0']],
-                        plugins: ["transform-object-rest-spread"]
-                    }], 'require-globify', 'windowify', 'envify']
+                        presets: ["@babel/preset-env", "@babel/preset-react"],
+                        plugins: ["@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread"]
+                    }], 'require-globify', 'windowify', 'envify', ['browserify-css', { global: true }]]
                 }
             },
             publish_sw: {
@@ -188,8 +200,8 @@ module.exports = function (grunt) {
                         'urls-to-cache': './browser/service-worker/cache.production.js'
                     },
                     transform: [['babelify', {
-                        presets: [['es2015'], ['react'], ['stage-0']],
-                        plugins: ["transform-object-rest-spread"]
+                        presets: ["@babel/preset-env", "@babel/preset-react"],
+                        plugins: ["@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread"]
                     }], 'require-globify']
                 }
             },
@@ -202,8 +214,8 @@ module.exports = function (grunt) {
                         'urls-to-cache': './browser/service-worker/cache.development.js'
                     },
                     transform: [['babelify', {
-                        presets: [['es2015'], ['react'], ['stage-0']],
-                        plugins: ["transform-object-rest-spread"]
+                        presets: ["@babel/preset-env", "@babel/preset-react"],
+                        plugins: ["@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread", "@babel/plugin-proposal-optional-chaining"]
                     }], 'require-globify']
                 }
             },
@@ -212,23 +224,24 @@ module.exports = function (grunt) {
                     'public/js/bundle.js': ['browser/index.js']
                 },
                 options: {
-                    transform: [['babelify', {
-                        presets: [['es2015'], ['react'], ['stage-0']],
-                        plugins: ["transform-object-rest-spread"]
-                    }], 'require-globify', 'windowify'],
-                    watch: true,
-                    keepAlive: true,
                     browserifyOptions: {
-                        debug: true
-                    }
+                        debug: true,
+                        fullPaths: true
+                    },
+                    transform: [['babelify', {
+                        presets: ["@babel/preset-env", "@babel/preset-react"],
+                        plugins: ["@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread"]
+                    }], 'require-globify', 'windowify', 'envify', ['browserify-css', { global: true }]],
+                    watch: true,
+                    keepAlive: true
                 }
             }
         },
         uglify: {
             publish: {
                 options: {
-                    sourceMap: true,
-                    sourceMapIncludeSources: true,
+                    sourceMap: false,
+                    sourceMapIncludeSources: false,
                     compress: {
                         dead_code: true,
                         drop_debugger: true,
@@ -257,16 +270,18 @@ module.exports = function (grunt) {
                         'public/js/lib/localforage/localforage.js',
 
                         'public/js/lib/jquery/jquery-3.4.1.min.js',
-                        'public/js/lib/jrespond/jRespond.js',
-                        'public/js/lib/mustache.js/mustache.js',
                         'public/js/lib/underscore/underscore.js',
                         'public/js/lib/backbone/backbone.js',
-                        'public/js/lib/proj4/proj4-combined.js',
 
                         'public/js/lib/typeahead.js/typeahead.jquery.js',
                         'public/js/lib/bootstrap-material-design/dist/js/ripples.js',
                         'public/js/lib/bootstrap-material-design/dist/js/material.js',
                         'public/js/lib/bootstrap-colorpicker/js/bootstrap-colorpicker.js',
+                        'public/js/lib/bootstrap-table/bootstrap-table.js',
+                        'public/js/lib/bootstrap-table/bootstrap-table-locale-all.js',
+                        'public/js/lib/bootstrap-table/extensions/export/bootstrap-table-export.js',
+                        'public/js/lib/bootstrap-table/extensions/filter-control/bootstrap-table-filter-control.js',
+                        'public/js/lib/tableExport.jquery.plugin/tableExport.js',
 
                         'public/js/bundle.js',
                     ],

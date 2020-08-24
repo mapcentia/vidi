@@ -300,7 +300,8 @@ module.exports = {
                             }
 
                             if (response.data.bounds !== null) {
-                                var bounds = response.data.bounds;
+                                var frame = urlVars.frame || 0;
+                                var bounds = response.data.bounds[frame];
                                 cloud.get().map.fitBounds([bounds._northEast, bounds._southWest], {animate: false})
                             }
 

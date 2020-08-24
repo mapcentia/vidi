@@ -23,6 +23,8 @@ const DEFAULT_STARTUP_MODAL_SUPRESSION_TEMPLATES = ["print.tmpl", "blank.tmpl", 
     name: 'print_[\\w]+\\.tmpl'
 }];
 
+import mustache from 'mustache';
+
 module.exports = {
 
     /**
@@ -188,7 +190,7 @@ module.exports = {
             me.startApp();
         } else {
             $.get("/api/template/" + urlparser.db + "/" + tmpl, function (template) {
-                var rendered = Mustache.render(template, gc2i18n.dict);
+                var rendered = mustache.render(template, gc2i18n.dict);
                 $("#main-container").html(rendered);
                 console.info("Loaded external template: " + tmpl);
                 me.startApp();
@@ -347,11 +349,12 @@ module.exports = {
                     // ==========================
 
                     //Hack to compile Glob files. Don´t call this function!
-                    function ಠ_ಠ() {
+                    function ಠ_ಠ_() {
                         require('./../../extensions/*/browser/*.js', {mode: 'expand'});
                         require('./../../extensions/*/browser/*/*.js', {mode: 'expand'});
-                        //require('./../../extensions/!(watconc)/browser/*.js', {mode: 'expand'});
-                        //require('./../../extensions/!(watconc)/browser/*/*.js', {mode: 'expand'});
+
+                        // require('./../../extensions/!(watsonc)/browser/*.js', {mode: 'expand'});
+                        // require('./../../extensions/!(watsonc)/browser/*/*.js', {mode: 'expand'});
                     }
 
                     if (typeof vidiConfig.extensions !== "undefined" && typeof vidiConfig.extensions.browser !== "undefined") {
@@ -414,6 +417,10 @@ module.exports = {
                         console.log('Service worker was registered and activated');
                         backboneEvents.get().trigger(`ready:serviceWorker`);
                         clearInterval(checkInterval);
+                    } else {
+                        navigator.serviceWorker.ready.then(() => {
+                            registration.active.postMessage("claimMe");
+                        });
                     }
                 }, 1000);
             }).catch(error => {

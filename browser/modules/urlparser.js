@@ -21,6 +21,7 @@ module.exports = {
     schema: uriObj.segmentCoded(2),
     staticRoute: uriObj.segmentCoded(3),
     urlVars: uriJs.parseQuery(queryStr),
+    search: queryStr,
     uriJs: uriJs,
     uriObj: uriObj
 };

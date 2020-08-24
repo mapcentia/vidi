@@ -75,7 +75,6 @@ module.exports = {
         "No drawings in the map": "Ingen tegninger i kortet",
         "Click map to place circle marker": "Klik for at placere markør",
 
-        "circlemarker": "tekstboks",
         "polygon": "polygon",
         "rectangle": "rektangel",
         "polyline": "linje",
@@ -108,7 +107,9 @@ module.exports = {
         "Title": "Titel",
         "Comment": "Kommentar",
         "The comment will be placed on the PDF": "Kommentaren vil blive placeret på PDF'en",
-        "Sticky": "Sticky",
+        "Sticky": "Husk indstillinger",
+        "Add new box": "Tilføj ny boks",
+        "Remove last box": "Fjern seneste boks",
 
         "Draw a line": "Tegn en linje",
         "Draw an area": "Tegn en flade",
@@ -218,6 +219,8 @@ module.exports = {
         "Refresh existing cache for layer": "Genindlæs eksisterende cache for lag",
         "Dynamic layer is cached only within the last requested bounding box": "Dynamiske lag er kun cached inden for det sidst ønskede udsnit",
         "Apply": "Anvend",
+        "Reset filter": "Nulstil filter",
+        "Filter editor": "Filter editor",
 
         // Base layers
         "Side-by-side mode": "Dobbelt baggrundskort",
@@ -232,7 +235,7 @@ module.exports = {
         "Default map extent": "Går tilbage til start udsnittet",
         "Previous extent": "Forrige udsnit",
         "Next extent": "Næste udsnit",
-        "Click here then draw a square on the map, to zoom in to an area": "Klik her og træk derefter en firkant på kortet for at zoome til et område område",
+        "Click here then draw a square on the map, to zoom in to an area": "Klik her og træk derefter en firkant på kortet for at zoome til et område",
 
         // APIBridge
         "Not authorized to perform this action": "Ikke autoriseret til at udføre denne handling.",

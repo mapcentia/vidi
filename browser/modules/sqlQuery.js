@@ -37,9 +37,6 @@ var download = require('./download');
  */
 var db = urlparser.db;
 
-var JSONSchemaForm = require("react-jsonschema-form");
-const Form = JSONSchemaForm.default;
-
 var extensions;
 
 let _self = false;
@@ -58,6 +55,8 @@ let defaultSelectedStyle = {
     fillOpacity: 0.2,
     opacity: 0.2
 };
+
+
 
 /**
  * A default template for GC2, with a loop
@@ -287,7 +286,7 @@ module.exports = {
                             setViewOnSelect: false,
                             responsive: false,
                             callCustomOnload: false,
-                            checkBox: true,
+                            checkBox: !simple,
                             height: 300,
                             locale: window._vidiLocale.replace("_", "-"),
                             template: template,
@@ -617,6 +616,11 @@ module.exports = {
                                                         <span class="sr-only">Next</span>
                                                     </a>
                                                 </div>`;
+                                    Handlebars.registerHelper('breaklines', function(text) {
+                                        text = Handlebars.Utils.escapeExpression(text);
+                                        text = text.replace(/(\r\n|\n|\r)/gm, '<br>');
+                                        return new Handlebars.SafeString(text);
+                                    });
                                     value = Handlebars.compile(tmpl)(feature.properties[property.key]);
                                 } else {
                                     let subValue = feature.properties[property.key];

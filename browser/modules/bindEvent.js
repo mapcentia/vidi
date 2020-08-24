@@ -6,9 +6,10 @@
 
 'use strict';
 
-import { LAYER, LAYER_TYPE_DEFAULT } from './layerTree/constants';
+import {LAYER, LAYER_TYPE_DEFAULT} from './layerTree/constants';
 
 var mobile = require('is-mobile');
+var jrespond = require('jrespond');
 
 /**
  *
@@ -103,7 +104,7 @@ module.exports = {
                     if (prefix === LAYER_TYPE_DEFAULT + `:`) {
                         prefix = ``;
                     }
-  
+
                     if (data) {
                         doNotLegend = data.doNotLegend;
                     }
@@ -131,6 +132,18 @@ module.exports = {
                     function () {
                         if ($(document).width() > 1024 && typeof window.vidiConfig.activateMainTab === "undefined") {
                             $("#search-border").trigger("click");
+                        }
+                        if (typeof window.vidiConfig.extensionConfig !== "undefined" &&
+                            typeof window.vidiConfig.extensionConfig.embed !== "undefined" &&
+                            window.vidiConfig.extensionConfig.embed.slideOutLayerTree === true
+                        ) {
+                            $("#burger-btn").trigger("click");
+                        }
+                        if (typeof window.vidiConfig.extensionConfig !== "undefined" &&
+                            typeof window.vidiConfig.extensionConfig.embed !== "undefined" &&
+                            window.vidiConfig.extensionConfig.embed.expandFirstInLayerTree === true
+                        ) {
+                            $(".js-toggle-layer-panel:first").trigger('click');
                         }
                     }, 200
                 );
@@ -311,7 +324,9 @@ module.exports = {
         }
 
         var searchShow = function () {
-            let localCollapsedWidth = Math.max.apply(Math, $('#side-panel #main-tabs > li > a, #side-panel #main-tabs > li [role="tab"]').map(function(){ return $(this).width(); }).get());
+            let localCollapsedWidth = Math.max.apply(Math, $('#side-panel #main-tabs > li > a, #side-panel #main-tabs > li [role="tab"]').map(function () {
+                return $(this).width();
+            }).get());
             if (localCollapsedWidth > 0) {
                 if (localCollapsedWidth < 170) localCollapsedWidth = 170;
                 localCollapsedWidth = localCollapsedWidth + 80;
@@ -340,7 +355,7 @@ module.exports = {
             $("#side-panel ul li").removeClass("active");
         };
 
-        var jRes = jRespond([
+        var jRes = jrespond([
             {
                 label: 'phone',
                 enter: 0,
@@ -466,7 +481,7 @@ module.exports = {
 
             var id = ($(this)).attr('href');
 
-            if (id === "#full-screen"){
+            if (id === "#full-screen") {
                 utils.toggleFullScreen();
             }
 
@@ -559,7 +574,7 @@ module.exports = {
         })
 
         // Listen for fullscreen changes
-        document.addEventListener("fullscreenchange", function(event) {
+        document.addEventListener("fullscreenchange", function (event) {
             if (document.fullscreenElement) {
                 $("#full-screen-btn i").html("fullscreen_exit")
             } else {
