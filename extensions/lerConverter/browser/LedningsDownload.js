@@ -16,6 +16,7 @@ import RadioGroup from '@material-ui/core/RadioGroup';
 import FormLabel from '@material-ui/core/FormLabel';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import SaveIcon from '@material-ui/icons/Save';
+import Grid from '@material-ui/core/Grid'
 
 
 class LedningsDownload extends React.Component {
@@ -29,26 +30,27 @@ class LedningsDownload extends React.Component {
                 {
                     format: 'shp',
                     formatTitle: 'ESRI Shape',
-                    formatDesc: 'Bla Bla 1',
-                    formatProduct: 'Man får bla bla 1'
+                    formatDesc: 'Shape er et gængs format til udveksling af geografisk information. Filen kan med fordel indlæses i QGIS',
+                    formatProduct: 'Man får en pakket zip-fil med indhold. der vil være en shp-fil for hver geometri-type, samt en log over hvilke kolonner der har skiftet navn i oversættelsen.'
                 },
                 {
                     format: 'dxf',
                     formatTitle: 'DXF',
-                    formatDesc: 'Bla Bla 2',
-                    formatProduct: 'Man får bla bla 2'
+                    formatDesc: 'DXF er et almindeligt CAD-format. ',
+                    formatProduct: 'Man får en pakket zip-fil (opdeling pr. type eller ejer? eller ejer/type? - hvad med komponenter?)'
                 },
                 {
                     format: 'geojson',
                     formatTitle: 'GeoJSON',
-                    formatDesc: 'GeoJSON er et åbent format. Brug blandt andet QGIS til at åbne filen.',
-                    formatProduct: 'Man får bla bla 3'
+                    formatDesc: 'GeoJSON er et åbent tekst-baseret format. Bruges ofte i web-sammenhæng. Filen kan med fordel indlæses i  QGIS.',
+                    formatProduct: 'Man får en GeoJSON fil, dette er et direkte udtræk af ledningspakken. '
                 }
             ]
         };
     }
     handleChange = (event) => {
         const _self = this
+
         _self.setState({format:event.target.value || ''})
     };
 
@@ -115,7 +117,7 @@ class LedningsDownload extends React.Component {
 
         const container = {
             display: 'flex',
-            fexWrap: 'wrap'
+            flexWrap: 'wrap'
         }
         const formControl = {
             minWidth: 120
@@ -123,6 +125,16 @@ class LedningsDownload extends React.Component {
         const margin = {
             margin: 10
         }
+
+        let formatDescription, desc, product
+        if (s.format === '') {
+            desc = 'Vælg et format'
+            product = ''
+        } else {
+            desc = s.formatList.find(x => x.format === s.format).formatDesc
+            product = s.formatList.find(x => x.format === s.format).formatProduct
+        }
+
 
         return (
             
@@ -139,16 +151,29 @@ class LedningsDownload extends React.Component {
                    /> Download
                 </Button>
               <Dialog disableBackdropClick disableEscapeKeyDown open={s.open} onClose={_self.handleClose}>
-                <DialogTitle>Vælg format og download</DialogTitle>
+                <DialogTitle>Vælg format</DialogTitle>
                 <DialogContent>
-                  <form style={container}>
-                    <FormControl style={formControl}>
-                        <RadioGroup aria-label="gender" name="gender1" value={s.format} onChange={_self.handleChange}>
-                            {s.formatList.map(f => <FormControlLabel value={f.format} control={<Radio />} label={f.formatTitle} />)}
-                        </RadioGroup>
-                    </FormControl>
-                  </form>
-                  <p></p>
+                <Grid
+                  container
+                  direction="row"
+                  justify="center"
+                  alignItems="flex-start"
+                >
+
+                </Grid>
+                    <Grid item xs={6}>
+                        <form style={container}>
+                          <FormControl style={formControl}>
+                              <RadioGroup aria-label="gender" name="gender1" value={s.format} onChange={_self.handleChange}>
+                                  {s.formatList.map(f => <FormControlLabel value={f.format} control={<Radio />} label={f.formatTitle} />)}
+                              </RadioGroup>
+                          </FormControl>
+                        </form>
+                    </Grid>
+                    <Grid item xs={6}>
+                        {desc === '' ? '' : <p>{desc}</p>}
+                        {product === '' ? '' : <p>{product}</p>}
+                    </Grid>
                 </DialogContent>
                 <DialogActions>
                   <Button onClick={_self.handleClose} color="default" size={p.size} variant={p.variant}>
