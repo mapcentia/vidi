@@ -1338,6 +1338,7 @@ module.exports = {
                 // Activates module
                 backboneEvents.get().on(`on:${exId}`, () => {
                     console.log('Starting documentCreate')
+                    backboneEvents.get().trigger("refresh:meta");
                     me.setState({
                         active: true
                     });
@@ -1356,7 +1357,8 @@ module.exports = {
                 });
                 
                 backboneEvents.get().on("allDoneLoading:layers", function () {
-                    console.log("inside allDoneLoading:layers, DClayers.length: " + DClayers.length + " me.state.active: " + me.state.active + " firstRunner: " + firstRunner);                    
+                    console.log("inside allDoneLoading:layers, DClayers.length: " + DClayers.length + " me.state.active: " + me.state.active + " firstRunner: " + firstRunner);
+//                    backboneEvents.get().trigger("refresh:meta");
                     loadAndInitFilters(me.state.active);
                 });
 
@@ -1416,7 +1418,7 @@ module.exports = {
                         });  
                         
                         // TODO: overveje om dette skal fjernes efter session autologin fix
-                        buildServiceSelect(select_id);
+                        //buildServiceSelect(select_id);
                         // run method here in order to support switch in event order, when running
                         // extension along with the session object autoLogin feature
                         loadAndInitFilters(me.state.active);                        
