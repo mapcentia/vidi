@@ -218,7 +218,7 @@ router.post('/api/extension/downloadForespoergsel', function (req, response) {
 
                     default:
                         response.status(500).json({
-                            error: "Format ikke implementeret: '" + b.format
+                            error: "Format ikke implementeret: '" + b.format + "'"
                         })
                         return
                 }

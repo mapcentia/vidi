@@ -7,7 +7,9 @@
 'use strict';
 
 /* Import big-brains*/
-import { v4 as uuidv4 } from 'uuid';
+import {
+    v4 as uuidv4
+} from 'uuid';
 import Dropzone from 'react-dropzone';
 import JSZip from 'jszip';
 import LedningsEjerStatusTable from "./LedningsEjerStatusTable";
@@ -595,7 +597,7 @@ module.exports = {
                         method: 'POST',
                         body: JSON.stringify(postData)
                     }
-                    
+
                     return new Promise(function (resolve, reject) {
                         // Do async job and resolve
                         fetch(gc2host + '/api/extension/upsertStatus', opts)
@@ -691,368 +693,368 @@ module.exports = {
                  *
                  */
                 class LerConverter extends React.Component {
-                        constructor(props) {
-                            super(props);
+                    constructor(props) {
+                        super(props);
 
-                            this.state = {
-                                active: false,
-                                done: false,
-                                loading: false,
-                                authed: false,
-                                progress: 0,
-                                progressText: '',
-                                ejerliste: [],
-                                isError: false,
-                                errorList: [],
-                                forespOptions: [],
-                                foresp: ''
-                            };
+                        this.state = {
+                            active: false,
+                            done: false,
+                            loading: false,
+                            authed: false,
+                            progress: 0,
+                            progressText: '',
+                            ejerliste: [],
+                            isError: false,
+                            errorList: [],
+                            forespOptions: [],
+                            foresp: ''
+                        };
 
-                            this.readContents = this.readContents.bind(this)
-                        }
+                        this.readContents = this.readContents.bind(this)
+                    }
 
-                        /**
-                         * Handle activation on mount
-                         */
-                        componentDidMount() {
-                            let me = this;
+                    /**
+                     * Handle activation on mount
+                     */
+                    componentDidMount() {
+                        let me = this;
 
-                            // Stop listening to any events, deactivate controls, but
-                            // keep effects of the module until they are deleted manually or reset:all is emitted
-                            backboneEvents.get().on("deactivate:all", () => {});
+                        // Stop listening to any events, deactivate controls, but
+                        // keep effects of the module until they are deleted manually or reset:all is emitted
+                        backboneEvents.get().on("deactivate:all", () => {});
 
-                            // Activates module
-                            backboneEvents.get().on(`on:${exId}`, () => {
-                                console.log('Starting lerConverter')
-                                me.setState({
-                                    active: true
-                                });
-                                me.populateDClayers()
-                                utils.cursorStyle().crosshair();
+                        // Activates module
+                        backboneEvents.get().on(`on:${exId}`, () => {
+                            console.log('Starting lerConverter')
+                            me.setState({
+                                active: true
                             });
+                            me.populateDClayers()
+                            utils.cursorStyle().crosshair();
+                        });
 
-                            // Deactivates module
-                            backboneEvents.get().on(`off:${exId} off:all reset:all`, () => {
-                                console.log('Stopping lerConverter')
-                                me.setState({
-                                    active: false
-                                });
-                                utils.cursorStyle().reset();
+                        // Deactivates module
+                        backboneEvents.get().on(`off:${exId} off:all reset:all`, () => {
+                            console.log('Stopping lerConverter')
+                            me.setState({
+                                active: false
                             });
+                            utils.cursorStyle().reset();
+                        });
 
-                            // On auth change, handle Auth state
-                            backboneEvents.get().on(`session:authChange`, () => {
-                                console.log('Auth changed!')
-                                fetch("/api/session/status")
-                                    .then(r => r.json())
-                                    .then(obj => me.setState({
-                                        authed: obj.status.authenticated
-                                    }, () => {
-                                        // Get foresp. if we really logged in.
-                                        // TODO: check we're in the right schema!
-                                        if (me.state.authed) {
-                                            me.populateForespoergselOption() //
-                                        }
-                                    }))
-                                    .catch(e => me.setState({
-                                        authed: false
-                                    }))
-                            })
-                        }
-
-
-                        /**
-                         * Handle file selected
-                         * @param {*} files 
-                         */
-                        onDrop(files) {
-                            const _self = this;
-                            //TODO: screen input
-                            //TODO: Handle more?
-                            this.readContents(files[0])
-
-                        }
-
-                        // serves as state reset
-                        onBackClickHandler() {
-                            const _self = this
-                            _self.setState({
-                                done: false,
-                                loading: false,
-                                foresp: '',
-                                svarUploadTime: '',
-                                ejerliste: [],
-                            }, () => {
-                                _self.populateForespoergselOption() // On back click, populate select with new foresp
-                                clearFilters()
-                            })
-                        }
-
-                        handleForespSelectChange(event) {
-                            const _self = this
-                            _self.setState({
-                                foresp: String(event.target.value)
-                            })
-                            _self.getForespoergsel(String(event.target.value))
-                            _self.setState({
-                                done: true
-                            })
-                        }
-
-                        /**
-                         * Reads content of uploaded ZIP-file
-                         * @param {*} zipblob 
-                         */
-                        readContents(zipblob) {
-                            var _self = this;
-                            var newZip = new JSZip();
-
-                            // reset states
-                            _self.setState({
-                                loading: true,
-                                done: false,
-                                progress: 0,
-                                progressText: 'Læser ledningspakkke',
-                                ejerliste: [],
-                                isError: false,
-                                errorList: [],
-                                svarUploadTime: ''
-                            })
-
-                            var statusKey = uuidv4()
-
-                            newZip.loadAsync(zipblob)
-                                .then(function (zip) {
-                                    /* Load Status - 'LedningsejerStatusListe.xml', set state */
-                                    _self.setState({
-                                        progress: 20,
-                                        progressText: 'Indlæser statusliste'
-                                    })
-                                    
-                                    zip.files['LedningsejerStatusListe.xml'].async('string')
-                                        .then(fileData => parsetoJSON(fileData))
-                                        .then(jsObj => parseStatus(jsObj))
-                                        .then(parsed => {
-                                            pushStatus(parsed, statusKey)
-                                                .then(r => {
-                                                    //console.log(r)
-                                                    let wait = 5000
-                                                    if (r.some(i => i.success === false)) {
-                                                        let errs = r.filter(obj => {
-                                                            return obj.success === false
-                                                        })
-                                                        console.log('errors!')
-                                                        console.log(errs)
-                                                        _self.setState({
-                                                            errorList: errs,
-                                                            isError: true,
-                                                            progress: 100,
-                                                            progressText: 'Der skete en fejl!'
-                                                        })
-                                                        setTimeout(_self.setState({
-                                                            loading: true,
-                                                            done: false
-                                                        }, () => {}), wait) // Return to start
-                                                    } else {
-                                                        console.log('all fine!')
-                                                        _self.setState({
-                                                            isError: false,
-                                                            progress: 30,
-                                                            progressText: 'Håndteret status!'
-                                                        })
-                                                    }
-                                                })
-                                                .catch(e => {
-                                                    console.log(e)
-                                                })
-                                        })
-                                        .then(_self.setState({
-                                            progress: 30,
-                                            progressText: 'Gemmer status'
-                                        }))
-                                    return zip //pass on same zip to next then
-                                })
-                                .then(function (zip) {
-                                    /* Load data - 'consolidated.gml' */
-                                    _self.setState({
-                                        progress: 70,
-                                        progressText: 'Gemmer ledningsdata'
-                                    })
-                                    zip.files['consolidated.gml'].async('string')
-                                        .then(fileData => parsetoJSON(fileData))
-                                        .then(jsObj => parseConsolidated(jsObj))
-                                        .then(parsed => {
-                                            pushForespoergsel(parsed, statusKey)
-                                                .then(r => {
-                                                    //console.log(r)
-                                                    let wait = 5000
-                                                    if (r.some(i => i.success === false)) {
-                                                        let errs = r.filter(obj => {
-                                                            return obj.success === false
-                                                        })
-                                                        console.log('errors!')
-                                                        console.log(errs)
-                                                        _self.setState({
-                                                            errorList: errs,
-                                                            isError: true,
-                                                            progress: 100,
-                                                            progressText: 'Der skete en fejl!'
-                                                        })
-                                                        setTimeout(_self.setState({
-                                                            loading: true,
-                                                            done: false
-                                                        }, () => {}), wait) // Return to start
-                                                    } else {
-                                                        console.log('all fine!')
-                                                        _self.setState({
-                                                            isError: false,
-                                                            progress: 100,
-                                                            progressText: 'Færdig!'
-                                                        })
-                                                        setTimeout(_self.setState({
-                                                            loading: false,
-                                                            done: true
-                                                        }, () => {
-                                                            _self.getForespoergsel(String(parsed.forespNummer))
-                                                        }), Math.floor(wait / 4)) // Go to ready
-                                                    }
-                                                })
-                                                .catch(e => {
-                                                    console.log(e)
-                                                })
-                                        })
-                                }).catch(function (error) {
-                                    console.log(error)
-                                })
-                        }
-
-                        /**
-                         * Populate the list of active layers used in filters
-                         */
-                        populateDClayers() {
-                            try {
-                                metaData.data.forEach(function (d) {
-                                    if (d.f_table_name) {
-                                        if (d.f_table_name.includes('lerkonvert_')) {
-                                            DClayers.push(d.f_table_schema + '.' + d.f_table_name);
-                                        }
+                        // On auth change, handle Auth state
+                        backboneEvents.get().on(`session:authChange`, () => {
+                            console.log('Auth changed!')
+                            fetch("/api/session/status")
+                                .then(r => r.json())
+                                .then(obj => me.setState({
+                                    authed: obj.status.authenticated
+                                }, () => {
+                                    // Get foresp. if we really logged in.
+                                    // TODO: check we're in the right schema!
+                                    if (me.state.authed) {
+                                        me.populateForespoergselOption() //
                                     }
-                                });
-                                //console.log(DClayers)
-                            } catch (error) {
-                                console.info('lerConverter - Kunne ikke finde lag med korrekt tag')
+                                }))
+                                .catch(e => me.setState({
+                                    authed: false
+                                }))
+                        })
+                    }
 
-                            }
 
-                        }
+                    /**
+                     * Handle file selected
+                     * @param {*} files 
+                     */
+                    onDrop(files) {
+                        const _self = this;
+                        //TODO: screen input
+                        //TODO: Handle more?
+                        this.readContents(files[0])
 
-                        /**
-                         * Populate the forsp-select with foresp currently saved in schema
-                         */
-                        populateForespoergselOption() {
-                            var _self = this;
-                            let opts = {
-                                headers: {
-                                    'Accept': 'application/json',
-                                    'Content-Type': 'application/json'
-                                },
-                                method: 'POST',
-                            }
-                            // Do async job
-                            fetch(gc2host + '/api/extension/getForespoergselOption', opts)
-                                .then(r => r.json())
-                                .then(d => {
-                                    //console.log(d)
-                                    _self.setState({
-                                        forespOptions: d
+                    }
+
+                    // serves as state reset
+                    onBackClickHandler() {
+                        const _self = this
+                        _self.setState({
+                            done: false,
+                            loading: false,
+                            foresp: '',
+                            svarUploadTime: '',
+                            ejerliste: [],
+                        }, () => {
+                            _self.populateForespoergselOption() // On back click, populate select with new foresp
+                            clearFilters()
+                        })
+                    }
+
+                    handleForespSelectChange(event) {
+                        const _self = this
+                        _self.setState({
+                            foresp: String(event.target.value)
+                        })
+                        _self.getForespoergsel(String(event.target.value))
+                        _self.setState({
+                            done: true
+                        })
+                    }
+
+                    /**
+                     * Reads content of uploaded ZIP-file
+                     * @param {*} zipblob 
+                     */
+                    readContents(zipblob) {
+                        var _self = this;
+                        var newZip = new JSZip();
+
+                        // reset states
+                        _self.setState({
+                            loading: true,
+                            done: false,
+                            progress: 0,
+                            progressText: 'Læser ledningspakkke',
+                            ejerliste: [],
+                            isError: false,
+                            errorList: [],
+                            svarUploadTime: ''
+                        })
+
+                        var statusKey = uuidv4()
+
+                        newZip.loadAsync(zipblob)
+                            .then(function (zip) {
+                                /* Load Status - 'LedningsejerStatusListe.xml', set state */
+                                _self.setState({
+                                    progress: 20,
+                                    progressText: 'Indlæser statusliste'
+                                })
+
+                                zip.files['LedningsejerStatusListe.xml'].async('string')
+                                    .then(fileData => parsetoJSON(fileData))
+                                    .then(jsObj => parseStatus(jsObj))
+                                    .then(parsed => {
+                                        pushStatus(parsed, statusKey)
+                                            .then(r => {
+                                                //console.log(r)
+                                                let wait = 5000
+                                                if (r.some(i => i.success === false)) {
+                                                    let errs = r.filter(obj => {
+                                                        return obj.success === false
+                                                    })
+                                                    console.log('errors!')
+                                                    console.log(errs)
+                                                    _self.setState({
+                                                        errorList: errs,
+                                                        isError: true,
+                                                        progress: 100,
+                                                        progressText: 'Der skete en fejl!'
+                                                    })
+                                                    setTimeout(_self.setState({
+                                                        loading: true,
+                                                        done: false
+                                                    }, () => {}), wait) // Return to start
+                                                } else {
+                                                    console.log('all fine!')
+                                                    _self.setState({
+                                                        isError: false,
+                                                        progress: 30,
+                                                        progressText: 'Håndteret status!'
+                                                    })
+                                                }
+                                            })
+                                            .catch(e => {
+                                                console.log(e)
+                                            })
                                     })
+                                    .then(_self.setState({
+                                        progress: 30,
+                                        progressText: 'Gemmer status'
+                                    }))
+                                return zip //pass on same zip to next then
+                            })
+                            .then(function (zip) {
+                                /* Load data - 'consolidated.gml' */
+                                _self.setState({
+                                    progress: 70,
+                                    progressText: 'Gemmer ledningsdata'
                                 })
-                                .catch(e => console.log(e))
-                        }
-
-                        getStatus(statuskey) {
-                            var _self = this
-                            let opts = {
-                                headers: {
-                                    'Accept': 'application/json',
-                                    'Content-Type': 'application/json'
-                                },
-                                method: 'POST',
-                                body: JSON.stringify({
-                                    statusKey: statuskey
-                                })
-                            }
-                            // Do async job
-                            fetch(gc2host + '/api/extension/getStatus', opts)
-                                .then(r => r.json())
-                                .then(d => {
-                                    let a = []
-                                    d.forEach(f =>{
-                                        a.push(f.properties)
-                                    }) 
-                                    _self.setState({
-                                        ejerliste: a
+                                zip.files['consolidated.gml'].async('string')
+                                    .then(fileData => parsetoJSON(fileData))
+                                    .then(jsObj => parseConsolidated(jsObj))
+                                    .then(parsed => {
+                                        pushForespoergsel(parsed, statusKey)
+                                            .then(r => {
+                                                //console.log(r)
+                                                let wait = 5000
+                                                if (r.some(i => i.success === false)) {
+                                                    let errs = r.filter(obj => {
+                                                        return obj.success === false
+                                                    })
+                                                    console.log('errors!')
+                                                    console.log(errs)
+                                                    _self.setState({
+                                                        errorList: errs,
+                                                        isError: true,
+                                                        progress: 100,
+                                                        progressText: 'Der skete en fejl!'
+                                                    })
+                                                    setTimeout(_self.setState({
+                                                        loading: true,
+                                                        done: false
+                                                    }, () => {}), wait) // Return to start
+                                                } else {
+                                                    console.log('all fine!')
+                                                    _self.setState({
+                                                        isError: false,
+                                                        progress: 100,
+                                                        progressText: 'Færdig!'
+                                                    })
+                                                    setTimeout(_self.setState({
+                                                        loading: false,
+                                                        done: true
+                                                    }, () => {
+                                                        _self.getForespoergsel(String(parsed.forespNummer))
+                                                    }), Math.floor(wait / 4)) // Go to ready
+                                                }
+                                            })
+                                            .catch(e => {
+                                                console.log(e)
+                                            })
                                     })
-                                })
-                                .catch(e => console.log(e))
+                            }).catch(function (error) {
+                                console.log(error)
+                            })
+                    }
+
+                    /**
+                     * Populate the list of active layers used in filters
+                     */
+                    populateDClayers() {
+                        try {
+                            metaData.data.forEach(function (d) {
+                                if (d.f_table_name) {
+                                    if (d.f_table_name.includes('lerkonvert_')) {
+                                        DClayers.push(d.f_table_schema + '.' + d.f_table_name);
+                                    }
+                                }
+                            });
+                            //console.log(DClayers)
+                        } catch (error) {
+                            console.info('lerConverter - Kunne ikke finde lag med korrekt tag')
+
                         }
 
-                        /**
-                         * Reads extents and status of saved foresp
-                         * @param {*} forespNummer 
-                         */
-                        getForespoergsel(forespNummer) {
-                            var _self = this;
-                            let opts = {
-                                headers: {
-                                    'Accept': 'application/json',
-                                    'Content-Type': 'application/json'
-                                },
-                                method: 'POST',
-                                body: JSON.stringify({
-                                    forespNummer: forespNummer
-                                })
-                            }
-                            // Do async job
-                            fetch(gc2host + '/api/extension/getForespoergsel', opts)
-                                .then(r => r.json())
-                                .then(d => {
-                                    //console.log(d);
+                    }
 
-                                    // Zoom to location
-                                    // this has to be better for sorting then status is incomming!
-                                    let f = d[0].properties;
-                                    //console.log(d)
-                                    let bounds = [
-                                        [
-                                            f.ymin, f.xmin
-                                        ],
-                                        [
-                                            f.ymax, f.xmax
-                                        ]
-                                    ];
-                                    cloud.get().map.fitBounds(bounds)
-                                    // Apply filter
-                                    _self.getStatus(f.statuskey)
-                                    applyFilter(buildFilter(f.forespnummer))
-
-
-                                    //SET SVAR_UPLOADTIME IN STATE
-                                    _self.setState({
-                                        svarUploadTime: f.svar_uploadtime
-                                    })
-                                })
-                                .catch(e => console.log(e))
+                    /**
+                     * Populate the forsp-select with foresp currently saved in schema
+                     */
+                    populateForespoergselOption() {
+                        var _self = this;
+                        let opts = {
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json'
+                            },
+                            method: 'POST',
                         }
+                        // Do async job
+                        fetch(gc2host + '/api/extension/getForespoergselOption', opts)
+                            .then(r => r.json())
+                            .then(d => {
+                                //console.log(d)
+                                _self.setState({
+                                    forespOptions: d
+                                })
+                            })
+                            .catch(e => console.log(e))
+                    }
 
-                        clickLogin() {
-                            document.getElementById('session').click()
+                    getStatus(statuskey) {
+                        var _self = this
+                        let opts = {
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json'
+                            },
+                            method: 'POST',
+                            body: JSON.stringify({
+                                statusKey: statuskey
+                            })
                         }
+                        // Do async job
+                        fetch(gc2host + '/api/extension/getStatus', opts)
+                            .then(r => r.json())
+                            .then(d => {
+                                let a = []
+                                d.forEach(f => {
+                                    a.push(f.properties)
+                                })
+                                _self.setState({
+                                    ejerliste: a
+                                })
+                            })
+                            .catch(e => console.log(e))
+                    }
 
-                        /**
-                         * Renders component
-                         */
-                        render() {
+                    /**
+                     * Reads extents and status of saved foresp
+                     * @param {*} forespNummer 
+                     */
+                    getForespoergsel(forespNummer) {
+                        var _self = this;
+                        let opts = {
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json'
+                            },
+                            method: 'POST',
+                            body: JSON.stringify({
+                                forespNummer: forespNummer
+                            })
+                        }
+                        // Do async job
+                        fetch(gc2host + '/api/extension/getForespoergsel', opts)
+                            .then(r => r.json())
+                            .then(d => {
+                                //console.log(d);
+
+                                // Zoom to location
+                                // this has to be better for sorting then status is incomming!
+                                let f = d[0].properties;
+                                //console.log(d)
+                                let bounds = [
+                                    [
+                                        f.ymin, f.xmin
+                                    ],
+                                    [
+                                        f.ymax, f.xmax
+                                    ]
+                                ];
+                                cloud.get().map.fitBounds(bounds)
+                                // Apply filter
+                                _self.getStatus(f.statuskey)
+                                applyFilter(buildFilter(f.forespnummer))
+
+
+                                //SET SVAR_UPLOADTIME IN STATE
+                                _self.setState({
+                                    svarUploadTime: f.svar_uploadtime
+                                })
+                            })
+                            .catch(e => console.log(e))
+                    }
+
+                    clickLogin() {
+                        document.getElementById('session').click()
+                    }
+
+                    /**
+                     * Renders component
+                     */
+                    render() {
                             const _self = this;
                             const s = _self.state
                             //console.log(s)
@@ -1088,205 +1090,155 @@ module.exports = {
                                             s.errorList
                                         }
                                         /> {
-                                            s.isError === true ?
-                                                <
-                                                Button size = "large"
-                                            color = "default"
-                                            style = {
-                                                margin
+                                        s.isError === true ?
+                                        <
+                                        Button size = "large"
+                                        color = "default"
+                                        style = {
+                                            margin
+                                        }
+                                        onClick = {
+                                            _self.onBackClickHandler.bind(this)
+                                        } > < ArrowBackIcon fontSize = "small" / > {
+                                            __("BackButton")
+                                        } < /Button> : ''} < /
+                                        div > <
+                                        /div> < /
+                                        div >
+                                    )
+                                } else if (s.done) {
+                                    // Either selected or uploaded.
+                                    return ( <
+                                        div role = "tabpanel" >
+                                        <
+                                        div className = "form-group" > {
+                                            __("uploadtime") + ': ' + s.svarUploadTime
+                                        } <
+                                        div style = {
+                                            {
+                                                display: 'flex'
                                             }
-                                            onClick = {
-                                                    _self.onBackClickHandler.bind(this)
-                                                } > < ArrowBackIcon fontSize = "small" / > {
-                                                    __("BackButton")
-                                                } < /Button> : ''} <
-                                                /div> <
-                                                /div> <
-                                                /div>
-                                        )
+                                        } >
+                                        <
+                                        Button size = "large"
+                                        color = "default"
+                                        variant = "contained"
+                                        style = {
+                                            margin
+                                        }
+                                        onClick = {
+                                            _self.onBackClickHandler.bind(this)
+                                        } >
+                                        <
+                                        ArrowBackIcon fontSize = "small" /
+                                        >
+                                        {
+                                            __("backbutton")
+                                        } <
+                                        /Button> <
+                                        LedningsDownload style = {
+                                            margin
+                                        }
+                                        size = "large"
+                                        color = "default"
+                                        variant = "contained"
+                                        endpoint = "/api/extension/downloadForespoergsel"
+                                        forespnummer = {
+                                            s.foresp
+                                        }
+                                        /> < /
+                                        div > <
+                                        div id = "lerConverter-feature-ledningsejerliste" >
+                                        <
+                                        LedningsEjerStatusTable statusliste = {
+                                            s.ejerliste
+                                        }
+                                        /> < /
+                                        div > <
+                                        /div> < /
+                                        div >
+                                    )
+                                } else {
+                                    // Just Browsing
+                                    return (
+                                        <div role = "tabpanel" >
+                                            <div className = "form-group">
+                                                <div id = "lerConverter-feature-select-container" style = {{width: '80%',margin: '10px auto 10px auto'}}>
+                                                    <FormControl style = {{width: '100%',padding: '20px'}}>
+                                                        <InputLabel id = "lerConverter-feature-select-label"> Vælg eksisterende forespørgsel </InputLabel>
+                                                        <Select id = "lerConverter-feature-select" value = {s.foresp} onChange = {_self.handleForespSelectChange.bind(this)}>
+                                                            {s.forespOptions.map(f => <MenuItem key = {f.forespnummer} value = {f.forespnummer}> {f.forespnummer + ': ' + f.bemaerkning + ' (Uploaded: ' + f.svar_uploadtime + ')'} </MenuItem>)}
+                                                        </Select>
+                                                    </FormControl>
+                                                    <div><p>Eller</p></div>
+                                                </div>
+                                                <div id = "lerConverter-feature-dropzone">
+                                                    <Dropzone onDrop = {_self.onDrop.bind(this)} style = {{width: '80%',height: '160px',padding: '50px',border: '1px green dashed',margin: '20px auto 20px auto',textAlign: 'center'}}>
+                                                        <p>{__("uploadmessage")}</p>
+                                                    </Dropzone>
+                                                </div>
+                                            </div>
+                                        </div>
+                                            )
+                                        }
                                     }
-                                    else if (s.done) {
-                                        // Either selected or uploaded.
-                                        return ( <
-                                            div role = "tabpanel" >
-                                            <
-                                            div className = "form-group" > {
-                                                __("uploadtime") + ': ' + s.svarUploadTime
-                                            } <
-                                            div style = {
-                                                {
-                                                    display: 'flex'
-                                                }
-                                            } >
-                                            <
-                                            Button size = "large"
-                                            color = "default"
-                                            variant = "contained"
-                                            style = {
-                                                margin
-                                            }
-                                            onClick = {
-                                                _self.onBackClickHandler.bind(this)
-                                            } >
-                                            <
-                                            ArrowBackIcon fontSize = "small" /
-                                            > {
-                                                __("backbutton")
-                                            } <
-                                            /Button> <
-                                            LedningsDownload style = {
-                                                margin
-                                            }
-                                            size = "large"
-                                            color = "default"
-                                            variant = "contained"
-                                            endpoint = "/api/extension/downloadForespoergsel"
-                                            forespnummer = {
-                                                s.foresp
-                                            }
-                                            /> <
-                                            /div> <
-                                            div id = "lerConverter-feature-ledningsejerliste" >
-                                            <
-                                            LedningsEjerStatusTable statusliste = {
-                                                s.ejerliste
-                                            }
-                                            /> <
-                                            /div> <
-                                            /div> <
-                                            /div>
-                                        )
-                                    } else {
-                                        //
+                                    else {
+                                        // Not Logged in
                                         return ( <
                                             div role = "tabpanel" >
                                             <
                                             div className = "form-group" >
                                             <
-                                            div id = "lerConverter-feature-select-container"
+                                            div id = "lerConverter-feature-login"
+                                            className = "alert alert-info"
+                                            role = "alert" > {
+                                                __("MissingLogin")
+                                            } <
+                                            /div> <
+                                            Button onClick = {
+                                                () => this.clickLogin()
+                                            }
+                                            color = "primary"
+                                            size = "large"
+                                            variant = "contained"
                                             style = {
                                                 {
-                                                    width: '80%',
-                                                    margin: '10px auto 10px auto'
+                                                    marginRight: "auto",
+                                                    marginLeft: "auto",
+                                                    display: "block"
                                                 }
-                                            } >
-                                            <
-                                            FormControl style = {
-                                                {
-                                                    width: '100%',
-                                                    padding: '20px'
-
-                                                }
-                                            } >
-                                            <
-                                            InputLabel id = "lerConverter-feature-select-label" > Vælg eksisterende forespørgsel < /InputLabel> <
-                                            Select id = "lerConverter-feature-select"
-                                            value = {
-                                                s.foresp
-                                            }
-                                            onChange = {
-                                                _self.handleForespSelectChange.bind(this)
-                                            } >
-                                            {
-                                                s.forespOptions.map(f => < MenuItem key = {
-                                                        f.forespnummer
-                                                    }
-                                                    value = {
-                                                        f.forespnummer
-                                                    } > {
-                                                        f.forespnummer + ': ' + f.bemaerkning + ' (Uploaded: ' + f.svar_uploadtime + ')'
-                                                    } < /MenuItem>)} <
-                                                    /Select> <
-                                                    /FormControl> <
-                                                    div >
-                                                    <
-                                                    p > Eller < /p> <
-                                                    /div> <
-                                                    /div> <
-                                                    div id = "lerConverter-feature-dropzone" >
-                                                    <
-                                                    Dropzone onDrop = {
-                                                        _self.onDrop.bind(this)
-                                                    }
-                                                    style = {
-                                                        {
-                                                            width: '80%',
-                                                            height: '160px',
-                                                            padding: '50px',
-                                                            border: '1px green dashed',
-                                                            margin: '20px auto 20px auto',
-                                                            textAlign: 'center'
-                                                        }
-                                                    } >
-                                                    <
-                                                    p > {
-                                                        __("uploadmessage")
-                                                    } < /p> <
-                                                    /Dropzone> <
-                                                    /div> <
-                                                    /div> <
-                                                    /div>
-                                                )
-                                            }
-                                        }
-                                        else {
-                                            // Not Logged in
-                                            return ( <
-                                                div role = "tabpanel" >
-                                                <
-                                                div className = "form-group" >
-                                                <
-                                                div id = "lerConverter-feature-login"
-                                                className = "alert alert-info"
-                                                role = "alert" > {
-                                                    __("MissingLogin")
-                                                } <
-                                                /div> <
-                                                Button onClick = {
-                                                    () => this.clickLogin()
-                                                }
-                                                color = "primary"
-                                                size = "large"
-                                                variant = "contained"
-                                                style = {
-                                                    {
-                                                        marginRight: "auto",
-                                                        marginLeft: "auto",
-                                                        display: "block"
-                                                    }
-                                                } >
-                                                {
-                                                    __("Login")
-                                                } <
-                                                /Button> <
-                                                /div> <
-                                                /div>
-                                            )
-                                        }
-
+                                            } > {
+                                                __("Login")
+                                            } <
+                                            /Button> < /
+                                            div > <
+                                            /div>
+                                        )
                                     }
 
                                 }
 
-                                utils.createMainTab(exId, __("Plugin Tooltip"), __("Info"), require('./../../../browser/modules/height')().max, "create_new_folder", false, exId);
+                            }
 
-                                // Append to DOM
-                                //==============
-                                try {
-                                    ReactDOM.render( <
-                                        LerConverter / > ,
-                                        document.getElementById(exId)
-                                    );
-                                } catch (e) {
+                            utils.createMainTab(exId, __("Plugin Tooltip"), __("Info"), require('./../../../browser/modules/height')().max, "create_new_folder", false, exId);
 
-                                }
+                            // Append to DOM
+                            //==============
+                            try {
+                                ReactDOM.render( <
+                                    LerConverter / > ,
+                                    document.getElementById(exId)
+                                );
+                            } catch (e) {
 
-                            },
+                            }
 
-                            callBack: function (url) {
-                                    utils.popupCenter(url, (utils.screen().width - 100), (utils.screen().height - 100), exId);
-                                },
-                                setCallBack: function (fn) {
-                                    this.callBack = fn;
-                                }
-                        };
+                        },
+
+                        callBack: function (url) {
+                            utils.popupCenter(url, (utils.screen().width - 100), (utils.screen().height - 100), exId);
+                        },
+                        setCallBack: function (fn) {
+                            this.callBack = fn;
+                        }
+                };
