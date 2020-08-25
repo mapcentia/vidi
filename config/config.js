@@ -782,7 +782,7 @@ module.exports = {
     // Brand name for the default template
     // ===================================
 
-    "brandName": "MapCentia ApS",
+    "brandName": "Geopartner A/S",
 
 
     // ===================================

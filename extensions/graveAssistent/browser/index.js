@@ -68,7 +68,7 @@ var clicktimer;
 var mapObj;
 
 var DClayers = []
-var gc2host = 'http://localhost:3000'
+//var gc2host = 'http://localhost:3000'
 var config = require('../../../config/config.js');
 
 /**
