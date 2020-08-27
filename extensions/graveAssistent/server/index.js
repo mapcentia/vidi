@@ -246,7 +246,7 @@ router.post('/api/extension/downloadForespoergsel', function (req, response) {
                 response.status(500).json(r)
             })
     } catch (error) {
-        console.log(error)
+        //console.log(error)
         response.status(500).json(error)
     }
 
@@ -288,7 +288,7 @@ router.post('/api/extension/getForespoergselOption', function (req, response) {
                 response.status(500).json(r)
             })
     } catch (error) {
-        console.log(error)
+        //console.log(error)
         response.status(500).json(error)
     }
 
@@ -410,7 +410,7 @@ router.post('/api/extension/getStatus', function (req, response) {
                 response.status(500).json(r)
             })
     } catch (error) {
-        console.log(error)
+        //console.log(error)
         response.status(500).json(error)
     }
 
@@ -464,7 +464,7 @@ router.post('/api/extension/upsertForespoergsel', function (req, response) {
         }
     })
 
-    console.log('Got: ' + b.forespNummer + '. statusKey: ' + b.statusKey + '. Lines: ' + lines.length + ', Polygons: ' + polys.length + ', Points: ' + pts.length)
+    //console.log('Got: ' + b.forespNummer + '. statusKey: ' + b.statusKey + '. Lines: ' + lines.length + ', Polygons: ' + polys.length + ', Points: ' + pts.length)
     let uploadTime = new Date().toLocaleString()
 
     try {
@@ -524,7 +524,7 @@ router.post('/api/extension/upsertForespoergsel', function (req, response) {
                 //chain.push(FeatureAPI(req, polys, TABLEPREFIX + 'polygons', '7416'))
             }
         } catch (error) {
-            console.log(error)
+            //console.log(error)
             response.status(500).json(error)
         }
 
@@ -550,7 +550,7 @@ router.post('/api/extension/upsertForespoergsel', function (req, response) {
                     )
             })
     } catch (error) {
-        console.log(error)
+        //console.log(error)
         response.status(500).json(error)
     }
 });
@@ -612,7 +612,7 @@ router.post('/api/extension/upsertStatus', function (req, response) {
             })
             //chain.push(FeatureAPI(req, lines, TABLEPREFIX + 'lines', '7416'))
         } catch (error) {
-            console.log(error)
+            //console.log(error)
             response.status(500).json(error)
         }
 
@@ -623,14 +623,14 @@ router.post('/api/extension/upsertStatus', function (req, response) {
                 response.status(200).json(r)
             })
             .catch(error => {
-                console.log(error)
+                //console.log(error)
                 response.status(500).json(error)
             })
 
 
 
     } catch (error) {
-        console.log(error)
+        //console.log(error)
         response.status(500).json(error)
     }
 
@@ -655,16 +655,16 @@ function FeatureAPI(req, featurecollection, table, crs) {
     };
 
     return new Promise(function (resolve, reject) {
-        console.log(q.substring(0, 60))
+        //console.log(q.substring(0, 60))
         fetch(url, options)
             .then(r => r.json())
             .then(data => {
                 // if message is present, is error
                 if (data.hasOwnProperty('message')) {
-                    console.log(data.message)
+                    //console.log(data.message)
                     reject(data)
                 } else {
-                    console.log('Success: ' + data.success + ' - Q: ' + postData.substring(0, 60))
+                    //console.log('Success: ' + data.success + ' - Q: ' + postData.substring(0, 60))
                     resolve(data)
                 }
             })

@@ -53,6 +53,12 @@ var layerTree = require('./../../../browser/modules/layerTree');
 
 /**
  *
+ * @type {*|exports|module.exports}
+ */
+var layers = require('./../../../browser/modules/layers');
+
+/**
+ *
  * @type {string}
  */
 var exId = "graveAssistent";
@@ -636,7 +642,7 @@ module.exports = {
                         }
 
                     }
-                    console.log(filter)
+                    //console.log(filter)
                     // Return the stuff
                     return filter
                 }
@@ -860,18 +866,15 @@ module.exports = {
                                                     _self.setState({
                                                         isError: false,
                                                         progress: 30,
-                                                        progressText: 'Håndteret status!'
+                                                        progressText: 'Gemmer status!'
                                                     })
+                                                    return zip
                                                 }
                                             })
                                             .catch(e => {
                                                 console.log(e)
                                             })
                                     })
-                                    .then(_self.setState({
-                                        progress: 30,
-                                        progressText: 'Gemmer status'
-                                    }))
                                 return zip //pass on same zip to next then
                             })
                             .then(function (zip) {
@@ -935,7 +938,7 @@ module.exports = {
                         try {
                             metaData.data.forEach(function (d) {
                                 if (d.f_table_name) {
-                                    if (d.f_table_name.includes('lerkonvert_')) {
+                                    if (d.f_table_name.includes('graveassistent_')) {
                                         DClayers.push(d.f_table_schema + '.' + d.f_table_name);
                                     }
                                 }
@@ -1034,6 +1037,7 @@ module.exports = {
                                     ]
                                 ];
                                 cloud.get().map.fitBounds(bounds)
+                                
                                 // Apply filter
                                 _self.getStatus(f.statuskey)
                                 applyFilter(buildFilter(f.forespnummer))
@@ -1070,93 +1074,33 @@ module.exports = {
                                 // Logged in
                                 if (s.loading) {
                                     // If Loading, show progress
-                                    return ( <
-                                        div role = "tabpanel" >
-                                        <
-                                        div className = "form-group" >
-                                        <
-                                        div >
-                                        <
-                                        LedningsProgress progress = {
-                                            s.progress
-                                        }
-                                        text = {
-                                            s.progressText
-                                        }
-                                        iserror = {
-                                            s.isError
-                                        }
-                                        errorlist = {
-                                            s.errorList
-                                        }
-                                        /> {
-                                        s.isError === true ?
-                                        <
-                                        Button size = "large"
-                                        color = "default"
-                                        style = {
-                                            margin
-                                        }
-                                        onClick = {
-                                            _self.onBackClickHandler.bind(this)
-                                        } > < ArrowBackIcon fontSize = "small" / > {
-                                            __("BackButton")
-                                        } < /Button> : ''} < /
-                                        div > <
-                                        /div> < /
-                                        div >
+                                    return (
+                                        <div role = "tabpanel" >
+                                            <div className = "form-group" >
+                                                <div>
+                                                    <LedningsProgress progress = {s.progress} text = {s.progressText} iserror = {s.isError} errorlist = {s.errorList} />
+                                                    {s.isError === true ? <Button size = "large" color = "default" style = {margin} onClick = {_self.onBackClickHandler.bind(this)}>< ArrowBackIcon fontSize = "small" /> {__("BackButton")} </Button> : ''}
+                                                </div >
+                                            </div>
+                                        </div>
                                     )
                                 } else if (s.done) {
                                     // Either selected or uploaded.
-                                    return ( <
-                                        div role = "tabpanel" >
-                                        <
-                                        div className = "form-group" > {
-                                            __("uploadtime") + ': ' + s.svarUploadTime
-                                        } <
-                                        div style = {
-                                            {
-                                                display: 'flex'
-                                            }
-                                        } >
-                                        <
-                                        Button size = "large"
-                                        color = "default"
-                                        variant = "contained"
-                                        style = {
-                                            margin
-                                        }
-                                        onClick = {
-                                            _self.onBackClickHandler.bind(this)
-                                        } >
-                                        <
-                                        ArrowBackIcon fontSize = "small" /
-                                        >
-                                        {
-                                            __("backbutton")
-                                        } <
-                                        /Button> <
-                                        LedningsDownload style = {
-                                            margin
-                                        }
-                                        size = "large"
-                                        color = "default"
-                                        variant = "contained"
-                                        endpoint = "/api/extension/downloadForespoergsel"
-                                        forespnummer = {
-                                            s.foresp
-                                        }
-                                        /> < /
-                                        div > <
-                                        div id = "graveAssistent-feature-ledningsejerliste" >
-                                        <
-                                        LedningsEjerStatusTable statusliste = {
-                                            s.ejerliste
-                                        }
-                                        /> < /
-                                        div > <
-                                        /div> < /
-                                        div >
+                                    return ( 
+                                        <div role = "tabpanel">
+                                            <div className = "form-group">
+                                                <p>{__("uploadtime") + ': ' + s.svarUploadTime}</p>
+                                                <div style = {{display: 'flex'}}>
+                                                    <Button size = "large" color = "default" variant = "contained" style = {margin} onClick = {_self.onBackClickHandler.bind(this)}>
+                                                        <ArrowBackIcon fontSize = "small" />{__("backbutton")}
+                                                    </Button>
+                                                    <LedningsDownload style = {margin} size = "large" color = "default" variant = "contained" endpoint = "/api/extension/downloadForespoergsel" forespnummer = {s.foresp}/>
+                                                </div >
+                                                <div id = "graveAssistent-feature-ledningsejerliste" >
+                                                    <LedningsEjerStatusTable statusliste = {s.ejerliste}/>
+                                                </div>
+                                            </div>
+                                        </div>
                                     )
                                 } else {
                                     // Just Browsing
@@ -1184,40 +1128,20 @@ module.exports = {
                                     }
                                     else {
                                         // Not Logged in
-                                        return ( <
-                                            div role = "tabpanel" >
-                                            <
-                                            div className = "form-group" >
-                                            <
-                                            div id = "graveAssistent-feature-login"
-                                            className = "alert alert-info"
-                                            role = "alert" > {
-                                                __("MissingLogin")
-                                            } <
-                                            /div> <
-                                            Button onClick = {
-                                                () => this.clickLogin()
-                                            }
-                                            color = "primary"
-                                            size = "large"
-                                            variant = "contained"
-                                            style = {
-                                                {
-                                                    marginRight: "auto",
-                                                    marginLeft: "auto",
-                                                    display: "block"
-                                                }
-                                            } > {
-                                                __("Login")
-                                            } <
-                                            /Button> < /
-                                            div > <
-                                            /div>
+                                        return (
+                                            <div role = "tabpanel" >
+                                                <div className = "form-group" >
+                                                    <div id = "graveAssistent-feature-login" className = "alert alert-info" role = "alert" >
+                                                        {__("MissingLogin")}
+                                                    </div>
+                                                    <Button onClick = {() => this.clickLogin()} color = "primary" size = "large" variant = "contained" style = {{marginRight: "auto", marginLeft: "auto", display: "block" }}>
+                                                        {__("Login")}
+                                                    </Button>
+                                                </div>
+                                            </div>
                                         )
                                     }
-
                                 }
-
                             }
 
                             utils.createMainTab(exId, __("Plugin Tooltip"), __("Info"), require('./../../../browser/modules/height')().max, "create_new_folder", false, exId);
