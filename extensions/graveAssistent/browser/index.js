@@ -871,64 +871,65 @@ module.exports = {
                                                     return zip
                                                 }
                                             })
+                                            .then(function (zip) {
+                                                /* Load data - 'consolidated.gml' */
+                                                _self.setState({
+                                                    progress: 70,
+                                                    progressText: 'Gemmer ledningsdata'
+                                                })
+                                                zip.files['consolidated.gml'].async('string')
+                                                    .then(fileData => parsetoJSON(fileData))
+                                                    .then(jsObj => parseConsolidated(jsObj))
+                                                    .then(parsed => {
+                                                        pushForespoergsel(parsed, statusKey)
+                                                            .then(r => {
+                                                                //console.log(r)
+                                                                let wait = 5000
+                                                                if (r.some(i => i.success === false)) {
+                                                                    let errs = r.filter(obj => {
+                                                                        return obj.success === false
+                                                                    })
+                                                                    console.log('errors!')
+                                                                    console.log(errs)
+                                                                    _self.setState({
+                                                                        errorList: errs,
+                                                                        isError: true,
+                                                                        progress: 100,
+                                                                        progressText: 'Der skete en fejl!'
+                                                                    })
+                                                                    setTimeout(_self.setState({
+                                                                        loading: true,
+                                                                        done: false
+                                                                    }, () => {}), wait) // Return to start
+                                                                } else {
+                                                                    console.log('all fine!')
+                                                                    _self.setState({
+                                                                        isError: false,
+                                                                        progress: 100,
+                                                                        progressText: 'Færdig!'
+                                                                    })
+                                                                    setTimeout(_self.setState({
+                                                                        loading: false,
+                                                                        done: true
+                                                                    }, () => {
+                                                                        _self.getForespoergsel(String(parsed.forespNummer))
+                                                                    }), Math.floor(wait / 4)) // Go to ready
+                                                                }
+                                                            })
+                                                            .catch(e => {
+                                                                console.log(e)
+                                                            })
+                                                    })
+                                            }).catch(function (error) {
+                                                console.log(error)
+                                            })
                                             .catch(e => {
                                                 console.log(e)
                                             })
                                     })
-                                return zip //pass on same zip to next then
+                                //return zip //pass on same zip to next then
                             })
-                            .then(function (zip) {
-                                /* Load data - 'consolidated.gml' */
-                                _self.setState({
-                                    progress: 70,
-                                    progressText: 'Gemmer ledningsdata'
-                                })
-                                zip.files['consolidated.gml'].async('string')
-                                    .then(fileData => parsetoJSON(fileData))
-                                    .then(jsObj => parseConsolidated(jsObj))
-                                    .then(parsed => {
-                                        pushForespoergsel(parsed, statusKey)
-                                            .then(r => {
-                                                //console.log(r)
-                                                let wait = 5000
-                                                if (r.some(i => i.success === false)) {
-                                                    let errs = r.filter(obj => {
-                                                        return obj.success === false
-                                                    })
-                                                    console.log('errors!')
-                                                    console.log(errs)
-                                                    _self.setState({
-                                                        errorList: errs,
-                                                        isError: true,
-                                                        progress: 100,
-                                                        progressText: 'Der skete en fejl!'
-                                                    })
-                                                    setTimeout(_self.setState({
-                                                        loading: true,
-                                                        done: false
-                                                    }, () => {}), wait) // Return to start
-                                                } else {
-                                                    console.log('all fine!')
-                                                    _self.setState({
-                                                        isError: false,
-                                                        progress: 100,
-                                                        progressText: 'Færdig!'
-                                                    })
-                                                    setTimeout(_self.setState({
-                                                        loading: false,
-                                                        done: true
-                                                    }, () => {
-                                                        _self.getForespoergsel(String(parsed.forespNummer))
-                                                    }), Math.floor(wait / 4)) // Go to ready
-                                                }
-                                            })
-                                            .catch(e => {
-                                                console.log(e)
-                                            })
-                                    })
-                            }).catch(function (error) {
-                                console.log(error)
-                            })
+                            
                     }
 
                     /**
