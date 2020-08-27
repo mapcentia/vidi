@@ -537,7 +537,7 @@ module.exports = {
                     }
                     return new Promise(function (resolve, reject) {
                         // Do async job and resolve
-                        fetch(gc2host + '/api/extension/upsertForespoergsel', opts)
+                        fetch('/api/extension/upsertForespoergsel', opts)
                             .then(r => {
                                 const data = r.json();
                                 resolve(data)
@@ -600,7 +600,7 @@ module.exports = {
 
                     return new Promise(function (resolve, reject) {
                         // Do async job and resolve
-                        fetch(gc2host + '/api/extension/upsertStatus', opts)
+                        fetch('/api/extension/upsertStatus', opts)
                             .then(r => {
                                 const data = r.json();
                                 resolve(data)
@@ -961,7 +961,7 @@ module.exports = {
                             method: 'POST',
                         }
                         // Do async job
-                        fetch(gc2host + '/api/extension/getForespoergselOption', opts)
+                        fetch('/api/extension/getForespoergselOption', opts)
                             .then(r => r.json())
                             .then(d => {
                                 //console.log(d)
@@ -985,7 +985,7 @@ module.exports = {
                             })
                         }
                         // Do async job
-                        fetch(gc2host + '/api/extension/getStatus', opts)
+                        fetch('/api/extension/getStatus', opts)
                             .then(r => r.json())
                             .then(d => {
                                 let a = []
@@ -1016,7 +1016,7 @@ module.exports = {
                             })
                         }
                         // Do async job
-                        fetch(gc2host + '/api/extension/getForespoergsel', opts)
+                        fetch('/api/extension/getForespoergsel', opts)
                             .then(r => r.json())
                             .then(d => {
                                 //console.log(d);
