@@ -874,10 +874,10 @@ module.exports = {
                                             .then(function (zip) {
                                                 console.log('Ledningsdata')
                                                 /* Load data - 'consolidated.gml' */
-                                                _self.setState({
-                                                    progress: 70,
-                                                    progressText: 'Gemmer ledningsdata'
-                                                })
+                                                //_self.setState({
+                                                //    progress: 70,
+                                                //    progressText: 'Gemmer ledningsdata'
+                                                //})
                                                 zip.files['consolidated.gml'].async('string')
                                                     .then(fileData => parsetoJSON(fileData))
                                                     .then(jsObj => parseConsolidated(jsObj))
