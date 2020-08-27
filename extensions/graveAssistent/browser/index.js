@@ -872,6 +872,7 @@ module.exports = {
                                                 }
                                             })
                                             .then(function (zip) {
+                                                console.log('Ledningsdata')
                                                 /* Load data - 'consolidated.gml' */
                                                 _self.setState({
                                                     progress: 70,
