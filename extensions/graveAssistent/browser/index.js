@@ -201,6 +201,11 @@ module.exports = {
                         "da_DK": "Træk og slip din ledningspakke her, eller klik for at vælg filen fra din computer",
                         "en_US": "Drag and drop your 'ledningspakke' here, or click to select from drive."
                     },
+                    "firstTime": {
+                        "da_DK": "Der er ingen forespørglser at vælge fra - start med at slippe din pakke herunder",
+                        "en_US": "There is nothing to select! - start by dropping your 'ledningspakke' below."
+                    },
+                    
                 };
 
                 /**
@@ -1106,17 +1111,12 @@ module.exports = {
                                     )
                                 } else {
                                     // Just Browsing
-                                    return (
-                                        <div role = "tabpanel" >
-                                            <div className = "form-group">
-                                                <div id = "graveAssistent-feature-select-container" style = {{width: '80%',margin: '10px auto 10px auto'}}>
-                                                    <FormControl style = {{width: '100%',padding: '20px'}}>
-                                                        <InputLabel id = "graveAssistent-feature-select-label"> Vælg eksisterende forespørgsel </InputLabel>
-                                                        <Select id = "graveAssistent-feature-select" value = {s.foresp} onChange = {_self.handleForespSelectChange.bind(this)}>
-                                                            {s.forespOptions.map(f => <MenuItem key = {f.forespnummer} value = {f.forespnummer}> {f.forespnummer + ': ' + f.bemaerkning + ' (Uploaded: ' + f.svar_uploadtime + ')'} </MenuItem>)}
-                                                        </Select>
-                                                    </FormControl>
-                                                    <div><p>Eller</p></div>
+                                    if (s.forespOptions.length < 1) {
+                                        // Nothing added
+                                        return (
+                                            <div role = "tabpanel" >
+                                                <div className = "form-group">
+                                                        <div><p>{__("firstTime")}</p></div>
                                                 </div>
                                                 <div id = "graveAssistent-feature-dropzone">
                                                     <Dropzone onDrop = {_self.onDrop.bind(this)} style = {{width: '80%',height: '160px',padding: '50px',border: '1px green dashed',margin: '20px auto 20px auto',textAlign: 'center'}}>
@@ -1124,8 +1124,32 @@ module.exports = {
                                                     </Dropzone>
                                                 </div>
                                             </div>
-                                        </div>
-                                            )
+                                                )
+                                    } else {
+                                        // We have options
+                                        return (
+                                            <div role = "tabpanel" >
+                                                <div className = "form-group">
+                                                    <div id = "graveAssistent-feature-select-container" style = {{width: '80%',margin: '10px auto 10px auto'}}>
+                                                        <FormControl style = {{width: '100%',padding: '20px'}}>
+                                                            <InputLabel id = "graveAssistent-feature-select-label"> Vælg eksisterende forespørgsel </InputLabel>
+                                                            <Select id = "graveAssistent-feature-select" value = {s.foresp} onChange = {_self.handleForespSelectChange.bind(this)}>
+                                                                {s.forespOptions.map(f => <MenuItem key = {f.forespnummer} value = {f.forespnummer}> {f.forespnummer + ': ' + f.bemaerkning + ' (Uploaded: ' + f.svar_uploadtime + ')'} </MenuItem>)}
+                                                            </Select>
+                                                        </FormControl>
+                                                        <div><p>Eller</p></div>
+                                                    </div>
+                                                    <div id = "graveAssistent-feature-dropzone">
+                                                        <Dropzone onDrop = {_self.onDrop.bind(this)} style = {{width: '80%',height: '160px',padding: '50px',border: '1px green dashed',margin: '20px auto 20px auto',textAlign: 'center'}}>
+                                                            <p>{__("uploadmessage")}</p>
+                                                        </Dropzone>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )
+
+                                    }
+                                    
                                         }
                                     }
                                     else {

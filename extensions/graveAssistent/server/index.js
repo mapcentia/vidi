@@ -233,7 +233,7 @@ router.post('/api/extension/downloadForespoergsel', function (req, response) {
                             filename: fn + r[0].ext,
                             mime: r[0].mime
                         }
-                        //console.log(payload)
+                        console.log(payload)
                         response.status(200).json(payload)
                     })
                     .catch(r => {
@@ -246,7 +246,7 @@ router.post('/api/extension/downloadForespoergsel', function (req, response) {
                 response.status(500).json(r)
             })
     } catch (error) {
-        //console.log(error)
+        console.log(error)
         response.status(500).json(error)
     }
 
@@ -279,7 +279,7 @@ router.post('/api/extension/getForespoergselOption', function (req, response) {
                 //console.log(r)
                 let returnArray = []
                 r.features.forEach(f => {
-                    //console.log(f)
+                    console.log(f)
                     returnArray.push(f.properties)
                 })
                 response.status(200).json(returnArray)
@@ -288,7 +288,7 @@ router.post('/api/extension/getForespoergselOption', function (req, response) {
                 response.status(500).json(r)
             })
     } catch (error) {
-        //console.log(error)
+        console.log(error)
         response.status(500).json(error)
     }
 
@@ -401,7 +401,7 @@ router.post('/api/extension/getStatus', function (req, response) {
 
                 let returnArray = []
                 r[0].features.forEach(f => {
-                    //console.log(f)
+                    console.log(f)
                     returnArray.push(f)
                 })
                 response.status(200).json(returnArray)
@@ -410,7 +410,7 @@ router.post('/api/extension/getStatus', function (req, response) {
                 response.status(500).json(r)
             })
     } catch (error) {
-        //console.log(error)
+        console.log(error)
         response.status(500).json(error)
     }
 
@@ -524,7 +524,7 @@ router.post('/api/extension/upsertForespoergsel', function (req, response) {
                 //chain.push(FeatureAPI(req, polys, TABLEPREFIX + 'polygons', '7416'))
             }
         } catch (error) {
-            //console.log(error)
+            console.log(error)
             response.status(500).json(error)
         }
 
@@ -534,7 +534,7 @@ router.post('/api/extension/upsertForespoergsel', function (req, response) {
                 //console.log(d)
                 Promise.all(post) // add new data
                     .then(r => {
-                        //console.log(r)
+                        console.log(r)
                         response.status(200).json(r)
                     })
                     .catch(error => {
@@ -543,14 +543,14 @@ router.post('/api/extension/upsertForespoergsel', function (req, response) {
                     })
             })
             .catch(r => {
-                // clean on any error
+                clean on any error
                 Promise.all(clean)
                     .finally(
                         response.status(500).json(r)
                     )
             })
     } catch (error) {
-        //console.log(error)
+        console.log(error)
         response.status(500).json(error)
     }
 });
@@ -612,25 +612,25 @@ router.post('/api/extension/upsertStatus', function (req, response) {
             })
             //chain.push(FeatureAPI(req, lines, TABLEPREFIX + 'lines', '7416'))
         } catch (error) {
-            //console.log(error)
+            console.log(error)
             response.status(500).json(error)
         }
 
         // Execute entire chain
         Promise.all(post) // add new data
             .then(r => {
-                //console.log(r)
+                console.log(r)
                 response.status(200).json(r)
             })
             .catch(error => {
-                //console.log(error)
+                console.log(error)
                 response.status(500).json(error)
             })
 
 
 
     } catch (error) {
-        //console.log(error)
+        console.log(error)
         response.status(500).json(error)
     }
 
@@ -655,16 +655,16 @@ function FeatureAPI(req, featurecollection, table, crs) {
     };
 
     return new Promise(function (resolve, reject) {
-        //console.log(q.substring(0, 60))
+        console.log(q.substring(0, 60))
         fetch(url, options)
             .then(r => r.json())
             .then(data => {
                 // if message is present, is error
                 if (data.hasOwnProperty('message')) {
-                    //console.log(data.message)
+                    console.log(data.message)
                     reject(data)
                 } else {
-                    //console.log('Success: ' + data.success + ' - Q: ' + postData.substring(0, 60))
+                    console.log('Success: ' + data.success + ' - Q: ' + postData.substring(0, 60))
                     resolve(data)
                 }
             })
@@ -695,16 +695,16 @@ function SQLAPI(q, req) {
 
     // Return new promise 
     return new Promise(function (resolve, reject) {
-        //console.log(q.substring(0,175))
+        console.log(q.substring(0,175))
         fetch(url, options)
             .then(r => r.json())
             .then(data => {
                 // if message is present, is error
                 if (data.hasOwnProperty('message')) {
-                    //console.log(data.message)
+                    console.log(data.message)
                     reject(data)
                 } else {
-                    //console.log('Success: '+ data.success+' - Q: '+q.substring(0,60))
+                    console.log('Success: '+ data.success+' - Q: '+q.substring(0,60))
                     resolve(data)
                 }
             })
