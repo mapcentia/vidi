@@ -543,7 +543,7 @@ router.post('/api/extension/upsertForespoergsel', function (req, response) {
                     })
             })
             .catch(r => {
-                clean on any error
+                //clean on any error
                 Promise.all(clean)
                     .finally(
                         response.status(500).json(r)
