@@ -221,6 +221,7 @@ module.exports = {
         "Apply": "Apply",
         "Reset filter": "Reset filter",
         "Filter editor": "Filter editor",
+        "Layer is visible": "Layer is visible",
 
         // Base layers
         "Side-by-side mode": "Side-by-side mode",

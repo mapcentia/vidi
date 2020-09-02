@@ -1619,10 +1619,10 @@ module.exports = {
      *
      * @returns {void}
      */
-    createTable(layerKey, forceDataLoad = false) {
+    createTable(layerKey, forceDataLoad = false, element = null) {
         let layerWithData = layers.getMapLayers(false, LAYER.VECTOR + ':' + layerKey);
         if (layerWithData.length === 1) {
-            let tableContainerId = `#table_view-${layerKey.replace(".", "_")}`;
+            let tableContainerId = element ? element : `#table_view-${layerKey.replace(".", "_")}`;
             if ($(tableContainerId + ` table`).length > 0) $(tableContainerId).empty();
             $(tableContainerId).append(`<table class="table" data-show-toggle="true" data-show-export="false" data-show-columns="true"></table>`);
 
@@ -1707,7 +1707,7 @@ module.exports = {
             if (tmpl) {
                 // Convert Markdown in text fields
                 let metaDataKeys = meta.getMetaDataKeys();
-                for (const property in  metaDataKeys[layerKey].fields) {
+                for (const property in metaDataKeys[layerKey].fields) {
                     if (metaDataKeys[layerKey].fields[property].type === "text") {
                         properties[property] = marked(properties[property]);
                     }
@@ -2490,6 +2490,7 @@ module.exports = {
             let lockedLayer = (layer.authentication === "Read/write" ? " <i class=\"fa fa-lock gc2-session-lock\" aria-hidden=\"true\"></i>" : "");
             let layerTypeSelector = ``;
             let parentLayerKeys = [];
+            let childLayerKeys = [];
             if (layer.meta) {
                 parsedMeta = _self.parseLayerMeta(layer);
                 if (parsedMeta) {
@@ -2504,6 +2505,25 @@ module.exports = {
                     if (`meta_desc` in parsedMeta) {
                         displayInfo = (parsedMeta.meta_desc || layer.f_table_abstract) ? `visible` : `hidden`;
                     }
+
+                    if (`referenced_by` in parsedMeta) {
+                        try {
+                            let m = parsedMeta.referenced_by;
+                            let referencedBy = m && m !== "" ? JSON.parse(parsedMeta.referenced_by) : null;
+                            if (referencedBy) {
+                                referencedBy.forEach(ref => {
+                                    meta.getMetaDataLatestLoaded().data.forEach(e => {
+                                        if (ref.rel === e.f_table_schema + "." + e.f_table_name) {
+                                            childLayerKeys.push(e.f_table_title || e.f_table_schema + "." + e.f_table_name)
+                                        }
+                                    })
+                                })
+                            }
+                        } catch (err) {
+                            console.error("Invalid JSON in referenced_by for layer key: " + layer.f_table_schema + "." + layer.f_table_name);
+                        }
+                    }
+
                     meta.getMetaDataLatestLoaded().data.forEach(e => {
                         try {
                             let m = JSON.parse(e?.meta)?.referenced_by;
@@ -2516,7 +2536,7 @@ module.exports = {
                                 })
                             }
                         } catch (err) {
-                            console.error("Invalid JSON in referenced_by for layer key: " + e.f_table_schema  + "." + e.f_table_name);
+                            console.error("Invalid JSON in referenced_by for layer key: " + e.f_table_schema + "." + e.f_table_name);
                         }
                     })
                 }
@@ -2532,7 +2552,7 @@ module.exports = {
             }
 
             let layerControlRecord = $(markupGeneratorInstance.getLayerControlRecord(layerKeyWithGeom, layerKey, layerIsActive,
-                layer, defaultLayerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo, subgroupId !== false, moduleState, disableCheckBox, parentLayerKeys));
+                layer, defaultLayerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo, subgroupId !== false, moduleState, disableCheckBox, parentLayerKeys, childLayerKeys));
 
             // Callback for selecting specific layer type to enable (layer type dropdown)
             $(layerControlRecord).find('[class^="js-layer-type-selector"]').on('click', (e, data) => {

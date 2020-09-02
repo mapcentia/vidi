@@ -221,6 +221,7 @@ module.exports = {
         "Apply": "Anvend",
         "Reset filter": "Nulstil filter",
         "Filter editor": "Filter editor",
+        "Layer is visible": "Laget er synligt",
 
         // Base layers
         "Side-by-side mode": "Dobbelt baggrundskort",

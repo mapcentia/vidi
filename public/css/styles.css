@@ -1572,3 +1572,6 @@ td.rdtYear:hover {
 .table.table-hover tr {
   cursor: pointer;
 }
+.info-icon {
+  cursor: help;
+}

@@ -493,7 +493,6 @@ class VectorLayerFilter extends React.Component {
                     pointerEvents: "none",
                     opacity: "0.2"
                 } : {}}>
-                    {childrenInfoMarkup}
                     <div className="form-group" style={{display: this.props.isFilterImmutable ? "none" : "inline"}}>
                         <p>{__(`Match`)} {matchSelector} {__(`of the following`)}</p>
                     </div>
