@@ -113,9 +113,9 @@ class MarkupGenerator {
                                 <span class="js-layer-is-disabled" style="visibility: ${disableCheckBox ? "inline" : "hidden"};" data-toggle="tooltip" data-placement="right"
                                     title="${__("Locked")}"><span class="material-icons" style="font-size: 13px; color: red">lock</span></span>
                                 <span class="js-layer-has-parents info-icon" style="visibility: ${parentLayerKeys.length > 0 ? "inline" : "hidden"};" data-toggle="tooltip" data-placement="right"
-                                    title="${__("Parents: ")}${parentLayerKeys.length > 0 ? parentLayerKeys.join(", ") : ""}"><span class="material-icons" style="font-size: 13px">arrow_upward</span></span>
+                                    title="${__("Parents")}: ${parentLayerKeys.length > 0 ? parentLayerKeys.join(", ") : ""}"><span class="material-icons" style="font-size: 13px">arrow_upward</span></span>
                                 <span class="js-layer-has-children info-icon" style="visibility: ${childLayerKeys.length > 0 ? "inline" : "hidden"};" data-toggle="tooltip" data-placement="right"
-                                    title="${__("Children: ")}${childLayerKeys.length > 0 ? childLayerKeys.join(", ") : ""}"><span class="material-icons" style="font-size: 13px">arrow_downward</span></span>
+                                    title="${__("Children")}: ${childLayerKeys.length > 0 ? childLayerKeys.join(", ") : ""}"><span class="material-icons" style="font-size: 13px">arrow_downward</span></span>
                                 <span style="display: none" class="_gc2_layer_sort_id">(${layer.sort_id})</span>
                             </span>
                         </div>

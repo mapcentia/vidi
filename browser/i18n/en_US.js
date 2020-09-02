@@ -222,6 +222,8 @@ module.exports = {
         "Reset filter": "Reset filter",
         "Filter editor": "Filter editor",
         "Layer is visible": "Layer is visible",
+        "Parents": "Parents",
+        "Children": "Children",
 
         // Base layers
         "Side-by-side mode": "Side-by-side mode",
