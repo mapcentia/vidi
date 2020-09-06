@@ -59,6 +59,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - The `infoClickCursorStyle` setting will set cursor style when using feature info click. Can be set to `pointer` or `crosshair`. The setting can be set in `config/config.js` or in a runtime config.
 - New Autocomplete control in filters. The control will fetch distinct values from PostgreSQL for use in the autocomplete field. All distinct values are fetch at once. 100.000 distinct values can be handle without problems. Only works on text fields and must be enabled in GC2 Structure tab.
 - The attribute `data-vidi-host` is added to `embed.js`, so it's possible to override the host from the token. This makes it possible to generate tokens on one setup and use them on others. E.g. on mirrored internal/external setups.
+- The Coordinate module now has a Pan To input field. The user can input a coordinate in the chosen system and the map will pan to the point.
 
 ### Changed
 - `public\js\vidi.js`is now required instead of loaded in a script tag. This way it's transpiled and can contain new JavaScript syntax.
