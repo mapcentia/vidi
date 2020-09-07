@@ -49,7 +49,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - `embed.js` has two new attributes: `data-vidi-use-config` and `data-vidi-use-schema`. These will trigger the use of schema and/or config from the token if present.
 - New GC2 Meta property which automatically can open a layer tool when the layer is switch on:
     - *default_open_tools*: JSON array with tools to open. Available options: `["filters","opacity","load-strategy","search"]` ("table" are not supported)
-- New GC2 properties:
+- New GC2 Meta properties:
     - *disable_check_box*: boolean, disables the layer check box:
         - When filtering a layer all its child layers with this property set to true will have their check boxes enabled. And when the filters are disabled again all child layers will be turned off and have their check boxes disabled again.
         - This makes it possible to setup child layers, which can only be viewed when filtered by its parent layer.
