@@ -125,12 +125,16 @@ var gc2table = (function () {
             if (id === undefined) return;
             var row = $('*[data-uniqueid="' + id + '"]');
             row.addClass("selected");
-            m.map._layers[id].setStyle({
-                opacity: 1,
-                dashArray: "5 8",
-                dashSpeed: 10,
-                lineCap: "butt"
-            });
+            try {
+                m.map._layers[id].setStyle({
+                    opacity: 1,
+                    dashArray: "5 8",
+                    dashSpeed: 10,
+                    lineCap: "butt"
+                });
+            } catch (e) {
+                console.warn("Can't set style on marker")
+            }
 
             onSelect(id, m.map._layers[id], key, caller);
 
