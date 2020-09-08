@@ -777,8 +777,13 @@ module.exports = {
                         const _self = this;
                         //TODO: screen input
                         //TODO: Handle more?
-                        this.readContents(files[0])
 
+                        var r = new FileReader();
+                        r.readAsDataURL(files[0])
+                        r.onloadend = function() {
+                            let b64 = r.result
+                            _self.readContents(b64)
+                        }
                     }
 
                     // serves as state reset
@@ -815,120 +820,72 @@ module.exports = {
                         var _self = this;
                         var newZip = new JSZip();
 
-                        // reset states
-                        _self.setState({
-                            loading: true,
-                            done: false,
-                            progress: 0,
-                            progressText: 'Læser ledningspakkke',
-                            ejerliste: [],
-                            isError: false,
-                            errorList: [],
-                            svarUploadTime: ''
-                        })
-
+                        let wait = 5000
                         var statusKey = uuidv4()
-
-                        newZip.loadAsync(zipblob)
+                        var b64 = zipblob.substring(28)
+                       
+                        newZip.loadAsync(b64, {base64: true})
                             .then(function (zip) {
                                 /* Load Status - 'LedningsejerStatusListe.xml', set state */
                                 _self.setState({
-                                    progress: 20,
-                                    progressText: 'Indlæser statusliste'
+                                    loading: true,
+                                    done: false,
+                                    progress: 0,
+                                    progressText: 'Læser ledningspakkke',
+                                    ejerliste: [],
+                                    isError: false,
+                                    errorList: [],
+                                    svarUploadTime: ''
                                 })
 
-                                zip.files['LedningsejerStatusListe.xml'].async('string')
-                                    .then(fileData => parsetoJSON(fileData))
-                                    .then(jsObj => parseStatus(jsObj))
-                                    .then(parsed => {
-                                        pushStatus(parsed, statusKey)
-                                            .then(r => {
-                                                //console.log(r)
-                                                let wait = 5000
-                                                if (r.some(i => i.success === false)) {
-                                                    let errs = r.filter(obj => {
-                                                        return obj.success === false
-                                                    })
-                                                    console.log('errors!')
-                                                    console.log(errs)
-                                                    _self.setState({
-                                                        errorList: errs,
-                                                        isError: true,
-                                                        progress: 100,
-                                                        progressText: 'Der skete en fejl!'
-                                                    })
-                                                    setTimeout(_self.setState({
-                                                        loading: true,
-                                                        done: false
-                                                    }, () => {}), wait) // Return to start
-                                                } else {
-                                                    console.log('all fine!')
-                                                    _self.setState({
-                                                        isError: false,
-                                                        progress: 30,
-                                                        progressText: 'Gemmer status!'
-                                                    })
-                                                    return zip
-                                                }
-                                            })
-                                            .then(function (zip) {
-                                                console.log('Ledningsdata')
-                                                /* Load data - 'consolidated.gml' */
-                                                //_self.setState({
-                                                //    progress: 70,
-                                                //    progressText: 'Gemmer ledningsdata'
-                                                //})
-                                                zip.files['consolidated.gml'].async('string')
-                                                    .then(fileData => parsetoJSON(fileData))
-                                                    .then(jsObj => parseConsolidated(jsObj))
-                                                    .then(parsed => {
-                                                        pushForespoergsel(parsed, statusKey)
-                                                            .then(r => {
-                                                                //console.log(r)
-                                                                let wait = 5000
-                                                                if (r.some(i => i.success === false)) {
-                                                                    let errs = r.filter(obj => {
-                                                                        return obj.success === false
-                                                                    })
-                                                                    console.log('errors!')
-                                                                    console.log(errs)
-                                                                    _self.setState({
-                                                                        errorList: errs,
-                                                                        isError: true,
-                                                                        progress: 100,
-                                                                        progressText: 'Der skete en fejl!'
-                                                                    })
-                                                                    setTimeout(_self.setState({
-                                                                        loading: true,
-                                                                        done: false
-                                                                    }, () => {}), wait) // Return to start
-                                                                } else {
-                                                                    console.log('all fine!')
-                                                                    _self.setState({
-                                                                        isError: false,
-                                                                        progress: 100,
-                                                                        progressText: 'Færdig!'
-                                                                    })
-                                                                    setTimeout(_self.setState({
-                                                                        loading: false,
-                                                                        done: true
-                                                                    }, () => {
-                                                                        _self.getForespoergsel(String(parsed.forespNummer))
-                                                                    }), Math.floor(wait / 4)) // Go to ready
-                                                                }
-                                                            })
-                                                            .catch(e => {
-                                                                console.log(e)
-                                                            })
-                                                    })
-                                            }).catch(function (error) {
-                                                console.log(error)
-                                            })
-                                            .catch(e => {
-                                                console.log(e)
-                                            })
-                                    })
-                                //return zip //pass on same zip to next then
+                                // Handle files
+                                return Promise.all([
+                                    zip.files['LedningsejerStatusListe.xml'].async('string'),
+                                    zip.files['consolidated.gml'].async('string')
+                                ])
+                            }).then(function(files) {
+                                var [status, consolidated] = files
+
+                                return Promise.all([
+                                    parsetoJSON(status),
+                                    parsetoJSON(consolidated)
+                                ])
+                            }).then(function(files) {
+                                var [status, consolidated] = files
+
+                                return Promise.all([
+                                    parseStatus(status),
+                                    parseConsolidated(consolidated)
+                                ])
+                            }).then(function(files) {
+                                var [status, consolidated] = files
+
+                                return [Promise.all([
+                                    pushStatus(status, statusKey),
+                                    pushForespoergsel(consolidated, statusKey)
+                                ]),consolidated.forespNummer]
+                            }).then(function(files) {
+                                console.log(files)
+                                _self.setState({
+                                    isError: false,
+                                    progress: 100,
+                                    progressText: 'Færdig!'
+                                })
+                                setTimeout(_self.setState({
+                                    loading: false,
+                                    done: true
+                                }, () => {
+                                    _self.getForespoergsel(String(files[1]))
+                                }), Math.floor(wait / 4))
+
+                            })
+                            .catch(e => {
+                                console.log(e)
+                                _self.setState({
+                                    isError: true,
+                                    progress: 100,
+                                    progressText: e
+                                })
                             })
                             
                     }
@@ -1119,7 +1076,7 @@ module.exports = {
                                                     <div><p>Eller</p></div>
                                                 </div>
                                                 <div id = "graveAssistent-feature-dropzone">
-                                                    <Dropzone onDrop = {_self.onDrop.bind(this)} style = {{width: '80%',height: '160px',padding: '50px',border: '1px green dashed',margin: '20px auto 20px auto',textAlign: 'center'}}>
+                                                    <Dropzone onDrop = {acceptedFiles => _self.onDrop(acceptedFiles)} style = {{width: '80%',height: '160px',padding: '50px',border: '1px green dashed',margin: '20px auto 20px auto',textAlign: 'center'}}>
                                                         <p>{__("uploadmessage")}</p>
                                                     </Dropzone>
                                                 </div>
