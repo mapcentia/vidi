@@ -16,7 +16,8 @@ import RadioGroup from '@material-ui/core/RadioGroup';
 import FormLabel from '@material-ui/core/FormLabel';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import SaveIcon from '@material-ui/icons/Save';
-import Grid from '@material-ui/core/Grid'
+import Grid from '@material-ui/core/Grid';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 
 class LedningsDownload extends React.Component {
@@ -31,21 +32,25 @@ class LedningsDownload extends React.Component {
                     format: 'shp',
                     formatTitle: 'ESRI Shape',
                     formatDesc: 'Shape er et gængs format til udveksling af geografisk information. Filen kan med fordel indlæses i QGIS',
+                    formatDisable: false,
                     formatProduct: 'Man får en pakket zip-fil med indhold. der vil være en shp-fil for hver geometri-type, samt en log over hvilke kolonner der har skiftet navn i oversættelsen.'
                 },
                 {
                     format: 'dxf',
                     formatTitle: 'DXF',
                     formatDesc: 'DXF er et almindeligt CAD-format. ',
+                    formatDisable: true,
                     formatProduct: 'Man får en pakket zip-fil (opdeling pr. type eller ejer? eller ejer/type? - hvad med komponenter?)'
                 },
                 {
                     format: 'geojson',
                     formatTitle: 'GeoJSON',
                     formatDesc: 'GeoJSON er et åbent tekst-baseret format. Bruges ofte i web-sammenhæng. Filen kan med fordel indlæses i  QGIS.',
-                    formatProduct: 'Man får en GeoJSON fil, dette er et direkte udtræk af ledningspakken. '
+                    formatDisable: false,
+                    formatProduct: 'Man får en GeoJSON fil, dette er et direkte udtræk af ledningspakken.'
                 }
-            ]
+            ],
+            loading: false
         };
     }
     handleChange = (event) => {
@@ -84,6 +89,10 @@ class LedningsDownload extends React.Component {
             body: JSON.stringify({forespNummer: _self.props.forespnummer, format: _self.state.format})
         }
         let url = _self.props.endpoint
+
+        // Set UI
+        _self.setState({loading:true})
+
         fetch(url, options)
         .then( r => r.json())
         .then( d => {
@@ -100,6 +109,7 @@ class LedningsDownload extends React.Component {
                 a.setAttribute('download', d.filename);
                 a.addEventListener('click', clickHandler, false);
                 a.click();
+                _self.setState({loading:false})
             })
             .then(_self.setState({open:false,format: ''}))
             .catch(e => console.log(e))
@@ -112,8 +122,8 @@ class LedningsDownload extends React.Component {
         const _self = this;
         const s = _self.state
         
-        console.log(p)
-        console.log(s)
+        //console.log(p)
+        //console.log(s)
 
         const container = {
             display: 'flex',
@@ -128,7 +138,7 @@ class LedningsDownload extends React.Component {
 
         let formatDescription, desc, product
         if (s.format === '') {
-            desc = 'Vælg et format'
+            desc = 'Vælg et format i siden, og få en fin forklaring over de forskellige formater du kan hente.'
             product = ''
         } else {
             desc = s.formatList.find(x => x.format === s.format).formatDesc
@@ -160,12 +170,12 @@ class LedningsDownload extends React.Component {
                   alignItems="flex-start"
                 >
 
-                </Grid>
+                
                     <Grid item xs={6}>
                         <form style={container}>
                           <FormControl style={formControl}>
                               <RadioGroup aria-label="gender" name="gender1" value={s.format} onChange={_self.handleChange}>
-                                  {s.formatList.map(f => <FormControlLabel key={f.format} value={f.format} control={<Radio />} label={f.formatTitle} />)}
+                                  {s.formatList.map(f => <FormControlLabel key={f.format} value={f.format} disabled={f.formatDisable} control={<Radio />} label={f.formatTitle} />)}
                               </RadioGroup>
                           </FormControl>
                         </form>
@@ -174,13 +184,15 @@ class LedningsDownload extends React.Component {
                         {desc === '' ? '' : <p>{desc}</p>}
                         {product === '' ? '' : <p>{product}</p>}
                     </Grid>
+                </Grid>
                 </DialogContent>
                 <DialogActions>
                   <Button onClick={_self.handleClose} color="default" size={p.size} variant={p.variant}>
                     Fortryd
                   </Button>
                   <Button onClick={_self.handleDownload} color="primary" size={p.size} variant={p.variant} disabled={s.format == '' ? true : false}>
-                    Download
+                    {s.loading ? 'Oversætter' : 'Download'}
+                    {s.loading && <CircularProgress size={20} />}
                   </Button>
                 </DialogActions>
               </Dialog>
