@@ -48,7 +48,7 @@ module.exports = {
         }
 
         $(`<li role="presentation">
-            <a data-module-id="${moduleId}" href="#${id}-content" aria-controls role="tab" data-toggle="tab">${iconRaw}${name}</a>
+            <a data-module-id="${moduleId}" href="#${id}-content" aria-controls role="tab" data-toggle="tab" data-module-title="${name}">${iconRaw}${name}</a>
         </li>`).appendTo("#main-tabs");
         $(`<div role="tabpanel" class="tab-pane fade" id="${id}-content"></div>`).appendTo(".tab-content.main-content");
         $(`<div class="help-btn"><i class="material-icons help-btn">help_outline</i></div>`).appendTo(el).on("click", function () {

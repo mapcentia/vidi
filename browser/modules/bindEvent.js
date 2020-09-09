@@ -557,6 +557,10 @@ module.exports = {
             $(this).on("click", function (e) {
                 backboneEvents.get().trigger(`off:all`);
                 let moduleId = $(this).data(`module-id`);
+                let moduleTitle = $(this).data(`module-title`);
+                $('#module-container').find(`.js-module-title`).text('');
+                if (moduleTitle) $('#module-container').find(`.js-module-title`).text(moduleTitle);
+
                 setTimeout(() => {
                     if (moduleId && moduleId !== ``) {
                         if (moduleId in applicationModules.extensions) {
@@ -566,7 +570,6 @@ module.exports = {
                         }
                     }
                 }, 100);
-
                 let id = ($(this));
                 $("#side-panel ul li").removeClass("active");
                 id.addClass("active");
