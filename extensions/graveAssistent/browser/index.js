@@ -1,6 +1,6 @@
 /*
- * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2019 MapCentia ApS
+ * @author     René Borella <rgb@geopartner.dk>
+ * @copyright  2020- Geoparntner A/S
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -22,9 +22,7 @@ import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
-import {
-    reject
-} from 'underscore';
+
 
 /**
  *
@@ -179,7 +177,7 @@ module.exports = {
 
                     "Plugin Tooltip": {
                         "da_DK": "LER 2.0 Graveassistent",
-                        "en_US": "LER 2.0 Graveassistant"
+                        "en_US": "LER 2.0 Graveassistent"
                     },
                     "MissingLogin": {
                         "da_DK": "NB: Du skal være logget ind for at kunne bruge funktionen",
@@ -195,12 +193,12 @@ module.exports = {
                     },
                     "uploadtime": {
                         "da_DK": "Ledningspakke uploaded",
-                        "en_US": "'Ledningspakke' uploaded at"
+                        "en_US": "Ledningspakke uploaded at"
                     },
                     "uploadmessage": {
                         "da_DK": "Træk og slip din ledningspakke her, eller klik for at vælg filen fra din computer",
-                        "en_US": "Drag and drop your 'ledningspakke' here, or click to select from drive."
-                    },
+                        "en_US": "Drag and drop your ledningspakke here, or click to select from drive."
+                    }
                 };
 
                 /**
@@ -210,6 +208,11 @@ module.exports = {
                  * @private
                  */
                 var __ = function (txt) {
+
+                    // Hack for locale not found?!
+                    //console.log(window._vidiLocale)
+                    //console.log(txt)
+
                     if (dict[txt][window._vidiLocale]) {
                         return dict[txt][window._vidiLocale];
                     } else {
@@ -233,6 +236,22 @@ module.exports = {
                     })
 
                     return flattened
+                }
+
+                var checkZipFile = function (zip) {
+
+                    //console.log(zip)
+                    let neededfiles = ['LedningsejerStatusListe.xml', 'consolidated.gml']
+
+                    return new Promise(function (resolve, reject) {
+                        neededfiles.forEach(key => {
+                            if (zip.file(key) == null) {
+                                reject('Filen ' + key + ' mangler i ledningspakken. Prøv igen.')
+                            } 
+                        })
+                        resolve(zip)
+                        
+                    }); 
                 }
 
                 /**
@@ -775,7 +794,6 @@ module.exports = {
                      */
                     onDrop(files) {
                         const _self = this;
-                        //TODO: screen input
                         //TODO: Handle more?
 
                         var r = new FileReader();
@@ -821,12 +839,12 @@ module.exports = {
                         var newZip = new JSZip();
 
                         let wait = 5000
+
                         var statusKey = uuidv4()
                         var b64 = zipblob.substring(28)
                        
                         newZip.loadAsync(b64, {base64: true})
                             .then(function (zip) {
-                                /* Load Status - 'LedningsejerStatusListe.xml', set state */
                                 _self.setState({
                                     loading: true,
                                     done: false,
@@ -838,6 +856,13 @@ module.exports = {
                                     svarUploadTime: ''
                                 })
 
+                                // Check for imperfections
+                                return Promise.all([
+                                    checkZipFile(zip)
+                                ])
+                            }).then(function(zipclean) {
+                                var [zip] = zipclean
+                                console.log(zip)
                                 // Handle files
                                 return Promise.all([
                                     zip.files['LedningsejerStatusListe.xml'].async('string'),
@@ -876,7 +901,7 @@ module.exports = {
                                     done: true
                                 }, () => {
                                     _self.getForespoergsel(String(files[1]))
-                                }), Math.floor(wait / 4))
+                                }), Math.floor(wait))
 
                             })
                             .catch(e => {
@@ -979,7 +1004,11 @@ module.exports = {
                         }
                         // Do async job
                         fetch('/api/extension/getForespoergsel', opts)
-                            .then(r => r.json())
+                            .then(r => {
+                                console.log(r.text)
+
+                                return r.json()
+                            })
                             .then(d => {
                                 console.log(d);
 
@@ -1038,7 +1067,7 @@ module.exports = {
                                             <div className = "form-group" >
                                                 <div>
                                                     <LedningsProgress progress = {s.progress} text = {s.progressText} iserror = {s.isError} errorlist = {s.errorList} />
-                                                    {s.isError === true ? <Button size = "large" color = "default" style = {margin} onClick = {_self.onBackClickHandler.bind(this)}>< ArrowBackIcon fontSize = "small" /> {__("BackButton")} </Button> : ''}
+                                                    {s.isError === true ? <Button size = "large" color = "default" style = {margin} onClick = {_self.onBackClickHandler.bind(this)}>< ArrowBackIcon fontSize = "small" /> {__("backbutton")} </Button> : ''}
                                                 </div >
                                             </div>
                                         </div>
@@ -1056,7 +1085,7 @@ module.exports = {
                                                     <LedningsDownload style = {margin} size = "large" color = "default" variant = "contained" endpoint = "/api/extension/downloadForespoergsel" forespnummer = {s.foresp}/>
                                                 </div >
                                                 <div id = "graveAssistent-feature-ledningsejerliste" >
-                                                    <LedningsEjerStatusTable statusliste = {s.ejerliste}/>
+                                                    {s.ejerliste.length > 0 ? <LedningsEjerStatusTable statusliste = {s.ejerliste}/> : <LedningsProgress progress={50} text={'Henter'} iserror={false} errorlist={[]} />}
                                                 </div>
                                             </div>
                                         </div>
