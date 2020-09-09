@@ -981,7 +981,7 @@ module.exports = {
                         fetch('/api/extension/getForespoergsel', opts)
                             .then(r => r.json())
                             .then(d => {
-                                //console.log(d);
+                                console.log(d);
 
                                 // Zoom to location
                                 // this has to be better for sorting then status is incomming!

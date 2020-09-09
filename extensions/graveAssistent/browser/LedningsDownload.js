@@ -165,7 +165,7 @@ class LedningsDownload extends React.Component {
                         <form style={container}>
                           <FormControl style={formControl}>
                               <RadioGroup aria-label="gender" name="gender1" value={s.format} onChange={_self.handleChange}>
-                                  {s.formatList.map(f => <FormControlLabel value={f.format} control={<Radio />} label={f.formatTitle} />)}
+                                  {s.formatList.map(f => <FormControlLabel key={f.format} value={f.format} control={<Radio />} label={f.formatTitle} />)}
                               </RadioGroup>
                           </FormControl>
                         </form>

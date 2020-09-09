@@ -89,10 +89,12 @@ class LedningsEjerStatusTable extends React.Component {
                 <div>
                     <Table>
                         <TableHead>
-                            <TableCell style={{ fontSize: FS }}>Status</TableCell>
-                            <TableCell style={{ fontSize: FS }}>Område</TableCell>
-                            <TableCell style={{ fontSize: FS }}>Status</TableCell>
-                            <TableCell style={{ fontSize: FS }}>Ejer</TableCell>
+                            <TableRow>
+                                <TableCell style={{ fontSize: FS }}>Status</TableCell>
+                                <TableCell style={{ fontSize: FS }}>Område</TableCell>
+                                <TableCell style={{ fontSize: FS }}>Status</TableCell>
+                                <TableCell style={{ fontSize: FS }}>Ejer</TableCell>
+                            </TableRow>
                         </TableHead>
                         <TableBody>
                     {this.props.statusliste.map(ejer =>{ 
