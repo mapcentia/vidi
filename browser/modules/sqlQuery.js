@@ -7,7 +7,7 @@
 'use strict';
 
 const layerTreeUtils = require('./layerTree/utils');
-import {LAYER, SYSTEM_FIELD_PREFIX} from './layerTree/constants';
+import {LAYER, SYSTEM_FIELD_PREFIX, MAP_RESOLUTIONS} from './layerTree/constants';
 
 /**
  * @type {*|exports|module.exports}
@@ -57,37 +57,36 @@ let defaultSelectedStyle = {
 };
 
 
-
 /**
  * A default template for GC2, with a loop
  * @type {string}
  */
 var defaultTemplate =
     `<div class="cartodb-popup-content">
-                <div class="form-group gc2-edit-tools" style="display: none; width: 90%;">
-                    <div class="btn-group btn-group-justified">
-                        <div class="btn-group">
-                            <button class="btn btn-primary btn-xs popup-edit-btn">
-                                <i class="fa fa-pencil-alt" aria-hidden="true"></i>
-                            </button>
-                        </div>
-                        <div class="btn-group">
-                            <button class="btn btn-danger btn-xs popup-delete-btn">
-                                <i class="fa fa-trash" aria-hidden="true"></i>
-                            </button>
-                        </div>
-                    </div>
+        <div class="form-group gc2-edit-tools" style="display: none; width: 90%;">
+            <div class="btn-group btn-group-justified">
+                <div class="btn-group">
+                    <button class="btn btn-primary btn-xs popup-edit-btn">
+                        <i class="fa fa-pencil-alt" aria-hidden="true"></i>
+                    </button>
                 </div>
-                <h3 class="popup-title">{{_vidi_content.title}}</h3>
-                {{#_vidi_content.fields}}
-                    <h4>{{title}}</h4>
-                    {{#if value}}
-                        <p {{#if type}}class="{{type}}"{{/if}}>{{{value}}}</p>
-                    {{else}}
-                        <p class="empty">null</p>
-                    {{/if}}
-                {{/_vidi_content.fields}}
-            </div>`;
+                <div class="btn-group">
+                    <button class="btn btn-danger btn-xs popup-delete-btn">
+                        <i class="fa fa-trash" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <h3 class="popup-title">{{_vidi_content.title}}</h3>
+        {{#_vidi_content.fields}}
+            <h4>{{title}}</h4>
+            {{#if value}}
+                <p {{#if type}}class="{{type}}"{{/if}}>{{{value}}}</p>
+            {{else}}
+                <p class="empty">null</p>
+            {{/if}}
+        {{/_vidi_content.fields}}
+    </div>`;
 
 /**
  * Default template for raster layers
@@ -219,12 +218,7 @@ module.exports = {
             backboneEvents.get().trigger("startLoading:layers", key);
 
             if (geoType !== "POLYGON" && geoType !== "MULTIPOLYGON") {
-                var res = [156543.0339280410, 78271.51696402048, 39135.75848201023, 19567.87924100512, 9783.939620502561,
-                    4891.969810251280, 2445.984905125640, 1222.992452562820, 611.4962262814100, 305.7481131407048,
-                    152.8740565703525, 76.43702828517624, 38.21851414258813, 19.10925707129406, 9.554628535647032,
-                    4.777314267823516, 2.388657133911758, 1.194328566955879, 0.5971642834779395, 0.298582141739,
-                    0.149291070869, 0.074645535435, 0.0373227677175, 0.018661384, 0.009330692, 0.004665346, 0.002332673, 0.001166337];
-                distance = 10 * res[cloud.get().getZoom()];
+                distance = 10 * MAP_RESOLUTIONS[cloud.get().getZoom()];
             }
 
             if (!callBack) {
@@ -241,6 +235,26 @@ module.exports = {
                     template = (parsedMeta.info_template && parsedMeta.info_template !== "") ? parsedMeta.info_template : template;
 
                     if (!isEmpty && !not_querable) {
+
+                        let popUpInner = `<div id="modal-info-body">
+                                <ul class="nav nav-tabs" id="info-tab"></ul>
+                                <div class="tab-content" id="info-pane"></div>
+                            </div>
+                            <div id="alternative-info-container" class="alternative-info-container-right" style="display:none"></div>`;
+
+                        if (typeof window.vidiConfig.featureInfoTableOnMap !== "undefined" && window.vidiConfig.featureInfoTableOnMap === true && simple) {
+                            let popup = L.popup({
+                                minWidth: 350
+                            })
+                                .setLatLng(infoClickPoint)
+                                .setContent(`<div id="info-box-pop-up"></div>`)
+                                .openOn(cloud.get().map);
+                            $("#info-box-pop-up").html(popUpInner);
+
+                        } else {
+                            $("#info-box").html(popUpInner);
+                        }
+
                         let display = simple ? "none" : "inline";
                         let dataShowExport, dataShowColumns, dataShowToggle, dataDetailView;
                         let info = infoText ? `<div>${infoText}</div>` : "";
@@ -287,7 +301,7 @@ module.exports = {
                             responsive: false,
                             callCustomOnload: false,
                             checkBox: !simple,
-                            height: 300,
+                            height: null,
                             locale: window._vidiLocale.replace("_", "-"),
                             template: template,
                             pkey: pkey,
@@ -460,7 +474,7 @@ module.exports = {
 
             cloud.get().addGeoJsonStore(qstore[index]);
 
-            var sql, f_geometry_column = metaDataKeys[value].f_geometry_column, fieldNames = [], fieldStr ;
+            var sql, f_geometry_column = metaDataKeys[value].f_geometry_column, fieldNames = [], fieldStr;
 
             if (fields) {
                 $.each(fields, function (i, v) {
@@ -616,7 +630,7 @@ module.exports = {
                                                         <span class="sr-only">Next</span>
                                                     </a>
                                                 </div>`;
-                                    Handlebars.registerHelper('breaklines', function(text) {
+                                    Handlebars.registerHelper('breaklines', function (text) {
                                         text = Handlebars.Utils.escapeExpression(text);
                                         text = text.replace(/(\r\n|\n|\r)/gm, '<br>');
                                         return new Handlebars.SafeString(text);

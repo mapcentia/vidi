@@ -23,6 +23,7 @@ var gc2table = (function () {
                 el: "#table",
                 autoUpdate: false,
                 height: 300,
+                tableBodyHeight: null,
                 setSelectedStyle: true,
                 openPopUp: false,
                 onPopupClose: false,
@@ -48,7 +49,7 @@ var gc2table = (function () {
                 },
                 renderInfoIn: null,
                 key: null,
-                caller: null
+                caller: null,
             }, prop,
             uid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
                 var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
@@ -393,8 +394,15 @@ var gc2table = (function () {
             }
 
             $(".fixed-table-body").css("overflow", "auto");
-            $(".fixed-table-body").css("max-height", tableBodyHeight + "px");
-            $(".fixed-table-body").css("height", tableBodyHeight + "px");
+            if (tableBodyHeight) {
+                if (!isNaN(tableBodyHeight)) {
+                    $(".fixed-table-body").css("max-height", tableBodyHeight + "px");
+                    $(".fixed-table-body").css("height", tableBodyHeight + "px");
+                } else {
+                    $(".fixed-table-body").css("max-height", tableBodyHeight);
+                    $(".fixed-table-body").css("height", tableBodyHeight);
+                }
+            }
         };
 
         getUncheckedIds = function () {
