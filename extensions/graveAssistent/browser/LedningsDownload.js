@@ -174,7 +174,7 @@ class LedningsDownload extends React.Component {
                     <Grid item xs={6}>
                         <form style={container}>
                           <FormControl style={formControl}>
-                              <RadioGroup aria-label="gender" name="gender1" value={s.format} onChange={_self.handleChange}>
+                              <RadioGroup aria-label="format" name="format1" value={s.format} onChange={_self.handleChange}>
                                   {s.formatList.map(f => <FormControlLabel key={f.format} value={f.format} disabled={f.formatDisable} control={<Radio />} label={f.formatTitle} />)}
                               </RadioGroup>
                           </FormControl>
@@ -192,8 +192,8 @@ class LedningsDownload extends React.Component {
                   </Button>
                   <Button onClick={_self.handleDownload} color="primary" size={p.size} variant={p.variant} disabled={s.format == '' ? true : false}>
                     {s.loading ? 'Oversætter' : 'Download'}
-                    {s.loading && <CircularProgress size={20} />}
                   </Button>
+                  {s.loading && <CircularProgress size={20} />}
                 </DialogActions>
               </Dialog>
             </div>

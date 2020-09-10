@@ -587,6 +587,10 @@ module.exports = {
                                         CVR: l.CVR,
                                         Navn: l.Navn
                                     }
+
+                                    if (l.CVR == '') {
+                                        obj['CVR'] = 0
+                                    }
                                     ejere.push(lc(obj))
                                 })
                             } else {
@@ -596,6 +600,11 @@ module.exports = {
                                     CVR: l.CVR,
                                     Navn: l.Navn
                                 }
+
+                                if (l.CVR == '') {
+                                        obj['CVR'] = 0
+                                    }
+                                    
                                 ejere.push(lc(obj))
                             }
                         })
@@ -794,6 +803,7 @@ module.exports = {
                      */
                     onDrop(files) {
                         const _self = this;
+
                         //TODO: Handle more?
 
                         var r = new FileReader();
@@ -898,7 +908,8 @@ module.exports = {
                                 })
                                 setTimeout(_self.setState({
                                     loading: false,
-                                    done: true
+                                    done: true,
+                                    foresp: String(files[1])
                                 }, () => {
                                     _self.getForespoergsel(String(files[1]))
                                 }), Math.floor(wait))
@@ -1002,13 +1013,10 @@ module.exports = {
                                 forespNummer: forespNummer
                             })
                         }
+
                         // Do async job
                         fetch('/api/extension/getForespoergsel', opts)
-                            .then(r => {
-                                console.log(r.text)
-
-                                return r.json()
-                            })
+                            .then(r => r.json())
                             .then(d => {
                                 console.log(d);
 
@@ -1016,14 +1024,7 @@ module.exports = {
                                 // this has to be better for sorting then status is incomming!
                                 let f = d[0].properties;
                                 //console.log(d)
-                                let bounds = [
-                                    [
-                                        f.ymin, f.xmin
-                                    ],
-                                    [
-                                        f.ymax, f.xmax
-                                    ]
-                                ];
+                                let bounds = [[f.ymin, f.xmin],[f.ymax, f.xmax]];
                                 cloud.get().map.fitBounds(bounds)
                                 
                                 // Apply filter
