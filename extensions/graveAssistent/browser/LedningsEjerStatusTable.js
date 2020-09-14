@@ -15,6 +15,7 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Tooltip from '@material-ui/core/Tooltip';
+import CancelIcon from '@material-ui/icons/Cancel';
 
 
 const getUnique = function(arr) {
@@ -47,8 +48,10 @@ const statusIcon = function(statusText) {
             return <WarningIcon style={{ color: '#808080'}}/>
         case 'Ledningsoplysninger udleveret':
             return  <CheckCircleIcon style={{ color: '#7FFF00'}} />
+        case 'Ikke leveret':
+            return <CancelIcon style={{ color: '#ff3700'}} />
         default:
-            return <WarningIcon style={{ color: '#FFA500'}}/>
+            return <WarningIcon style={{ color: '#FFA500'}} />
     }
 }
 

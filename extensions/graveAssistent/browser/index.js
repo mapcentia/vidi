@@ -246,7 +246,7 @@ module.exports = {
                     return new Promise(function (resolve, reject) {
                         neededfiles.forEach(key => {
                             if (zip.file(key) == null) {
-                                reject('Filen ' + key + ' mangler i ledningspakken. Prøv igen.')
+                                reject('Filen ' + key + ' mangler i ledningspakken. Prøv at hente pakken fra ler.dk igen.')
                             } 
                         })
                         resolve(zip)
@@ -341,8 +341,8 @@ module.exports = {
                         geomObj.type = 'MultiLineString'
                     } else if ('Surface' in obj) {
                         geomObj.type = "MultiPolygon"
-                        console.log(obj)
-                        console.log(flat)
+                        //console.log(obj)
+                        //console.log(flat)
                     } else if ('Polygon' in obj) {
                         geomObj.type = "MultiPolygon"
                     } else {
@@ -437,114 +437,123 @@ module.exports = {
                             data.push(Object.values(cons[i])[0])
                         }
                     }
-
-                    // Handle Graveforsp.
-                    try {
-                        foresp.forEach(function (item) {
-                            //console.log(item)
-
-                            //console.log(item.polygonProperty)
-                            let geom = handleGeometry(item.polygonProperty)
-                            //console.log(geom)
-
-                            delete item.polygonProperty
-                            delete item.graveart_anden
-                            delete item.graveart_id
-                            delete item.fid
-
-                            item.objectType = item.objectType.replace('lergml:', '')
-
-                            returnObj.forespNummer = item.orderNo
-
-                            item.forespNummer = returnObj.forespNummer
-                            delete item.orderNo
-
-                            returnObj.foresp = {
-                                type: 'Feature',
-                                properties: lc(item),
-                                geometry: geom
-                            };
-
-                        })
-                    } catch (error) {
-                        console.log(error)
-                        reject(error)
-                    }
-
-                    /* Enrich each data value with contant, package and owner information - overwrite duplicate information */
-                    try {
-                        data.forEach(function (item) {
-
-                            let obj = {}
-                            obj = Object.assign(obj, item)
-                            obj = Object.assign(obj, profil.find(o => o.svar_indberetningsNr === item.indberetningsNr))
-                            obj = Object.assign(obj, owner.find(o => o.svar_ledningsejer === item.ledningsejer))
-                            obj = Object.assign(obj, packageinfo.find(o => o.svar_indberetningsNr === item.indberetningsNr))
-
-                            // Remove specifics
-                            delete obj.svar_folderName
-                            delete obj.svar_forventetAfleveringstidpunkt
-                            delete obj.svar_objectType
-                            delete obj.svar_cvr
-                            delete obj.svar_ledningsejer
-                            delete obj.svar_indberetningsområde
-                            delete obj.indberetningsNr
-
-                            // clean values
-                            obj["objectType"] = obj["objectType"].replace('ler:', '')
-                            delete obj.attr;
-                            delete obj.svar_attr;
-
-                            obj.forespNummer = returnObj.forespNummer
-
-                            // etableringstidspunkt
-                            if (obj.hasOwnProperty('etableringstidspunkt')) {
-                                if (obj.etableringstidspunkt.hasOwnProperty('attr')) {
-                                    //can only be "before"
-                                    obj.etableringstidspunkt = 'Før ' + obj.etableringstidspunkt.value
-                                }
-                            }
-
-                            // postfix rest of attributes
-                            for (const [key, value] of Object.entries(obj)) {
-                                // skip geom
-                                if (key == 'geometri') {
-                                    continue
-                                }
-
-                                if (typeof value == 'object') {
-                                    //console.log(value);
-                                    obj[key] = value.value + ' ' + value.attr.uom
-                                    //console.log(obj[key])
-                                }
-                            }
-
-                            //Redo Geometry
-                            //console.log(obj.geometri)
-                            let geom = handleGeometry(obj.geometri);
-                            //console.log(geom)
-                            delete obj.geometri;
-
-                            //hack to geojson obj
-                            obj = {
-                                type: 'Feature',
-                                properties: lc(obj),
-                                geometry: geom
-                            }
-
-                            returnObj.data.push(lc(obj))
-                            //TODO: gather up
-                        })
-                    } catch (error) {
-                        console.log(error)
-                        reject(error)
-                    }
-
-                    console.log('Fandt elementer: '.concat(packageinfo.length, ' UtilityPackageInfo, ', owner.length, ' UtilityOwner, ', profil.length, ' Kontaktprofil, ', data.length, ' data'))
-                    //console.log(returnObj)
-
                     // use promise to return data in stream
                     return new Promise(function (resolve, reject) {
+                        // Handle Graveforsp.
+                        try {
+                            foresp.forEach(function (item) {
+                                //console.log(item)
+
+                                //console.log(item.polygonProperty)
+                                let geom = handleGeometry(item.polygonProperty)
+                                //console.log(geom)
+                                
+                                delete item.polygonProperty
+
+                                // TODO: implement gravearter
+                                delete item.graveart_andet
+                                delete item.graveart_anden
+                                delete item.graveart_id
+                                
+                                delete item.fid
+
+                                item.objectType = item.objectType.replace('lergml:', '')
+
+                                returnObj.forespNummer = item.orderNo
+
+                                item.forespNummer = returnObj.forespNummer
+                                delete item.orderNo
+
+                                returnObj.foresp = {
+                                    type: 'Feature',
+                                    properties: lc(item),
+                                    geometry: geom
+                                };
+
+                            })
+                        } catch (error) {
+                            console.log(error)
+                            reject(error)
+                        }
+
+                        /* Enrich each data value with contant, package and owner information - overwrite duplicate information */
+                        if (data.length > 1) {
+                            try {
+                                data.forEach(function (item) {
+    
+                                    let obj = {}
+                                    obj = Object.assign(obj, item)
+                                    obj = Object.assign(obj, profil.find(o => o.svar_indberetningsNr === item.indberetningsNr))
+                                    obj = Object.assign(obj, owner.find(o => o.svar_ledningsejer === item.ledningsejer))
+                                    obj = Object.assign(obj, packageinfo.find(o => o.svar_indberetningsNr === item.indberetningsNr))
+    
+                                    // Remove specifics
+                                    delete obj.svar_folderName
+                                    delete obj.svar_forventetAfleveringstidpunkt
+                                    delete obj.svar_objectType
+                                    delete obj.svar_cvr
+                                    delete obj.svar_ledningsejer
+                                    delete obj.svar_indberetningsområde
+                                    delete obj.indberetningsNr
+    
+                                    // clean values
+                                    obj["objectType"] = obj["objectType"].replace('ler:', '')
+                                    delete obj.attr;
+                                    delete obj.svar_attr;
+    
+                                    obj.forespNummer = returnObj.forespNummer
+    
+                                    // etableringstidspunkt
+                                    if (obj.hasOwnProperty('etableringstidspunkt')) {
+                                        if (obj.etableringstidspunkt.hasOwnProperty('attr')) {
+                                            //can only be "before"
+                                            obj.etableringstidspunkt = 'Før ' + obj.etableringstidspunkt.value
+                                        }
+                                    }
+    
+                                    // postfix rest of attributes
+                                    for (const [key, value] of Object.entries(obj)) {
+                                        // skip geom
+                                        if (key == 'geometri') {
+                                            continue
+                                        }
+    
+                                        if (typeof value == 'object') {
+                                            //console.log(value);
+                                            obj[key] = value.value + ' ' + value.attr.uom
+                                            //console.log(obj[key])
+                                        }
+                                    }
+    
+                                    //Redo Geometry
+                                    //console.log(obj.geometri)
+                                    let geom = handleGeometry(obj.geometri);
+                                    //console.log(geom)
+                                    delete obj.geometri;
+    
+                                    //hack to geojson obj
+                                    obj = {
+                                        type: 'Feature',
+                                        properties: lc(obj),
+                                        geometry: geom
+                                    }
+    
+                                    returnObj.data.push(lc(obj))
+                                    //TODO: gather up
+                                })
+                            } catch (error) {
+                                console.log(error)
+                                reject(error)
+                            }
+                        } else {
+                            reject('Ledningspakken har ikke noget indhold. Dette kan ske hvis ingen ledningsejere har svaret endnu')
+                        }
+
+
+                        console.log('Fandt elementer: '.concat(packageinfo.length, ' UtilityPackageInfo, ', owner.length, ' UtilityOwner, ', profil.length, ' Kontaktprofil, ', data.length, ' data'))
+                        //console.log(returnObj)
+
+
                         resolve(returnObj)
                     });
 
@@ -575,46 +584,51 @@ module.exports = {
 
                     let ejerList = statusObj.LedningsejerListe.Ledningsejer
 
+                    // Force ejerList into an array
+                    if (!(ejerList instanceof Array)) {
+                        ejerList = [ejerList]
+                    }
+
                     let ejere = []
-                    try {
-                        ejerList.forEach(l => {
-                            // Check if we have more IOs
-                            if (Array.isArray(l.Interesseområde)) {
-                                l.Interesseområde.forEach(i => {
+                    // use promise to return data in stream
+                    return new Promise(function (resolve, reject) {
+                        try {
+                            ejerList.forEach(l => {
+                                // Check if we have more IOs
+                                if (Array.isArray(l.Interesseområde)) {
+                                    l.Interesseområde.forEach(i => {
+                                        let obj = {
+                                            IndberetningsNr: i.IndberetningsNr,
+                                            Status: i.Status,
+                                            CVR: l.CVR,
+                                            Navn: l.Navn
+                                        }
+    
+                                        if (l.CVR == '') {
+                                            obj['CVR'] = 0
+                                        }
+                                        ejere.push(lc(obj))
+                                    })
+                                } else {
                                     let obj = {
-                                        IndberetningsNr: i.IndberetningsNr,
-                                        Status: i.Status,
+                                        IndberetningsNr: l.Interesseområde.IndberetningsNr,
+                                        Status: l.Interesseområde.Status,
                                         CVR: l.CVR,
                                         Navn: l.Navn
                                     }
-
+    
                                     if (l.CVR == '') {
-                                        obj['CVR'] = 0
-                                    }
+                                            obj['CVR'] = 0
+                                        }
+                                        
                                     ejere.push(lc(obj))
-                                })
-                            } else {
-                                let obj = {
-                                    IndberetningsNr: l.Interesseområde.IndberetningsNr,
-                                    Status: l.Interesseområde.Status,
-                                    CVR: l.CVR,
-                                    Navn: l.Navn
                                 }
-
-                                if (l.CVR == '') {
-                                        obj['CVR'] = 0
-                                    }
-                                    
-                                ejere.push(lc(obj))
-                            }
-                        })
-                    } catch (error) {
-                        console.log(error)
-                        reject(error)
-                    }
-                    // use promise to return data in stream
-                    return new Promise(function (resolve, reject) {
-                        resolve(ejere)
+                            })
+                            resolve(ejere)
+                        } catch (error) {
+                            console.log(error)
+                            reject(error)
+                        }
                     });
                 }
 
@@ -741,7 +755,10 @@ module.exports = {
                             isError: false,
                             errorList: [],
                             forespOptions: [],
-                            foresp: ''
+                            foresp: '',
+                            overskredetDato: false,
+                            harFarlig: false,
+                            harMegetFarlig: false
                         };
 
                         this.readContents = this.readContents.bind(this)
@@ -795,7 +812,23 @@ module.exports = {
                                 }))
                         })
                     }
+                    
+                    hasMForF(number){
+                        if (number > 0){
+                            return true
+                        } else {
+                            return false
+                        }
+                    }
 
+                    isTooOld(timestamp){
+                        if (new Date(timestamp) < new Date()) {
+                            return true
+                        } else {
+                            return false
+                        }
+
+                    }
 
                     /**
                      * Handle file selected
@@ -872,7 +905,7 @@ module.exports = {
                                 ])
                             }).then(function(zipclean) {
                                 var [zip] = zipclean
-                                console.log(zip)
+                                //console.log(zip)
                                 // Handle files
                                 return Promise.all([
                                     zip.files['LedningsejerStatusListe.xml'].async('string'),
@@ -900,20 +933,16 @@ module.exports = {
                                     pushForespoergsel(consolidated, statusKey)
                                 ]),consolidated.forespNummer]
                             }).then(function(files) {
-                                console.log(files)
+                                //console.log(files)
                                 _self.setState({
                                     isError: false,
                                     progress: 100,
-                                    progressText: 'Færdig!'
-                                })
-                                setTimeout(_self.setState({
+                                    progressText: 'Færdig!',
                                     loading: false,
                                     done: true,
                                     foresp: String(files[1])
-                                }, () => {
-                                    _self.getForespoergsel(String(files[1]))
-                                }), Math.floor(wait))
-
+                                })
+                                _self.getForespoergsel(String(files[1]))
                             })
                             .catch(e => {
                                 console.log(e)
@@ -1013,7 +1042,6 @@ module.exports = {
                                 forespNummer: forespNummer
                             })
                         }
-
                         // Do async job
                         fetch('/api/extension/getForespoergsel', opts)
                             .then(r => r.json())
@@ -1022,8 +1050,13 @@ module.exports = {
 
                                 // Zoom to location
                                 // this has to be better for sorting then status is incomming!
+                                if (d.length == 0) {
+                                    throw 'ass'
+                                }
+
+                                // TODO: implement warning if MF/F exists!
+
                                 let f = d[0].properties;
-                                //console.log(d)
                                 let bounds = [[f.ymin, f.xmin],[f.ymax, f.xmax]];
                                 cloud.get().map.fitBounds(bounds)
                                 
@@ -1034,7 +1067,10 @@ module.exports = {
 
                                 //SET SVAR_UPLOADTIME IN STATE
                                 _self.setState({
-                                    svarUploadTime: f.svar_uploadtime
+                                    svarUploadTime: f.svar_uploadtime,
+                                    overskredetDato: this.isTooOld(f.svar_gyldigtil),
+                                    harFarlig: this.hasMForF(f.l_f),
+                                    harMegetFarlig: this.hasMForF(f.l_mf)
                                 })
                             })
                             .catch(e => console.log(e))
@@ -1058,6 +1094,42 @@ module.exports = {
                             const margin = {
                                 margin: 10
                             }
+                            const bad = {
+                                color: 'white',
+                                padding: '2%',
+                                position: 'relative',
+                                display: 'block',
+                                textAlign: 'center',
+                                fontSize: '2rem',
+                                margin: '1rem',
+                                height: '50px',
+                                backgroundColor: '#eda72d'
+                            }
+                            const badder = {
+                                color: 'white',
+                                padding: '2%',
+                                position: 'relative',
+                                display: 'block',
+                                textAlign: 'center',
+                                fontSize: '2rem',
+                                margin: '1rem',
+                                height: '50px',
+                                backgroundColor: '#ed6d2d'
+                            }
+                            const baddest = {
+                                color: 'white',
+                                padding: '2%',
+                                position: 'relative',
+                                display: 'block',
+                                textAlign: 'center',
+                                fontSize: '2rem',
+                                margin: '1rem',
+                                height: '50px',
+                                backgroundColor: '#ed2d2d'
+                            }
+
+
+                    
 
                             if (s.authed) {
                                 // Logged in
@@ -1086,6 +1158,9 @@ module.exports = {
                                                     <LedningsDownload style = {margin} size = "large" color = "default" variant = "contained" endpoint = "/api/extension/downloadForespoergsel" forespnummer = {s.foresp}/>
                                                 </div >
                                                 <div id = "graveAssistent-feature-ledningsejerliste" >
+                                                    {s.overskredetDato && <div style={baddest}>Denne ledningspakke er ikke længere gyldig!</div>}
+                                                    {s.harFarlig && <div style={bad} >Indeholder farlige ledninger</div>}
+                                                    {s.harMegetFarlig && <div style={badder} >Indeholder meget farlige ledninger!</div>}
                                                     {s.ejerliste.length > 0 ? <LedningsEjerStatusTable statusliste = {s.ejerliste}/> : <LedningsProgress progress={50} text={'Henter'} iserror={false} errorlist={[]} />}
                                                 </div>
                                             </div>
