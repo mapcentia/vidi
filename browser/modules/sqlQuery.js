@@ -278,6 +278,7 @@ module.exports = {
                             <table class="table" data-detail-view="${dataDetailView}" data-detail-formatter="detailFormatter" data-show-toggle="${dataShowToggle}" data-show-export="${dataShowExport}" data-show-columns="${dataShowColumns}"></table>
                         </div>`);
 
+                        // TODO Set if featureInfoTableOnMap = true
                         if (typeof parsedMeta.select_function !== "undefined" && parsedMeta.select_function !== "") {
                             try {
                                 selectCallBack = Function('"use strict";return (' + parsedMeta.select_function + ')')();
@@ -305,7 +306,7 @@ module.exports = {
                             locale: window._vidiLocale.replace("_", "-"),
                             template: template,
                             pkey: pkey,
-                            renderInfoIn: parsedMeta.info_element_selector || null,
+                            renderInfoIn: parsedMeta.info_element_selector || null, // TODO Set if featureInfoTableOnMap = true
                             onSelect: selectCallBack,
                             key: keyWithoutGeom,
                             caller: _self,
@@ -359,6 +360,7 @@ module.exports = {
 
                         let showTableInPopup = typeof window.vidiConfig.showTableInPopUp === "boolean" && window.vidiConfig.showTableInPopUp === true;
 
+                        // TODO Set if featureInfoTableOnMap = true
                         if (typeof parsedMeta.info_function !== "undefined" && parsedMeta.info_function !== "") {
                             try {
                                 let func = Function('"use strict";return (' + parsedMeta.info_function + ')')();
