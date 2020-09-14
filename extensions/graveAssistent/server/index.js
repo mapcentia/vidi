@@ -324,15 +324,20 @@ router.post('/api/extension/getForespoergsel', function (req, response) {
     let chain = []
     let buffer = 50
     // Go ahead with the logic
-    let q = 'Select forespnummer,bemaerkning,svar_uploadtime,graveperiode_fra,graveperiode_til,\
-                ST_XMax(ST_Extent(ST_Transform(ST_Expand(the_geom,' + buffer + '),4326))) xmax,\
-                ST_XMin(ST_Extent(ST_Transform(ST_Expand(the_geom,' + buffer + '),4326))) xmin,\
-                ST_YMax(ST_Extent(ST_Transform(ST_Expand(the_geom,' + buffer + '),4326))) ymax,\
-                ST_YMin(ST_Extent(ST_Transform(ST_Expand(the_geom,' + buffer + '),4326))) ymin,\
-                the_geom, statuskey\
-                from ' + s.screenName + '.' + TABLEPREFIX + 'graveforespoergsel\
-                where forespnummer = ' + b.forespNummer + '\
-                GROUP BY forespnummer, bemaerkning,svar_uploadtime,graveperiode_fra,graveperiode_til, the_geom, statuskey'
+    let q = 'Select l.svar_gyldigtil, g.forespnummer,g.bemaerkning,g.svar_uploadtime,g.graveperiode_fra,g.graveperiode_til,\
+                    ST_XMax(ST_Extent(ST_Transform(ST_Expand(g.the_geom,' + buffer + '),4326))) xmax,\
+                    ST_XMin(ST_Extent(ST_Transform(ST_Expand(g.the_geom,' + buffer + '),4326))) xmin,\
+                    ST_YMax(ST_Extent(ST_Transform(ST_Expand(g.the_geom,' + buffer + '),4326))) ymax,\
+                    ST_YMin(ST_Extent(ST_Transform(ST_Expand(g.the_geom,' + buffer + '),4326))) ymin,\
+                    g.the_geom, g.statuskey,\
+                    (SELECT count(gid) from ' + s.screenName + '.' + TABLEPREFIX + 'lines where fareklasse = \'meget farlig\' and forespnummer = ' + b.forespNummer + ' ) l_mf,\
+                    (SELECT count(gid) from ' + s.screenName + '.' + TABLEPREFIX + 'lines where fareklasse = \'farlig\' and forespnummer = ' + b.forespNummer + ' ) l_f\
+                    from ' + s.screenName + '.' + TABLEPREFIX + 'graveforespoergsel g\
+                    join ' + s.screenName + '.' + TABLEPREFIX + 'lines l on g.forespnummer = l.forespnummer\
+                    where g.forespnummer = ' + b.forespNummer + '\
+                    GROUP BY g.forespnummer, l.svar_gyldigtil, g.bemaerkning,g.svar_uploadtime,g.graveperiode_fra,g.graveperiode_til, g.the_geom, g.statuskey'
+
+
 
     chain.push(SQLAPI(q, req))
 
