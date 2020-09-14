@@ -1086,6 +1086,7 @@ module.exports = {
                     render() {
                             const _self = this;
                             const s = _self.state
+                            //console.log(s)
 
                             const formControl = {
                                 minWidth: 120
@@ -1131,7 +1132,9 @@ module.exports = {
                     
 
                             if (s.authed) {
+                                // Logged in
                                 if (s.loading) {
+                                    // If Loading, show progress
                                     return (
                                         <div role = "tabpanel" >
                                             <div className = "form-group" >
@@ -1143,6 +1146,7 @@ module.exports = {
                                         </div>
                                     )
                                 } else if (s.done) {
+                                    // Either selected or uploaded.
                                     return ( 
                                         <div role = "tabpanel">
                                             <div className = "form-group">
@@ -1163,6 +1167,7 @@ module.exports = {
                                         </div>
                                     )
                                 } else {
+                                    // Just Browsing
                                     return (
                                         <div role = "tabpanel" >
                                             <div className = "form-group">
@@ -1186,6 +1191,7 @@ module.exports = {
                                         }
                                     }
                                     else {
+                                        // Not Logged in
                                         return (
                                             <div role = "tabpanel" >
                                                 <div className = "form-group" >
