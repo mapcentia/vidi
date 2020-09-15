@@ -39,7 +39,7 @@ class LedningsDownload extends React.Component {
                     format: 'dxf',
                     formatTitle: 'DXF',
                     formatDesc: 'DXF er et almindeligt CAD-format. ',
-                    formatDisable: true,
+                    formatDisable: false,
                     formatProduct: 'Man får en pakket zip-fil (opdeling pr. type eller ejer? eller ejer/type? - hvad med komponenter?)'
                 },
                 {

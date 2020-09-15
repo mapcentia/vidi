@@ -225,7 +225,7 @@ module.exports = {
                  * @param {*} obj 
                  */
                 var flattenObject = function (obj) {
-                    const flattened = {}
+                    let flattened = {}
 
                     Object.keys(obj).forEach((key) => {
                         if (typeof obj[key] === 'object' && obj[key] !== null) {
@@ -261,6 +261,8 @@ module.exports = {
                 var parsetoJSON = function (xmlData) {
                     var jsonObj, Err = {}
                     var parser = require('fast-xml-parser');
+                    var he = require('he');
+
                     var options = {
                         attributeNamePrefix: "",
                         attrNodeName: "attr", //default is 'false'
@@ -275,17 +277,31 @@ module.exports = {
                         cdataPositionChar: "\\c",
                         parseTrueNumberOnly: false,
                         arrayMode: false, //"strict"
-                        stopNodes: ["parse-me-as-string"]
+                        stopNodes: ["parse-me-as-string"],
+                        attrValueProcessor: (val, attrName) => he.decode(val, {isAttributeValue: true}),//default is a=>a
+                        tagValueProcessor : (val, tagName) => he.decode(val), //default is a=>a
                     };
 
+                    try {
+                        jsonObj = parser.parse(xmlData, options);
+                    } catch (error) {
+                        Err = error
+                    }
+                    
+                    // If you try to validate before parseing, like a good boy, you get TypeError in production!
+                    //if (parser.validate(xmlData) === true) { //optional (it'll return an object in case it's not valid)
+                    //        jsonObj = parser.parse(xmlData, options);
+                    //        //console.log(jsonObj)
+                    //    } else {
+                    //        Err = parser.validate(xmlData)
+                    //}
+
                     return new Promise(function (resolve, reject) {
-                        if (parser.validate(xmlData) === true) { //optional (it'll return an object in case it's not valid)
-                            jsonObj = parser.parse(xmlData, options);
+                        if (Err.length > 0){
+                            reject(Err)
+                        } else {
                             //console.log(jsonObj)
                             resolve(jsonObj)
-                        } else {
-                            err = parser.validate(xmlData)
-                            reject(err)
                         }
                     });
                 }
@@ -949,7 +965,7 @@ module.exports = {
                                 _self.setState({
                                     isError: true,
                                     progress: 100,
-                                    progressText: e
+                                    progressText: String(e)
                                 })
                             })
                             
@@ -1046,12 +1062,13 @@ module.exports = {
                         fetch('/api/extension/getForespoergsel', opts)
                             .then(r => r.json())
                             .then(d => {
-                                console.log(d);
+                                //console.log(d);
 
                                 // Zoom to location
                                 // this has to be better for sorting then status is incomming!
-                                if (d.length == 0) {
-                                    throw 'ass'
+                                if (d.length === 0) {
+                                    // Go back on nothing
+                                    _self.onBackClickHandler()
                                 }
 
                                 // TODO: implement warning if MF/F exists!
@@ -1139,7 +1156,7 @@ module.exports = {
                                         <div role = "tabpanel" >
                                             <div className = "form-group" >
                                                 <div>
-                                                    <LedningsProgress progress = {s.progress} text = {s.progressText} iserror = {s.isError} errorlist = {s.errorList} />
+                                                    <LedningsProgress progress = {s.progress} text = {s.progressText} iserror = {s.isError} errorlist = {[]} />
                                                     {s.isError === true ? <Button size = "large" color = "default" style = {margin} onClick = {_self.onBackClickHandler.bind(this)}>< ArrowBackIcon fontSize = "small" /> {__("backbutton")} </Button> : ''}
                                                 </div >
                                             </div>
@@ -1213,12 +1230,9 @@ module.exports = {
                             // Append to DOM
                             //==============
                             try {
-                                ReactDOM.render( <
-                                    GraveAssistent / > ,
-                                    document.getElementById(exId)
-                                );
+                                ReactDOM.render( <GraveAssistent/> , document.getElementById(exId));
                             } catch (e) {
-
+                                throw 'Failed to load DOM'
                             }
 
                         },
