@@ -215,6 +215,10 @@ router.post('/api/extension/downloadForespoergsel', function (req, response) {
                         // Run geolambda
                         translate.push(GEOLAMBDA(String(b.forespNummer), 'ESRI Shapefile', base64))
                         break;
+                    case 'dxf':
+                        // Run geolambda
+                        translate.push(GEOLAMBDA(String(b.forespNummer), 'DXF', base64))
+                        break;
 
                     default:
                         response.status(500).json({
