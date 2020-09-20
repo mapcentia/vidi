@@ -17,7 +17,8 @@ import {
     VIRTUAL_LAYERS_SCHEMA,
     SYSTEM_FIELD_PREFIX,
     LAYER,
-    ICONS
+    ICONS,
+    MAP_RESOLUTIONS
 } from './constants';
 
 import {OPEN_INFO_IN_ELEMENT} from './../sqlQuery'
@@ -106,7 +107,7 @@ var apiBridgeInstance = false;
  * Specifies if layer tree is ready
  * @todo Minimize number of global variables
  */
-let extensions = false, editor = false, qstore = [];
+let extensions = false, editor = false, qstore = [], reloadIntervals = [], vectorPopUp;
 
 /**
  * Getting ready for React future of the layerTree by implementing single source-of-truth
@@ -1413,6 +1414,7 @@ module.exports = {
         }
 
         let trackingLayerKey = (LAYER.VECTOR + ':' + layerKey);
+
         moduleState.vectorStores[trackingLayerKey] = new geocloud.sqlStore({
             map: cloud.get().map,
             parentFiltersHash,
@@ -1434,6 +1436,30 @@ module.exports = {
             sql,
             clustering: layerTreeUtils.getIfClustering(meta.parseLayerMeta(layerKey)),
             onLoad: (l) => {
+                let tableElement = meta.parseLayerMeta(layerKey)?.show_table_on_side;
+                let reloadInterval = meta.parseLayerMeta(layerKey)?.reload_interval;
+                if (tableElement) {
+                    $("#pane").css("left", "0");
+                    $("#pane").css("width", "70%");
+                    $("#map").css("width", "115%");
+                    $("#vector-side-table").remove();
+                    $("#pane").before(`<div id="vector-side-table" style="width: 30%; float: right; background-color: white"></div>`)
+                    _self.createTable(layerKey, true, "#vector-side-table", {
+                        showToggle: false,
+                        showExport: false,
+                        showColumns: false,
+                        cardView: true,
+                        height: null,
+                        tableBodyHeight: "100vh"
+                    });
+                }
+                if (reloadInterval && reloadInterval !== "") {
+                    clearInterval(reloadIntervals[layerKey]);
+                    reloadIntervals[layerKey] = setInterval(() => {
+                        _self.reloadLayer(LAYER.VECTOR + ":" + layerKey)
+
+                    }, parseInt(reloadInterval));
+                }
                 layers.decrementCountLoading(l.id);
                 backboneEvents.get().trigger("doneLoading:layers", l.id);
                 // We fire activeLayersChange event on load, so we are sure state is updated
@@ -1441,7 +1467,6 @@ module.exports = {
                 if (typeof onLoad[LAYER.VECTOR + ':' + layerKey] === "function") {
                     onLoad[LAYER.VECTOR + ':' + layerKey](l);
                 }
-
                 if (l === undefined || l.geoJSON === null) {
                     return
                 }
@@ -1485,7 +1510,11 @@ module.exports = {
                                 editingButtonsMarkup = markupGeneratorInstance.getEditingButtons();
                             }
 
-                            _self.displayAttributesPopup(feature, layer, e, editingButtonsMarkup, layerKey);
+                            _self.displayAttributesPopup([{
+                                feature: feature,
+                                layer: layer,
+                                layerKey: layerKey
+                            }], e, editingButtonsMarkup);
 
                             if (moduleState.editingIsEnabled && layerIsEditable) {
                                 $(`.js-vector-layer-popup`).find(".ge-start-edit").unbind("click.ge-start-edit").bind("click.ge-start-edit", function () {
@@ -1510,7 +1539,53 @@ module.exports = {
                 } else {
                     // If there is no handler for specific layer, then display attributes only
                     layer.on("click", function (e) {
-                        _self.displayAttributesPopup(feature, layer, e, '', layerKey);
+
+                        // Multi select disabled
+                        if (typeof window.vidiConfig.vectorMultiSelect === "undefined" || window.vidiConfig.vectorMultiSelect === false) {
+                            _self.displayAttributesPopup([{
+                                feature: feature,
+                                layer: layer,
+                                layerKey: layerKey
+                            }], e);
+                            return
+                        }
+
+                        // multi select enabled
+                        let clickBounds = L.latLngBounds(e.latlng, e.latlng);
+                        let distance = 10 * MAP_RESOLUTIONS[cloud.get().getZoom()];
+                        let intersectingFeatures = [];
+                        let intersectingLayers = [];
+                        let mapObj = cloud.get().map;
+                        for (let l in mapObj._layers) {
+                            let overlay = mapObj._layers[l];
+                            if (overlay._layers) {
+                                for (let f in overlay._layers) {
+                                    let featureForChecking = overlay._layers[f];
+                                    let bounds;
+                                    if (featureForChecking.getBounds) {
+                                        bounds = featureForChecking.getBounds();
+                                    } else if (featureForChecking._latlng) {
+                                        let circle = new L.circle(featureForChecking._latlng, {radius: distance});
+                                        // DIRTY HACK
+                                        circle.addTo(mapObj);
+                                        bounds = circle.getBounds();
+                                        circle.removeFrom(mapObj);
+                                    }
+                                    try {
+                                        if (bounds && clickBounds.intersects(bounds) && overlay.id) {
+                                            intersectingFeatures.push({
+                                                "feature": featureForChecking.feature,
+                                                "layer": overlay,
+                                                "layerKey": overlay.id.split(":")[1]
+                                            });
+                                        }
+                                    } catch (e) {
+                                        console.log(e);
+                                    }
+                                }
+                            }
+                        }
+                        _self.displayAttributesPopup(intersectingFeatures, e, '');
                     });
                 }
             },
@@ -1619,12 +1694,25 @@ module.exports = {
      *
      * @returns {void}
      */
-    createTable(layerKey, forceDataLoad = false, element = null) {
+    createTable(layerKey, forceDataLoad = false, element = null, conf) {
+        let prop, defaults = {
+            showToggle: true,
+            showExport: false,
+            showColumns: true,
+            cardView: false,
+            height: 250,
+            tableBodyHeight: null
+        };
+        if (conf) {
+            for (prop in conf) {
+                defaults[prop] = conf[prop];
+            }
+        }
         let layerWithData = layers.getMapLayers(false, LAYER.VECTOR + ':' + layerKey);
         if (layerWithData.length === 1) {
             let tableContainerId = element ? element : `#table_view-${layerKey.replace(".", "_")}`;
             if ($(tableContainerId + ` table`).length > 0) $(tableContainerId).empty();
-            $(tableContainerId).append(`<table class="table" data-show-toggle="true" data-show-export="false" data-show-columns="true"></table>`);
+            $(tableContainerId).append(`<table class="table" data-show-toggle="${defaults.showToggle}" data-show-export="${defaults.showExport}" data-show-columns="${defaults.showColumns}" data-card-view="${defaults.cardView}"></table>`);
 
             let metaDataKeys = meta.getMetaDataKeys();
             let template = (typeof metaDataKeys[layerKey].infowindow !== "undefined"
@@ -1653,7 +1741,8 @@ module.exports = {
                 responsive: false,
                 callCustomOnload: true,
                 assignFeatureEventListenersOnDataLoad: true,
-                height: 250,
+                height: defaults.height,
+                tableBodyHeight: defaults.tableBodyHeight,
                 locale: window._vidiLocale.replace("_", "-"),
                 template: template,
                 styleSelected
@@ -1666,70 +1755,105 @@ module.exports = {
         }
     },
 
-    displayAttributesPopup(feature, layer, event, additionalControls = ``, layerKey) {
+    displayAttributesPopup(features, event, additionalControls = ``) {
         event.originalEvent.clickedOnFeature = true;
-
-        let parsedMeta = _self.parseLayerMeta(meta.getMetaByKey(layerKey, false));
-
-        let properties = JSON.parse(JSON.stringify(feature.properties));
-        for (var key in properties) {
-            if (properties.hasOwnProperty(key)) {
-                if (key.indexOf(SYSTEM_FIELD_PREFIX) === 0) {
-                    delete properties[key];
-                }
-            }
-        }
-
-        var i = properties._vidi_content.fields.length;
-        while (i--) {
-            if (properties._vidi_content.fields[i].title.indexOf(SYSTEM_FIELD_PREFIX) === 0 || properties._vidi_content.fields[i].title === `_id`) {
-                properties._vidi_content.fields.splice(i, 1);
-            }
-        }
-
-        if (typeof parsedMeta.info_function !== "undefined" && parsedMeta.info_function !== "") {
-            try {
-                let func = Function('"use strict";return (' + parsedMeta.info_function + ')')();
-                func(feature, layer, layerKey, sqlQuery, moduleState.vectorStores[LAYER.VECTOR + ':' + layerKey], cloud.get().map);
-            } catch (e) {
-                console.info("Error in click function for: " + layerKey);
-            }
-        }
-
         let renderedText = null;
-        Handlebars.registerHelper('breaklines', function (text) {
-            text = Handlebars.Utils.escapeExpression(text);
-            text = text.replace(/(\r\n|\n|\r)/gm, '<br>');
-            return new Handlebars.SafeString(text);
-        });
-        try {
-            let tmpl = sqlQuery.getVectorTemplate(layerKey);
-            if (tmpl) {
-                // Convert Markdown in text fields
-                let metaDataKeys = meta.getMetaDataKeys();
-                for (const property in metaDataKeys[layerKey].fields) {
-                    if (metaDataKeys[layerKey].fields[property].type === "text") {
-                        properties[property] = marked(properties[property]);
+        let accordion = "";
+        let count = 0;
+
+        $(".vector-feature-info-panel").remove();
+        if (typeof vectorPopUp !== "undefined") {
+            vectorPopUp.closePopup();
+        }
+
+        features.forEach((f) => {
+            let layerKey = f.layerKey;
+            let feature = f.feature;
+            let layer = f.layer;
+
+            let parsedMeta = _self.parseLayerMeta(meta.getMetaByKey(layerKey, false));
+            let properties = JSON.parse(JSON.stringify(feature.properties));
+            for (var key in properties) {
+                if (properties.hasOwnProperty(key)) {
+                    if (key.indexOf(SYSTEM_FIELD_PREFIX) === 0) {
+                        delete properties[key];
                     }
                 }
-                properties.text1 = marked(properties.text1);
-                renderedText = Handlebars.compile(tmpl)(properties);
             }
-        } catch (e) {
-            console.info("Error in pop-up template for: " + layerKey);
-        }
 
-        if (typeof parsedMeta.info_element_selector !== "undefined" && parsedMeta.info_element_selector !== "" && renderedText !== null) {
-            $(parsedMeta.info_element_selector).html(renderedText)
-        } else {
-            let managePopup = L.popup({
-                autoPan: false,
-                minWidth: 160,
-                className: `js-vector-layer-popup custom-popup`
-            }).setLatLng(event.latlng).setContent(`<div>
-            ${additionalControls}
-            <div>${renderedText}</div>
-        </div>`).openOn(cloud.get().map);
+            let i = properties._vidi_content.fields.length;
+            while (i--) {
+                if (properties._vidi_content.fields[i].title.indexOf(SYSTEM_FIELD_PREFIX) === 0 || properties._vidi_content.fields[i].title === `_id`) {
+                    properties._vidi_content.fields.splice(i, 1);
+                }
+            }
+
+            if (typeof parsedMeta.info_function !== "undefined" && parsedMeta.info_function !== "") {
+                try {
+                    let func = Function('"use strict";return (' + parsedMeta.info_function + ')')();
+                    func(feature, layer, layerKey, sqlQuery, moduleState.vectorStores[LAYER.VECTOR + ':' + layerKey], cloud.get().map);
+                } catch (e) {
+                    console.info("Error in click function for: " + layerKey, e);
+                }
+            }
+
+            Handlebars.registerHelper('breaklines', function (text) {
+                text = Handlebars.Utils.escapeExpression(text);
+                text = text.replace(/(\r\n|\n|\r)/gm, '<br>');
+                return new Handlebars.SafeString(text);
+            });
+            try {
+                let tmpl = sqlQuery.getVectorTemplate(layerKey);
+                if (tmpl) {
+                    // Convert Markdown in text fields
+                    let metaDataKeys = meta.getMetaDataKeys();
+                    for (const property in metaDataKeys[layerKey].fields) {
+                        if (metaDataKeys[layerKey].fields[property].type === "text") {
+                            properties[property] = marked(properties[property]);
+                        }
+                    }
+                    //properties.text1 = marked(properties.text1);
+                    renderedText = Handlebars.compile(tmpl)(properties);
+                    let randText = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                        let r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                        return v.toString(16);
+                    });
+                    if (typeof parsedMeta.disable_vector_feature_info === "undefined" || parsedMeta.disable_vector_feature_info === false) {
+                        count++;
+                        accordion += `<div class="panel panel-default vector-feature-info-panel" id="vector-feature-info-panel-${randText}" style="box-shadow: none;border-radius: 0; margin-bottom: 0">
+                                        <div class="panel-heading" role="tab" style="padding: 8px 0px 8px 15px;border-bottom: 1px white solid">
+                                            <h4 class="panel-title">
+                                                <a style="display: block; color: black" class="accordion-toggle js-toggle-feature-panel" data-toggle="collapse" data-parent="#layers" href="#collapse${randText}">${layerKey}</a>
+                                            </h4>
+                                        </div>
+                                        <ul class="list-group" id="group-${randText}" role="tabpanel"><div id="collapse${randText}" class="accordion-body collapse" style="padding: 3px 8px 3px 8px">${renderedText}</div></ul>
+                                    </div>`;
+                    } else {
+                        console.log(`Feature info disabled for ${layerKey}`)
+                    }
+                }
+            } catch (e) {
+                console.info("Error in pop-up template for: " + layerKey);
+            }
+
+            if (count > 0) {
+                if (typeof parsedMeta.info_element_selector !== "undefined" && parsedMeta.info_element_selector !== "" && renderedText !== null) {
+                    $(parsedMeta.info_element_selector).html(renderedText)
+                } else {
+                    vectorPopUp = L.popup({
+                        autoPan: true,
+                        minWidth: 300,
+                        className: `js-vector-layer-popup custom-popup`
+                    }).setLatLng(event.latlng).setContent(`<div>
+                                                                ${additionalControls}
+                                                                <div style="margin-right: 5px; margin-left: 2px">${accordion}</div>
+                                                            </div>`).openOn(cloud.get().map);
+
+                }
+            }
+        })
+        if (count === 1) {
+            $(".js-toggle-feature-panel:first").trigger('click');
         }
     },
 

@@ -77,6 +77,8 @@ module.exports = {
                 window.vidiConfig.dontUseAdvancedBaseLayerSwitcher = data.dontUseAdvancedBaseLayerSwitcher ? data.dontUseAdvancedBaseLayerSwitcher : window.vidiConfig.dontUseAdvancedBaseLayerSwitcher;
                 window.vidiConfig.wmsUriReplace = data.wmsUriReplace ? data.wmsUriReplace : window.vidiConfig.wmsUriReplace;
                 window.vidiConfig.infoClickCursorStyle = data.infoClickCursorStyle ? data.infoClickCursorStyle : window.vidiConfig.infoClickCursorStyle;
+                window.vidiConfig.vectorMultiSelect = data.vectorMultiSelect ? data.vectorMultiSelect : window.vidiConfig.vectorMultiSelect;
+                window.vidiConfig.featureInfoTableOnMap = data.featureInfoTableOnMap ? data.featureInfoTableOnMap : window.vidiConfig.featureInfoTableOnMap;
             }).fail(function () {
                 console.log("Could not load: " + configFile);
                 if (window.vidiConfig.defaultConfig && (window.vidiConfig.defaultConfig !== configFile)) {
