@@ -85,7 +85,7 @@
     "require-globify": "^1.4.0",
     "serialijse": "0.0.17",
     "showdown": "^1.5.1",
-    "snackbarjs": "^1.1.0",
+    "snackbarjs": "github:FezVrasta/snackbarjs",
     "snapshot": "0.0.0",
     "socket.io": "^1.7.1",
     "socket.io-client": "^1.7.1",
