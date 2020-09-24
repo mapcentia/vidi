@@ -20,6 +20,7 @@ class AutocompleteControl extends React.Component {
             options: [],
             currentField: null
         }
+
     }
 
     handleOnSelect(value) {
@@ -27,7 +28,7 @@ class AutocompleteControl extends React.Component {
         this.props.onChange(value)
     }
 
-    render() {
+    componentDidMount() {
         let _self = this;
         if (this.state.currentField !== this.props.field) {
             let field = this.props.field;
@@ -51,7 +52,9 @@ class AutocompleteControl extends React.Component {
                 }
             });
         }
+    }
 
+    render() {
         return (
             <ReactAutocomplete
                 id={this.props.id}
@@ -71,8 +74,10 @@ class AutocompleteControl extends React.Component {
                 renderItem={(item, highlighted) =>
                     <div key={item} style={{backgroundColor: highlighted ? '#eee' : 'transparent'}}>{item}</div>
                 }
-                value={this.state.value}
-                onChange={e => this.setState({value: e.target.value})}
+                value={this.props.value}
+                onChange={(event) => {
+                    this.props.onChange(event.target.value)
+                }}
                 onSelect={value => this.handleOnSelect(value)}
                 renderMenu={children => (
                     <div style={{

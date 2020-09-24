@@ -79,7 +79,7 @@ class MarkupGenerator {
         </li>`);
     }
 
-    getLayerControlRecord(layerKeyWithGeom, layerKey, layerIsActive, layer, layerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo, isSubLayer, moduleState, disableCheckBox, parentLayerKeys) {
+    getLayerControlRecord(layerKeyWithGeom, layerKey, layerIsActive, layer, layerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo, isSubLayer, moduleState, disableCheckBox, parentLayerKeys, childLayerKeys) {
         let queueFailedButtonStyle = regularButtonStyle + ` background-color: orange; padding-left: 4px; padding-right: 4px;`;
         let queueRejectedByServerButtonStyle = regularButtonStyle + ` background-color: red; padding-left: 4px; padding-right: 4px;`;
         let tooltip = layer.f_table_abstract || ``;
@@ -108,11 +108,14 @@ class MarkupGenerator {
                         <div style="display: inline-block;">
                             <span>
                                 ${text}${lockedLayer}
-                                <span class="js-tiles-contain-data" style="visibility: ${moduleState.tileContentCache[layerKey] ? "inline" : "hidden"};"><i class="fa fa-eye" style="color: green;"></i></span>
+                                <span class="js-tiles-contain-data" style="visibility: ${moduleState.tileContentCache[layerKey] ? "inline" : "hidden"};" data-toggle="tooltip" data-placement="right"
+                                    title="${__("Layer is visible")}"><i class="fa fa-eye info-icon" style="color: green;"></i></span>
                                 <span class="js-layer-is-disabled" style="visibility: ${disableCheckBox ? "inline" : "hidden"};" data-toggle="tooltip" data-placement="right"
                                     title="${__("Locked")}"><span class="material-icons" style="font-size: 13px; color: red">lock</span></span>
-                                <span class="js-layer-has-parents" style="visibility: ${parentLayerKeys.length > 0 ? "inline" : "hidden"};" data-toggle="tooltip" data-placement="right"
-                                    title="${__("Parents: ")}${parentLayerKeys.length > 0 ? parentLayerKeys.join(", ") : ""}"><span class="material-icons" style="font-size: 13px">filter_list</span></span>
+                                <span class="js-layer-has-parents info-icon" style="visibility: ${parentLayerKeys.length > 0 ? "inline" : "hidden"};" data-toggle="tooltip" data-placement="right"
+                                    title="${__("Parents")}: ${parentLayerKeys.length > 0 ? parentLayerKeys.join(", ") : ""}"><span class="material-icons" style="font-size: 13px">arrow_upward</span></span>
+                                <span class="js-layer-has-children info-icon" style="visibility: ${childLayerKeys.length > 0 ? "inline" : "hidden"};" data-toggle="tooltip" data-placement="right"
+                                    title="${__("Children")}: ${childLayerKeys.length > 0 ? childLayerKeys.join(", ") : ""}"><span class="material-icons" style="font-size: 13px">arrow_downward</span></span>
                                 <span style="display: none" class="_gc2_layer_sort_id">(${layer.sort_id})</span>
                             </span>
                         </div>

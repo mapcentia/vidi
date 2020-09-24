@@ -201,7 +201,7 @@ module.exports = module.exports = {
                 }
                 // Enable the corresponding UTF grid layer
                 // TODO check "mouseover" properties in fieldConf. No need to switch on if mouse over is not wanted
-                _self.enableUTFGrid(gc2Id);
+                //_self.enableUTFGrid(gc2Id);
                 resolve();
             }).catch(err => {
                 if (err) {

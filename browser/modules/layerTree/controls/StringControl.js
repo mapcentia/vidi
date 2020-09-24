@@ -26,7 +26,9 @@ class StringControl extends React.Component {
                 type="text"
                 placeholder="abc123"
                 value={this.props.value}
-                onChange={(event) => { this.props.onChange(event.target.value) }}/>);
+                onChange={(event) => {
+                    this.props.onChange(event.target.value)
+                }}/>);
         }
     }
 }

@@ -147,7 +147,8 @@ module.exports = {
                     east: 0,
                     north: 0,
                     south: 0,
-                    zone: 0
+                    zone: 0,
+                    panTo: ""
                 };
 
                 this.center = {
@@ -171,14 +172,16 @@ module.exports = {
 
                 this.coordinatesSystem = "dd";
 
+                this.handlePanToCoordsChange = this.handlePanToCoordsChange.bind(this);
+                this.handlePanToCoordsSubmit = this.handlePanToCoordsSubmit.bind(this);
             }
 
             componentDidMount() {
-                var me = this;
+                let me = this;
 
                 cloud.get().map.on('mousemove', function (e) {
 
-                    var z = utmZone.getZone(e.latlng.lat, e.latlng.lng), crss = {
+                    let z = utmZone.getZone(e.latlng.lat, e.latlng.lng), crss = {
                         "dest": "+proj=utm +zone=" + z + " +ellps=WGS84 +datum=WGS84 +units=m +no_defs",
                         "source": "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
                     }, coords = proj4(crss.source, crss.dest, [e.latlng.lng, e.latlng.lat]);
@@ -192,9 +195,7 @@ module.exports = {
                 });
 
                 cloud.get().map.on("move", function () {
-
                     me.setExtent();
-
                 });
 
                 this.setExtent = function () {
@@ -224,9 +225,85 @@ module.exports = {
             }
 
             convertDDToDMS(D, lng) {
-                return [D < 0 ? lng ? 'W ' : 'S ' : lng ? 'E ' : 'N ', 0 | (D < 0 ? D = -D : D), 'd ', 0 | (D < 0 ? D = -D : D) % 1 * 60, "' ", 0 | D * 60 % 1 * 60, '"'].join('');
+                return [0 | (D < 0 ? D = -D : D), '° ', 0 | (D < 0 ? D = -D : D) % 1 * 60, "' ", 0 | D * 60 % 1 * 60, '"', D < 0 ? lng ? ' W' : ' S' : lng ? ' E' : ' N'].join('');
             }
 
+            convertDMSToDD(input) {
+                if (input.indexOf('N') === -1 && input.indexOf('S') === -1 &&
+                    input.indexOf('W') === -1 && input.indexOf('E') === -1) {
+                    return input.split(',');
+                }
+                let parts = input.split(/[°'"]+/).join(' ').split(/[^\w\S]+/);
+                let directions = [];
+                let coords = [];
+                let dd = 0;
+                let pow = 0;
+                for (let i in parts) {
+                    // we end on a direction
+                    if (isNaN(parts[i])) {
+                        let _float = parseFloat(parts[i]);
+                        let direction = parts[i];
+                        if (!isNaN(_float)) {
+                            dd += (_float / Math.pow(60, pow++));
+                            direction = parts[i].replace(_float, '');
+                        }
+                        direction = direction[0];
+                        if (direction === 'S' || direction === 'W') {
+                            dd *= -1;
+                        }
+                        directions[directions.length] = direction;
+                        coords[coords.length] = dd;
+                        dd = pow = 0;
+                    } else {
+                        dd += (parseFloat(parts[i]) / Math.pow(60, pow++));
+                    }
+                }
+                if (directions[0] === 'W' || directions[0] === 'E') {
+                    let tmp = coords[0];
+                    coords[0] = coords[1];
+                    coords[1] = tmp;
+                }
+                return coords;
+            }
+
+            handlePanToCoordsChange(event) {
+                this.setState({panTo: event.target.value});
+            }
+
+            handlePanToCoordsSubmit(event) {
+                event.preventDefault();
+                let coords;
+                switch (this.coordinatesSystem) {
+                    case "dms":
+                        coords = this.convertDMSToDD(this.state.panTo);
+                        break;
+                    case "dd":
+                        if (this.state.panTo.split(",").length === 2) {
+                            coords = this.state.panTo.split(",");
+                        } else if (this.state.panTo.split(" ").length === 2) {
+                            coords = this.state.panTo.split(" ");
+                        }
+                        break;
+                    case "utm":
+                        let z = utmZone.getZone(cloud.get().map.getCenter().lat, cloud.get().map.getCenter().lng);
+                        let crss = {
+                            "source": "+proj=utm +zone=" + z + " +ellps=WGS84 +datum=WGS84 +units=m +no_defs",
+                            "dest": "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
+                        };
+                        try {
+                            coords = proj4(crss.source, crss.dest, this.state.panTo.split(" ").map(Number)).reverse();
+                        } catch (e) {
+                            alert(utils.__("Couldn't pan to coords", dict));
+                        }
+                        break;
+                }
+                try {
+                    cloud.get().map.panTo(coords);
+                } catch (e) {
+                    alert(utils.__("Couldn't pan to coords", dict));
+                }
+
+            }
 
             render() {
                 return (
@@ -235,7 +312,8 @@ module.exports = {
                         <h3>{utils.__("Choose coordinate system", dict)}</h3>
                         <div className="radio">
                             <label>
-                                <input onClick={this.onCoordinatesSystemClick} type="radio" id="coordinates-system-dd"
+                                <input onClick={this.onCoordinatesSystemClick} type="radio"
+                                       id="coordinates-system-dd"
                                        name="coordinates-system" value="dd" defaultChecked="1"/>
                                 {utils.__("Latitude/Longitude, decimal degrees", dict)}
                             </label>
@@ -243,7 +321,8 @@ module.exports = {
 
                         <div className="radio">
                             <label>
-                                <input onClick={this.onCoordinatesSystemClick} type="radio" id="coordinates-system-dms"
+                                <input onClick={this.onCoordinatesSystemClick} type="radio"
+                                       id="coordinates-system-dms"
                                        name="coordinates-system" value="dms"/>
                                 {utils.__("Latitude/Longitude, degrees, minutes and seconds", dict)}
                             </label>
@@ -251,7 +330,8 @@ module.exports = {
 
                         <div className="radio">
                             <label>
-                                <input onClick={this.onCoordinatesSystemClick} type="radio" id="coordinates-system-utm"
+                                <input onClick={this.onCoordinatesSystemClick} type="radio"
+                                       id="coordinates-system-utm"
                                        name="coordinates-system" value="utm"/>
                                 UTM
                             </label>
@@ -307,17 +387,31 @@ module.exports = {
                             </div>
 
                         </div>
+                        <div>
+                            <h3>{utils.__("Pan to", dict)}</h3>
+                            <form onSubmit={this.handlePanToCoordsSubmit}>
+                                <div className="form-group">
+                                    <input type="text" className="form-control" value={this.state.panTo}
+                                           onChange={this.handlePanToCoordsChange}
+                                           placeholder={utils.__("Coordinate", dict)}/>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 );
             }
         }
 
         try {
-            ReactDOM.render(
-                <Coordinates/>,
-                document.getElementById(exId)
-            );
-        } catch (e) {
+            ReactDOM
+                .render(
+                    <Coordinates/>,
+                    document
+                        .getElementById(exId)
+                )
+            ;
+        } catch
+            (e) {
 
         }
 

@@ -432,6 +432,14 @@ module.exports = {
                     if (geoJson.properties[key] === undefined) {
                         geoJson.properties[key] = null;
                     }
+                    if ((fields[key].type === "bytea" ||
+                        fields[key].type.startsWith("time") ||
+                        fields[key].type.startsWith("time") ||
+                        fields[key].type.startsWith("character") ||
+                        fields[key].type.startsWith("text")) &&
+                        geoJson.properties[key] !== null) {
+                        geoJson.properties[key] = encodeURIComponent(geoJson.properties[key]);
+                    }
                 });
 
                 featureCollection = {
@@ -736,6 +744,7 @@ module.exports = {
                         if (eventFeatureCopy.properties[key]) {
                             eventFeatureCopy.properties[key] = parseFloat(eventFeatureCopy.properties[key]);
                         }
+                        break
                     default:
                         break;
                 }
@@ -775,6 +784,14 @@ module.exports = {
                         // Set undefined values back to NULL
                         if (GeoJSON.properties[key] === undefined) {
                             GeoJSON.properties[key] = null;
+                        }
+                        if ((fields[key].type === "bytea" ||
+                            fields[key].type.startsWith("time") ||
+                            fields[key].type.startsWith("time") ||
+                            fields[key].type.startsWith("character") ||
+                            fields[key].type.startsWith("text")) &&
+                            GeoJSON.properties[key] !== null) {
+                            GeoJSON.properties[key] = encodeURIComponent(GeoJSON.properties[key]);
                         }
                     } else {
                         // Remove system fields, which should not be updated by the user

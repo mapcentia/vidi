@@ -615,7 +615,7 @@ inline .leaflet-control-print {
 }
 .custom-popup .leaflet-popup-content {
   margin: 7px 20px 7px 12px !important;
-  max-height: 250px;
+  max-height: 350px;
   overflow: auto;
 }
 .custom-popup .leaflet-popup-content-wrapper {
@@ -636,7 +636,7 @@ inline .leaflet-control-print {
   margin-bottom: 0;
 }
 .custom-popup .leaflet-popup-content-wrapper a {
-  color: rgba(0, 255, 255, 0.5) !important;
+  color: rgba(0, 255, 255, 0.5);
 }
 .custom-popup .leaflet-popup-tip-container {
   width: 30px !important;
@@ -1560,9 +1560,6 @@ td.rdtYear:hover {
 #place-search {
   top: 6px;
 }
-#alternative-info-container {
-  height: calc(100vh + 1px);
-}
 .print-div-icon {
   font-size: 55px;
   font-weight: bold;
@@ -1580,4 +1577,7 @@ td.rdtYear:hover {
 }
 .table.table-hover tr {
   cursor: pointer;
+}
+.info-icon {
+  cursor: help;
 }

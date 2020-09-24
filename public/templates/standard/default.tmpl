@@ -150,6 +150,7 @@
 
             <div id="module-container" class="slide-right">
                 <div class="modal-header">
+                    <label style="margin-bottom: 0px; margin-top: 4px;" class="js-module-title"></label>
                     <button type="button" class="close" aria-hidden="true">×</button>
                     <h2 class="modal-title"></h2>
                 </div>
@@ -185,13 +186,7 @@
                                         <div id="buffer-slider" class="slider shor"></div>
                                     </div>
                                 </div>
-                                <div id="info-box">
-                                    <div id="modal-info-body">
-                                        <ul class="nav nav-tabs" id="info-tab"></ul>
-                                        <div class="tab-content" id="info-pane"></div>
-                                    </div>
-                                    <div id="alternative-info-container" class="alternative-info-container-right"></div>
-                                </div>
+                                <div id="info-box"></div>
                                 <table id="dtable" data-show-toggle="true"></table>
 
                             </div>
@@ -554,7 +549,7 @@
                     <!-- Nav tabs -->
                     <ul class="" role="tablist" id="main-tabs">
                         <li role="presentation">
-                            <a href="#search-content" aria-controls="search-content" role="tab" data-toggle="tab">
+                            <a href="#search-content" aria-controls="search-content" data-module-title="{{Search}}" role="tab" data-toggle="tab">
                                 <i data-container="body" data-toggle="tooltip" data-placement="left"
                                     title="{{Search}}" class="material-icons">search</i>
                                 <span class="module-title">{{Search}}</span>
@@ -562,7 +557,7 @@
                         </li>
 
                         <li role="presentation">
-                            <a data-module-id="infoClick" href="#info-content" aria-controls="info-content" role="tab" data-toggle="tab">
+                            <a data-module-id="infoClick" href="#info-content" data-module-title="{{Info}}"  aria-controls="info-content" role="tab" data-toggle="tab">
                                 <i data-container="body" data-toggle="tooltip" data-placement="left"
                                     title="{{Info}}" class="material-icons">info</i>
                                 <span class="module-title">{{Info}}</span>
@@ -570,7 +565,7 @@
                         </li>
 
                         <li role="presentation">
-                            <a data-module-id="layerTree" href="#layer-content" aria-controls="" role="tab" data-toggle="tab">
+                            <a data-module-id="layerTree" href="#layer-content" data-module-title="{{Layers}}" aria-controls="" role="tab" data-toggle="tab">
                                 <i data-container="body" data-toggle="tooltip" data-placement="left"
                                     title="{{Layers}}" class="material-icons">layers</i>
                                 <span class="module-title">{{Layers}}</span>
@@ -578,7 +573,7 @@
                         </li>
 
                         <li role="presentation">
-                            <a data-module-id="baseLayer" href="#baselayer-content" aria-controls="" role="tab" data-toggle="tab">
+                            <a data-module-id="baseLayer" href="#baselayer-content" data-module-title="{{Baselayers}}"  aria-controls="" role="tab" data-toggle="tab">
                                 <i data-container="body" data-toggle="tooltip" data-placement="left"
                                     title="{{Baselayers}}" class="material-icons">map</i>
                                 <span class="module-title">{{Baselayers}}</span>
@@ -586,7 +581,7 @@
                         </li>
 
                         <li role="presentation">
-                            <a data-module-id="legend" href="#legend-content" aria-controls="" role="tab" data-toggle="tab">
+                            <a data-module-id="legend" href="#legend-content" aria-controls="" data-module-title="{{Legend}}" role="tab" data-toggle="tab">
                                 <i data-container="body" data-toggle="tooltip" data-placement="left"
                                     title="{{Legend}}" class="material-icons">format_color_text</i>
                                 <span class="module-title">{{Legend}}</span>
@@ -594,7 +589,7 @@
                         </li>
 
                         <li role="presentation">
-                            <a data-module-id="draw" href="#draw-content" aria-controls="" role="tab" data-toggle="tab">
+                            <a data-module-id="draw" href="#draw-content" aria-controls="" data-module-title="{{Draw}}" role="tab" data-toggle="tab">
                                 <i data-container="body" data-toggle="tooltip" data-placement="left"
                                     title="{{Draw}}" class="material-icons">create</i>
                                 <span class="module-title">{{Draw}}</span>
@@ -602,7 +597,7 @@
                         </li>
 
                         <li role="presentation">
-                            <a data-module-id="stateSnapshots" href="#state-snapshots-content" aria-controls="" role="tab" data-toggle="tab">
+                            <a data-module-id="stateSnapshots" href="#state-snapshots-content" aria-controls="" data-module-title="{{State snapshots}}" role="tab" data-toggle="tab">
                                 <i data-container="body" data-toggle="tooltip" data-placement="left"
                                     title="{{State snapshots}}" class="material-icons">folder</i>
                                 <span class="module-title">{{State snapshots}}</span>
@@ -610,7 +605,7 @@
                         </li>
 
                         <li role="presentation">
-                            <a data-module-id="print" href="#print-content" aria-controls="" role="tab" data-toggle="tab">
+                            <a data-module-id="print" href="#print-content" aria-controls="" data-module-title="{{Print}}" role="tab" data-toggle="tab">
                                 <i data-container="body" data-toggle="tooltip" data-placement="left"
                                     title="{{Print}}" class="material-icons">print</i>
                                 <span class="module-title">{{Print}}</span>

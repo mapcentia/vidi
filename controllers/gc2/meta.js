@@ -6,14 +6,16 @@
 
 var express = require('express');
 var router = express.Router();
-var config = require('../../config/config.js').gc2;
+var config = require('../../config/config.js');
 var request = require('request');
 var utf8 = require('utf8');
 
 router.get('/api/meta/:db/:schema', function (req, response) {
     var db = req.params.db, schema = req.params.schema, url, options;
 
-    url = config.host + "/api/v1/meta/" + db + "/" + utf8.encode(schema);
+    var addedSchemata = typeof config.addedSchemata !== "undefined" ? "," + config.addedSchemata : "";
+
+    url = config.gc2.host + "/api/v1/meta/" + db + "/" + utf8.encode(schema) + addedSchemata;
     options = {
         uri: url,
         encoding: 'utf8',
