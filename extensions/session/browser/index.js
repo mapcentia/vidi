@@ -58,29 +58,6 @@ module.exports = {
         // sign in if autoLogin is set to true
         //===================
 
-        $.ajax({
-            dataType: 'json',
-            url: "/api/session/status",
-            type: "GET",
-            success: function (data) {
-                if (data.status.authenticated) {
-                    backboneEvents.get().trigger(`refresh:auth`);
-                    backboneEvents.get().trigger(`session:authChange`, true);
-                    $(".gc2-session-lock").show();
-                    $(".gc2-session-unlock").hide();
-                    userName = data.status.screen_name;
-                } else {
-                    backboneEvents.get().trigger(`session:authChange`, false);
-                    $(".gc2-session-lock").hide();
-                    $(".gc2-session-unlock").show();
-                    userName = null;
-                }
-            },
-            error: function (error) {
-                console.error(error.responseJSON);
-            }
-        });
-
         class Status extends React.Component {
             render() {
                 return <div className={"alert alert-dismissible " + this.props.alertClass} role="alert">
@@ -130,8 +107,8 @@ module.exports = {
                 event.preventDefault();
                 if (!me.state.auth) {
                     let dataToAuthorizeWith = {
-                        "user":  me.state.sessionScreenName,
-                        "password":  me.state.sessionPassword,
+                        "user": me.state.sessionScreenName,
+                        "password": me.state.sessionPassword,
                         "schema": "public"
                     };
 
@@ -205,6 +182,10 @@ module.exports = {
                             me.setState({auth: true});
                             $(".gc2-session-lock").show();
                             $(".gc2-session-unlock").hide();
+                            // True if auto login happens. When reload meta
+                            if (data?.screen_name && data?.status?.authenticated) {
+                                backboneEvents.get().trigger("refresh:meta");
+                            }
                         } else {
                             backboneEvents.get().trigger(`session:authChange`, false);
 
@@ -275,7 +256,7 @@ module.exports = {
             return sessionInstance.authenticated();
         } else {
             return false;
-        }  
+        }
     },
 
     update: function () {
