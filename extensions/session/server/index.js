@@ -26,7 +26,6 @@ if (typeof config.autoLoginPossible !== "undefined" && config.autoLoginPossible 
  *
  * @type {module.exports.print|{templates, scales}}
  */
-var config = require('../../../config/config.js');
 
 var start = function (dataToAuthorizeWith, req, response, status) {
     var options = {
