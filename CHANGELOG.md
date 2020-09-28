@@ -99,6 +99,7 @@ and this project adheres to [CalVer](https://calver.org/).
 ```
 - The `Enable filtering` property of the Structure tab in GC2 is now called `Disable filtering` and will if check omit the field in Vidi filtering. The property was not used before.
 - Babel bumped to version 7
+- Local GC2 config files are now fetched through the server back-end.
 
 ### Fixed
 - Using `indexOf` instead of `includes`, because the latter is not transpiled in Babel. It's an Internet Explorer issue.
