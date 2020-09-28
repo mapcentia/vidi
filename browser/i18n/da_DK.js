@@ -224,6 +224,7 @@ module.exports = {
         "Layer is visible": "Laget er synligt",
         "Parents": "Forældre",
         "Children": "Børn",
+        "Back": "Tilbage",
 
         // Base layers
         "Side-by-side mode": "Dobbelt baggrundskort",

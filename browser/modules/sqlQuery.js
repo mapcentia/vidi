@@ -56,6 +56,8 @@ let defaultSelectedStyle = {
     opacity: 0.2
 };
 
+let backArrowIsAdded = false;
+
 
 /**
  * A default template for GC2, with a loop
@@ -140,7 +142,7 @@ module.exports = {
     init: function (qstore, wkt, proj, callBack, num, infoClickPoint, whereClause, includes, zoomToResult, onPopupCloseButtonClick, selectCallBack = () => {
     }, prefix = "", simple = false, infoText = null) {
         let layers, count = {index: 0, hits: 0}, hit = false, distance, editor = false,
-            metaDataKeys = meta.getMetaDataKeys();
+            metaDataKeys = meta.getMetaDataKeys(), firstLoop = true;
         elementPrefix = prefix;
 
         if (`editor` in extensions) {
@@ -198,6 +200,18 @@ module.exports = {
                 ? $.parseJSON(metaDataKeys[value].fieldconf) : null;
             let parsedMeta = layerTree.parseLayerMeta(metaDataKeys[value]);
 
+            let featureInfoTableOnMap = (typeof window.vidiConfig.featureInfoTableOnMap !== "undefined" && window.vidiConfig.featureInfoTableOnMap === true && simple);
+
+            // Back arrow to template if featureInfoTableOnMap is true
+            if (featureInfoTableOnMap && !backArrowIsAdded) {
+                backArrowIsAdded = true;
+                defaultTemplate = `
+                                <div style='cursor: pointer;' onclick='javascript:$("#modal-info-body").show();$("#alternative-info-container").hide();$("#modal-info-body").css("visibility", "visible");$("#click-for-info-slide .modal-title").empty();'>
+                                    <span class='material-icons'  style=''>keyboard_arrow_left </span>
+                                    <span style="top: -7px;position: relative;">${__("Back")}</span>
+                                </div>` + defaultTemplate;
+            }
+
             if (parsedMeta.info_element_selector) {
                 $(parsedMeta.info_element_selector).empty();
             }
@@ -236,23 +250,27 @@ module.exports = {
 
                     if (!isEmpty && !not_querable) {
 
-                        let popUpInner = `<div id="modal-info-body">
+                        if (firstLoop) { // Only add html once
+                            firstLoop = false;
+                            let popUpInner = `<div id="modal-info-body">
                                 <ul class="nav nav-tabs" id="info-tab"></ul>
                                 <div class="tab-content" id="info-pane"></div>
                             </div>
                             <div id="alternative-info-container" class="alternative-info-container-right" style="display:none"></div>`;
 
-                        if (typeof window.vidiConfig.featureInfoTableOnMap !== "undefined" && window.vidiConfig.featureInfoTableOnMap === true && simple) {
-                            let popup = L.popup({
-                                minWidth: 350
-                            })
-                                .setLatLng(infoClickPoint)
-                                .setContent(`<div id="info-box-pop-up"></div>`)
-                                .openOn(cloud.get().map);
-                            $("#info-box-pop-up").html(popUpInner);
+                            // Add alternative-info-container to pop-up if featureInfoTableOnMap or else in left slide panel
+                            if (featureInfoTableOnMap) {
+                                let popup = L.popup({
+                                    minWidth: 350
+                                })
+                                    .setLatLng(infoClickPoint)
+                                    .setContent(`<div id="info-box-pop-up"></div>`)
+                                    .openOn(cloud.get().map);
+                                $("#info-box-pop-up").html(popUpInner);
 
-                        } else {
-                            $("#info-box").html(popUpInner);
+                            } else {
+                                $("#info-box").html(popUpInner);
+                            }
                         }
 
                         let display = simple ? "none" : "inline";
@@ -278,8 +296,14 @@ module.exports = {
                             <table class="table" data-detail-view="${dataDetailView}" data-detail-formatter="detailFormatter" data-show-toggle="${dataShowToggle}" data-show-export="${dataShowExport}" data-show-columns="${dataShowColumns}"></table>
                         </div>`);
 
-                        // TODO Set if featureInfoTableOnMap = true
-                        if (typeof parsedMeta.select_function !== "undefined" && parsedMeta.select_function !== "") {
+                        // Set select_function if featureInfoTableOnMap = true
+                        if ((typeof parsedMeta.select_function === "undefined" || parsedMeta.select_function === "") && featureInfoTableOnMap) {
+                            let selectFunction = `function(id, layer, key, sqlQuery){
+                                     $("#modal-info-body").hide();
+                                     $("#alternative-info-container").show();
+                                  }`;
+                            selectCallBack = Function('"use strict";return (' + selectFunction + ')')();
+                        } else if (typeof parsedMeta.select_function !== "undefined" && parsedMeta.select_function !== "") {
                             try {
                                 selectCallBack = Function('"use strict";return (' + parsedMeta.select_function + ')')();
                             } catch (e) {
@@ -306,7 +330,7 @@ module.exports = {
                             locale: window._vidiLocale.replace("_", "-"),
                             template: template,
                             pkey: pkey,
-                            renderInfoIn: parsedMeta.info_element_selector || null, // TODO Set if featureInfoTableOnMap = true
+                            renderInfoIn: parsedMeta.info_element_selector || featureInfoTableOnMap ? "#alternative-info-container" : null,
                             onSelect: selectCallBack,
                             key: keyWithoutGeom,
                             caller: _self,
@@ -360,7 +384,6 @@ module.exports = {
 
                         let showTableInPopup = typeof window.vidiConfig.showTableInPopUp === "boolean" && window.vidiConfig.showTableInPopUp === true;
 
-                        // TODO Set if featureInfoTableOnMap = true
                         if (typeof parsedMeta.info_function !== "undefined" && parsedMeta.info_function !== "") {
                             try {
                                 let func = Function('"use strict";return (' + parsedMeta.info_function + ')')();

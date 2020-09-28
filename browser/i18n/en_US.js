@@ -224,6 +224,7 @@ module.exports = {
         "Layer is visible": "Layer is visible",
         "Parents": "Parents",
         "Children": "Children",
+        "Back": "Back",
 
         // Base layers
         "Side-by-side mode": "Side-by-side mode",
