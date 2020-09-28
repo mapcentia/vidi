@@ -1448,7 +1448,7 @@ module.exports = {
                         showToggle: false,
                         showExport: false,
                         showColumns: false,
-                        cardView: true,
+                        cardView: false,
                         height: null,
                         tableBodyHeight: "100vh"
                     });
