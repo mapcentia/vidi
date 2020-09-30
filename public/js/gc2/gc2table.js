@@ -31,6 +31,7 @@ var gc2table = (function () {
                 setViewOnSelect: true,
                 responsive: true,
                 autoPan: false,
+                setZoom: false,
                 locale: 'en-US',
                 callCustomOnload: true,
                 ns: "",
@@ -78,6 +79,7 @@ var gc2table = (function () {
             onPopupClose = defaults.onPopupClose,
             onPopupCloseButtonClick = defaults.onPopupCloseButtonClick,
             autoPan = defaults.autoPan,
+            setZoom = defaults.setZoom,
             responsive = defaults.responsive,
             callCustomOnload = defaults.callCustomOnload,
             locale = defaults.locale,
@@ -233,9 +235,17 @@ var gc2table = (function () {
                         setTimeout(function () {
                             if (setViewOnSelect) {
                                 try {
-                                    m.map.panTo(layer.getBounds().getCenter());
+                                    if (setZoom) {
+                                        m.map.fitBounds(layer.getBounds(), {maxZoom: 16});
+                                    } else {
+                                        m.map.panTo(layer.getBounds().getCenter());
+                                    }
                                 } catch (e) {
-                                    m.map.panTo(layer.getLatLng());
+                                    if (setZoom) {
+                                        m.map.setView(layer.getLatLng(), 16);
+                                    } else {
+                                        m.map.panTo(layer.getLatLng());
+                                    }
                                 }
                             }
                         }, 100);
