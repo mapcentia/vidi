@@ -570,6 +570,7 @@ var onSearchLoad = function () {
 // bruges senere til at placere sag i docunote
 // abelsvej 8, https://dawa.aws.dk/adgangsadresser/0a3f5094-9776-32b8-e044-0003ba298018
 // kristrupvej 1, https://dawa.aws.dk/adgangsadresser/0a3f5094-b7b0-32b8-e044-0003ba298018
+
 var getEjdNr = function(adgangsadresseid) {
     var esr;
     var adresseid;
@@ -590,15 +591,29 @@ var getEjdNr = function(adgangsadresseid) {
                 esr = komkode.concat(esr);
                 adresseid = data[0].id;
 
+                var adresse = $.ajax({
+                    url: 'https://dawa.aws.dk/datavask/adresser?betegnelse='+filterKey,
+                    type: "get",
+                    async: false,
+                    success: function(data,status) {
+                        if (data.resultater == null) {
+                            //nothing.. return null
+                            return null
+                        } else {
+                            //danner esr ejendomsnummer
+                            var adresse = data.resultater[0].adresse.id;
+                            return adresse             
+                        }
+                    }
+                })
+                if (adresse.responseJSON.resultater.kategori != 'C') {
+                    adresseid = adresse.responseJSON.resultater[0].adresse.id;
+                }  
                 config.extensionConfig.documentCreate.tables[0].defaults.esrnr = esr
                 config.extensionConfig.documentCreate.tables[1].defaults.esrnr = esr
                 config.extensionConfig.documentCreate.tables[0].defaults.adresseid = adresseid
                 config.extensionConfig.documentCreate.tables[1].defaults.adresseid = adresseid
-                //buildFeatureMeta($('#'+select_id).val())
-                // return {
-                //     "adresseid":adresseid,
-                //     "esr":esr
-                // }  
+            
                 return 1             
             }
         }
