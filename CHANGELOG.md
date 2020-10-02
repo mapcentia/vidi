@@ -55,6 +55,7 @@ and this project adheres to [CalVer](https://calver.org/).
         - This makes it possible to setup child layers, which can only be viewed when filtered by its parent layer.
     - *filter_immutable*: boolean, makes the filter setup immutable.
         - Then set, the arbitrary filter setup can't be changes. Only values can. Should be used together with `filter_config`.
+    - *reload_interval* integer, set a reload interval for vector layers. Can be used to autoload fresh data from live data sources. Units are milliseconds. 
     - *show_table_on_side*: boolean, render the vector list of the layer in an injected element with id `vector-side-table`, so you get a map and list side-by-side.
     - *zoom_on_table_click*: boolean, whether the map should zoom to vector feature or not when clicked in table. Default is just pan to feature.
 - A Reset filter button is added, which will reset the filter to the original state.
