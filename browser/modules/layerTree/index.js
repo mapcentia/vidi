@@ -1728,6 +1728,8 @@ module.exports = {
                 fillOpacity: 0.2
             });
 
+            let parsedMeta = _self.parseLayerMeta(meta.getMetaByKey(layerKey, false));
+
             let localTable = gc2table.init({
                 el: tableContainerId + ` table`,
                 ns: tableContainerId,
@@ -1745,7 +1747,8 @@ module.exports = {
                 tableBodyHeight: defaults.tableBodyHeight,
                 locale: window._vidiLocale.replace("_", "-"),
                 template: template,
-                styleSelected
+                styleSelected,
+                setZoom: parsedMeta?.zoom_on_table_click ?  parsedMeta.zoom_on_table_click : false
             });
 
             localTable.loadDataInTable(true, forceDataLoad);
