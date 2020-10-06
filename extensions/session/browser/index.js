@@ -163,7 +163,6 @@ module.exports = {
                     success: function (data) {
                         if (data.status.authenticated) {
                             backboneEvents.get().trigger(`session:authChange`, true);
-
                             me.setState({sessionScreenName: data.status.screen_name});
                             me.setState({statusText: `Signed in as ${data.status.screen_name} (${data.status.email})`});
                             me.setState({alertClass: "alert-success"});
@@ -171,6 +170,7 @@ module.exports = {
                             me.setState({auth: true});
                             $(".gc2-session-lock").show();
                             $(".gc2-session-unlock").hide();
+                            userName = data.status.screen_name;
                             // True if auto login happens. When reload meta
                             if (data?.screen_name && data?.status?.authenticated) {
                                 backboneEvents.get().trigger("refresh:meta");
