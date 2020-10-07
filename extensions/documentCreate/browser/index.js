@@ -262,7 +262,10 @@ var getExistingDocs = function (key, fileIdent = false) {
             
                     // set the cosmetic backgroundlayer visible (if specified)
                     if (conf.cosmeticbackgroundlayer) {
-                        layerTree.reloadLayer(conf.cosmeticbackgroundlayer);
+                        if (!(layerTree.getState().activeLayers.includes(conf.cosmeticbackgroundlayer))) {
+                            console.log('reload wms')
+                            layerTree.reloadLayer(conf.cosmeticbackgroundlayer);
+                        }
                     }
                 });
             }
@@ -828,7 +831,12 @@ var buildFeatureMeta = function (layer, previousLayer = undefined) {
 
         // set the backgroundlayer visible
         if (conf.cosmeticbackgroundlayer) {
-            layerTree.reloadLayer(conf.cosmeticbackgroundlayer);
+            //layerTree.reloadLayer(conf.cosmeticbackgroundlayer);
+            if (!(layerTree.getState().activeLayers.includes(conf.cosmeticbackgroundlayer))) {
+                console.log('reload wms')
+                layerTree.reloadLayer(conf.cosmeticbackgroundlayer);
+             }
+
         }
         
         for (col in fields) {
@@ -1433,7 +1441,7 @@ module.exports = {
                         });  
                         
                         // TODO: overveje om dette skal fjernes efter session autologin fix
-                        //buildServiceSelect(select_id);
+                        buildServiceSelect(select_id);
                         // run method here in order to support switch in event order, when running
                         // extension along with the session object autoLogin feature
                         loadAndInitFilters(me.state.active);                        
