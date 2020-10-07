@@ -66,6 +66,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - Modules now has title headings.
 - Added boolean config `vectorMultiSelect` in `config/config.js`. This will enable multi select on vector layers. Works cross layer too. Can be set in runtime config.
 - Added boolean config `featureInfoTableOnMap` in `config/config.js`. This is a shotcut to set `info_template`, `info_element_selector` and `info_function`, so the single feature info pops up on the map instead of the right slide panel. Great for the `embed.tmpl`
+- New button "Fit bounds to filter" in layer filters, which will set the view extent to the bounds of the filtered layer.
 
 ### Changed
 - `public\js\vidi.js`is now required instead of loaded in a script tag. This way it's transpiled and can contain new JavaScript syntax.

@@ -110,7 +110,8 @@ class VectorLayerFilter extends React.Component {
             predefinedFilters,
             disabledPredefinedFilters,
             editorFilters: props.editorFilters,
-            editorFiltersActive: props.editorFiltersActive
+            editorFiltersActive: props.editorFiltersActive,
+            fitBoundsActiveOnLayer: props.fitBoundsActiveOnLayer
         };
     }
 
@@ -127,6 +128,7 @@ class VectorLayerFilter extends React.Component {
     }
 
     onRulesApply() {
+        this.setState({fitBoundsActiveOnLayer: true})
         this.props.onApplyArbitrary({
             layerKey: (this.props.layer.f_table_schema + `.` + this.props.layer.f_table_name),
             filters: JSON.parse(JSON.stringify(this.state.arbitraryFilters))
@@ -134,8 +136,11 @@ class VectorLayerFilter extends React.Component {
     }
 
     onRulesClear() {
+        let layerKey = this.props.layer.f_table_schema + `.` + this.props.layer.f_table_name;
+        this.setState({fitBoundsActiveOnLayer: false});
+        this.props.onDisableArbitrary(layerKey);
         this.props.onApplyArbitrary({
-            layerKey: (this.props.layer.f_table_schema + `.` + this.props.layer.f_table_name),
+            layerKey: layerKey,
             filters: {
                 match: `any`,
                 columns: []
@@ -279,7 +284,8 @@ class VectorLayerFilter extends React.Component {
                     let expressionSet = this.getExpressionSetForType(this.state.layer.fields[key].type);
                     expressionSet.map((expression, index) => {
                         expressionOptions.push(
-                            <option key={`expression_` + layerKey + `_` + (index + 1)} value={expression}>{expression}</option>);
+                            <option key={`expression_` + layerKey + `_` + (index + 1)}
+                                    value={expression}>{expression}</option>);
                     });
                 }
             }
@@ -353,6 +359,11 @@ class VectorLayerFilter extends React.Component {
         validateFilters(resetArbitraryFilters);
         this.onRulesClear();
         this.setState({arbitraryFilters: resetArbitraryFilters});
+        this.setState({fitBoundsActiveOnLayer: false});
+    }
+
+    handleFitBounds() {
+        this.props.onApplyFitBounds(this.props.layer.f_table_schema + `.` + this.props.layer.f_table_name);
     }
 
     render() {
@@ -422,13 +433,17 @@ class VectorLayerFilter extends React.Component {
 
                 if (STRING_TYPES.indexOf(type) !== -1 && fieldconf && fieldconf[column.fieldname] && fieldconf[column.fieldname].autocomplete) {
                     control = (
-                        <AutocompleteControl id={id} value={column.value} layerKey={layerKey} field={column.fieldname} restriction={column.restriction} db={this.props.db}  onChange={changeHandler}/>);
+                        <AutocompleteControl id={id} value={column.value} layerKey={layerKey} field={column.fieldname}
+                                             restriction={column.restriction} db={this.props.db}
+                                             onChange={changeHandler}/>);
                 } else if (STRING_TYPES.indexOf(type) !== -1) {
                     control = (
-                        <StringControl id={id} value={column.value} restriction={column.restriction} onChange={changeHandler}/>);
+                        <StringControl id={id} value={column.value} restriction={column.restriction}
+                                       onChange={changeHandler}/>);
                 } else if (NUMBER_TYPES.indexOf(type) !== -1) {
                     control = (
-                        <NumberControl id={id} value={column.value} restriction={column.restriction} onChange={changeHandler}/>);
+                        <NumberControl id={id} value={column.value} restriction={column.restriction}
+                                       onChange={changeHandler}/>);
                 } else if (DATE_TYPES.indexOf(type) !== -1) {
                     control = (<DateControl id={id} value={column.value} onChange={changeHandler}/>);
                 } else if (DATETIME_TYPES.indexOf(type) !== -1) {
@@ -445,7 +460,9 @@ class VectorLayerFilter extends React.Component {
             controlDivStyle.maxWidth = `160px`;
             filterControls.push(<div key={`column_` + index} style={{display: `flex`}}>
                 <div className="form-group" style={divStyle}>
-                    <button className="btn btn-xs btn-warning" type="button" onClick={this.onRuleDelete.bind(this, index)} style={{display: this.props.isFilterImmutable ? "none" : "inline"}}>
+                    <button className="btn btn-xs btn-warning" type="button"
+                            onClick={this.onRuleDelete.bind(this, index)}
+                            style={{display: this.props.isFilterImmutable ? "none" : "inline"}}>
                         <i className="fa fa-minus"></i>
                     </button>
                 </div>
@@ -471,7 +488,8 @@ class VectorLayerFilter extends React.Component {
                     this.state.layer.children.map((item, index) => {
                         if (item.rel && item.parent_column && item.child_column) {
                             records.push(
-                                <li key={`child_record_${index}`} style={{fontFamily: `"Courier New", Courier, monospace`}}>
+                                <li key={`child_record_${index}`}
+                                    style={{fontFamily: `"Courier New", Courier, monospace`}}>
                                     {layerKey}.{item.parent_column} - {item.rel}.{item.child_column}
                                 </li>);
                         }
@@ -487,7 +505,6 @@ class VectorLayerFilter extends React.Component {
                 return result;
             };
 
-            let childrenInfoMarkup = childrenInfo();
             return (
                 <div className="js-arbitrary-filters" style={this.state.editorFiltersActive ? {
                     pointerEvents: "none",
@@ -498,10 +515,12 @@ class VectorLayerFilter extends React.Component {
                     </div>
                     <div>{filterControls}</div>
                     <div>
-                        <button className="btn btn-sm" type="button" onClick={this.onRuleAdd.bind(this)} style={{display: this.props.isFilterImmutable ? "none" : "inline"}}>
+                        <button className="btn btn-sm" type="button" onClick={this.onRuleAdd.bind(this)}
+                                style={{display: this.props.isFilterImmutable ? "none" : "inline"}}>
                             <i className="fa fa-plus"></i> {__(`Add condition`)}
                         </button>
-                        <button className="btn btn-sm btn-success" type="button" disabled={!allRulesAreValid} onClick={this.onRulesApply.bind(this)}>
+                        <button className="btn btn-sm btn-success" type="button" disabled={!allRulesAreValid}
+                                onClick={this.onRulesApply.bind(this)}>
                             <i className="fa fa-check"></i> {__(`Apply`)}
                         </button>
                         <button className="btn btn-sm" type="button" onClick={this.onRulesClear.bind(this)}>
@@ -584,7 +603,8 @@ class VectorLayerFilter extends React.Component {
                     </div>
                     <div>
                         <label>
-                            <input type="checkbox" checked={this.state.editorFiltersActive} onChange={this.activateEditor.bind(this)}/> {__(`Filter editor`)}
+                            <input type="checkbox" checked={this.state.editorFiltersActive}
+                                   onChange={this.activateEditor.bind(this)}/> {__(`Filter editor`)}
                         </label>
                         <button style={!this.state.editorFiltersActive ? {
                             pointerEvents: "none",
@@ -602,6 +622,13 @@ class VectorLayerFilter extends React.Component {
                 <i className="fa fa-reply"></i> {__(`Reset filter`)}</button>)
         };
 
+        const buildFitBoundsButton = (props) => {
+            console.log("this.state.predefinedFilters", this.state.predefinedFilters)
+            console.log("this.state.arbitraryFilters", this.state.arbitraryFilters)
+            return (<button disabled={!this.state.fitBoundsActiveOnLayer} className="btn btn-xs btn-info" onClick={this.handleFitBounds.bind(this)}>
+                <i className="fa fa-arrows-alt"></i> {__(`Fit bounds to filter`)}</button>)
+        };
+
         let activeFiltersTab = false;
         let tabControl = false;
         if (Object.keys(this.state.predefinedFilters).length > 0) {
@@ -609,11 +636,13 @@ class VectorLayerFilter extends React.Component {
                 <div className="btn-group btn-group-justified" role="group">
                     <div className="btn-group" role="group">
                         <button type="button" className="btn btn-default"
-                                disabled={this.state.activeTab === PREDEFINED_TAB} onClick={this.switchActiveTab.bind(this)}>{__(`Predefined`)}</button>
+                                disabled={this.state.activeTab === PREDEFINED_TAB}
+                                onClick={this.switchActiveTab.bind(this)}>{__(`Predefined`)}</button>
                     </div>
                     <div className="btn-group" role="group">
                         <button type="button" className="btn btn-default"
-                                disabled={this.state.activeTab === ARBITRARY_TAB} onClick={this.switchActiveTab.bind(this)}>{__(`Arbitrary`)}</button>
+                                disabled={this.state.activeTab === ARBITRARY_TAB}
+                                onClick={this.switchActiveTab.bind(this)}>{__(`Arbitrary`)}</button>
                     </div>
                 </div>
             </div>);
@@ -633,6 +662,7 @@ class VectorLayerFilter extends React.Component {
                 {activeFiltersTab}
                 {buildWhereClauseField()}
                 {buildResetButton()}
+                {buildFitBoundsButton()}
             </div>
         );
     }
@@ -647,6 +677,8 @@ VectorLayerFilter.propTypes = {
     arbitraryFilters: PropTypes.object.isRequired,
     onApplyPredefined: PropTypes.func.isRequired,
     onApplyArbitrary: PropTypes.func.isRequired,
+    onDisableArbitrary: PropTypes.func.isRequired,
+    onApplyFitBounds: PropTypes.func.isRequired,
     onChangeEditor: PropTypes.func.isRequired,
     onActivateEditor: PropTypes.func.isRequired,
     onApplyEditor: PropTypes.func.isRequired,

@@ -130,7 +130,9 @@ let moduleState = {
     virtualLayers: [],
     tileContentCache: {},
     editorFilters: {},
-    editorFiltersActive: {}
+    editorFiltersActive: {},
+    fitBoundsActiveOnLayers: {},
+    disabledLabelsOnLayers: {}
 };
 
 const marked = require('marked');
@@ -591,6 +593,7 @@ module.exports = {
         let state = {
             order: moduleState.layerTreeOrder,
             arbitraryFilters: moduleState.arbitraryFilters,
+            fitBoundsActiveOnLayers: moduleState.fitBoundsActiveOnLayers,
             virtualLayers: preparedVirtualLayers,
             predefinedFilters: moduleState.predefinedFilters,
             activeLayers,
@@ -598,7 +601,7 @@ module.exports = {
             opacitySettings,
             dynamicLoad: moduleState.dynamicLoad,
             editorFilters: moduleState.editorFilters,
-            editorFiltersActive: moduleState.editorFiltersActive
+            editorFiltersActive: moduleState.editorFiltersActive,
         };
         return state;
     },
@@ -608,7 +611,6 @@ module.exports = {
      * @param filters
      */
     applyFilters: (filters) => {
-        console.log("filters", filters)
         moduleState.arbitraryFilters = filters;
     },
 
@@ -933,6 +935,7 @@ module.exports = {
                                 if (forcedState.opacitySettings) moduleState.opacitySettings = forcedState.opacitySettings;
                                 if (forcedState.predefinedFilters) moduleState.predefinedFilters = forcedState.predefinedFilters;
                                 if (forcedState.arbitraryFilters) moduleState.arbitraryFilters = forcedState.arbitraryFilters;
+                                //if (forcedState.fitBoundsActiveOnLayers) moduleState.fitBoundsActiveOnLayers = forcedState.fitBoundsActiveOnLayers;
                                 if (forcedState.dynamicLoad) moduleState.dynamicLoad = forcedState.dynamicLoad;
                                 if (forcedState.editorFilters) moduleState.editorFilters = forcedState.editorFilters;
                                 if (forcedState.editorFiltersActive) moduleState.editorFiltersActive = forcedState.editorFiltersActive;
@@ -1172,6 +1175,7 @@ module.exports = {
                 };
 
                 applySetting(`arbitraryFilters`, {});
+                applySetting(`fitBoundsActiveOnLayers`, {});
                 applySetting(`predefinedFilters`, {});
                 applySetting(`editorFilters`, {});
                 applySetting(`editorFiltersActive`, {});
@@ -1748,7 +1752,7 @@ module.exports = {
                 locale: window._vidiLocale.replace("_", "-"),
                 template: template,
                 styleSelected,
-                setZoom: parsedMeta?.zoom_on_table_click ?  parsedMeta.zoom_on_table_click : false
+                setZoom: parsedMeta?.zoom_on_table_click ? parsedMeta.zoom_on_table_click : false
             });
 
             localTable.loadDataInTable(true, forceDataLoad);
@@ -2943,6 +2947,13 @@ module.exports = {
                         isFilterImmutable = typeof parsedMeta.filter_immutable === "boolean" ? parsedMeta.filter_immutable : false;
                     }
 
+                    let localFitBoundsActiveOnLayer = {};
+                    if (moduleState.fitBoundsActiveOnLayers && layerKey in moduleState.fitBoundsActiveOnLayers) {
+                        localFitBoundsActiveOnLayer = moduleState.fitBoundsActiveOnLayers[layerKey];
+                    } else {
+                        localFitBoundsActiveOnLayer = false;
+                    }
+
                     let activeFilters = _self.getActiveLayerFilters(layerKey);
                     $(layerContainer).find(`.js-toggle-filters-number-of-filters`).text(activeFilters.length);
                     setTimeout(() => {
@@ -2955,8 +2966,11 @@ module.exports = {
                                     predefinedFilters={localPredefinedFilters}
                                     disabledPredefinedFilters={moduleState.predefinedFilters[layerKey] ? moduleState.predefinedFilters[layerKey] : []}
                                     arbitraryFilters={localArbitraryfilters}
+                                    fitBoundsActiveOnLayer={localFitBoundsActiveOnLayer}
                                     onApplyPredefined={_self.onApplyPredefinedFiltersHandler}
                                     onApplyArbitrary={_self.onApplyArbitraryFiltersHandler}
+                                    onDisableArbitrary={_self.onDisableArbitraryFiltersHandler}
+                                    onApplyFitBounds={_self.onApplyFitBoundsFiltersHandler}
                                     onApplyEditor={_self.onApplyEditorFiltersHandler}
                                     onActivateEditor={_self.onActivateEditorFiltersHandler}
                                     onChangeEditor={_self.onChangeEditorFiltersHandler}
@@ -3153,6 +3167,39 @@ module.exports = {
         validateFilters(filters);
         moduleState.arbitraryFilters[layerKey] = filters;
         _self.reloadLayerOnFiltersChange(layerKey, forcedReloadLayerType);
+    },
+
+    onDisableArbitraryFiltersHandler: (layerKey) => {
+        moduleState.fitBoundsActiveOnLayers[layerKey] = false;
+    },
+
+    onApplyFitBoundsFiltersHandler: (layerKey) => {
+        let metaData = meta.getMetaByKey(layerKey);
+        let whereClause = _self.getActiveLayerFilters(layerKey)[0];
+        let sql = `SELECT 
+                    ST_Xmin(ST_Extent(extent)) AS txmin,
+                    ST_Xmax(ST_Extent(extent)) AS txmax,
+                    ST_Ymin(ST_Extent(extent)) AS tymin,
+                    ST_Ymax(ST_Extent(extent)) AS tymax
+                FROM (SELECT ST_astext(ST_Transform(ST_setsrid(ST_Extent(${metaData.f_geometry_column}),${metaData.srid}),4326)) AS extent FROM ${layerKey} WHERE ${whereClause}) as foo`;
+        let q = {
+            q: sql
+        }
+        $.ajax({
+            url: '/api/sql/' + urlparser.db,
+            contentType: 'application/x-www-form-urlencoded',
+            scriptCharset: "utf-8",
+            dataType: 'json',
+            type: 'POST',
+            data: q,
+            success: function (response) {
+                let e = response.features[0].properties;
+                cloud.get().map.fitBounds([[e.tymin, e.txmin], [e.tymax, e.txmax]], {maxZoom: 18})
+            },
+            error: function (response) {
+            }
+        });
+        moduleState.fitBoundsActiveOnLayers[layerKey] = true;
     },
 
     onApplyPredefinedFiltersHandler: ({layerKey, filters}, forcedReloadLayerType = false) => {
