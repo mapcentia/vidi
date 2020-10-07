@@ -38,6 +38,7 @@ import mustache from 'mustache';
 
 import LayerFilter from './LayerFilter';
 import LoadStrategyToggle from './LoadStrategyToggle';
+import LabelSettingToggle from './LabelSettingToggle';
 import {
     validateFilters,
     EXPRESSIONS_FOR_STRINGS,
@@ -132,7 +133,7 @@ let moduleState = {
     editorFilters: {},
     editorFiltersActive: {},
     fitBoundsActiveOnLayers: {},
-    disabledLabelsOnLayers: {}
+    labelSettings: {}
 };
 
 const marked = require('marked');
@@ -362,6 +363,11 @@ module.exports = {
                         $(container).find('.js-layer-settings-opacity').hide(0);
                     };
 
+                    const hideLabels = () => {
+                        $(container).find(`.js-toggle-labels`).hide(0);
+                        $(container).find('.js-layer-settings-labels').hide(0);
+                    };
+
                     const hideLoadStrategy = () => {
                         $(container).find(`.js-toggle-load-strategy`).hide(0);
                         $(container).find('.js-layer-settings-load-strategy').hide(0);
@@ -403,6 +409,7 @@ module.exports = {
                         // Load strategy and filters should be kept opened after setLayerState()
                         if ($(container).attr(`data-last-layer-type`) !== desiredSetupType) {
                             hideOpacity();
+                            hideLabels();
                         }
 
                         if (layerIsEnabled) {
@@ -418,6 +425,7 @@ module.exports = {
                             hideOfflineMode();
                             hideLoadStrategy();
                             hideOpacity();
+                            hideLabels();
                             hideTableView();
                             hideSearch();
                         }
@@ -432,6 +440,7 @@ module.exports = {
                         if (layerIsEnabled) {
                             $(container).find('.gc2-add-feature').css(`visibility`, `visible`);
                             $(container).find(`.js-toggle-opacity`).show(0);
+                            $(container).find(`.js-toggle-labels`).show(0);
                             $(container).find(`.js-toggle-filters`).show(0);
                             $(container).find(`.js-toggle-filters-number-of-filters`).show(0);
                             $(container).find(`.js-toggle-search`).show(0);
@@ -439,6 +448,7 @@ module.exports = {
                             hideAddFeature();
                             hideFilters();
                             hideOpacity();
+                            hideLabels();
                             hideSearch();
                         }
 
@@ -457,6 +467,7 @@ module.exports = {
                         $(container).find('.js-layer-settings-filters').hide(0);
                         if (desiredSetupType === LAYER.VECTOR_TILE) {
                             hideOpacity();
+                            hideLabels();
                             hideFilters();
                         }
                     } else if (desiredSetupType === LAYER.WEBGL) {
@@ -466,6 +477,7 @@ module.exports = {
                         hideLoadStrategy();
                         hideTableView();
                         hideOpacity();
+                        hideLabels();
                         hideSearch();
                     } else {
                         throw new Error(`${desiredSetupType} control setup is not supported yet`);
@@ -594,6 +606,7 @@ module.exports = {
             order: moduleState.layerTreeOrder,
             arbitraryFilters: moduleState.arbitraryFilters,
             fitBoundsActiveOnLayers: moduleState.fitBoundsActiveOnLayers,
+            labelSettings: moduleState.labelSettings,
             virtualLayers: preparedVirtualLayers,
             predefinedFilters: moduleState.predefinedFilters,
             activeLayers,
@@ -936,6 +949,7 @@ module.exports = {
                                 if (forcedState.predefinedFilters) moduleState.predefinedFilters = forcedState.predefinedFilters;
                                 if (forcedState.arbitraryFilters) moduleState.arbitraryFilters = forcedState.arbitraryFilters;
                                 //if (forcedState.fitBoundsActiveOnLayers) moduleState.fitBoundsActiveOnLayers = forcedState.fitBoundsActiveOnLayers;
+                                if (forcedState.labelSettings) moduleState.labelSettings = forcedState.labelSettings;
                                 if (forcedState.dynamicLoad) moduleState.dynamicLoad = forcedState.dynamicLoad;
                                 if (forcedState.editorFilters) moduleState.editorFilters = forcedState.editorFilters;
                                 if (forcedState.editorFiltersActive) moduleState.editorFiltersActive = forcedState.editorFiltersActive;
@@ -950,6 +964,14 @@ module.exports = {
                                     moduleState.dynamicLoad[key] = true;
                                 } else {
                                     moduleState.dynamicLoad[key] = false;
+                                }
+                            }
+
+                            for (let key in moduleState.labelSettings) {
+                                if (moduleState.labelSettings[key] === `true` || moduleState.labelSettings[key] === true) {
+                                    moduleState.labelSettings[key] = true;
+                                } else {
+                                    moduleState.labelSettings[key] = false;
                                 }
                             }
 
@@ -1176,6 +1198,7 @@ module.exports = {
 
                 applySetting(`arbitraryFilters`, {});
                 applySetting(`fitBoundsActiveOnLayers`, {});
+                applySetting(`labelSettings`, {});
                 applySetting(`predefinedFilters`, {});
                 applySetting(`editorFilters`, {});
                 applySetting(`editorFiltersActive`, {});
@@ -2893,6 +2916,30 @@ module.exports = {
                         _self._selectIcon($(layerContainer).find('.js-toggle-opacity'));
                         $(layerContainer).find('.js-layer-settings-opacity').toggle();
                     });
+
+                    // Labels
+                    let componentContainerId = `layer-settings-labels-${layerKey}`;
+                    let value = true;
+                    if (layerKey in moduleState.labelSettings && [true, false].indexOf(moduleState.labelSettings[layerKey]) !== -1) {
+                        value = moduleState.labelSettings[layerKey];
+                    }
+                    $(layerContainer).find('.js-layer-settings-labels').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
+                    setTimeout(() => {
+                        if (document.getElementById(componentContainerId)) {
+                            ReactDOM.render(<LabelSettingToggle
+                                    layerKey={layerKey}
+                                    initialValue={value}
+                                    onChange={_self.onChangeLabelsHandler}/>,
+                                document.getElementById(componentContainerId));
+                            $(layerContainer).find('.js-layer-settings-labels').hide(0);
+                            $(layerContainer).find(`.js-toggle-labels`).click(() => {
+                                _self._selectIcon($(layerContainer).find('.js-toggle-labels'));
+                                $(layerContainer).find('.js-layer-settings-labels').toggle();
+                            });
+                        } else {
+                            console.error(`Unable to find the labels control container`);
+                        }
+                    }, 10);
                 }
 
                 if (isVirtual === false) {
@@ -3163,6 +3210,15 @@ module.exports = {
         _self.reloadLayer(LAYER.VECTOR + ':' + layerKey);
     },
 
+    onChangeLabelsHandler: ({layerKey, labelsAreEnabled}) => {
+        moduleState.labelSettings[layerKey] = labelsAreEnabled;
+        let correspondingLayer = meta.getMetaByKey(layerKey);
+        //backboneEvents.get().trigger(`${MODULE_NAME}:dynamicLoadLayersChange`);
+        //_self.reloadLayer(LAYER.RASTER_TILE + ':' + layerKey);
+        _self.reloadLayerOnLabelChange(layerKey, labelsAreEnabled);
+
+    },
+
     onApplyArbitraryFiltersHandler: ({layerKey, filters}, forcedReloadLayerType = false) => {
         validateFilters(filters);
         moduleState.arbitraryFilters[layerKey] = filters;
@@ -3220,6 +3276,9 @@ module.exports = {
         moduleState.editorFiltersActive[layerKey] = active;
     },
 
+    reloadLayerOnLabelChange: (layerKey) => {
+        _self.reloadLayer(layerKey, false, false, false);
+    },
 
     reloadLayerOnFiltersChange: (layerKey, forcedReloadLayerType = false) => {
         if (layerKey.indexOf(`:`) > -1) {

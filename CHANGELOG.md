@@ -67,6 +67,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - Added boolean config `vectorMultiSelect` in `config/config.js`. This will enable multi select on vector layers. Works cross layer too. Can be set in runtime config.
 - Added boolean config `featureInfoTableOnMap` in `config/config.js`. This is a shotcut to set `info_template`, `info_element_selector` and `info_function`, so the single feature info pops up on the map instead of the right slide panel. Great for the `embed.tmpl`
 - New button "Fit bounds to filter" in layer filters, which will set the view extent to the bounds of the filtered layer.
+- New "Labels" panel for raster tile layers with a checkbox for hiding/showing labels on the layer. Works for both MapServer and QGIS back-end (GC2 must support this).
 
 ### Changed
 - `public\js\vidi.js`is now required instead of loaded in a script tag. This way it's transpiled and can contain new JavaScript syntax.
@@ -107,6 +108,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - Babel bumped to version 7
 - Local GC2 config files are now fetched through the server back-end.
 - `embed.tmpl` will now show login button if session module is enabled.
+- The WMS requests now has a `qgs` parameter for QGIS backed layers. The value is path to the qgs file for the layer (base64 encoded). GC2 can now use this instead of pulling the path from the storage making QGIS faster.
 
 ### Fixed
 - Using `indexOf` instead of `includes`, because the latter is not transpiled in Babel. It's an Internet Explorer issue.

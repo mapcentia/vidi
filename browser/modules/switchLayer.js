@@ -168,7 +168,7 @@ module.exports = module.exports = {
      * @returns {Promise}
      */
     enableRasterTile: (gc2Id, forceReload, doNotLegend, setupControls) => {
-        if (LOG) console.log(`switchLa.yer: enableRasterTile ${gc2Id}`);
+        if (LOG) console.log(`switchLayer: enableRasterTile ${gc2Id}`);
 
         return new Promise((resolve, reject) => {
             // Only one layer at a time, so using the raster tile layer identifier
@@ -176,7 +176,15 @@ module.exports = module.exports = {
             layerTree.setSelectorValue(gc2Id, LAYER.RASTER_TILE);
             _self.enableCheckBoxesOnChildren(gc2Id);
 
-            layers.addLayer(gc2Id, [layerTree.getLayerFilterString(gc2Id)]).then(() => {
+            let layerTreeState = layerTree.getState();
+            let labelsEnabled;
+            if (layerTreeState.labelSettings[gc2Id] === `true` || layerTreeState.labelSettings[gc2Id] === true) {
+                labelsEnabled = true;
+            } else {
+                labelsEnabled = false;
+            }
+
+            layers.addLayer(gc2Id, [layerTree.getLayerFilterString(gc2Id),`labels=${labelsEnabled}`]).then(() => {
 
                 _self.checkLayerControl(gc2Id, doNotLegend, setupControls);
 

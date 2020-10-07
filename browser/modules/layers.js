@@ -56,6 +56,9 @@ var uri = null;
 
 let _self = false;
 
+let uriJs = require('urijs');
+
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init, getMetaDataKeys: module.exports.getMetaDataKeys, ready: module.exports.ready}}
@@ -274,6 +277,15 @@ module.exports = {
                 let layer = layerDescription.f_table_schema + "." + layerDescription.f_table_name;
                 let {useCache, mapRequestProxy} = _self.getCachingDataForLayer(layerDescription, additionalURLParameters);
                 if (layer === layerKey) {
+                    let qgs;
+                    if (layerDescription.wmssource && layerDescription.wmssource.includes("qgis_mapserv")) {
+                        let uriObj = new uriJs(layerDescription.wmssource);
+                        let queryStr = uriObj.search();
+                        let parsedQuery = uriJs.parseQuery(queryStr)
+                        console.log(parsedQuery)
+                        qgs = btoa(parsedQuery.map);
+                        additionalURLParameters.push(`qgs=${qgs}`);
+                    }
                     var isBaseLayer = !!layerDescription.baselayer;
                     layers[[layer]] = cloud.get().addTileLayers({
                         additionalURLParameters,

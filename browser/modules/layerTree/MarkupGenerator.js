@@ -173,6 +173,9 @@ class MarkupGenerator {
                             <a href="javascript:void(0);" class="js-toggle-opacity">
                                 <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Opacity`)}" class="material-icons">opacity</i>
                             </a>
+                            <a href="javascript:void(0);" class="js-toggle-labels">
+                                <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Labels`)}" class="material-icons">label</i>
+                            </a>
                             <a href="javascript:void(0);" class="js-toggle-table">
                                 <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Table view`)}" class="material-icons">list</i>
                             </a>
@@ -196,6 +199,7 @@ class MarkupGenerator {
             <div class="js-layer-settings-filters" style="display: none;"></div>
             <div class="js-layer-settings-load-strategy" style="display: none;"></div>
             <div class="js-layer-settings-opacity" style="display: none;"></div>
+            <div class="js-layer-settings-labels" style="display: none;"></div>
             <div class="js-layer-settings-search" style="display: none;"></div>
             <div class="js-layer-settings-table" id="table_view-${layerKey.replace(".", "_")}" style="display: none;"></div>
             </div>

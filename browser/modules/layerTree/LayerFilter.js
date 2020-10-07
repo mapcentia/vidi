@@ -623,8 +623,6 @@ class VectorLayerFilter extends React.Component {
         };
 
         const buildFitBoundsButton = (props) => {
-            console.log("this.state.predefinedFilters", this.state.predefinedFilters)
-            console.log("this.state.arbitraryFilters", this.state.arbitraryFilters)
             return (<button disabled={!this.state.fitBoundsActiveOnLayer} className="btn btn-xs btn-info" onClick={this.handleFitBounds.bind(this)}>
                 <i className="fa fa-arrows-alt"></i> {__(`Fit bounds to filter`)}</button>)
         };
