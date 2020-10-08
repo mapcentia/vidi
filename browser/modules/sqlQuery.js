@@ -102,6 +102,24 @@ var defaultTemplateRaster =
                 <p>{{{value_0}}}</p>
              </div>`;
 
+const sortObject = function (obj) {
+    let arr = [];
+    let prop;
+    for (prop in obj) {
+        if (obj.hasOwnProperty(prop)) {
+            arr.push({
+                'key': prop,
+                'value': obj[prop],
+                'sort_id': obj[prop].sort_id
+            });
+        }
+    }
+    arr.sort(function (a, b) {
+        return a.sort_id - b.sort_id;
+    });
+    return arr; // returns array
+};
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init, reset: module.exports.reset}}
@@ -206,7 +224,7 @@ module.exports = {
             if (featureInfoTableOnMap && !backArrowIsAdded) {
                 backArrowIsAdded = true;
                 defaultTemplate = `
-                                <div style='cursor: pointer;' onclick='javascript:$("#modal-info-body").show();$("#alternative-info-container").hide();$("#modal-info-body").css("visibility", "visible");$("#click-for-info-slide .modal-title").empty();'>
+                                <div class='show-when-multiple-hits' style='cursor: pointer;' onclick='javascript:$("#modal-info-body").show();$("#alternative-info-container").hide();$("#click-for-info-slide .modal-title").empty();'>
                                     <span class='material-icons'  style=''>keyboard_arrow_left </span>
                                     <span style="top: -7px;position: relative;">${__("Back")}</span>
                                 </div>` + defaultTemplate;
@@ -299,9 +317,9 @@ module.exports = {
                         // Set select_function if featureInfoTableOnMap = true
                         if ((typeof parsedMeta.select_function === "undefined" || parsedMeta.select_function === "") && featureInfoTableOnMap) {
                             let selectFunction = `function(id, layer, key, sqlQuery){
-                                     $("#modal-info-body").hide();
-                                     $("#alternative-info-container").show();
-                                  }`;
+                                                     $("#modal-info-body").hide();
+                                                     $("#alternative-info-container").show();
+                                                  }`;
                             selectCallBack = Function('"use strict";return (' + selectFunction + ')')();
                         } else if (typeof parsedMeta.select_function !== "undefined" && parsedMeta.select_function !== "") {
                             try {
@@ -340,7 +358,7 @@ module.exports = {
                         if (!parsedMeta.info_element_selector) {
                             _table.object.on("openpopup" + "_" + _table.uid, function (e) {
                                 let popup = e.getPopup();
-                                if (popup._closeButton) {
+                                if (popup?._closeButton) {
                                     popup._closeButton.onclick = function (clickEvent) {
                                         if (onPopupCloseButtonClick) onPopupCloseButtonClick(e._leaflet_id);
                                     }
@@ -450,8 +468,9 @@ module.exports = {
                                 // If only one hit across all layers, the click the only row
                                 if (count.hits === 1) {
                                     $("[data-uniqueid]").trigger("click");
+                                    $(".show-when-multiple-hits").hide();
                                 }
-                            }, 200);
+                            }, 100);
                         }
                     }
                 };
@@ -731,6 +750,7 @@ module.exports = {
         });
         $(`#${elementPrefix}info-tab`).empty();
         $(`#${elementPrefix}info-pane`).empty();
+        cloud.get().map.closePopup();
     },
 
     resetAll: function () {
@@ -759,22 +779,4 @@ module.exports = {
 
         }
     }
-};
-
-var sortObject = function (obj) {
-    var arr = [];
-    var prop;
-    for (prop in obj) {
-        if (obj.hasOwnProperty(prop)) {
-            arr.push({
-                'key': prop,
-                'value': obj[prop],
-                'sort_id': obj[prop].sort_id
-            });
-        }
-    }
-    arr.sort(function (a, b) {
-        return a.sort_id - b.sort_id;
-    });
-    return arr; // returns array
 };
