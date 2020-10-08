@@ -331,6 +331,10 @@ module.exports = {
                         }
                         cm = _self.prepareDataForTableView(value, layerObj.geoJSON.features);
                         $('#tab_' + storeId).tab('show');
+
+                        hit = true;
+                        count.hits = count.hits + Object.keys(layerObj.layer._layers).length;
+
                         var _table = gc2table.init({
                             el: "#_" + storeId + " table",
                             ns: "#_" + storeId,
@@ -340,7 +344,7 @@ module.exports = {
                             autoUpdate: false,
                             autoPan: false,
                             openPopUp: true,
-                            setViewOnSelect: false,
+                            setViewOnSelect: count.hits > 1,
                             responsive: false,
                             callCustomOnload: false,
                             checkBox: !simple,
@@ -352,7 +356,8 @@ module.exports = {
                             onSelect: selectCallBack,
                             key: keyWithoutGeom,
                             caller: _self,
-                            styleSelected: styleForSelectedFeatures
+                            styleSelected: styleForSelectedFeatures,
+                            setZoom: parsedMeta?.zoom_on_table_click ? parsedMeta.zoom_on_table_click : false
                         });
 
                         if (!parsedMeta.info_element_selector) {
@@ -411,8 +416,7 @@ module.exports = {
                                 console.error(e.message);
                             }
                         }
-                        hit = true;
-                        count.hits = count.hits + Object.keys(layerObj.layer._layers).length;
+
 
                         // Add fancy material raised style to buttons
                         $(".bootstrap-table .btn-default").addClass("btn-raised");
