@@ -22,6 +22,7 @@ import FormControl from '@material-ui/core/FormControl';
 import { isSet } from 'lodash';
 import { getClassSet } from 'react-bootstrap/lib/utils/bootstrapUtils';
 import MatrikelTable from './MatrikelTable';
+import DAWASearch from './DAWASearch';
 
 
 /**
@@ -29,6 +30,12 @@ import MatrikelTable from './MatrikelTable';
  * @type {*|exports|module.exports}
  */
 var cloud;
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
+var search = require('./../../../browser/modules/search/danish');
 
 /**
  *
@@ -77,7 +84,6 @@ var clicktimer;
  */
 var mapObj;
 
-var DClayers = []
 var config = require('../../../config/config.js');
 
 // Get URL vars
@@ -86,10 +92,6 @@ if (urlparser.urlVars.user) {
 }
 if (urlparser.urlVars.sagsnr) {
     var sagsnr = urlparser.urlVars.sagsnr;
-}
-
-function hasChild(obj) {
-    return !!Object.keys(obj).length;
 }
 
 require('snackbarjs');
@@ -103,7 +105,8 @@ var snack = function (msg) {
         content: '<p>' + msg + '</p>',
         timeout: 10000
     });
-}
+};
+var resultLayer = new L.FeatureGroup();
 
 /**
  *
@@ -234,7 +237,6 @@ module.exports = {
                             .catch(e => reject(e))
                     })
                 }
-                
 
                 /**
                  *
@@ -254,6 +256,7 @@ module.exports = {
 
                         this.readContents = this.readContents.bind(this)
                         this.deleteMatrikel = this.deleteMatrikel.bind(this)
+                        this.focusMatrikel = this.focusMatrikel.bind(this)
                         this.addMatrikel = this.addMatrikel.bind(this)
                     }
 
@@ -367,31 +370,42 @@ module.exports = {
 
                     focusMatrikel(id){
                         const _self = this;
-                        // TODO: Focus on matrikel - infobox.
+                        // TODO: Focus on matrikel
+                        // Zoom to geom, change style, show info box
                     }
 
                     addMatrikel(id){
                         const _self = this;
                         // TODO: Add matrikel to map and state.
+                        console.log(id)
                         var clean = _self.cleanMatr(id)
+                        console.log(clean)
 
-                        // Add to state
-                        let prev = _self.state.matrList
-                        prev.push(clean)
-                        _self.setState({
-                            matrList: prev
-                        })
+                        // If not already in state, then put it there
+                        var AlreadyInList = _self.state.matrList.find(m => m['key'] === clean.key)
+                        if (!AlreadyInList) {
+
+                            // State
+                            let prev = _self.state.matrList
+                            prev.push(clean)
+                            _self.setState({
+                                matrList: prev
+                            })
+
+                            // TODO: Map
+                        }
                     }
 
                     cleanMatr(matr){
                         // Determines the matrikel-object in state
                         var clean = {
-                            ejerlavskode: '',
-                            matrikelnr: '',
-                            kommune: '',
-                            kommunekode: '',
-                            bfe: '',
-                            esr: ''
+                            ejerlavsnavn: 'PLACEHOLDER',
+                            ejerlavskode: 'PLACEHOLDER',
+                            matrikelnr: 'PLACEHOLDER',
+                            kommune: 'PLACEHOLDER',
+                            kommunekode: 'PLACEHOLDER',
+                            bfe: 'PLACEHOLDER',
+                            esr: 'PLACEHOLDER'
                         }
 
                         // Comes from Docunote
@@ -405,6 +419,7 @@ module.exports = {
                             clean.esr =  matr.customData.matresrnr
                         }
 
+                        clean.key = clean.ejerlavskode+clean.matrikelnr
                         return clean
                     }
 
@@ -437,7 +452,16 @@ module.exports = {
                                         {s.error.length > 0 && <div style={error} >{s.error}</div>}
                                         <h4>Journalnummer: {s.case.number}</h4>
                                         <p>{s.case.title}</p>
-                                        <MatrikelTable matrListe = {s.matrList} _handleDelete = {_self.deleteMatrikel} _handleFocus = {_self.focusMatrikel}/>
+                                        <DAWASearch 
+                                            _handleResult = {_self.addMatrikel}
+                                            triggerAtChar = {4}
+                                        />
+                                        <MatrikelTable
+                                            matrListe = {s.matrList}
+                                            shorterLength = {40}
+                                            _handleDelete = {_self.deleteMatrikel}
+                                            _handleFocus = {_self.focusMatrikel}
+                                        />
                                     </div>
                                 </div>
                             )

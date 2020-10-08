@@ -18,26 +18,26 @@ import Tooltip from '@material-ui/core/Tooltip';
 import CancelIcon from '@material-ui/icons/Cancel';
 
 
-
-var shorter = function(string) {
-    let l = 40;
-    if (string.length > l){
-        return string.slice(0,l-3)+'...'
-    } else {
-        return string
-    }
-};
-
-
 class MatrikelTable extends React.Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            matrListe: props.matrListe
+            matrListe: props.matrListe,
+            shorterLength: (props.shorterLength === undefined ) ? 40 : parseInt(props.shorterLength)
         };
 
     }
+
+    shorter(text) {
+        var l = this.state.shorterLength;
+        if (text.length > l){
+            return text.slice(0,l-3)+'...';
+        } else {
+            return text;
+        }
+    };
+    
 
     _handleDelete(id){
         this.props._handleDelete(id);
@@ -73,10 +73,11 @@ class MatrikelTable extends React.Component {
                         </TableHead>
                         <TableBody>
                     {this.props.matrListe.map(matr =>{
+                        console.log(matr);
                         return (
                         <TableRow key={'geosag-matrikelliste-'+matr.ejerlavskode+matr.kommunenr+matr.matrikelnr}>
                             <TableCell align="left" style={ cellStyle }><button onClick={this._handleDelete.bind(this, matr)}>Fjern</button><button onClick={this._handleFocus.bind(this, matr)}>Vis</button></TableCell>
-                            <TableCell align="left" style={ cellStyle }>{matr.matrikelnr+','+shorter(matr.ejerlavsnavn)}</TableCell>
+                            <TableCell align="left" style={ cellStyle }>{matr.matrikelnr+','+this.shorter(matr.ejerlavsnavn)}</TableCell>
                             <TableCell align="left" style={ cellStyle }>{matr.kommune}</TableCell>
                         </TableRow>)
                     })}
