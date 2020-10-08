@@ -178,10 +178,10 @@ module.exports = module.exports = {
 
             let layerTreeState = layerTree.getState();
             let labelsEnabled;
-            if (layerTreeState.labelSettings[gc2Id] === `true` || layerTreeState.labelSettings[gc2Id] === true) {
-                labelsEnabled = true;
+            if (typeof layerTreeState.labelSettings[gc2Id] !== "undefined" && (layerTreeState.labelSettings[gc2Id] === `false` || layerTreeState.labelSettings[gc2Id] === false)) {
+                labelsEnabled = "false";
             } else {
-                labelsEnabled = false;
+                labelsEnabled = "true";
             }
 
             layers.addLayer(gc2Id, [layerTree.getLayerFilterString(gc2Id),`labels=${labelsEnabled}`]).then(() => {
