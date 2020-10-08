@@ -808,11 +808,12 @@ module.exports = {
 
 
     // ===================================
-    // About text for the default template
+    // About text and modal box at startup 
+    // for the default template
     // ===================================
-
-    "aboutBox": "<p>My awesome web map</p>",
-
+    "aboutBox":"<h1>Velkommen</h1><p>Det er her muligt at se forskellige baggrundskort, som topografiske kort og luftfoto-serier, tilføje en række korttemaer, læse informationer om disse, samt tegne, tage mål, udskrive kort, mv.</p><p>Geopartner A/S er ikke ansvarlig for misbrug af oplysninger eller for fejl i de oplysninger, der stilles til rådighed.</p><p>For yderligere oplysninger og kontaktinformationer besøg <a href='http://www.geopartner.dk' target='_blank'>www.geopartner.dk</a>.</p>",
+    "startUpModal":"<h1>Velkommen</h1><p>Det er her muligt at se forskellige baggrundskort, som topografiske kort og luftfoto-serier, tilføje en række korttemaer, læse informationer om disse, samt tegne, tage mål, udskrive kort, mv.</p><p>Geopartner A/S er ikke ansvarlig for misbrug af oplysninger eller for fejl i de oplysninger, der stilles til rådighed.</p><p>For yderligere oplysninger og kontaktinformationer besøg <a href='http://www.geopartner.dk' target='_blank'>www.geopartner.dk</a>.</p>",
+    
     // ========================================
     // Set a width for video elements in popups
     // Should be a string with units - defaults to '250px'
@@ -911,63 +912,108 @@ module.exports = {
     // dtkSkaermkortDaempet
     // hereNormalNightGrey
     // ===================================================
-
-    "baseLayers": [
-
-        {
-            "id": "geodk.bright",
-            "name": "GeoDanmark kort",
-            "db": "baselayers",
-            "host": "https://gc2.io",
-            "config": {
-                "maxZoom": 21,
-                "maxNativeZoom": 19,
-                "attribution": "&copy; SDFE & MapCentia ApS"
-            }
-        },
-
-
-        // Pre-defined base layers
-        {
-            "id": "osm",
-            "name": "Open Street Map"
-        },
-
-        {
-            "id": "stamenTonerLite",
-            "name": "Stamen Toner Light"
-        },
-
-        // Base layer from GC2
-        {
-            "id": "gc2_group._b_baggrundskort01.baggrundskort01",
-            "name": "Topografisk kort",
-            "db": "geofyn",
-            "host": "https://kort.geofyn.dk",
-            "config": {
-                "maxZoom": 21,
-                "maxNativeZoom": 19,
-                "attribution": "Geofyn A/S"
-            },
-
-            // A base layer can comprise one or more overlays
-            "overlays": [{
-                    "id": "tekster.tekster_samlet_wms_web",
-                    "db": "geofyn",
-                    "host": "https://kort.geofyn.dk",
-                    "config": {
-                        "attribution": "Geofyn A/S"
-                    }
-                },
-                {
-                    "id": "tekster.adgangsadresseinfo",
-                    "db": "geofyn",
-                    "host": "https://kort.geofyn.dk",
-                    "config": {
-                        "attribution": "Geofyn A/S"
-                    }
-                }
-            ]
+   "baseLayers":[
+      {
+         "id":"geodk.bright",
+         "name":"Topografisk kort",
+         "db":"baselayers",
+         "host":"https://dk.gc2.io",
+         "abstract":"<p>Topografisk kort baseret på GeoDanmark data, som opdateres årligt.</p><p>Copyright: Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.</p><p>Baggrundskortet må frit anvendes, men følgende skal angives 'Indeholder GeoDanmark-data fra Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.'. </p><br><img src='https://nextcloud.gc2.io/index.php/apps/files_sharing/publicpreview/aqwPtJAKE9BzKes?x=2553&y=827&a=true&file=sagsbehandler_basiskort_eget.png&scalingup=0'>",
+         "config":{
+            "maxZoom":19,
+            "maxNativeZoom":19,
+            "attribution":"&copy; Styrelsen for Dataforsyning og Effektivisering og Danske kommuner."
+         }
+      },
+      {
+         "id":"luftfotoserier.geodanmark_2019_12_5cm",
+         "name":"Luftfoto 2019",
+         "db":"baselayers",
+         "host":"https://dk.gc2.io",
+         "abstract":"<p>Oprettede luftfoto (ortofoto) marts/april 2019 (15 cm pixels).</p><p>Copyright: Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.</p><p>Luftfotoet må frit anvendes, men følgende skal angives 'Indeholder GeoDanmark-data fra Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.'.</p><br><img src='https://nextcloud.gc2.io/index.php/apps/files_sharing/publicpreview/zqoWbwDGiyCQ5zn?x=2553&y=827&a=true&file=luftfoto_2019.png&scalingup=0'>",
+         "config":{
+            "maxZoom":19,
+            "maxNativeZoom":19,
+            "attribution":"&copy; Styrelsen for Dataforsyning og Effektivisering og Danske kommuner."
+         }
+      },      
+      {
+         "id":"luftfotoserier.geodanmark_2018_12_5cm",
+         "name":"Luftfoto 2018",
+         "db":"baselayers",
+         "host":"https://dk.gc2.io",
+         "abstract":"<p>Oprettede luftfoto (ortofoto) marts/april 2018 (15 cm pixels).</p><p>Copyright: Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.</p><p>Luftfotoet må frit anvendes, men følgende skal angives 'Indeholder GeoDanmark-data fra Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.'.</p><br><img src='https://nextcloud.gc2.io/index.php/apps/files_sharing/publicpreview/WzGweqNMZDKyx8E?x=2553&y=827&a=true&file=luftfoto_2018.png&scalingup=0'>",
+         "config":{
+            "maxZoom":19,
+            "maxNativeZoom":19,
+            "attribution":"&copy; Styrelsen for Dataforsyning og Effektivisering og Danske kommuner."
+         }
+      },
+      {
+         "id":"luftfotoserier.geodanmark_2017_12_5cm",
+         "name":"Luftfoto 2017",
+         "db":"baselayers",
+         "host":"https://dk.gc2.io",
+         "abstract":"<p>Oprettede luftfoto (ortofoto) marts/april 2017 (15 cm pixels).</p><p>Copyright: Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.</p><p>Luftfotoet må frit anvendes, men følgende skal angives 'Indeholder GeoDanmark-data fra Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.'.</p><br><img src='https://nextcloud.gc2.io/index.php/apps/files_sharing/publicpreview/bXBDW6ssarLkWdZ?x=2553&y=827&a=true&file=luftfoto_2017.png&scalingup=0'>",
+         "config":{
+            "maxZoom":19,
+            "maxNativeZoom":19,
+            "attribution":"&copy; Styrelsen for Dataforsyning og Effektivisering og Danske kommuner."
+         }
+      },
+      {
+         "id": "kortforsyningen.dtk_skaermkort_daempet",
+         "name":"Skærmkort - dæmpet",
+         "db":"baselayers",
+         "host":"https://dk.gc2.io",
+         "abstract":"<p>Skærmkort, som opdateres årligt.</p><p>Copyright: Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.</p><p>Baggrundskortet må frit anvendes, men følgende skal angives 'Indeholder data fra Styrelsen for Dataforsyning og Effektivisering.'. </p><br><img src='https://nextcloud.gc2.io/index.php/apps/files_sharing/publicpreview/aqwPtJAKE9BzKes?x=2553&y=827&a=true&file=sagsbehandler_basiskort_eget.png&scalingup=0'>",
+         "config":{
+            "maxZoom":19,
+            "maxNativeZoom":19,
+            "attribution":"&copy; Styrelsen for Dataforsyning og Effektivisering."
+         }
+      },
+      {
+          "id": "osm",
+         "name":"Topografisk kort - Open Street Map",
+         "abstract":"<p>Kortet hentes fra Open Street Map.</p><br><img src='https://nextcloud.gc2.io/index.php/apps/files_sharing/publicpreview/d66QC8j5mNi4xDS?x=2553&y=827&a=true&file=open_street_map.png&scalingup=0'>",
+         "config":{
+            "maxZoom":19,
+            "maxNativeZoom":19,
+            "attribution":"&copy; Open Street Map"
+         }
+      },      
+      {
+        "id": "stamenToner",
+        "name": "Stamen Toner",
+        "abstract":"<p>Kortet hentes fra Stamen Toner.</p><br><img src='https://nextcloud.gc2.io/index.php/apps/files_sharing/publicpreview/YpYDEbo6C8BX34a?x=2553&y=827&a=true&file=stamen_toner_dark.png&scalingup=0'>",
+        "config":{
+          "maxZoom":19,
+          "maxNativeZoom":19,
+          "attribution":"&copy; Stamen Toner"
         }
-    ]
+      },      
+      {
+        "id": "stamenTonerLite",
+        "name": "Stamen Toner Light",
+        "abstract":"<p>Kortet hentes fra Stamen Toner.</p><br><img src='https://nextcloud.gc2.io/index.php/apps/files_sharing/publicpreview/YpYDEbo6C8BX34a?x=2553&y=827&a=true&file=stamen_toner_light.png&scalingup=0'>",
+        "config":{
+          "maxZoom":19,
+          "maxNativeZoom":19,
+          "attribution":"&copy; Stamen Toner"
+        }
+      },
+      {
+         "id": "kortforsyningen.topo25", 
+         "name": "Klassisk 4cm kort", 
+         "db": "baselayers", 
+         "host": "https://gc2.io",
+         "abstract":"<p>Topografisk rasterkort over Danmark i målestoksforholdet 1:25.000. Copyright: Styrelsen for Dataforsyning og Effektivisering.</p>",
+         "config": {
+            "maxZoom":19,
+            "maxNativeZoom":19,
+            "attribution":"&copy; Styrelsen for Dataforsyning og Effektivisering." 
+        }
+      }
+   ]
 }
