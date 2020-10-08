@@ -282,7 +282,6 @@ module.exports = {
                         let uriObj = new uriJs(layerDescription.wmssource);
                         let queryStr = uriObj.search();
                         let parsedQuery = uriJs.parseQuery(queryStr)
-                        console.log(parsedQuery)
                         qgs = btoa(parsedQuery.map);
                         additionalURLParameters.push(`qgs=${qgs}`);
                     }
