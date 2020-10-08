@@ -57,7 +57,7 @@ and this project adheres to [CalVer](https://calver.org/).
         - Then set, the arbitrary filter setup can't be changes. Only values can. Should be used together with `filter_config`.
     - *reload_interval* integer, set a reload interval for vector layers. Can be used to autoload fresh data from live data sources. Units are milliseconds. 
     - *show_table_on_side*: boolean, render the vector list of the layer in an injected element with id `vector-side-table`, so you get a map and list side-by-side.
-    - *zoom_on_table_click*: boolean, whether the map should zoom to vector feature or not when clicked in table. Default is just pan to feature.
+    - *zoom_on_table_click*: boolean, whether the map should zoom to vector feature or not when clicked in table. Is set on both vector layer tables and feature info result tables.
 - A Reset filter button is added, which will reset the filter to the original state.
 - The `infoClickCursorStyle` setting will set cursor style when using feature info click. Can be set to `pointer` or `crosshair`. The setting can be set in `config/config.js` or in a runtime config.
 - New Autocomplete control in filters. The control will fetch distinct values from PostgreSQL for use in the autocomplete field. All distinct values are fetch at once. 100.000 distinct values can be handle without problems. Only works on text fields and must be enabled in GC2 Structure tab.
