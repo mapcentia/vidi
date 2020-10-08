@@ -366,6 +366,8 @@ module.exports = {
                         _self.setState({
                             matrList: _self.state.matrList.filter(el => el != id)
                         });
+
+                        // TODO: Remove from Map
                     }
 
                     focusMatrikel(id){
@@ -377,9 +379,7 @@ module.exports = {
                     addMatrikel(id){
                         const _self = this;
                         // TODO: Add matrikel to map and state.
-                        console.log(id)
                         var clean = _self.cleanMatr(id)
-                        console.log(clean)
 
                         // If not already in state, then put it there
                         var AlreadyInList = _self.state.matrList.find(m => m['key'] === clean.key)
@@ -392,7 +392,7 @@ module.exports = {
                                 matrList: prev
                             })
 
-                            // TODO: Map
+                            // TODO: Add to Map
                         }
                     }
 
@@ -454,7 +454,8 @@ module.exports = {
                                         <p>{s.case.title}</p>
                                         <DAWASearch 
                                             _handleResult = {_self.addMatrikel}
-                                            triggerAtChar = {4}
+                                            triggerAtChar = {2}
+                                            nocache = {true}
                                         />
                                         <MatrikelTable
                                             matrListe = {s.matrList}

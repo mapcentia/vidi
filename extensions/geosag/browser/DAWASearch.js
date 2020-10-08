@@ -12,6 +12,18 @@ class DAWASearch extends React.Component {
 
         this.state = {
             searchTerm: '',
+            searchResults: [],
+
+            resultsPerSource: (props.resultsPerSource === undefined ) ? 4 : parseInt(props.resultsPerSource),
+            fuzzy: (props.fuzzy === undefined ) ? true : props.fuzzy,
+            srid: (props.srid === undefined ) ? 25832 : parseInt(props.srid),
+            nocache: (props.nocache === undefined ) ? false : props.nocache,
+
+            enableAdresse: (props.enableAdresse === undefined ) ? true : props.enableAdresse,
+            enableMatrikel: (props.enableMatrikel === undefined ) ? true : props.enableMatrikel,
+            enableBFE: (props.enableBFE === undefined ) ? true : props.enableBFE,
+            enableSFE: (props.enableSFE === undefined ) ? true : props.enableSFE,
+
             placeholder: this.buildPlaceholder(),
             triggerAtChar: (props.triggerAtChar === undefined ) ? 4 : parseInt(props.triggerAtChar)
         };
@@ -19,6 +31,7 @@ class DAWASearch extends React.Component {
     }
 
     buildPlaceholder() {
+        //console.log(this.state);
         return 'Adresse, matr.nr, ESR nr. eller SFE nr.';
     }
 
@@ -26,30 +39,115 @@ class DAWASearch extends React.Component {
         this.props._handleResult(id);
     }
 
-    editSearchTerm = (e) => {
-        var _self = this;
-        _self.setState({
-            searchTerm: e.target.value
-        });
-    }
+    dynamicSearch = (event) => {
 
-    dynamicSearch = () => {
         var _self = this;
         var s = _self.state;
+        var term = event.target.value;
 
         // If not at triggerChar, do nothing
-        if (s.searchTerm.length < s.triggerAtChar) {
-            return [];
+        if (term.length < s.triggerAtChar) {
+            _self.setState({
+                searchTerm: term,
+                searchResults: []
+            });
         } else {
             // run promises here to return stuff from somewhere
+            var calls = [];
 
-            return [
-                {resultText: "test"},
-                {resultText: "test2"},
-                {resultText: "test3"}
-            ];
+            // Anything
+            if (s.enableAdresse) { calls.push(this.callDawa('adresser',term));}
+            if (s.enableMatrikel) { calls.push(this.callDawa('jordstykker',term));}
+
+            // only integers
+            if (!isNaN(parseInt(term))) {
+                if (s.enableESR) { calls.push(this.callDawa('jordstykker',term, 'udvidet_esrejendomsnr'));}
+                if (s.enableBFE) { calls.push(this.callDawa('jordstykker',term, 'bfenummer'));}
+                if (s.enableSFE) { calls.push(this.callDawa('jordstykker',term, 'sfeejendomsnr'));}
+            }
+            
+            // Call the stuff
+            Promise.all(calls)
+                .then( results => {
+                    // Merge all the things
+                    try {
+                        var all = results.flat(1);
+                        var cleaned = [];
+
+                        console.log(all);
+
+                        all.forEach(obj => {
+                            console.log(obj);
+                            if (obj.hasOwnProperty('tekst')) {
+                                cleaned.push(obj);
+                            }
+                        });
+                        console.log(cleaned);
+
+                        _self.setState({
+                            searchTerm: term,
+                            searchResults: cleaned
+                        })
+                    } catch (e) {
+                        console.log(e)
+                    }
+                    
+                })
+                .catch(err => {
+                    console.log(err);
+                    //_self.setState({
+                    //    error: e.toString()
+                    //});
+                });
         }
-    }
+    };
+
+    callDawa = (service, term, specific = undefined) => {
+        var s = this.state;
+        var hostName = 'https://dawa.aws.dk/'+service+'/autocomplete?';
+        var params = {};
+
+        params.per_side = s.resultsPerSource;
+        params.side = 1;
+        params.srid = s.srid;
+        
+        if (s.nocache) {
+            params.cache='no-cache';
+        }
+
+        // Pinpointing
+        if (specific) {
+            switch(specific) {
+                case 'bfenummer':               
+                        params.bfenummer = term;
+                    break;
+                case 'esrejendomsnr':
+                        params.udvidet_esrejendomsnr = term;
+                    break;
+                case 'sfeejendomsnr':
+                        params.sfeejendomsnr = term;
+                    break;
+            }
+        } else {
+            params.q = term;
+        }
+
+        // Get ready to rumble
+        console.log(hostName + new URLSearchParams(params));
+
+        return new Promise(function(resolve, reject) {
+            fetch(hostName + new URLSearchParams(params))
+                .then(r => r.json())
+                .then(d => {
+                    if (d.hasOwnProperty('tekst')) {
+                        resolve(d);
+                    } else {
+                        reject(d);
+                    }
+                })
+                .catch(e => reject(e));
+        });
+    };
 
     render() {
         var _self = this;
@@ -58,9 +156,9 @@ class DAWASearch extends React.Component {
 
         return (
             <div>
-                <input type='text' value={ s.searchTerm } onChange={ _self.editSearchTerm } placeholder={ s.placeholder } />
+                <input type='text' value= { s.searchTerm } onChange={ this.dynamicSearch } placeholder={ s.placeholder } />
                 <ResultsList
-                    results= { _self.dynamicSearch() }
+                    results= { s.searchResults }
                     _handleResult={ _self._handleResult }
                 />
             </div>
