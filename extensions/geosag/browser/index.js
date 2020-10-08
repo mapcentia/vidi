@@ -21,6 +21,7 @@ import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
 import { isSet } from 'lodash';
 import { getClassSet } from 'react-bootstrap/lib/utils/bootstrapUtils';
+import MatrikelTable from './MatrikelTable';
 
 
 /**
@@ -184,8 +185,33 @@ module.exports = {
                 };
 
 
-                var getExistingMatr = function(sagsnr){
+                var getExistingMatr = function(caseId){
+                    // Get Existing parts from Matrikelliste
+                    return new Promise(function (resolve, reject) {
+                        let obj = {
+                            caseId: caseId,
+                            user: user
+                        }
+                        let opts = {
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json'
+                            },
+                            method: 'POST',
+                            body: JSON.stringify(obj)
+                        }
+                        // Do async job and resolve
+                        fetch('/api/extension/getExistingMatr', opts)
+                            .then(r => {
+                                const data = r.json();
+                                resolve(data)
+                            })
+                            .catch(e => reject(e))
+                    })
+                }
 
+                var getCase = function(sagsnr){
+                    // Get case object for display
                     return new Promise(function (resolve, reject) {
                         let obj = {
                             sagsnr: sagsnr,
@@ -200,7 +226,7 @@ module.exports = {
                             body: JSON.stringify(obj)
                         }
                         // Do async job and resolve
-                        fetch('/api/extension/getExistingMatr', opts)
+                        fetch('/api/extension/getCase', opts)
                             .then(r => {
                                 const data = r.json();
                                 resolve(data)
@@ -227,6 +253,8 @@ module.exports = {
                         };
 
                         this.readContents = this.readContents.bind(this)
+                        this.deleteMatrikel = this.deleteMatrikel.bind(this)
+                        this.addMatrikel = this.addMatrikel.bind(this)
                     }
 
                     /**
@@ -248,6 +276,9 @@ module.exports = {
                             console.log(`user: ${user}`)
                             console.log(`sagsnr: ${sagsnr}`)
 
+                            // Init empty layer / Check if layer has content already
+                            // Make sure we can change extension and not loose expensive information.
+
                             if (user == undefined && sagsnr == undefined) {
                                 me.setState({
                                     allow: false,
@@ -255,21 +286,33 @@ module.exports = {
                                 })
                             } else {
                                 // Get case
-                                getExistingMatr(sagsnr)
-                                    .then(r => {
-                                        me.setState({
-                                            allow: true,
-                                            error: '',
-                                            matrList: r,
-                                            existingMatrList: r
-                                        })
+                                getCase(sagsnr)
+                                .then(r => {
+                                    console.log(r)
+                                    me.setState({
+                                        case: r
                                     })
-                                    .catch(e => {
-                                        me.setState({
-                                            allow: false,
-                                            error: e
-                                        })
+                                    return getExistingMatr(r.caseId)
+                                })
+                                .then(r => {
+                                    console.log(r)
+                                    me.setState({
+                                        allow: true,
+                                        error: '',
+                                        existingMatrList: r.matrikler
                                     })
+
+                                    r.matrikler.forEach(function(obj) {
+                                        me.addMatrikel(obj)
+                                    })
+
+                                })
+                                .catch(e => {
+                                    me.setState({
+                                        allow: false,
+                                        error: e
+                                    })
+                                })
                             }
 
                             utils.cursorStyle().crosshair();
@@ -282,8 +325,8 @@ module.exports = {
                                 active: false
                             });
                             utils.cursorStyle().reset();
-                        });
 
+                        });
                     }
                     
 
@@ -312,6 +355,60 @@ module.exports = {
                         var _self = this;                            
                     }
 
+                    deleteMatrikel(id){
+                        const _self = this;
+                        // TODO: Remove matrikel from map and state.
+                        
+                        // Remove from state
+                        _self.setState({
+                            matrList: _self.state.matrList.filter(el => el != id)
+                        });
+                    }
+
+                    focusMatrikel(id){
+                        const _self = this;
+                        // TODO: Focus on matrikel - infobox.
+                    }
+
+                    addMatrikel(id){
+                        const _self = this;
+                        // TODO: Add matrikel to map and state.
+                        var clean = _self.cleanMatr(id)
+
+                        // Add to state
+                        let prev = _self.state.matrList
+                        prev.push(clean)
+                        _self.setState({
+                            matrList: prev
+                        })
+                    }
+
+                    cleanMatr(matr){
+                        // Determines the matrikel-object in state
+                        var clean = {
+                            ejerlavskode: '',
+                            matrikelnr: '',
+                            kommune: '',
+                            kommunekode: '',
+                            bfe: '',
+                            esr: ''
+                        }
+
+                        // Comes from Docunote
+                        if (matr.hasOwnProperty('personId')) {
+                            clean.ejerlavskode = matr.customData.ejerlavskode
+                            clean.ejerlavsnavn = matr.lastName
+                            clean.matrikelnr =  matr.customData.matrnrcustom
+                            clean.kommune =  matr.customData.matrkomnavn
+                            clean.kommunekode = matr.customData.kommunenr
+                            clean.bfe =  ''
+                            clean.esr =  matr.customData.matresrnr
+                        }
+
+                        return clean
+                    }
+
+
 
                     /**
                      * Renders component
@@ -338,7 +435,9 @@ module.exports = {
                                 <div role = "tabpanel" >
                                     <div className = "form-group" >
                                         {s.error.length > 0 && <div style={error} >{s.error}</div>}
-                                        allowed
+                                        <h4>Journalnummer: {s.case.number}</h4>
+                                        <p>{s.case.title}</p>
+                                        <MatrikelTable matrListe = {s.matrList} _handleDelete = {_self.deleteMatrikel} _handleFocus = {_self.focusMatrikel}/>
                                     </div>
                                 </div>
                             )
@@ -347,7 +446,7 @@ module.exports = {
                                 <div role = "tabpanel" >
                                     <div className = "form-group" >
                                         {s.error.length > 0 && <div style={error} >{s.error}</div>}
-                                        not allowed
+                                        Indlæser.
                                     </div>
                                 </div>
                             )

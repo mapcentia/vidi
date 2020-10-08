@@ -91,9 +91,9 @@ router.post('/api/extension/getExistingMatr', function (req, response) {
         return;
     }
     // Sagsnummer not in call
-    if (!req.body.hasOwnProperty("sagsnr")) {
+    if (!req.body.hasOwnProperty("caseId")) {
         response.status(401).json({
-            error: "Sagsnummer mangler i kaldet"
+            error: "caseId mangler i kaldet"
         });
         return;
     }
@@ -104,12 +104,7 @@ router.post('/api/extension/getExistingMatr', function (req, response) {
             .then(function(user) {
                 // user is allowed
                 //console.log(user);
-                return getDocunote('Cases/number/'+ req.body.sagsnr.toString());
-            })
-            .then(function(docunoteCase) {
-                // case exists
-                //console.log(docunoteCase);
-                return getDocunote('Cases/'+ docunoteCase.caseId.toString()+'/parts');
+                return getDocunote('Cases/'+ req.body.caseId.toString()+'/parts');
             })
             .then(function(docunoteCaseParts) {
                 // Got parts, get information on each person
@@ -145,9 +140,52 @@ router.post('/api/extension/getExistingMatr', function (req, response) {
                 var matrs = parts.filter(function(obj) {
                     return obj.listId === lookingForListId;
                 });
-                
+
                 // Return Matr to user
                 response.status(200).json({"matrikler": matrs});
+                return;
+            })
+            .catch(function(error) {
+                response.status(500).json(error);
+                return;
+            });
+
+    } catch (error) {
+        //console.log(error)
+        response.status(500).json(error);
+    }
+});
+
+router.post('/api/extension/getCase', function (req, response) {
+    response.setHeader('Content-Type', 'application/json');
+
+    // User not in call
+    if (!req.body.hasOwnProperty("user")) {
+        response.status(401).json({
+            error: "User mangler i kaldet"
+        });
+        return;
+    }
+    // Sagsnummer not in call
+    if (!req.body.hasOwnProperty("sagsnr")) {
+        response.status(401).json({
+            error: "Sagsnummer mangler i kaldet"
+        });
+        return;
+    }
+
+    // Logic
+    try {
+        verifyUser(req.body.user.toString())
+            .then(function(user) {
+                // user is allowed
+                //console.log(user);
+                return getDocunote('Cases/number/'+ req.body.sagsnr.toString());
+            })
+            .then(function(Case) {
+                // Got the Case
+                // Return Matr to user
+                response.status(200).json(Case);
                 return;
             })
             .catch(function(error) {
