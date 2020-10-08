@@ -935,7 +935,27 @@ module.exports = {
             "maxZoom":19,
             "maxNativeZoom":19,
             "attribution":"&copy; Styrelsen for Dataforsyning og Effektivisering og Danske kommuner."
-         }
+         },
+         "overlays":[
+            {
+               "id":"dar.adgangsadresser_husnr",
+               "db":"baselayers",
+               "host":"https://dk.gc2.io",
+               "config":{
+                  "maxZoom":19,
+                  "maxNativeZoom":19
+               }
+            },
+            {
+               "id":"geodk.vejmidte_brudt_m_navn",
+               "db":"baselayers",
+               "host":"https://dk.gc2.io",
+               "config":{
+                  "maxZoom":19,
+                  "maxNativeZoom":19
+               }
+            }
+         ]
       },      
       {
          "id":"luftfotoserier.geodanmark_2018_12_5cm",
@@ -1008,12 +1028,11 @@ module.exports = {
          "name": "Klassisk 4cm kort", 
          "db": "baselayers", 
          "host": "https://gc2.io",
-         "abstract":"<p>Topografisk rasterkort over Danmark i målestoksforholdet 1:25.000. Copyright: Styrelsen for Dataforsyning og Effektivisering.</p>",
          "config": {
             "maxZoom":19,
             "maxNativeZoom":19,
             "attribution":"&copy; Styrelsen for Dataforsyning og Effektivisering." 
-        }
+         }
       }
    ]
 }
