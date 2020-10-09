@@ -6,6 +6,14 @@
 
 import React from 'react';
 
+function uniqBy(a, key) {
+    var seen = {};
+    return a.filter(function(item) {
+        var k = key(item);
+        return seen.hasOwnProperty(k) ? false : (seen[k] = true);
+    })
+}
+
 class DAWASearch extends React.Component {
     constructor(props) {
         super(props);
@@ -14,7 +22,9 @@ class DAWASearch extends React.Component {
             searchTerm: '',
             searchResults: [],
 
-            resultsPerSource: (props.resultsPerSource === undefined ) ? 4 : parseInt(props.resultsPerSource),
+            resultsPerSource: (props.resultsPerSource === undefined ) ? 3 : parseInt(props.resultsPerSource),
+            resultsMax: (props.resultsMax === undefined ) ? 10 : parseInt(props.resultsMax),
+            resultsKeepOpen: (props.resultsKeepOpen === undefined ) ? false : props.resultsKeepOpen,
             fuzzy: (props.fuzzy === undefined ) ? true : props.fuzzy,
             srid: (props.srid === undefined ) ? 25832 : parseInt(props.srid),
             nocache: (props.nocache === undefined ) ? false : props.nocache,
@@ -26,6 +36,7 @@ class DAWASearch extends React.Component {
 
             placeholder: this.buildPlaceholder(),
             triggerAtChar: (props.triggerAtChar === undefined ) ? 4 : parseInt(props.triggerAtChar)
+
         };
 
     }
@@ -36,6 +47,13 @@ class DAWASearch extends React.Component {
     }
 
     _handleResult = (id) => {
+        var s = this.state;
+        if (!s.resultsKeepOpen) {
+            this.setState({
+                searchResults: [],
+                searchTerm: ''
+            });
+        }
         this.props._handleResult(id);
     }
 
@@ -44,6 +62,8 @@ class DAWASearch extends React.Component {
         var _self = this;
         var s = _self.state;
         var term = event.target.value;
+
+        //TODO: do smth when there is only 1 result.
 
         // If not at triggerChar, do nothing
         if (term.length < s.triggerAtChar) {
@@ -68,36 +88,34 @@ class DAWASearch extends React.Component {
             
             // Call the stuff
             Promise.all(calls)
-                .then( results => {
+                .then( r => {
+                    var results = r;
                     // Merge all the things
                     try {
                         var all = results.flat(1);
                         var cleaned = [];
 
-                        console.log(all);
-
+                        // Dont bring errors
                         all.forEach(obj => {
-                            console.log(obj);
                             if (obj.hasOwnProperty('tekst')) {
                                 cleaned.push(obj);
                             }
                         });
-                        console.log(cleaned);
 
                         _self.setState({
                             searchTerm: term,
-                            searchResults: cleaned
-                        })
+                            searchResults: uniqBy(cleaned, JSON.stringify).slice(0, s.resultsMax)
+                        });
                     } catch (e) {
-                        console.log(e)
-                    }
-                    
+                        _self.setState({
+                            error: e.toString()
+                        });
+                    } 
                 })
                 .catch(err => {
-                    console.log(err);
-                    //_self.setState({
-                    //    error: e.toString()
-                    //});
+                    _self.setState({
+                        error: e.toString()
+                    });
                 });
         }
     };
@@ -133,17 +151,13 @@ class DAWASearch extends React.Component {
         }
 
         // Get ready to rumble
-        console.log(hostName + new URLSearchParams(params));
+        //console.log(hostName + new URLSearchParams(params));
 
         return new Promise(function(resolve, reject) {
             fetch(hostName + new URLSearchParams(params))
                 .then(r => r.json())
                 .then(d => {
-                    if (d.hasOwnProperty('tekst')) {
-                        resolve(d);
-                    } else {
-                        reject(d);
-                    }
+                    resolve(d);
                 })
                 .catch(e => reject(e));
         });
@@ -189,7 +203,7 @@ class ResultsList extends React.Component {
         if (this.props.results.length > 0) {
             return (
                 <div style={ResultListStyle}>
-                    {this.props.results.map(r => <div style={ResultStyle} onClick={_self._handleResult.bind(this, r)} key={r.resultText}>{r.resultText}</div>)}
+                    {this.props.results.map(r => <div style={ResultStyle} onClick={_self._handleResult.bind(this, r)} key={r.tekst}>{r.tekst}</div>)}
                 </div> 
             );
         } else {

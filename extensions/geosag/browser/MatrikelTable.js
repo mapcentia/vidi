@@ -73,11 +73,11 @@ class MatrikelTable extends React.Component {
                         </TableHead>
                         <TableBody>
                     {this.props.matrListe.map(matr =>{
-                        console.log(matr);
+                        //console.log(matr);
                         return (
                         <TableRow key={'geosag-matrikelliste-'+matr.ejerlavskode+matr.kommunenr+matr.matrikelnr}>
                             <TableCell align="left" style={ cellStyle }><button onClick={this._handleDelete.bind(this, matr)}>Fjern</button><button onClick={this._handleFocus.bind(this, matr)}>Vis</button></TableCell>
-                            <TableCell align="left" style={ cellStyle }>{matr.matrikelnr+','+this.shorter(matr.ejerlavsnavn)}</TableCell>
+                            <TableCell align="left" style={ cellStyle }>{matr.matrikelnr+', '+this.shorter(matr.ejerlavsnavn)}</TableCell>
                             <TableCell align="left" style={ cellStyle }>{matr.kommune}</TableCell>
                         </TableRow>)
                     })}

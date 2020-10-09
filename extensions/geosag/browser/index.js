@@ -19,7 +19,7 @@ import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
-import { isSet } from 'lodash';
+import { isNull, isSet } from 'lodash';
 import { getClassSet } from 'react-bootstrap/lib/utils/bootstrapUtils';
 import MatrikelTable from './MatrikelTable';
 import DAWASearch from './DAWASearch';
@@ -187,6 +187,19 @@ module.exports = {
                     }
                 };
 
+                var itsSomething = function(obj) {
+                    if (obj === undefined) {
+                        return false
+                    }
+                    if (isNull(obj)){
+                        return false
+                    }
+                    if (isNaN(obj)){
+                        return false
+                    }
+
+                    return true
+                }
 
                 var getExistingMatr = function(caseId){
                     // Get Existing parts from Matrikelliste
@@ -237,6 +250,29 @@ module.exports = {
                             .catch(e => reject(e))
                     })
                 }
+
+                var getJordstykkeByCoordinate = function(E,N, geom = undefined) {
+                    var hostName = 'https://dawa.aws.dk/jordstykker?';
+                    
+                    var params = {
+                        cache: 'no-cache',
+                        x: E,
+                        y: N,
+                        srid: '25832'
+                    };
+
+                    // TODO: Add toogle to use for getting geometry aswell
+            
+                    return new Promise(function(resolve, reject) {
+                        fetch(hostName + new URLSearchParams(params))
+                            .then(r => r.json())
+                            .then(d => {
+                                resolve(d);
+                            })
+                            .catch(e => reject(e));
+                    });
+                }
+
 
                 /**
                  *
@@ -379,51 +415,113 @@ module.exports = {
                     addMatrikel(id){
                         const _self = this;
                         // TODO: Add matrikel to map and state.
-                        var clean = _self.cleanMatr(id)
+                        _self.unifyMatr(id)
+                            .then(clean => {
+                                try {
+                                    var AlreadyInList = _self.state.matrList.find(m => m['key'] === clean.key)
+                                    if (!AlreadyInList) {
+                                        // If not already in state, then put it there
+                                        let prev = _self.state.matrList
+                                        prev.push(clean)
 
-                        // If not already in state, then put it there
-                        var AlreadyInList = _self.state.matrList.find(m => m['key'] === clean.key)
-                        if (!AlreadyInList) {
-
-                            // State
-                            let prev = _self.state.matrList
-                            prev.push(clean)
-                            _self.setState({
-                                matrList: prev
+                                        _self.setState({
+                                            matrList: prev
+                                        })
+                                    
+                                        // TODO: Add to Map
+                                    }
+                                } catch (error) {
+                                    _self.setState({
+                                        error: e.toString()
+                                    });
+                                }
+                                
                             })
-
-                            // TODO: Add to Map
-                        }
+                            .catch(e => {
+                                _self.setState({
+                                    error: e.toString()
+                                });
+                            })
                     }
 
-                    cleanMatr(matr){
+                    unifyMatr(matr){
                         // Determines the matrikel-object in state
+                        var unableToGetValue = '-'
                         var clean = {
-                            ejerlavsnavn: 'PLACEHOLDER',
-                            ejerlavskode: 'PLACEHOLDER',
-                            matrikelnr: 'PLACEHOLDER',
-                            kommune: 'PLACEHOLDER',
-                            kommunekode: 'PLACEHOLDER',
-                            bfe: 'PLACEHOLDER',
-                            esr: 'PLACEHOLDER'
+                            ejerlavsnavn: unableToGetValue,
+                            ejerlavskode: unableToGetValue,
+                            matrikelnr: unableToGetValue,
+                            kommune: unableToGetValue,
+                            kommunekode: unableToGetValue,
+                            bfe: unableToGetValue,
+                            esr: unableToGetValue
                         }
+                        
 
-                        // Comes from Docunote
-                        if (matr.hasOwnProperty('personId')) {
-                            clean.ejerlavskode = matr.customData.ejerlavskode
-                            clean.ejerlavsnavn = matr.lastName
-                            clean.matrikelnr =  matr.customData.matrnrcustom
-                            clean.kommune =  matr.customData.matrkomnavn
-                            clean.kommunekode = matr.customData.kommunenr
-                            clean.bfe =  ''
-                            clean.esr =  matr.customData.matresrnr
-                        }
+                        // TODO: make value checks more robust.
 
-                        clean.key = clean.ejerlavskode+clean.matrikelnr
-                        return clean
+                        return new Promise(function(resolve, reject) {
+                            // Comes from DAWA Adresse
+                            if (matr.hasOwnProperty('adresse')) {
+                                getJordstykkeByCoordinate(matr.adresse.x, matr.adresse.y)
+                                    .then(d => {
+                                        clean.ejerlavskode = d[0].ejerlav.kode.toString()
+                                        clean.ejerlavsnavn = (itsSomething(d[0].ejerlav.navn)) ? unableToGetValue : d[0].ejerlav.navn
+                                        clean.matrikelnr = d[0].matrikelnr
+                                        clean.kommune = (itsSomething(d[0].kommune.navn)) ? unableToGetValue : d[0].kommune.navn
+                                        clean.kommunekode = (itsSomething(d[0].kommune.kode)) ? unableToGetValue : d[0].kommune.kode
+                                        clean.bfe = (itsSomething(d[0].bfenummer)) ? unableToGetValue : d[0].bfenummer
+                                        clean.esr = (itsSomething(d[0].udvidet_esrejendomsnr)) ? unableToGetValue : d[0].udvidet_esrejendomsnr
+
+                                        clean.key = clean.ejerlavskode+clean.matrikelnr
+                                        resolve(clean)
+                                    })
+                                    .catch(e => reject(e))
+                            }
+
+                            // Comes from DAWA Jordstykke
+                            if (matr.hasOwnProperty('jordstykke')) {
+                                try {
+                                    clean.ejerlavskode = matr.jordstykke.ejerlav.kode.toString()
+                                    clean.ejerlavsnavn = (itsSomething(matr.jordstykke.ejerlav.navn)) ? unableToGetValue : matr.jordstykke.ejerlav.navn
+                                    clean.matrikelnr = matr.jordstykke.matrikelnr
+                                    
+                                    if (isNull(matr.jordstykke.kommune)) {
+                                        clean.kommune = unableToGetValue
+                                        clean.kommunekode = unableToGetValue
+                                    } else {
+                                        clean.kommune = (itsSomething(matr.jordstykke.kommune.navn)) ? unableToGetValue : matr.jordstykke.kommune.navn
+                                        clean.kommunekode = (itsSomething(matr.jordstykke.kommune.kode)) ? unableToGetValue : matr.jordstykke.kommune.kode
+                                    }
+                                    clean.bfe = (isNull(matr.jordstykke.bfenummer)) ? unableToGetValue : matr.jordstykke.bfenummer
+                                    clean.esr = (itsSomething(matr.jordstykke.udvidet_esrejendomsnr)) ? unableToGetValue : matr.jordstykke.udvidet_esrejendomsnr
+    
+                                    clean.key = clean.ejerlavskode+clean.matrikelnr
+                                    resolve(clean)
+                                } catch (error) {
+                                    reject(error.toString())
+                                }
+                            }
+
+                            // Comes from Docunote
+                            if (matr.hasOwnProperty('personId')) {
+                                try {
+                                    clean.ejerlavskode = matr.customData.ejerlavskode
+                                    clean.ejerlavsnavn = (itsSomething(matr.lastName)) ? unableToGetValue : matr.lastName
+                                    clean.matrikelnr =  matr.customData.matrnrcustom
+                                    clean.kommune =  (itsSomething(matr.customData.matrkomnavn)) ? unableToGetValue : matr.customData.matrkomnavn
+                                    clean.kommunekode = (itsSomething(matr.customData.kommunenr)) ? unableToGetValue : matr.customData.kommunenr
+                                    clean.bfe =  (itsSomething(matr.customData.bfenummer)) ? unableToGetValue : matr.customData.bfenummer
+                                    clean.esr =  (itsSomething(matr.customData.matresrnr)) ? unableToGetValue : matr.customData.matresrnr
+    
+                                    clean.key = clean.ejerlavskode+clean.matrikelnr
+                                    resolve(clean)
+                                } catch (error) {
+                                    reject(error.toString())
+                                }
+                            }
+                        });
                     }
-
-
 
                     /**
                      * Renders component
