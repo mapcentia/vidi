@@ -481,7 +481,7 @@ module.exports = {
         }
 
         var layerQueryDraw = [], layerQueryResult = [], layerQueryBuffer = [], layerPrint = [], e, parr, configFile = null;
-        if (isNaN(scale) || scale < 200) {
+        if (scale && (isNaN(scale) || scale < 200)) {
             alert(__("Not a valid scale. Must be over 200."));
             return false;
         }
