@@ -920,8 +920,8 @@ module.exports = {
          "host":"https://dk.gc2.io",
          "abstract":"<p>Topografisk kort baseret på GeoDanmark data, som opdateres årligt.</p><p>Copyright: Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.</p><p>Baggrundskortet må frit anvendes, men følgende skal angives 'Indeholder GeoDanmark-data fra Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.'. </p><br><img src='https://nextcloud.gc2.io/index.php/apps/files_sharing/publicpreview/aqwPtJAKE9BzKes?x=2553&y=827&a=true&file=sagsbehandler_basiskort_eget.png&scalingup=0'>",
          "config":{
-            "maxZoom":19,
-            "maxNativeZoom":19,
+            "maxZoom":21,
+            "maxNativeZoom":21,
             "attribution":"&copy; Styrelsen for Dataforsyning og Effektivisering og Danske kommuner."
          }
       },
@@ -932,8 +932,8 @@ module.exports = {
          "host":"https://dk.gc2.io",
          "abstract":"<p>Oprettede luftfoto (ortofoto) marts/april 2019 (15 cm pixels).</p><p>Copyright: Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.</p><p>Luftfotoet må frit anvendes, men følgende skal angives 'Indeholder GeoDanmark-data fra Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.'.</p><br><img src='https://nextcloud.gc2.io/index.php/apps/files_sharing/publicpreview/zqoWbwDGiyCQ5zn?x=2553&y=827&a=true&file=luftfoto_2019.png&scalingup=0'>",
          "config":{
-            "maxZoom":19,
-            "maxNativeZoom":19,
+            "maxZoom":21,
+            "maxNativeZoom":21,
             "attribution":"&copy; Styrelsen for Dataforsyning og Effektivisering og Danske kommuner."
          },
          "overlays":[
@@ -942,8 +942,8 @@ module.exports = {
                "db":"baselayers",
                "host":"https://dk.gc2.io",
                "config":{
-                  "maxZoom":19,
-                  "maxNativeZoom":19
+                  "maxZoom":21,
+                  "maxNativeZoom":21
                }
             },
             {
@@ -951,8 +951,8 @@ module.exports = {
                "db":"baselayers",
                "host":"https://dk.gc2.io",
                "config":{
-                  "maxZoom":19,
-                  "maxNativeZoom":19
+                  "maxZoom":21,
+                  "maxNativeZoom":21
                }
             }
          ]
@@ -964,8 +964,8 @@ module.exports = {
          "host":"https://dk.gc2.io",
          "abstract":"<p>Oprettede luftfoto (ortofoto) marts/april 2018 (15 cm pixels).</p><p>Copyright: Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.</p><p>Luftfotoet må frit anvendes, men følgende skal angives 'Indeholder GeoDanmark-data fra Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.'.</p><br><img src='https://nextcloud.gc2.io/index.php/apps/files_sharing/publicpreview/WzGweqNMZDKyx8E?x=2553&y=827&a=true&file=luftfoto_2018.png&scalingup=0'>",
          "config":{
-            "maxZoom":19,
-            "maxNativeZoom":19,
+            "maxZoom":21,
+            "maxNativeZoom":21,
             "attribution":"&copy; Styrelsen for Dataforsyning og Effektivisering og Danske kommuner."
          }
       },
@@ -976,8 +976,8 @@ module.exports = {
          "host":"https://dk.gc2.io",
          "abstract":"<p>Oprettede luftfoto (ortofoto) marts/april 2017 (15 cm pixels).</p><p>Copyright: Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.</p><p>Luftfotoet må frit anvendes, men følgende skal angives 'Indeholder GeoDanmark-data fra Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.'.</p><br><img src='https://nextcloud.gc2.io/index.php/apps/files_sharing/publicpreview/bXBDW6ssarLkWdZ?x=2553&y=827&a=true&file=luftfoto_2017.png&scalingup=0'>",
          "config":{
-            "maxZoom":19,
-            "maxNativeZoom":19,
+            "maxZoom":21,
+            "maxNativeZoom":21,
             "attribution":"&copy; Styrelsen for Dataforsyning og Effektivisering og Danske kommuner."
          }
       },
@@ -988,8 +988,8 @@ module.exports = {
          "host":"https://dk.gc2.io",
          "abstract":"<p>Skærmkort, som opdateres årligt.</p><p>Copyright: Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.</p><p>Baggrundskortet må frit anvendes, men følgende skal angives 'Indeholder data fra Styrelsen for Dataforsyning og Effektivisering.'. </p><br><img src='https://nextcloud.gc2.io/index.php/apps/files_sharing/publicpreview/aqwPtJAKE9BzKes?x=2553&y=827&a=true&file=sagsbehandler_basiskort_eget.png&scalingup=0'>",
          "config":{
-            "maxZoom":19,
-            "maxNativeZoom":19,
+            "maxZoom":21,
+            "maxNativeZoom":21,
             "attribution":"&copy; Styrelsen for Dataforsyning og Effektivisering."
          }
       },
@@ -998,8 +998,8 @@ module.exports = {
          "name":"Topografisk kort - Open Street Map",
          "abstract":"<p>Kortet hentes fra Open Street Map.</p><br><img src='https://nextcloud.gc2.io/index.php/apps/files_sharing/publicpreview/d66QC8j5mNi4xDS?x=2553&y=827&a=true&file=open_street_map.png&scalingup=0'>",
          "config":{
-            "maxZoom":19,
-            "maxNativeZoom":19,
+            "maxZoom":21,
+            "maxNativeZoom":21,
             "attribution":"&copy; Open Street Map"
          }
       },      
@@ -1008,8 +1008,8 @@ module.exports = {
         "name": "Stamen Toner",
         "abstract":"<p>Kortet hentes fra Stamen Toner.</p><br><img src='https://nextcloud.gc2.io/index.php/apps/files_sharing/publicpreview/YpYDEbo6C8BX34a?x=2553&y=827&a=true&file=stamen_toner_dark.png&scalingup=0'>",
         "config":{
-          "maxZoom":19,
-          "maxNativeZoom":19,
+          "maxZoom":21,
+          "maxNativeZoom":21,
           "attribution":"&copy; Stamen Toner"
         }
       },      
@@ -1018,8 +1018,8 @@ module.exports = {
         "name": "Stamen Toner Light",
         "abstract":"<p>Kortet hentes fra Stamen Toner.</p><br><img src='https://nextcloud.gc2.io/index.php/apps/files_sharing/publicpreview/YpYDEbo6C8BX34a?x=2553&y=827&a=true&file=stamen_toner_light.png&scalingup=0'>",
         "config":{
-          "maxZoom":19,
-          "maxNativeZoom":19,
+          "maxZoom":21,
+          "maxNativeZoom":21,
           "attribution":"&copy; Stamen Toner"
         }
       },
@@ -1029,8 +1029,8 @@ module.exports = {
          "db": "baselayers", 
          "host": "https://gc2.io",
          "config": {
-            "maxZoom":19,
-            "maxNativeZoom":19,
+            "maxZoom":21,
+            "maxNativeZoom":21,
             "attribution":"&copy; Styrelsen for Dataforsyning og Effektivisering." 
          }
       }
