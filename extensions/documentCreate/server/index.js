@@ -21,6 +21,7 @@ moment.locale("da_DK");
 
 var BACKEND = config.backend;
 
+const nopostcase = 0;
 const REQCASETYPEID = 44;
 const ADRCASETYPEID = 50;
 const SYNCSOURCE = 24;
@@ -165,7 +166,14 @@ router.post('/api/extension/documentCreateSendFeature', function (req, response)
                             if (result.parentType == 3){
                                 addPartRequestCase(result.caseId,req.body.features[0].properties.adgangsadresseid)
                             } else{
-                                addPartRequestCase(result.caseId,req.body.features[0].properties.adresseid)
+                                if ("adresseid" in result){
+
+                                    partbody = makePartBodyHenvendelse(caseId,result.adresseid)
+                                    putPartToCaseDn(partbody,caseId)
+                                } else {
+                                    addPartRequestCase(result.caseId,req.body.features[0].properties.adresseid)
+                                }
+
                             }
 
                             var postCaseToGc2Promise = postToGC2(req, req.body.db);
@@ -248,19 +256,45 @@ function GetParentFolder(ejdCaseId, parentId, parenttype, dnTitle, esrnr, enhadr
             }
             // parentfolder found now search for folder kundehenvendelse
             if (result.parentid > 0){
+                // get parts
+
+                getParentParts = getCaseParts(result.parentid );
                 getParentPromise = getFoldersDn(result.parentid, result.parenttype );
-                Promise.all([getParentPromise]).then(function (values) {
+                Promise.all([getParentParts,getParentPromise]).then(function (values) {
                     for (i = 0; i < values[0].length; i++) {
                         // if kundehenvendelser found use this folder as result else remain current result
-                        if (values[0][i].name == "Kundehenvendelser") {
+                        if (values[0][i].pickerName == "Adresse") {
                             // 
-                            result.parentid = values[0][i].nodeId;
-                            result.parenttype = values[0][i].nodeType;
+                            result.adresseid = values[0][i].parts[0].partRecordId;
                             console.log(result)
                         }
                     }
+                    for (i = 0; i < values[1].length; i++) {
+                        // if kundehenvendelser found use this folder as result else remain current result
+                        if (values[1][i].name == "Kundehenvendelser") {
+                            // 
+                            result.parentid = values[1][i].nodeId;
+                            result.parenttype = values[1][i].nodeType;
+                            console.log(result)
+                        }
+                    }
+
                     resolve(result);
                 })
+
+                // get folder                
+                // Promise.all([getParentPromise]).then(function (values) {
+                //     for (i = 0; i < values[0].length; i++) {
+                //         // if kundehenvendelser found use this folder as result else remain current result
+                //         if (values[0][i].name == "Kundehenvendelser") {
+                //             // 
+                //             result.parentid = values[0][i].nodeId;
+                //             result.parenttype = values[0][i].nodeType;
+                //             console.log(result)
+                //         }
+                //     }
+                //     resolve(result);
+                // })
             } else {
 
                 // make adgangsadressesag
@@ -342,6 +376,14 @@ function createAddressPart(dnTitle, adrguid, ejdnr) {
     })
 }
 
+// get parts 
+function getCaseParts(caseid){
+//    {{url}}Cases/17129/parts
+    url = 'https://docunoteapi.vmr.dk/api/v1/Cases/' + caseid + '/parts'
+    partjson = ReqToDn(url)
+    return partjson
+    
+}
 
 function addPartsToCase(esrnr, adrguid, caseId) {
     // get ids for esrnr and adrguid
@@ -643,36 +685,42 @@ function postCaseToDn(casebody) {
                 'userName': USERNAME
             }
         };
-    return new Promise(function(resolve, reject) {
-        var req = https.request(options, function (res) {
-            var chunks = [];
-            //response.header('content-type', 'text/plain');
-            res.on('error', function (e) {
-                console.log(e);
-                reject(e);
-            });
-            res.on('data', function (chunk) {
-                chunks.push(chunk);
-                console.log('Response: ' + chunk);
-            });
-            res.on("end", function () {
-                var jsfile = new Buffer.concat(chunks); 
-                //chunks = Buffer.concat(chunks).toString;
-                //response.send(jsfile);
+    // if (nopostcase==1){
+    //     return {}
+    // }
+    // else{
+        return new Promise(function(resolve, reject) {
+            var req = https.request(options, function (res) {
+                var chunks = [];
+                //response.header('content-type', 'text/plain');
+                res.on('error', function (e) {
+                    console.log(e);
+                    reject(e);
+                });
+                res.on('data', function (chunk) {
+                    chunks.push(chunk);
+                    console.log('Response: ' + chunk);
+                });
+                res.on("end", function () {
+                    var jsfile = new Buffer.concat(chunks); 
+                    //chunks = Buffer.concat(chunks).toString;
+                    //response.send(jsfile);
 
-                console.log(JSON.parse(jsfile))
-                if ('errorCode' in JSON.parse(jsfile)) {
-                    reject(JSON.parse(jsfile))
-                    //resolve(JSON.parse(jsfile));
-                } else {
-                    resolve(JSON.parse(jsfile));
-                }
-              
-            });
-        })
-        req.write(postData, 'utf8');
-        req.end();  
-    });
+                    console.log(JSON.parse(jsfile))
+                    if ('errorCode' in JSON.parse(jsfile)) {
+                        reject(JSON.parse(jsfile))
+                        //resolve(JSON.parse(jsfile));
+                    } else {
+                        resolve(JSON.parse(jsfile));
+                    }
+                
+                });
+            })
+            req.write(postData, 'utf8');
+            req.end();  
+        });        
+    // }
+
 }
 
 
