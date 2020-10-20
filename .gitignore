@@ -117,3 +117,4 @@ public/js/templates.js
 
 # Environment variables
 .env
+extensions/geosag/server/config.js
