@@ -1589,19 +1589,21 @@ module.exports = {
                         let activeTilelayers = activelayers.filter(layer => !layer.startsWith(LAYER.VECTOR + ':') && !layer.startsWith(LAYER.VECTOR_TILE + ':') && !layer.startsWith(LAYER.WEBGL + ':'))
                         if (activeTilelayers.length > 0) {
                             sqlQuery.init(qstore, wkt, "3857", (store) => {
-                                sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + store.key, store.geoJSON.features);
-                                store.layer.eachLayer((layer) => {
-                                    intersectingFeatures.push({
-                                        feature: layer.feature,
-                                        layer: layer,
-                                        layerKey: store.key
-                                    });
-                                })
-                                layers.decrementCountLoading("_vidi_sql_" + store.id);
-                                backboneEvents.get().trigger("doneLoading:layers", "_vidi_sql_" + store.id);
-                                if (layers.getCountLoading() === 0) {
-                                    _self.displayAttributesPopup(intersectingFeatures, e);
-                                }
+                                setTimeout(()=> {
+                                    sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + store.key, store.geoJSON.features);
+                                    store.layer.eachLayer((layer) => {
+                                        intersectingFeatures.push({
+                                            feature: layer.feature,
+                                            layer: layer,
+                                            layerKey: store.key
+                                        });
+                                    })
+                                    layers.decrementCountLoading("_vidi_sql_" + store.id);
+                                    backboneEvents.get().trigger("doneLoading:layers", "_vidi_sql_" + store.id);
+                                    if (layers.getCountLoading() === 0) {
+                                        _self.displayAttributesPopup(intersectingFeatures, e);
+                                    }
+                                }, 200)
                             }, null, [coord3857[0], coord3857[1]]);
                         }
                         let clickBounds = L.latLngBounds(e.latlng, e.latlng);

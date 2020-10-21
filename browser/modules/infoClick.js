@@ -88,19 +88,21 @@ module.exports = {
                     } else {
                         let intersectingFeatures = [];
                         sqlQuery.init(qstore, wkt, "3857", (store) => {
-                            sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + store.key, store.geoJSON.features);
-                            store.layer.eachLayer((layer) => {
-                                intersectingFeatures.push({
-                                    feature: layer.feature,
-                                    layer: layer,
-                                    layerKey: store.key
-                                });
-                            })
-                            _layers.decrementCountLoading("_vidi_sql_" + store.id);
-                            backboneEvents.get().trigger("doneLoading:layers", "_vidi_sql_" + store.id);
-                            if (_layers.getCountLoading() === 0) {
-                                layerTree.displayAttributesPopup(intersectingFeatures, e);
-                            }
+                            setTimeout(()=> {
+                                sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + store.key, store.geoJSON.features);
+                                store.layer.eachLayer((layer) => {
+                                    intersectingFeatures.push({
+                                        feature: layer.feature,
+                                        layer: layer,
+                                        layerKey: store.key
+                                    });
+                                })
+                                _layers.decrementCountLoading("_vidi_sql_" + store.id);
+                                backboneEvents.get().trigger("doneLoading:layers", "_vidi_sql_" + store.id);
+                                if (_layers.getCountLoading() === 0) {
+                                    layerTree.displayAttributesPopup(intersectingFeatures, e);
+                                }
+                            }, 200)
                         }, null, [coords.lat, coords.lng]);
 
                     }
