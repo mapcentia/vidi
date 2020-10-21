@@ -75,6 +75,7 @@ let MarkupGenerator = require('./MarkupGenerator');
 let markupGeneratorInstance = new MarkupGenerator();
 
 import {GROUP_CHILD_TYPE_LAYER, GROUP_CHILD_TYPE_GROUP, LayerSorting} from './LayerSorting';
+import sq from "../../../bower_components/momentjs/src/locale/sq";
 
 let layerSortingInstance = new LayerSorting();
 let latestFullTreeStructure = false;
@@ -1904,7 +1905,10 @@ module.exports = {
                     }).setLatLng(event.latlng).setContent(`<div>
                                                                 ${additionalControls}
                                                                 <div style="margin-right: 5px; margin-left: 2px">${accordion}</div>
-                                                            </div>`).openOn(cloud.get().map);
+                                                            </div>`).openOn(cloud.get().map)
+                        .on('remove', () => {
+                            sqlQuery.resetAll();
+                        });
 
                 }
             }

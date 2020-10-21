@@ -295,7 +295,10 @@ module.exports = {
                                 })
                                     .setLatLng(infoClickPoint)
                                     .setContent(`<div id="info-box-pop-up"></div>`)
-                                    .openOn(cloud.get().map);
+                                    .openOn(cloud.get().map)
+                                    .on('remove', ()=>{
+                                       _self.resetAll();
+                                    });
                                 $("#info-box-pop-up").html(popUpInner);
 
                             } else {
