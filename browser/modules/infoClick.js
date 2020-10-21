@@ -6,6 +6,8 @@
 
 'use strict';
 
+import {LAYER} from "./layerTree/constants";
+
 const MODULE_ID = `infoClick`;
 
 var cloud;
@@ -13,6 +15,8 @@ var backboneEvents;
 var utils;
 var clicktimer;
 var sqlQuery;
+var layerTree;
+var _layers;
 var qstore = [];
 var active = false;
 var _self = false;
@@ -27,6 +31,8 @@ module.exports = {
         sqlQuery = o.sqlQuery;
         backboneEvents = o.backboneEvents;
         utils = o.utils;
+        layerTree = o.layerTree;
+        _layers = o.layers;
         _self = this;
         return this;
     },
@@ -62,19 +68,42 @@ module.exports = {
             if (clicktimer) {
                 clearTimeout(clicktimer);
             } else {
-                clicktimer = setTimeout(function (e) {
+                clicktimer = setTimeout(function () {
                     clicktimer = undefined;
                     var coords = event.getCoordinate(), wkt;
                     wkt = "POINT(" + coords.x + " " + coords.y + ")";
-                    sqlQuery.init(qstore, wkt, "3857", null, null, [coords.lat, coords.lng], false, false, false, (layerId) => {
-                        setTimeout(() => {
-                            let parentLayer = cloud.get().map._layers[layerId];
-                            let clearQueryResults = true;
-                            if (parentLayer && parentLayer.editor && parentLayer.editor.enabled()) clearQueryResults = false;
-                            if (clearQueryResults) backboneEvents.get().trigger("sqlQuery:clear");
-                        }, 100);
-                    }, () => {
-                    }, "", true);
+
+                    // Cross Multi select disabled
+                    if (typeof window.vidiConfig.crossMultiSelect === "undefined" || window.vidiConfig.crossMultiSelect === false) {
+                        sqlQuery.init(qstore, wkt, "3857", null, null, [coords.lat, coords.lng], false, false, false, (layerId) => {
+                            setTimeout(() => {
+                                let parentLayer = cloud.get().map._layers[layerId];
+                                let clearQueryResults = true;
+                                if (parentLayer && parentLayer.editor && parentLayer.editor.enabled()) clearQueryResults = false;
+                                if (clearQueryResults) backboneEvents.get().trigger("sqlQuery:clear");
+                            }, 100);
+                        }, () => {
+                        }, "", true);
+                        // Cross Multi select enabled
+                    } else {
+                        let intersectingFeatures = [];
+                        sqlQuery.init(qstore, wkt, "3857", (store) => {
+                            sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + store.key, store.geoJSON.features);
+                            store.layer.eachLayer((layer) => {
+                                intersectingFeatures.push({
+                                    feature: layer.feature,
+                                    layer: layer,
+                                    layerKey: store.key
+                                });
+                            })
+                            _layers.decrementCountLoading("_vidi_sql_" + store.id);
+                            backboneEvents.get().trigger("doneLoading:layers", "_vidi_sql_" + store.id);
+                            if (_layers.getCountLoading() === 0) {
+                                layerTree.displayAttributesPopup(intersectingFeatures, e);
+                            }
+                        }, null, [coords.lat, coords.lng]);
+
+                    }
                 }, 250);
             }
         });

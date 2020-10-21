@@ -185,6 +185,7 @@ geocloud = (function () {
             }
 
             this.layer.id = this.defaults.name;
+            this.key = this.defaults.key;
         };
         this.geoJSON = null;
         this.featureStore = null;

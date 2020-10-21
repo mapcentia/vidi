@@ -90,6 +90,18 @@ var defaultTemplate =
         {{/_vidi_content.fields}}
     </div>`;
 
+var defaultTemplateForCrossMultiSelect =
+    `<div class="cartodb-popup-content">
+        {{#_vidi_content.fields}}
+            <h4>{{title}}</h4>
+            {{#if value}}
+                <p {{#if type}}class="{{type}}"{{/if}}>{{{value}}}</p>
+            {{else}}
+                <p class="empty">null</p>
+            {{/if}}
+        {{/_vidi_content.fields}}
+    </div>`;
+
 /**
  * Default template for raster layers
  * @type {string}
@@ -488,6 +500,7 @@ module.exports = {
                 uri: "/api/sql",
                 clickable: true,
                 id: index,
+                key: value,
                 base64: true,
                 styleMap: styleForSelectedFeatures,
                 // Set _vidi_type on all vector layers,
@@ -768,7 +781,7 @@ module.exports = {
     getVectorTemplate: function (layerKey) {
         let metaDataKeys = meta.getMetaDataKeys();
         let parsedMeta = layerTree.parseLayerMeta(metaDataKeys[layerKey]);
-        let template = (typeof metaDataKeys[layerKey].infowindow !== "undefined" && metaDataKeys[layerKey].infowindow.template !== "") ? metaDataKeys[layerKey].infowindow.template : metaDataKeys[layerKey].type === "RASTER" ? defaultTemplateRaster : defaultTemplate;
+        let template = (typeof metaDataKeys[layerKey].infowindow !== "undefined" && metaDataKeys[layerKey].infowindow.template !== "") ? metaDataKeys[layerKey].infowindow.template : defaultTemplateForCrossMultiSelect;
         template = (parsedMeta.info_template && parsedMeta.info_template !== "") ? parsedMeta.info_template : template;
         return template;
     },

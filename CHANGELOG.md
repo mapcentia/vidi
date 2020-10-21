@@ -68,6 +68,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - Added boolean config `featureInfoTableOnMap` in `config/config.js`. This is a shotcut to set `info_template`, `info_element_selector` and `info_function`, so the single feature info pops up on the map instead of the right slide panel. Great for the `embed.tmpl`
 - New button "Fit bounds to filter" in layer filters, which will set the view extent to the bounds of the filtered layer.
 - New "Labels" panel for raster tile layers with a checkbox for hiding/showing labels on the layer. Works for both MapServer and QGIS back-end (GC2 must support this).
+- Added boolean config `crossMultiSelect` in `config/config.js`. This will enable cross multi select on both vector and raster tile layers. This will result in a unified feature info experience, which are well suited for informative maps using the `embed.tmpl` template. Can be set in runtime config. 
 
 ### Changed
 - `public\js\vidi.js`is now required instead of loaded in a script tag. This way it's transpiled and can contain new JavaScript syntax.

@@ -140,6 +140,7 @@ const marked = require('marked');
 
 let filterComp = {};
 let lastFilter;
+let utils;
 
 /**
  *
@@ -156,6 +157,7 @@ module.exports = {
         switchLayer = o.switchLayer;
         backboneEvents = o.backboneEvents;
         extensions = o.extensions;
+        utils = o.utils;
 
         offlineModeControlsManager = new OfflineModeControlsManager(meta);
 
@@ -1567,8 +1569,8 @@ module.exports = {
                     // If there is no handler for specific layer, then display attributes only
                     layer.on("click", function (e) {
 
-                        // Multi select disabled
-                        if (typeof window.vidiConfig.vectorMultiSelect === "undefined" || window.vidiConfig.vectorMultiSelect === false) {
+                        // Cross Multi select disabled
+                        if (typeof window.vidiConfig.crossMultiSelect === "undefined" || window.vidiConfig.crossMultiSelect === false) {
                             _self.displayAttributesPopup([{
                                 feature: feature,
                                 layer: layer,
@@ -1577,11 +1579,32 @@ module.exports = {
                             return
                         }
 
-                        // multi select enabled
+                        // Cross multi select enabled
+                        let coord3857 = utils.transform("EPSG:4326", "EPSG:3857", [e.latlng.lng, e.latlng.lat]);
+                        let wkt = "POINT(" + coord3857[0] + " " + coord3857[1] + ")";
+                        let intersectingFeatures = [];
+                        // Get active raster tile layers, so we can check if database should be queried
+                        let activelayers = layers.getMapLayers() ? layers.getLayers().split(",") : [];
+                        let activeTilelayers = activelayers.filter(layer => !layer.startsWith(LAYER.VECTOR + ':') && !layer.startsWith(LAYER.VECTOR_TILE + ':') && !layer.startsWith(LAYER.WEBGL + ':'))
+                        if (activeTilelayers.length > 0) {
+                            sqlQuery.init(qstore, wkt, "3857", (store) => {
+                                sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + store.key, store.geoJSON.features);
+                                store.layer.eachLayer((layer) => {
+                                    intersectingFeatures.push({
+                                        feature: layer.feature,
+                                        layer: layer,
+                                        layerKey: store.key
+                                    });
+                                })
+                                layers.decrementCountLoading("_vidi_sql_" + store.id);
+                                backboneEvents.get().trigger("doneLoading:layers", "_vidi_sql_" + store.id);
+                                if (layers.getCountLoading() === 0) {
+                                    _self.displayAttributesPopup(intersectingFeatures, e);
+                                }
+                            }, null, [coord3857[0], coord3857[1]]);
+                        }
                         let clickBounds = L.latLngBounds(e.latlng, e.latlng);
                         let distance = 10 * MAP_RESOLUTIONS[cloud.get().getZoom()];
-                        let intersectingFeatures = [];
-                        let intersectingLayers = [];
                         let mapObj = cloud.get().map;
                         for (let l in mapObj._layers) {
                             let overlay = mapObj._layers[l];
@@ -1610,9 +1633,12 @@ module.exports = {
                                         console.log(e);
                                     }
                                 }
+                                // No active raster tile layers - open the pop-up
+                                if (activeTilelayers.length === 0) {
+                                    _self.displayAttributesPopup(intersectingFeatures, e);
+                                }
                             }
                         }
-                        _self.displayAttributesPopup(intersectingFeatures, e, '');
                     });
                 }
             },
@@ -1837,9 +1863,10 @@ module.exports = {
                 if (tmpl) {
                     // Convert Markdown in text fields
                     let metaDataKeys = meta.getMetaDataKeys();
+                    let title = metaDataKeys[layerKey].f_table_title ? metaDataKeys[layerKey].f_table_title : metaDataKeys[layerKey].f_table_name;
                     for (const property in metaDataKeys[layerKey].fields) {
                         if (metaDataKeys[layerKey].fields[property].type === "text") {
-                            properties[property] = marked(properties[property]);
+                            //properties[property] = marked(properties[property]);
                         }
                     }
                     //properties.text1 = marked(properties.text1);
@@ -1853,7 +1880,7 @@ module.exports = {
                         accordion += `<div class="panel panel-default vector-feature-info-panel" id="vector-feature-info-panel-${randText}" style="box-shadow: none;border-radius: 0; margin-bottom: 0">
                                         <div class="panel-heading" role="tab" style="padding: 8px 0px 8px 15px;border-bottom: 1px white solid">
                                             <h4 class="panel-title">
-                                                <a style="display: block; color: black" class="accordion-toggle js-toggle-feature-panel" data-toggle="collapse" data-parent="#layers" href="#collapse${randText}">${layerKey}</a>
+                                                <a style="display: block; color: black" class="accordion-toggle js-toggle-feature-panel" data-toggle="collapse" data-parent="#layers" href="#collapse${randText}">${title}</a>
                                             </h4>
                                         </div>
                                         <ul class="list-group" id="group-${randText}" role="tabpanel"><div id="collapse${randText}" class="accordion-body collapse" style="padding: 3px 8px 3px 8px">${renderedText}</div></ul>
@@ -1863,7 +1890,7 @@ module.exports = {
                     }
                 }
             } catch (e) {
-                console.info("Error in pop-up template for: " + layerKey);
+                console.info("Error in pop-up template for: " + layerKey, e);
             }
 
             if (count > 0) {
