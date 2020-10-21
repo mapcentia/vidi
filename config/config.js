@@ -919,6 +919,19 @@ module.exports = {
         }
     },
 
+    // =========================================================
+    // Ignore URLs for caching by ServiceWorker.
+    // Works wonders for embedding .mp4-videos with timecodes like
+    // "...2020.mp4#t=308,312"
+    // ==========================================================
+
+    "urlsIgnoredForCaching": [
+        {
+            "regExp": true,
+            "requested": "maptv.geopartner.dk"
+        }
+    ],
+
     // ===================================================
     // Configuration of which base layers are available
     //
