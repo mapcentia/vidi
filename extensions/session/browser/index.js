@@ -171,6 +171,7 @@ module.exports = {
                     dataType: 'json',
                     url: "/api/session/status",
                     type: "GET",
+                    data: "autoLogin=" + autoLogin + "&autoLoginMaxAge=" + autoLoginMaxAge,
                     success: function (data) {
                         if (data.status.authenticated) {                            
                             backboneEvents.get().trigger(`session:authChange`, true);

@@ -192,8 +192,8 @@ TODO fix formular så den ikke nulstilles hver gang
  */
 var getExistingDocs = function (key, fileIdent = false) {
     // turn on layers with filter on address! - easy peasy?
-
     //build the right stuff
+    
     var filter = documentCreateBuildFilter(key, fileIdent)
     var caseFound = false;
     var layersToReload = [];
@@ -250,7 +250,6 @@ var getExistingDocs = function (key, fileIdent = false) {
         //There is stuff, go there
         var myBounds = new L.LatLngBounds(bounds)
         //console.log(myBounds)
-
         //wait for ready event!
         backboneEvents.get().once('allDoneLoading:layers', () => {
             cloud.get().map.fitBounds(myBounds, {maxZoom: config.extensionConfig.documentCreate.maxZoom});
@@ -262,13 +261,14 @@ var getExistingDocs = function (key, fileIdent = false) {
             
                     // set the cosmetic backgroundlayer visible (if specified)
                     if (conf.cosmeticbackgroundlayer) {
-                        layerTree.reloadLayer(conf.cosmeticbackgroundlayer);
+                        if (!(layerTree.getState().activeLayers.includes(conf.cosmeticbackgroundlayer))) {
+                            console.log('reload wms')
+                            layerTree.reloadLayer(conf.cosmeticbackgroundlayer);
+                        }
                     }
                 });
             }
         }) 
-
-        // create list with links 
     }
     if (fileIdent) {
         // we are in a editing session
@@ -339,14 +339,7 @@ var documentCreateGetFilterBounds = function (key, isfileIdent = false) {map
     return boundsArr
 }
 
-var documentGetExistingCasesFilter = function (key, isfileIdent = false) {
-    // if (!_USERSTR) {
-    //     $.when(_checkLoginDocMenu()).done(function(a1){
-    //         // the code here will be executed when all four ajax requests resolve.
-    //         // a1, a2, a3 and a4 are lists of length 3 containing the response text,
-    //         // status, and jqXHR object for each of the four ajax calls respectively.
-    //     });
-    // }
+var documentGetExistingCasesFilter = function (key, isfileIdent = false) {    
     //build query
     var qrystr = 'WITH cases (casenumber, sagsstatus, forsyningstype, prioritet, sagsnavn, ansvarlig, problemtype, ' + config.extensionConfig.documentCreate.fileIdentCol +', henvendelsesdato ) AS ('
     var tables = []
@@ -481,31 +474,38 @@ var documentCreateBuildFilter = function (key = undefined, isfileIdent = false) 
 }
 
 var documentCreateApplyFilter = function (filter) {
-    for (let layerKey in filter){
-        console.log('documentCreate - Apply filter to '+layerKey)
+    // ensure all filters, layers, and states are active,
+    // before attempting to apply filters
+    if (DClayers.length > 0 &&
+        _USERSTR.length > 0 &&
+        firstRunner === false) {
 
-        //Make sure layer is on
-        //TODO tænd laget hvis det ikke allerede er tændt! - skal være tændt før man kan ApplyFilter
-        layerTree.reloadLayer(layerKey)            
-            
-        //Toggle the filter
-        if (filter[layerKey].columns.length == 0) {
-            // insert fixed dummy filter
-            // in order to filter out all features from layer
-            var blankfeed = {expression: "=",
-                            fieldname: "adresse",
-                            restriction: false,
-                            value: "---"};
-            filter[layerKey].columns.push(blankfeed);
+        for (let layerKey in filter){
+            console.log('documentCreate - Apply filter to '+layerKey)
 
-            layerTree.onApplyArbitraryFiltersHandler({ layerKey,filters: filter[layerKey]}, 't');
-        } else {
-            layerTree.onApplyArbitraryFiltersHandler({ layerKey,filters: filter[layerKey]}, 't');
+            //Make sure layer is on
+            //TODO tænd laget hvis det ikke allerede er tændt! - skal være tændt før man kan ApplyFilter
+            layerTree.reloadLayer(layerKey)            
+                
+            //Toggle the filter
+            if (filter[layerKey].columns.length == 0) {
+                // insert fixed dummy filter
+                // in order to filter out all features from layer
+                var blankfeed = {expression: "=",
+                                fieldname: "adresse",
+                                restriction: false,
+                                value: "---"};
+                filter[layerKey].columns.push(blankfeed);
+
+                layerTree.onApplyArbitraryFiltersHandler({ layerKey,filters: filter[layerKey]}, 't');
+            } else {
+                layerTree.onApplyArbitraryFiltersHandler({ layerKey,filters: filter[layerKey]}, 't');
+            }
+            //Reload
+            layerTree.reloadLayerOnFiltersChange(layerKey)
+
+            continue;
         }
-        //Reload
-        layerTree.reloadLayerOnFiltersChange(layerKey)
-
-        continue;
     }
 };
 var clearExistingDocFilters = function () {
@@ -527,7 +527,6 @@ var mapObj;
     
 var onSearchLoad = function () {
     console.log('documentCreate - search trigered')
-    //_checkLoginDocMenu();
     // VMR
     // filter to content on key
     getExistingDocs($('#documentCreate-custom-search').val());
@@ -622,51 +621,6 @@ var getEjdNr = function(adgangsadresseid) {
       //  return
     };
     
-
-/**
- * Checks login
- */
-var _checkLoginDocMenu = function () {    
-    xhr = $.ajax({
-        method: "GET",
-        url: "/api/session/status",
-        async: false,
-        scriptCharset: "utf-8",
-        success: function (response) {
-            if (response.status.authenticated == true) {
-                // determine user role (USER OR SUB_USER)
-                //$("documentCreate-custom-search").prop('disabled', false);
-                if (response.status.subUser == false) {
-                    currentUserRole = userRole.USER;
-                    _USERSTR = response.status.userName
-                    return response.status.authenticated;
-                } else {
-                    currentUserRole = userRole.SUB_USER;
-                    _USERSTR = response.status.screen_name + '@' + urlparser.db;
-                    return response.status.authenticated;
-                }
-
-            } else {
-                //disable submit button
-                clearExistingDocFilters();
-                $('#documentList-feature-content').html('')
-                //$("documentCreate-custom-search").prop('disabled', true);
-                DClayers = [];
-                // reset add. search
-                $("#" + id).val('');
-                resultLayer.clearLayers();
-                _USERSTR = "";
-                return response.status.unauthorized;
-
-            } 
-        },
-        error: function () {
-            throw new Error('Fejl i request');
-        }
-    })
-    
-};
-
 /**
  * 
  * @param {*} tablename 
@@ -772,24 +726,25 @@ var documentCreateFeatureSend = function (tablename,feature) {
  * @private
  */
 var buildServiceSelect = function (id) {
-    DClayers = [];
-    // clear select services
-    $('#'+select_id).find('option').remove().end().append('<option value=""></option>').val('')
-    
-    metaData.data.forEach(function(d) {
-        if (d.tags) {
-            // Add layer to select box if tag is correctly defined
-            if (d.tags.includes(config.extensionConfig.documentCreate.metaTag)) {
-                if (d.f_table_schema+'.'+d.f_table_name == config.extensionConfig.documentCreate.defaulttable) {
-                    $('#'+select_id).append('<option selected value="'+d.f_table_schema+'.'+d.f_table_name+'">'+d.f_table_title+'</option>');
-                } else {
-                    $('#'+select_id).append('<option value="'+d.f_table_schema+'.'+d.f_table_name+'">'+d.f_table_title+'</option>');
-                }
-                DClayers.push(d.f_table_schema+'.'+d.f_table_name);
-            };
-        }
+    if (DClayers.length == 0) {
+        // clear select services
+        $('#'+select_id).find('option').remove().end().append('<option value=""></option>').val('')
+        
+        metaData.data.forEach(function(d) {
+            if (d.tags) {
+                // Add layer to select box if tag is correctly defined
+                if (d.tags.includes(config.extensionConfig.documentCreate.metaTag)) {
+                    if (d.f_table_schema+'.'+d.f_table_name == config.extensionConfig.documentCreate.defaulttable) {
+                        $('#'+select_id).append('<option selected value="'+d.f_table_schema+'.'+d.f_table_name+'">'+d.f_table_title+'</option>');
+                    } else {
+                        $('#'+select_id).append('<option value="'+d.f_table_schema+'.'+d.f_table_name+'">'+d.f_table_title+'</option>');
+                    }
+                    DClayers.push(d.f_table_schema+'.'+d.f_table_name);
+                };
+            }
 
-    });
+        });
+    }
     
 };
 
@@ -828,7 +783,12 @@ var buildFeatureMeta = function (layer, previousLayer = undefined) {
 
         // set the backgroundlayer visible
         if (conf.cosmeticbackgroundlayer) {
-            layerTree.reloadLayer(conf.cosmeticbackgroundlayer);
+            //layerTree.reloadLayer(conf.cosmeticbackgroundlayer);
+            if (!(layerTree.getState().activeLayers.includes(conf.cosmeticbackgroundlayer))) {
+                console.log('reload wms')
+                layerTree.reloadLayer(conf.cosmeticbackgroundlayer);
+             }
+
         }
         
         for (col in fields) {
@@ -1060,10 +1020,7 @@ var SetGUI_ControlState = function (state_Enum) {
 var loadAndInitFilters = function (active_state) {
     try {    
         //check login status
-        //_checkLoginDocMenu();
-        if (active_state === true &&
-            DClayers.length == 0) {   
-
+        if (active_state === true) {   
             buildServiceSelect(select_id);
         }        
     } catch (error) {
@@ -1087,8 +1044,8 @@ var loadAndInitFilters = function (active_state) {
                 clearExistingDocFilters()
             }
         } catch (error) {
-            console.log(error.stack);
-            console.info('loadAndInitFilters - failed due to layers are not yet loaded, hence reset firstRunnervariable');
+            //console.log(error.stack);
+            console.info('loadAndInitFilters - failed due to layers are not yet loaded, firstRunnervariable is reset');
             firstRunner = true;
         }
         // query for last synchronization and put in user information
@@ -1353,7 +1310,9 @@ module.exports = {
                 // Activates module
                 backboneEvents.get().on(`on:${exId}`, () => {
                     console.log('Starting documentCreate')
+                    /*
                     backboneEvents.get().trigger("refresh:meta");
+                    */
                     me.setState({
                         active: true
                     });
@@ -1423,39 +1382,48 @@ module.exports = {
 
                 backboneEvents.get().on(`session:authChange`, (authenticated) => {
                     console.log("inside session:authChang, authenticated: " + authenticated);
-                    _checkLoginDocMenu();
-                    if (authenticated) {
-                        // determine user role (USER OR SUB_USER)
-                        //$("documentCreate-custom-search").prop('disabled', false);
-                        SetGUI_ControlState(GUI_CONTROL_STATE.AUTHENTICATE_HIDE_ALERT);
-                        me.setState({
+                    fetch("/api/session/status")
+                        .then(r => r.json())
+                        .then(obj => me.setState({
+                            authed: authenticated,                            
+                            active: true,
+                            subuser: obj.status.subuser,
+                            screen_name: obj.status.screen_name
+                        }, () => {
+                            // Get foresp. if we really logged in.
+                            // TODO: check we're in the right schema! (LKM: ER DET NØDVENDIGT?)
+                            console.log("me.state.authed: " + me.state.authed);
+                            if (me.state.authed) {
+                                if (me.state.subuser === false) {
+                                    _USERSTR = me.state.screen_name
+                                } else {
+                                    _USERSTR = me.state.screen_name + '@' + urlparser.db;
+                                }                   
+                                SetGUI_ControlState(GUI_CONTROL_STATE.AUTHENTICATE_HIDE_ALERT);
+                                                               
+                                // run method here in order to support switch in event order, when running
+                                // extension along with the session object autoLogin feature
+                                loadAndInitFilters(me.state.active);
+                            } else {
+                                // disable all controls
+                                // notify, no user is logged in
+                                SetGUI_ControlState(GUI_CONTROL_STATE.NO_CONTROLS_VISIBLE + GUI_CONTROL_STATE.AUTHENTICATE_SHOW_ALERT);
+                                editingAllowed = false;
+                               _USERSTR = "";
+                                clearExistingDocFilters();
+                                $('#documentList-feature-content').html('');
+                                firstRunner = true;
+                                DClayers = [];                                
+                                $("#" + id).val('');
+                                resultLayer.clearLayers();
+                            }
+                        }))
+                        .catch(e => me.setState({
+                            authed: false,
                             active: true
-                        });  
-                        
-                        // TODO: overveje om dette skal fjernes efter session autologin fix
-                        //buildServiceSelect(select_id);
-                        // run method here in order to support switch in event order, when running
-                        // extension along with the session object autoLogin feature
-                        loadAndInitFilters(me.state.active);                        
-                    } else {
-                        // disable all controls
-                        // notify, no user is logged in
-                        SetGUI_ControlState(GUI_CONTROL_STATE.NO_CONTROLS_VISIBLE + GUI_CONTROL_STATE.AUTHENTICATE_SHOW_ALERT);
-                        editingAllowed = false;
-                        /*
-                        //disable submit button
-                        // $('#mapGo-btn').attr('checked', false);
-                        $("documentCreate-custom-search").prop('disabled', true);
-                        */
-                        clearExistingDocFilters();
-                        $('#documentList-feature-content').html('');
-                        firstRunner = true;
-                        DClayers = [];
-                            // reset add. search
-                        $("#" + id).val('');
-                        resultLayer.clearLayers();
-                    } 
-                });
+                        }
+                ))}
+            );
 
                 // Handle change in service type
                 // ==========================

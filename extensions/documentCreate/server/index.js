@@ -21,6 +21,7 @@ moment.locale("da_DK");
 
 var BACKEND = config.backend;
 
+const nopostcase = 0;
 const REQCASETYPEID = 44;
 const ADRCASETYPEID = 50;
 const SYNCSOURCE = 24;
@@ -69,7 +70,7 @@ router.post('/api/extension/documentCreateSendFeature', function (req, response)
     //console.log(req.body.db)
     
     // check if addresscase is already created
-    const qrystr = 'SELECT adrfileid, parenttype FROM ' + req.body.schema + '.adressesager WHERE adresseguid = \'' + req.body.features[0].properties.adgangsadresseid + '\'';
+    const qrystr = 'SELECT adrfileid, parenttype, dnadrid FROM ' + req.body.schema + '.adressesager WHERE adresseguid = \'' + req.body.features[0].properties.adgangsadresseid + '\'';
 
 //    const qrystr = 'INSERT INTO vmr.adressesager (adrfileid, adresseguid) VALUES (108896,\'0a3f50c1-0523-32b8-e044-0003ba298018\')'
     var getExistinAdrCaseGc2Promise = ReqToGC2(req.session, qrystr, req.body.db);
@@ -77,15 +78,15 @@ router.post('/api/extension/documentCreateSendFeature', function (req, response)
     var dnTitle = oisAddressFormatter(req.body.features[0].properties.adresse)
 
     //Check for existing cases if so use existing parentid
-    getExistinAdrCaseGc2Promise.then(function(result) {
-        console.log(result)
-        console.log(result.features)
+    getExistinAdrCaseGc2Promise.then(function(resultExistingAdrCase) {
+        console.log(resultExistingAdrCase)
+        console.log(resultExistingAdrCase.features)
         
-        if (result.features.length) {
+        if (resultExistingAdrCase.features.length) {
             // adressesagen er oprettet i DN så skal der bare oprettes henvendelsessager under denne
             // 
             // body json for Case
-            bodyreq = makeRequestCaseBody(req, result.features[0].properties.adrfileid, REQCASETYPEID, dnTitle, result.features[0].properties.parenttype)
+            bodyreq = makeRequestCaseBody(req, resultExistingAdrCase.features[0].properties.adrfileid, REQCASETYPEID, dnTitle, resultExistingAdrCase.features[0].properties.parenttype)
             
             var postReqCaseToDnPromise = postCaseToDn(bodyreq);
             postReqCaseToDnPromise.then(function(result) {
@@ -98,14 +99,20 @@ router.post('/api/extension/documentCreateSendFeature', function (req, response)
                     var postCaseToGc2Promise = postToGC2(req, req.body.db);
                     var resultjson = {"message":"Sag oprettet","casenumber": result.number}
 
-                    // tilføj part
+                    // tilføj part, bruger tidligere partid, hvis det findes
                     //partbody = makePartBodyHenvendelse(result.caseId,req.body.features[0].properties.adresseid)
                     // brug adgangsadresse hvis parent er adgangsadressesag ellers brug enhedsadress
-                    if (result.parentType == 3){
-                        addPartRequestCase(result.caseId,req.body.features[0].properties.adgangsadresseid)
-                    } else{
-                        addPartRequestCase(result.caseId,req.body.features[0].properties.adresseid)
-                    }
+//                    if (resultExistingAdrCase.features[0].properties.parentType == 3){
+                        if (resultExistingAdrCase.features[0].properties.dnadrid){
+                            partbody = makePartBodyHenvendelse(result.caseId,resultExistingAdrCase.features[0].properties.dnadrid)
+                            putPartToCaseDn(partbody,result.caseId)
+                        }
+                        else{
+                            addPartRequestCase(result.caseId,req.body.features[0].properties.adresseid)
+                        }
+ //                   } else{
+ //                       addPartRequestCase(result.caseId,req.body.features[0].properties.adresseid)
+ //                   }
 
                     postCaseToGc2Promise.then(function(result){
                         response.status(200).send(resultjson)
@@ -142,35 +149,42 @@ router.post('/api/extension/documentCreateSendFeature', function (req, response)
                 
                 getParentFolderPromise.then(function(result) {
                     bodyreq = makeRequestCaseBody(req, result.parentid, REQCASETYPEID, dnTitle, result.parenttype)
-                    var insertToGc2Promise = SqlInsertToGC2(req.session, 'INSERT INTO ' + req.body.schema + '.adressesager (adrfileid, parenttype, adresseguid) VALUES (' + result.parentid +', ' + result.parenttype +', \'' + req.body.features[0].properties.adgangsadresseid + '\')', req.body.db) 
+                    var insertToGc2Promise = SqlInsertToGC2(req.session, 'INSERT INTO ' + req.body.schema + '.adressesager (adrfileid, parenttype, adresseguid, dnadrid) VALUES (' + result.parentid +', ' + result.parenttype +', \'' + req.body.features[0].properties.adgangsadresseid + '\',' + result.adresseid +')', req.body.db) 
                     // opret adgangsadresseid til brug for seneere opslag.
-                    insertToGc2Promise.then(function(result) {
-                        console.log(result)
+                    insertToGc2Promise.then(function(resultgc2) {
+                        console.log(resultgc2)
                     }, function(err){
                         console.log(err)
                     }                    
                     )                
                     var postReqCaseToDnPromise = postCaseToDn(bodyreq);
-                    postReqCaseToDnPromise.then(function(result) {
-                        if ('caseId' in result) {
-                            console.log(result)
+                    postReqCaseToDnPromise.then(function(resultpostdn) {
+                        if ('caseId' in resultpostdn) {
+                            console.log(resultpostdn)
                             //response.status(200).send('Sag oprettet i DN med journalnummer: ' +result.caseId )
-                            req.body.features[0].properties.fileident = result.caseId
-                            req.body.features[0].properties.casenumber = result.number
+                            req.body.features[0].properties.fileident = resultpostdn.caseId
+                            req.body.features[0].properties.casenumber = resultpostdn.number
 
                             // tilføj part
                             //partbody = makePartBodyHenvendelse(result.caseId,req.body.features[0].properties.adresseid)
                             //putPartToCaseDn(partbody,result.caseId)
                             // brug adgangsadresse hvis parent er adgangsadressesag ellers brug enhedsadress
-                            if (result.parentType == 3){
-                                addPartRequestCase(result.caseId,req.body.features[0].properties.adgangsadresseid)
+                            if (resultpostdn.parentType == 3){
+                                addPartRequestCase(resultpostdn.caseId,req.body.features[0].properties.adgangsadresseid)
                             } else{
-                                addPartRequestCase(result.caseId,req.body.features[0].properties.adresseid)
+                                if ("adresseid" in result){
+
+                                    partbody = makePartBodyHenvendelse(resultpostdn.caseId,result.adresseid)
+                                    putPartToCaseDn(partbody,resultpostdn.caseId)
+                                } else {
+                                    addPartRequestCase(resultpostdn.caseId,req.body.features[0].properties.adresseid)
+                                }
+
                             }
 
                             var postCaseToGc2Promise = postToGC2(req, req.body.db);
-                            var resultjson = {"message":"Sag oprettet","casenumber": result.number}
-                            postCaseToGc2Promise.then(function(result){
+                            var resultjson = {"message":"Sag oprettet","casenumber": resultpostdn.number}
+                            postCaseToGc2Promise.then(function(resultjson){
                                 response.status(200).send(resultjson)
                             }, function(err) {
                                 response.status(500).send('ikke oprettet')
@@ -248,19 +262,33 @@ function GetParentFolder(ejdCaseId, parentId, parenttype, dnTitle, esrnr, enhadr
             }
             // parentfolder found now search for folder kundehenvendelse
             if (result.parentid > 0){
+                // get parts
+
+                getParentParts = getCaseParts(result.parentid );
                 getParentPromise = getFoldersDn(result.parentid, result.parenttype );
-                Promise.all([getParentPromise]).then(function (values) {
+                Promise.all([getParentParts,getParentPromise]).then(function (values) {
                     for (i = 0; i < values[0].length; i++) {
-                        // if kundehenvendelser found use this folder as result else remain current result
-                        if (values[0][i].name == "Kundehenvendelser") {
+                        // Get adressepart
+                        if (values[0][i].pickerName == "Adresse") {
                             // 
-                            result.parentid = values[0][i].nodeId;
-                            result.parenttype = values[0][i].nodeType;
+                            result.adresseid = values[0][i].parts[0].partRecordId;
                             console.log(result)
                         }
                     }
+                    for (i = 0; i < values[1].length; i++) {
+                        // if kundehenvendelser found use this folder as result else remain current result
+                        if (values[1][i].name == "Kundehenvendelser") {
+                            // 
+                            result.parentid = values[1][i].nodeId;
+                            result.parenttype = values[1][i].nodeType;
+                            console.log(result)
+                        }
+                    }
+
                     resolve(result);
                 })
+
+
             } else {
 
                 // make adgangsadressesag
@@ -271,12 +299,13 @@ function GetParentFolder(ejdCaseId, parentId, parenttype, dnTitle, esrnr, enhadr
                     // if rejected get case by syncid
                     result.parentid = values.caseId;
                     result.parenttype = NODETYPECASE;
-                    //ToDo: Create part to add adressesag // Done
+                    //Create part to add adressesag
                     var createcontactpromise = createAddressPart(dnTitle,adgadrguid,esrnr)
                     createcontactpromise.then(function(adressbody) {
                         var createaddresspromise = postCompanyToDn(adressbody)
                         createaddresspromise.then(function(company) {
                             addPartsToCase(esrnr, adgadrguid, values.caseId)
+                            result.adresseid = company.companyId
                             resolve(result);
                             }
                         )
@@ -342,6 +371,14 @@ function createAddressPart(dnTitle, adrguid, ejdnr) {
     })
 }
 
+// get parts 
+function getCaseParts(caseid){
+//    {{url}}Cases/17129/parts
+    url = 'https://docunoteapi.vmr.dk/api/v1/Cases/' + caseid + '/parts'
+    partjson = ReqToDn(url)
+    return partjson
+    
+}
 
 function addPartsToCase(esrnr, adrguid, caseId) {
     // get ids for esrnr and adrguid
@@ -643,36 +680,42 @@ function postCaseToDn(casebody) {
                 'userName': USERNAME
             }
         };
-    return new Promise(function(resolve, reject) {
-        var req = https.request(options, function (res) {
-            var chunks = [];
-            //response.header('content-type', 'text/plain');
-            res.on('error', function (e) {
-                console.log(e);
-                reject(e);
-            });
-            res.on('data', function (chunk) {
-                chunks.push(chunk);
-                console.log('Response: ' + chunk);
-            });
-            res.on("end", function () {
-                var jsfile = new Buffer.concat(chunks); 
-                //chunks = Buffer.concat(chunks).toString;
-                //response.send(jsfile);
+    // if (nopostcase==1){
+    //     return {}
+    // }
+    // else{
+        return new Promise(function(resolve, reject) {
+            var req = https.request(options, function (res) {
+                var chunks = [];
+                //response.header('content-type', 'text/plain');
+                res.on('error', function (e) {
+                    console.log(e);
+                    reject(e);
+                });
+                res.on('data', function (chunk) {
+                    chunks.push(chunk);
+                    console.log('Response: ' + chunk);
+                });
+                res.on("end", function () {
+                    var jsfile = new Buffer.concat(chunks); 
+                    //chunks = Buffer.concat(chunks).toString;
+                    //response.send(jsfile);
 
-                console.log(JSON.parse(jsfile))
-                if ('errorCode' in JSON.parse(jsfile)) {
-                    reject(JSON.parse(jsfile))
-                    //resolve(JSON.parse(jsfile));
-                } else {
-                    resolve(JSON.parse(jsfile));
-                }
-              
-            });
-        })
-        req.write(postData, 'utf8');
-        req.end();  
-    });
+                    console.log(JSON.parse(jsfile))
+                    if ('errorCode' in JSON.parse(jsfile)) {
+                        reject(JSON.parse(jsfile))
+                        //resolve(JSON.parse(jsfile));
+                    } else {
+                        resolve(JSON.parse(jsfile));
+                    }
+                
+                });
+            })
+            req.write(postData, 'utf8');
+            req.end();  
+        });        
+    // }
+
 }
 
 
