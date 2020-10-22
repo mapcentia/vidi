@@ -106,7 +106,9 @@ var snack = function (msg) {
         timeout: 10000
     });
 };
-var resultLayer = new L.FeatureGroup();
+
+var matrikelLayer = new L.FeatureGroup();
+var searchLayer = new L.FeatureGroup();
 
 /**
  *
@@ -251,7 +253,7 @@ module.exports = {
                     })
                 }
 
-                var getJordstykkeByCoordinate = function(E,N, geom = undefined) {
+                var getJordstykkeByCoordinate = function(E,N) {
                     var hostName = 'https://dawa.aws.dk/jordstykker?';
                     
                     var params = {
@@ -261,18 +263,37 @@ module.exports = {
                         srid: '25832'
                     };
 
-                    // TODO: Add toogle to use for getting geometry aswell
-            
                     return new Promise(function(resolve, reject) {
                         fetch(hostName + new URLSearchParams(params))
                             .then(r => r.json())
                             .then(d => {
+                                console.log(d);
                                 resolve(d);
                             })
                             .catch(e => reject(e));
                     });
                 }
 
+                var getJordstykkeGeom = function(matr, elavkode) {
+                    // Builds feature for map
+                    var hostName = 'https://dawa.aws.dk/jordstykker/'+elavkode+'/'+matr+'/?';
+                    
+                    var params = {
+                        cache: 'no-cache',
+                        format: 'geojson',
+                        srid: '4326'
+                    };
+
+                    return new Promise(function(resolve, reject) {
+                        fetch(hostName + new URLSearchParams(params))
+                            .then(r => r.json())
+                            .then(d => {
+                                d.properties.key = elavkode+matr
+                                resolve(d);
+                            })
+                            .catch(e => reject(e));
+                    });
+                }
 
                 /**
                  *
@@ -294,6 +315,11 @@ module.exports = {
                         this.deleteMatrikel = this.deleteMatrikel.bind(this)
                         this.focusMatrikel = this.focusMatrikel.bind(this)
                         this.addMatrikel = this.addMatrikel.bind(this)
+                        this.getCustomLayer = this.getCustomLayer.bind(this)
+                        this.matrikelCoordTransf = this.matrikelCoordTransf.bind(this)
+                        this.matrikelOnEachFeature = this.matrikelOnEachFeature.bind(this)
+                        this.matrikelStyle = this.matrikelStyle.bind(this)
+                        this.zoomToMatrikel = this.zoomToMatrikel.bind(this)
                     }
 
                     /**
@@ -305,6 +331,11 @@ module.exports = {
                         // Stop listening to any events, deactivate controls, but
                         // keep effects of the module until they are deleted manually or reset:all is emitted
                         backboneEvents.get().on("deactivate:all", () => {});
+
+                        // Add layer
+                        cloud.get().map.addLayer(matrikelLayer);
+                        cloud.get().map.addLayer(searchLayer);
+                        matrikelLayer.clearLayers();
 
                         // Activates module
                         backboneEvents.get().on(`on:${exId}`, () => {
@@ -341,6 +372,7 @@ module.exports = {
                                         existingMatrList: r.matrikler
                                     })
 
+                                    // Add existing
                                     r.matrikler.forEach(function(obj) {
                                         me.addMatrikel(obj)
                                     })
@@ -367,7 +399,6 @@ module.exports = {
 
                         });
                     }
-                    
 
                     /**
                      * Handle file selected
@@ -396,52 +427,105 @@ module.exports = {
 
                     deleteMatrikel(id){
                         const _self = this;
-                        // TODO: Remove matrikel from map and state.
+                        // Remove matrikel from map and state.
+
+                        // Remove from Map
+                        let layer = _self.getCustomLayer(id.key)
                         
+                        // TODO: But it's still there?!
+                        cloud.get().map.removeLayer(layer)
+
                         // Remove from state
                         _self.setState({
                             matrList: _self.state.matrList.filter(el => el != id)
                         });
+                    }
 
-                        // TODO: Remove from Map
+                    searchMatrikel(id){
+                        const _self = this;
+
+                        //empty
+                        searchLayer.clearLayers();
+
+                        _self.unifyMatr(id)
+                        .then(clean => {
+                            return getJordstykkeGeom(clean.matrikelnr, clean.ejerlavskode)
+                        })
+                        .then(feat => {_self.addMatrikelToMap(feat)})
+                        .catch(e => console.log(e))
                     }
 
                     focusMatrikel(id){
                         const _self = this;
-                        // TODO: Focus on matrikel
                         // Zoom to geom, change style, show info box
+                        _self.zoomToMatrikel(id.key);
+                        _self.triggerMatrikel(id.key);
+                    }
+
+                    zoomToMatrikel(key, maxZoom = 16, padding = 50) {
+                        const _self = this;
+                        var layer = _self.getCustomLayer(key);
+                        cloud.get().map.fitBounds(layer.getBounds(), {padding: [padding, padding], maxZoom: maxZoom});
+                    }
+
+                    triggerMatrikel(key, event = 'click') {
+                        const _self = this;
+                        var layer = _self.getCustomLayer(key);
+                        console.log(layer)
+                        layer.getLayers[0].fireEvent(event)
+                    }
+
+                    getCustomLayer(key) {
+                        var l;
+                        var match = matrikelLayer.eachLayer(function(layer) {
+                            if (layer.id == key) {
+                                l = layer
+                            }
+                        })
+                        return l
+                    }
+
+                    alreadyInActive(key) {
+                        const _self = this;
+                        return _self.state.matrList.find(m => m['key'] === key)
                     }
 
                     addMatrikel(id){
                         const _self = this;
-                        // TODO: Add matrikel to map and state.
-                        _self.unifyMatr(id)
-                            .then(clean => {
-                                try {
-                                    var AlreadyInList = _self.state.matrList.find(m => m['key'] === clean.key)
-                                    if (!AlreadyInList) {
-                                        // If not already in state, then put it there
-                                        let prev = _self.state.matrList
-                                        prev.push(clean)
+                        // Add matrikel to map and state.
+                        console.log(id)
 
-                                        _self.setState({
-                                            matrList: prev
-                                        })
-                                    
-                                        // TODO: Add to Map
-                                    }
-                                } catch (error) {
+                        return new Promise(function(resolve, reject) {
+                            _self.unifyMatr(id)
+                            .then(clean => {
+                                if (!_self.alreadyInActive(clean.key)) {
+                                    // If not already in state, then put it there
+                                    let prev = _self.state.matrList
+                                    prev.push(clean)
                                     _self.setState({
-                                        error: e.toString()
-                                    });
+                                        matrList: prev
+                                    })
+                                    return getJordstykkeGeom(clean.matrikelnr, clean.ejerlavskode)
                                 }
-                                
                             })
+                            .then(feat => {_self.addMatrikelToMap(feat)})
+                            .then(resolve(layer))
                             .catch(e => {
-                                _self.setState({
-                                    error: e.toString()
-                                });
+                                reject(e)
                             })
+                        });
+                    }
+
+                    addMatrikelToMap(feat){
+                        const _self = this;
+                        console.log(feat);
+                        var js = new L.GeoJSON(feat, {
+                            style: _self.matrikelStyle,
+                            onEachFeature: _self.matrikelOnEachFeature,
+                            coordsToLatLng: _self.matrikelCoordTransf
+                        });
+                        js.id = feat.properties.key;
+                        js.addTo(matrikelLayer);
                     }
 
                     unifyMatr(matr){
@@ -523,6 +607,63 @@ module.exports = {
                         });
                     }
 
+                    // Map style
+                    matrikelStyle(feature){
+                        const _self = this;
+
+                        let basic = {
+                            fillColor: 'green', 
+                            fillOpacity: 0.5,  
+                            weight: 2,
+                            opacity: 1,
+                            color: '#ffffff',
+                            dashArray: '3'
+                        };
+
+                        // TODO: If matrikel is in active list, show it
+                        if (_self.alreadyInActive(feature.properties.key)){
+                            basic.fillColor = 'red'
+                            basic.fillOpacity = 0.75
+                        }
+                        return basic;
+                    };
+
+                    matrikelHighlightStyle = {
+                        'fillColor': 'yellow',
+                        'weight': 2,
+                        'opacity': 1
+                    };
+
+                    matrikelOnEachFeature(feature, layer) {
+                        const _self = this;
+
+                        var popupContent = "<p><b>Key: </b>"+ feature.properties.key+'</p>';
+                    
+                        layer.bindPopup(popupContent);
+                    
+                        layer.on({
+                            mouseover: () =>{
+                                layer.setStyle(_self.matrikelHighlightStyle);
+                            },
+                            mouseout: () => {
+                                matrikelLayer.setStyle(_self.matrikelStyle);
+                            },
+                            click: (e) => {
+                                console.log(e)
+                            }
+                        }); 
+                    }
+                    
+                    matrikelCoordTransf(coords){
+                        const _self = this;
+
+                        if (coords.length == 3) {
+                            return new L.LatLng(coords[1], coords[0], coords[2])
+                        } else {
+                            return new L.LatLng(coords[1], coords[0])
+                        }
+                    }
+
                     /**
                      * Renders component
                      */
@@ -551,7 +692,7 @@ module.exports = {
                                         <h4>Journalnummer: {s.case.number}</h4>
                                         <p>{s.case.title}</p>
                                         <DAWASearch 
-                                            _handleResult = {_self.addMatrikel}
+                                            _handleResult = {_self.searchMatrikel}
                                             triggerAtChar = {2}
                                             nocache = {true}
                                         />
