@@ -108,7 +108,6 @@ var snack = function (msg) {
 };
 
 var matrikelLayer = new L.FeatureGroup();
-var searchLayer = new L.FeatureGroup();
 
 /**
  *
@@ -253,21 +252,27 @@ module.exports = {
                     })
                 }
 
-                var getJordstykkeByCoordinate = function(E,N) {
+                var getJordstykkeByCoordinate = function(E,N,utm=true) {
                     var hostName = 'https://dawa.aws.dk/jordstykker?';
                     
                     var params = {
                         cache: 'no-cache',
-                        x: E,
-                        y: N,
-                        srid: '25832'
                     };
+
+                    if (utm) {
+                        params.x = E
+                        params.y = N
+                        params.srid = '25832'
+                    } else {
+                        params.x = E
+                        params.y = N
+                        params.srid = '4326'
+                    }
 
                     return new Promise(function(resolve, reject) {
                         fetch(hostName + new URLSearchParams(params))
                             .then(r => r.json())
                             .then(d => {
-                                console.log(d);
                                 resolve(d);
                             })
                             .catch(e => reject(e));
@@ -320,6 +325,7 @@ module.exports = {
                         this.matrikelOnEachFeature = this.matrikelOnEachFeature.bind(this)
                         this.matrikelStyle = this.matrikelStyle.bind(this)
                         this.zoomToMatrikel = this.zoomToMatrikel.bind(this)
+                        this.unifyMatr = this.unifyMatr.bind(this)
                     }
 
                     /**
@@ -334,8 +340,18 @@ module.exports = {
 
                         // Add layer
                         cloud.get().map.addLayer(matrikelLayer);
-                        cloud.get().map.addLayer(searchLayer);
                         matrikelLayer.clearLayers();
+                        
+                        // Click event - info
+                        mapObj.on("click", function (e) {
+                            getJordstykkeByCoordinate(e.latlng.lng, e.latlng.lat, false)
+                            .then(r=>{
+                                // Add selection
+                                r.forEach(function(obj) {
+                                    me.addMatrikel(obj)
+                                })
+                            })
+                        });
 
                         // Activates module
                         backboneEvents.get().on(`on:${exId}`, () => {
@@ -441,20 +457,6 @@ module.exports = {
                         });
                     }
 
-                    searchMatrikel(id){
-                        const _self = this;
-
-                        //empty
-                        searchLayer.clearLayers();
-
-                        _self.unifyMatr(id)
-                        .then(clean => {
-                            return getJordstykkeGeom(clean.matrikelnr, clean.ejerlavskode)
-                        })
-                        .then(feat => {_self.addMatrikelToMap(feat)})
-                        .catch(e => console.log(e))
-                    }
-
                     focusMatrikel(id){
                         const _self = this;
                         // Zoom to geom, change style, show info box
@@ -498,6 +500,7 @@ module.exports = {
                         return new Promise(function(resolve, reject) {
                             _self.unifyMatr(id)
                             .then(clean => {
+                                console.log(clean)
                                 if (!_self.alreadyInActive(clean.key)) {
                                     // If not already in state, then put it there
                                     let prev = _self.state.matrList
@@ -560,7 +563,10 @@ module.exports = {
                                         clean.key = clean.ejerlavskode+clean.matrikelnr
                                         resolve(clean)
                                     })
-                                    .catch(e => reject(e))
+                                    .catch(e => {
+                                        console.log(error)
+                                        reject(e)
+                                    })
                             }
 
                             // Comes from DAWA Jordstykke
@@ -583,6 +589,32 @@ module.exports = {
                                     clean.key = clean.ejerlavskode+clean.matrikelnr
                                     resolve(clean)
                                 } catch (error) {
+                                    console.log(error)
+                                    reject(error.toString())
+                                }
+                            }
+
+                            // Comes from DAWA Jordstykke - coordinate
+                            if (matr.hasOwnProperty('featureid')) {
+                                try {
+                                    clean.ejerlavskode = matr.ejerlav.kode.toString()
+                                    clean.ejerlavsnavn = (itsSomething(matr.ejerlav.navn)) ? unableToGetValue : matr.ejerlav.navn
+                                    clean.matrikelnr = matr.matrikelnr
+                                    
+                                    if (isNull(matr.kommune)) {
+                                        clean.kommune = unableToGetValue
+                                        clean.kommunekode = unableToGetValue
+                                    } else {
+                                        clean.kommune = (itsSomething(matr.kommune.navn)) ? unableToGetValue : matr.kommune.navn
+                                        clean.kommunekode = (itsSomething(matr.kommune.kode)) ? unableToGetValue : matr.kommune.kode
+                                    }
+                                    clean.bfe = (isNull(matr.bfenummer)) ? unableToGetValue : matr.bfenummer
+                                    clean.esr = (itsSomething(matr.udvidet_esrejendomsnr)) ? unableToGetValue : matr.udvidet_esrejendomsnr
+    
+                                    clean.key = clean.ejerlavskode+clean.matrikelnr
+                                    resolve(clean)
+                                } catch (error) {
+                                    console.log(error)
                                     reject(error.toString())
                                 }
                             }
@@ -601,6 +633,7 @@ module.exports = {
                                     clean.key = clean.ejerlavskode+clean.matrikelnr
                                     resolve(clean)
                                 } catch (error) {
+                                    console.log(error)
                                     reject(error.toString())
                                 }
                             }
@@ -692,7 +725,7 @@ module.exports = {
                                         <h4>Journalnummer: {s.case.number}</h4>
                                         <p>{s.case.title}</p>
                                         <DAWASearch 
-                                            _handleResult = {_self.searchMatrikel}
+                                            _handleResult = {_self.addMatrikel}
                                             triggerAtChar = {2}
                                             nocache = {true}
                                         />
