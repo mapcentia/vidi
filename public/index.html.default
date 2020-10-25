@@ -115,7 +115,7 @@
 <!-- Build -->
 <!-- build:js /js/build/all.min.js -->
 <!-- Leaflet -->
-<script src="/js/lib/leaflet/leaflet-src.js"></script>
+<script src="/js/lib/leaflet-glify/glify-browser.js"></script>
 <script src="/js/lib/leaflet-history/leaflet-history.js"></script>
 <script src="/js/lib/leaflet-boxzoom/leaflet-boxzoom.js"></script>
 <script src="/js/lib/leaflet-draw/leaflet.draw.js"></script>
