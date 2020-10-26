@@ -18,8 +18,6 @@ var userName = null;
 
 
 var exId = `login-modal-body`;
-var autoLogin = false; // Auto login is insecure and sets cookie with login creds.
-var autoLoginMaxAge = null;
 
 /**
  *
@@ -45,17 +43,8 @@ module.exports = {
          */
         var ReactDOM = require('react-dom');
 
-        if (typeof config.extensionConfig !== "undefined" && typeof config.extensionConfig.session !== "undefined") {
-            if (typeof config.extensionConfig.session.autoLogin !== "undefined") {
-                autoLogin = config.extensionConfig.session.autoLogin;
-            }
-            if (typeof config.extensionConfig.session.autoLoginMaxAge !== "undefined") {
-                autoLoginMaxAge = config.extensionConfig.session.autoLoginMaxAge;
-            }
-        }
 
         // Check if signed in
-        // sign in if autoLogin is set to true
         //===================
 
         class Status extends React.Component {
@@ -171,11 +160,9 @@ module.exports = {
                     dataType: 'json',
                     url: "/api/session/status",
                     type: "GET",
-                    data: "autoLogin=" + autoLogin + "&autoLoginMaxAge=" + autoLoginMaxAge,
                     success: function (data) {
-                        if (data.status.authenticated) {                            
+                        if (data.status.authenticated) {
                             backboneEvents.get().trigger(`session:authChange`, true);
-
                             me.setState({sessionScreenName: data.status.screen_name});
                             me.setState({statusText: `Signed in as ${data.status.screen_name} (${data.status.email})`});
                             me.setState({alertClass: "alert-success"});
@@ -183,6 +170,7 @@ module.exports = {
                             me.setState({auth: true});
                             $(".gc2-session-lock").show();
                             $(".gc2-session-unlock").hide();
+                            userName = data.status.screen_name;
                             // True if auto login happens. When reload meta
                             if (data?.screen_name && data?.status?.authenticated) {
                                 backboneEvents.get().trigger("refresh:meta");
