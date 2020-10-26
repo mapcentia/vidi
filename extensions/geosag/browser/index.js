@@ -273,6 +273,25 @@ module.exports = {
                         fetch(hostName + new URLSearchParams(params))
                             .then(r => r.json())
                             .then(d => {
+                                d.properties.key = elavkode+matr
+                                resolve(d);
+                            })
+                            .catch(e => reject(e));
+                    });
+                }
+                
+                var getJordstykkeByMatr = function (){
+                    var hostName = 'https://dawa.aws.dk/jordstykker/'+elavkode+'/'+matr+'/?';
+                    
+                    var params = {
+                        cache: 'no-cache'
+                    };
+
+                    return new Promise(function(resolve, reject) {
+                        fetch(hostName + new URLSearchParams(params))
+                            .then(r => r.json())
+                            .then(d => {
+                                d.properties.key = elavkode+matr
                                 resolve(d);
                             })
                             .catch(e => reject(e));
@@ -341,9 +360,10 @@ module.exports = {
                         // Add layer
                         cloud.get().map.addLayer(matrikelLayer);
                         matrikelLayer.clearLayers();
-                        
+
                         // Click event - info
                         mapObj.on("click", function (e) {
+                            //TODO: Enable only if extension is active?!
                             getJordstykkeByCoordinate(e.latlng.lng, e.latlng.lat, false)
                             .then(r=>{
                                 // Add selection
@@ -352,7 +372,8 @@ module.exports = {
                                 })
                             })
                         });
-
+                        
+                        
                         // Activates module
                         backboneEvents.get().on(`on:${exId}`, () => {
                             console.log(`Starting ${exId}`)
@@ -403,6 +424,7 @@ module.exports = {
                             }
 
                             utils.cursorStyle().crosshair();
+
                         });
 
                         // Deactivates module
@@ -473,8 +495,9 @@ module.exports = {
                     triggerMatrikel(key, event = 'click') {
                         const _self = this;
                         var layer = _self.getCustomLayer(key);
-                        console.log(layer)
-                        layer.getLayers[0].fireEvent(event)
+                        //console.log(layer)
+
+                        // TODO: Trigger click event on matrikel
                     }
 
                     getCustomLayer(key) {
@@ -492,13 +515,31 @@ module.exports = {
                         return _self.state.matrList.find(m => m['key'] === key)
                     }
 
+                    resolveMatrikel(id) {
+                        return new Promise(function(resolve, reject) {
+                            if (id.hasOwnProperty('key') || id.hasOwnProperty('synchronizeIdentifier')){
+                                resolve(id)
+                            } else {
+                                console.log('unknown')
+                                getJordstykkeByMatr()
+                                .then(r => {resolve(r)})
+                                .catch(e => {reject(e)})
+                            }
+                        });
+                    }
+
                     addMatrikel(id){
                         const _self = this;
                         // Add matrikel to map and state.
                         console.log(id)
 
+                        // We don't have information, get it
                         return new Promise(function(resolve, reject) {
-                            _self.unifyMatr(id)
+
+                            _self.resolveMatrikel(id)
+                            .then(r => {
+                                return _self.unifyMatr(id)
+                            })
                             .then(clean => {
                                 console.log(clean)
                                 if (!_self.alreadyInActive(clean.key)) {
@@ -521,7 +562,6 @@ module.exports = {
 
                     addMatrikelToMap(feat){
                         const _self = this;
-                        console.log(feat);
                         var js = new L.GeoJSON(feat, {
                             style: _self.matrikelStyle,
                             onEachFeature: _self.matrikelOnEachFeature,
@@ -669,10 +709,41 @@ module.exports = {
 
                     matrikelOnEachFeature(feature, layer) {
                         const _self = this;
+                        var p = feature.properties
 
-                        var popupContent = "<p><b>Key: </b>"+ feature.properties.key+'</p>';
+                        var container = $('<div />');
+
+                        container.on('click', '.addMatrikel', function() {
+                            alert("addMatrikel");
+                        });
+
+                        container.on('click', '.addEjendom', function() {
+                            alert("addEjendom");
+                        });
+
+                        container.on('click', '.deleteMatrikel', function() {
+                            alert("deleteMatrikel");
+                        });
+
+                        container.on('click', '.deleteEjendom', function() {
+                            alert("deleteEjendom");
+                        });
+
+                        container.html(`
+                        <h5>${p.matrikelnr}</h5>
+                        <h6>${p.ejerlavnavn} (${p.ejerlavkode})</h6>
+                        <p>
+                        <b>Kommune:</b>${p.kommunenavn} (${p.kommunekode})</br>
+                        <b>ESR: </b>${p.udvidet_esrejendomsnr}</br>
+                        <b>BFE: </b>${p.bfenummer}</br>
+                        </p>
+                        <p>
+                        <b>Tilføj: </b><a href="#" class="addMatrikel" alt="Tilføj matrikel">matrikel</a> / <a href="#" class="addEjendom" alt="Tilføj ejendom">ejendom</a></br>
+                        <b>Fjern: </b><a href="#" class="deleteMatrikel" alt="Fjern matrikel">matrikel</a> / <a href="#" class="deleteEjendom" alt="Fjern ejendom">ejendom</a></br>
+                        </p>
+                        `);
                     
-                        layer.bindPopup(popupContent);
+                        layer.bindPopup(container[0]);
                     
                         layer.on({
                             mouseover: () =>{
@@ -680,11 +751,15 @@ module.exports = {
                             },
                             mouseout: () => {
                                 matrikelLayer.setStyle(_self.matrikelStyle);
-                            },
-                            click: (e) => {
-                                console.log(e)
                             }
                         }); 
+                    }
+
+                    addEjendom( bfe ) {
+                        console.log(bfe);
+                    }
+                    deleteEjendom( bfe )  {
+                        console.log(bfe);
                     }
                     
                     matrikelCoordTransf(coords){
