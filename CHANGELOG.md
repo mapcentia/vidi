@@ -110,6 +110,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - Local GC2 config files are now fetched through the server back-end.
 - `embed.tmpl` will now show login button if session module is enabled.
 - The WMS requests now has a `qgs` parameter for QGIS backed layers. The value is path to the qgs file for the layer (base64 encoded). In GC2 the path will be used to send the request directly to qgis_serv instead of cascading it through MapServer.
+- Raster tile layers without pixels (invisible in the map) are now not queried by feature info.
 
 ### Fixed
 - Using `indexOf` instead of `includes`, because the latter is not transpiled in Babel. It's an Internet Explorer issue.

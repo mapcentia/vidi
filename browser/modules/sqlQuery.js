@@ -185,6 +185,13 @@ module.exports = {
         this.reset(qstore);
         layers = _layers.getLayers() ? _layers.getLayers().split(",") : [];
 
+        // Filter layers without pixels from
+        layers = layers.filter((key)=>{
+            if (typeof moduleState.tileContentCache[key] === "boolean" && moduleState.tileContentCache[key] === true) {
+                return true;
+            }
+        })
+
         // Set layers to passed array of layers if set
         layers = includes || layers;
 
@@ -231,6 +238,7 @@ module.exports = {
             let parsedMeta = layerTree.parseLayerMeta(metaDataKeys[value]);
 
             let featureInfoTableOnMap = (typeof window.vidiConfig.featureInfoTableOnMap !== "undefined" && window.vidiConfig.featureInfoTableOnMap === true && simple);
+            let f_geometry_column = metaDataKeys[value].f_geometry_column
 
             // Back arrow to template if featureInfoTableOnMap is true
             if (featureInfoTableOnMap && !backArrowIsAdded) {
@@ -538,7 +546,7 @@ module.exports = {
 
             cloud.get().addGeoJsonStore(qstore[index]);
 
-            var sql, f_geometry_column = metaDataKeys[value].f_geometry_column, fieldNames = [], fieldStr;
+            var sql, fieldNames = [], fieldStr;
 
             if (fields) {
                 $.each(fields, function (i, v) {
