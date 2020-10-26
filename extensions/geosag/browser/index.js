@@ -223,7 +223,10 @@ module.exports = {
                                 const data = r.json();
                                 resolve(data)
                             })
-                            .catch(e => reject(e))
+                            .catch(e => {
+                                console.log(e)
+                                reject(e)
+                            });
                     })
                 }
 
@@ -248,7 +251,10 @@ module.exports = {
                                 const data = r.json();
                                 resolve(data)
                             })
-                            .catch(e => reject(e))
+                            .catch(e => {
+                                console.log(e)
+                                reject(e)
+                            });
                     })
                 }
 
@@ -273,14 +279,14 @@ module.exports = {
                         fetch(hostName + new URLSearchParams(params))
                             .then(r => r.json())
                             .then(d => {
-                                d.properties.key = elavkode+matr
+                                d.key = elavkode+matr
                                 resolve(d);
                             })
                             .catch(e => reject(e));
                     });
                 }
                 
-                var getJordstykkeByMatr = function (){
+                var getJordstykkeByMatr = function (matr, elavkode){
                     var hostName = 'https://dawa.aws.dk/jordstykker/'+elavkode+'/'+matr+'/?';
                     
                     var params = {
@@ -291,10 +297,13 @@ module.exports = {
                         fetch(hostName + new URLSearchParams(params))
                             .then(r => r.json())
                             .then(d => {
-                                d.properties.key = elavkode+matr
+                                d.key = elavkode+matr
                                 resolve(d);
                             })
-                            .catch(e => reject(e));
+                            .catch(e => {
+                                console.log(e)
+                                reject(e)
+                            });
                     });
                 }
 
@@ -315,7 +324,10 @@ module.exports = {
                                 d.properties.key = elavkode+matr
                                 resolve(d);
                             })
-                            .catch(e => reject(e));
+                            .catch(e => {
+                                console.log(e)
+                                reject(e)
+                            });
                     });
                 }
 
@@ -368,7 +380,7 @@ module.exports = {
                             .then(r=>{
                                 // Add selection
                                 r.forEach(function(obj) {
-                                    me.addMatrikel(obj)
+                                    me.addMatrikel(obj, false)
                                 })
                             })
                         });
@@ -402,20 +414,25 @@ module.exports = {
                                     return getExistingMatr(r.caseId)
                                 })
                                 .then(r => {
-                                    console.log(r)
+                                    //console.log(r)
                                     me.setState({
                                         allow: true,
                                         error: '',
                                         existingMatrList: r.matrikler
                                     })
-
+                                    var jobs = []
                                     // Add existing
                                     r.matrikler.forEach(function(obj) {
-                                        me.addMatrikel(obj)
+                                        // Add to list also
+                                        jobs.push(me.addMatrikel(obj, true));
                                     })
-
+                                    return Promise.all(jobs);
+                                })
+                                .then(j => {
+                                    //console.log(j)
                                 })
                                 .catch(e => {
+                                    console.log(e)
                                     me.setState({
                                         allow: false,
                                         error: e
@@ -468,14 +485,12 @@ module.exports = {
                         // Remove matrikel from map and state.
 
                         // Remove from Map
-                        let layer = _self.getCustomLayer(id.key)
-                        
-                        // TODO: But it's still there?!
-                        cloud.get().map.removeLayer(layer)
+                        //let layer = _self.getCustomLayer(id.key)
+                        //cloud.get().map.removeLayer(layer)
 
                         // Remove from state
                         _self.setState({
-                            matrList: _self.state.matrList.filter(el => el != id)
+                            matrList: _self.state.matrList.filter(el => el.key != id.key)
                         });
                     }
 
@@ -518,19 +533,20 @@ module.exports = {
                     resolveMatrikel(id) {
                         return new Promise(function(resolve, reject) {
                             if (id.hasOwnProperty('key') || id.hasOwnProperty('synchronizeIdentifier')){
+                                console.log('known')
                                 resolve(id)
                             } else {
                                 console.log('unknown')
-                                getJordstykkeByMatr()
+                                getJordstykkeByMatr(id.matrikelnr, id.ejerlav.toString())
                                 .then(r => {resolve(r)})
                                 .catch(e => {reject(e)})
                             }
                         });
                     }
 
-                    addMatrikel(id){
+                    addMatrikel(id, addToList=false) {
                         const _self = this;
-                        // Add matrikel to map and state.
+                        // Add matrikel to map
                         console.log(id)
 
                         // We don't have information, get it
@@ -538,22 +554,21 @@ module.exports = {
 
                             _self.resolveMatrikel(id)
                             .then(r => {
-                                return _self.unifyMatr(id)
+                                console.log(r)
+                                return _self.unifyMatr(r)
                             })
                             .then(clean => {
                                 console.log(clean)
-                                if (!_self.alreadyInActive(clean.key)) {
-                                    // If not already in state, then put it there
-                                    let prev = _self.state.matrList
-                                    prev.push(clean)
-                                    _self.setState({
-                                        matrList: prev
-                                    })
-                                    return getJordstykkeGeom(clean.matrikelnr, clean.ejerlavskode)
+                                if (addToList) {
+                                    console.log('adding to list')
+                                    _self.addMatrikelToList(clean)
                                 }
+                                return getJordstykkeGeom(clean.matrikelnr, clean.ejerlavskode)
                             })
                             .then(feat => {_self.addMatrikelToMap(feat)})
-                            .then(resolve(layer))
+                            .then(layer => {
+                                resolve(id)
+                            })
                             .catch(e => {
                                 reject(e)
                             })
@@ -562,13 +577,34 @@ module.exports = {
 
                     addMatrikelToMap(feat){
                         const _self = this;
-                        var js = new L.GeoJSON(feat, {
-                            style: _self.matrikelStyle,
-                            onEachFeature: _self.matrikelOnEachFeature,
-                            coordsToLatLng: _self.matrikelCoordTransf
-                        });
-                        js.id = feat.properties.key;
-                        js.addTo(matrikelLayer);
+
+                        // check if exists already
+                        var evaluate = _self.getCustomLayer(feat.properties.key)
+                        console.log(evaluate)
+                        if (evaluate) {
+                            console.log('we got that layer already')
+                        } else {
+                            var js = new L.GeoJSON(feat, {
+                                style: _self.matrikelStyle,
+                                onEachFeature: _self.matrikelOnEachFeature,
+                                coordsToLatLng: _self.matrikelCoordTransf
+                            });
+                            js.id = feat.properties.key;
+                            js.addTo(matrikelLayer);
+                        }
+                    }
+
+                    addMatrikelToList(id) {
+                        const _self = this;
+                        console.log(id)
+                        if (!_self.alreadyInActive(id.key)) {
+                            // If not already in state, then put it there
+                            let prev = _self.state.matrList
+                            prev.push(id)
+                            _self.setState({
+                                matrList: prev
+                            })
+                        }
                     }
 
                     unifyMatr(matr){
@@ -714,35 +750,39 @@ module.exports = {
                         var container = $('<div />');
 
                         container.on('click', '.addMatrikel', function() {
-                            alert("addMatrikel");
+                            _self.addMatrikel({matrikelnr: p.matrikelnr, ejerlav: p.ejerlavkode}, true);
                         });
 
                         container.on('click', '.addEjendom', function() {
-                            alert("addEjendom");
+                            _self.addEjendom(p.bfenummer);
                         });
 
                         container.on('click', '.deleteMatrikel', function() {
-                            alert("deleteMatrikel");
+                            _self.deleteMatrikel({key:p.key});
                         });
 
                         container.on('click', '.deleteEjendom', function() {
-                            alert("deleteEjendom");
+                            _self.deleteEjendom(p.bfenummer);
                         });
 
                         container.html(`
                         <h5>${p.matrikelnr}</h5>
                         <h6>${p.ejerlavnavn} (${p.ejerlavkode})</h6>
                         <p>
-                        <b>Kommune:</b>${p.kommunenavn} (${p.kommunekode})</br>
+                        <b>Kommune: </b>${p.kommunenavn} (${p.kommunekode})</br>
                         <b>ESR: </b>${p.udvidet_esrejendomsnr}</br>
                         <b>BFE: </b>${p.bfenummer}</br>
                         </p>
-                        <p>
-                        <b>Tilføj: </b><a href="#" class="addMatrikel" alt="Tilføj matrikel">matrikel</a> / <a href="#" class="addEjendom" alt="Tilføj ejendom">ejendom</a></br>
-                        <b>Fjern: </b><a href="#" class="deleteMatrikel" alt="Fjern matrikel">matrikel</a> / <a href="#" class="deleteEjendom" alt="Fjern ejendom">ejendom</a></br>
-                        </p>
+                        
                         `);
-                    
+
+                        container.append(`
+                            <p>
+                            <b>Tilføj: </b><a href="#" class="addMatrikel" alt="Tilføj matrikel">matrikel</a> / <a href="#" class="addEjendom" alt="Tilføj ejendom">ejendom</a></br>
+                            <b>Fjern: </b><a href="#" class="deleteMatrikel" alt="Fjern matrikel">matrikel</a> / <a href="#" class="deleteEjendom" alt="Fjern ejendom">ejendom</a></br>
+                            </p>
+                        `)
+         
                         layer.bindPopup(container[0]);
                     
                         layer.on({
