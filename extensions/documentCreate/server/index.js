@@ -184,7 +184,7 @@ router.post('/api/extension/documentCreateSendFeature', function (req, response)
 
                             var postCaseToGc2Promise = postToGC2(req, req.body.db);
                             var resultjson = {"message":"Sag oprettet","casenumber": resultpostdn.number}
-                            postCaseToGc2Promise.then(function(resultjson){
+                            postCaseToGc2Promise.then(function(result){
                                 response.status(200).send(resultjson)
                             }, function(err) {
                                 response.status(500).send('ikke oprettet')
