@@ -1587,6 +1587,12 @@ module.exports = {
                         // Get active raster tile layers, so we can check if database should be queried
                         let activelayers = layers.getMapLayers() ? layers.getLayers().split(",") : [];
                         let activeTilelayers = activelayers.filter(layer => !layer.startsWith(LAYER.VECTOR + ':') && !layer.startsWith(LAYER.VECTOR_TILE + ':') && !layer.startsWith(LAYER.WEBGL + ':'))
+                        // Filter tiles layer without pixels
+                        activeTilelayers = activeTilelayers.filter((key)=>{
+                            if (typeof moduleState.tileContentCache[key] === "boolean" && moduleState.tileContentCache[key] === true) {
+                                return true;
+                            }
+                        })
                         if (activeTilelayers.length > 0) {
                             sqlQuery.init(qstore, wkt, "3857", (store) => {
                                 setTimeout(()=> {
