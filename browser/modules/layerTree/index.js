@@ -1872,7 +1872,10 @@ module.exports = {
                 if (tmpl) {
                     // Convert Markdown in text fields
                     let metaDataKeys = meta.getMetaDataKeys();
-                    let title = parsedMeta?.accordion_summery ? properties[parsedMeta.accordion_summery] : metaDataKeys[layerKey].f_table_title ? metaDataKeys[layerKey].f_table_title : metaDataKeys[layerKey].f_table_name;
+                    let hasSummary = typeof parsedMeta?.accordion_summery !== "undefined" && parsedMeta?.accordion_summery !== "";
+                    let summaryPrefix = typeof parsedMeta?.accordion_summery_prefix !== "undefined" && parsedMeta?.accordion_summery_prefix !== "" ? parsedMeta?.accordion_summery_prefix : null;
+                    let title = metaDataKeys[layerKey].f_table_title ? metaDataKeys[layerKey].f_table_title : metaDataKeys[layerKey].f_table_name;
+                    title = hasSummary ? summaryPrefix ? `<span style="color: #AAAAAA">${summaryPrefix}</span>&nbsp;&nbsp;${properties[parsedMeta.accordion_summery]}` : properties[parsedMeta.accordion_summery] : title;
                     for (const property in metaDataKeys[layerKey].fields) {
                         if (metaDataKeys[layerKey].fields[property].type === "text") {
                             //properties[property] = marked(properties[property]);
