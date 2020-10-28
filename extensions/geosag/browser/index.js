@@ -390,17 +390,6 @@ module.exports = {
                         // keep effects of the module until they are deleted manually or reset:all is emitted
                         backboneEvents.get().on("deactivate:all", () => {});
 
-                        // Add layer
-                        cloud.get().map.addLayer(matrikelLayer);
-                        matrikelLayer.clearLayers();
-
-                        // Click event - info
-                        mapObj.on("click", function (e) {
-                            //TODO: Enable only if extension is active?!
-                            me.findMatrikel(e);
-                        });
-                        
-                        
                         // Activates module
                         backboneEvents.get().on(`on:${exId}`, () => {
                             console.log(`Starting ${exId}`)
@@ -455,6 +444,16 @@ module.exports = {
                                 })
                             }
 
+                            // Add layer
+                            cloud.get().map.addLayer(matrikelLayer);
+                            matrikelLayer.clearLayers();
+                            
+                            // Click event - info
+                            mapObj.on("click", function (e) {
+                                //TODO: Enable only if extension is active?!
+                                me.findMatrikel(e);
+                            });
+
                             utils.cursorStyle().crosshair();
 
                         });
@@ -467,6 +466,8 @@ module.exports = {
                             });
                             utils.cursorStyle().reset();
 
+                            // Remove click handeler
+                            mapObj.off('click');
                         });
                     }
 

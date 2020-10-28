@@ -68,6 +68,7 @@ class MatrikelTable extends React.Component {
                             <TableRow>
                                 <TableCell style={ cellStyle }></TableCell>
                                 <TableCell style={ cellStyle }>Matrikel</TableCell>
+                                <TableCell style={ cellStyle }>BFE</TableCell>
                                 <TableCell style={ cellStyle }>Kommune</TableCell>
                             </TableRow>
                         </TableHead>
@@ -78,6 +79,7 @@ class MatrikelTable extends React.Component {
                         <TableRow key={'geosag-matrikelliste-'+matr.ejerlavskode+matr.kommunenr+matr.matrikelnr}>
                             <TableCell align="left" style={ cellStyle }><button onClick={this._handleDelete.bind(this, matr)}>Fjern</button><button onClick={this._handleFocus.bind(this, matr)}>Vis</button></TableCell>
                             <TableCell align="left" style={ cellStyle }>{matr.matrikelnr+', '+this.shorter(matr.ejerlavsnavn)}</TableCell>
+                            <TableCell align="left" style={ cellStyle }>{matr.bfe}</TableCell>
                             <TableCell align="left" style={ cellStyle }>{matr.kommune}</TableCell>
                         </TableRow>)
                     })}
