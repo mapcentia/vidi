@@ -351,6 +351,7 @@ module.exports = {
                         this.deleteMatrikel = this.deleteMatrikel.bind(this)
                         this.focusMatrikel = this.focusMatrikel.bind(this)
                         this.addMatrikel = this.addMatrikel.bind(this)
+                        this.findMatrikel = this.findMatrikel.bind(this)
                         this.getCustomLayer = this.getCustomLayer.bind(this)
                         this.matrikelCoordTransf = this.matrikelCoordTransf.bind(this)
                         this.matrikelOnEachFeature = this.matrikelOnEachFeature.bind(this)
@@ -532,7 +533,7 @@ module.exports = {
 
                     resolveMatrikel(id) {
                         return new Promise(function(resolve, reject) {
-                            if (id.hasOwnProperty('key') || id.hasOwnProperty('synchronizeIdentifier')){
+                            if (id.hasOwnProperty('key') || id.hasOwnProperty('synchronizeIdentifier') || id.hasOwnProperty('tekst')){
                                 console.log('known')
                                 resolve(id)
                             } else {
@@ -547,51 +548,68 @@ module.exports = {
                     addMatrikel(id, addToList=false) {
                         const _self = this;
                         // Add matrikel to map
-                        console.log(id)
 
                         // We don't have information, get it
                         return new Promise(function(resolve, reject) {
-
                             _self.resolveMatrikel(id)
                             .then(r => {
-                                console.log(r)
-                                return _self.unifyMatr(r)
+                                console.log(r);
+                                return _self.unifyMatr(r);
                             })
                             .then(clean => {
                                 console.log(clean)
                                 if (addToList) {
-                                    console.log('adding to list')
-                                    _self.addMatrikelToList(clean)
+                                    console.log('adding to list');
+                                    _self.addMatrikelToList(clean);
                                 }
                                 return getJordstykkeGeom(clean.matrikelnr, clean.ejerlavskode)
                             })
-                            .then(feat => {_self.addMatrikelToMap(feat)})
+                            .then(feat => {
+                                console.log(feat);
+                                return _self.addMatrikelToMap(feat)
+                            })
                             .then(layer => {
-                                resolve(id)
+                                console.log(layer);
+                                resolve(layer);
                             })
                             .catch(e => {
-                                reject(e)
+                                console.log(e);
+                                reject(e);
                             })
                         });
                     }
 
+                    findMatrikel(id) {
+                        const _self = this;
+                        _self.addMatrikel(id, false)
+                        .then(r => {
+                            console.log(r);
+                            _self.zoomToMatrikel(r.id);
+                        })
+                        .catch(e => {
+                            console.log(e)
+                        })
+                    }
+
                     addMatrikelToMap(feat){
                         const _self = this;
-
-                        // check if exists already
-                        var evaluate = _self.getCustomLayer(feat.properties.key)
-                        console.log(evaluate)
-                        if (evaluate) {
-                            console.log('we got that layer already')
-                        } else {
-                            var js = new L.GeoJSON(feat, {
-                                style: _self.matrikelStyle,
-                                onEachFeature: _self.matrikelOnEachFeature,
-                                coordsToLatLng: _self.matrikelCoordTransf
-                            });
-                            js.id = feat.properties.key;
-                            js.addTo(matrikelLayer);
-                        }
+                        return new Promise(function(resolve, reject) {
+                            // check if exists already
+                            var evaluate = _self.getCustomLayer(feat.properties.key)
+                            if (evaluate) {
+                                console.log('we got that layer already')
+                                reject(feat);
+                            } else {
+                                var js = new L.GeoJSON(feat, {
+                                    style: _self.matrikelStyle,
+                                    onEachFeature: _self.matrikelOnEachFeature,
+                                    coordsToLatLng: _self.matrikelCoordTransf
+                                });
+                                js.id = feat.properties.key;
+                                js.addTo(matrikelLayer);
+                                resolve(js);
+                            }
+                        })
                     }
 
                     addMatrikelToList(id) {
@@ -626,7 +644,7 @@ module.exports = {
                         return new Promise(function(resolve, reject) {
                             // Comes from DAWA Adresse
                             if (matr.hasOwnProperty('adresse')) {
-                                getJordstykkeByCoordinate(matr.adresse.x, matr.adresse.y)
+                                getJordstykkeByCoordinate(matr.adresse.x, matr.adresse.y, true)
                                     .then(d => {
                                         clean.ejerlavskode = d[0].ejerlav.kode.toString()
                                         clean.ejerlavsnavn = (itsSomething(d[0].ejerlav.navn)) ? unableToGetValue : d[0].ejerlav.navn
@@ -840,7 +858,7 @@ module.exports = {
                                         <h4>Journalnummer: {s.case.number}</h4>
                                         <p>{s.case.title}</p>
                                         <DAWASearch 
-                                            _handleResult = {_self.addMatrikel}
+                                            _handleResult = {_self.findMatrikel}
                                             triggerAtChar = {2}
                                             nocache = {true}
                                         />
