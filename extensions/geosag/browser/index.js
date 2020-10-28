@@ -279,8 +279,7 @@ module.exports = {
                         fetch(hostName + new URLSearchParams(params))
                             .then(r => r.json())
                             .then(d => {
-                                d.key = elavkode+matr
-                                resolve(d);
+                                resolve(d[0]);
                             })
                             .catch(e => reject(e));
                     });
@@ -533,14 +532,19 @@ module.exports = {
 
                     resolveMatrikel(id) {
                         return new Promise(function(resolve, reject) {
-                            if (id.hasOwnProperty('key') || id.hasOwnProperty('synchronizeIdentifier') || id.hasOwnProperty('tekst')){
+                            if (id.hasOwnProperty('key') || id.hasOwnProperty('synchronizeIdentifier') ||id.hasOwnProperty('tekst')){
                                 console.log('known')
                                 resolve(id)
                             } else {
                                 console.log('unknown')
+                                console.log(id)
                                 getJordstykkeByMatr(id.matrikelnr, id.ejerlav.toString())
-                                .then(r => {resolve(r)})
-                                .catch(e => {reject(e)})
+                                .then(r => {
+                                    resolve(r)
+                                })
+                                .catch(e => {
+                                    reject(e)
+                                })
                             }
                         });
                     }
@@ -584,7 +588,7 @@ module.exports = {
                         _self.addMatrikel(id, false)
                         .then(r => {
                             console.log(r);
-                            _self.zoomToMatrikel(r.id);
+                            _self.focusMatrikel({key: r.id});
                         })
                         .catch(e => {
                             console.log(e)
@@ -598,7 +602,7 @@ module.exports = {
                             var evaluate = _self.getCustomLayer(feat.properties.key)
                             if (evaluate) {
                                 console.log('we got that layer already')
-                                reject(feat);
+                                resolve(_self.getCustomLayer(feat.properties.key));
                             } else {
                                 var js = new L.GeoJSON(feat, {
                                     style: _self.matrikelStyle,
@@ -646,20 +650,21 @@ module.exports = {
                             if (matr.hasOwnProperty('adresse')) {
                                 getJordstykkeByCoordinate(matr.adresse.x, matr.adresse.y, true)
                                     .then(d => {
-                                        clean.ejerlavskode = d[0].ejerlav.kode.toString()
-                                        clean.ejerlavsnavn = (itsSomething(d[0].ejerlav.navn)) ? unableToGetValue : d[0].ejerlav.navn
-                                        clean.matrikelnr = d[0].matrikelnr
-                                        clean.kommune = (itsSomething(d[0].kommune.navn)) ? unableToGetValue : d[0].kommune.navn
-                                        clean.kommunekode = (itsSomething(d[0].kommune.kode)) ? unableToGetValue : d[0].kommune.kode
-                                        clean.bfe = (itsSomething(d[0].bfenummer)) ? unableToGetValue : d[0].bfenummer
-                                        clean.esr = (itsSomething(d[0].udvidet_esrejendomsnr)) ? unableToGetValue : d[0].udvidet_esrejendomsnr
+                                        clean.ejerlavskode = d.ejerlav.kode.toString()
+                                        clean.ejerlavsnavn = (itsSomething(d.ejerlav.navn)) ? unableToGetValue : d.ejerlav.navn
+                                        clean.matrikelnr = d.matrikelnr
+                                        clean.kommune = (itsSomething(d.kommune.navn)) ? unableToGetValue : d.kommune.navn
+                                        clean.kommunekode = (itsSomething(d.kommune.kode)) ? unableToGetValue : d.kommune.kode
+                                        clean.bfe = (itsSomething(d.bfenummer)) ? unableToGetValue : d.bfenummer
+                                        clean.esr = (itsSomething(d.udvidet_esrejendomsnr)) ? unableToGetValue : d.udvidet_esrejendomsnr
 
                                         clean.key = clean.ejerlavskode+clean.matrikelnr
+                                        console.log(clean)
                                         resolve(clean)
                                     })
-                                    .catch(e => {
+                                    .catch(error => {
                                         console.log(error)
-                                        reject(e)
+                                        reject(error)
                                     })
                             }
 
