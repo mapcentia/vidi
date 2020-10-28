@@ -378,8 +378,8 @@ module.exports = {
                             //TODO: Enable only if extension is active?!
                             me.addMatrikel(e)
                             .then(r=>{
-                                console.log(r)
-                                me.focusMatrikel(r.id)
+                                me.focusMatrikel(r.id);
+                                me.triggerMatrikel(r.id);
                             })
                         });
                         
@@ -480,9 +480,7 @@ module.exports = {
 
                     deleteMatrikel(id){
                         const _self = this;
-                        // Remove matrikel from map and state.
-
-                        // Remove from Map
+                        // Remove from Map - we dont want that - keep as cache'ish
                         //let layer = _self.getCustomLayer(id.key)
                         //cloud.get().map.removeLayer(layer)
 
@@ -508,9 +506,9 @@ module.exports = {
                     triggerMatrikel(key, event = 'click') {
                         const _self = this;
                         var layer = _self.getCustomLayer(key);
-                        //console.log(layer)
+                        // Trigger click event on matrikel
+                        layer.getLayers()[0].openPopup();
 
-                        // TODO: Trigger click event on matrikel
                     }
 
                     getCustomLayer(key) {
@@ -565,11 +563,9 @@ module.exports = {
                         return new Promise(function(resolve, reject) {
                             _self.resolveMatrikel(id)
                             .then(r => {
-                                console.log(r);
                                 return _self.unifyMatr(r);
                             })
                             .then(clean => {
-                                console.log(clean)
                                 if (addToList) {
                                     console.log('adding to list');
                                     _self.addMatrikelToList(clean);
@@ -577,11 +573,9 @@ module.exports = {
                                 return getJordstykkeGeom(clean.matrikelnr, clean.ejerlavskode)
                             })
                             .then(feat => {
-                                console.log(feat);
                                 return _self.addMatrikelToMap(feat)
                             })
                             .then(layer => {
-                                console.log(layer);
                                 resolve(layer);
                             })
                             .catch(e => {
@@ -595,7 +589,6 @@ module.exports = {
                         const _self = this;
                         _self.addMatrikel(id, false)
                         .then(r => {
-                            console.log(r);
                             _self.focusMatrikel({key: r.id});
                         })
                         .catch(e => {
@@ -609,7 +602,7 @@ module.exports = {
                             // check if exists already
                             var evaluate = _self.getCustomLayer(feat.properties.key)
                             if (evaluate) {
-                                console.log('we got that layer already')
+                                // Already present, return the layer
                                 resolve(_self.getCustomLayer(feat.properties.key));
                             } else {
                                 var js = new L.GeoJSON(feat, {
@@ -626,7 +619,6 @@ module.exports = {
 
                     addMatrikelToList(id) {
                         const _self = this;
-                        console.log(id)
                         if (!_self.alreadyInActive(id.key)) {
                             // If not already in state, then put it there
                             let prev = _self.state.matrList
@@ -652,7 +644,6 @@ module.exports = {
                         
 
                         // TODO: make value checks more robust.
-
                         return new Promise(function(resolve, reject) {
                             // Comes from DAWA Adresse
                             if (matr.hasOwnProperty('adresse')) {
@@ -667,7 +658,6 @@ module.exports = {
                                         clean.esr = (itsSomething(d.udvidet_esrejendomsnr)) ? unableToGetValue : d.udvidet_esrejendomsnr
 
                                         clean.key = clean.ejerlavskode+clean.matrikelnr
-                                        console.log(clean)
                                         resolve(clean)
                                     })
                                     .catch(error => {
@@ -778,20 +768,18 @@ module.exports = {
                         const _self = this;
                         var p = feature.properties
 
-                        var container = $('<div />');
+                        // Construct popup content
 
+                        var container = $('<div />');
                         container.on('click', '.addMatrikel', function() {
                             _self.addMatrikel({matrikelnr: p.matrikelnr, ejerlav: p.ejerlavkode}, true);
                         });
-
                         container.on('click', '.addEjendom', function() {
                             _self.addEjendom(p.bfenummer);
                         });
-
                         container.on('click', '.deleteMatrikel', function() {
                             _self.deleteMatrikel({key:p.key});
                         });
-
                         container.on('click', '.deleteEjendom', function() {
                             _self.deleteEjendom(p.bfenummer);
                         });
@@ -804,7 +792,6 @@ module.exports = {
                         <b>ESR: </b>${p.udvidet_esrejendomsnr}</br>
                         <b>BFE: </b>${p.bfenummer}</br>
                         </p>
-                        
                         `);
 
                         container.append(`
@@ -813,9 +800,9 @@ module.exports = {
                             <b>Fjern: </b><a href="#" class="deleteMatrikel" alt="Fjern matrikel">matrikel</a> / <a href="#" class="deleteEjendom" alt="Fjern ejendom">ejendom</a></br>
                             </p>
                         `)
-         
                         layer.bindPopup(container[0]);
                     
+                        // Set Highlight
                         layer.on({
                             mouseover: () =>{
                                 layer.setStyle(_self.matrikelHighlightStyle);
