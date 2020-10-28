@@ -376,12 +376,10 @@ module.exports = {
                         // Click event - info
                         mapObj.on("click", function (e) {
                             //TODO: Enable only if extension is active?!
-                            getJordstykkeByCoordinate(e.latlng.lng, e.latlng.lat, false)
+                            me.addMatrikel(e)
                             .then(r=>{
-                                // Add selection
-                                r.forEach(function(obj) {
-                                    me.addMatrikel(obj, false)
-                                })
+                                console.log(r)
+                                me.focusMatrikel(r.id)
                             })
                         });
                         
@@ -532,9 +530,19 @@ module.exports = {
 
                     resolveMatrikel(id) {
                         return new Promise(function(resolve, reject) {
-                            if (id.hasOwnProperty('key') || id.hasOwnProperty('synchronizeIdentifier') ||id.hasOwnProperty('tekst')){
-                                console.log('known')
+                            if (id.hasOwnProperty('key') || id.hasOwnProperty('synchronizeIdentifier') || id.hasOwnProperty('tekst')){
+                                // From docunote or DAWA
                                 resolve(id)
+                            } else if (id.hasOwnProperty('latlng')) {
+                                // Event from click
+                                getJordstykkeByCoordinate(id.latlng.lng, id.latlng.lat, false)
+                                .then(r => {
+                                    resolve(r);
+                                })
+                                .catch(e => {
+                                    reject(e);
+                                })
+
                             } else {
                                 console.log('unknown')
                                 console.log(id)
@@ -864,7 +872,7 @@ module.exports = {
                                         <p>{s.case.title}</p>
                                         <DAWASearch 
                                             _handleResult = {_self.findMatrikel}
-                                            triggerAtChar = {2}
+                                            triggerAtChar = {3}
                                             nocache = {true}
                                         />
                                         <MatrikelTable
