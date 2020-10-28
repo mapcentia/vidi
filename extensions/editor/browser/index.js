@@ -438,6 +438,7 @@ module.exports = {
                         fields[key].type.startsWith("character") ||
                         fields[key].type.startsWith("text")) &&
                         geoJson.properties[key] !== null) {
+                        geoJson.properties[key] = geoJson.properties[key].replaceAll("\"", "\\\"");
                         geoJson.properties[key] = encodeURIComponent(geoJson.properties[key]);
                     }
                 });
@@ -791,6 +792,7 @@ module.exports = {
                             fields[key].type.startsWith("character") ||
                             fields[key].type.startsWith("text")) &&
                             GeoJSON.properties[key] !== null) {
+                            GeoJSON.properties[key] = GeoJSON.properties[key].replaceAll("\"", "\\\"");
                             GeoJSON.properties[key] = encodeURIComponent(GeoJSON.properties[key]);
                         }
                     } else {
