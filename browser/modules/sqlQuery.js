@@ -674,7 +674,8 @@ module.exports = {
                             if (!feature.properties[property.key]) {
                                 value = `<i class="fa fa-ban"></i>`;
                             } else {
-                                if (metaDataKeys[layerKey]["fields"][property.key].type.startsWith("json")) {
+                                let layerKeyWithoutPrefix = layerKey.replace(LAYER.VECTOR + ':', '');
+                                if (metaDataKeys[layerKeyWithoutPrefix]["fields"][property.key].type.startsWith("json")) {
                                     // We use a Handlebars template to create a image carousel
                                     let carouselId = Base64.encode(layerKey).replace(/=/g, "");
                                     let tmpl = `<div id="${carouselId}" class="carousel slide" data-ride="carousel">
