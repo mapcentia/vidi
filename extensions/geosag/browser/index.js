@@ -832,7 +832,6 @@ module.exports = {
 
                     addEjendom( bfe ) {
                         const _self = this;
-                        console.log(bfe);
                         getJordstykkerByBFE( bfe )
                         .then(r => {
                             let jobs = [];
@@ -842,14 +841,24 @@ module.exports = {
                             return jobs
                         })
                         .then(l => {
-                            console.log(l)
+                            //console.log(l)
                         })
                         .catch(e => {
                             console.log(e);
                         })
                     }
                     deleteEjendom( bfe )  {
-                        console.log(bfe);
+                        const _self = this;
+                        getJordstykkerByBFE( bfe )
+                        .then(r => {
+                            r.forEach(matr => {
+                                let k = matr.jordstykke.ejerlav.kode+matr.jordstykke.matrikelnr;
+                                _self.deleteMatrikel({key: k});
+                            })
+                        })
+                        .catch(e => {
+                            console.log(e);
+                        })
                     }
                     
                     matrikelCoordTransf(coords){
