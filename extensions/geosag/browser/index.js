@@ -390,6 +390,12 @@ module.exports = {
                         // keep effects of the module until they are deleted manually or reset:all is emitted
                         backboneEvents.get().on("deactivate:all", () => {});
 
+                        // Add layer
+                        // Init empty layer / Check if layer has content already
+                        // Make sure we can change extension and not loose expensive information.
+                        cloud.get().map.addLayer(matrikelLayer);
+                        matrikelLayer.clearLayers();
+
                         // Activates module
                         backboneEvents.get().on(`on:${exId}`, () => {
                             console.log(`Starting ${exId}`)
@@ -399,8 +405,7 @@ module.exports = {
                             console.log(`user: ${user}`)
                             console.log(`sagsnr: ${sagsnr}`)
 
-                            // Init empty layer / Check if layer has content already
-                            // Make sure we can change extension and not loose expensive information.
+
 
                             if (user == undefined && sagsnr == undefined) {
                                 me.setState({
@@ -444,10 +449,8 @@ module.exports = {
                                 })
                             }
 
-                            // Add layer
-                            cloud.get().map.addLayer(matrikelLayer);
-                            matrikelLayer.clearLayers();
-                            
+
+
                             // Click event - info
                             mapObj.on("click", function (e) {
                                 //TODO: Enable only if extension is active?!
