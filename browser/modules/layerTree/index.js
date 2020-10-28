@@ -1588,14 +1588,14 @@ module.exports = {
                         let activelayers = layers.getMapLayers() ? layers.getLayers().split(",") : [];
                         let activeTilelayers = activelayers.filter(layer => !layer.startsWith(LAYER.VECTOR + ':') && !layer.startsWith(LAYER.VECTOR_TILE + ':') && !layer.startsWith(LAYER.WEBGL + ':'))
                         // Filter tiles layer without pixels
-                        activeTilelayers = activeTilelayers.filter((key)=>{
+                        activeTilelayers = activeTilelayers.filter((key) => {
                             if (typeof moduleState.tileContentCache[key] === "boolean" && moduleState.tileContentCache[key] === true) {
                                 return true;
                             }
                         })
                         if (activeTilelayers.length > 0) {
                             sqlQuery.init(qstore, wkt, "3857", (store) => {
-                                setTimeout(()=> {
+                                setTimeout(() => {
                                     sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + store.key, store.geoJSON.features);
                                     store.layer.eachLayer((layer) => {
                                         intersectingFeatures.push({
@@ -1872,7 +1872,7 @@ module.exports = {
                 if (tmpl) {
                     // Convert Markdown in text fields
                     let metaDataKeys = meta.getMetaDataKeys();
-                    let title = metaDataKeys[layerKey].f_table_title ? metaDataKeys[layerKey].f_table_title : metaDataKeys[layerKey].f_table_name;
+                    let title = parsedMeta?.accordion_summery ? properties[parsedMeta.accordion_summery] : metaDataKeys[layerKey].f_table_title ? metaDataKeys[layerKey].f_table_title : metaDataKeys[layerKey].f_table_name;
                     for (const property in metaDataKeys[layerKey].fields) {
                         if (metaDataKeys[layerKey].fields[property].type === "text") {
                             //properties[property] = marked(properties[property]);
@@ -1889,10 +1889,10 @@ module.exports = {
                         accordion += `<div class="panel panel-default vector-feature-info-panel" id="vector-feature-info-panel-${randText}" style="box-shadow: none;border-radius: 0; margin-bottom: 0">
                                         <div class="panel-heading" role="tab" style="padding: 8px 0px 8px 15px;border-bottom: 1px white solid">
                                             <h4 class="panel-title">
-                                                <a style="display: block; color: black" class="accordion-toggle js-toggle-feature-panel" data-toggle="collapse" data-parent="#layers" href="#collapse${randText}">${title}</a>
+                                                <a style="display: block; color: black" class="feature-info-accordion-toggle accordion-toggle js-toggle-feature-panel" data-toggle="collapse" data-parent="#layers" href="#collapse${randText}">${title}</a>
                                             </h4>
                                         </div>
-                                        <ul class="list-group" id="group-${randText}" role="tabpanel"><div id="collapse${randText}" class="accordion-body collapse" style="padding: 3px 8px 3px 8px">${renderedText}</div></ul>
+                                        <ul class="list-group" id="group-${randText}" role="tabpanel"><div id="collapse${randText}" class="feature-info-accordion-body accordion-body collapse" style="padding: 3px 8px 3px 8px">${renderedText}</div></ul>
                                     </div>`;
                     } else {
                         console.log(`Feature info disabled for ${layerKey}`)
@@ -1917,6 +1917,9 @@ module.exports = {
                         .on('remove', () => {
                             sqlQuery.resetAll();
                         });
+                    $(".feature-info-accordion-toggle").on("click", () => {
+                        $('.feature-info-accordion-body').collapse("hide")
+                    })
 
                 }
             }
