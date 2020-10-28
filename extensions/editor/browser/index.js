@@ -758,7 +758,10 @@ module.exports = {
                     case `text`:
                     case `character varying`:
                         if (eventFeatureCopy.properties[key]) {
-                            eventFeatureCopy.properties[key] = decodeURIComponent(eventFeatureCopy.properties[key]);
+                            try { // If string is not
+                                eventFeatureCopy.properties[key] = decodeURIComponent(eventFeatureCopy.properties[key]);
+                            } catch (e) {
+                            }
                             eventFeatureCopy.properties[key] = eventFeatureCopy.properties[key].replace(/\\"/g, '"');
                         }
                         break;
