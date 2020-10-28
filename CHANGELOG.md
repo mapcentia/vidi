@@ -65,9 +65,10 @@ and this project adheres to [CalVer](https://calver.org/).
 - The Coordinate module now has a Pan To input field. The user can input a coordinate in the chosen system and the map will pan to the point.
 - Modules now has title headings.
 - Added boolean config `vectorMultiSelect` in `config/config.js`. This will enable multi select on vector layers. Works cross layer too. Can be set in runtime config.
-- Added boolean config `featureInfoTableOnMap` in `config/config.js`. This is a shotcut to set `info_template`, `info_element_selector` and `info_function`, so the single feature info pops up on the map instead of the right slide panel. Great for the `embed.tmpl`
+- Added boolean config `featureInfoTableOnMap` in `config/config.js`. This is a shortcut to set `info_template`, `info_element_selector` and `info_function`, so the single feature info pops up on the map instead of the right slide panel. Great for the `embed.tmpl`
 - New button "Fit bounds to filter" in layer filters, which will set the view extent to the bounds of the filtered layer.
 - New "Labels" panel for raster tile layers with a checkbox for hiding/showing labels on the layer. Works for both MapServer and QGIS back-end (GC2 must support this).
+- Added boolean config `crossMultiSelect` in `config/config.js`. This will enable cross multi select on both vector and raster tile layers. This will result in a unified feature info experience, which are well suited for informative maps using the `embed.tmpl` template. All feature info results will be displayed in an accordion widget. The accordion summary is default layer title, but can be set to an attribute value with the meta config `accordion_summery`. Can be set in runtime config. 
 
 ### Changed
 - `public\js\vidi.js`is now required instead of loaded in a script tag. This way it's transpiled and can contain new JavaScript syntax.
@@ -109,12 +110,16 @@ and this project adheres to [CalVer](https://calver.org/).
 - Local GC2 config files are now fetched through the server back-end.
 - `embed.tmpl` will now show login button if session module is enabled.
 - The WMS requests now has a `qgs` parameter for QGIS backed layers. The value is path to the qgs file for the layer (base64 encoded). In GC2 the path will be used to send the request directly to qgis_serv instead of cascading it through MapServer.
+- Raster tile layers without pixels (invisible in the map) are now not queried by feature info.
+- Turning on a vector layer will now load the legend of the raster tile representation of the layer
 
 ### Fixed
 - Using `indexOf` instead of `includes`, because the latter is not transpiled in Babel. It's an Internet Explorer issue.
 - `embed.js` now works in IE11.
 - Accept 'da' locale in request headers. Only da-DK worked so far.
 - If the Service Worker doesn't get registered when Vidi will now start anyways without the Service Worker. On a hard refresh (Ctrl-f5) the Service Worker will claim the clients, so a hard refresh will not unregister Service Worker, but the cache will be deleted. 
+- Text in editor is now url encoded.
+- Quotes are now escaped for text in editor.
 
 ## [2020.2.0]
 ### Added

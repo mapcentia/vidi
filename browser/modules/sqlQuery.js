@@ -90,6 +90,18 @@ var defaultTemplate =
         {{/_vidi_content.fields}}
     </div>`;
 
+var defaultTemplateForCrossMultiSelect =
+    `<div class="cartodb-popup-content">
+        {{#_vidi_content.fields}}
+            <h4>{{title}}</h4>
+            {{#if value}}
+                <p {{#if type}}class="{{type}}"{{/if}}>{{{value}}}</p>
+            {{else}}
+                <p class="empty">null</p>
+            {{/if}}
+        {{/_vidi_content.fields}}
+    </div>`;
+
 /**
  * Default template for raster layers
  * @type {string}
@@ -173,6 +185,13 @@ module.exports = {
         this.reset(qstore);
         layers = _layers.getLayers() ? _layers.getLayers().split(",") : [];
 
+        // Filter layers without pixels from
+        layers = layers.filter((key)=>{
+            if (typeof moduleState.tileContentCache[key] === "boolean" && moduleState.tileContentCache[key] === true) {
+                return true;
+            }
+        })
+
         // Set layers to passed array of layers if set
         layers = includes || layers;
 
@@ -219,6 +238,7 @@ module.exports = {
             let parsedMeta = layerTree.parseLayerMeta(metaDataKeys[value]);
 
             let featureInfoTableOnMap = (typeof window.vidiConfig.featureInfoTableOnMap !== "undefined" && window.vidiConfig.featureInfoTableOnMap === true && simple);
+            let f_geometry_column = metaDataKeys[value].f_geometry_column
 
             // Back arrow to template if featureInfoTableOnMap is true
             if (featureInfoTableOnMap && !backArrowIsAdded) {
@@ -283,7 +303,10 @@ module.exports = {
                                 })
                                     .setLatLng(infoClickPoint)
                                     .setContent(`<div id="info-box-pop-up"></div>`)
-                                    .openOn(cloud.get().map);
+                                    .openOn(cloud.get().map)
+                                    .on('remove', ()=>{
+                                       _self.resetAll();
+                                    });
                                 $("#info-box-pop-up").html(popUpInner);
 
                             } else {
@@ -488,6 +511,7 @@ module.exports = {
                 uri: "/api/sql",
                 clickable: true,
                 id: index,
+                key: value,
                 base64: true,
                 styleMap: styleForSelectedFeatures,
                 // Set _vidi_type on all vector layers,
@@ -522,7 +546,7 @@ module.exports = {
 
             cloud.get().addGeoJsonStore(qstore[index]);
 
-            var sql, f_geometry_column = metaDataKeys[value].f_geometry_column, fieldNames = [], fieldStr;
+            var sql, fieldNames = [], fieldStr;
 
             if (fields) {
                 $.each(fields, function (i, v) {
@@ -650,7 +674,8 @@ module.exports = {
                             if (!feature.properties[property.key]) {
                                 value = `<i class="fa fa-ban"></i>`;
                             } else {
-                                if (metaDataKeys[layerKey]["fields"][property.key].type.startsWith("json")) {
+                                let layerKeyWithoutPrefix = layerKey.replace(LAYER.VECTOR + ':', '');
+                                if (metaDataKeys[layerKeyWithoutPrefix]["fields"][property.key].type.startsWith("json")) {
                                     // We use a Handlebars template to create a image carousel
                                     let carouselId = Base64.encode(layerKey).replace(/=/g, "");
                                     let tmpl = `<div id="${carouselId}" class="carousel slide" data-ride="carousel">
@@ -768,7 +793,7 @@ module.exports = {
     getVectorTemplate: function (layerKey) {
         let metaDataKeys = meta.getMetaDataKeys();
         let parsedMeta = layerTree.parseLayerMeta(metaDataKeys[layerKey]);
-        let template = (typeof metaDataKeys[layerKey].infowindow !== "undefined" && metaDataKeys[layerKey].infowindow.template !== "") ? metaDataKeys[layerKey].infowindow.template : metaDataKeys[layerKey].type === "RASTER" ? defaultTemplateRaster : defaultTemplate;
+        let template = (typeof metaDataKeys[layerKey].infowindow !== "undefined" && metaDataKeys[layerKey].infowindow.template !== "") ? metaDataKeys[layerKey].infowindow.template : defaultTemplateForCrossMultiSelect;
         template = (parsedMeta.info_template && parsedMeta.info_template !== "") ? parsedMeta.info_template : template;
         return template;
     },

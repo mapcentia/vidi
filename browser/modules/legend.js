@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2019 MapCentia ApS
+ * @copyright  2013-2020 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -14,14 +14,15 @@ let db = urlparser.db;
 let BACKEND = require('../../config/config.js').backend;
 let hasBeenVisible = [];
 let hasBeenVisibleTmp = [];
+let constants = require('./layerTree/constants')
 
 //var CSSParser = require("jscssp").CSSParser;
 
 let arrayUnique = (array) => {
     let a = array.concat();
-    for(let i=0; i<a.length; ++i) {
-        for(let j=i+1; j<a.length; ++j) {
-            if(a[i] === a[j])
+    for (let i = 0; i < a.length; ++i) {
+        for (let j = i + 1; j < a.length; ++j) {
+            if (a[i] === a[j])
                 a.splice(j--, 1);
         }
     }
@@ -41,7 +42,8 @@ module.exports = module.exports = {
     },
     init: function (layerArr, el) {
         return new Promise(function (resolve, reject) {
-            let metaDataKeys = meta.getMetaDataKeys(), visibleLayers = _layers.getLayers(";"), checked, layerName, param = ``, layers;
+            let metaDataKeys = meta.getMetaDataKeys(), visibleLayers = _layers.getLayers(";"), checked, layerName,
+                param = ``, layers;
 
             // No layers visible
             if (metaDataKeys.length === 0) {
@@ -63,7 +65,7 @@ module.exports = module.exports = {
                 if (hasBeenVisible.length === hasBeenVisibleTmp.length && hasBeenVisible.every((value, index) => value === hasBeenVisibleTmp[index])) {
                     resolve();
                 }
-    
+
                 hasBeenVisibleTmp = hasBeenVisible;
                 param = 'l=' + hasBeenVisible.join(";") + '&db=' + db;
             }
@@ -74,7 +76,8 @@ module.exports = module.exports = {
                     var list = $('<ul class="list-group"/>'), li, classUl, title, className;
                     $.each(response, function (i, v) {
                         if (typeof v.id !== "undefined") {
-                            title = metaDataKeys[v.id].f_table_title ? metaDataKeys[v.id].f_table_title : metaDataKeys[v.id].f_table_name;
+                            let id = v.id.replace(constants.LAYER.VECTOR + ':', '')
+                            title = metaDataKeys[id].f_table_title ? metaDataKeys[id].f_table_title : metaDataKeys[id].f_table_name;
                         }
                         var u, showLayer = false;
                         if (typeof v === "object" && v.classes !== undefined) {
@@ -97,9 +100,10 @@ module.exports = module.exports = {
                                         }
                                     }
                                 }
-                                layerName = metaDataKeys[v.id].f_table_schema + "." + metaDataKeys[v.id].f_table_name;
-                                checked = ($.inArray(layerName, visibleLayers ? visibleLayers.split(";") : "") > -1) ? "checked" : "";
-                                list.append($("<li class='list-group-item'><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + layerName + "' " + checked + ">" + title + "</label></div></li>"));
+                                let id = v.id.replace(constants.LAYER.VECTOR + ':', '')
+                                let type = v.id.startsWith(constants.LAYER.VECTOR + ':') ? 'v' : 't';
+                                checked = ($.inArray(v.id, visibleLayers ? visibleLayers.split(";") : "") > -1) ? "checked" : "";
+                                list.append($("<li class='list-group-item'><div class='checkbox'><label><input data-gc2-layer-type=" + type + " type='checkbox' data-gc2-id='" + id + "' " + checked + ">" + title + "</label></div></li>"));
                                 list.append(li.append(classUl));
                             }
 
@@ -1265,8 +1269,7 @@ function FilterLinearGradient(aValue, aEngine) {
                         var unit = match[1];
                         if (unit == "%") {
                             endpoint.push((100 - v) + "%");
-                        }
-                        else
+                        } else
                             cancelled = true;
                     }
                         break;
@@ -1288,14 +1291,12 @@ function FilterLinearGradient(aValue, aEngine) {
                             var unit = match[1];
                             if (unit == "%") {
                                 endpoint.push((100 - v) + "%");
-                            }
-                            else
+                            } else
                                 cancelled = true;
                         }
                             break;
                     }
-            }
-            else {
+            } else {
                 switch (angle) {
                     case 0:
                         endpoint.push("right");
@@ -1318,8 +1319,7 @@ function FilterLinearGradient(aValue, aEngine) {
                         break;
                 }
             }
-        }
-        else {
+        } else {
             // no position defined, we accept only vertical and horizontal
             if (angle == "")
                 angle = 270;
@@ -1362,8 +1362,7 @@ function FilterLinearGradient(aValue, aEngine) {
                     cancelled = true;
                     break;
                 }
-            }
-            else {
+            } else {
                 var j = i + 1;
                 while (j < g.value.stops.length && !g.value.stops[j].position)
                     j++;
@@ -1378,8 +1377,7 @@ function FilterLinearGradient(aValue, aEngine) {
 
         if (cancelled)
             return "";
-    }
-    else {
+    } else {
         str = (g.value.isRepeating ? "repeating-" : "") + "linear-gradient(";
         if (angle || position)
             str += (angle ? angle : position) + ", ";
@@ -1633,8 +1631,7 @@ CSSScanner.prototype = {
                 else if (!this.isHexDigit(c) && !this.isWhiteSpace(c)) {
                     this.pushback();
                     break;
-                }
-                else
+                } else
                     break;
             }
             if (i == 6) {
@@ -1723,12 +1720,10 @@ CSSScanner.prototype = {
             var unit = this.gatherIdent(c);
             s += unit;
             return new jscsspToken(jscsspToken.DIMENSION_TYPE, s, unit);
-        }
-        else if (c == "%") {
+        } else if (c == "%") {
             s += "%";
             return new jscsspToken(jscsspToken.PERCENTAGE_TYPE, s);
-        }
-        else if (c != -1)
+        } else if (c != -1)
             this.pushback();
         return new jscsspToken(jscsspToken.NUMBER_TYPE, s);
     },
@@ -1741,8 +1736,7 @@ CSSScanner.prototype = {
             if (c == aStop && previousChar != CSS_ESCAPE) {
                 s += c;
                 break;
-            }
-            else if (c == CSS_ESCAPE) {
+            } else if (c == CSS_ESCAPE) {
                 c = this.peek();
                 if (c == -1)
                     break;
@@ -1755,16 +1749,13 @@ CSSScanner.prototype = {
                         if (c == "\n")
                             c = this.read();
                     }
-                }
-                else {
+                } else {
                     s += this.gatherEscape();
                     c = this.peek();
                 }
-            }
-            else if (c == "\n" || c == "\r" || c == "\f") {
+            } else if (c == "\n" || c == "\r" || c == "\f") {
                 break;
-            }
-            else
+            } else
                 s += c;
 
             previousChar = c;
@@ -1873,8 +1864,7 @@ CSSParser.prototype.parseBackgroundImages = function () {
             var urlContent = this.parseURL(token);
             backgrounds.push({type: "image", value: "url(" + urlContent});
             token = this.getToken(true, true);
-        }
-        else if (token.isFunction("linear-gradient(")
+        } else if (token.isFunction("linear-gradient(")
             || token.isFunction("radial-gradient(")
             || token.isFunction("repeating-linear-gradient(")
             || token.isFunction("repeating-radial-gradient(")) {
@@ -1886,17 +1876,14 @@ CSSParser.prototype.parseBackgroundImages = function () {
                     value: gradient
                 });
                 token = this.getToken(true, true);
-            }
-            else
+            } else
                 return null;
-        }
-        else if (token.isIdent("none")
+        } else if (token.isIdent("none")
             || token.isIdent("inherit")
             || token.isIdent("initial")) {
             backgrounds.push({type: token.value});
             token = this.getToken(true, true);
-        }
-        else
+        } else
             return null;
 
         if (token.isSymbol(",")) {
@@ -1942,9 +1929,7 @@ CSSParser.prototype.parseBackgroundShorthand = function (token, aDecl, aAcceptPr
             if (token.isSymbol("}"))
                 this.ungetToken();
             break;
-        }
-
-        else if (!bgColor
+        } else if (!bgColor
             && !bgRepeat
             && !bgAttachment
             && !bgImage
@@ -1955,15 +1940,11 @@ CSSParser.prototype.parseBackgroundShorthand = function (token, aDecl, aAcceptPr
             bgAttachment = this.kINHERIT;
             bgImage = this.kINHERIT;
             bgPosition = this.kINHERIT;
-        }
-
-        else {
+        } else {
             if (!bgAttachment
                 && (token.isIdent("scroll") || token.isIdent("fixed"))) {
                 bgAttachment = token.value;
-            }
-
-            else if (!bgPosition
+            } else if (!bgPosition
                 && ((token.isIdent() && token.value in kPos)
                     || token.isDimension()
                     || token.isNumber("0")
@@ -1983,17 +1964,13 @@ CSSParser.prototype.parseBackgroundShorthand = function (token, aDecl, aAcceptPr
                     this.ungetToken();
                     bgPosition += " center";
                 }
-            }
-
-            else if (!bgRepeat
+            } else if (!bgRepeat
                 && (token.isIdent("repeat")
                     || token.isIdent("repeat-x")
                     || token.isIdent("repeat-y")
                     || token.isIdent("no-repeat"))) {
                 bgRepeat = token.value;
-            }
-
-            else if (!bgImage
+            } else if (!bgImage
                 && (token.isFunction("url(") || token.isIdent("none"))) {
                 bgImage = token.value;
                 if (token.isFunction("url(")) {
@@ -2004,9 +1981,7 @@ CSSParser.prototype.parseBackgroundShorthand = function (token, aDecl, aAcceptPr
                     else
                         return "";
                 }
-            }
-
-            else if (!bgImage
+            } else if (!bgImage
                 && (token.isFunction("linear-gradient(")
                     || token.isFunction("radial-gradient(")
                     || token.isFunction("repeating-linear-gradient(") || token.isFunction("repeating-radial-gradient("))) {
@@ -2016,9 +1991,7 @@ CSSParser.prototype.parseBackgroundShorthand = function (token, aDecl, aAcceptPr
                     bgImage = this.serializeGradient(gradient);
                 else
                     return "";
-            }
-
-            else {
+            } else {
                 var color = this.parseColor(token);
                 if (!bgColor && color)
                     bgColor = color;
@@ -2065,15 +2038,11 @@ CSSParser.prototype.parseBorderColorShorthand = function (token, aDecl, aAcceptP
             if (token.isSymbol("}"))
                 this.ungetToken();
             break;
-        }
-
-        else if (!values.length && token.isIdent(this.kINHERIT)) {
+        } else if (!values.length && token.isIdent(this.kINHERIT)) {
             values.push(token.value);
             token = this.getToken(true, true);
             break;
-        }
-
-        else {
+        } else {
             var color = this.parseColor(token);
             if (color)
                 values.push(color);
@@ -2136,30 +2105,22 @@ CSSParser.prototype.parseBorderEdgeOrOutlineShorthand = function (token, aDecl, 
             if (token.isSymbol("}"))
                 this.ungetToken();
             break;
-        }
-
-        else if (!bWidth
+        } else if (!bWidth
             && !bStyle
             && !bColor
             && token.isIdent(this.kINHERIT)) {
             bWidth = this.kINHERIT;
             bStyle = this.kINHERIT;
             bColor = this.kINHERIT;
-        }
-
-        else if (!bWidth &&
+        } else if (!bWidth &&
             (token.isDimension()
                 || (token.isIdent() && token.value in this.kBORDER_WIDTH_NAMES)
                 || token.isNumber("0"))) {
             bWidth = token.value;
-        }
-
-        else if (!bStyle &&
+        } else if (!bStyle &&
             (token.isIdent() && token.value in this.kBORDER_STYLE_NAMES)) {
             bStyle = token.value;
-        }
-
-        else {
+        } else {
             var color = (aProperty == "outline" && token.isIdent("invert"))
                 ? "invert" : this.parseColor(token);
             if (!bColor && color)
@@ -2187,8 +2148,7 @@ CSSParser.prototype.parseBorderEdgeOrOutlineShorthand = function (token, aDecl, 
         addPropertyToDecl(this, aDecl, "border-right", bWidth, bStyle, bColor);
         addPropertyToDecl(this, aDecl, "border-bottom", bWidth, bStyle, bColor);
         addPropertyToDecl(this, aDecl, "border-left", bWidth, bStyle, bColor);
-    }
-    else
+    } else
         addPropertyToDecl(this, aDecl, aProperty, bWidth, bStyle, bColor);
     return bWidth + " " + bStyle + " " + bColor;
 };
@@ -2204,11 +2164,9 @@ CSSParser.prototype.parseBorderImage = function () {
             if ((borderImage.url[0] == '"' && borderImage.url[borderImage.url.length - 1] == '"')
                 || (borderImage.url[0] == "'" && borderImage.url[borderImage.url.length - 1] == "'"))
                 borderImage.url = borderImage.url.substr(1, borderImage.url.length - 2);
-        }
-        else
+        } else
             return null;
-    }
-    else
+    } else
         return null;
 
     token = this.getToken(true, true);
@@ -2286,16 +2244,11 @@ CSSParser.prototype.parseBorderStyleShorthand = function (token, aDecl, aAcceptP
             if (token.isSymbol("}"))
                 this.ungetToken();
             break;
-        }
-
-        else if (!values.length && token.isIdent(this.kINHERIT)) {
+        } else if (!values.length && token.isIdent(this.kINHERIT)) {
             values.push(token.value);
-        }
-
-        else if (token.isIdent() && token.value in this.kBORDER_STYLE_NAMES) {
+        } else if (token.isIdent() && token.value in this.kBORDER_STYLE_NAMES) {
             values.push(token.value);
-        }
-        else
+        } else
             return "";
 
         token = this.getToken(true, true);
@@ -2356,18 +2309,13 @@ CSSParser.prototype.parseBorderWidthShorthand = function (token, aDecl, aAcceptP
             if (token.isSymbol("}"))
                 this.ungetToken();
             break;
-        }
-
-        else if (!values.length && token.isIdent(this.kINHERIT)) {
+        } else if (!values.length && token.isIdent(this.kINHERIT)) {
             values.push(token.value);
-        }
-
-        else if (token.isDimension()
+        } else if (token.isDimension()
             || token.isNumber("0")
             || (token.isIdent() && token.value in this.kBORDER_WIDTH_NAMES)) {
             values.push(token.value);
-        }
-        else
+        } else
             return "";
 
         token = this.getToken(true, true);
@@ -2419,8 +2367,7 @@ CSSParser.prototype.parseBoxShadows = function () {
         if (token.isIdent("none")) {
             shadows.push({none: true});
             token = this.getToken(true, true);
-        }
-        else {
+        } else {
             if (token.isIdent('inset')) {
                 inset = true;
                 token = this.getToken(true, true);
@@ -2437,8 +2384,7 @@ CSSParser.prototype.parseBoxShadows = function () {
                 token.isDimensionOfUnit("pt")) {
                 var offsetX = token.value;
                 token = this.getToken(true, true);
-            }
-            else
+            } else
                 return [];
 
             if (!inset && token.isIdent('inset')) {
@@ -2457,8 +2403,7 @@ CSSParser.prototype.parseBoxShadows = function () {
                 token.isDimensionOfUnit("pt")) {
                 var offsetY = token.value;
                 token = this.getToken(true, true);
-            }
-            else
+            } else
                 return [];
 
             if (!inset && token.isIdent('inset')) {
@@ -2534,8 +2479,7 @@ CSSParser.prototype.parseBoxShadows = function () {
                 offsetX = "0px";
                 offsetY = "0px";
                 token = this.getToken(true, true);
-            }
-            else if (!token.isNotNull())
+            } else if (!token.isNotNull())
                 return shadows;
             else
                 return [];
@@ -2564,14 +2508,11 @@ CSSParser.prototype.parseCharsetRule = function (aSheet) {
                     rule.parentStyleSheet = aSheet;
                     aSheet.cssRules.push(rule);
                     return true;
-                }
-                else
+                } else
                     this.reportError(kCHARSET_RULE_MISSING_SEMICOLON);
-            }
-            else
+            } else
                 this.reportError(kCHARSET_RULE_CHARSET_IS_STRING);
-        }
-        else
+        } else
             this.reportError(kCHARSET_RULE_MISSING_WS);
     }
 
@@ -2624,9 +2565,7 @@ CSSParser.prototype.parseColor = function (token) {
         if (!token.isSymbol(")"))
             return "";
         color += token.value;
-    }
-
-    else if (token.isFunction("hsl(")
+    } else if (token.isFunction("hsl(")
         || token.isFunction("hsla(")) {
         color = token.value;
         var isHsla = token.isFunction("hsla(")
@@ -2669,9 +2608,7 @@ CSSParser.prototype.parseColor = function (token) {
         if (!token.isSymbol(")"))
             return "";
         color += token.value;
-    }
-
-    else if (token.isIdent()
+    } else if (token.isIdent()
         && (token.value in this.kCOLOR_NAMES))
         color = token.value;
 
@@ -3009,13 +2946,9 @@ CSSParser.prototype.parseCueShorthand = function (token, declarations, aAcceptPr
             if (token.isSymbol("}"))
                 this.ungetToken();
             break;
-        }
-
-        else if (!values.length && token.isIdent(this.kINHERIT)) {
+        } else if (!values.length && token.isIdent(this.kINHERIT)) {
             values.push(token.value);
-        }
-
-        else if (token.isIdent("none"))
+        } else if (token.isIdent("none"))
             values.push(token.value);
 
         else if (token.isFunction("url(")) {
@@ -3025,8 +2958,7 @@ CSSParser.prototype.parseCueShorthand = function (token, declarations, aAcceptPr
                 values.push("url(" + urlContent);
             else
                 return "";
-        }
-        else
+        } else
             return "";
 
         token = this.getToken(true, true);
@@ -3118,12 +3050,9 @@ CSSParser.prototype.parseDeclaration = function (aToken, aDecl, aAcceptPriority,
                         if (token.isSymbol(";") || token.isSymbol("}")) {
                             if (token.isSymbol("}"))
                                 this.ungetToken();
-                        }
-                        else return "";
-                    }
-                    else return "";
-                }
-                else if (token.isNotNull() && !token.isSymbol(";") && !token.isSymbol("}"))
+                        } else return "";
+                    } else return "";
+                } else if (token.isNotNull() && !token.isSymbol(";") && !token.isSymbol("}"))
                     return "";
                 for (var i = 0; i < declarations.length; i++) {
                     declarations[i].priority = priority;
@@ -3132,8 +3061,7 @@ CSSParser.prototype.parseDeclaration = function (aToken, aDecl, aAcceptPriority,
                 return descriptor + ": " + value + ";";
             }
         }
-    }
-    else if (aToken.isComment()) {
+    } else if (aToken.isComment()) {
         if (this.mPreserveComments) {
             this.forgetState();
             var comment = new jscsspComment();
@@ -3288,9 +3216,7 @@ CSSParser.prototype.parseFontShorthand = function (token, aDecl, aAcceptPriority
             if (token.isSymbol("}"))
                 this.ungetToken();
             break;
-        }
-
-        else if (!fStyle && !fVariant && !fWeight
+        } else if (!fStyle && !fVariant && !fWeight
             && !fSize && !fLineHeight && !fFamily
             && !fSystem
             && token.isIdent(this.kINHERIT)) {
@@ -3301,34 +3227,24 @@ CSSParser.prototype.parseFontShorthand = function (token, aDecl, aAcceptPriority
             fLineHeight = this.kINHERIT;
             fFamily = this.kINHERIT;
             fSystem = this.kINHERIT;
-        }
-
-        else {
+        } else {
             if (!fSystem && (token.isIdent() && token.value in kValues)) {
                 fSystem = token.value;
                 break;
-            }
-
-            else {
+            } else {
                 if (!fStyle
                     && token.isIdent()
                     && (token.value in kStyle)) {
                     fStyle = token.value;
-                }
-
-                else if (!fVariant
+                } else if (!fVariant
                     && token.isIdent()
                     && (token.value in kVariant)) {
                     fVariant = token.value;
-                }
-
-                else if (!fWeight
+                } else if (!fWeight
                     && (token.isIdent() || token.isNumber())
                     && (token.value in kWeight)) {
                     fWeight = token.value;
-                }
-
-                else if (!fSize
+                } else if (!fSize
                     && ((token.isIdent() && (token.value in kSize))
                         || token.isDimension()
                         || token.isPercentage())) {
@@ -3339,21 +3255,15 @@ CSSParser.prototype.parseFontShorthand = function (token, aDecl, aAcceptPriority
                         if (!fLineHeight &&
                             (token.isDimension() || token.isNumber() || token.isPercentage())) {
                             fLineHeight = token.value;
-                        }
-                        else
+                        } else
                             return "";
-                    }
-                    else if (!token.isWhiteSpace())
+                    } else if (!token.isWhiteSpace())
                         continue;
-                }
-
-                else if (token.isIdent("normal")) {
+                } else if (token.isIdent("normal")) {
                     normalCount++;
                     if (normalCount > 3)
                         return "";
-                }
-
-                else if (!fFamily && // *MUST* be last to be tested here
+                } else if (!fFamily && // *MUST* be last to be tested here
                     (token.isString()
                         || token.isIdent())) {
                     var lastWasComma = false;
@@ -3365,32 +3275,26 @@ CSSParser.prototype.parseFontShorthand = function (token, aDecl, aAcceptPriority
                             || token.isSymbol("}")) {
                             this.ungetToken();
                             break;
-                        }
-                        else if (token.isIdent() && token.value in kFamily) {
+                        } else if (token.isIdent() && token.value in kFamily) {
                             var value = new jscsspVariable(kJscsspPRIMITIVE_VALUE, null);
                             value.value = token.value;
                             fFamilyValues.push(value);
                             fFamily += token.value;
                             break;
-                        }
-                        else if (token.isString() || token.isIdent()) {
+                        } else if (token.isString() || token.isIdent()) {
                             var value = new jscsspVariable(kJscsspPRIMITIVE_VALUE, null);
                             value.value = token.value;
                             fFamilyValues.push(value);
                             fFamily += token.value;
                             lastWasComma = false;
-                        }
-                        else if (!lastWasComma && token.isSymbol(",")) {
+                        } else if (!lastWasComma && token.isSymbol(",")) {
                             fFamily += ", ";
                             lastWasComma = true;
-                        }
-                        else
+                        } else
                             return "";
                         token = this.getToken(true, true);
                     }
-                }
-
-                else {
+                } else {
                     return "";
                 }
             }
@@ -3427,8 +3331,7 @@ CSSParser.prototype.parseFunctionArgument = function (token) {
     if (token.isString()) {
         value += token.value;
         token = this.getToken(true, true);
-    }
-    else {
+    } else {
         var parenthesis = 1;
         while (true) {
             if (!token.isNotNull())
@@ -3498,9 +3401,7 @@ CSSParser.prototype.parseGradient = function () {
                 if (!token.isSymbol(","))
                     return null;
                 token = this.getToken(true, true);
-            }
-
-            else if (token.isIdent("to")) {
+            } else if (token.isIdent("to")) {
                 foundPosition = true;
                 token = this.getToken(true, true);
                 if (token.isIdent("top")
@@ -3514,8 +3415,7 @@ CSSParser.prototype.parseGradient = function () {
                         gradient.position += " " + token.value;
                         token = this.getToken(true, true);
                     }
-                }
-                else
+                } else
                     return null;
 
                 if (!token.isSymbol(","))
@@ -3535,20 +3435,17 @@ CSSParser.prototype.parseGradient = function () {
                         && (token.isIdent("circle") || token.isIdent("ellipse"))) {
                         gradient.shape = token.value;
                         token = this.getToken(true, true);
-                    }
-                    else if (!gradient.extent
+                    } else if (!gradient.extent
                         && (token.isIdent("closest-corner")
                             || token.isIdent("closes-side")
                             || token.isIdent("farthest-corner")
                             || token.isIdent("farthest-corner"))) {
                         gradient.extent = token.value;
                         token = this.getToken(true, true);
-                    }
-                    else if (gradient.positions.length < 2 && token.isLength()) {
+                    } else if (gradient.positions.length < 2 && token.isLength()) {
                         gradient.positions.push(token.value);
                         token = this.getToken(true, true);
-                    }
-                    else
+                    } else
                         break;
                 }
 
@@ -3558,34 +3455,30 @@ CSSParser.prototype.parseGradient = function () {
                     || (!gradient.positions.length && gradient.extent)
                     || (!gradient.positions.length && !gradient.extent)) {
                     // shape ok
-                }
-                else {
+                } else {
                     return null;
                 }
 
                 if (token.isIdent("at")) {
                     token = this.getToken(true, true);
                     if (((token.isIdent() && token.value in kPos)
-                            || token.isDimension()
-                            || token.isNumber("0")
-                            || token.isPercentage())) {
+                        || token.isDimension()
+                        || token.isNumber("0")
+                        || token.isPercentage())) {
                         gradient.at = token.value;
                         token = this.getToken(true, true);
                         if (token.isDimension() || token.isNumber("0") || token.isPercentage()) {
                             gradient.at += " " + token.value;
-                        }
-                        else if (token.isIdent() && token.value in kPos) {
+                        } else if (token.isIdent() && token.value in kPos) {
                             if ((gradient.at in kHPos && token.value in kHPos) ||
                                 (gradient.at in kVPos && token.value in kVPos))
                                 return "";
                             gradient.at += " " + token.value;
-                        }
-                        else {
+                        } else {
                             this.ungetToken();
                             gradient.at += " center";
                         }
-                    }
-                    else
+                    } else
                         return null;
 
                     token = this.getToken(true, true);
@@ -3669,16 +3562,14 @@ CSSParser.prototype.parseImportRule = function (aToken, aSheet) {
     if (token.isString()) {
         href = token.value;
         s += " " + href;
-    }
-    else if (token.isFunction("url(")) {
+    } else if (token.isFunction("url(")) {
         token = this.getToken(true, true);
         var urlContent = this.parseURL(token);
         if (urlContent) {
             href = "url(" + urlContent;
             s += " " + href;
         }
-    }
-    else
+    } else
         this.reportError(kIMPORT_RULE_MISSING_URL);
 
     if (href) {
@@ -3744,15 +3635,13 @@ CSSParser.prototype.parseKeyframesRule = function (aToken, aSheet) {
                 token.type = jscsspToken.NULL_TYPE;
                 break;
             }
-        }
-        else if (token.isSymbol("{")) {
+        } else if (token.isSymbol("{")) {
             if (!foundName) {
                 token.type = jscsspToken.NULL_TYPE;
                 // not a valid keyframes at-rule
             }
             break;
-        }
-        else {
+        } else {
             token.type = jscsspToken.NULL_TYPE;
             // not a valid keyframes at-rule
             break;
@@ -3812,16 +3701,13 @@ CSSParser.prototype.parseKeyframeRule = function (aToken, aOwner) {
             if (token.isSymbol("{")) {
                 this.ungetToken();
                 break;
-            }
-            else if (token.isSymbol(",")) {
+            } else if (token.isSymbol(",")) {
                 key += ", ";
-            }
-            else {
+            } else {
                 key = "";
                 break;
             }
-        }
-        else {
+        } else {
             key = "";
             break;
         }
@@ -3852,8 +3738,7 @@ CSSParser.prototype.parseKeyframeRule = function (aToken, aOwner) {
                 token = this.getToken(true, false);
             }
         }
-    }
-    else {
+    } else {
         // key is invalid so the whole rule is invalid with it
     }
 
@@ -3891,35 +3776,25 @@ CSSParser.prototype.parseListStyleShorthand = function (token, aDecl, aAcceptPri
             if (token.isSymbol("}"))
                 this.ungetToken();
             break;
-        }
-
-        else if (!lType && !lPosition && !lImage
+        } else if (!lType && !lPosition && !lImage
             && token.isIdent(this.kINHERIT)) {
             lType = this.kINHERIT;
             lPosition = this.kINHERIT;
             lImage = this.kINHERIT;
-        }
-
-        else if (!lType &&
+        } else if (!lType &&
             (token.isIdent() && token.value in this.kLIST_STYLE_TYPE_NAMES)) {
             lType = token.value;
-        }
-
-        else if (!lPosition &&
+        } else if (!lPosition &&
             (token.isIdent() && token.value in kPosition)) {
             lPosition = token.value;
-        }
-
-        else if (!lImage && token.isFunction("url")) {
+        } else if (!lImage && token.isFunction("url")) {
             token = this.getToken(true, true);
             var urlContent = this.parseURL(token);
             if (urlContent) {
                 lImage = "url(" + urlContent;
-            }
-            else
+            } else
                 return "";
-        }
-        else if (!token.isIdent("none"))
+        } else if (!token.isIdent("none"))
             return "";
 
         token = this.getToken(true, true);
@@ -3966,14 +3841,10 @@ CSSParser.prototype.parse = function (aString, aTryToPreserveWhitespaces, aTryTo
         if (token.isWhiteSpace()) {
             if (aTryToPreserveWhitespaces)
                 this.addWhitespace(sheet, token.value);
-        }
-
-        else if (token.isComment()) {
+        } else if (token.isComment()) {
             if (this.mPreserveComments)
                 this.addComment(sheet, token.value);
-        }
-
-        else if (token.isAtRule()) {
+        } else if (token.isAtRule()) {
             if (token.isAtRule("@variables")) {
                 if (!foundImportRules && !foundStyleRules)
                     this.parseVariablesRule(token, sheet);
@@ -3981,8 +3852,7 @@ CSSParser.prototype.parse = function (aString, aTryToPreserveWhitespaces, aTryTo
                     this.reportError(kVARIABLES_RULE_POSITION);
                     this.addUnknownAtRule(sheet, token.value);
                 }
-            }
-            else if (token.isAtRule("@import")) {
+            } else if (token.isAtRule("@import")) {
                 // @import rules MUST occur before all style and namespace
                 // rules
                 if (!foundStyleRules && !foundNameSpaceRules)
@@ -3991,8 +3861,7 @@ CSSParser.prototype.parse = function (aString, aTryToPreserveWhitespaces, aTryTo
                     this.reportError(kIMPORT_RULE_POSITION);
                     this.addUnknownAtRule(sheet, token.value);
                 }
-            }
-            else if (token.isAtRule("@namespace")) {
+            } else if (token.isAtRule("@namespace")) {
                 // @namespace rules MUST occur before all style rule and
                 // after all @import rules
                 if (!foundStyleRules)
@@ -4001,40 +3870,32 @@ CSSParser.prototype.parse = function (aString, aTryToPreserveWhitespaces, aTryTo
                     this.reportError(kNAMESPACE_RULE_POSITION);
                     this.addUnknownAtRule(sheet, token.value);
                 }
-            }
-            else if (token.isAtRule("@font-face")) {
+            } else if (token.isAtRule("@font-face")) {
                 if (this.parseFontFaceRule(token, sheet))
                     foundStyleRules = true;
                 else
                     this.addUnknownAtRule(sheet, token.value);
-            }
-            else if (token.isAtRule("@page")) {
+            } else if (token.isAtRule("@page")) {
                 if (this.parsePageRule(token, sheet))
                     foundStyleRules = true;
                 else
                     this.addUnknownAtRule(sheet, token.value);
-            }
-            else if (token.isAtRule("@media")) {
+            } else if (token.isAtRule("@media")) {
                 if (this.parseMediaRule(token, sheet))
                     foundStyleRules = true;
                 else
                     this.addUnknownAtRule(sheet, token.value);
-            }
-            else if (token.isAtRule("@keyframes")) {
+            } else if (token.isAtRule("@keyframes")) {
                 if (!this.parseKeyframesRule(token, sheet))
                     this.addUnknownAtRule(sheet, token.value);
-            }
-            else if (token.isAtRule("@charset")) {
+            } else if (token.isAtRule("@charset")) {
                 this.reportError(kCHARSET_RULE_CHARSET_SOF);
                 this.addUnknownAtRule(sheet, token.value);
-            }
-            else {
+            } else {
                 this.reportError(kUNKNOWN_AT_RULE);
                 this.addUnknownAtRule(sheet, token.value);
             }
-        }
-
-        else // plain style rules
+        } else // plain style rules
         {
             var ruleText = this.parseStyleRule(token, sheet, false);
             if (ruleText)
@@ -4063,21 +3924,16 @@ CSSParser.prototype.parseMarginOrPaddingShorthand = function (token, aDecl, aAcc
             if (token.isSymbol("}"))
                 this.ungetToken();
             break;
-        }
-
-        else if (!values.length && token.isIdent(this.kINHERIT)) {
+        } else if (!values.length && token.isIdent(this.kINHERIT)) {
             values.push(token.value);
             token = this.getToken(true, true);
             break;
-        }
-
-        else if (token.isDimension()
+        } else if (token.isDimension()
             || token.isNumber("0")
             || token.isPercentage()
             || token.isIdent("auto")) {
             values.push(token.value);
-        }
-        else
+        } else
             return "";
 
         token = this.getToken(true, true);
@@ -4172,8 +4028,7 @@ CSSParser.prototype.parseMediaQuery = function () {
         m.medium = token.value;
         m.cssText += token.value;
         token = this.getToken(true, true);
-    }
-    else if (token.isIdent("not") || token.isIdent("only")) {
+    } else if (token.isIdent("not") || token.isIdent("only")) {
         m.amplifier = token.value.toLowerCase();
         m.cssText += token.value.toLowerCase();
         token = this.getToken(true, true);
@@ -4189,8 +4044,7 @@ CSSParser.prototype.parseMediaQuery = function () {
             m.cssText += " " + token.value;
             m.medium = token.value;
             token = this.getToken(true, true);
-        }
-        else
+        } else
             return null;
     }
 
@@ -4200,8 +4054,7 @@ CSSParser.prototype.parseMediaQuery = function () {
         if (token.isIdent("and")) {
             m.cssText += " and";
             token = this.getToken(true, true);
-        }
-        else if (!token.isSymbol("{"))
+        } else if (!token.isSymbol("{"))
             return null;
     }
 
@@ -4225,17 +4078,13 @@ CSSParser.prototype.parseMediaQuery = function () {
                         if (token.isIdent("and")) {
                             m.cssText += " and";
                             token = this.getToken(true, true);
-                        }
-                        else if (!token.isSymbol("{"))
+                        } else if (!token.isSymbol("{"))
                             return null;
-                    }
-                    else
+                    } else
                         return m;
-                }
-                else
+                } else
                     return null;
-            }
-            else if (token.isSymbol(")")) {
+            } else if (token.isSymbol(")")) {
                 m.constraints.push({constraint: constraint, value: null});
                 m.cssText += " (" + constraint + ")";
                 token = this.getToken(true, true);
@@ -4243,17 +4092,13 @@ CSSParser.prototype.parseMediaQuery = function () {
                     if (token.isIdent("and")) {
                         m.cssText += " and";
                         token = this.getToken(true, true);
-                    }
-                    else
+                    } else
                         return null;
-                }
-                else
+                } else
                     return m;
-            }
-            else
+            } else
                 return null;
-        }
-        else
+        } else
             return null;
     }
     return m;
@@ -4287,8 +4132,7 @@ CSSParser.prototype.parseMediaRule = function (aToken, aSheet) {
                     break;
                 }
             }
-        }
-        else if (token.isSymbol("{"))
+        } else if (token.isSymbol("{"))
             break;
         else if (foundMedia) {
             token.type = jscsspToken.NULL_TYPE;
@@ -4453,13 +4297,9 @@ CSSParser.prototype.parsePauseShorthand = function (token, declarations, aAccept
             if (token.isSymbol("}"))
                 this.ungetToken();
             break;
-        }
-
-        else if (!values.length && token.isIdent(this.kINHERIT)) {
+        } else if (!values.length && token.isIdent(this.kINHERIT)) {
             values.push(token.value);
-        }
-
-        else if (token.isDimensionOfUnit("ms")
+        } else if (token.isDimensionOfUnit("ms")
             || token.isDimensionOfUnit("s")
             || token.isPercentage()
             || token.isNumber("0"))
@@ -4497,8 +4337,8 @@ CSSParser.prototype.parseDefaultPropertyValue = function (token, aDecl, aAcceptP
     while (token.isNotNull()) {
 
         if ((token.isSymbol(";")
-                || token.isSymbol("}")
-                || token.isSymbol("!"))
+            || token.isSymbol("}")
+            || token.isSymbol("!"))
             && !blocks.length) {
             if (token.isSymbol("}"))
                 this.ungetToken();
@@ -4508,21 +4348,18 @@ CSSParser.prototype.parseDefaultPropertyValue = function (token, aDecl, aAcceptP
         if (token.isIdent(this.kINHERIT)) {
             if (values.length) {
                 return "";
-            }
-            else {
+            } else {
                 valueText = this.kINHERIT;
                 var value = new jscsspVariable(kJscsspINHERIT_VALUE, aSheet);
                 values.push(value);
                 token = this.getToken(true, true);
                 break;
             }
-        }
-        else if (token.isSymbol("{")
+        } else if (token.isSymbol("{")
             || token.isSymbol("(")
             || token.isSymbol("[")) {
             blocks.push(token.value);
-        }
-        else if (token.isSymbol("}")
+        } else if (token.isSymbol("}")
             || token.isSymbol("]")) {
             if (blocks.length) {
                 var ontop = blocks[blocks.length - 1];
@@ -4547,14 +4384,11 @@ CSSParser.prototype.parseDefaultPropertyValue = function (token, aDecl, aAcceptP
                         valueText += "var(" + name + ")";
                         value.name = name;
                         values.push(value);
-                    }
-                    else
+                    } else
                         return "";
-                }
-                else
+                } else
                     return "";
-            }
-            else {
+            } else {
                 var fn = token.value;
                 token = this.getToken(false, true);
                 var arg = this.parseFunctionArgument(token);
@@ -4563,29 +4397,24 @@ CSSParser.prototype.parseDefaultPropertyValue = function (token, aDecl, aAcceptP
                     var value = new jscsspVariable(kJscsspPRIMITIVE_VALUE, aSheet);
                     value.value = fn + arg;
                     values.push(value);
-                }
-                else
+                } else
                     return "";
             }
-        }
-        else if (token.isSymbol("#")) {
+        } else if (token.isSymbol("#")) {
             var color = this.parseColor(token);
             if (color) {
                 valueText += color;
                 var value = new jscsspVariable(kJscsspPRIMITIVE_VALUE, aSheet);
                 value.value = color;
                 values.push(value);
-            }
-            else
+            } else
                 return "";
-        }
-        else if (!token.isWhiteSpace() && !token.isSymbol(",")) {
+        } else if (!token.isWhiteSpace() && !token.isSymbol(",")) {
             var value = new jscsspVariable(kJscsspPRIMITIVE_VALUE, aSheet);
             value.value = token.value;
             values.push(value);
             valueText += token.value;
-        }
-        else
+        } else
             valueText += token.value;
         token = this.getToken(false, true);
     }
@@ -4648,16 +4477,14 @@ CSSParser.prototype.parseSelector = function (aToken, aParseSelectorOnly) {
                     s += token.value + " ";
                     combinatorFound = true;
                 }
-            }
-            else {
+            } else {
                 s += token.value;
                 combinatorFound = true;
             }
             isFirstInChain = true;
             token = this.getToken(true, true);
             continue;
-        }
-        else {
+        } else {
             var simpleSelector = this.parseSimpleSelector(token, isFirstInChain, true);
             if (!simpleSelector)
                 break; // error
@@ -4717,7 +4544,7 @@ CSSParser.prototype.parseSimpleSelector = function (token, isFirstInChain, canNe
                     if (token.isIdent())
                         specificity.d++;
                 } else
-                // oops that's an error...
+                    // oops that's an error...
                     return null;
             } else {
                 this.ungetToken();
@@ -4732,12 +4559,10 @@ CSSParser.prototype.parseSimpleSelector = function (token, isFirstInChain, canNe
                 if (token.isIdent())
                     specificity.d++;
             } else
-            // oops that's an error
+                // oops that's an error
                 return null;
         }
-    }
-
-    else if (token.isSymbol(".") || token.isSymbol("#")) {
+    } else if (token.isSymbol(".") || token.isSymbol("#")) {
         var isClass = token.isSymbol(".");
         s += token.value;
         token = this.getToken(false, true);
@@ -4747,12 +4572,9 @@ CSSParser.prototype.parseSimpleSelector = function (token, isFirstInChain, canNe
                 specificity.c++;
             else
                 specificity.b++;
-        }
-        else
+        } else
             return null;
-    }
-
-    else if (token.isSymbol(":")) {
+    } else if (token.isSymbol(":")) {
         s += token.value;
         token = this.getToken(false, true);
         if (token.isSymbol(":")) {
@@ -4765,8 +4587,7 @@ CSSParser.prototype.parseSimpleSelector = function (token, isFirstInChain, canNe
                 specificity.d++;
             else
                 specificity.c++;
-        }
-        else if (token.isFunction()) {
+        } else if (token.isFunction()) {
             s += token.value;
             if (token.isFunction(":not(")) {
                 if (!canNegate)
@@ -4784,8 +4605,7 @@ CSSParser.prototype.parseSimpleSelector = function (token, isFirstInChain, canNe
                         return null;
                 }
                 specificity.c++;
-            }
-            else {
+            } else {
                 while (true) {
                     token = this.getToken(false, true);
                     if (token.isSymbol(")")) {
@@ -4821,8 +4641,7 @@ CSSParser.prototype.parseSimpleSelector = function (token, isFirstInChain, canNe
                 s += token.value;
             else
                 return null;
-        }
-        else
+        } else
             return null;
 
         // nothing, =, *=, $=, ^=, |=
@@ -4838,26 +4657,21 @@ CSSParser.prototype.parseSimpleSelector = function (token, isFirstInChain, canNe
             if (token.isString() || token.isIdent()) {
                 s += token.value;
                 token = this.getToken(true, true);
-            }
-            else
+            } else
                 return null;
 
             if (token.isSymbol("]")) {
                 s += token.value;
                 specificity.c++;
-            }
-            else
+            } else
                 return null;
-        }
-        else if (token.isSymbol("]")) {
+        } else if (token.isSymbol("]")) {
             s += token.value;
             specificity.c++;
-        }
-        else
+        } else
             return null;
 
-    }
-    else if (token.isWhiteSpace()) {
+    } else if (token.isWhiteSpace()) {
         var t = this.lookAhead(true, true);
         if (t.isSymbol('{'))
             return ""
@@ -4908,8 +4722,7 @@ CSSParser.prototype.parseStyleRule = function (aToken, aOwner, aIsInsideMediaRul
                 token = this.getToken(true, false);
             }
         }
-    }
-    else {
+    } else {
         // selector is invalid so the whole rule is invalid with it
     }
 
@@ -4940,8 +4753,7 @@ CSSParser.prototype.parseTextShadows = function () {
         if (token.isIdent("none")) {
             shadows.push({none: true});
             token = this.getToken(true, true);
-        }
-        else {
+        } else {
             if (token.isFunction("rgb(") ||
                 token.isFunction("rgba(") ||
                 token.isFunction("hsl(") ||
@@ -4962,8 +4774,7 @@ CSSParser.prototype.parseTextShadows = function () {
                 token.isDimensionOfUnit("pt")) {
                 var offsetX = token.value;
                 token = this.getToken(true, true);
-            }
-            else
+            } else
                 return [];
             if (token.isPercentage() ||
                 token.isDimensionOfUnit("cm") ||
@@ -4976,8 +4787,7 @@ CSSParser.prototype.parseTextShadows = function () {
                 token.isDimensionOfUnit("pt")) {
                 var offsetY = token.value;
                 token = this.getToken(true, true);
-            }
-            else
+            } else
                 return [];
             if (token.isPercentage() ||
                 token.isDimensionOfUnit("cm") ||
@@ -5015,8 +4825,7 @@ CSSParser.prototype.parseTextShadows = function () {
                 offsetX = "0px";
                 offsetY = "0px";
                 token = this.getToken(true, true);
-            }
-            else if (!token.isNotNull())
+            } else if (!token.isNotNull())
                 return shadows;
             else
                 return [];
@@ -5171,8 +4980,7 @@ CSSParser.prototype.parseURL = function (token) {
     if (token.isString()) {
         value += token.value;
         token = this.getToken(true, true);
-    }
-    else
+    } else
         while (true) {
             if (!token.isNotNull()) {
                 this.reportError(kURL_EOF);
@@ -5528,8 +5336,7 @@ jscsspDeclaration.prototype = {
                         extras[j] = extras[j] || (kCSS_VENDOR_VALUES[kwd][j] != "");
                     }
                 }
-            }
-            else
+            } else
                 return null;
         }
 
@@ -5554,8 +5361,7 @@ jscsspDeclaration.prototype = {
                             }
                         }
                         str += (i ? separator : "") + v;
-                    }
-                    else
+                    } else
                         return null;
                 }
                 if (str)
@@ -5953,16 +5759,14 @@ jscsspStylesheet.prototype = {
     insertRule: function (aRule, aIndex) {
         try {
             this.cssRules.splice(aIndex, 1, aRule);
-        }
-        catch (e) {
+        } catch (e) {
         }
     },
 
     deleteRule: function (aIndex) {
         try {
             this.cssRules.splice(aIndex);
-        }
-        catch (e) {
+        } catch (e) {
         }
     },
 

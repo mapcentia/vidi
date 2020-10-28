@@ -226,8 +226,8 @@ module.exports = {
         "Children": "Børn",
         "Back": "Tilbage",
         "Fit bounds to filter": "Sæt udsnit til filter",
-        "Labels": "mærkater",
-        "Show labels": "Vis mærkater",
+        "Labels": "Labels",
+        "Show labels": "Vis labels",
 
         // Base layers
         "Side-by-side mode": "Dobbelt baggrundskort",

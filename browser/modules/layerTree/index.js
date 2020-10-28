@@ -75,6 +75,7 @@ let MarkupGenerator = require('./MarkupGenerator');
 let markupGeneratorInstance = new MarkupGenerator();
 
 import {GROUP_CHILD_TYPE_LAYER, GROUP_CHILD_TYPE_GROUP, LayerSorting} from './LayerSorting';
+import sq from "../../../bower_components/momentjs/src/locale/sq";
 
 let layerSortingInstance = new LayerSorting();
 let latestFullTreeStructure = false;
@@ -140,6 +141,7 @@ const marked = require('marked');
 
 let filterComp = {};
 let lastFilter;
+let utils;
 
 /**
  *
@@ -156,6 +158,7 @@ module.exports = {
         switchLayer = o.switchLayer;
         backboneEvents = o.backboneEvents;
         extensions = o.extensions;
+        utils = o.utils;
 
         offlineModeControlsManager = new OfflineModeControlsManager(meta);
 
@@ -1567,8 +1570,8 @@ module.exports = {
                     // If there is no handler for specific layer, then display attributes only
                     layer.on("click", function (e) {
 
-                        // Multi select disabled
-                        if (typeof window.vidiConfig.vectorMultiSelect === "undefined" || window.vidiConfig.vectorMultiSelect === false) {
+                        // Cross Multi select disabled
+                        if (typeof window.vidiConfig.crossMultiSelect === "undefined" || window.vidiConfig.crossMultiSelect === false) {
                             _self.displayAttributesPopup([{
                                 feature: feature,
                                 layer: layer,
@@ -1577,11 +1580,40 @@ module.exports = {
                             return
                         }
 
-                        // multi select enabled
+                        // Cross multi select enabled
+                        let coord3857 = utils.transform("EPSG:4326", "EPSG:3857", [e.latlng.lng, e.latlng.lat]);
+                        let wkt = "POINT(" + coord3857[0] + " " + coord3857[1] + ")";
+                        let intersectingFeatures = [];
+                        // Get active raster tile layers, so we can check if database should be queried
+                        let activelayers = layers.getMapLayers() ? layers.getLayers().split(",") : [];
+                        let activeTilelayers = activelayers.filter(layer => !layer.startsWith(LAYER.VECTOR + ':') && !layer.startsWith(LAYER.VECTOR_TILE + ':') && !layer.startsWith(LAYER.WEBGL + ':'))
+                        // Filter tiles layer without pixels
+                        activeTilelayers = activeTilelayers.filter((key) => {
+                            if (typeof moduleState.tileContentCache[key] === "boolean" && moduleState.tileContentCache[key] === true) {
+                                return true;
+                            }
+                        })
+                        if (activeTilelayers.length > 0) {
+                            sqlQuery.init(qstore, wkt, "3857", (store) => {
+                                setTimeout(() => {
+                                    sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + store.key, store.geoJSON.features);
+                                    store.layer.eachLayer((layer) => {
+                                        intersectingFeatures.push({
+                                            feature: layer.feature,
+                                            layer: layer,
+                                            layerKey: store.key
+                                        });
+                                    })
+                                    layers.decrementCountLoading("_vidi_sql_" + store.id);
+                                    backboneEvents.get().trigger("doneLoading:layers", "_vidi_sql_" + store.id);
+                                    if (layers.getCountLoading() === 0) {
+                                        _self.displayAttributesPopup(intersectingFeatures, e);
+                                    }
+                                }, 200)
+                            }, null, [coord3857[0], coord3857[1]]);
+                        }
                         let clickBounds = L.latLngBounds(e.latlng, e.latlng);
                         let distance = 10 * MAP_RESOLUTIONS[cloud.get().getZoom()];
-                        let intersectingFeatures = [];
-                        let intersectingLayers = [];
                         let mapObj = cloud.get().map;
                         for (let l in mapObj._layers) {
                             let overlay = mapObj._layers[l];
@@ -1610,9 +1642,12 @@ module.exports = {
                                         console.log(e);
                                     }
                                 }
+                                // No active raster tile layers - open the pop-up
+                                if (activeTilelayers.length === 0) {
+                                    _self.displayAttributesPopup(intersectingFeatures, e);
+                                }
                             }
                         }
-                        _self.displayAttributesPopup(intersectingFeatures, e, '');
                     });
                 }
             },
@@ -1837,9 +1872,13 @@ module.exports = {
                 if (tmpl) {
                     // Convert Markdown in text fields
                     let metaDataKeys = meta.getMetaDataKeys();
+                    let hasSummary = typeof parsedMeta?.accordion_summery !== "undefined" && parsedMeta?.accordion_summery !== "";
+                    let summaryPrefix = typeof parsedMeta?.accordion_summery_prefix !== "undefined" && parsedMeta?.accordion_summery_prefix !== "" ? parsedMeta?.accordion_summery_prefix : null;
+                    let title = metaDataKeys[layerKey].f_table_title ? metaDataKeys[layerKey].f_table_title : metaDataKeys[layerKey].f_table_name;
+                    title = hasSummary ? summaryPrefix ? `<span style="color: #AAAAAA">${summaryPrefix}</span>&nbsp;&nbsp;${properties[parsedMeta.accordion_summery]}` : properties[parsedMeta.accordion_summery] : title;
                     for (const property in metaDataKeys[layerKey].fields) {
                         if (metaDataKeys[layerKey].fields[property].type === "text") {
-                            properties[property] = marked(properties[property]);
+                            //properties[property] = marked(properties[property]);
                         }
                     }
                     //properties.text1 = marked(properties.text1);
@@ -1853,17 +1892,17 @@ module.exports = {
                         accordion += `<div class="panel panel-default vector-feature-info-panel" id="vector-feature-info-panel-${randText}" style="box-shadow: none;border-radius: 0; margin-bottom: 0">
                                         <div class="panel-heading" role="tab" style="padding: 8px 0px 8px 15px;border-bottom: 1px white solid">
                                             <h4 class="panel-title">
-                                                <a style="display: block; color: black" class="accordion-toggle js-toggle-feature-panel" data-toggle="collapse" data-parent="#layers" href="#collapse${randText}">${layerKey}</a>
+                                                <a style="display: block; color: black" class="feature-info-accordion-toggle accordion-toggle js-toggle-feature-panel" data-toggle="collapse" data-parent="#layers" href="#collapse${randText}">${title}</a>
                                             </h4>
                                         </div>
-                                        <ul class="list-group" id="group-${randText}" role="tabpanel"><div id="collapse${randText}" class="accordion-body collapse" style="padding: 3px 8px 3px 8px">${renderedText}</div></ul>
+                                        <ul class="list-group" id="group-${randText}" role="tabpanel"><div id="collapse${randText}" class="feature-info-accordion-body accordion-body collapse" style="padding: 3px 8px 3px 8px">${renderedText}</div></ul>
                                     </div>`;
                     } else {
                         console.log(`Feature info disabled for ${layerKey}`)
                     }
                 }
             } catch (e) {
-                console.info("Error in pop-up template for: " + layerKey);
+                console.info("Error in pop-up template for: " + layerKey, e);
             }
 
             if (count > 0) {
@@ -1877,7 +1916,13 @@ module.exports = {
                     }).setLatLng(event.latlng).setContent(`<div>
                                                                 ${additionalControls}
                                                                 <div style="margin-right: 5px; margin-left: 2px">${accordion}</div>
-                                                            </div>`).openOn(cloud.get().map);
+                                                            </div>`).openOn(cloud.get().map)
+                        .on('remove', () => {
+                            sqlQuery.resetAll();
+                        });
+                    $(".feature-info-accordion-toggle").on("click", () => {
+                        $('.feature-info-accordion-body').collapse("hide")
+                    })
 
                 }
             }
