@@ -330,6 +330,27 @@ module.exports = {
                     });
                 }
 
+                var getJordstykkerByBFE = function(bfenummer) {
+                    var hostName = 'https://dawa.aws.dk/jordstykker/autocomplete?';
+                    
+                    var params = {
+                        cache: 'no-cache',
+                        bfenummer: bfenummer
+                    };
+
+                    return new Promise(function(resolve, reject) {
+                        fetch(hostName + new URLSearchParams(params))
+                            .then(r => r.json())
+                            .then(d => {
+                                resolve(d);
+                            })
+                            .catch(e => {
+                                console.log(e)
+                                reject(e)
+                            });
+                    });
+                }
+
                 /**
                  *
                  */
@@ -376,11 +397,7 @@ module.exports = {
                         // Click event - info
                         mapObj.on("click", function (e) {
                             //TODO: Enable only if extension is active?!
-                            me.addMatrikel(e)
-                            .then(r=>{
-                                me.focusMatrikel(r.id);
-                                me.triggerMatrikel(r.id);
-                            })
+                            me.findMatrikel(e);
                         });
                         
                         
@@ -814,7 +831,22 @@ module.exports = {
                     }
 
                     addEjendom( bfe ) {
+                        const _self = this;
                         console.log(bfe);
+                        getJordstykkerByBFE( bfe )
+                        .then(r => {
+                            let jobs = [];
+                            r.forEach(matr => {
+                                jobs.push(_self.addMatrikel(matr, true))
+                            })
+                            return jobs
+                        })
+                        .then(l => {
+                            console.log(l)
+                        })
+                        .catch(e => {
+                            console.log(e);
+                        })
                     }
                     deleteEjendom( bfe )  {
                         console.log(bfe);
