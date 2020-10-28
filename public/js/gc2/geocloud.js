@@ -785,6 +785,7 @@ geocloud = (function () {
                     layers: layer,
                     format: 'image/png',
                     transparent: true,
+                    minZoom: defaults.minZoom,
                     maxZoom: defaults.maxZoom,
                     tileSize: defaults.tileSize
                 };
@@ -913,6 +914,7 @@ geocloud = (function () {
                 config = {
                     tms: true,
                     attribution: defaults.attribution,
+                    minZoom: defaults.minZoom,
                     maxZoom: defaults.maxZoom,
                     maxNativeZoom: defaults.maxNativeZoom,
                     tileSize: 256,
@@ -2227,6 +2229,7 @@ geocloud = (function () {
                 names: [],
                 resolutions: this.map.resolutions,
                 type: "wms",
+                minZoom: 1,
                 maxZoom: 26,
                 maxNativeZoom: 26,
                 tileSize: MAPLIB === "ol2" ? OpenLayers.Size(256, 256) : 256,
