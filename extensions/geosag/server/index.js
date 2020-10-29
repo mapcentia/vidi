@@ -6,6 +6,7 @@ var https = require('https');
 var moment = require('moment');
 var config = require('../../../config/config.js');
 var he = require('he');
+var shajs = require('sha.js');
 var fetch = require('node-fetch');
 const wkt = require('wkt');
 
@@ -65,9 +66,18 @@ function getDocunote(endpoint) {
 }
 
 // Checks if user is allowed to use endpoints
-function verifyUser(userstring) {
+function verifyUser(request) {
     return new Promise(function(resolve, reject) {
             //TODO: Make sure only the right people can use the API!
+            //console.log(request)
+            try {
+                console.log('Incomming: '+request.body.user.toString())
+                console.log('Requested: '+request.connection.remoteAddress)
+                console.log('Requested: '+request.headers['x-forwarded-for'])
+            } catch (error) {
+                console.log(error)
+            }
+
             if (true) {
                 resolve({success: true, message:'User allowed'});
             } else {
@@ -100,7 +110,7 @@ router.post('/api/extension/getExistingMatr', function (req, response) {
 
     // Logic
     try {
-        verifyUser(req.body.user.toString())
+        verifyUser(req)
             .then(function(user) {
                 // user is allowed
                 //console.log(user);
@@ -176,7 +186,7 @@ router.post('/api/extension/getCase', function (req, response) {
 
     // Logic
     try {
-        verifyUser(req.body.user.toString())
+        verifyUser(req)
             .then(function(user) {
                 // user is allowed
                 //console.log(user);
