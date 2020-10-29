@@ -129,7 +129,7 @@ body {
   padding: 0 !important;
 }
 .leaflet-popup-content .tab-pane {
-  padding: 6px 0 0 0  !important;
+  padding: 0  !important;
 }
 #pane {
   position: fixed;
@@ -249,7 +249,7 @@ input[type="checkbox"] {
   background-color: #ffffff !important;
 }
 .nav-tabs > li > a {
-  color: #777 !important;
+  color: #999 !important;
   border-radius: 0;
   border: 1px solid rgba(255, 255, 255, 0) !important;
   border-bottom: 0 !important;
@@ -257,7 +257,6 @@ input[type="checkbox"] {
 .nav-tabs > li.active > a {
   border: 1px solid #ddd !important;
   border-bottom: 0 !important;
-  background-color: white;
   color: #111 !important;
 }
 .nav-tabs > li > a:hover {

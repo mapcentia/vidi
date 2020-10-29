@@ -371,7 +371,7 @@ module.exports = {
                             responsive: false,
                             callCustomOnload: false,
                             checkBox: !simple,
-                            height: null,
+                            height: featureInfoTableOnMap ? 150 : 350,
                             locale: window._vidiLocale.replace("_", "-"),
                             template: template,
                             pkey: pkey,
