@@ -290,10 +290,14 @@ module.exports = {
 
                 if (fields[key]) {
                     switch (fields[key].type) {
-                        case `int`:
+                        case `smallint`:
                         case `integer`:
+                        case `bigint`:
                             properties[key].type = `integer`;
                             break;
+                        case `decimal`:
+                        case `numeric`:
+                        case `real`:
                         case `double precision`:
                             properties[key].type = `number`;
                             break;
@@ -739,6 +743,7 @@ module.exports = {
 
             // Transform field values according to their types
             Object.keys(fields).map(key => {
+                console.log(fields[key].type)
                 switch (fields[key].type) {
                     case `double precision`:
                         if (eventFeatureCopy.properties[key]) {
