@@ -3284,7 +3284,8 @@ module.exports = {
                     ST_Ymax(ST_Extent(extent)) AS tymax
                 FROM (SELECT ST_astext(ST_Transform(ST_setsrid(ST_Extent(${metaData.f_geometry_column}),${metaData.srid}),4326)) AS extent FROM ${layerKey} WHERE ${whereClause}) as foo`;
         let q = {
-            q: sql
+            q: base64.encode(sql),
+            base64: true
         }
         $.ajax({
             url: '/api/sql/' + urlparser.db,
