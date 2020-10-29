@@ -120,6 +120,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - If the Service Worker doesn't get registered when Vidi will now start anyways without the Service Worker. On a hard refresh (Ctrl-f5) the Service Worker will claim the clients, so a hard refresh will not unregister Service Worker, but the cache will be deleted. 
 - Text in editor is now url encoded.
 - Quotes are now escaped for text in editor.
+- All numeric Postgres types are now handled correct in editor 
 
 ## [2020.2.0]
 ### Added
