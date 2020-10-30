@@ -58,7 +58,7 @@ module.exports = {
     },
     init: function (onLoad, el, onlyAddress, getProperty) {
         var type1, type2, type3, type4, gids = {}, searchString, dslM, shouldA = [], shouldM = [], dsl1, dsl2, size,
-            komKode = window.vidiConfig.searchConfig.komkode, placeStore, maxZoom,
+            komKode = window.vidiConfig.searchConfig.komkode, placeStores = {}, maxZoom,
             esrSearchActive = typeof (window.vidiConfig.searchConfig.esrSearchActive) !== "undefined" ? window.vidiConfig.searchConfig.esrSearchActive : false,
             sfeSearchActive = typeof (window.vidiConfig.searchConfig.sfeSearchActive) !== "undefined" ? window.vidiConfig.searchConfig.sfeSearchActive : false;
             size = typeof (window.vidiConfig.searchConfig.size) !== "undefined" ? window.vidiConfig.searchConfig.size : 10;
@@ -75,6 +75,27 @@ module.exports = {
                 searchTxt + " eller ESR nr.");
         }
 
+        let colorPicker = ` 
+                                        <div class="row">
+                                            <div class="col-lg-6">
+
+                                                <label for="search-colorpicker-input"
+                                                       class="col-md-3 control-label">{{Color}}</label>
+                            <div id="search-colorpicker" class="input-group colorpicker-component col-md-10">
+                                <input id="search-colorpicker-input" name="search-colorpicker-input"
+                                       type="text" value="#ff0000" class="form-control"
+                                       style="margin-left: 15px;"/>
+                                <span class="input-group-addon"><i
+                                        style="margin-left: 10px;"/></span>
+                            </div>
+                        </div>
+                        </div>
+`
+        ;
+        $("#place-search").append(colorPicker)
+        $("#search-colorpicker").colorpicker({
+            container: $("#search-colorpicker")
+        });
 
         // Set max zoom then zooming on target
         // ===================================
@@ -86,7 +107,9 @@ module.exports = {
 
         backboneEvents.get().on("clear:search", function () {
             console.info("Clearing search");
-            placeStore.reset();
+            for (const property in placeStores) {
+                placeStores[property].reset();
+            }
             $("#custom-search").val("");
         });
 
@@ -115,32 +138,34 @@ module.exports = {
         // Define GC2 SQL store
         // ====================
 
-        placeStore = new geocloud.sqlStore({
-            jsonp: false,
-            method: "POST",
-            dataType: "json",
-            sql: null,
-            clickable: false,
-            // Make Awesome Markers
-            pointToLayer: function (feature, latlng) {
-                return L.marker(latlng, {
-                    icon: L.AwesomeMarkers.icon({
-                            icon: 'home',
-                            markerColor: '#C31919',
-                            prefix: 'fa'
-                        }
-                    )
-                });
-            },
-            styleMap: {
-                weight: 3,
-                color: '#C31919',
-                dashArray: '',
-                Opacity: 1,
-                fillOpacity: 0
-            },
-            onLoad: onLoad
-        });
+        let getPlaceStore = () => {
+            return new geocloud.sqlStore({
+                jsonp: false,
+                method: "POST",
+                dataType: "json",
+                sql: null,
+                clickable: false,
+                // Make Awesome Markers
+                pointToLayer: function (feature, latlng) {
+                    return L.marker(latlng, {
+                        icon: L.AwesomeMarkers.icon({
+                                icon: 'home',
+                                markerColor: '#C31919',
+                                prefix: 'fa'
+                            }
+                        )
+                    });
+                },
+                styleMap: {
+                    weight: 3,
+                    color: $("#search-colorpicker-input").val(),
+                    dashArray: '',
+                    Opacity: 1,
+                    fillOpacity: 0
+                },
+                onLoad: onLoad
+            });
+        }
 
         if (komKode !== "*") {
             if (typeof komKode === "string") {
@@ -813,7 +838,7 @@ module.exports = {
                 || (type3 === "esr_nr" && name === "esr_ejdnr") || (type4 === "sfe_nr" && name === "sfe_ejdnr")
                 || extraSearchesNames.indexOf(name) !== -1
             ) {
-                placeStore.reset();
+                //placeStore.reset();
                 switch (name) {
                     case "esr_ejdnr" :
                         placeStore.db = MDB;
@@ -830,15 +855,17 @@ module.exports = {
                         placeStore.load();
                         break;
                     case "matrikel" :
-                        placeStore.db = MDB;
-                        placeStore.host = MHOST;
                         searchString = datum.value;
+                        placeStores[searchString] = getPlaceStore();
+                        placeStores[searchString].db = MDB;
+                        placeStores[searchString].host = MHOST;
                         if (getProperty) {
-                            placeStore.sql = "SELECT esr_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE esr_ejendomsnummer = (SELECT esr_ejendomsnummer FROM matrikel.jordstykke WHERE gid=" + gids[type2][datum.value] + ") group by esr_ejendomsnummer";
+                            placeStores[searchString].sql = "SELECT esr_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE esr_ejendomsnummer = (SELECT esr_ejendomsnummer FROM matrikel.jordstykke WHERE gid=" + gids[type2][datum.value] + ") group by esr_ejendomsnummer";
                         } else {
-                            placeStore.sql = "SELECT gid,the_geom,ST_asgeojson(ST_transform(the_geom,4326)) as geojson FROM matrikel.jordstykke WHERE gid='" + gids[type2][datum.value] + "'";
+                            placeStores[searchString].sql = "SELECT gid,the_geom,ST_asgeojson(ST_transform(the_geom,4326)) as geojson FROM matrikel.jordstykke WHERE gid='" + gids[type2][datum.value] + "'";
                         }
-                        placeStore.load();
+                        placeStores[searchString].load();
+                        console.log(placeStores)
                         break;
                     case "adresse" :
                         placeStore.db = ADB;
