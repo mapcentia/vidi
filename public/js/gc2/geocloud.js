@@ -2230,8 +2230,8 @@ geocloud = (function () {
                 resolutions: this.map.resolutions,
                 type: "wms",
                 minZoom: 1,
-                maxZoom: 26,
-                maxNativeZoom: 26,
+                maxZoom: 28,
+                maxNativeZoom: 28,
                 tileSize: MAPLIB === "ol2" ? OpenLayers.Size(256, 256) : 256,
                 uri: null
             };
