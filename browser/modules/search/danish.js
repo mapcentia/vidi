@@ -17,6 +17,8 @@ var cloud;
  */
 var backboneEvents;
 
+var draw;
+
 /**
  *
  * @type {string}
@@ -41,6 +43,8 @@ var MHOST = "https://dk.gc2.io";
  */
 var MDB = "dk";
 
+const drawTools = require(`./../drawTools`);
+
 /**
  * Global var with config object
  */
@@ -53,6 +57,7 @@ window.vidiConfig = require('../../../config/config.js');
 module.exports = {
     set: function (o) {
         cloud = o.cloud;
+        draw = o.draw;
         backboneEvents = o.backboneEvents;
         return this;
     },
@@ -62,6 +67,7 @@ module.exports = {
             esrSearchActive = typeof (window.vidiConfig.searchConfig.esrSearchActive) !== "undefined" ? window.vidiConfig.searchConfig.esrSearchActive : false,
             sfeSearchActive = typeof (window.vidiConfig.searchConfig.sfeSearchActive) !== "undefined" ? window.vidiConfig.searchConfig.sfeSearchActive : false;
             size = typeof (window.vidiConfig.searchConfig.size) !== "undefined" ? window.vidiConfig.searchConfig.size : 10;
+
 
         // adjust search text
         var searchTxt = "Adresse, matr. nr.";
@@ -122,8 +128,24 @@ module.exports = {
             onLoad = function () {
                 var resultLayer = new L.FeatureGroup();
                 cloud.get().map.addLayer(resultLayer);
-                resultLayer.addLayer(this.layer);
+                //resultLayer.addLayer(this.layer);
                 cloud.get().zoomToExtentOfgeoJsonStore(this, maxZoom);
+                this.layer._vidi_type = "draw"
+                this.layer.eachLayer((l)=>{
+                    console.log(l)
+                    l._vidi_type = "draw"
+                    l.on('click', function (event) {
+                        draw.bindPopup(event);
+                    });
+                    l.feature = {
+                        properties: {
+                            type: l.feature.properties.matrikelnummer + ' ' + l.feature.properties.ejerlavsnavn,
+                            area: drawTools.getArea(l)
+                        }
+                    };
+                    draw.getDrawItems().addLayer(l)
+                })
+                draw.getTable().loadDataInTable(false, true);
             }
         }
 
@@ -144,7 +166,7 @@ module.exports = {
                 method: "POST",
                 dataType: "json",
                 sql: null,
-                clickable: false,
+                clickable: true,
                 // Make Awesome Markers
                 pointToLayer: function (feature, latlng) {
                     return L.marker(latlng, {
@@ -839,23 +861,23 @@ module.exports = {
                 || extraSearchesNames.indexOf(name) !== -1
             ) {
                 //placeStore.reset();
+                searchString = datum.value;
                 switch (name) {
                     case "esr_ejdnr" :
-                        placeStore.db = MDB;
-                        placeStore.host = MHOST;
-                        searchString = datum.value;
-                        placeStore.sql = "SELECT esr_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE esr_ejendomsnummer = (SELECT esr_ejendomsnummer FROM matrikel.jordstykke WHERE gid=" + gids[type3][datum.value] + ") group by esr_ejendomsnummer";
-                        placeStore.load();
+                        placeStores[searchString] = getPlaceStore();
+                        placeStores[searchString].db = MDB;
+                        placeStores[searchString].host = MHOST;
+                        placeStores[searchString].sql = "SELECT esr_ejendomsnummer,matrikelnummer,ejerlavsnavn,the_geom FROM matrikel.jordstykke WHERE esr_ejendomsnummer = (SELECT esr_ejendomsnummer FROM matrikel.jordstykke WHERE gid=" + gids[type3][datum.value] + ")";
+                        placeStores[searchString].load();
                         break;
                     case "sfe_ejdnr" :
-                        placeStore.db = MDB;
-                        placeStore.host = MHOST;
-                        searchString = datum.value;
-                        placeStore.sql = "SELECT sfe_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE sfe_ejendomsnummer = (SELECT sfe_ejendomsnummer FROM matrikel.jordstykke WHERE gid=" + gids[type4][datum.value] + ") group by sfe_ejendomsnummer";
-                        placeStore.load();
+                        placeStores[searchString] = getPlaceStore();
+                        placeStores[searchString].db = MDB;
+                        placeStores[searchString].host = MHOST;
+                        placeStores[searchString].sql = "SELECT sfe_ejendomsnummer,matrikelnummer,ejerlavsnavn,the_geom FROM matrikel.jordstykke WHERE sfe_ejendomsnummer = (SELECT sfe_ejendomsnummer FROM matrikel.jordstykke WHERE gid=" + gids[type4][datum.value] + ")";
+                        placeStores[searchString].load();
                         break;
                     case "matrikel" :
-                        searchString = datum.value;
                         placeStores[searchString] = getPlaceStore();
                         placeStores[searchString].db = MDB;
                         placeStores[searchString].host = MHOST;

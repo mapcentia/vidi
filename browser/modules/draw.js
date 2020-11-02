@@ -105,7 +105,6 @@ module.exports = {
             $("#draw-line-total-dist").prop("disabled", !b);
         });
         //
-
         cloud.get().map.addLayer(drawnItems);
         store.layer = drawnItems;
         $("#draw-colorpicker").colorpicker({
@@ -640,12 +639,19 @@ module.exports = {
         return store.layer;
     },
 
+    getDrawItems: function () {
+        return drawnItems;
+    },
+
     /**
      *
      * @returns {gc2table}
      */
     getTable: function () {
         return table;
+    },
+    getStore: function() {
+        return store;
     },
 
     /**

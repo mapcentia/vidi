@@ -380,7 +380,8 @@ module.exports = {
                             key: keyWithoutGeom,
                             caller: _self,
                             styleSelected: styleForSelectedFeatures,
-                            setZoom: parsedMeta?.zoom_on_table_click ? parsedMeta.zoom_on_table_click : false
+                            setZoom: parsedMeta?.zoom_on_table_click ? parsedMeta.zoom_on_table_click : false,
+                            dashSelected: true
                         });
 
                         if (!parsedMeta.info_element_selector) {
@@ -494,7 +495,7 @@ module.exports = {
                                 $(`#${elementPrefix}modal-info-body table`).bootstrapTable('resetView');
                                 // If only one hit across all layers, the click the only row
                                 if (count.hits === 1) {
-                                    $("[data-uniqueid]").trigger("click");
+                                    $("#info-box [data-uniqueid]").trigger("click");
                                     $(".show-when-multiple-hits").hide();
                                 }
                             }, 100);
