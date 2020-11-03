@@ -51,7 +51,7 @@ module.exports = {
         let loadConfig = function () {
             let configParam;
             if (configFile.startsWith("/")) {
-                configParam = window.gc2host + configFile
+                configParam = "/api/localconfig?file=" + configFile
             } else {
                 configParam = "/api/config/" + urlparser.db + "/" + configFile;
             }
@@ -77,7 +77,7 @@ module.exports = {
                 window.vidiConfig.dontUseAdvancedBaseLayerSwitcher = data.dontUseAdvancedBaseLayerSwitcher ? data.dontUseAdvancedBaseLayerSwitcher : window.vidiConfig.dontUseAdvancedBaseLayerSwitcher;
                 window.vidiConfig.wmsUriReplace = data.wmsUriReplace ? data.wmsUriReplace : window.vidiConfig.wmsUriReplace;
                 window.vidiConfig.infoClickCursorStyle = data.infoClickCursorStyle ? data.infoClickCursorStyle : window.vidiConfig.infoClickCursorStyle;
-                window.vidiConfig.vectorMultiSelect = data.vectorMultiSelect ? data.vectorMultiSelect : window.vidiConfig.vectorMultiSelect;
+                window.vidiConfig.crossMultiSelect = data.crossMultiSelect ? data.crossMultiSelect : window.vidiConfig.crossMultiSelect;
                 window.vidiConfig.featureInfoTableOnMap = data.featureInfoTableOnMap ? data.featureInfoTableOnMap : window.vidiConfig.featureInfoTableOnMap;
             }).fail(function () {
                 console.log("Could not load: " + configFile);
@@ -345,7 +345,7 @@ module.exports = {
                             modules.search[v] = require('./search/' + v + '.js');
                             modules.search[v].set(modules);
                         });
-                        modules.search[window.vidiConfig.enabledSearch].init();
+                        modules.search[window.vidiConfig.enabledSearch].init(null, null, null, null, 'init');
                     }
 
                     // Require extensions modules
