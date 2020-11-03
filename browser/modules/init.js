@@ -345,7 +345,7 @@ module.exports = {
                             modules.search[v] = require('./search/' + v + '.js');
                             modules.search[v].set(modules);
                         });
-                        modules.search[window.vidiConfig.enabledSearch].init();
+                        modules.search[window.vidiConfig.enabledSearch].init(null, null, null, null, 'init');
                     }
 
                     // Require extensions modules
