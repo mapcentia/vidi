@@ -21,7 +21,7 @@ GC2_HOST = (GC2_HOST.split("http://").length > 1 ? GC2_HOST.split("http://")[1] 
 moment.locale("da_DK");
 
 var BACKEND = config.backend;
-var dn = require('../server/config');
+//var dn = require('../server/config');
 
 // Days from 19000101 to 19700101
 const DAYSSINCE = 25569
