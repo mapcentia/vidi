@@ -722,8 +722,14 @@ module.exports = {
                                 value = `<i class="fa fa-ban"></i>`;
                             } else {
                                 let subValue = feature.properties[property.key];
+                                let width = '250px'
+
+                                if(window.vidiConfig.hasOwnProperty('popupVideoWidth')) {
+                                    width = window.vidiConfig.popupVideoWidth
+                                }
+
                                 value =
-                                    `<video width="250" controls>
+                                    `<video width="`+ width +`" controls>
                                         <source src="${subValue}" type="video/mp4">
                                         <source src="${subValue}" type="video/ogg">
                                         <source src="${subValue}" type="video/webm">

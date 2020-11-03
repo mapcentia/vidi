@@ -132,6 +132,19 @@ router.get('/api/session/stop', function (req, response) {
 
 router.get('/api/session/status', function (req, response) {
     let autoLoginCookie = req.cookies['autoconnect.gc2'];
+    /*
+    if (autoLogin == false && req.query.autoLogin)
+        autoLogin = req.query.autoLogin;
+    
+    if (req.query.autoLoginMaxAge)
+        autoLoginMaxAge = req.query.autoLoginMaxAge;
+    */
+    if (autoLogin === false && typeof req.query.autoLogin !== "undefined")
+        autoLogin = req.query.autoLogin === "true" ? true: false;
+    
+    if (typeof  req.query.autoLoginMaxAge  !== "undefined")
+        autoLoginMaxAge = typeof parseInt(req.query.autoLoginMaxAge) === "number" ? parseInt(req.query.autoLoginMaxAge) : 0 ; // Eller hvad nu default skal være
+
     if (autoLogin && autoLoginCookie && !req.session.gc2SessionId) {
         let creds = JSON.parse(autoLoginCookie);
         let credsForGc2 = {

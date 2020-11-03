@@ -18,11 +18,22 @@ module.exports = function (grunt) {
     });
 
     // Default build parameters
-    let copyBootstrapVariablesCommand = 'cp ./config/_variables.less ./public/js/lib/bootstrap-material-design/less';
+    let copyBootstrapVariablesCommand;
     let lessConfig = {"public/css/styles.css": "public/less/styles.default.less"};
     if (theme && theme === 'watsonc') {
-        copyBootstrapVariablesCommand = 'cp ./extensions/' + theme + '/config/_variables.less ./public/js/lib/bootstrap-material-design/less';
-        lessConfig = {"public/css/styles.css": "public/less/styles." + theme + ".less"};
+        if(process.platform === 'win32') {
+            copyBootstrapVariablesCommand = 'copy "extensions\\' + theme + '\\config\\_variables.less" "public\\js\\lib\\bootstrap-material-design\\less';
+            lessConfig = {"public\\css\\styles.css": "public\\less\\styles." + theme + ".less"};
+        } else {
+            copyBootstrapVariablesCommand = 'cp ./extensions/' + theme + '/config/_variables.less ./public/js/lib/bootstrap-material-design/less';
+            lessConfig = {"public/css/styles.css": "public/less/styles." + theme + ".less"};
+        }
+    } else {
+        if(process.platform === 'win32') {
+            copyBootstrapVariablesCommand = 'copy "config\\_variables.less" "public\\js\\lib\\bootstrap-material-design\\less"'
+        } else {
+            copyBootstrapVariablesCommand = 'cp ./config/_variables.less ./public/js/lib/bootstrap-material-design/less';
+        }
     }
 
     grunt.initConfig({
@@ -326,9 +337,9 @@ module.exports = function (grunt) {
         shell: {
             default: {
                 command: [
-                    copyBootstrapVariablesCommand,
+                   copyBootstrapVariablesCommand,
                     'grunt --gruntfile ./public/js/lib/bootstrap-material-design/Gruntfile.js dist-less'
-                ].join('&&')
+                ].join('&')
             }
         },
         cacheBust: {
@@ -375,13 +386,16 @@ module.exports = function (grunt) {
         var crypto = require('crypto');
         var md5 = crypto.createHash('md5');
 
-        var jsSource = grunt.file.expand({filter: "isFile", cwd: "public/js/build"}, ["all.min.js"]);
-        var cssSource = grunt.file.expand({filter: "isFile", cwd: "public/css/build"}, ["all.min.css"]);
-        if (jsSource.length !== 1 || cssSource.length !== 1) {
-            throw new Error(`Unable to find all.min.*.js[css] sources`);
-        }
+        // Disables for ease of use - add latør
+        //var jsSource = grunt.file.expand({filter: "isFile", cwd: "public/js/build"}, ["all.min.js"]);
+        //var cssSource = grunt.file.expand({filter: "isFile", cwd: "public/css/build"}, ["all.min.css"]);
+        //if (jsSource.length !== 1 || cssSource.length !== 1) {
+        //    throw new Error(`Unable to find all.min.*.js[css] sources`);
+        //}
 
-        var buffer = grunt.file.read('public/js/build/' + jsSource[0]) + grunt.file.read('public/css/build/' + cssSource[0]);
+        //var buffer = grunt.file.read('public/js/build/' + jsSource[0]) + grunt.file.read('public/css/build/' + cssSource[0]);
+
+        var buffer = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
         md5.update(buffer);
         var md5Hash = md5.digest('hex');
         var versionJSON = grunt.file.readJSON('public/version.json');
