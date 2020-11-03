@@ -900,7 +900,7 @@ module.exports = {
                         let wait = 5000
 
                         var statusKey = uuidv4()
-                        var b64 = zipblob.substring(28)
+                        var b64 = zipblob.split.(',')[1];
                        
                         newZip.loadAsync(b64, {base64: true})
                             .then(function (zip) {
