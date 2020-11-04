@@ -105,7 +105,6 @@ module.exports = {
             $("#draw-line-total-dist").prop("disabled", !b);
         });
         //
-
         cloud.get().map.addLayer(drawnItems);
         store.layer = drawnItems;
         $("#draw-colorpicker").colorpicker({
@@ -316,7 +315,7 @@ module.exports = {
 
                 drawLayer.feature = {
                     properties: {
-                        type: __(type),
+                        type: type,
                         area: area,
                         distance: distance
                     }
@@ -603,7 +602,7 @@ module.exports = {
 
         if (type === 'polyline') {
 
-            window.lag = l.showExtremities($("#draw-line-extremity").val(), $("#draw-line-extremity-size").val(), $("#draw-line-extremity-where").val());
+            l.showExtremities($("#draw-line-extremity").val(), $("#draw-line-extremity-size").val(), $("#draw-line-extremity-where").val());
 
             l._extremities = {
                 pattern: $("#draw-line-extremity").val(),
@@ -640,12 +639,19 @@ module.exports = {
         return store.layer;
     },
 
+    getDrawItems: function () {
+        return drawnItems;
+    },
+
     /**
      *
      * @returns {gc2table}
      */
     getTable: function () {
         return table;
+    },
+    getStore: function() {
+        return store;
     },
 
     /**

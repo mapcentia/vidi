@@ -56,6 +56,8 @@ let defaultSelectedStyle = {
     opacity: 0.2
 };
 
+let backArrowIsAdded = false;
+
 
 /**
  * A default template for GC2, with a loop
@@ -88,6 +90,18 @@ var defaultTemplate =
         {{/_vidi_content.fields}}
     </div>`;
 
+var defaultTemplateForCrossMultiSelect =
+    `<div class="cartodb-popup-content">
+        {{#_vidi_content.fields}}
+            <h4>{{title}}</h4>
+            {{#if value}}
+                <p {{#if type}}class="{{type}}"{{/if}}>{{{value}}}</p>
+            {{else}}
+                <p class="empty">null</p>
+            {{/if}}
+        {{/_vidi_content.fields}}
+    </div>`;
+
 /**
  * Default template for raster layers
  * @type {string}
@@ -99,6 +113,24 @@ var defaultTemplateRaster =
                 <h4>Value</h4>
                 <p>{{{value_0}}}</p>
              </div>`;
+
+const sortObject = function (obj) {
+    let arr = [];
+    let prop;
+    for (prop in obj) {
+        if (obj.hasOwnProperty(prop)) {
+            arr.push({
+                'key': prop,
+                'value': obj[prop],
+                'sort_id': obj[prop].sort_id
+            });
+        }
+    }
+    arr.sort(function (a, b) {
+        return a.sort_id - b.sort_id;
+    });
+    return arr; // returns array
+};
 
 /**
  *
@@ -140,7 +172,7 @@ module.exports = {
     init: function (qstore, wkt, proj, callBack, num, infoClickPoint, whereClause, includes, zoomToResult, onPopupCloseButtonClick, selectCallBack = () => {
     }, prefix = "", simple = false, infoText = null) {
         let layers, count = {index: 0, hits: 0}, hit = false, distance, editor = false,
-            metaDataKeys = meta.getMetaDataKeys();
+            metaDataKeys = meta.getMetaDataKeys(), firstLoop = true;
         elementPrefix = prefix;
 
         if (`editor` in extensions) {
@@ -152,6 +184,13 @@ module.exports = {
 
         this.reset(qstore);
         layers = _layers.getLayers() ? _layers.getLayers().split(",") : [];
+
+        // Filter layers without pixels from
+        layers = layers.filter((key)=>{
+            if (typeof moduleState.tileContentCache[key] === "boolean" && moduleState.tileContentCache[key] === true) {
+                return true;
+            }
+        })
 
         // Set layers to passed array of layers if set
         layers = includes || layers;
@@ -198,6 +237,19 @@ module.exports = {
                 ? $.parseJSON(metaDataKeys[value].fieldconf) : null;
             let parsedMeta = layerTree.parseLayerMeta(metaDataKeys[value]);
 
+            let featureInfoTableOnMap = (typeof window.vidiConfig.featureInfoTableOnMap !== "undefined" && window.vidiConfig.featureInfoTableOnMap === true && simple);
+            let f_geometry_column = metaDataKeys[value].f_geometry_column
+
+            // Back arrow to template if featureInfoTableOnMap is true
+            if (featureInfoTableOnMap && !backArrowIsAdded) {
+                backArrowIsAdded = true;
+                defaultTemplate = `
+                                <div class='show-when-multiple-hits' style='cursor: pointer;' onclick='javascript:$("#modal-info-body").show();$("#alternative-info-container").hide();$("#click-for-info-slide .modal-title").empty();'>
+                                    <span class='material-icons'  style=''>keyboard_arrow_left </span>
+                                    <span style="top: -7px;position: relative;">${__("Back")}</span>
+                                </div>` + defaultTemplate;
+            }
+
             if (parsedMeta.info_element_selector) {
                 $(parsedMeta.info_element_selector).empty();
             }
@@ -236,23 +288,30 @@ module.exports = {
 
                     if (!isEmpty && !not_querable) {
 
-                        let popUpInner = `<div id="modal-info-body">
+                        if (firstLoop) { // Only add html once
+                            firstLoop = false;
+                            let popUpInner = `<div id="modal-info-body">
                                 <ul class="nav nav-tabs" id="info-tab"></ul>
                                 <div class="tab-content" id="info-pane"></div>
                             </div>
                             <div id="alternative-info-container" class="alternative-info-container-right" style="display:none"></div>`;
 
-                        if (typeof window.vidiConfig.featureInfoTableOnMap !== "undefined" && window.vidiConfig.featureInfoTableOnMap === true && simple) {
-                            let popup = L.popup({
-                                minWidth: 350
-                            })
-                                .setLatLng(infoClickPoint)
-                                .setContent(`<div id="info-box-pop-up"></div>`)
-                                .openOn(cloud.get().map);
-                            $("#info-box-pop-up").html(popUpInner);
+                            // Add alternative-info-container to pop-up if featureInfoTableOnMap or else in left slide panel
+                            if (featureInfoTableOnMap) {
+                                let popup = L.popup({
+                                    minWidth: 350
+                                })
+                                    .setLatLng(infoClickPoint)
+                                    .setContent(`<div id="info-box-pop-up"></div>`)
+                                    .openOn(cloud.get().map)
+                                    .on('remove', ()=>{
+                                       _self.resetAll();
+                                    });
+                                $("#info-box-pop-up").html(popUpInner);
 
-                        } else {
-                            $("#info-box").html(popUpInner);
+                            } else {
+                                $("#info-box").html(popUpInner);
+                            }
                         }
 
                         let display = simple ? "none" : "inline";
@@ -278,8 +337,14 @@ module.exports = {
                             <table class="table" data-detail-view="${dataDetailView}" data-detail-formatter="detailFormatter" data-show-toggle="${dataShowToggle}" data-show-export="${dataShowExport}" data-show-columns="${dataShowColumns}"></table>
                         </div>`);
 
-                        // TODO Set if featureInfoTableOnMap = true
-                        if (typeof parsedMeta.select_function !== "undefined" && parsedMeta.select_function !== "") {
+                        // Set select_function if featureInfoTableOnMap = true
+                        if ((typeof parsedMeta.select_function === "undefined" || parsedMeta.select_function === "") && featureInfoTableOnMap) {
+                            let selectFunction = `function(id, layer, key, sqlQuery){
+                                                     $("#modal-info-body").hide();
+                                                     $("#alternative-info-container").show();
+                                                  }`;
+                            selectCallBack = Function('"use strict";return (' + selectFunction + ')')();
+                        } else if (typeof parsedMeta.select_function !== "undefined" && parsedMeta.select_function !== "") {
                             try {
                                 selectCallBack = Function('"use strict";return (' + parsedMeta.select_function + ')')();
                             } catch (e) {
@@ -289,6 +354,10 @@ module.exports = {
                         }
                         cm = _self.prepareDataForTableView(value, layerObj.geoJSON.features);
                         $('#tab_' + storeId).tab('show');
+
+                        hit = true;
+                        count.hits = count.hits + Object.keys(layerObj.layer._layers).length;
+
                         var _table = gc2table.init({
                             el: "#_" + storeId + " table",
                             ns: "#_" + storeId,
@@ -298,25 +367,27 @@ module.exports = {
                             autoUpdate: false,
                             autoPan: false,
                             openPopUp: true,
-                            setViewOnSelect: false,
+                            setViewOnSelect: count.hits > 1,
                             responsive: false,
                             callCustomOnload: false,
                             checkBox: !simple,
-                            height: null,
+                            height: featureInfoTableOnMap ? 150 : 350,
                             locale: window._vidiLocale.replace("_", "-"),
                             template: template,
                             pkey: pkey,
-                            renderInfoIn: parsedMeta.info_element_selector || null, // TODO Set if featureInfoTableOnMap = true
+                            renderInfoIn: parsedMeta.info_element_selector || featureInfoTableOnMap ? "#alternative-info-container" : null,
                             onSelect: selectCallBack,
                             key: keyWithoutGeom,
                             caller: _self,
-                            styleSelected: styleForSelectedFeatures
+                            styleSelected: styleForSelectedFeatures,
+                            setZoom: parsedMeta?.zoom_on_table_click ? parsedMeta.zoom_on_table_click : false,
+                            dashSelected: true
                         });
 
                         if (!parsedMeta.info_element_selector) {
                             _table.object.on("openpopup" + "_" + _table.uid, function (e) {
                                 let popup = e.getPopup();
-                                if (popup._closeButton) {
+                                if (popup?._closeButton) {
                                     popup._closeButton.onclick = function (clickEvent) {
                                         if (onPopupCloseButtonClick) onPopupCloseButtonClick(e._leaflet_id);
                                     }
@@ -360,7 +431,6 @@ module.exports = {
 
                         let showTableInPopup = typeof window.vidiConfig.showTableInPopUp === "boolean" && window.vidiConfig.showTableInPopUp === true;
 
-                        // TODO Set if featureInfoTableOnMap = true
                         if (typeof parsedMeta.info_function !== "undefined" && parsedMeta.info_function !== "") {
                             try {
                                 let func = Function('"use strict";return (' + parsedMeta.info_function + ')')();
@@ -370,8 +440,7 @@ module.exports = {
                                 console.error(e.message);
                             }
                         }
-                        hit = true;
-                        count.hits = count.hits + Object.keys(layerObj.layer._layers).length;
+
 
                         // Add fancy material raised style to buttons
                         $(".bootstrap-table .btn-default").addClass("btn-raised");
@@ -426,9 +495,10 @@ module.exports = {
                                 $(`#${elementPrefix}modal-info-body table`).bootstrapTable('resetView');
                                 // If only one hit across all layers, the click the only row
                                 if (count.hits === 1) {
-                                    $("[data-uniqueid]").trigger("click");
+                                    $("#info-box [data-uniqueid]").trigger("click");
+                                    $(".show-when-multiple-hits").hide();
                                 }
-                            }, 200);
+                            }, 100);
                         }
                     }
                 };
@@ -442,6 +512,7 @@ module.exports = {
                 uri: "/api/sql",
                 clickable: true,
                 id: index,
+                key: value,
                 base64: true,
                 styleMap: styleForSelectedFeatures,
                 // Set _vidi_type on all vector layers,
@@ -476,7 +547,7 @@ module.exports = {
 
             cloud.get().addGeoJsonStore(qstore[index]);
 
-            var sql, f_geometry_column = metaDataKeys[value].f_geometry_column, fieldNames = [], fieldStr;
+            var sql, fieldNames = [], fieldStr;
 
             if (fields) {
                 $.each(fields, function (i, v) {
@@ -604,7 +675,8 @@ module.exports = {
                             if (!feature.properties[property.key]) {
                                 value = `<i class="fa fa-ban"></i>`;
                             } else {
-                                if (metaDataKeys[layerKey]["fields"][property.key].type.startsWith("json")) {
+                                let layerKeyWithoutPrefix = layerKey.replace(LAYER.VECTOR + ':', '');
+                                if (metaDataKeys[layerKeyWithoutPrefix]["fields"][property.key].type.startsWith("json")) {
                                     // We use a Handlebars template to create a image carousel
                                     let carouselId = Base64.encode(layerKey).replace(/=/g, "");
                                     let tmpl = `<div id="${carouselId}" class="carousel slide" data-ride="carousel">
@@ -651,14 +723,8 @@ module.exports = {
                                 value = `<i class="fa fa-ban"></i>`;
                             } else {
                                 let subValue = feature.properties[property.key];
-                                let width = '250px'
-
-                                if(window.vidiConfig.hasOwnProperty('popupVideoWidth')) {
-                                    width = window.vidiConfig.popupVideoWidth
-                                }
-
                                 value =
-                                    `<video width="`+ width +`" controls>
+                                    `<video width="250" controls>
                                         <source src="${subValue}" type="video/mp4">
                                         <source src="${subValue}" type="video/ogg">
                                         <source src="${subValue}" type="video/webm">
@@ -714,6 +780,7 @@ module.exports = {
         });
         $(`#${elementPrefix}info-tab`).empty();
         $(`#${elementPrefix}info-pane`).empty();
+        cloud.get().map.closePopup();
     },
 
     resetAll: function () {
@@ -727,7 +794,7 @@ module.exports = {
     getVectorTemplate: function (layerKey) {
         let metaDataKeys = meta.getMetaDataKeys();
         let parsedMeta = layerTree.parseLayerMeta(metaDataKeys[layerKey]);
-        let template = (typeof metaDataKeys[layerKey].infowindow !== "undefined" && metaDataKeys[layerKey].infowindow.template !== "") ? metaDataKeys[layerKey].infowindow.template : metaDataKeys[layerKey].type === "RASTER" ? defaultTemplateRaster : defaultTemplate;
+        let template = (typeof metaDataKeys[layerKey].infowindow !== "undefined" && metaDataKeys[layerKey].infowindow.template !== "") ? metaDataKeys[layerKey].infowindow.template : defaultTemplateForCrossMultiSelect;
         template = (parsedMeta.info_template && parsedMeta.info_template !== "") ? parsedMeta.info_template : template;
         return template;
     },
@@ -742,22 +809,4 @@ module.exports = {
 
         }
     }
-};
-
-var sortObject = function (obj) {
-    var arr = [];
-    var prop;
-    for (prop in obj) {
-        if (obj.hasOwnProperty(prop)) {
-            arr.push({
-                'key': prop,
-                'value': obj[prop],
-                'sort_id': obj[prop].sort_id
-            });
-        }
-    }
-    arr.sort(function (a, b) {
-        return a.sort_id - b.sort_id;
-    });
-    return arr; // returns array
 };
