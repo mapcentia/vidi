@@ -2061,6 +2061,25 @@ geocloud = (function () {
             }());
         };
 
+        this.addXYZBaselayer = function (url, conf) {
+            var l = new L.TileLayer(url, conf);
+            l.id = conf.name;
+            l.baseLayer = true;
+            lControl.addBaseLayer(l, conf.name) ;
+            this.showLayer(conf.name)
+            return [l];
+
+        };
+
+        this.addWmsBaseLayer = function (url, conf) {
+            var l = new L.TileLayer.WMS(url, conf);
+            l.id = conf.name;
+            l.baseLayer = true;
+            lControl.addBaseLayer(l, conf.name) ;
+            this.showLayer(conf.name)
+            return [l];
+        }
+
         this.addBaseLayer = function (l, db, config, h) {
             var o;
             switch (l) {
