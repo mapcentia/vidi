@@ -702,7 +702,7 @@ module.exports = {
                         "mapsizeMm": [190, 120]
                     }
                 }
-            },
+            }/*,
             "_mapGoPrint": {
                 "A4": {
                     "p": {
@@ -710,7 +710,7 @@ module.exports = {
                         "mapsizeMm": [190, 120]
                     }
                 }
-            },
+            },*/
         },
 
 
@@ -759,10 +759,10 @@ module.exports = {
             },
             {
                 "geosag": ["index"]
-            },
+            }/*,
             {
                 "MapGOMenu": ["index", "reportRender", "infoClick", "controller"]
-            }
+            }*/
         ],
         "server": [{
                 "conflictSearch": ["index"]
@@ -779,10 +779,10 @@ module.exports = {
             },
             {
                 "geosag": ["index"]
-            },
+            }/*,
             {
                 "MapGOMenu": ["index"]
-            }
+            }*/
         ]
     },
 
