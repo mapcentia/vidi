@@ -238,6 +238,11 @@ var _zoomToFeature = function (table, key, fid) {
 };
 
 /**
+ * Draw module
+ */
+var draw;
+
+/**
  *
  * @type set: module.exports.set, init: module.exports.init
  */
@@ -251,6 +256,7 @@ module.exports = module.exports = {
     set: function (o) {
         cloud = o.cloud.get();
         utils = o.utils;
+        draw = o.draw;
         meta = o.meta;
         backboneEvents = o.backboneEvents;
         socketId = o.socketId;
@@ -301,6 +307,11 @@ module.exports = module.exports = {
         } catch (e) {
             searchLoadedLayers = true;
         }
+
+        // Set up draw module for conflict
+        draw.setConflictSearch(this);
+        $("#_draw_make_conflict_with_selected").show();
+        $("#_draw_make_conflict_with_all").show();
 
         cloud.map.addLayer(drawnItems);
         cloud.map.addLayer(bufferItems);
@@ -522,7 +533,7 @@ module.exports = module.exports = {
      * @param callBack
      * @param id Set specific layer id to use. Else the first in drawnItems will be used
      */
-    makeSearch: function (text, callBack, id = null) {
+    makeSearch: function (text, callBack, id = null, fromDrawing = false) {
         var primitive, coord,
             layer, buffer = parseFloat($("#conflict-buffer-value").val()), bufferValue = buffer,
             hitsTable = $("#hits-content tbody"),
@@ -530,8 +541,21 @@ module.exports = module.exports = {
             errorTable = $("#error-content tbody"),
             hitsData = $("#hits-data"),
             row, fileId, searchFinish, geomStr,
-            metaDataKeys = meta.getMetaDataKeys(),
-            visibleLayers = cloud.getAllTypesOfVisibleLayers().split(";");
+            visibleLayers = cloud.getAllTypesOfVisibleLayers().split(";"), crss;
+
+        const setCrss = (layer) => {
+            if (typeof layer.getBounds !== "undefined") {
+                coord = layer.getBounds().getSouthWest();
+            } else {
+                coord = layer.getLatLng();
+            }
+            var zone = require('./../../../browser/modules/utmZone.js').getZone(coord.lat, coord.lng);
+            crss = {
+                "proj": "+proj=utm +zone=" + zone + " +ellps=WGS84 +datum=WGS84 +units=m +no_defs",
+                "unproj": "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
+            };
+        }
+
         if (text) {
             currentFromText = text;
         }
@@ -546,7 +570,37 @@ module.exports = module.exports = {
         } catch (e) {
         }
 
-        if (id) {
+        if (fromDrawing) {
+            layer = draw.getStore().layer;
+            if (id) {
+                layer = layer._layers[id];
+            } else {
+                setCrss(layer);
+                let collection = {
+                    "type": "GeometryCollection",
+                    "geometries": [],
+                    "properties": layer._layers[Object.keys(layer._layers)[0]].feature.properties
+                }
+                layer.eachLayer((l) => {
+                    // We use a buffer to recreate a circle from the GeoJSON point
+                    if (typeof l._mRadius !== "undefined") {
+                        let buffer = l._mRadius;
+                        let primitive = l.toGeoJSON();
+                        primitive.type = "Feature"; // Must be there
+                        // Get utm zone
+                        let reader = new jsts.io.GeoJSONReader();
+                        let writer = new jsts.io.GeoJSONWriter();
+                        let geom = reader.read(reproject.reproject(primitive, "unproj", "proj", crss));
+                        let buffer4326 = reproject.reproject(writer.write(geom.geometry.buffer(buffer)), "proj", "unproj", crss);
+                        collection.geometries.push(buffer4326)
+                    } else {
+                        collection.geometries.push(l.toGeoJSON().geometry)
+                    }
+                })
+                let newLayer = L.geoJSON(collection);
+                layer = newLayer;
+            }
+        } else if (id) {
             layer = drawnItems._layers[id];
         } else {
             for (var prop in drawnItems._layers) {
@@ -567,17 +621,8 @@ module.exports = module.exports = {
             primitive = primitive.features[0];
         }
         if (primitive) {
-            if (typeof layer.getBounds !== "undefined") {
-                coord = layer.getBounds().getSouthWest();
-            } else {
-                coord = layer.getLatLng();
-            }
-            // Get utm zone
-            var zone = require('./../../../browser/modules/utmZone.js').getZone(coord.lat, coord.lng);
-            var crss = {
-                "proj": "+proj=utm +zone=" + zone + " +ellps=WGS84 +datum=WGS84 +units=m +no_defs",
-                "unproj": "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
-            };
+            setCrss(layer);
+            primitive.type = "Feature"; // Must be there
             var reader = new jsts.io.GeoJSONReader();
             var writer = new jsts.io.GeoJSONWriter();
             var geom = reader.read(reproject.reproject(primitive, "unproj", "proj", crss));

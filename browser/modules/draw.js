@@ -23,6 +23,8 @@ var cloud, utils, state, serializeLayers;
  */
 var drawOn = false;
 
+var selectedDrawing;
+
 /**
  *
  * @type {L.FeatureGroup}
@@ -60,6 +62,8 @@ var backboneEvents;
 
 var editing = false;
 
+var conflictSearch;
+
 let _self = false;
 
 module.exports = {
@@ -88,8 +92,12 @@ module.exports = {
             _self.off();
         });
 
-        backboneEvents.get().on(`on:${MODULE_NAME}`, () => { _self.control(true); });
-        backboneEvents.get().on(`off:${MODULE_NAME}`, () => { _self.control(false); });
+        backboneEvents.get().on(`on:${MODULE_NAME}`, () => {
+            _self.control(true);
+        });
+        backboneEvents.get().on(`off:${MODULE_NAME}`, () => {
+            _self.control(false);
+        });
 
         state.listenTo(MODULE_NAME, _self);
         state.listen(MODULE_NAME, `update`);
@@ -111,6 +119,8 @@ module.exports = {
             container: $("#draw-colorpicker")
         });
         $("#draw-table").append("<table class='table'></table>");
+
+
         (function poll() {
             if (gc2table.isLoaded()) {
                 table = gc2table.init({
@@ -142,11 +152,38 @@ module.exports = {
                     responsive: false,
                     openPopUp: false
                 });
+                $("#_draw_make_conflict_with_selected").on("click", () => {
+                    _self.makeConflictSearchWithSelected();
+                })
+                $("#_draw_make_conflict_with_all").on("click", () => {
+                    _self.makeConflictSearchWithAll();
+                })
+                table.object.on("selected_" + table.uid, (e) => {
+                    selectedDrawing = e;
+                })
 
             } else {
                 setTimeout(poll, 30);
             }
         }());
+    },
+
+    makeConflictSearchWithSelected: () => {
+        if (!selectedDrawing) {
+            alert("Vælg en tegning")
+            return;
+        }
+        // Switch on Conflict
+        $('#main-tabs a[href="#conflict-content"]').trigger('click');
+        conflictSearch.makeSearch("Fra tegning", null, selectedDrawing, true);
+    },
+
+
+
+    makeConflictSearchWithAll: () => {
+        // Switch on Conflict
+        $('#main-tabs a[href="#conflict-content"]').trigger('click');
+        conflictSearch.makeSearch("Fra tegning", null, null, true);
     },
 
     off: () => {
@@ -189,22 +226,18 @@ module.exports = {
                 draw: {
                     polygon: {
                         allowIntersection: true,
-                        shapeOptions: {
-                        },
+                        shapeOptions: {},
                         showArea: true
                     },
                     polyline: {
                         metric: true,
-                        shapeOptions: {
-                        }
+                        shapeOptions: {}
                     },
                     rectangle: {
-                        shapeOptions: {
-                        }
+                        shapeOptions: {}
                     },
                     circle: {
-                        shapeOptions: {
-                        }
+                        shapeOptions: {}
                     },
                     marker: true,
                     circlemarker: true
@@ -280,7 +313,8 @@ module.exports = {
 
                     var text = prompt(__("Enter a text for the marker or cancel to add without text"), "");
                     if (text !== null) {
-                        drawLayer.bindTooltip(text, {permanent: true}).on("click", () => {}).openTooltip();
+                        drawLayer.bindTooltip(text, {permanent: true}).on("click", () => {
+                        }).openTooltip();
                         drawLayer._vidi_marker_text = text;
                     } else {
                         drawLayer._vidi_marker_text = null;
@@ -317,7 +351,8 @@ module.exports = {
                     properties: {
                         type: type,
                         area: area,
-                        distance: distance
+                        distance: distance,
+                        _radius: type === 'circle' ? drawLayer.getRadius() : null
                     }
                 };
 
@@ -336,14 +371,12 @@ module.exports = {
                         v.feature.properties.distance = L.GeometryUtil.readableDistance(v._mRadius, true);
                         v.updateMeasurements();
 
-                    }
-                    else if (typeof v._icon !== "undefined") {
+                    } else if (typeof v._icon !== "undefined") {
                     } else if (v.feature.properties.distance !== null) {
                         v.feature.properties.distance = drawTools.getDistance(v);
                         v.updateMeasurements();
 
-                    }
-                    else if (v.feature.properties.area !== null) {
+                    } else if (v.feature.properties.area !== null) {
                         v.feature.properties.area = drawTools.getArea(v);
                         v.updateMeasurements();
 
@@ -354,13 +387,19 @@ module.exports = {
                 table.loadDataInTable(false, true);
             });
 
-            var po1 = $('.leaflet-draw-section:eq(0)').popover({content: __("Use these tools for creating markers, lines, areas, squares and circles."), placement: "left"});
+            var po1 = $('.leaflet-draw-section:eq(0)').popover({
+                content: __("Use these tools for creating markers, lines, areas, squares and circles."),
+                placement: "left"
+            });
             po1.popover("show");
             setTimeout(function () {
                 po1.popover("hide");
             }, 2500);
 
-            var po2 = $('.leaflet-draw-section:eq(1)').popover({content: __("Use these tools for editing existing drawings."), placement: "left"});
+            var po2 = $('.leaflet-draw-section:eq(1)').popover({
+                content: __("Use these tools for editing existing drawings."),
+                placement: "left"
+            });
             po2.popover("show");
             setTimeout(function () {
                 po2.popover("hide");
@@ -402,7 +441,7 @@ module.exports = {
             drawnItems = JSON.stringify(serializeLayers.serializeDrawnItems(true));
         }
 
-        return { drawnItems };
+        return {drawnItems};
     },
 
     /**
@@ -426,9 +465,9 @@ module.exports = {
 
     /**
      * Recreates drawnings on the map
-     * 
+     *
      * @param {Object} parr Features to draw
-     * 
+     *
      * @return {void}
      */
     recreateDrawnings: (parr, enableControl = true) => {
@@ -488,7 +527,8 @@ module.exports = {
 
                     // Add label
                     if (m._vidi_marker_text) {
-                        g.bindTooltip(m._vidi_marker_text, {permanent: true}).on("click", () => {}).openTooltip();
+                        g.bindTooltip(m._vidi_marker_text, {permanent: true}).on("click", () => {
+                        }).openTooltip();
                     }
 
                     // Adding vidi-specific properties
@@ -583,7 +623,7 @@ module.exports = {
                 formatArea: utils.formatArea
             });
         } else {
-            if (type !== 'marker' && type !== 'circlemarker' ) {
+            if (type !== 'marker' && type !== 'circlemarker') {
                 l.hideMeasurements();
             }
         }
@@ -650,7 +690,7 @@ module.exports = {
     getTable: function () {
         return table;
     },
-    getStore: function() {
+    getStore: function () {
         return store;
     },
 
@@ -678,6 +718,10 @@ module.exports = {
         });
         let blob = new Blob([JSON.stringify(geojson)], {type: "text/plain;charset=utf-8"});
         fileSaver.saveAs(blob, "drawings.geojson");
+    },
+
+    setConflictSearch: function (o) {
+        conflictSearch = o;
     }
 };
 
@@ -806,7 +850,7 @@ module.exports = {
             if (L.DomUtil.hasClass(svg, 'defs')) {
                 defsNode = svg.getElementById('defs');
 
-            } else{
+            } else {
                 L.DomUtil.addClass(svg, 'defs');
                 defsNode = L.SVG.create('defs');
                 defsNode.setAttribute('id', 'defs');
