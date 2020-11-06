@@ -84,14 +84,14 @@ and this project adheres to [CalVer](https://calver.org/).
     "maxNativeZoom": 22
 }
 ```
-- XYZ layer can be added as base layer like this (old but undocumented):
+- XYZ layer can be added as base layer like this (old feature but was undocumented and buggy):
 ```json
 {
     "type": "XYZ",
     "url": "https://m3.mapserver.mapy.cz/base-m/{z}-{x}-{y}?s=0.3&dm=Luminosity",
     "id": "mapy",
     "name": "Mapy",
-    "description": "Kort fra Mapy",
+    "description": "Map from Mapy",
     "attribution": "Mapy",
     "minZoom": 1,
     "maxZoom": 20,
