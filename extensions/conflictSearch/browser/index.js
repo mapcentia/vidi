@@ -617,6 +617,7 @@ module.exports = module.exports = {
             }
         }
         primitive = layer.toGeoJSON();
+        console.log(primitive)
         if (typeof primitive.features !== "undefined") {
             primitive = primitive.features[0];
         }
@@ -626,15 +627,9 @@ module.exports = module.exports = {
             var reader = new jsts.io.GeoJSONReader();
             var writer = new jsts.io.GeoJSONWriter();
             var geom = reader.read(reproject.reproject(primitive, "unproj", "proj", crss));
-
+            // buffer4326
             var buffer4326 = reproject.reproject(writer.write(geom.geometry.buffer(buffer)), "proj", "unproj", crss);
 
-            var projWktWithBuffer;
-            if (buffer === 0) {
-                projWktWithBuffer = Terraformer.convert(writer.write(geom.geometry));
-            } else {
-                projWktWithBuffer = Terraformer.convert(writer.write(geom.geometry.buffer(buffer)));
-            }
 
             var l = L.geoJson(buffer4326, {
                 "color": "#ff7800",
@@ -664,9 +659,14 @@ module.exports = module.exports = {
                 schemataStr = schemata.join(",");
             }
 
+            var projWktWithBuffer;
+            if (buffer === 0) {
+                projWktWithBuffer = Terraformer.convert(writer.write(geom.geometry));
+            } else {
+                projWktWithBuffer = Terraformer.convert(writer.write(geom.geometry.buffer(buffer)));
+            }
             preProcessor({
                 "projWktWithBuffer": projWktWithBuffer
-
             }).then(function () {
                 xhr = $.ajax({
                     method: "POST",
