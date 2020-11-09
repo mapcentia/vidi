@@ -756,7 +756,7 @@ module.exports = {
                 }
 
             },
-            "Agriteam_Brørup": { // Your print templates. "print" is the default
+            "Agriteam_Brorup": { // Your print templates. "print" is the default
                 A4: {
                     l: {
                         mapsizePx: [1060, 730],
