@@ -710,7 +710,7 @@ module.exports = {
                 }
 
             },
-            "Agriteam_Viborg": { // Your print templates. "print" is the default
+            "Agriteam Viborg_Aars": { // Your print templates. "print" is the default
                 A4: {
                     l: {
                         mapsizePx: [1060, 730],
