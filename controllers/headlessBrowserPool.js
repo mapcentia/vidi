@@ -16,7 +16,7 @@ if (typeof config.puppeteerProcesses !== "undefined") {
     puppeteerProcesses.min = typeof config.puppeteerProcesses.min !== "undefined" ? config.puppeteerProcesses.min : 0;
     puppeteerProcesses.max = typeof config.puppeteerProcesses.max !== "undefined" ? config.puppeteerProcesses.max : 2;
 } else {
-    puppeteerProcesses = {min: 2, max: 5};
+    puppeteerProcesses = {min: 0, max: 2};
 }
 
 const startupParameters = {

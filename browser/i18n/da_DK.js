@@ -226,6 +226,10 @@ module.exports = {
         "Layer is visible": "Laget er synligt",
         "Parents": "Forældre",
         "Children": "Børn",
+        "Back": "Tilbage",
+        "Fit bounds to filter": "Sæt udsnit til filter",
+        "Labels": "Labels",
+        "Show labels": "Vis labels",
 
         // Base layers
         "Side-by-side mode": "Dobbelt baggrundskort",

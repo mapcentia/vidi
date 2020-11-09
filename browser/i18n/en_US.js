@@ -226,6 +226,10 @@ module.exports = {
         "Layer is visible": "Layer is visible",
         "Parents": "Parents",
         "Children": "Children",
+        "Back": "Back",
+        "Fit bounds to filter": "Fit bounds to filter",
+        "Labels": "Labels",
+        "Show labels": "Show labels",
 
         // Base layers
         "Side-by-side mode": "Side-by-side mode",

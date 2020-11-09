@@ -53,14 +53,51 @@ and this project adheres to [CalVer](https://calver.org/).
     - *disable_check_box*: boolean, disables the layer check box:
         - When filtering a layer all its child layers with this property set to true will have their check boxes enabled. And when the filters are disabled again all child layers will be turned off and have their check boxes disabled again.
         - This makes it possible to setup child layers, which can only be viewed when filtered by its parent layer.
-    - *filter_immutable*: boolean, make the filter setup immutable.
+    - *filter_immutable*: boolean, makes the filter setup immutable.
         - Then set, the arbitrary filter setup can't be changes. Only values can. Should be used together with `filter_config`.
+    - *reload_interval* integer, set a reload interval for vector layers. Can be used to autoload fresh data from live data sources. Units are milliseconds. 
+    - *show_table_on_side*: boolean, render the vector list of the layer in an injected element with id `vector-side-table`, so you get a map and list side-by-side.
+    - *zoom_on_table_click*: boolean, whether the map should zoom to vector feature or not when clicked in table. Is set on both vector layer tables and feature info result tables.
 - A Reset filter button is added, which will reset the filter to the original state.
 - The `infoClickCursorStyle` setting will set cursor style when using feature info click. Can be set to `pointer` or `crosshair`. The setting can be set in `config/config.js` or in a runtime config.
 - New Autocomplete control in filters. The control will fetch distinct values from PostgreSQL for use in the autocomplete field. All distinct values are fetch at once. 100.000 distinct values can be handle without problems. Only works on text fields and must be enabled in GC2 Structure tab.
 - The attribute `data-vidi-host` is added to `embed.js`, so it's possible to override the host from the token. This makes it possible to generate tokens on one setup and use them on others. E.g. on mirrored internal/external setups.
 - The Coordinate module now has a Pan To input field. The user can input a coordinate in the chosen system and the map will pan to the point.
 - Modules now has title headings.
+- Added boolean config `vectorMultiSelect` in `config/config.js`. This will enable multi select on vector layers. Works cross layer too. Can be set in runtime config.
+- Added boolean config `featureInfoTableOnMap` in `config/config.js`. This is a shortcut to set `info_template`, `info_element_selector` and `info_function`, so the single feature info pops up on the map instead of the right slide panel. Great for the `embed.tmpl`
+- New button "Fit bounds to filter" in layer filters, which will set the view extent to the bounds of the filtered layer.
+- New "Labels" panel for raster tile layers with a checkbox for hiding/showing labels on the layer. Works for both MapServer and QGIS back-end (GC2 must support this).
+- Added boolean config `crossMultiSelect` in `config/config.js`. This will enable cross multi select on both vector and raster tile layers. This will result in a unified feature info experience, which are well suited for informative maps using the `embed.tmpl` template. All feature info results will be displayed in an accordion widget. The accordion summary is default layer title, but can be set to an attribute value with the meta config `accordion_summery`. Can be set in runtime config. 
+- WMS layers can now be added directly as base layers. A WMS base layer example:
+```json
+{
+    "type": "wms",
+    "url": "https://services.kortforsyningen.dk/service?SERVICENAME=forvaltning2&",
+    "layers": ["Basis_kort","Navne_basis_kort","Husnummer"],
+    "id": "Basis_kort",
+    "name": "Basiskort",
+    "description": "Basiskort fra kortforsyningen",
+    "attribution": "Kortforsyningen",
+    "minZoom": 4,
+    "maxZoom": 22,
+    "maxNativeZoom": 22
+}
+```
+- XYZ layer can be added as base layer like this (old feature but was undocumented and buggy):
+```json
+{
+    "type": "XYZ",
+    "url": "https://m3.mapserver.mapy.cz/base-m/{z}-{x}-{y}?s=0.3&dm=Luminosity",
+    "id": "mapy",
+    "name": "Mapy",
+    "description": "Map from Mapy",
+    "attribution": "Mapy",
+    "minZoom": 1,
+    "maxZoom": 20,
+    "maxNativeZoom": 19
+}
+```
 
 ### Changed
 - `public\js\vidi.js`is now required instead of loaded in a script tag. This way it's transpiled and can contain new JavaScript syntax.
@@ -99,12 +136,20 @@ and this project adheres to [CalVer](https://calver.org/).
 ```
 - The `Enable filtering` property of the Structure tab in GC2 is now called `Disable filtering` and will if check omit the field in Vidi filtering. The property was not used before.
 - Babel bumped to version 7
+- Local GC2 config files are now fetched through the server back-end.
+- `embed.tmpl` will now show login button if session module is enabled.
+- The WMS requests now has a `qgs` parameter for QGIS backed layers. The value is path to the qgs file for the layer (base64 encoded). In GC2 the path will be used to send the request directly to qgis_serv instead of cascading it through MapServer.
+- Raster tile layers without pixels (invisible in the map) are now not queried by feature info.
+- Turning on a vector layer will now load the legend of the raster tile representation of the layer
 
 ### Fixed
 - Using `indexOf` instead of `includes`, because the latter is not transpiled in Babel. It's an Internet Explorer issue.
 - `embed.js` now works in IE11.
 - Accept 'da' locale in request headers. Only da-DK worked so far.
 - If the Service Worker doesn't get registered when Vidi will now start anyways without the Service Worker. On a hard refresh (Ctrl-f5) the Service Worker will claim the clients, so a hard refresh will not unregister Service Worker, but the cache will be deleted. 
+- Text in editor is now url encoded.
+- Quotes are now escaped for text in editor.
+- All numeric Postgres types are now handled correct in editor 
 
 ## [2020.2.0]
 ### Added
