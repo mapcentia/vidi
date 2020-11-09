@@ -710,7 +710,7 @@ module.exports = {
                 }
 
             },
-            "Agriteam Randers": { // Your print templates. "print" is the default
+            "Agriteam_Randers": { // Your print templates. "print" is the default
                 A4: {
                     l: {
                         mapsizePx: [1060, 730],
