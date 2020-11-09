@@ -709,7 +709,7 @@ module.exports = {
                     }
                 }
 
-            },,
+            },
             "Agriteam Randers": { // Your print templates. "print" is the default
                 A4: {
                     l: {
