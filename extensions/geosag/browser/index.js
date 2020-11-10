@@ -207,11 +207,11 @@ module.exports = {
                     return true
                 }
 
-                var getExistingMatr = function(caseId){
+                var getExistingMatr = function(sagsnr){
                     // Get Existing parts from Matrikelliste
                     return new Promise(function (resolve, reject) {
                         let obj = {
-                            caseId: caseId,
+                            sagsnr: sagsnr,
                             user: user
                         }
                         let opts = {
@@ -235,11 +235,12 @@ module.exports = {
                     })
                 }
 
-                var saveMatrChanges = function(matrs){
+                var saveMatrChanges = function(sagsnr, matrs){
                     // Saves changes to Docunote
                     return new Promise(function (resolve, reject) {
                         let obj = {
-                            caseId: caseId,
+                            sagsnr: sagsnr,
+                            matrs: matrs,
                             user: user
                         }
                         let opts = {
@@ -248,7 +249,7 @@ module.exports = {
                                 'Content-Type': 'application/json'
                             },
                             method: 'POST',
-                            body: JSON.stringify(matr)
+                            body: JSON.stringify(obj)
                         }
                         // Do async job and resolve
                         fetch('/api/extension/saveMatrChanges', opts)
@@ -435,12 +436,8 @@ module.exports = {
                             console.log(`Starting ${exId}`)
 
                             // If neither is set, error out
-
                             console.log(`user: ${user}`)
                             console.log(`sagsnr: ${sagsnr}`)
-
-
-
                             if (user == undefined && sagsnr == undefined) {
                                 me.setState({
                                     allow: false,
@@ -449,8 +446,6 @@ module.exports = {
                             } else {
                                 me.refreshFromDocunote(sagsnr, user)
                             }
-
-
 
                             // Click event - info
                             mapObj.on("click", function (e) {
@@ -527,10 +522,27 @@ module.exports = {
                     };
 
                     saveChangesHandler(id) {
-                        var _self = this; 
+                        var _self = this;
 
-                        console.log(id)
-                        console.log(_self.state)
+                        _self.setState({
+                            saveState: 'saving',
+                            error: ''
+                        }, () => {
+                            saveMatrChanges(sagsnr, id)
+                            .then(r => {
+                                _self.setState({
+                                    saveState: 'done',
+                                    error: ''
+                                })
+                            })
+                            .catch(e => {
+                                console.log(e)
+                                _self.setState({
+                                    saveState: 'error',
+                                    error: e.toString()
+                                })
+                            })
+                        })
                     }
 
                     refreshFromDocunote(sagsnr, user) {
@@ -580,7 +592,8 @@ module.exports = {
 
                         // Remove from state
                         _self.setState({
-                            matrList: _self.state.matrList.filter(el => el.key != id.key)
+                            matrList: _self.state.matrList.filter(el => el.key != id.key),
+                            saveState: ''
                         });
                     }
 
@@ -723,7 +736,8 @@ module.exports = {
                             let prev = _self.state.matrList
                             prev.push(id)
                             _self.setState({
-                                matrList: prev
+                                matrList: prev,
+                                saveState: ''
                             })
                         }
                     }
@@ -979,8 +993,6 @@ module.exports = {
                                     return <Tooltip title={'Gemmer i på sagen'}><CircularProgress color={"primary"}/></Tooltip>
                                 case 'done':
                                     return <Tooltip title={'Alt OK'}><CheckIcon /></Tooltip>
-                                case 'error':
-                                    return <Tooltip title={'Læs beskeden herover'}><ErrorIcon color={"secondary"}/></Tooltip>
                                 default:
                                     return <Tooltip title={'Gem ændringer'}><IconButton color={"primary"} onClick={_self.saveChangesHandler.bind(this, s.matrList)}><SaveIcon /></IconButton></Tooltip>
                             }

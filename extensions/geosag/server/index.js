@@ -16,7 +16,7 @@ const wkt = require('wkt');
  * @type {string}
  */
 var GC2_HOST = config.gc2.host;
-GC2_HOST = (GC2_HOST.split("http://").length > 1 ? GC2_HOST.split("http://")[1] : GC2_HOST);
+GC2_HOST = (GC2_HOST.split("https://").length > 1 ? GC2_HOST.split("https://")[1] : GC2_HOST);
 
 // Set locale for date/time string
 moment.locale("da_DK");
@@ -47,7 +47,8 @@ var docunote = function(endpoint, method) {
 function getDocunote(endpoint) {
     //var api = docunote('Cases/number/'+ sagsnr.toString(), 'GET');
     //var api = docunote('Persons/'+ personId.toString(), 'GET');
-    //var api = docunote('Cases/'+ caseId.toString()+'/parts', 'GET');
+    //var api = docunote('Cases/'+ sagsnr.toString()+'/parts', 'GET');
+    //var api = docunote('Persons/synchronizeSource/101/synchronizeId/122105327c', 'GET');
     
     var api = docunote(endpoint, 'GET');
     console.log(api.url + ' - Calling');
@@ -56,9 +57,10 @@ function getDocunote(endpoint) {
         // Do async job
         request.get(api, function(err, resp, body) {
             if (err) {
+                console.log(api.url + ' - Recieved - ERROR');
                 reject(err);
             } else {
-                console.log(api.url + ' - Recieved');
+                console.log(api.url + ' - Recieved - OK');
                 resolve(JSON.parse(body));
             }
         });
@@ -101,9 +103,9 @@ router.post('/api/extension/getExistingMatr', function (req, response) {
         return;
     }
     // Sagsnummer not in call
-    if (!req.body.hasOwnProperty("caseId")) {
+    if (!req.body.hasOwnProperty("sagsnr")) {
         response.status(401).json({
-            error: "caseId mangler i kaldet"
+            error: "Sagsnummer mangler i kaldet"
         });
         return;
     }
@@ -114,7 +116,7 @@ router.post('/api/extension/getExistingMatr', function (req, response) {
             .then(function(user) {
                 // user is allowed
                 //console.log(user);
-                return getDocunote('Cases/'+ req.body.caseId.toString()+'/parts');
+                return getDocunote('Cases/'+ req.body.sagsnr.toString()+'/parts');
             })
             .then(function(docunoteCaseParts) {
                 // Got parts, get information on each person
@@ -209,4 +211,78 @@ router.post('/api/extension/getCase', function (req, response) {
     }
 });
 
+
+function matrikelExists(matr) {
+    // Checks if matrikel already exists as "part-able".
+    // If person exists, return only information for parts.
+    return new Promise(function(resolve, reject) {
+        getDocunote(`Persons/synchronizeSource/${dn.synchronizeSource}/synchronizeId/${matr.key}`, 'GET')
+        .then(r => {
+            resolve({
+                key: r.synchronizeIdentifier,
+                nodeId: r.nodeId,
+                nodeType: r.nodeType
+            })
+        })
+    }); 
+}
+
+router.post('/api/extension/saveMatrChanges', function (req, response) {
+    response.setHeader('Content-Type', 'application/json');
+
+    // User not in call
+    if (!req.body.hasOwnProperty("user")) {
+        response.status(401).json({
+            error: "User mangler i kaldet"
+        });
+        return;
+    }
+    // Sagsnummer not in call
+    if (!req.body.hasOwnProperty("sagsnr")) {
+        response.status(401).json({
+            error: "Sagsnummer mangler i kaldet"
+        });
+        return;
+    }
+    // Matrikler not in call
+    if (!req.body.hasOwnProperty("matrs")) {
+        response.status(401).json({
+            error: "Matrikler mangler i kaldet"
+        });
+        return;
+    }
+
+    // Logic
+    try {
+        var matrs = req.body.matrs;
+        verifyUser(req)
+            .then(function(user) {
+                // user is allowed
+
+                // Check if matrs exist already
+                let jobs = [];
+                matrs.forEach(f => {
+                    jobs.push(matrikelExists(f));
+                })
+                return Promise.all(jobs);
+            })
+            .then(function(exists) {
+                console.log(matrs)
+                // If matr not in exists, create.
+
+                
+                // Create non-existing matr
+                response.status(200).json(exists);
+                return;
+            })
+            .catch(function(error) {
+                response.status(500).json(error);
+                return;
+            });
+
+    } catch (error) {
+        //console.log(error)
+        response.status(500).json(error);
+    }
+});
 module.exports = router;
