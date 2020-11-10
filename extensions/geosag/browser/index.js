@@ -23,7 +23,12 @@ import { isNull, isSet } from 'lodash';
 import { getClassSet } from 'react-bootstrap/lib/utils/bootstrapUtils';
 import MatrikelTable from './MatrikelTable';
 import DAWASearch from './DAWASearch';
-
+import SaveIcon from '@material-ui/icons/Save';
+import IconButton from '@material-ui/core/IconButton';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import CheckIcon from '@material-ui/icons/Check';
+import ErrorIcon from '@material-ui/icons/Error';
+import Tooltip from '@material-ui/core/Tooltip';
 
 /**
  *
@@ -230,6 +235,34 @@ module.exports = {
                     })
                 }
 
+                var saveMatrChanges = function(matrs){
+                    // Saves changes to Docunote
+                    return new Promise(function (resolve, reject) {
+                        let obj = {
+                            caseId: caseId,
+                            user: user
+                        }
+                        let opts = {
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json'
+                            },
+                            method: 'POST',
+                            body: JSON.stringify(matr)
+                        }
+                        // Do async job and resolve
+                        fetch('/api/extension/saveMatrChanges', opts)
+                            .then(r => {
+                                const data = r.json();
+                                resolve(data)
+                            })
+                            .catch(e => {
+                                console.log(e)
+                                reject(e)
+                            });
+                    })
+                }
+
                 var getCase = function(sagsnr){
                     // Get case object for display
                     return new Promise(function (resolve, reject) {
@@ -359,12 +392,12 @@ module.exports = {
                         super(props);
 
                         this.state = {
-                            loading: false,
                             allow: false,
                             case: '',
                             matrList: [],
                             existingMatrList: [],
-                            error: ''
+                            error: '',
+                            saveState: ''
                         };
 
                         this.readContents = this.readContents.bind(this);
@@ -511,13 +544,28 @@ module.exports = {
                             return true;
                         } else {
                             l1.forEach(f => {
+                                // Are existing a part of the list?
                                 let k = f.synchronizeIdentifier;
+                                if (!l2.find(x => x.key == f )) {
+                                    return true;
+                                };
+                            })
+                            l2.forEach(f => {
+                                // Are new part of existing?
+                                let k = f.key;
                                 if (!l2.find(x => x.key == f )) {
                                     return true;
                                 };
                             })
                         };
                     };
+
+                    saveChangesHandler(id) {
+                        var _self = this; 
+
+                        console.log(id)
+                        console.log(_self.state)
+                    }
 
                     deleteMatrikel(id){
                         const _self = this;
@@ -920,12 +968,25 @@ module.exports = {
                             backgroundColor: '#eda72d'
                         }
 
+                        var saveButton = () => {
+                            switch(s.saveState) {
+                                case 'saving':
+                                    return <Tooltip title={'Gemmer i på sagen'}><CircularProgress color={"primary"}/></Tooltip>
+                                case 'done':
+                                    return <Tooltip title={'Alt OK'}><CheckIcon /></Tooltip>
+                                case 'error':
+                                    return <Tooltip title={'Læs beskeden herover'}><ErrorIcon color={"secondary"}/></Tooltip>
+                                default:
+                                    return <Tooltip title={'Gem ændringer'}><IconButton color={"primary"} onClick={_self.saveChangesHandler.bind(this, s.matrList)}><SaveIcon /></IconButton></Tooltip>
+                            }
+                        }
+
                         if (s.allow) {
                             return (
                                 <div role = "tabpanel" >
                                     <div className = "form-group" >
                                         {s.error.length > 0 && <div style={error} >{s.error}</div>}
-                                        <h4>Journalnummer: {s.case.number} {_self.hasChanges() && <button >Gem</button>}</h4>
+                                        <h4>Journalnummer: {s.case.number} {_self.hasChanges() && saveButton()}</h4>
                                         <p>{s.case.title}</p>
                                         <DAWASearch 
                                             _handleResult = {_self.findMatrikel}
