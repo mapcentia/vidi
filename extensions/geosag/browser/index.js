@@ -438,6 +438,7 @@ module.exports = {
                                     return Promise.all(jobs);
                                 })
                                 .then(j => {
+                                    this.zoomToLayer();
                                     //console.log(j)
                                 })
                                 .catch(e => {
@@ -522,6 +523,11 @@ module.exports = {
                         const _self = this;
                         var layer = _self.getCustomLayer(key);
                         cloud.get().map.fitBounds(layer.getBounds(), {padding: [padding, padding], maxZoom: maxZoom});
+                    }
+
+                    zoomToLayer() {
+                        const _self = this;
+                        cloud.get().map.fitBounds(matrikelLayer.getBounds());
                     }
 
                     triggerMatrikel(key, event = 'click') {
