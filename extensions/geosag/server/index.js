@@ -4,7 +4,8 @@ var router = express.Router();
 var http = require('http');
 var https = require('https');
 var moment = require('moment');
-var config = require('../../../config/gp/config.geosag');
+var config = require('../../../config/config');
+var dn = require('../../../config/gp/config.geosag');
 var he = require('he');
 var fetch = require('node-fetch');
 const wkt = require('wkt');
@@ -21,7 +22,7 @@ GC2_HOST = (GC2_HOST.split("http://").length > 1 ? GC2_HOST.split("http://")[1] 
 moment.locale("da_DK");
 
 var BACKEND = config.backend;
-var dn = require('../server/config');
+
 
 // Days from 19000101 to 19700101
 const DAYSSINCE = 25569
