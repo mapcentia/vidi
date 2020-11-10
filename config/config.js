@@ -291,6 +291,28 @@ module.exports = {
                     }
                 }
             },
+            "vandvaerk_poulstrupvand2": { // Your print templates. "print" is the default
+                A4: {
+                    l: {
+                        mapsizePx: [1060, 730],
+                        mapsizeMm: [280, 192]
+                    },
+                    p: {
+                        mapsizePx: [730, 1060],
+                        mapsizeMm: [192, 280]
+                    }
+                },
+                A3: {
+                    l: {
+                        mapsizePx: [1525, 1065],
+                        mapsizeMm: [401, 282]
+                    },
+                    p: {
+                        mapsizePx: [1065, 1525],
+                        mapsizeMm: [282, 401]
+                    }
+                }
+            },
             "vandvaerk_herrestedmaare2": { // Your print templates. "print" is the default
                 A4: {
                     l: {
@@ -688,7 +710,98 @@ module.exports = {
                 }
 
             },
+            "Agriteam_Viborg_Aars": { // Your print templates. "print" is the default
+                A4: {
+                    l: {
+                        mapsizePx: [1060, 730],
+                        mapsizeMm: [280, 192]
+                    },
+                    p: {
+                        mapsizePx: [730, 1060],
+                        mapsizeMm: [192, 280]
+                    }
+                },
+                A3: {
+                    l: {
+                        mapsizePx: [1525, 1065],
+                        mapsizeMm: [401, 282]
+                    },
+                    p: {
+                        mapsizePx: [1065, 1525],
+                        mapsizeMm: [282, 401]
+                    }
+                }
 
+            },
+            "Agriteam_Varde": { // Your print templates. "print" is the default
+                A4: {
+                    l: {
+                        mapsizePx: [1060, 730],
+                        mapsizeMm: [280, 192]
+                    },
+                    p: {
+                        mapsizePx: [730, 1060],
+                        mapsizeMm: [192, 280]
+                    }
+                },
+                A3: {
+                    l: {
+                        mapsizePx: [1525, 1065],
+                        mapsizeMm: [401, 282]
+                    },
+                    p: {
+                        mapsizePx: [1065, 1525],
+                        mapsizeMm: [282, 401]
+                    }
+                }
+
+            },
+            "Agriteam_Brorup": { // Your print templates. "print" is the default
+                A4: {
+                    l: {
+                        mapsizePx: [1060, 730],
+                        mapsizeMm: [280, 192]
+                    },
+                    p: {
+                        mapsizePx: [730, 1060],
+                        mapsizeMm: [192, 280]
+                    }
+                },
+                A3: {
+                    l: {
+                        mapsizePx: [1525, 1065],
+                        mapsizeMm: [401, 282]
+                    },
+                    p: {
+                        mapsizePx: [1065, 1525],
+                        mapsizeMm: [282, 401]
+                    }
+                }
+
+            },
+            "Agriteam_Randers": { // Your print templates. "print" is the default
+                A4: {
+                    l: {
+                        mapsizePx: [1060, 730],
+                        mapsizeMm: [280, 192]
+                    },
+                    p: {
+                        mapsizePx: [730, 1060],
+                        mapsizeMm: [192, 280]
+                    }
+                },
+                A3: {
+                    l: {
+                        mapsizePx: [1525, 1065],
+                        mapsizeMm: [401, 282]
+                    },
+                    p: {
+                        mapsizePx: [1065, 1525],
+                        mapsizeMm: [282, 401]
+                    }
+                }
+
+            },
             // ========================================================
             // Names starting with "_" will not appear in the Print tab
             // But can be used by other extensions.
@@ -702,7 +815,7 @@ module.exports = {
                         "mapsizeMm": [190, 120]
                     }
                 }
-            },
+            }/*,
             "_mapGoPrint": {
                 "A4": {
                     "p": {
@@ -710,7 +823,7 @@ module.exports = {
                         "mapsizeMm": [190, 120]
                     }
                 }
-            },
+            },*/
         },
 
 
@@ -759,10 +872,10 @@ module.exports = {
             },
             {
                 "geosag": ["index"]
-            },
+            }/*,
             {
                 "MapGOMenu": ["index", "reportRender", "infoClick", "controller"]
-            }
+            }*/
         ],
         "server": [{
                 "conflictSearch": ["index"]
@@ -779,10 +892,10 @@ module.exports = {
             },
             {
                 "geosag": ["index"]
-            },
+            }/*,
             {
                 "MapGOMenu": ["index"]
-            }
+            }*/
         ]
     },
 

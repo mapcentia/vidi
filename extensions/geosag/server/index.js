@@ -6,7 +6,6 @@ var https = require('https');
 var moment = require('moment');
 var config = require('../../../config/config.js');
 var he = require('he');
-var shajs = require('sha.js');
 var fetch = require('node-fetch');
 const wkt = require('wkt');
 

@@ -185,6 +185,7 @@ geocloud = (function () {
             }
 
             this.layer.id = this.defaults.name;
+            this.key = this.defaults.key;
         };
         this.geoJSON = null;
         this.featureStore = null;
@@ -784,6 +785,7 @@ geocloud = (function () {
                     layers: layer,
                     format: 'image/png',
                     transparent: true,
+                    minZoom: defaults.minZoom,
                     maxZoom: defaults.maxZoom,
                     tileSize: defaults.tileSize
                 };
@@ -912,6 +914,7 @@ geocloud = (function () {
                 config = {
                     tms: true,
                     attribution: defaults.attribution,
+                    minZoom: defaults.minZoom,
                     maxZoom: defaults.maxZoom,
                     maxNativeZoom: defaults.maxNativeZoom,
                     tileSize: 256,
@@ -2058,6 +2061,25 @@ geocloud = (function () {
             }());
         };
 
+        this.addXYZBaselayer = function (url, conf) {
+            var l = new L.TileLayer(url, conf);
+            l.id = conf.name;
+            l.baseLayer = true;
+            lControl.addBaseLayer(l, conf.name) ;
+            this.showLayer(conf.name)
+            return [l];
+
+        };
+
+        this.addWmsBaseLayer = function (url, conf) {
+            var l = new L.TileLayer.WMS(url, conf);
+            l.id = conf.name;
+            l.baseLayer = true;
+            lControl.addBaseLayer(l, conf.name) ;
+            this.showLayer(conf.name)
+            return [l];
+        }
+
         this.addBaseLayer = function (l, db, config, h) {
             var o;
             switch (l) {
@@ -2226,8 +2248,9 @@ geocloud = (function () {
                 names: [],
                 resolutions: this.map.resolutions,
                 type: "wms",
-                maxZoom: 26,
-                maxNativeZoom: 26,
+                minZoom: 1,
+                maxZoom: 28,
+                maxNativeZoom: 28,
                 tileSize: MAPLIB === "ol2" ? OpenLayers.Size(256, 256) : 256,
                 uri: null
             };

@@ -125,6 +125,7 @@
     "jsts": "^1.1.2",
     "jszip": "^3.5.0",
     "kepler.gl": "0.0.27",
+    "leaflet-clonelayer": "^1.0.7",
     "leaflet-geojson-stream": "0.0.0",
     "leaflet.markercluster": "^1.4.1",
     "localforage": "^1.7.4",

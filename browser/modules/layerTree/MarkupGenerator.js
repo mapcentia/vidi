@@ -173,6 +173,9 @@ class MarkupGenerator {
                             <a href="javascript:void(0);" class="js-toggle-opacity">
                                 <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Opacity`)}" class="material-icons">opacity</i>
                             </a>
+                            <a href="javascript:void(0);" class="js-toggle-labels">
+                                <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Labels`)}" class="material-icons">label</i>
+                            </a>
                             <a href="javascript:void(0);" class="js-toggle-table">
                                 <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Table view`)}" class="material-icons">list</i>
                             </a>
@@ -186,7 +189,7 @@ class MarkupGenerator {
                         
                         <i style="float: right; padding-top: 9px; font-size: 26px;" class="material-icons layer-move-vert">more_vert</i>
         
-                        <div style="float: right; padding-top: 12px; padding-right: 10px;">${addButton}
+                        <div style="float: right; padding-top: 8px; padding-right: 10px;">${addButton}
                             <a href="javascript:void(0);" data-toggle="tooltip" data-placement="left" title="${tooltip}" style="visibility: ${displayInfo};" class="info-label" data-gc2-id="${layerKey}">${__(`Info`)}</a>
                         </div>
                     </div>
@@ -196,6 +199,7 @@ class MarkupGenerator {
             <div class="js-layer-settings-filters" style="display: none;"></div>
             <div class="js-layer-settings-load-strategy" style="display: none;"></div>
             <div class="js-layer-settings-opacity" style="display: none;"></div>
+            <div class="js-layer-settings-labels" style="display: none;"></div>
             <div class="js-layer-settings-search" style="display: none;"></div>
             <div class="js-layer-settings-table" id="table_view-${layerKey.replace(".", "_")}" style="display: none;"></div>
             </div>

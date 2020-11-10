@@ -85,6 +85,8 @@ module.exports = {
         "Get as PDF": "Get as PDF",
         "Conflicts": "Conflicts",
         "No Conflicts": "No Conflicts",
+        "Conflict with selected": "Conflict with selected",
+        "Conflict with all": "Conflict with all",
 
         "Print": "Print",
         "Search places": "Search places",
@@ -224,6 +226,10 @@ module.exports = {
         "Layer is visible": "Layer is visible",
         "Parents": "Parents",
         "Children": "Children",
+        "Back": "Back",
+        "Fit bounds to filter": "Fit bounds to filter",
+        "Labels": "Labels",
+        "Show labels": "Show labels",
 
         // Base layers
         "Side-by-side mode": "Side-by-side mode",

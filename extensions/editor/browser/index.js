@@ -290,10 +290,14 @@ module.exports = {
 
                 if (fields[key]) {
                     switch (fields[key].type) {
-                        case `int`:
+                        case `smallint`:
                         case `integer`:
+                        case `bigint`:
                             properties[key].type = `integer`;
                             break;
+                        case `decimal`:
+                        case `numeric`:
+                        case `real`:
                         case `double precision`:
                             properties[key].type = `number`;
                             break;
@@ -438,7 +442,8 @@ module.exports = {
                         fields[key].type.startsWith("character") ||
                         fields[key].type.startsWith("text")) &&
                         geoJson.properties[key] !== null) {
-                        geoJson.properties[key] = geoJson.properties[key];
+                        geoJson.properties[key] = geoJson.properties[key].replace(/\\([\s\S])|(["])/ig, "\\$1$2");
+                        geoJson.properties[key] = encodeURIComponent(geoJson.properties[key]);
                     }
                 });
 
@@ -735,20 +740,39 @@ module.exports = {
                     eventFeatureCopy.properties[key] = undefined;
                 }
             });
-            console.log(eventFeatureCopy);
 
             // Transform field values according to their types
             Object.keys(fields).map(key => {
+                console.log(fields[key].type)
                 switch (fields[key].type) {
                     case `double precision`:
                         if (eventFeatureCopy.properties[key]) {
                             eventFeatureCopy.properties[key] = parseFloat(eventFeatureCopy.properties[key]);
                         }
                         break
-                    default:
+                    case `date`:
+                    case `bytea`:
+                    case `timestamp with time zone`:
+                    case `timestamp without time zone`:
+                    case `time with time zone`:
+                    case `time without time zone`:
+                        if (eventFeatureCopy.properties[key]) {
+                            eventFeatureCopy.properties[key] = decodeURIComponent(eventFeatureCopy.properties[key]);
+                        }
+                        break;
+                    case `text`:
+                    case `character varying`:
+                        if (eventFeatureCopy.properties[key]) {
+                            try { // If string is not
+                                eventFeatureCopy.properties[key] = decodeURIComponent(eventFeatureCopy.properties[key]);
+                            } catch (e) {
+                            }
+                            eventFeatureCopy.properties[key] = eventFeatureCopy.properties[key].replace(/\\"/g, '"');
+                        }
                         break;
                 }
             });
+            console.log(eventFeatureCopy);
 
             /**
              * Commit to GC2
@@ -791,7 +815,8 @@ module.exports = {
                             fields[key].type.startsWith("character") ||
                             fields[key].type.startsWith("text")) &&
                             GeoJSON.properties[key] !== null) {
-                            GeoJSON.properties[key] = GeoJSON.properties[key];
+                            GeoJSON.properties[key] = GeoJSON.properties[key].replace(/\\([\s\S])|(["])/ig, "\\$1$2");
+                            GeoJSON.properties[key] = encodeURIComponent(GeoJSON.properties[key]);
                         }
                     } else {
                         // Remove system fields, which should not be updated by the user

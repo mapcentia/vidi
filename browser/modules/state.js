@@ -71,8 +71,8 @@ var p, hashArr = hash.replace("#", "").split("/");
 // and hard code the call to reportRender.render in state::initializeFromHashPart
 
 // Disabled default conflictsearch report generation
-//var reportRender = require('../../extensions/conflictSearch/browser/reportRender');
-var reportRender = require('../../extensions/MapGOMenu/browser/reportRender'); 
+var reportRender = require('../../extensions/conflictSearch/browser/reportRender');
+//var reportRender = require('../../extensions/MapGOMenu/browser/reportRender'); 
 
 /**
  * Returns internaly stored global state
