@@ -447,41 +447,7 @@ module.exports = {
                                     error: "Mangler bruger og journalnummer."
                                 })
                             } else {
-                                // Get case
-                                getCase(sagsnr)
-                                .then(r => {
-                                    console.log(r)
-                                    me.setState({
-                                        case: r
-                                    })
-                                    return getExistingMatr(r.caseId)
-                                })
-                                .then(r => {
-                                    //console.log(r)
-                                    me.setState({
-                                        allow: true,
-                                        error: '',
-                                        existingMatrList: r.matrikler
-                                    })
-                                    var jobs = []
-                                    // Add existing
-                                    r.matrikler.forEach(function(obj) {
-                                        // Add to list also
-                                        jobs.push(me.addMatrikel(obj, true));
-                                    })
-                                    return Promise.all(jobs);
-                                })
-                                .then(j => {
-                                    this.zoomToLayer();
-                                    //console.log(j)
-                                })
-                                .catch(e => {
-                                    console.log(e)
-                                    me.setState({
-                                        allow: false,
-                                        error: e
-                                    })
-                                })
+                                me.refreshFromDocunote(sagsnr, user)
                             }
 
 
@@ -565,6 +531,45 @@ module.exports = {
 
                         console.log(id)
                         console.log(_self.state)
+                    }
+
+                    refreshFromDocunote(sagsnr, user) {
+                        var _self = this; 
+                        // Get case
+                        getCase(sagsnr)
+                        .then(r => {
+                            console.log(r)
+                            _self.setState({
+                                case: r
+                            })
+                            return getExistingMatr(r.caseId)
+                        })
+                        .then(r => {
+                            //console.log(r)
+                            _self.setState({
+                                allow: true,
+                                error: '',
+                                existingMatrList: r.matrikler
+                            })
+                            var jobs = []
+                            // Add existing
+                            r.matrikler.forEach(function(obj) {
+                                // Add to list also
+                                jobs.push(_self.addMatrikel(obj, true));
+                            })
+                            return Promise.all(jobs);
+                        })
+                        .then(j => {
+                            this.zoomToLayer();
+                            //console.log(j)
+                        })
+                        .catch(e => {
+                            console.log(e)
+                            _self.setState({
+                                allow: false,
+                                error: e
+                            })
+                        })
                     }
 
                     deleteMatrikel(id){
