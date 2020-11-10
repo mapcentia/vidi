@@ -119,4 +119,4 @@ public/js/templates.js
 .env
 
 # Related to extensions
-/extensions/geosag/server/config.js
+/config/gp
