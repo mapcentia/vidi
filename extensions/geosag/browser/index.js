@@ -367,17 +367,18 @@ module.exports = {
                             error: ''
                         };
 
-                        this.readContents = this.readContents.bind(this)
-                        this.deleteMatrikel = this.deleteMatrikel.bind(this)
-                        this.focusMatrikel = this.focusMatrikel.bind(this)
-                        this.addMatrikel = this.addMatrikel.bind(this)
-                        this.findMatrikel = this.findMatrikel.bind(this)
-                        this.getCustomLayer = this.getCustomLayer.bind(this)
-                        this.matrikelCoordTransf = this.matrikelCoordTransf.bind(this)
-                        this.matrikelOnEachFeature = this.matrikelOnEachFeature.bind(this)
-                        this.matrikelStyle = this.matrikelStyle.bind(this)
-                        this.zoomToMatrikel = this.zoomToMatrikel.bind(this)
-                        this.unifyMatr = this.unifyMatr.bind(this)
+                        this.readContents = this.readContents.bind(this);
+                        this.deleteMatrikel = this.deleteMatrikel.bind(this);
+                        this.focusMatrikel = this.focusMatrikel.bind(this);
+                        this.addMatrikel = this.addMatrikel.bind(this);
+                        this.findMatrikel = this.findMatrikel.bind(this);
+                        this.getCustomLayer = this.getCustomLayer.bind(this);
+                        this.matrikelCoordTransf = this.matrikelCoordTransf.bind(this);
+                        this.matrikelOnEachFeature = this.matrikelOnEachFeature.bind(this);
+                        this.matrikelStyle = this.matrikelStyle.bind(this);
+                        this.zoomToMatrikel = this.zoomToMatrikel.bind(this);
+                        this.unifyMatr = this.unifyMatr.bind(this);
+                        this.hasChanges = this.hasChanges.bind(this);
                     }
 
                     /**
@@ -499,6 +500,24 @@ module.exports = {
                     readContents(blob) {
                         var _self = this;                            
                     }
+
+                    hasChanges() {
+                        const _self = this;
+                        let l1 = _self.state.existingMatrList;
+                        let l2 = _self.state.matrList;
+
+                        if (l1.length != l2.length) {
+                            // Do we even have the same number?
+                            return true;
+                        } else {
+                            l1.forEach(f => {
+                                let k = f.synchronizeIdentifier;
+                                if (!l2.find(x => x.key == f )) {
+                                    return true;
+                                };
+                            })
+                        };
+                    };
 
                     deleteMatrikel(id){
                         const _self = this;
@@ -886,7 +905,7 @@ module.exports = {
                      */
                     render() {
                         const _self = this;
-                        const s = _self.state
+                        const s = _self.state;
                         //console.log(s)
 
                         const error = {
@@ -906,7 +925,7 @@ module.exports = {
                                 <div role = "tabpanel" >
                                     <div className = "form-group" >
                                         {s.error.length > 0 && <div style={error} >{s.error}</div>}
-                                        <h4>Journalnummer: {s.case.number}</h4>
+                                        <h4>Journalnummer: {s.case.number} {_self.hasChanges() && <button >Gem</button>}</h4>
                                         <p>{s.case.title}</p>
                                         <DAWASearch 
                                             _handleResult = {_self.findMatrikel}
