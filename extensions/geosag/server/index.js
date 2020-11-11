@@ -227,7 +227,6 @@ router.post('/api/extension/getCase', function (req, response) {
             })
             .then(function(Case) {
                 // Got the Case
-                // Return Matr to user
                 response.status(200).json(Case);
                 return;
             })
@@ -251,8 +250,8 @@ function matrikelExists(matr) {
         .then(r => {
             resolve({
                 key: r.synchronizeIdentifier,
-                nodeId: r.nodeId,
-                nodeType: r.nodeType
+                partNodeType: r.nodeType,
+                partRecordId: r.nodeId
             })
         })
     }); 
@@ -283,8 +282,9 @@ function createMatrikelPart(matr) {
         .then(r => {
             resolve({
                 key: r.synchronizeIdentifier,
-                nodeId: r.nodeId,
-                nodeType: r.nodeType
+                partNodeType: r.nodeType,
+                partRecordId: r.nodeId
+                
             })
         })
         .catch(e => {
@@ -330,6 +330,7 @@ router.post('/api/extension/saveMatrChanges', function (req, response) {
     try {
         var matrs = req.body.matrs;
         var parts = [];
+        var caseId;
         verifyUser(req)
             .then(function(user) {
                 // user is allowed
@@ -361,12 +362,47 @@ router.post('/api/extension/saveMatrChanges', function (req, response) {
                 }
             })
             .then(function(created){
-                // change parts
-                Array.prototype.push.apply(created, parts)
-                console.log(created)
+                // Push newly created into parts
+                Array.prototype.push.apply(parts, created)
+                // Remove null's and keys
+                var nullLess = parts.filter(value => Object.keys(value).length !== 0);
+                parts = nullLess
+                parts.forEach(function(v){ delete v.key });
 
-                response.status(200).json(created);
 
+                // Get Information from case
+                return getDocunote('Cases/number/'+ req.body.sagsnr.toString());
+            })
+            .then(function(docunoteCase) {
+                //Get case number
+                caseId = docunoteCase.caseId.toString()
+                return getDocunote('Cases/'+ caseId+'/parts');
+            })
+            .then(function(docunoteCaseParts) {
+
+                // Get the right picker
+                var picker = docunoteCaseParts.find(function(obj) {
+                    return obj.pickerName === dn.partsPicker;
+                });
+
+                // Get anything but matrikel-persons
+                var keepParts = picker.parts.filter(function(obj) {
+                    return obj.partNodeType !== dn.partsType;
+                });
+
+                // Glorious end result!
+                Array.prototype.push.apply(keepParts, parts)
+                var newPicker = [
+                    {
+                        pickerName: dn.partsPicker,
+                        parts: keepParts
+                    }
+                ]
+                return postDocunote('Cases/'+ caseId+'/pickers', newPicker);
+            })
+            .then(function(savedParts) {
+                response.status(200).json(savedParts);
+                return;
             })
             .catch(function(error) {
                 response.status(500).json(error);
