@@ -309,7 +309,7 @@ module.exports = {
             state.bookmarkState(customData).then(response => {
                 backboneEvents.get().trigger(endEventName, response);
                 callBack(response.responseJSON);
-                resolve();
+                resolve(response);
             }).catch(response => {
                 backboneEvents.get().trigger(endEventName, response);
                 callBack(response.responseJSON);
@@ -437,7 +437,13 @@ module.exports = {
         recScale[boxCount] = rectangle(c, recEdit[boxCount], "red");
         recScale[boxCount]._vidi_type = "print";
         printItems.addLayer(recScale[boxCount]);
-        icons[boxCount] = (L.marker(c, {icon: L.divIcon({className: 'print-div-icon', iconSize: null, html: `<span>${(boxCount + 1)}</span>`})}).addTo(cloud.get().map));
+        icons[boxCount] = (L.marker(c, {
+            icon: L.divIcon({
+                className: 'print-div-icon',
+                iconSize: null,
+                html: `<span>${(boxCount + 1)}</span>`
+            })
+        }).addTo(cloud.get().map));
 
         var sw = recEdit[boxCount].getBounds().getSouthWest(), ne = recEdit[boxCount].getBounds().getNorthEast();
         curBounds[boxCount] = [sw.lat, sw.lng, ne.lat, ne.lng];
@@ -447,7 +453,13 @@ module.exports = {
             })
             for (let i = 0; i <= boxCount; i++) {
                 let c = recEdit[i].getBounds().getCenter();
-                icons[i] = (L.marker(c, {icon: L.divIcon({className: 'print-div-icon', iconSize: null, html: `<span>${(i + 1)}</span>`})}).addTo(cloud.get().map));
+                icons[i] = (L.marker(c, {
+                    icon: L.divIcon({
+                        className: 'print-div-icon',
+                        iconSize: null,
+                        html: `<span>${(i + 1)}</span>`
+                    })
+                }).addTo(cloud.get().map));
                 center[i] = c; // re-calculate centers
                 rectangle(c, recEdit[i], "red");
                 //if (curScale !== newScale || (curBounds[i][0] !== newBounds[0] && curBounds[i][1] !== newBounds[1] && curBounds[i][2] !== newBounds[2] && curBounds[i][3] !== newBounds[3])) {
@@ -480,7 +492,8 @@ module.exports = {
             return paramsFromDb;
         }
 
-        var layerQueryDraw = [], layerQueryResult = [], layerQueryBuffer = [], layerPrint = [], e, parr, configFile = null;
+        var layerQueryDraw = [], layerQueryResult = [], layerQueryBuffer = [], layerPrint = [], e, parr,
+            configFile = null;
         if (scale && (isNaN(scale) || scale < 200)) {
             alert(__("Not a valid scale. Must be over 200."));
             return false;
@@ -599,6 +612,10 @@ module.exports = {
             data.customData = customData || null;
             state.getState().then(applicationState => {
                 data.state = applicationState;
+                // Set layer active if provided
+                if (customData && typeof customData.layer === "string") {
+                    data.state.modules.layerTree.activeLayers = [customData.layer];
+                }
                 resolve(data);
             });
         });
