@@ -93,7 +93,6 @@ module.exports = {
         // Click event for print button
         $("#conflict-print-btn").on("click", function () {
             // Trigger print dialog off
-            backboneEvents.get().trigger("off:print");
             $("#conflict-set-print-area-btn").prop("disabled", true);
             $("#conflict-get-print-fieldset").prop("disabled", true);
             $(this).button('loading');
