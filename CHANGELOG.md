@@ -148,8 +148,11 @@ and this project adheres to [CalVer](https://calver.org/).
 - Accept 'da' locale in request headers. Only da-DK worked so far.
 - If the Service Worker doesn't get registered when Vidi will now start anyways without the Service Worker. On a hard refresh (Ctrl-f5) the Service Worker will claim the clients, so a hard refresh will not unregister Service Worker, but the cache will be deleted. 
 - Text in editor is now url encoded.
-- Quotes are now escaped for text in editor.
-- All numeric Postgres types are now handled correct in editor 
+- Quotes are now escaped for text in the editor.
+- All numeric Postgres types are now handled correct in the editor.
+- Puppeteer processes are now destroyed, if an exception is thrown during print. This prevents leak of processes.
+- Re-acquirement of a Puppeteer process is done if timeout, so the print will eventual be finished.
+- Puppeteer processes will be destroyed after 60 seconds. This prevents hanging processes, which blocks further prints.
 
 ## [2020.2.0]
 ### Added
