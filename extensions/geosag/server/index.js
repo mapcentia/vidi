@@ -30,7 +30,7 @@ const DAYSSINCE = 25569
 const MILISECSDAY = 86400000
 
 // Build Docunote-requests
-var docunote = function(endpoint, method) {
+var docunote = function(endpoint, method, body=undefined) {
     var api = {
         url: dn.hostUrl + 'api/' + dn.version + '/' + endpoint,
         headers: {
@@ -39,29 +39,51 @@ var docunote = function(endpoint, method) {
             userName: dn.userName,
             userKey: dn.userKey,
         },
-        method: method
+        method: method,
+        json: true
     };
-    return api;
+
+    if (body !== undefined) {
+        api.body = body
+        return api;
+    } else {
+        return api;
+    }
+    
 };
 
 function getDocunote(endpoint) {
-    //var api = docunote('Cases/number/'+ sagsnr.toString(), 'GET');
-    //var api = docunote('Persons/'+ personId.toString(), 'GET');
-    //var api = docunote('Cases/'+ sagsnr.toString()+'/parts', 'GET');
-    //var api = docunote('Persons/synchronizeSource/101/synchronizeId/122105327c', 'GET');
-    
     var api = docunote(endpoint, 'GET');
-    console.log(api.url + ' - Calling');
+
+    console.log(api.method + ': ' + api.url + ' - Calling');
     // Return new promise 
     return new Promise(function(resolve, reject) {
         // Do async job
         request.get(api, function(err, resp, body) {
             if (err) {
-                console.log(api.url + ' - Recieved - ERROR');
+                console.log(api.method + ': ' + api.url + ' - Recieved - ERROR');
                 reject(err);
             } else {
-                console.log(api.url + ' - Recieved - OK');
-                resolve(JSON.parse(body));
+                console.log(api.method + ': ' + api.url + ' - Recieved - OK');
+                resolve(body);
+            }
+        });
+    }); 
+}
+function postDocunote(endpoint, body) { 
+    var api = docunote(endpoint, 'POST', body);
+
+    console.log(api.method + ': ' + api.url + ' - Calling');
+    // Return new promise 
+    return new Promise(function(resolve, reject) {
+        // Do async job
+        request.post(api, function(err, resp, body) {
+            if (err) {
+                console.log(api.method + ': ' + api.url + ' - Recieved - ERROR');
+                reject(err);
+            } else {
+                console.log(api.method + ': ' + api.url + ' - Recieved - OK');
+                resolve(body);
             }
         });
     }); 
@@ -95,7 +117,9 @@ function verifyUser(request) {
 router.post('/api/extension/getExistingMatr', function (req, response) {
     response.setHeader('Content-Type', 'application/json');
 
-    // User not in call
+    // Validation block
+    try {
+        // User not in call
     if (!req.body.hasOwnProperty("user")) {
         response.status(401).json({
             error: "User mangler i kaldet"
@@ -109,6 +133,10 @@ router.post('/api/extension/getExistingMatr', function (req, response) {
         });
         return;
     }
+    } catch (error) {
+        //console.log(error)
+        response.status(500).json(error);
+    }
 
     // Logic
     try {
@@ -121,17 +149,15 @@ router.post('/api/extension/getExistingMatr', function (req, response) {
             .then(function(docunoteCaseParts) {
                 // Got parts, get information on each person
                 //console.log(docunoteCaseParts);
-                var lookingForType = 19;
-                var lookingForPicker = 'system_partiespicker';
 
                 // Get the right picker
                 var picker = docunoteCaseParts.find(function(obj) {
-                    return obj.pickerName === lookingForPicker;
+                    return obj.pickerName === dn.partsPicker;
                 });
 
                 // Get the right parts
                 var parts = picker.parts.filter(function(obj) {
-                    return obj.partNodeType === lookingForType;
+                    return obj.partNodeType === dn.partsType;
                 });
 
                 var partsToCheck = [];
@@ -148,9 +174,8 @@ router.post('/api/extension/getExistingMatr', function (req, response) {
                 //});
 
                 // Make sure we only get items from "Matrikelliste"
-                var lookingForListId = 5;
                 var matrs = parts.filter(function(obj) {
-                    return obj.listId === lookingForListId;
+                    return obj.listId === dn.personListId;
                 });
 
                 // Return Matr to user
@@ -171,7 +196,9 @@ router.post('/api/extension/getExistingMatr', function (req, response) {
 router.post('/api/extension/getCase', function (req, response) {
     response.setHeader('Content-Type', 'application/json');
 
-    // User not in call
+    // Validation block
+    try {
+        // User not in call
     if (!req.body.hasOwnProperty("user")) {
         response.status(401).json({
             error: "User mangler i kaldet"
@@ -184,6 +211,10 @@ router.post('/api/extension/getCase', function (req, response) {
             error: "Sagsnummer mangler i kaldet"
         });
         return;
+    }
+    } catch (error) {
+        //console.log(error)
+        response.status(500).json(error);
     }
 
     // Logic
@@ -226,11 +257,50 @@ function matrikelExists(matr) {
         })
     }); 
 }
+function createMatrikelPart(matr) {
+    // creates matrikel part
+    return new Promise(function(resolve, reject) {
+
+        //console.log(matr)
+
+        var newMatr = {
+            firstName: matr.matrikelnr,
+            lastName: matr.ejerlavsnavn,
+            synchronizeIdentifier: matr.key,
+            synchronizeSource: dn.synchronizeSource,
+            listId: dn.personListId,
+            customData: {
+                ejerlavskode: matr.ejerlavskode,
+                kommunenr: (matr.kommunekode == '-' ? null : matr.kommunekode),
+                matresrnr: (matr.esr == '-' ? null : matr.esr),
+                matrkomnavm: (matr.kommune == '-' ? null : matr.kommune),
+                matrnrcustom: matr.matrikelnr,
+                matrsfenr: (matr.bfe == '-' ? null : matr.bfe),
+            }
+        }
+
+        postDocunote(`Persons`, newMatr)
+        .then(r => {
+            resolve({
+                key: r.synchronizeIdentifier,
+                nodeId: r.nodeId,
+                nodeType: r.nodeType
+            })
+        })
+        .catch(e => {
+            console.log(e)
+            reject(e);
+        })
+    }); 
+
+}
 
 router.post('/api/extension/saveMatrChanges', function (req, response) {
     response.setHeader('Content-Type', 'application/json');
 
-    // User not in call
+    // Validation block
+    try {
+        // User not in call
     if (!req.body.hasOwnProperty("user")) {
         response.status(401).json({
             error: "User mangler i kaldet"
@@ -251,10 +321,15 @@ router.post('/api/extension/saveMatrChanges', function (req, response) {
         });
         return;
     }
+    } catch (error) {
+        //console.log(error)
+        response.status(500).json(error);
+    }
 
     // Logic
     try {
         var matrs = req.body.matrs;
+        var parts = [];
         verifyUser(req)
             .then(function(user) {
                 // user is allowed
@@ -267,13 +342,31 @@ router.post('/api/extension/saveMatrChanges', function (req, response) {
                 return Promise.all(jobs);
             })
             .then(function(exists) {
-                console.log(matrs)
-                // If matr not in exists, create.
+                // Move existing into parts
+                parts = exists;
 
-                
-                // Create non-existing matr
-                response.status(200).json(exists);
-                return;
+                // If matr not in exists, create.
+                let creates = [];
+                matrs.forEach(f => {
+                    if (!exists.some(e => e.key === f.key)) {
+                        // Create non-existing matr
+                        creates.push(createMatrikelPart(f))
+                      }
+                })
+                if (creates.length > 0) {
+                    return Promise.all(creates);
+                } else {
+                    // If none is created return 
+                    return Promise.resolve([])
+                }
+            })
+            .then(function(created){
+                // change parts
+                Array.prototype.push.apply(created, parts)
+                console.log(created)
+
+                response.status(200).json(created);
+
             })
             .catch(function(error) {
                 response.status(500).json(error);
