@@ -100,7 +100,7 @@ module.exports = {
                 let positiveHits = JSON.parse(JSON.stringify(results));
                 for (const property in results.hits) {
                     if (results.hits[property].hits === 0) {
-                        delete positiveHits.hits[property];
+                        // delete positiveHits.hits[property];
                     }
                 }
                 let hits = positiveHits.hits
