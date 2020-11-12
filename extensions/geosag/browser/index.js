@@ -533,6 +533,8 @@ module.exports = {
                                 _self.setState({
                                     saveState: 'done',
                                     error: ''
+                                }, () => {
+                                    _self.refreshFromDocunote();
                                 })
                             })
                             .catch(e => {
@@ -612,7 +614,12 @@ module.exports = {
 
                     zoomToLayer() {
                         const _self = this;
-                        cloud.get().map.fitBounds(matrikelLayer.getBounds());
+                        if (_self.state.matrList.length > 0) {
+                            cloud.get().map.fitBounds(matrikelLayer.getBounds());
+                        } else {
+                            // This should have been the extents set in GC2 admin, but i couldn't be arsed.
+                            cloud.get().map.panTo(new L.LatLng(56.0751,8.7561), 7);
+                        }  
                     }
 
                     triggerMatrikel(key, event = 'click') {
@@ -620,7 +627,6 @@ module.exports = {
                         var layer = _self.getCustomLayer(key);
                         // Trigger click event on matrikel
                         layer.getLayers()[0].openPopup();
-
                     }
 
                     getCustomLayer(key) {
