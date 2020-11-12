@@ -110,98 +110,134 @@ function print(key, q, req, response, outputPng = false, frame = 0, count) {
 
         let check = false;
         let delay = 1000;
-        headless.acquire().then(browser => {
-            if (!outputPng) {
-                browser.newPage().then(async (page) => {
-                    await page.emulateMedia('screen');
-                    page.on('console', msg => {
-                        if (msg.text().indexOf(`Vidi is now loaded`) !== -1) {
-                            if (!check) {
-                                check = true;
-                                console.log('App was loaded, generating PDF');
-                                setTimeout(() => {
-                                    page.pdf({
-                                        path: `${__dirname}/../public/tmp/print/pdf/${key}.pdf`,
-                                        landscape: (q.orientation === 'l'),
-                                        format: q.pageSize,
-                                        printBackground: true,
-                                        margin: margin
-                                    }).then(() => {
-                                        console.log('Done #', count.n);
-                                        if (q.bounds.length === 1) { // Only one page. No need to merge
-                                            console.log('Only one page. No need to merge.');
-                                            response.send({success: true, key, url});
-                                        }
-                                        headless.destroy(browser);
-                                        count.n++;
-                                    });
-                                }, delay);
-                            }
+        const func = () => {
+            headless.acquire().then(browser => {
+                    setTimeout(() => {
+                        if (headless.isBorrowedResource(browser)) {
+                            headless.destroy(browser);
+                            console.log("Destroying browser after 60 secs");
                         }
-                    });
-                    await page.goto(url);
-                });
-            } else {
-                browser.newPage().then(page => {
-                    let width;
-                    let height;
-                    switch (q.pageSize) {
-                        case "A4":
-                            switch (q.orientation) {
-                                case "p":
-                                    width = 790;
-                                    height = 1116;
-                                    break;
-                                case "l":
-                                    width = 1116;
-                                    height = 790;
-                                    break;
-                            }
-                            break;
-                        default:
-                            width = 1500;
-                            height = 1500;
-                            break;
-                    }
-                    page.emulate({
-                        viewport: {width, height},
-                        userAgent: 'Puppeteer'
-                    }).then(() => {
-                        page.on('console', msg => {
-                            console.log(msg.text());
-                            if (msg.text().indexOf(`Vidi is now loaded`) !== -1) {
-                                console.log('App was loaded, generating PNG');
-                                setTimeout(() => {
-                                    page.evaluate(`$('.leaflet-top').remove();$('#loadscreen').remove();`).then(() => {
-                                        page.screenshot({
-                                            encoding: `base64`
-                                        }).then(data => {
-                                            let img = new Buffer.from(data, 'base64');
-                                            response.writeHead(200, {
-                                                'Content-Type': 'image/png',
-                                                'Content-Length': img.length
-                                            });
-                                            headless.destroy(browser);
-                                            response.end(img);
-                                        }).catch(error => {
-                                            response.status(500);
-                                            response.send(error);
-                                        });
-                                    }).catch(error => {
-                                        response.status(500);
-                                        response.send(error);
-                                    });
-                                }, delay);
-                            }
+                    }, 60000);
+                    if (!outputPng) {
+                        browser.newPage().then(async (page) => {
+                            await page.emulateMedia('screen');
+                            page.on('console', msg => {
+                                if (msg.text().indexOf(`Vidi is now loaded`) !== -1) {
+                                    if (!check) {
+                                        check = true;
+                                        console.log('App was loaded, generating PDF');
+                                        setTimeout(() => {
+                                            page.pdf({
+                                                path: `${__dirname}/../public/tmp/print/pdf/${key}.pdf`,
+                                                landscape: (q.orientation === 'l'),
+                                                format: q.pageSize,
+                                                printBackground: true,
+                                                margin: margin
+                                            }).then(() => {
+                                                    console.log('Done #', count.n);
+                                                    if (q.bounds.length === 1) { // Only one page. No need to merge
+                                                        console.log('Only one page. No need to merge.');
+                                                        response.send({success: true, key, url});
+                                                    }
+                                                    headless.destroy(browser);
+                                                    count.n++;
+                                                }
+                                            ).catch(() => {
+                                                    console.log('Error while creating PDF');
+                                                    headless.destroy(browser);
+                                                    response.status(500).send({
+                                                        success: false
+                                                    });
+                                                }
+                                            );
+                                        }, delay);
+                                    }
+                                }
+                            });
+                            await page.goto(url);
+                        }).catch(() => {
+                            console.log('Error while creating PDF');
+                            headless.destroy(browser);
+                            response.status(500).send({
+                                success: false
+                            });
                         });
-                        page.goto(url);
-                    }).catch(error => {
-                        response.status(500);
-                        response.send(error);
-                    });
-                });
-            }
-        });
+                    } else {
+                        browser.newPage().then(page => {
+                            let width;
+                            let height;
+                            switch (q.pageSize) {
+                                case "A4":
+                                    switch (q.orientation) {
+                                        case "p":
+                                            width = 790;
+                                            height = 1116;
+                                            break;
+                                        case "l":
+                                            width = 1116;
+                                            height = 790;
+                                            break;
+                                    }
+                                    break;
+                                default:
+                                    width = 1500;
+                                    height = 1500;
+                                    break;
+                            }
+                            page.emulate({
+                                viewport: {width, height},
+                                userAgent: 'Puppeteer'
+                            }).then(() => {
+                                page.on('console', msg => {
+                                    console.log(msg.text());
+                                    if (msg.text().indexOf(`Vidi is now loaded`) !== -1) {
+                                        console.log('App was loaded, generating PNG');
+                                        setTimeout(() => {
+                                            page.evaluate(`$('.leaflet-top').remove();$('#loadscreen').remove();`).then(() => {
+                                                page.screenshot({
+                                                    encoding: `base64`
+                                                }).then(data => {
+                                                    let img = new Buffer.from(data, 'base64');
+                                                    response.writeHead(200, {
+                                                        'Content-Type': 'image/png',
+                                                        'Content-Length': img.length
+                                                    });
+                                                    headless.destroy(browser);
+                                                    response.end(img);
+                                                }).catch(error => {
+                                                    console.log('Error while creating PDF');
+                                                    headless.destroy(browser);
+                                                    response.status(500);
+                                                    response.send(error);
+                                                });
+                                            }).catch(error => {
+                                                console.log('Error while creating PDF');
+                                                headless.destroy(browser);
+                                                response.status(500);
+                                                response.send(error);
+                                            });
+                                        }, delay);
+                                    }
+                                });
+                                page.goto(url);
+                            }).catch(error => {
+                                headless.destroy(browser);
+                                response.status(500);
+                                response.send(error);
+                            });
+                        }).catch(error => {
+                            headless.destroy(browser);
+                            response.status(500);
+                            response.send(error);
+                        });
+                    }
+                }
+            ).catch(error => {
+                console.log("Can't get a browser right now: ", error.message);
+                setTimeout(() => func(), 500)
+            });
+        }
+        func();
     });
 
 }

@@ -69,6 +69,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - New button "Fit bounds to filter" in layer filters, which will set the view extent to the bounds of the filtered layer.
 - New "Labels" panel for raster tile layers with a checkbox for hiding/showing labels on the layer. Works for both MapServer and QGIS back-end (GC2 must support this).
 - Added boolean config `crossMultiSelect` in `config/config.js`. This will enable cross multi select on both vector and raster tile layers. This will result in a unified feature info experience, which are well suited for informative maps using the `embed.tmpl` template. All feature info results will be displayed in an accordion widget. The accordion summary is default layer title, but can be set to an attribute value with the meta config `accordion_summery`. Can be set in runtime config. 
+- It's now possible to start conflict search from Drawing module. A single drawing or all drawings together can be used for search.
 - WMS layers can now be added directly as base layers. A WMS base layer example:
 ```json
 {
@@ -140,7 +141,9 @@ and this project adheres to [CalVer](https://calver.org/).
 - `embed.tmpl` will now show login button if session module is enabled.
 - The WMS requests now has a `qgs` parameter for QGIS backed layers. The value is path to the qgs file for the layer (base64 encoded). In GC2 the path will be used to send the request directly to qgis_serv instead of cascading it through MapServer.
 - Raster tile layers without pixels (invisible in the map) are now not queried by feature info.
-- Turning on a vector layer will now load the legend of the raster tile representation of the layer
+- Turning on a vector layer will now load the legend of the raster tile representation of the layer.
+- Conflict search now are able to make a print with each hit and merge the PDFs together.
+
 
 ### Fixed
 - Using `indexOf` instead of `includes`, because the latter is not transpiled in Babel. It's an Internet Explorer issue.
@@ -148,8 +151,11 @@ and this project adheres to [CalVer](https://calver.org/).
 - Accept 'da' locale in request headers. Only da-DK worked so far.
 - If the Service Worker doesn't get registered when Vidi will now start anyways without the Service Worker. On a hard refresh (Ctrl-f5) the Service Worker will claim the clients, so a hard refresh will not unregister Service Worker, but the cache will be deleted. 
 - Text in editor is now url encoded.
-- Quotes are now escaped for text in editor.
-- All numeric Postgres types are now handled correct in editor 
+- Quotes are now escaped for text in the editor.
+- All numeric Postgres types are now handled correct in the editor.
+- Puppeteer processes are now destroyed if an exception is thrown during print. This prevents leak of processes.
+- Re-acquirement of a Puppeteer process is done if timeout, so the print will eventual be finished.
+- Puppeteer processes will be destroyed after 60 seconds. This prevents hanging processes, which blocks further prints.
 
 ## [2020.2.0]
 ### Added
