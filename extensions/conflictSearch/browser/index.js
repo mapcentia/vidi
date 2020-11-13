@@ -684,7 +684,7 @@ module.exports = module.exports = {
                         $('#conflict-main-tabs a[href="#conflict-result-content"]').tab('show');
                         $('#conflict-result-content a[href="#hits-content"]').tab('show');
                         $('#conflict-result .btn:first-child').attr("href", "/html?id=" + response.file)
-                        $("#conflict-download-pdf").prop("download", `Søgning foretaget med ${response.text} d. ${response.dateTime}`);
+                        $("#conflict-download-pdf").prop("download", `Søgning foretaget med ${response.text} d. ${response.dateTime}.pdf`);
 
                         fileId = response.file;
                         searchFinish = true;
@@ -890,7 +890,6 @@ var dom = `
                                 <a href="bootstrap-elements.html" class="btn btn-primary btn-raised dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></a>
                                 <ul class="dropdown-menu">
                                     <li><a href="javascript:void(0)" id="conflict-download-pdf">Download PDF</a></li>
-                                    <li><a target="_blank" href="javascript:void(0)" id="conflict-open-html">Open HTML page</a></li>
                                 </ul>
                             </div>
                         </fieldset>

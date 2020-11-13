@@ -87,6 +87,7 @@ module.exports = {
         "No Conflicts": "Ingen konflikter",
         "Conflict with selected": "Konflikt med valgte",
         "Conflict with all": "Konflikt med alle",
+        "Prints completed": "Antal print udført",
 
         "Print": "Print",
         "Search places": "Søg på steder",

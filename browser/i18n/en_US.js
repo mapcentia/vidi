@@ -87,6 +87,7 @@ module.exports = {
         "No Conflicts": "No Conflicts",
         "Conflict with selected": "Conflict with selected",
         "Conflict with all": "Conflict with all",
+        "Prints completed": "Prints completed",
 
         "Print": "Print",
         "Search places": "Search places",
