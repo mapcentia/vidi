@@ -118,5 +118,5 @@ public/js/templates.js
 # Environment variables
 .env
 
-# Related to extensions
-/config/gp
+# Related to extensions & secrets
+/config/gp/

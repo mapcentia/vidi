@@ -25,5 +25,6 @@ router.use(require('./static'));
 router.use(require('./feature'));
 router.use(require('./template'));
 router.use(require('./css'));
+router.use(require('./mergePrint'));
 
 module.exports = router;

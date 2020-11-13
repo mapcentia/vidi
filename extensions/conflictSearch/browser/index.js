@@ -543,18 +543,19 @@ module.exports = module.exports = {
             row, fileId, searchFinish, geomStr,
             visibleLayers = cloud.getAllTypesOfVisibleLayers().split(";"), crss;
 
-            const setCrss = (layer) => {
-                if (typeof layer.getBounds !== "undefined") {
-                    coord = layer.getBounds().getSouthWest();
-                } else {
-                    coord = layer.getLatLng();
-                }
-                var zone = require('./../../../browser/modules/utmZone.js').getZone(coord.lat, coord.lng);
-                crss = {
-                    "proj": "+proj=utm +zone=" + zone + " +ellps=WGS84 +datum=WGS84 +units=m +no_defs",
-                    "unproj": "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
-                };
+        const setCrss = (layer) => {
+            if (typeof layer.getBounds !== "undefined") {
+                coord = layer.getBounds().getSouthWest();
+            } else {
+                coord = layer.getLatLng();
             }
+            var zone = require('./../../../browser/modules/utmZone.js').getZone(coord.lat, coord.lng);
+            crss = {
+                "proj": "+proj=utm +zone=" + zone + " +ellps=WGS84 +datum=WGS84 +units=m +no_defs",
+                "unproj": "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
+            };
+        }
+
         if (text) {
             currentFromText = text;
         }
@@ -616,6 +617,7 @@ module.exports = module.exports = {
             }
         }
         primitive = layer.toGeoJSON();
+        console.log(primitive)
         if (typeof primitive.features !== "undefined") {
             primitive = primitive.features[0];
         }
@@ -625,15 +627,9 @@ module.exports = module.exports = {
             var reader = new jsts.io.GeoJSONReader();
             var writer = new jsts.io.GeoJSONWriter();
             var geom = reader.read(reproject.reproject(primitive, "unproj", "proj", crss));
-
+            // buffer4326
             var buffer4326 = reproject.reproject(writer.write(geom.geometry.buffer(buffer)), "proj", "unproj", crss);
 
-            var projWktWithBuffer;
-            if (buffer === 0) {
-                projWktWithBuffer = Terraformer.convert(writer.write(geom.geometry));
-            } else {
-                projWktWithBuffer = Terraformer.convert(writer.write(geom.geometry.buffer(buffer)));
-            }
 
             var l = L.geoJson(buffer4326, {
                 "color": "#ff7800",
@@ -663,9 +659,14 @@ module.exports = module.exports = {
                 schemataStr = schemata.join(",");
             }
 
+            var projWktWithBuffer;
+            if (buffer === 0) {
+                projWktWithBuffer = Terraformer.convert(writer.write(geom.geometry));
+            } else {
+                projWktWithBuffer = Terraformer.convert(writer.write(geom.geometry.buffer(buffer)));
+            }
             preProcessor({
                 "projWktWithBuffer": projWktWithBuffer
-
             }).then(function () {
                 xhr = $.ajax({
                     method: "POST",
@@ -683,7 +684,7 @@ module.exports = module.exports = {
                         $('#conflict-main-tabs a[href="#conflict-result-content"]').tab('show');
                         $('#conflict-result-content a[href="#hits-content"]').tab('show');
                         $('#conflict-result .btn:first-child').attr("href", "/html?id=" + response.file)
-                        $("#conflict-download-pdf").prop("download", `Søgning foretaget med ${response.text} d. ${response.dateTime}`);
+                        $("#conflict-download-pdf").prop("download", `Søgning foretaget med ${response.text} d. ${response.dateTime}.pdf`);
 
                         fileId = response.file;
                         searchFinish = true;
