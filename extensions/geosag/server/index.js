@@ -365,10 +365,14 @@ router.post('/api/extension/saveMatrChanges', function (req, response) {
                 // Push newly created into parts
                 Array.prototype.push.apply(parts, created)
                 // Remove null's and keys
+                parts = JSON.parse(JSON.stringify(parts))
+
+                // Remove empty objects
                 var nullLess = parts.filter(value => Object.keys(value).length !== 0);
                 parts = nullLess
-                parts.forEach(function(v){ delete v.key });
 
+                // Remove key
+                parts.forEach(function(v){ delete v.key });
 
                 // Get Information from case
                 return getDocunote('Cases/number/'+ req.body.sagsnr.toString());
