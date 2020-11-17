@@ -534,7 +534,7 @@ module.exports = {
                                     saveState: 'done',
                                     error: ''
                                 }, () => {
-                                    _self.refreshFromDocunote();
+                                    _self.refreshFromDocunote(sagsnr, user);
                                 })
                             })
                             .catch(e => {
