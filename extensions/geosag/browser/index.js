@@ -923,10 +923,16 @@ module.exports = {
                     
                         // Set Highlight
                         layer.on({
-                            mouseover: () =>{
+                            mouseover: () => {
                                 layer.setStyle(_self.matrikelHighlightStyle);
                             },
                             mouseout: () => {
+                                matrikelLayer.setStyle(_self.matrikelStyle);
+                            },
+                            popupopen: () => {
+                                layer.setStyle(_self.matrikelHighlightStyle);
+                            },
+                            popupclose: () => {
                                 matrikelLayer.setStyle(_self.matrikelStyle);
                             }
                         }); 
