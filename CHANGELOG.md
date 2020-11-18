@@ -129,7 +129,7 @@ and this project adheres to [CalVer](https://calver.org/).
 ```json
 {
   "puppeteerProcesses": {
-        "min": 2,
+        "min": 1,
         "max": 5
     }
 }
