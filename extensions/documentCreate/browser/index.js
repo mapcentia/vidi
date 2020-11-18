@@ -483,22 +483,23 @@ var documentCreateApplyFilter = function (filter) {
         for (let layerKey in filter){
             console.log('documentCreate - Apply filter to '+layerKey)
 
-            //Make sure layer is on
-            //TODO tænd laget hvis det ikke allerede er tændt! - skal være tændt før man kan ApplyFilter
-            layerTree.reloadLayer(layerKey)            
-                
+            
             //Toggle the filter
             if (filter[layerKey].columns.length == 0) {
                 // insert fixed dummy filter
                 // in order to filter out all features from layer
                 var blankfeed = {expression: "=",
-                                fieldname: "adresse",
-                                restriction: false,
-                                value: "---"};
+                fieldname: "adresse",
+                restriction: false,
+                value: "---"};
                 filter[layerKey].columns.push(blankfeed);
-
+                
                 layerTree.onApplyArbitraryFiltersHandler({ layerKey,filters: filter[layerKey]}, 't');
             } else {
+                //Make sure layer is on
+                //TODO tænd laget hvis det ikke allerede er tændt! - skal være tændt før man kan ApplyFilter
+                layerTree.reloadLayer(layerKey)            
+
                 layerTree.onApplyArbitraryFiltersHandler({ layerKey,filters: filter[layerKey]}, 't');
             }
             //Reload
@@ -1018,16 +1019,6 @@ var SetGUI_ControlState = function (state_Enum) {
  * @private
  */
 var loadAndInitFilters = function (active_state) {
-    try {    
-        //check login status
-        if (active_state === true) {   
-            buildServiceSelect(select_id);
-        }        
-    } catch (error) {
-        console.info('documentCreate - Kunne ikke bygge ServiceSelect')
-        console.log(error.stack);
-        return;
-    }
     if (firstRunner && _USERSTR.length > 0) {
         firstRunner = false;
         try {
@@ -1087,6 +1078,18 @@ var loadAndInitFilters = function (active_state) {
                 }
             }
         });  
+    }
+    if (!filterKey && !fileIdent) {
+        try {    
+            //check login status
+            if (active_state === true) {   
+                buildServiceSelect(select_id);
+            }        
+        } catch (error) {
+            console.info('documentCreate - Kunne ikke bygge ServiceSelect')
+            console.log(error.stack);
+            return;
+        }
     }
 }
 
@@ -1460,6 +1463,8 @@ module.exports = {
                 // reset select to default layer
                 if (DClayers.length > 0) {
                     $('#'+select_id+' option[value="'+config.extensionConfig.documentCreate.defaulttable+'"]').prop('selected', true);                    
+                } else {
+                    buildServiceSelect(select_id);
                 }
 
                 // reset previous search and selewcted values
