@@ -313,6 +313,7 @@ module.exports = {
     },
 
     off: function () {
+        searchOn = false;
         // Clean up
         _clearDrawItems();
         $("#advanced-info-btn").prop("checked", false);
