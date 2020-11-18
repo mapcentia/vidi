@@ -494,7 +494,7 @@ module.exports = {
                                 $(`#${elementPrefix}modal-info-body table`).bootstrapTable('resetView');
                                 // If only one hit across all layers, the click the only row
                                 if (count.hits === 1) {
-                                    $("[data-uniqueid]").trigger("click");
+                                    $("#_0 [data-uniqueid]").trigger("click");
                                     $(".show-when-multiple-hits").hide();
                                 }
                             }, 100);
