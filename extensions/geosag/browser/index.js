@@ -534,6 +534,8 @@ module.exports = {
                                     saveState: 'done',
                                     error: ''
                                 }, () => {
+                                    // Clear layer, and reload from DN
+                                    matrikelLayer.clearLayers();
                                     _self.refreshFromDocunote(sagsnr, user);
                                 })
                             })
