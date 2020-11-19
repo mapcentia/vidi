@@ -120,3 +120,13 @@ public/js/templates.js
 
 # Related to extensions & secrets
 /config/gp/
+
+# Remove built css stuff
+public/js/lib/bootstrap-material-design/dist/css/bootstrap-material-design.css
+public/js/lib/bootstrap-material-design/dist/css/bootstrap-material-design.css.map
+public/js/lib/bootstrap-material-design/dist/css/bootstrap-material-design.min.css
+public/js/lib/bootstrap-material-design/dist/css/bootstrap-material-design.min.css.map
+public/js/lib/bootstrap-material-design/dist/css/ripples.css
+public/js/lib/bootstrap-material-design/dist/css/ripples.css.map
+public/js/lib/bootstrap-material-design/less/_variables.less
+public/css/styles.css

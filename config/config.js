@@ -1048,6 +1048,10 @@ module.exports = {
         {
             "regExp": true,
             "requested": "maptv.geopartner.dk"
+        },
+        {
+            "regExp": true,
+            "requested": "docunoteapi.geopartner.dk"
         }
     ],
 
