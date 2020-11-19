@@ -55,16 +55,16 @@ var docunote = function(endpoint, method, body=undefined) {
 function getDocunote(endpoint) {
     var api = docunote(endpoint, 'GET');
 
-    console.log(api.method + ': ' + api.url + ' - Calling');
+    //console.log(api.method + ': ' + api.url + ' - Calling');
     // Return new promise 
     return new Promise(function(resolve, reject) {
         // Do async job
         request.get(api, function(err, resp, body) {
             if (err) {
-                console.log(api.method + ': ' + api.url + ' - Recieved - ERROR');
+                //console.log(api.method + ': ' + api.url + ' - Recieved - ERROR');
                 reject(err);
             } else {
-                console.log(api.method + ': ' + api.url + ' - Recieved - OK');
+                //console.log(api.method + ': ' + api.url + ' - Recieved - OK');
                 resolve(body);
             }
         });
@@ -73,16 +73,16 @@ function getDocunote(endpoint) {
 function postDocunote(endpoint, body) { 
     var api = docunote(endpoint, 'POST', body);
 
-    console.log(api.method + ': ' + api.url + ' - Calling');
+    //console.log(api.method + ': ' + api.url + ' - Calling');
     // Return new promise 
     return new Promise(function(resolve, reject) {
         // Do async job
         request.post(api, function(err, resp, body) {
             if (err) {
-                console.log(api.method + ': ' + api.url + ' - Recieved - ERROR');
+                //console.log(api.method + ': ' + api.url + ' - Recieved - ERROR');
                 reject(err);
             } else {
-                console.log(api.method + ': ' + api.url + ' - Recieved - OK');
+                //console.log(api.method + ': ' + api.url + ' - Recieved - OK');
                 resolve(body);
             }
         });
@@ -92,19 +92,20 @@ function postDocunote(endpoint, body) {
 // Checks if user is allowed to use endpoints
 function verifyUser(request) {
     return new Promise(function(resolve, reject) {
-            //TODO: Make sure only the right people can use the API!
             //console.log(request)
-            try {
-                console.log('Incomming: '+request.body.user.toString())
-                console.log('Requested: '+request.connection.remoteAddress)
-                console.log('Requested: '+request.headers['x-forwarded-for'])
-            } catch (error) {
-                console.log(error)
-            }
+            
+            //try {
+            //    console.log('Incomming: '+request.body.user.toString())
+            //    console.log('Requested: '+request.connection.remoteAddress)
+            //    console.log('Requested: '+request.headers['x-forwarded-for'])
+            //} catch (error) {
+            //    console.log(error)
+            //}
 
-            if (true) {
+            if (dn.allow_from.includes(request.headers['x-forwarded-for']) || request.connection.remoteAddress == '::1') {
                 resolve({success: true, message:'User allowed'});
             } else {
+                console.log(`GeoSag: Blocked access for ${request.connection.remoteAddress}/${request.headers['x-forwarded-for']}`)
                 reject({success: false, message:'User not allowed'});
             }
     });  
@@ -120,12 +121,12 @@ router.post('/api/extension/getExistingMatr', function (req, response) {
     // Validation block
     try {
         // User not in call
-    if (!req.body.hasOwnProperty("user")) {
-        response.status(401).json({
-            error: "User mangler i kaldet"
-        });
-        return;
-    }
+        //if (!req.body.hasOwnProperty("user")) {
+        //    response.status(401).json({
+        //        error: "User mangler i kaldet"
+        //    });
+        //    return;
+        //}
     // Sagsnummer not in call
     if (!req.body.hasOwnProperty("sagsnr")) {
         response.status(401).json({
@@ -199,12 +200,12 @@ router.post('/api/extension/getCase', function (req, response) {
     // Validation block
     try {
         // User not in call
-    if (!req.body.hasOwnProperty("user")) {
-        response.status(401).json({
-            error: "User mangler i kaldet"
-        });
-        return;
-    }
+        //if (!req.body.hasOwnProperty("user")) {
+        //    response.status(401).json({
+        //        error: "User mangler i kaldet"
+        //    });
+        //    return;
+        //}
     // Sagsnummer not in call
     if (!req.body.hasOwnProperty("sagsnr")) {
         response.status(401).json({
@@ -301,12 +302,12 @@ router.post('/api/extension/saveMatrChanges', function (req, response) {
     // Validation block
     try {
         // User not in call
-    if (!req.body.hasOwnProperty("user")) {
-        response.status(401).json({
-            error: "User mangler i kaldet"
-        });
-        return;
-    }
+        //if (!req.body.hasOwnProperty("user")) {
+        //    response.status(401).json({
+        //        error: "User mangler i kaldet"
+        //    });
+        //    return;
+        //}
     // Sagsnummer not in call
     if (!req.body.hasOwnProperty("sagsnr")) {
         response.status(401).json({

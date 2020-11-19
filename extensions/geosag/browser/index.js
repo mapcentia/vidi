@@ -92,9 +92,10 @@ var mapObj;
 var config = require('../../../config/config.js');
 
 // Get URL vars
-if (urlparser.urlVars.user) {
-    var user = urlparser.urlVars.user;
-}
+//if (urlparser.urlVars.user) {
+//    var user = urlparser.urlVars.user;
+//}
+var user = 'none';
 if (urlparser.urlVars.sagsnr) {
     var sagsnr = urlparser.urlVars.sagsnr;
 }
