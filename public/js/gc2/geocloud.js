@@ -295,6 +295,7 @@ geocloud = (function () {
                 jsonp: (this.defaults.jsonp) ? 'jsonp_callback' : false,
                 url: this.host + this.uri + '/' + this.db,
                 type: this.defaults.method,
+                timeout: 5000,
                 success: function (response) {
 
                     if (response.success === false && doNotShowAlertOnError === undefined) {

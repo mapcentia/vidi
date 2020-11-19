@@ -186,7 +186,7 @@ module.exports = {
         layers = _layers.getLayers() ? _layers.getLayers().split(",") : [];
 
         // Filter layers without pixels from
-        layers = layers.filter((key)=>{
+        layers = layers.filter((key) => {
             if (typeof moduleState.tileContentCache[key] === "boolean" && moduleState.tileContentCache[key] === true) {
                 return true;
             }
@@ -304,8 +304,8 @@ module.exports = {
                                     .setLatLng(infoClickPoint)
                                     .setContent(`<div id="info-box-pop-up"></div>`)
                                     .openOn(cloud.get().map)
-                                    .on('remove', ()=>{
-                                       _self.resetAll();
+                                    .on('remove', () => {
+                                        _self.resetAll();
                                     });
                                 $("#info-box-pop-up").html(popUpInner);
 
@@ -514,6 +514,13 @@ module.exports = {
                 key: value,
                 base64: true,
                 styleMap: styleForSelectedFeatures,
+                error: () => {
+                    $.snackbar({
+                        content: "<span>" + __("Error or timeout on") + " " + layerTitel + "</span>",
+                        htmlAllowed: true,
+                        timeout: 2000
+                    })
+                },
                 // Set _vidi_type on all vector layers,
                 // so they can be recreated as query layers
                 // after serialization
