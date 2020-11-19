@@ -752,7 +752,10 @@ geocloud = (function () {
                 url = defaults.mapRequestProxy + uri;
             }
         } else {
-            url = defaults.host + "/mapcache/" + defaults.db + "/wms";
+            url = "/mapcache/" + defaults.db + "/wms";
+            if ('mapRequestProxy' in defaults && defaults.mapRequestProxy !== false) {
+                url = defaults.mapRequestProxy + url;
+            }
             var url1 = url;
             var url2 = url;
             var url3 = url;
@@ -983,8 +986,8 @@ geocloud = (function () {
             url = defaults.host + uri;
             if ('mapRequestProxy' in defaults && defaults.mapRequestProxy !== false) {
                 // The LayerVectorGrid needs to have {x|y|z} templates in the URL, which will disappear after encodeURIComponent(), so need to store them temporary
+                url = defaults.mapRequestProxy + uri;
                 url = url.replace('{x}', 'REPLACE_THE_X').replace('{y}', 'REPLACE_THE_Y').replace('{z}', 'REPLACE_THE_Z');
-                url = defaults.mapRequestProxy + '?request=' + encodeURIComponent(url);
                 url = url.replace('REPLACE_THE_X', '{x}').replace('REPLACE_THE_Y', '{y}').replace('REPLACE_THE_Z', '{z}');
             }
         }
