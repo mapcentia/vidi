@@ -836,6 +836,9 @@ module.exports = {
                             || (layerKeyNoPrefix in moduleState.dynamicLoad && moduleState.dynamicLoad[layerKeyNoPrefix] === true)) {
                             needToReload = true;
                             let currentMapBBox = cloud.get().map.getBounds();
+                            console.log(localTypeStores[layerKey])
+                            console.log(localTypeStores)
+                            console.log(layerKey)
                             if (`buffered_bbox` in localTypeStores[layerKey]) {
                                 if (localTypeStores[layerKey].buffered_bbox === false || localTypeStores[layerKey].buffered_bbox && localTypeStores[layerKey].buffered_bbox.contains(currentMapBBox)) {
                                     needToReload = false;
@@ -1444,6 +1447,14 @@ module.exports = {
         }
 
         let trackingLayerKey = (LAYER.VECTOR + ':' + layerKey);
+        try {
+            console.log("DESTROYING");
+            $("#vector-side-table table").bootstrapTable("destroy")
+            $("#vector-side-table").remove();
+            tables[trackingLayerKey].destroy();
+        } catch (e) {
+            console.error(e)
+        }
 
         moduleState.vectorStores[trackingLayerKey] = new geocloud.sqlStore({
             map: cloud.get().map,
@@ -1472,7 +1483,6 @@ module.exports = {
                     $("#pane").css("left", "0");
                     $("#pane").css("width", "70%");
                     $("#map").css("width", "115%");
-                    $("#vector-side-table").remove();
                     $("#pane").before(`<div id="vector-side-table" style="width: 30%; float: right; background-color: white"></div>`)
                     _self.createTable(layerKey, true, "#vector-side-table", {
                         showToggle: false,
@@ -1486,7 +1496,9 @@ module.exports = {
                 if (reloadInterval && reloadInterval !== "") {
                     clearInterval(reloadIntervals[layerKey]);
                     reloadIntervals[layerKey] = setInterval(() => {
-                        _self.reloadLayer(LAYER.VECTOR + ":" + layerKey)
+                        setTimeout(()=>{
+                            _self.reloadLayer(LAYER.VECTOR + ":" + layerKey)
+                        }, 100)
 
                     }, parseInt(reloadInterval));
                 }
@@ -1756,7 +1768,6 @@ module.exports = {
      * @param {String}  layerKey      Layer key
      * @param {Boolean} forceDataLoad Specifies if the data load should be forced
      *
-     * @returns {void}
      */
     createTable(layerKey, forceDataLoad = false, element = null, conf) {
         let prop, defaults = {
@@ -1817,6 +1828,7 @@ module.exports = {
 
             localTable.loadDataInTable(true, forceDataLoad);
             tables[LAYER.VECTOR + ':' + layerKey] = localTable;
+            return localTable;
         } else {
             throw new Error(`Unable to create gc2table, as the data is not loaded yet`);
         }
