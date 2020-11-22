@@ -125,6 +125,12 @@ body {
 .tab-pane {
   padding: 6px;
 }
+.tab-pane .tab-pane {
+  padding: 0 !important;
+}
+.leaflet-popup-content .tab-pane {
+  padding: 0  !important;
+}
 #pane {
   position: fixed;
   top: 0px;
@@ -199,7 +205,6 @@ input[type="checkbox"] {
 }
 #result {
   opacity: 1 !important;
-  background-color: transparent !important;
   padding: 10px;
   position: relative;
 }
@@ -240,8 +245,28 @@ input[type="checkbox"] {
   padding: 6px 10px;
   text-decoration: none !important;
 }
-.nav-tabs > .active {
-  background-color: rgba(255, 255, 255, 0.1) !important;
+.nav-tabs {
+  background-color: #ffffff !important;
+}
+.nav-tabs > li > a {
+  color: #999 !important;
+  border-radius: 0;
+  border: 1px solid rgba(255, 255, 255, 0) !important;
+  border-bottom: 0 !important;
+}
+.nav-tabs > li.active > a {
+  border: 1px solid #ddd !important;
+  border-bottom: 0 !important;
+  color: #111 !important;
+}
+.nav-tabs > li > a:hover {
+  background-color: #eee !important;
+  border: 1px solid rgba(255, 255, 255, 0) !important;
+  border-bottom: 0 !important;
+}
+.nav-tabs > li > a:hover,
+.nav-tabs > li > a:focus {
+  color: inherit !important;
 }
 .pane input,
 .pane textarea {
@@ -622,7 +647,10 @@ inline .leaflet-control-print {
   background: #fff !important;
   font-size: 12px !important;
   line-height: 20px !important;
-  border-radius: 5px !important;
+  border-radius: 0 !important;
+}
+.leaflet-popup-content-wrapper {
+  border-radius: 1px !important;
 }
 .leaflet-popup-content-wrapper p {
   margin-top: 0 !important;
@@ -1043,6 +1071,10 @@ h4 small {
 }
 .fixed-table-body {
   height: 100%;
+}
+.fixed-table-container {
+  border-radius: 0;
+  -webkit-border-radius: 0;
 }
 .fixed-table-container thead th .th-inner {
   font-size: 12px;

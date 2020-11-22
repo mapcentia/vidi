@@ -16,6 +16,11 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Tooltip from '@material-ui/core/Tooltip';
 import CancelIcon from '@material-ui/icons/Cancel';
+import IconButton from '@material-ui/core/IconButton';
+import DeleteIcon from '@material-ui/icons/Delete';
+import PageviewIcon from '@material-ui/icons/Pageview';
+import Grid from '@material-ui/core/Grid';
+
 
 
 class MatrikelTable extends React.Component {
@@ -50,7 +55,7 @@ class MatrikelTable extends React.Component {
     render() {
         var p = this.props;
         var s = this.state;
-        var FS = '1rem'
+        var FS = '1.2rem'
         
         var cellStyle = {
             fontSize: FS
@@ -63,13 +68,15 @@ class MatrikelTable extends React.Component {
         } else {
             return (
                 <div>
-                    <Table>
+                    <Table size="small">
+                        <colgroup>
+                           <col style={{width:'10%'}}/>
+                           <col style={{width:'80%'}}/>
+                        </colgroup>
                         <TableHead>
                             <TableRow>
                                 <TableCell style={ cellStyle }></TableCell>
                                 <TableCell style={ cellStyle }>Matrikel</TableCell>
-                                <TableCell style={ cellStyle }>BFE</TableCell>
-                                <TableCell style={ cellStyle }>Kommune</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -77,10 +84,13 @@ class MatrikelTable extends React.Component {
                         //console.log(matr);
                         return (
                         <TableRow key={'geosag-matrikelliste-'+matr.ejerlavskode+matr.kommunenr+matr.matrikelnr}>
-                            <TableCell align="left" style={ cellStyle }><button onClick={this._handleDelete.bind(this, matr)}>Fjern</button><button onClick={this._handleFocus.bind(this, matr)}>Vis</button></TableCell>
+                            <TableCell align="left" style={ cellStyle }>
+                            <div style={{display: 'flex', alignItems: 'center'}}>
+                                <Grid><Tooltip title={'Vis matrikel i kortet'}><IconButton size={'small'} onClick={this._handleFocus.bind(this, matr)}><PageviewIcon /></IconButton></Tooltip></Grid>
+                                <Grid><Tooltip title={'Fjern matrikel fra listen.'}><IconButton size={'small'} onClick={this._handleDelete.bind(this, matr)}><DeleteIcon /></IconButton></Tooltip></Grid>
+                            </div>
+                            </TableCell>
                             <TableCell align="left" style={ cellStyle }>{matr.matrikelnr+', '+this.shorter(matr.ejerlavsnavn)}</TableCell>
-                            <TableCell align="left" style={ cellStyle }>{matr.bfe}</TableCell>
-                            <TableCell align="left" style={ cellStyle }>{matr.kommune}</TableCell>
                         </TableRow>)
                     })}
                         </TableBody>

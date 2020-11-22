@@ -174,6 +174,8 @@ class DAWASearch extends React.Component {
                 <ResultsList
                     results= { s.searchResults }
                     _handleResult={ _self._handleResult }
+                    q={ s.searchTerm }
+                    t={ s.triggerAtChar }
                 />
             </div>
         );
@@ -192,21 +194,16 @@ class ResultsList extends React.Component {
     render() {
         var _self = this;
 
-        var ResultListStyle = {
-            display: "block"
-        }
-        var ResultStyle = {
-            display: "block",
-            backgroundColor: 'red'
-        }
-
         if (this.props.results.length > 0) {
             return (
-                <div style={ResultListStyle}>
-                    {this.props.results.map(r => <div style={ResultStyle} onClick={_self._handleResult.bind(this, r)} key={r.tekst}>{r.tekst}</div>)}
+                <div id="geosag-results">
+                    {this.props.results.map(r => <div class="geosag-result" onClick={_self._handleResult.bind(this, r)} key={r.tekst}>{r.tekst}</div>)}
                 </div> 
             );
         } else {
+            if (this.props.q.length > 0 && this.props.q.length > this.props.t) {
+                return <p>Der er ikke fundet noget, prøv igen.</p>
+            }
             return '';
         }
     }

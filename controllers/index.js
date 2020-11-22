@@ -20,9 +20,11 @@ router.use(require('./' + backend + '/sql'));
 router.use(require('./print'));
 router.use(require('./locale'));
 router.use(require('./config'));
+router.use(require('./localConfig'));
 router.use(require('./static'));
 router.use(require('./feature'));
 router.use(require('./template'));
 router.use(require('./css'));
+router.use(require('./mergePrint'));
 
 module.exports = router;

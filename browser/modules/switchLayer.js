@@ -168,15 +168,20 @@ module.exports = module.exports = {
      * @returns {Promise}
      */
     enableRasterTile: (gc2Id, forceReload, doNotLegend, setupControls) => {
-        if (LOG) console.log(`switchLa.yer: enableRasterTile ${gc2Id}`);
-
+        if (LOG) console.log(`switchLayer: enableRasterTile ${gc2Id}`);
         return new Promise((resolve, reject) => {
             // Only one layer at a time, so using the raster tile layer identifier
             layers.incrementCountLoading(gc2Id);
             layerTree.setSelectorValue(gc2Id, LAYER.RASTER_TILE);
-            _self.enableCheckBoxesOnChildren(gc2Id);
 
-            layers.addLayer(gc2Id, [layerTree.getLayerFilterString(gc2Id)]).then(() => {
+            let layerTreeState = layerTree.getState();
+            let labelsEnabled;
+            if (typeof layerTreeState.labelSettings[gc2Id] !== "undefined" && (layerTreeState.labelSettings[gc2Id] === `false` || layerTreeState.labelSettings[gc2Id] === false)) {
+                labelsEnabled = "false";
+            } else {
+                labelsEnabled = "true";
+            }
+            layers.addLayer(gc2Id, [layerTree.getLayerFilterString(gc2Id), `labels=${labelsEnabled}`]).then(() => {
 
                 _self.checkLayerControl(gc2Id, doNotLegend, setupControls);
 
@@ -202,6 +207,7 @@ module.exports = module.exports = {
                 // Enable the corresponding UTF grid layer
                 // TODO check "mouseover" properties in fieldConf. No need to switch on if mouse over is not wanted
                 //_self.enableUTFGrid(gc2Id);
+                _self.enableCheckBoxesOnChildren(gc2Id);
                 resolve();
             }).catch(err => {
                 if (err) {
@@ -209,7 +215,7 @@ module.exports = module.exports = {
                 }
 
                 _self.loadMissingMeta(gc2Id).then(() => {
-                    // Trying to recreate the layer tree with updated meta and switch layer again                           
+                    // Trying to recreate the layer tree with updated meta and switch layer again
                     layerTree.create().then(() => {
                         // All layers are guaranteed to exist in meta
                         let currentLayers = layers.getLayers();
@@ -219,7 +225,10 @@ module.exports = module.exports = {
                             });
                         }
 
-                        _self.init(gc2Id, true).then(resolve);
+                        _self.init(gc2Id, true).then(() => {
+                            _self.enableCheckBoxesOnChildren(gc2Id);
+                            resolve();
+                        });
                     });
                 }).catch(() => {
                     console.error(`Could not add ${gc2Id} raster tile layer`);

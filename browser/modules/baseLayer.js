@@ -10,7 +10,7 @@ import noUiSlider from 'nouislider';
 
 const MODULE_NAME = `baseLayer`;
 
-import { LAYER } from './layerTree/constants';
+import {LAYER} from './layerTree/constants';
 import layerTreeUtils from './layerTree/utils';
 
 /**
@@ -46,8 +46,8 @@ let currentTwoLayersAtOnceMode = TWO_LAYERS_AT_ONCE_MODES[0];
 
 /**
  * Checks if the module state has correct structure
- * 
- * @param {Object} state Module state 
+ *
+ * @param {Object} state Module state
  */
 const validateModuleState = (state) => {
     if (`twoLayersAtOnceMode` in state && TWO_LAYERS_AT_ONCE_MODES.indexOf(state.twoLayersAtOnceMode) !== -1
@@ -152,7 +152,7 @@ module.exports = module.exports = {
     },
 
     /**
-     * 
+     *
      */
     toggleSideBySideControl: (forcedState) => {
         let result = false;
@@ -187,7 +187,7 @@ module.exports = module.exports = {
                                 } else if (forcedState.twoLayersAtOnceMode === TWO_LAYERS_AT_ONCE_MODES[1]) {
                                     $(`[name="two-layers-at-once-mode"][value="${forcedState.twoLayersAtOnceMode}"]`).trigger('click');
                                 }
-                    
+
                                 resolve();
                             }, 100);
                         }, 100);
@@ -245,7 +245,9 @@ module.exports = module.exports = {
                     layerId = bl.id;
                     layerName = bl.name;
                 } else if (typeof window.setBaseLayers[i].restrictTo === "undefined"
-                    || window.setBaseLayers[i].restrictTo.filter((n) => { return schemas.indexOf(n) != -1; }).length > 0) {
+                    || window.setBaseLayers[i].restrictTo.filter((n) => {
+                        return schemas.indexOf(n) != -1;
+                    }).length > 0) {
                     baseLayers.push(window.setBaseLayers[i].id);
                     layerId = window.setBaseLayers[i].id;
                     layerName = window.setBaseLayers[i].name;
@@ -324,23 +326,23 @@ module.exports = module.exports = {
                     if (Array.isArray(layer1)) layer1 = layer1.pop();
                     layer1._vidi_twolayersatonce_sidebyside = true;
                     layer1.addTo(cloud.get().map);
-    
-                    let layer2  = _self.addBaseLayer(activeTwoLayersModeLayer);
+
+                    let layer2 = _self.addBaseLayer(activeTwoLayersModeLayer);
                     if (Array.isArray(layer2)) layer2 = layer2.pop();
                     layer2._vidi_twolayersatonce_sidebyside = true;
                     layer2.addTo(cloud.get().map);
-    
+
                     cloud.get().map.invalidateSize();
                     sideBySideControl = L.control.sideBySide(layer1, layer2).addTo(cloud.get().map);
-    
+
                     backboneEvents.get().trigger(`${MODULE_NAME}:side-by-side-mode-change`);
                 } else if (currentTwoLayersAtOnceMode === TWO_LAYERS_AT_ONCE_MODES[1]) {
                     let layer1 = _self.addBaseLayer(activeBaseLayer);
                     if (Array.isArray(layer1)) layer1 = layer1.pop();
                     layer1._vidi_twolayersatonce_overlay = true;
                     layer1.addTo(cloud.get().map);
-    
-                    let layer2  = _self.addBaseLayer(activeTwoLayersModeLayer);
+
+                    let layer2 = _self.addBaseLayer(activeTwoLayersModeLayer);
                     if (Array.isArray(layer2)) layer2 = layer2.pop();
                     layer2._vidi_twolayersatonce_overlay = true;
                     layer2.addTo(cloud.get().map);
@@ -349,7 +351,7 @@ module.exports = module.exports = {
 
                     overlayLayer = layer2;
                     overlayLayer.setOpacity(overlayOpacity / 100);
-                    
+
                     backboneEvents.get().trigger(`${MODULE_NAME}:side-by-side-mode-change`);
                 } else {
                     throw new Error(`Invalid two layers at once mode value (${currentTwoLayersAtOnceMode})`);
@@ -441,7 +443,7 @@ module.exports = module.exports = {
                                     'max': 90
                                 }
                             });
-       
+
                             slider.noUiSlider.on(`update`, (values, handle, unencoded, tap, positions) => {
                                 let sliderValue = parseFloat(values[handle]);
                                 overlayOpacity = sliderValue;
@@ -515,7 +517,7 @@ module.exports = module.exports = {
 
     /**
      * Returns layers order in corresponding groups
-     * 
+     *
      * @return {Promise}
      */
     getSideBySideModeStatus: () => {
@@ -532,7 +534,7 @@ module.exports = module.exports = {
      * Returns current module state
      */
     getState: () => {
-        let state = { twoLayersAtOnceMode: false };
+        let state = {twoLayersAtOnceMode: false};
 
         const getLayersIdentifiers = () => {
             let layer1Id = $('input[name=baselayers]:checked').val();
@@ -598,12 +600,12 @@ module.exports = module.exports = {
      * Get the ids of the added base layer.
      * @returns {Array}
      */
-    getBaseLayer: function(){
+    getBaseLayer: function () {
         return baseLayers;
     },
 
     /**
-     * 
+     *
      * @return {Object} Layer object
      */
     addBaseLayer: function (id, options = false) {
@@ -625,22 +627,27 @@ module.exports = module.exports = {
                     result = addedLayers[0];
                     result.baseLayer = true;
                     result.id = bl.id;
+
                 } else if (typeof bl.type !== "undefined" && bl.type === "XYZ") {
-                    customBaseLayer = new L.TileLayer(bl.url, {
+                    result = cloud.get().addXYZBaselayer(bl.url, {
+                        name: bl.id,
                         attribution: bl.attribution,
-
-                        // Set zoom levels from config, if they are there, else default
-                        // to [0-18] (native), [0-20] (interpolated)
-
                         minZoom: typeof bl.minZoom !== "undefined" ? bl.minZoom : 0,
                         maxZoom: typeof bl.maxZoom !== "undefined" ? bl.maxZoom : 20,
-                        maxNativeZoom: typeof bl.maxNativeZoom !== "undefined" ? bl.maxNativeZoom : 18
+                        maxNativeZoom: typeof bl.maxNativeZoom !== "undefined" ? bl.maxNativeZoom : 18,
+                        baseLayer: true
                     });
-
-                    customBaseLayer.baseLayer = true;
-                    customBaseLayer.id = bl.id;
-
-                    result = cloud.get().addLayer(customBaseLayer, bl.name, true);
+                } else if (typeof bl.type !== "undefined" && bl.type === "wms") {
+                    result = cloud.get().addWmsBaseLayer(bl.url, {
+                        name: bl.id,
+                        layers: bl.layers,
+                        attribution: bl.attribution,
+                        format: 'image/png',
+                        transparent: false,
+                        minZoom: typeof bl.minZoom !== "undefined" ? bl.minZoom : 0,
+                        maxZoom: typeof bl.maxZoom !== "undefined" ? bl.maxZoom : 20,
+                        maxNativeZoom: typeof bl.maxNativeZoom !== "undefined" ? bl.maxNativeZoom : 18,
+                    });
                 } else {
                     result = cloud.get().addBaseLayer(bl.id, bl.db, bl.config, bl.host || null);
                 }

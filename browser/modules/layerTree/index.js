@@ -38,6 +38,7 @@ import mustache from 'mustache';
 
 import LayerFilter from './LayerFilter';
 import LoadStrategyToggle from './LoadStrategyToggle';
+import LabelSettingToggle from './LabelSettingToggle';
 import {
     validateFilters,
     EXPRESSIONS_FOR_STRINGS,
@@ -74,6 +75,7 @@ let MarkupGenerator = require('./MarkupGenerator');
 let markupGeneratorInstance = new MarkupGenerator();
 
 import {GROUP_CHILD_TYPE_LAYER, GROUP_CHILD_TYPE_GROUP, LayerSorting} from './LayerSorting';
+import sq from "../../../bower_components/momentjs/src/locale/sq";
 
 let layerSortingInstance = new LayerSorting();
 let latestFullTreeStructure = false;
@@ -130,13 +132,16 @@ let moduleState = {
     virtualLayers: [],
     tileContentCache: {},
     editorFilters: {},
-    editorFiltersActive: {}
+    editorFiltersActive: {},
+    fitBoundsActiveOnLayers: {},
+    labelSettings: {}
 };
 
 const marked = require('marked');
 
 let filterComp = {};
 let lastFilter;
+let utils;
 
 /**
  *
@@ -153,6 +158,7 @@ module.exports = {
         switchLayer = o.switchLayer;
         backboneEvents = o.backboneEvents;
         extensions = o.extensions;
+        utils = o.utils;
 
         offlineModeControlsManager = new OfflineModeControlsManager(meta);
 
@@ -360,6 +366,11 @@ module.exports = {
                         $(container).find('.js-layer-settings-opacity').hide(0);
                     };
 
+                    const hideLabels = () => {
+                        $(container).find(`.js-toggle-labels`).hide(0);
+                        $(container).find('.js-layer-settings-labels').hide(0);
+                    };
+
                     const hideLoadStrategy = () => {
                         $(container).find(`.js-toggle-load-strategy`).hide(0);
                         $(container).find('.js-layer-settings-load-strategy').hide(0);
@@ -401,6 +412,7 @@ module.exports = {
                         // Load strategy and filters should be kept opened after setLayerState()
                         if ($(container).attr(`data-last-layer-type`) !== desiredSetupType) {
                             hideOpacity();
+                            hideLabels();
                         }
 
                         if (layerIsEnabled) {
@@ -416,6 +428,7 @@ module.exports = {
                             hideOfflineMode();
                             hideLoadStrategy();
                             hideOpacity();
+                            hideLabels();
                             hideTableView();
                             hideSearch();
                         }
@@ -430,6 +443,7 @@ module.exports = {
                         if (layerIsEnabled) {
                             $(container).find('.gc2-add-feature').css(`visibility`, `visible`);
                             $(container).find(`.js-toggle-opacity`).show(0);
+                            $(container).find(`.js-toggle-labels`).show(0);
                             $(container).find(`.js-toggle-filters`).show(0);
                             $(container).find(`.js-toggle-filters-number-of-filters`).show(0);
                             $(container).find(`.js-toggle-search`).show(0);
@@ -437,6 +451,7 @@ module.exports = {
                             hideAddFeature();
                             hideFilters();
                             hideOpacity();
+                            hideLabels();
                             hideSearch();
                         }
 
@@ -455,6 +470,7 @@ module.exports = {
                         $(container).find('.js-layer-settings-filters').hide(0);
                         if (desiredSetupType === LAYER.VECTOR_TILE) {
                             hideOpacity();
+                            hideLabels();
                             hideFilters();
                         }
                     } else if (desiredSetupType === LAYER.WEBGL) {
@@ -464,6 +480,7 @@ module.exports = {
                         hideLoadStrategy();
                         hideTableView();
                         hideOpacity();
+                        hideLabels();
                         hideSearch();
                     } else {
                         throw new Error(`${desiredSetupType} control setup is not supported yet`);
@@ -591,6 +608,8 @@ module.exports = {
         let state = {
             order: moduleState.layerTreeOrder,
             arbitraryFilters: moduleState.arbitraryFilters,
+            fitBoundsActiveOnLayers: moduleState.fitBoundsActiveOnLayers,
+            labelSettings: moduleState.labelSettings,
             virtualLayers: preparedVirtualLayers,
             predefinedFilters: moduleState.predefinedFilters,
             activeLayers,
@@ -598,7 +617,7 @@ module.exports = {
             opacitySettings,
             dynamicLoad: moduleState.dynamicLoad,
             editorFilters: moduleState.editorFilters,
-            editorFiltersActive: moduleState.editorFiltersActive
+            editorFiltersActive: moduleState.editorFiltersActive,
         };
         return state;
     },
@@ -608,7 +627,6 @@ module.exports = {
      * @param filters
      */
     applyFilters: (filters) => {
-        console.log("filters", filters)
         moduleState.arbitraryFilters = filters;
     },
 
@@ -933,6 +951,8 @@ module.exports = {
                                 if (forcedState.opacitySettings) moduleState.opacitySettings = forcedState.opacitySettings;
                                 if (forcedState.predefinedFilters) moduleState.predefinedFilters = forcedState.predefinedFilters;
                                 if (forcedState.arbitraryFilters) moduleState.arbitraryFilters = forcedState.arbitraryFilters;
+                                //if (forcedState.fitBoundsActiveOnLayers) moduleState.fitBoundsActiveOnLayers = forcedState.fitBoundsActiveOnLayers;
+                                if (forcedState.labelSettings) moduleState.labelSettings = forcedState.labelSettings;
                                 if (forcedState.dynamicLoad) moduleState.dynamicLoad = forcedState.dynamicLoad;
                                 if (forcedState.editorFilters) moduleState.editorFilters = forcedState.editorFilters;
                                 if (forcedState.editorFiltersActive) moduleState.editorFiltersActive = forcedState.editorFiltersActive;
@@ -947,6 +967,14 @@ module.exports = {
                                     moduleState.dynamicLoad[key] = true;
                                 } else {
                                     moduleState.dynamicLoad[key] = false;
+                                }
+                            }
+
+                            for (let key in moduleState.labelSettings) {
+                                if (moduleState.labelSettings[key] === `true` || moduleState.labelSettings[key] === true) {
+                                    moduleState.labelSettings[key] = true;
+                                } else {
+                                    moduleState.labelSettings[key] = false;
                                 }
                             }
 
@@ -1172,6 +1200,8 @@ module.exports = {
                 };
 
                 applySetting(`arbitraryFilters`, {});
+                applySetting(`fitBoundsActiveOnLayers`, {});
+                applySetting(`labelSettings`, {});
                 applySetting(`predefinedFilters`, {});
                 applySetting(`editorFilters`, {});
                 applySetting(`editorFiltersActive`, {});
@@ -1448,7 +1478,7 @@ module.exports = {
                         showToggle: false,
                         showExport: false,
                         showColumns: false,
-                        cardView: true,
+                        cardView: false,
                         height: null,
                         tableBodyHeight: "100vh"
                     });
@@ -1540,8 +1570,8 @@ module.exports = {
                     // If there is no handler for specific layer, then display attributes only
                     layer.on("click", function (e) {
 
-                        // Multi select disabled
-                        if (typeof window.vidiConfig.vectorMultiSelect === "undefined" || window.vidiConfig.vectorMultiSelect === false) {
+                        // Cross Multi select disabled
+                        if (typeof window.vidiConfig.crossMultiSelect === "undefined" || window.vidiConfig.crossMultiSelect === false) {
                             _self.displayAttributesPopup([{
                                 feature: feature,
                                 layer: layer,
@@ -1550,11 +1580,40 @@ module.exports = {
                             return
                         }
 
-                        // multi select enabled
+                        // Cross multi select enabled
+                        let coord3857 = utils.transform("EPSG:4326", "EPSG:3857", [e.latlng.lng, e.latlng.lat]);
+                        let wkt = "POINT(" + coord3857[0] + " " + coord3857[1] + ")";
+                        let intersectingFeatures = [];
+                        // Get active raster tile layers, so we can check if database should be queried
+                        let activelayers = layers.getMapLayers() ? layers.getLayers().split(",") : [];
+                        let activeTilelayers = activelayers.filter(layer => !layer.startsWith(LAYER.VECTOR + ':') && !layer.startsWith(LAYER.VECTOR_TILE + ':') && !layer.startsWith(LAYER.WEBGL + ':'))
+                        // Filter tiles layer without pixels
+                        activeTilelayers = activeTilelayers.filter((key) => {
+                            if (typeof moduleState.tileContentCache[key] === "boolean" && moduleState.tileContentCache[key] === true) {
+                                return true;
+                            }
+                        })
+                        if (activeTilelayers.length > 0) {
+                            sqlQuery.init(qstore, wkt, "3857", (store) => {
+                                setTimeout(() => {
+                                    sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + store.key, store.geoJSON.features);
+                                    store.layer.eachLayer((layer) => {
+                                        intersectingFeatures.push({
+                                            feature: layer.feature,
+                                            layer: layer,
+                                            layerKey: store.key
+                                        });
+                                    })
+                                    layers.decrementCountLoading("_vidi_sql_" + store.id);
+                                    backboneEvents.get().trigger("doneLoading:layers", "_vidi_sql_" + store.id);
+                                    if (layers.getCountLoading() === 0) {
+                                        _self.displayAttributesPopup(intersectingFeatures, e);
+                                    }
+                                }, 200)
+                            }, null, [coord3857[0], coord3857[1]]);
+                        }
                         let clickBounds = L.latLngBounds(e.latlng, e.latlng);
                         let distance = 10 * MAP_RESOLUTIONS[cloud.get().getZoom()];
-                        let intersectingFeatures = [];
-                        let intersectingLayers = [];
                         let mapObj = cloud.get().map;
                         for (let l in mapObj._layers) {
                             let overlay = mapObj._layers[l];
@@ -1583,9 +1642,12 @@ module.exports = {
                                         console.log(e);
                                     }
                                 }
+                                // No active raster tile layers - open the pop-up
+                                if (activeTilelayers.length === 0) {
+                                    _self.displayAttributesPopup(intersectingFeatures, e);
+                                }
                             }
                         }
-                        _self.displayAttributesPopup(intersectingFeatures, e, '');
                     });
                 }
             },
@@ -1728,6 +1790,8 @@ module.exports = {
                 fillOpacity: 0.2
             });
 
+            let parsedMeta = _self.parseLayerMeta(meta.getMetaByKey(layerKey, false));
+
             let localTable = gc2table.init({
                 el: tableContainerId + ` table`,
                 ns: tableContainerId,
@@ -1745,7 +1809,8 @@ module.exports = {
                 tableBodyHeight: defaults.tableBodyHeight,
                 locale: window._vidiLocale.replace("_", "-"),
                 template: template,
-                styleSelected
+                styleSelected,
+                setZoom: parsedMeta?.zoom_on_table_click ? parsedMeta.zoom_on_table_click : false
             });
 
             localTable.loadDataInTable(true, forceDataLoad);
@@ -1807,9 +1872,13 @@ module.exports = {
                 if (tmpl) {
                     // Convert Markdown in text fields
                     let metaDataKeys = meta.getMetaDataKeys();
+                    let hasSummary = typeof parsedMeta?.accordion_summery !== "undefined" && parsedMeta?.accordion_summery !== "";
+                    let summaryPrefix = typeof parsedMeta?.accordion_summery_prefix !== "undefined" && parsedMeta?.accordion_summery_prefix !== "" ? parsedMeta?.accordion_summery_prefix : null;
+                    let title = metaDataKeys[layerKey].f_table_title ? metaDataKeys[layerKey].f_table_title : metaDataKeys[layerKey].f_table_name;
+                    title = hasSummary ? summaryPrefix ? `<span style="color: #AAAAAA">${summaryPrefix}</span>&nbsp;&nbsp;${properties[parsedMeta.accordion_summery]}` : properties[parsedMeta.accordion_summery] : title;
                     for (const property in metaDataKeys[layerKey].fields) {
                         if (metaDataKeys[layerKey].fields[property].type === "text") {
-                            properties[property] = marked(properties[property]);
+                            //properties[property] = marked(properties[property]);
                         }
                     }
                     //properties.text1 = marked(properties.text1);
@@ -1823,17 +1892,17 @@ module.exports = {
                         accordion += `<div class="panel panel-default vector-feature-info-panel" id="vector-feature-info-panel-${randText}" style="box-shadow: none;border-radius: 0; margin-bottom: 0">
                                         <div class="panel-heading" role="tab" style="padding: 8px 0px 8px 15px;border-bottom: 1px white solid">
                                             <h4 class="panel-title">
-                                                <a style="display: block; color: black" class="accordion-toggle js-toggle-feature-panel" data-toggle="collapse" data-parent="#layers" href="#collapse${randText}">${layerKey}</a>
+                                                <a style="display: block; color: black" class="feature-info-accordion-toggle accordion-toggle js-toggle-feature-panel" data-toggle="collapse" data-parent="#layers" href="#collapse${randText}">${title}</a>
                                             </h4>
                                         </div>
-                                        <ul class="list-group" id="group-${randText}" role="tabpanel"><div id="collapse${randText}" class="accordion-body collapse" style="padding: 3px 8px 3px 8px">${renderedText}</div></ul>
+                                        <ul class="list-group" id="group-${randText}" role="tabpanel"><div id="collapse${randText}" class="feature-info-accordion-body accordion-body collapse" style="padding: 3px 8px 3px 8px">${renderedText}</div></ul>
                                     </div>`;
                     } else {
                         console.log(`Feature info disabled for ${layerKey}`)
                     }
                 }
             } catch (e) {
-                console.info("Error in pop-up template for: " + layerKey);
+                console.info("Error in pop-up template for: " + layerKey, e);
             }
 
             if (count > 0) {
@@ -1847,7 +1916,13 @@ module.exports = {
                     }).setLatLng(event.latlng).setContent(`<div>
                                                                 ${additionalControls}
                                                                 <div style="margin-right: 5px; margin-left: 2px">${accordion}</div>
-                                                            </div>`).openOn(cloud.get().map);
+                                                            </div>`).openOn(cloud.get().map)
+                        .on('remove', () => {
+                            sqlQuery.resetAll();
+                        });
+                    $(".feature-info-accordion-toggle").on("click", () => {
+                        $('.feature-info-accordion-body').collapse("hide")
+                    })
 
                 }
             }
@@ -2886,6 +2961,30 @@ module.exports = {
                         _self._selectIcon($(layerContainer).find('.js-toggle-opacity'));
                         $(layerContainer).find('.js-layer-settings-opacity').toggle();
                     });
+
+                    // Labels
+                    let componentContainerId = `layer-settings-labels-${layerKey}`;
+                    let value = true;
+                    if (layerKey in moduleState.labelSettings && [true, false].indexOf(moduleState.labelSettings[layerKey]) !== -1) {
+                        value = moduleState.labelSettings[layerKey];
+                    }
+                    $(layerContainer).find('.js-layer-settings-labels').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
+                    setTimeout(() => {
+                        if (document.getElementById(componentContainerId)) {
+                            ReactDOM.render(<LabelSettingToggle
+                                    layerKey={layerKey}
+                                    initialValue={value}
+                                    onChange={_self.onChangeLabelsHandler}/>,
+                                document.getElementById(componentContainerId));
+                            $(layerContainer).find('.js-layer-settings-labels').hide(0);
+                            $(layerContainer).find(`.js-toggle-labels`).click(() => {
+                                _self._selectIcon($(layerContainer).find('.js-toggle-labels'));
+                                $(layerContainer).find('.js-layer-settings-labels').toggle();
+                            });
+                        } else {
+                            console.error(`Unable to find the labels control container`);
+                        }
+                    }, 10);
                 }
 
                 if (isVirtual === false) {
@@ -2940,6 +3039,13 @@ module.exports = {
                         isFilterImmutable = typeof parsedMeta.filter_immutable === "boolean" ? parsedMeta.filter_immutable : false;
                     }
 
+                    let localFitBoundsActiveOnLayer = {};
+                    if (moduleState.fitBoundsActiveOnLayers && layerKey in moduleState.fitBoundsActiveOnLayers) {
+                        localFitBoundsActiveOnLayer = moduleState.fitBoundsActiveOnLayers[layerKey];
+                    } else {
+                        localFitBoundsActiveOnLayer = false;
+                    }
+
                     let activeFilters = _self.getActiveLayerFilters(layerKey);
                     $(layerContainer).find(`.js-toggle-filters-number-of-filters`).text(activeFilters.length);
                     setTimeout(() => {
@@ -2952,8 +3058,11 @@ module.exports = {
                                     predefinedFilters={localPredefinedFilters}
                                     disabledPredefinedFilters={moduleState.predefinedFilters[layerKey] ? moduleState.predefinedFilters[layerKey] : []}
                                     arbitraryFilters={localArbitraryfilters}
+                                    fitBoundsActiveOnLayer={localFitBoundsActiveOnLayer}
                                     onApplyPredefined={_self.onApplyPredefinedFiltersHandler}
                                     onApplyArbitrary={_self.onApplyArbitraryFiltersHandler}
+                                    onDisableArbitrary={_self.onDisableArbitraryFiltersHandler}
+                                    onApplyFitBounds={_self.onApplyFitBoundsFiltersHandler}
                                     onApplyEditor={_self.onApplyEditorFiltersHandler}
                                     onActivateEditor={_self.onActivateEditorFiltersHandler}
                                     onChangeEditor={_self.onChangeEditorFiltersHandler}
@@ -3146,10 +3255,53 @@ module.exports = {
         _self.reloadLayer(LAYER.VECTOR + ':' + layerKey);
     },
 
+    onChangeLabelsHandler: ({layerKey, labelsAreEnabled}) => {
+        moduleState.labelSettings[layerKey] = labelsAreEnabled;
+        let correspondingLayer = meta.getMetaByKey(layerKey);
+        //backboneEvents.get().trigger(`${MODULE_NAME}:dynamicLoadLayersChange`);
+        //_self.reloadLayer(LAYER.RASTER_TILE + ':' + layerKey);
+        _self.reloadLayerOnLabelChange(layerKey, labelsAreEnabled);
+
+    },
+
     onApplyArbitraryFiltersHandler: ({layerKey, filters}, forcedReloadLayerType = false) => {
         validateFilters(filters);
         moduleState.arbitraryFilters[layerKey] = filters;
         _self.reloadLayerOnFiltersChange(layerKey, forcedReloadLayerType);
+    },
+
+    onDisableArbitraryFiltersHandler: (layerKey) => {
+        moduleState.fitBoundsActiveOnLayers[layerKey] = false;
+    },
+
+    onApplyFitBoundsFiltersHandler: (layerKey) => {
+        let metaData = meta.getMetaByKey(layerKey);
+        let whereClause = _self.getActiveLayerFilters(layerKey)[0];
+        let sql = `SELECT 
+                    ST_Xmin(ST_Extent(extent)) AS txmin,
+                    ST_Xmax(ST_Extent(extent)) AS txmax,
+                    ST_Ymin(ST_Extent(extent)) AS tymin,
+                    ST_Ymax(ST_Extent(extent)) AS tymax
+                FROM (SELECT ST_astext(ST_Transform(ST_setsrid(ST_Extent(${metaData.f_geometry_column}),${metaData.srid}),4326)) AS extent FROM ${layerKey} WHERE ${whereClause}) as foo`;
+        let q = {
+            q: base64.encode(sql),
+            base64: true
+        }
+        $.ajax({
+            url: '/api/sql/' + urlparser.db,
+            contentType: 'application/x-www-form-urlencoded',
+            scriptCharset: "utf-8",
+            dataType: 'json',
+            type: 'POST',
+            data: q,
+            success: function (response) {
+                let e = response.features[0].properties;
+                cloud.get().map.fitBounds([[e.tymin, e.txmin], [e.tymax, e.txmax]], {maxZoom: 18})
+            },
+            error: function (response) {
+            }
+        });
+        moduleState.fitBoundsActiveOnLayers[layerKey] = true;
     },
 
     onApplyPredefinedFiltersHandler: ({layerKey, filters}, forcedReloadLayerType = false) => {
@@ -3170,6 +3322,9 @@ module.exports = {
         moduleState.editorFiltersActive[layerKey] = active;
     },
 
+    reloadLayerOnLabelChange: (layerKey) => {
+        _self.reloadLayer(layerKey, false, false, false);
+    },
 
     reloadLayerOnFiltersChange: (layerKey, forcedReloadLayerType = false) => {
         if (layerKey.indexOf(`:`) > -1) {

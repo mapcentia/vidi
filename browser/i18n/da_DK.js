@@ -85,7 +85,9 @@ module.exports = {
         "Get as PDF": "Hent som PDF",
         "Conflicts": "Konflikter",
         "No Conflicts": "Ingen konflikter",
-
+        "Conflict with selected": "Konflikt med valgte",
+        "Conflict with all": "Konflikt med alle",
+        
         "Print": "Print",
         "Search places": "Søg på steder",
         "Activate advanced query": "Aktivér avanceret forespørgsel",
@@ -224,6 +226,10 @@ module.exports = {
         "Layer is visible": "Laget er synligt",
         "Parents": "Forældre",
         "Children": "Børn",
+        "Back": "Tilbage",
+        "Fit bounds to filter": "Sæt udsnit til filter",
+        "Labels": "Labels",
+        "Show labels": "Vis labels",
 
         // Base layers
         "Side-by-side mode": "Dobbelt baggrundskort",

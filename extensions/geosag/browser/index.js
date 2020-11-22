@@ -23,7 +23,12 @@ import { isNull, isSet } from 'lodash';
 import { getClassSet } from 'react-bootstrap/lib/utils/bootstrapUtils';
 import MatrikelTable from './MatrikelTable';
 import DAWASearch from './DAWASearch';
-
+import SaveIcon from '@material-ui/icons/Save';
+import IconButton from '@material-ui/core/IconButton';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import CheckIcon from '@material-ui/icons/Check';
+import ErrorIcon from '@material-ui/icons/Error';
+import Tooltip from '@material-ui/core/Tooltip';
 
 /**
  *
@@ -87,9 +92,10 @@ var mapObj;
 var config = require('../../../config/config.js');
 
 // Get URL vars
-if (urlparser.urlVars.user) {
-    var user = urlparser.urlVars.user;
-}
+//if (urlparser.urlVars.user) {
+//    var user = urlparser.urlVars.user;
+//}
+var user = 'none';
 if (urlparser.urlVars.sagsnr) {
     var sagsnr = urlparser.urlVars.sagsnr;
 }
@@ -202,11 +208,11 @@ module.exports = {
                     return true
                 }
 
-                var getExistingMatr = function(caseId){
+                var getExistingMatr = function(sagsnr){
                     // Get Existing parts from Matrikelliste
                     return new Promise(function (resolve, reject) {
                         let obj = {
-                            caseId: caseId,
+                            sagsnr: sagsnr,
                             user: user
                         }
                         let opts = {
@@ -219,6 +225,35 @@ module.exports = {
                         }
                         // Do async job and resolve
                         fetch('/api/extension/getExistingMatr', opts)
+                            .then(r => {
+                                const data = r.json();
+                                resolve(data)
+                            })
+                            .catch(e => {
+                                console.log(e)
+                                reject(e)
+                            });
+                    })
+                }
+
+                var saveMatrChanges = function(sagsnr, matrs){
+                    // Saves changes to Docunote
+                    return new Promise(function (resolve, reject) {
+                        let obj = {
+                            sagsnr: sagsnr,
+                            matrs: matrs,
+                            user: user
+                        }
+                        let opts = {
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json'
+                            },
+                            method: 'POST',
+                            body: JSON.stringify(obj)
+                        }
+                        // Do async job and resolve
+                        fetch('/api/extension/saveMatrChanges', opts)
                             .then(r => {
                                 const data = r.json();
                                 resolve(data)
@@ -359,25 +394,26 @@ module.exports = {
                         super(props);
 
                         this.state = {
-                            loading: false,
                             allow: false,
                             case: '',
                             matrList: [],
                             existingMatrList: [],
-                            error: ''
+                            error: '',
+                            saveState: ''
                         };
 
-                        this.readContents = this.readContents.bind(this)
-                        this.deleteMatrikel = this.deleteMatrikel.bind(this)
-                        this.focusMatrikel = this.focusMatrikel.bind(this)
-                        this.addMatrikel = this.addMatrikel.bind(this)
-                        this.findMatrikel = this.findMatrikel.bind(this)
-                        this.getCustomLayer = this.getCustomLayer.bind(this)
-                        this.matrikelCoordTransf = this.matrikelCoordTransf.bind(this)
-                        this.matrikelOnEachFeature = this.matrikelOnEachFeature.bind(this)
-                        this.matrikelStyle = this.matrikelStyle.bind(this)
-                        this.zoomToMatrikel = this.zoomToMatrikel.bind(this)
-                        this.unifyMatr = this.unifyMatr.bind(this)
+                        this.readContents = this.readContents.bind(this);
+                        this.deleteMatrikel = this.deleteMatrikel.bind(this);
+                        this.focusMatrikel = this.focusMatrikel.bind(this);
+                        this.addMatrikel = this.addMatrikel.bind(this);
+                        this.findMatrikel = this.findMatrikel.bind(this);
+                        this.getCustomLayer = this.getCustomLayer.bind(this);
+                        this.matrikelCoordTransf = this.matrikelCoordTransf.bind(this);
+                        this.matrikelOnEachFeature = this.matrikelOnEachFeature.bind(this);
+                        this.matrikelStyle = this.matrikelStyle.bind(this);
+                        this.zoomToMatrikel = this.zoomToMatrikel.bind(this);
+                        this.unifyMatr = this.unifyMatr.bind(this);
+                        this.hasChanges = this.hasChanges.bind(this);
                     }
 
                     /**
@@ -401,55 +437,16 @@ module.exports = {
                             console.log(`Starting ${exId}`)
 
                             // If neither is set, error out
-
                             console.log(`user: ${user}`)
                             console.log(`sagsnr: ${sagsnr}`)
-
-
-
                             if (user == undefined && sagsnr == undefined) {
                                 me.setState({
                                     allow: false,
                                     error: "Mangler bruger og journalnummer."
                                 })
                             } else {
-                                // Get case
-                                getCase(sagsnr)
-                                .then(r => {
-                                    console.log(r)
-                                    me.setState({
-                                        case: r
-                                    })
-                                    return getExistingMatr(r.caseId)
-                                })
-                                .then(r => {
-                                    //console.log(r)
-                                    me.setState({
-                                        allow: true,
-                                        error: '',
-                                        existingMatrList: r.matrikler
-                                    })
-                                    var jobs = []
-                                    // Add existing
-                                    r.matrikler.forEach(function(obj) {
-                                        // Add to list also
-                                        jobs.push(me.addMatrikel(obj, true));
-                                    })
-                                    return Promise.all(jobs);
-                                })
-                                .then(j => {
-                                    //console.log(j)
-                                })
-                                .catch(e => {
-                                    console.log(e)
-                                    me.setState({
-                                        allow: false,
-                                        error: e
-                                    })
-                                })
+                                me.refreshFromDocunote(sagsnr, user)
                             }
-
-
 
                             // Click event - info
                             mapObj.on("click", function (e) {
@@ -499,6 +496,99 @@ module.exports = {
                         var _self = this;                            
                     }
 
+                    hasChanges() {
+                        const _self = this;
+                        let l1 = _self.state.existingMatrList;
+                        let l2 = _self.state.matrList;
+
+                        if (l1.length != l2.length) {
+                            // Do we even have the same number?
+                            return true;
+                        } else {
+                            l1.forEach(f => {
+                                // Are existing a part of the list?
+                                let k = f.synchronizeIdentifier;
+                                if (!l2.find(x => x.key == f )) {
+                                    return true;
+                                };
+                            })
+                            l2.forEach(f => {
+                                // Are new part of existing?
+                                let k = f.key;
+                                if (!l2.find(x => x.key == f )) {
+                                    return true;
+                                };
+                            })
+                        };
+                    };
+
+                    saveChangesHandler(id) {
+                        var _self = this;
+
+                        _self.setState({
+                            saveState: 'saving',
+                            error: ''
+                        }, () => {
+                            saveMatrChanges(sagsnr, id)
+                            .then(r => {
+                                _self.setState({
+                                    saveState: 'done',
+                                    error: ''
+                                }, () => {
+                                    // Clear layer, and reload from DN
+                                    matrikelLayer.clearLayers();
+                                    _self.refreshFromDocunote(sagsnr, user);
+                                })
+                            })
+                            .catch(e => {
+                                console.log(e)
+                                _self.setState({
+                                    saveState: 'error',
+                                    error: e.toString()
+                                })
+                            })
+                        })
+                    }
+
+                    refreshFromDocunote(sagsnr, user) {
+                        var _self = this; 
+                        // Get case
+                        getCase(sagsnr)
+                        .then(r => {
+                            console.log(r)
+                            _self.setState({
+                                case: r
+                            })
+                            return getExistingMatr(r.caseId)
+                        })
+                        .then(r => {
+                            //console.log(r)
+                            _self.setState({
+                                allow: true,
+                                error: '',
+                                existingMatrList: r.matrikler
+                            })
+                            var jobs = []
+                            // Add existing
+                            r.matrikler.forEach(function(obj) {
+                                // Add to list also
+                                jobs.push(_self.addMatrikel(obj, true));
+                            })
+                            return Promise.all(jobs);
+                        })
+                        .then(j => {
+                            this.zoomToLayer();
+                            //console.log(j)
+                        })
+                        .catch(e => {
+                            console.log(e)
+                            _self.setState({
+                                allow: false,
+                                error: e
+                            })
+                        })
+                    }
+
                     deleteMatrikel(id){
                         const _self = this;
                         // Remove from Map - we dont want that - keep as cache'ish
@@ -507,7 +597,8 @@ module.exports = {
 
                         // Remove from state
                         _self.setState({
-                            matrList: _self.state.matrList.filter(el => el.key != id.key)
+                            matrList: _self.state.matrList.filter(el => el.key != id.key),
+                            saveState: ''
                         });
                     }
 
@@ -524,12 +615,21 @@ module.exports = {
                         cloud.get().map.fitBounds(layer.getBounds(), {padding: [padding, padding], maxZoom: maxZoom});
                     }
 
+                    zoomToLayer() {
+                        const _self = this;
+                        if (_self.state.matrList.length > 0) {
+                            cloud.get().map.fitBounds(matrikelLayer.getBounds());
+                        } else {
+                            // This should have been the extents set in GC2 admin, but i couldn't be arsed.
+                            cloud.get().map.panTo(new L.LatLng(56.0751,8.7561), 7);
+                        }  
+                    }
+
                     triggerMatrikel(key, event = 'click') {
                         const _self = this;
                         var layer = _self.getCustomLayer(key);
                         // Trigger click event on matrikel
                         layer.getLayers()[0].openPopup();
-
                     }
 
                     getCustomLayer(key) {
@@ -645,7 +745,8 @@ module.exports = {
                             let prev = _self.state.matrList
                             prev.push(id)
                             _self.setState({
-                                matrList: prev
+                                matrList: prev,
+                                saveState: ''
                             })
                         }
                     }
@@ -825,10 +926,16 @@ module.exports = {
                     
                         // Set Highlight
                         layer.on({
-                            mouseover: () =>{
+                            mouseover: () => {
                                 layer.setStyle(_self.matrikelHighlightStyle);
                             },
                             mouseout: () => {
+                                matrikelLayer.setStyle(_self.matrikelStyle);
+                            },
+                            popupopen: () => {
+                                layer.setStyle(_self.matrikelHighlightStyle);
+                            },
+                            popupclose: () => {
                                 matrikelLayer.setStyle(_self.matrikelStyle);
                             }
                         }); 
@@ -880,7 +987,7 @@ module.exports = {
                      */
                     render() {
                         const _self = this;
-                        const s = _self.state
+                        const s = _self.state;
                         //console.log(s)
 
                         const error = {
@@ -895,12 +1002,23 @@ module.exports = {
                             backgroundColor: '#eda72d'
                         }
 
+                        var saveButton = () => {
+                            switch(s.saveState) {
+                                case 'saving':
+                                    return <Tooltip title={'Gemmer i på sagen'}><CircularProgress color={"primary"}/></Tooltip>
+                                case 'done':
+                                    return <Tooltip title={'Alt OK'}><CheckIcon /></Tooltip>
+                                default:
+                                    return <Tooltip title={'Gem ændringer'}><IconButton color={"primary"} onClick={_self.saveChangesHandler.bind(this, s.matrList)}><SaveIcon /></IconButton></Tooltip>
+                            }
+                        }
+
                         if (s.allow) {
                             return (
                                 <div role = "tabpanel" >
                                     <div className = "form-group" >
                                         {s.error.length > 0 && <div style={error} >{s.error}</div>}
-                                        <h4>Journalnummer: {s.case.number}</h4>
+                                        <h4>Journalnummer: {s.case.number} {_self.hasChanges() && saveButton()}</h4>
                                         <p>{s.case.title}</p>
                                         <DAWASearch 
                                             _handleResult = {_self.findMatrikel}
