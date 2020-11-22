@@ -34,5 +34,6 @@ const proxifyRequest = (req, response) => {
 };
 
 router.all('/api/wms/:db/:schema', proxifyRequest);
+router.all('/api/mapcache/:db/wms', proxifyRequest);
 
 module.exports = router;

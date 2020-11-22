@@ -5,6 +5,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
 ## [UNRELEASED]
+### Fixed
+- MapCache layer now works. Both raster and vector tiles.
+- Timeout (5.000ms) on sqlStore. Feature info will now handle errors or cancels (e.g. due to timeout) on SQL requests and a "toast" will inform the user.
+- `crossMultiSelect` will always show vector feature info if a simultaneously raster SQL request fails or timeouts.
+- Memory leak fixed when reloading vector layers.
+- Interval reload of vector layers are done with the `load` method instead of switching the layer off and on.
+- Update of interval reloaded vector layers happens only if data has changed.
+
+## [2020.11.0] - 2020-18-11
 ### Added
 - The awesome Leaflet plugin Leaflet.markercluster is added, so by setting the meta property `use_clustering` to `true` clustering can be enabled on single point vector layers. No other setting for Leaflet.markercluster is available for now.
 - With the `cssFiles` config it's possible to load external css file from the `configUrl`. E.g.:
@@ -129,7 +138,7 @@ and this project adheres to [CalVer](https://calver.org/).
 ```json
 {
   "puppeteerProcesses": {
-        "min": 2,
+        "min": 1,
         "max": 5
     }
 }

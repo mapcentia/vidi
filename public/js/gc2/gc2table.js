@@ -359,6 +359,11 @@ var gc2table = (function () {
             if (customOnLoad) {
                 store.onLoad = customOnLoad;
             }
+
+            // Unbind event so no references are left to object
+            object.unbind("clearSelection_" + uid);
+            object.unbind("selected_" + uid);
+            alert();
         };
 
         assignEventListeners = function () {
@@ -477,7 +482,8 @@ var gc2table = (function () {
             uid: uid,
             store: store,
             moveEndOff: moveEndOff,
-            moveEndOn: moveEndOn
+            moveEndOn: moveEndOn,
+            bootStrapTable : $(el).bootstrapTable
         };
     };
     return {

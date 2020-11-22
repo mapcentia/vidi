@@ -430,7 +430,7 @@ module.exports = {
             useCache = false;
         }
         // Detect if layer is protected and route it through backend if live WMS is used (Mapcache does not need authorization)
-        let mapRequestProxy = useCache ? false : urlparser.hostname + `/api`;
+        let mapRequestProxy = urlparser.hostname + `/api`;
         return {useCache, mapRequestProxy};
     }
 };
