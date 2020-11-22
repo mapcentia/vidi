@@ -10,6 +10,8 @@ and this project adheres to [CalVer](https://calver.org/).
 - Timeout (5.000ms) on sqlStore. Feature info will now handle errors or cancels (e.g. due to timeout) on SQL requests and a "toast" will inform the user.
 - `crossMultiSelect` will always show vector feature info if a simultaneously raster SQL request fails or timeouts.
 - Memory leak fixed when reloading vector layers.
+- Interval reload of vector layers are done with the `load` method instead of switching the layer off and on.
+- Update of interval reloaded vector layers happens only if data has changed.
 
 ## [2020.11.0] - 2020-18-11
 ### Added

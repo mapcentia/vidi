@@ -1447,14 +1447,6 @@ module.exports = {
         }
 
         let trackingLayerKey = (LAYER.VECTOR + ':' + layerKey);
-        try {
-            console.log("DESTROYING");
-            $("#vector-side-table table").bootstrapTable("destroy")
-            $("#vector-side-table").remove();
-            tables[trackingLayerKey].destroy();
-        } catch (e) {
-            console.error(e)
-        }
 
         moduleState.vectorStores[trackingLayerKey] = new geocloud.sqlStore({
             map: cloud.get().map,
@@ -1477,9 +1469,10 @@ module.exports = {
             sql,
             clustering: layerTreeUtils.getIfClustering(meta.parseLayerMeta(layerKey)),
             onLoad: (l) => {
-                let tableElement = meta.parseLayerMeta(layerKey)?.show_table_on_side;
                 let reloadInterval = meta.parseLayerMeta(layerKey)?.reload_interval;
-                if (tableElement) {
+                let tableElement = meta.parseLayerMeta(layerKey)?.show_table_on_side;
+                // Create side table once
+                if (tableElement && !$('#vector-side-table').length) {
                     $("#pane").css("left", "0");
                     $("#pane").css("width", "70%");
                     $("#map").css("width", "115%");
@@ -1496,10 +1489,7 @@ module.exports = {
                 if (reloadInterval && reloadInterval !== "") {
                     clearInterval(reloadIntervals[layerKey]);
                     reloadIntervals[layerKey] = setInterval(() => {
-                        setTimeout(()=>{
-                            _self.reloadLayer(LAYER.VECTOR + ":" + layerKey)
-                        }, 100)
-
+                        l.load();
                     }, parseInt(reloadInterval));
                 }
                 layers.decrementCountLoading(l.id);

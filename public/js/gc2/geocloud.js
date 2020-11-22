@@ -249,6 +249,8 @@ geocloud = (function () {
         this.featuresLimitReached = false;
 
         this.buffered_bbox = false;
+        this.currentGeoJsonHash = null;
+        this.dataHasChanged = false;
 
         this.load = function (doNotShowAlertOnError) {
             try {
@@ -306,10 +308,22 @@ geocloud = (function () {
                         if (response.features !== null) {
                             response = me.transformResponse(response, me.id);
 
-                            me.geoJSON = response;
-                            if (dynamicQueryIsUsed) {
-                                me.layer.clearLayers();
+                            let clone = JSON.parse(JSON.stringify(response));
+                            delete clone.peak_memory_usage;
+                            delete clone._execution_time;
+                            let newHash = md5(JSON.stringify(clone));
+                            if (me.currentGeoJsonHash && me.currentGeoJsonHash === newHash) {
+                                console.log("Hashes match. Not reloading");
+                                me.dataHasChanged = false;
+                                return
                             }
+                            me.geoJSON = response;
+                            me.currentGeoJsonHash = newHash
+                            me.dataHasChanged = true;
+
+                            //if (dynamicQueryIsUsed) {
+                                me.layer.clearLayers();
+                            //}
 
                             if (me.maxFeaturesLimit !== false && me.onMaxFeaturesLimitReached !== false && parseInt(me.maxFeaturesLimit) > 0) {
                                 if (me.geoJSON.features.length >= parseInt(me.maxFeaturesLimit)) {
@@ -339,8 +353,10 @@ geocloud = (function () {
                     }
                 },
                 error: this.defaults.error.bind(this),
-                complete: function () {
-                    me.onLoad(me);
+                complete: function (e) {
+                    if (me.dataHasChanged) {
+                        me.onLoad(me);
+                    }
                 }
             });
 
@@ -2069,7 +2085,7 @@ geocloud = (function () {
             var l = new L.TileLayer(url, conf);
             l.id = conf.name;
             l.baseLayer = true;
-            lControl.addBaseLayer(l, conf.name) ;
+            lControl.addBaseLayer(l, conf.name);
             this.showLayer(conf.name)
             return [l];
 
@@ -2079,7 +2095,7 @@ geocloud = (function () {
             var l = new L.TileLayer.WMS(url, conf);
             l.id = conf.name;
             l.baseLayer = true;
-            lControl.addBaseLayer(l, conf.name) ;
+            lControl.addBaseLayer(l, conf.name);
             this.showLayer(conf.name)
             return [l];
         }
