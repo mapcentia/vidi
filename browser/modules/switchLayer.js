@@ -497,6 +497,21 @@ module.exports = module.exports = {
 
                 layers.reorderLayers();
             } else {
+                if (name.startsWith(LAYER.VECTOR + ':')) {
+                    let tables = layerTree.getTables();
+                    let stores = layerTree.getStores();
+                    stores[name].destroy();
+                    if (typeof tables[name] === "object") {
+                        try {
+                            $("#table_view-" + name.split(":")[1].replace('.', '_') + " .bootstrap-table").remove();
+                            tables[name].destroy();
+                            delete tables[name];
+                        } catch (e) {
+                            console.error(e)
+                        }
+                    }
+                    stores[name].geoJSON = null;
+                }
                 _self.uncheckLayerControl(name, doNotLegend, setupControls);
                 //Remove UTF grid layer
                 _self._removeUtfGrid(name);

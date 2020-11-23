@@ -355,6 +355,7 @@ var gc2table = (function () {
                     }
                 });
             });
+            moveEndOff();
 
             if (customOnLoad) {
                 store.onLoad = customOnLoad;
@@ -363,7 +364,11 @@ var gc2table = (function () {
             // Unbind event so no references are left to object
             object.unbind("clearSelection_" + uid);
             object.unbind("selected_" + uid);
-            alert();
+
+            $(el).bootstrapTable('removeAll')
+            $(el).bootstrapTable('destroy')
+            originalLayers = null;
+            store = null;
         };
 
         assignEventListeners = function () {
