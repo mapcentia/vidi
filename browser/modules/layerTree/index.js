@@ -840,6 +840,7 @@ module.exports = {
                             || (layerKeyNoPrefix in moduleState.dynamicLoad && moduleState.dynamicLoad[layerKeyNoPrefix] === true)) {
                             needToReload = true;
                             let currentMapBBox = cloud.get().map.getBounds();
+                            // TODO bug the layer is available as webGL
                             console.log(localTypeStores[layerKey])
                             console.log(localTypeStores)
                             console.log(layerKey)
@@ -3121,7 +3122,11 @@ module.exports = {
                     // Table view
                     $(layerContainer).find(`.js-toggle-table`).click(() => {
                         let tableContainerId = `#table_view-${layerKey.replace(".", "_")}`;
-                        if ($(tableContainerId + ` table`).length === 1) $(tableContainerId + ` table`).empty();
+                        // If table is open, then destroy it so it doesn't leak
+                        if ($(tableContainerId + ` table`).length > 0) {
+                            tables[LAYER.VECTOR + ':' + layerKey].destroy();
+                            $(tableContainerId + ` .bootstrap-table`).remove();
+                        }
                         _self.createTable(layerKey, true);
 
                         _self._selectIcon($(layerContainer).find('.js-toggle-table'));

@@ -355,6 +355,7 @@ var gc2table = (function () {
                     }
                 });
             });
+            moveEndOff();
 
             if (customOnLoad) {
                 store.onLoad = customOnLoad;
