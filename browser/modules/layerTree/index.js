@@ -244,6 +244,10 @@ module.exports = {
         return moduleState.vectorStores;
     },
 
+    getTables: () => {
+        return tables;
+    },
+
     /**
      * Returns WebGL stores
      *

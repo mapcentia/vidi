@@ -151,6 +151,7 @@ geocloud = (function () {
 
     // Base class for stores
     storeClass = function () {
+        var parentThis = this;
         //this.defaults = STOREDEFAULTS;
         this.hide = function () {
             this.layer.setVisibility(false);
@@ -198,6 +199,7 @@ geocloud = (function () {
                     this.layer.clearLayers();
                     break;
             }
+            parentThis.geoJSON = null;
         };
         this.isEmpty = function () {
             switch (MAPLIB) {
@@ -317,12 +319,12 @@ geocloud = (function () {
                                 me.dataHasChanged = false;
                                 return
                             }
-                            me.geoJSON = response;
+                            me.geoJSON = clone;
                             me.currentGeoJsonHash = newHash
                             me.dataHasChanged = true;
 
                             //if (dynamicQueryIsUsed) {
-                                me.layer.clearLayers();
+                            me.layer.clearLayers();
                             //}
 
                             if (me.maxFeaturesLimit !== false && me.onMaxFeaturesLimitReached !== false && parseInt(me.maxFeaturesLimit) > 0) {
@@ -339,14 +341,14 @@ geocloud = (function () {
 
                             if (!me.clustering) {
                                 // In this case me.layer is L.geoJson
-                                me.layer.addData(response);
+                                me.layer.addData(clone);
                             } else {
                                 // In this case me.layer is L.markerClusterGroup
-                                me.geoJsonLayer.addData(response);
+                                me.geoJsonLayer.addData(clone);
                                 me.layer.addLayer(me.geoJsonLayer);
                             }
                             me.layer.defaultOptions = me.layer.options; // So layer can be reset
-
+                            response = null;
                         } else {
                             me.geoJSON = null;
                         }
@@ -366,6 +368,13 @@ geocloud = (function () {
         this.abort = function () {
             xhr.abort();
         }
+        this.destroy = function () {
+            this.reset();
+            xhr = {
+                abort: function () {/* stub */
+                }
+            };
+        };
     };
 
     /**
