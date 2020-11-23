@@ -335,10 +335,18 @@ const storeErrorHandler = (response)=>{
     if (response && response.statusText === `abort`) {
         // If the request was aborted, then it was sanctioned by Vidi, so no need to inform user
     } else if (response && response.responseJSON) {
-        alert(response.responseJSON.message);
+        $.snackbar({
+            content: `<span>${response.responseJSON.message}</span>`,
+            htmlAllowed: true,
+            timeout: 6000
+        });
         console.error(response.responseJSON.message);
     } else {
-        alert(`Error occured`);
+        $.snackbar({
+            content: `<span>Error occurred</span>`,
+            htmlAllowed: true,
+            timeout: 4000
+        });
         console.error(response);
     }
 };
