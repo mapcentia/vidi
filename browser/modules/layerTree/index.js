@@ -3123,12 +3123,13 @@ module.exports = {
                     $(layerContainer).find(`.js-toggle-table`).click(() => {
                         let tableContainerId = `#table_view-${layerKey.replace(".", "_")}`;
                         // If table is open, then destroy it so it doesn't leak
-                        if ($(tableContainerId + ` table`).length > 0) {
+                        if ($(tableContainerId + ` .bootstrap-table`).length > 0) {
                             tables[LAYER.VECTOR + ':' + layerKey].destroy();
+                            delete tables[LAYER.VECTOR + ':' + layerKey];
                             $(tableContainerId + ` .bootstrap-table`).remove();
+                        } else {
+                            _self.createTable(layerKey, true);
                         }
-                        _self.createTable(layerKey, true);
-
                         _self._selectIcon($(layerContainer).find('.js-toggle-table'));
                         $(layerContainer).find('.js-layer-settings-table').toggle();
 
