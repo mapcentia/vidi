@@ -360,10 +360,20 @@ var gc2table = (function () {
                     }
                 });
             });
+            moveEndOff();
 
             if (customOnLoad) {
                 store.onLoad = customOnLoad;
             }
+
+            // Unbind event so no references are left to object
+            object.unbind("clearSelection_" + uid);
+            object.unbind("selected_" + uid);
+
+            $(el).bootstrapTable('removeAll')
+            $(el).bootstrapTable('destroy')
+            originalLayers = null;
+            store = null;
         };
 
         assignEventListeners = function () {
@@ -482,7 +492,8 @@ var gc2table = (function () {
             uid: uid,
             store: store,
             moveEndOff: moveEndOff,
-            moveEndOn: moveEndOn
+            moveEndOn: moveEndOn,
+            bootStrapTable : $(el).bootstrapTable
         };
     };
     return {

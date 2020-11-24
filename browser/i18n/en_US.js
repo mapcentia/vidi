@@ -38,6 +38,7 @@ module.exports = {
         "From drawing": "From drawing",
         "From object in layer": "From object in layer",
         "Waiting to start": "Waiting to start",
+        "Error or timeout on": "Error or timeout on",
 
         // Drawing
         "Cancel drawing": "Cancel drawing",

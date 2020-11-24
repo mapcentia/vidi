@@ -38,6 +38,7 @@ module.exports = {
         "From drawing": "Fra tegning",
         "From object in layer": "Fra objekt i lag",
         "Waiting to start": "Venter på at starte",
+        "Error or timeout on": "Fejl eller timeout på",
 
         // Drawing
         "Cancel drawing": " Afbryd tegning",
