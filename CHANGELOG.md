@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
 ## [UNRELEASED]
+### Added
+- Print can now output to PNG. If multiple pages when the PNG files are added to a zip file.
+
 ### Fixed
 - MapCache layer now works. Both raster and vector tiles.
 - Timeout (5.000ms) on sqlStore. Feature info will now handle errors or cancels (e.g. due to timeout) on SQL requests and a "toast" will inform the user.
@@ -163,7 +166,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - All numeric Postgres types are now handled correct in the editor.
 - Puppeteer processes are now destroyed, if an exception is thrown during print. This prevents leak of processes.
 - Re-acquirement of a Puppeteer process is done if timeout, so the print will eventual be finished.
-- Puppeteer processes will be destroyed after 60 seconds. This prevents hanging processes, which blocks further prints.
+- Puppeteer processes will be destroyed after 60 seconds no matter what. This prevents hanging processes, which could blocks further prints.
 
 ## [2020.2.0]
 ### Added
