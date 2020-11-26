@@ -185,6 +185,24 @@ module.exports = {
         conflictSearch.makeSearch("Fra tegning", null, null, true);
     },
 
+    makeConflictSearchWithSelected: () => {
+        if (!selectedDrawing) {
+            alert("Vælg en tegning")
+            return;
+        }
+        // Switch on Conflict
+        $('#main-tabs a[href="#conflict-content"]').trigger('click');
+        conflictSearch.makeSearch("Fra tegning", null, selectedDrawing, true);
+    },
+
+
+
+    makeConflictSearchWithAll: () => {
+        // Switch on Conflict
+        $('#main-tabs a[href="#conflict-content"]').trigger('click');
+        conflictSearch.makeSearch("Fra tegning", null, null, true);
+    },
+
     off: () => {
         // Unbind events
         cloud.get().map.off('draw:created');

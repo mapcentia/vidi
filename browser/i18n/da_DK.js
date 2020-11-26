@@ -38,6 +38,7 @@ module.exports = {
         "From drawing": "Fra tegning",
         "From object in layer": "Fra objekt i lag",
         "Waiting to start": "Venter på at starte",
+        "Error or timeout on": "Fejl eller timeout på",
 
         // Drawing
         "Cancel drawing": " Afbryd tegning",
@@ -87,7 +88,7 @@ module.exports = {
         "No Conflicts": "Ingen konflikter",
         "Conflict with selected": "Konflikt med valgte",
         "Conflict with all": "Konflikt med alle",
-        
+        "Prints completed": "Antal print udført",
         "Print": "Print",
         "Search places": "Søg på steder",
         "Activate advanced query": "Aktivér avanceret forespørgsel",
@@ -99,8 +100,10 @@ module.exports = {
         "Activate drawing tools": "Aktivér tegneværktøjer",
         "Activate print tools": "Aktivér printværktøjer",
         "Make PDF": "Lav PDF",
+        "Make PNG": "Lav PNG",
         "Download": "Download",
         "Open PDF": "Åben PDF",
+        "Open": "Åben",
         "Open HTML page": "Åben HTML side",
         "Scale": "Skala",
         "Template": "Skabelon",

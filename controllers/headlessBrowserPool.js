@@ -32,24 +32,43 @@ const startupParameters = {
     //userDataDir: '/tmp/chromeSession'
 };
 
-module.exports = {
-    pool: genericPool.createPool({
-        create() {
-            return puppeteer.launch(startupParameters);
-        },
-        destroy(browser) {
-            return browser.close();
-        },
-        validate(browser) {
-            return Promise.race([
-                new Promise(res => setTimeout(() => res(false), 1500)),
-                browser.version().then(_ => true).catch(_ => false)
-            ])
-        },
-    }, {
-        min: puppeteerProcesses.min,
-        max: puppeteerProcesses.max,
-        testOnBorrow: true,
-        //acquireTimeoutMillis: 15000
-    })
-};
+const pool = genericPool.createPool({
+    create() {
+        return puppeteer.launch(startupParameters);
+    },
+    destroy(browser) {
+        return browser.close();
+    },
+    validate(browser) {
+        return Promise.race([
+            new Promise(res => setTimeout(() => res(false), 1500)),
+            browser.version().then(_ => true).catch(_ => false)
+        ])
+    },
+}, {
+    min: puppeteerProcesses.min,
+    max: puppeteerProcesses.max,
+    testOnBorrow: true,
+    acquireTimeoutMillis: 500, // Should be bigger that it takes to start a headless browser
+    evictionRunIntervalMillis: 5000,
+    numTestsPerEvictionRun: 3, // Default
+    maxWaitingClients: 5,
+    idleTimeoutMillis: 30000
+
+})
+
+setInterval(() => {
+    if (pool.size === pool.max) {
+        let poolInfo = {
+            "pool.max": pool.max,
+            "pool.size": pool.size,
+            "pool.available": pool.available,
+            "pool.borrowed": pool.borrowed,
+            "pool.pending": pool.pending,
+            "pool.spareResourceCapacity": pool.spareResourceCapacity
+        }
+        console.log(poolInfo)
+    }
+}, 5000)
+
+module.exports = {pool};

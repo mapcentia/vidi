@@ -77,6 +77,7 @@
   "dependencies": {
     "@material-ui/core": "^3.9.4",
     "@material-ui/icons": "^3.0.2",
+    "adm-zip": "^0.5.0",
     "array-move": "^2.2.2",
     "arrive": "^2.3.1",
     "async": "^2.6.3",

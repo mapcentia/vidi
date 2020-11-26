@@ -890,7 +890,6 @@ var dom = `
                                 <a href="bootstrap-elements.html" class="btn btn-primary btn-raised dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></a>
                                 <ul class="dropdown-menu">
                                     <li><a href="javascript:void(0)" id="conflict-download-pdf">Download PDF</a></li>
-                                    <li><a target="_blank" href="javascript:void(0)" id="conflict-open-html">Open HTML page</a></li>
                                 </ul>
                             </div>
                         </fieldset>

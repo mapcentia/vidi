@@ -114,10 +114,17 @@ module.exports = {
 
         backboneEvents.get().on("end:print", function (response) {
             $("#get-print-fieldset").prop("disabled", false);
-            $("#download-pdf, #open-pdf").attr("href", "/tmp/print/pdf/" + response.key + ".pdf");
+            if (response.format === "pdf") {
+                $("#download-pdf, #open-pdf").attr("href", "/tmp/print/pdf/" + response.key + ".pdf");
+            } else if (response.format === "png"){
+                $("#download-pdf, #open-pdf").attr("href", "/tmp/print/png/" + response.key + ".png");
+            } else {
+                $("#download-pdf, #open-pdf").attr("href", "/tmp/print/png/" + response.key + ".zip");
+            }
             $("#download-pdf").attr("download", response.key);
             $("#open-html").attr("href", response.url);
             $("#start-print-btn").button('reset');
+            $(".dropdown-toggle.start-print-btn").prop("disabled", false);
             // GeoEnviron
             console.log("GEMessage:LaunchURL:" + urlparser.uriObj.protocol() + "://" + urlparser.uriObj.host() + "/tmp/print/pdf/" + response.key + ".pdf");
         });
@@ -125,6 +132,14 @@ module.exports = {
         $("#start-print-btn").on("click", function () {
             if (_self.print()) {
                 $(this).button('loading');
+                $(".dropdown-toggle.start-print-btn").prop("disabled", true);
+                $("#get-print-fieldset").prop("disabled", true);
+            }
+        });
+        $("#start-print-png-btn").on("click", function () {
+            if (_self.print("end:print", null, true)) {
+                $("#start-print-btn").button('loading');
+                $(".dropdown-toggle.start-print-btn").prop("disabled", true);
                 $("#get-print-fieldset").prop("disabled", true);
             }
         });
@@ -158,7 +173,7 @@ module.exports = {
 
     off: function () {
         _cleanUp(true);
-        $("#print-form :input, #start-print-btn, #select-scale").prop("disabled", true);
+        $("#print-form :input, .start-print-btn, #select-scale").prop("disabled", true);
     },
 
     setCallBack: function (fn) {
@@ -171,7 +186,7 @@ module.exports = {
     on: function () {
         let numOfPrintTmpl = 0;
         alreadySetFromState = false;
-        $("#print-form :input, #start-print-btn, #select-scale").prop("disabled", false);
+        $("#print-form :input, .start-print-btn, #select-scale").prop("disabled", false);
         $("#print-tmpl").empty();
         $("#print-size").empty();
         $("#print-orientation").empty();
@@ -304,9 +319,9 @@ module.exports = {
         }, 5);
     },
 
-    print: (endEventName = "end:print", customData) => {
+    print: (endEventName = "end:print", customData, png = false) => {
         return new Promise((resolve, reject) => {
-            state.bookmarkState(customData).then(response => {
+            state.bookmarkState(customData, png).then(response => {
                 backboneEvents.get().trigger(endEventName, response);
                 callBack(response.responseJSON);
                 resolve(response);
