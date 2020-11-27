@@ -74,22 +74,89 @@ module.exports = {
     },
 
     init: () => {
+        function dragstart_handler(ev) {
+            // Add the target element's id to the data transfer object
+            ev.dataTransfer.setData("text/plain", ev.target.id);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            // Get the element by id
+            const element = document.getElementById("p1");
+            // Add the ondragstart event listener
+            element.addEventListener("dragstart", dragstart_handler);
+        });
+
+        $("#drag-test").on("dragend", (e) => {
+            event.preventDefault();
+            let map = cloud.get().map;
+            console.log(e)
+            let conPoint = map.containerPointToLayerPoint([e.screenX, e.screenY]);
+            let coord = map.mouseEventToLatLng(e);
+            console.log(coord)
+
+            var icon = L.divIcon({
+                iconSize: new L.Point(100, 100),
+                html: `<div class="pointer">
+                        <div class="marker" style="padding: 10px; box-sizing: border-box; background-color: #0d47a1">
+                            TEST
+                        </div>
+                    </div>`
+            });
+            var marker = L.marker(coord, {icon: icon, draggable: true}).addTo(map);
+            var img = $('.pointer');
+
+            var offset = img.offset();
+            var mouseDown = false;
+
+            function mouse(evt) {
+                if (mouseDown == true) {
+                    var center_x = (offset.left) + (img.width() / 2);
+                    var center_y = (offset.top) + (img.height() / 2);
+                    var mouse_x = evt.pageX;
+                    var mouse_y = evt.pageY;
+                    var radians = Math.atan2(mouse_x - center_x, mouse_y - center_y);
+                    var degree = (radians * (180 / Math.PI) * -1) + 90;
+                    console.log(degree)
+                    img.css('-moz-transform', 'rotate(' + degree + 'deg)');
+                    img.css('-webkit-transform', 'rotate(' + degree + 'deg)');
+                    img.css('-o-transform', 'rotate(' + degree + 'deg)');
+                    img.css('-ms-transform', 'rotate(' + degree + 'deg)');
+                }
+            }
+
+            img.mousedown(function (e) {
+                marker.dragging.disable();
+                map.dragging.disable();
+                map.touchZoom.disable();
+
+
+                mouseDown = true;
+                $(document).mousemove(mouse);
+            });
+            $(document).mouseup(function (e) {
+                marker.dragging.enable();
+                map.dragging.enable();
+                map.touchZoom.enable();
+
+                mouseDown = false;
+            })
+
+        })
+        $("body").bind("ondrop", (event) => {
+            event.preventDefault();
+            alert("drop")
+        })
+
+        $("body").bind("ondragover", (event) => {
+
+            event.preventDefault();
+            console.log("over")
+        })
 
         $("#_draw_download_geojson").click(function () {
             _self.download();
         });
 
-        backboneEvents.get().on(`reset:all`, () => {
-            _self.resetState();
-        });
-
-        backboneEvents.get().on(`off:all`, () => {
-            _self.control(false);
-            _self.off();
-        });
-
-        backboneEvents.get().on(`on:${MODULE_NAME}`, () => { _self.control(true); });
-        backboneEvents.get().on(`off:${MODULE_NAME}`, () => { _self.control(false); });
 
         state.listenTo(MODULE_NAME, _self);
         state.listen(MODULE_NAME, `update`);
@@ -190,22 +257,18 @@ module.exports = {
                 draw: {
                     polygon: {
                         allowIntersection: true,
-                        shapeOptions: {
-                        },
+                        shapeOptions: {},
                         showArea: true
                     },
                     polyline: {
                         metric: true,
-                        shapeOptions: {
-                        }
+                        shapeOptions: {}
                     },
                     rectangle: {
-                        shapeOptions: {
-                        }
+                        shapeOptions: {}
                     },
                     circle: {
-                        shapeOptions: {
-                        }
+                        shapeOptions: {}
                     },
                     marker: true,
                     circlemarker: true
@@ -281,7 +344,8 @@ module.exports = {
 
                     var text = prompt(__("Enter a text for the marker or cancel to add without text"), "");
                     if (text !== null) {
-                        drawLayer.bindTooltip(text, {permanent: true}).on("click", () => {}).openTooltip();
+                        drawLayer.bindTooltip(text, {permanent: true}).on("click", () => {
+                        }).openTooltip();
                         drawLayer._vidi_marker_text = text;
                     } else {
                         drawLayer._vidi_marker_text = null;
@@ -337,14 +401,12 @@ module.exports = {
                         v.feature.properties.distance = L.GeometryUtil.readableDistance(v._mRadius, true);
                         v.updateMeasurements();
 
-                    }
-                    else if (typeof v._icon !== "undefined") {
+                    } else if (typeof v._icon !== "undefined") {
                     } else if (v.feature.properties.distance !== null) {
                         v.feature.properties.distance = drawTools.getDistance(v);
                         v.updateMeasurements();
 
-                    }
-                    else if (v.feature.properties.area !== null) {
+                    } else if (v.feature.properties.area !== null) {
                         v.feature.properties.area = drawTools.getArea(v);
                         v.updateMeasurements();
 
@@ -355,13 +417,19 @@ module.exports = {
                 table.loadDataInTable(false, true);
             });
 
-            var po1 = $('.leaflet-draw-section:eq(0)').popover({content: __("Use these tools for creating markers, lines, areas, squares and circles."), placement: "left"});
+            var po1 = $('.leaflet-draw-section:eq(0)').popover({
+                content: __("Use these tools for creating markers, lines, areas, squares and circles."),
+                placement: "left"
+            });
             po1.popover("show");
             setTimeout(function () {
                 po1.popover("hide");
             }, 2500);
 
-            var po2 = $('.leaflet-draw-section:eq(1)').popover({content: __("Use these tools for editing existing drawings."), placement: "left"});
+            var po2 = $('.leaflet-draw-section:eq(1)').popover({
+                content: __("Use these tools for editing existing drawings."),
+                placement: "left"
+            });
             po2.popover("show");
             setTimeout(function () {
                 po2.popover("hide");
@@ -403,7 +471,7 @@ module.exports = {
             drawnItems = JSON.stringify(serializeLayers.serializeDrawnItems(true));
         }
 
-        return { drawnItems };
+        return {drawnItems};
     },
 
     /**
@@ -427,9 +495,9 @@ module.exports = {
 
     /**
      * Recreates drawnings on the map
-     * 
+     *
      * @param {Object} parr Features to draw
-     * 
+     *
      * @return {void}
      */
     recreateDrawnings: (parr, enableControl = true) => {
@@ -489,7 +557,8 @@ module.exports = {
 
                     // Add label
                     if (m._vidi_marker_text) {
-                        g.bindTooltip(m._vidi_marker_text, {permanent: true}).on("click", () => {}).openTooltip();
+                        g.bindTooltip(m._vidi_marker_text, {permanent: true}).on("click", () => {
+                        }).openTooltip();
                     }
 
                     // Adding vidi-specific properties
@@ -584,7 +653,7 @@ module.exports = {
                 formatArea: utils.formatArea
             });
         } else {
-            if (type !== 'marker' && type !== 'circlemarker' ) {
+            if (type !== 'marker' && type !== 'circlemarker') {
                 l.hideMeasurements();
             }
         }
@@ -800,7 +869,7 @@ module.exports = {
             if (L.DomUtil.hasClass(svg, 'defs')) {
                 defsNode = svg.getElementById('defs');
 
-            } else{
+            } else {
                 L.DomUtil.addClass(svg, 'defs');
                 defsNode = L.SVG.create('defs');
                 defsNode.setAttribute('id', 'defs');
