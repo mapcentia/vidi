@@ -72,7 +72,7 @@ class StateSnapshotsDashboard extends React.Component {
      */
     getSnapshotMeta() {
         let result = {};
-        let queryParameters = this.props.urlparser.uriObj.search(true);
+        let queryParameters = this.props.urlparser.urlVars;
         if (`config` in queryParameters && queryParameters.config) {
             result.config = queryParameters.config;
         }
@@ -355,7 +355,7 @@ class StateSnapshotsDashboard extends React.Component {
 
             // Detecting not prioritized parameters from current URL
             let highPriorityConfigString = false, lowPriorityConfigString = false;
-            let queryParameters = this.props.urlparser.uriObj.search(true);
+            let queryParameters = this.props.urlparser.urlVars;
             if (`config` in queryParameters && queryParameters.config) {
                 lowPriorityConfigString = queryParameters.config;
             }
