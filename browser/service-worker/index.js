@@ -19,11 +19,6 @@ const CONFIG = require('../../config/config.js');
 const {detect} = require('detect-browser');
 const browser = detect();
 
-/**
- * Parsing URLs
- */
-const uriJs = require('urijs');
-
 const localforage = require('localforage');
 
 /**
@@ -407,12 +402,16 @@ const normalizeTheURLForFetch = (event) => {
              */
             const processGETRequest = (clonedRequest) => {
                 let mappedObject = {};
-                let parsedQuery = new uriJs(clonedRequest.url);
-                let queryParameters = parsedQuery.search(true);
-                if (`q` in queryParameters && queryParameters.q) {
-                    mappedObject.q = queryParameters.q;
+                let url = new URL(clonedRequest.url)
+                let searchParams = new URLSearchParams(url.search);
+                let urlVars = {};
+                for (let p of searchParams) {
+                    urlVars[p[0]] = p[1];
                 }
-
+                console.log("GET in SW", urlVars);
+                if (`q` in urlVars && urlVars.q) {
+                    mappedObject.q = urlVars.q;
+                }
                 proceedWithRequestData(clonedRequest.method, mappedObject, cleanedRequestURL);
             };
 

@@ -32,7 +32,6 @@ var pageSize;
 var printingOrientation;
 var backboneEvents;
 var legend;
-var moment = require('moment');
 var meta;
 var state;
 var _self = false;
@@ -40,6 +39,14 @@ var callBack = () => {
 };
 var alreadySetFromState = false;
 var paramsFromDb;
+
+import dayjs from 'dayjs';
+import advancedFormat from "dayjs/plugin/advancedFormat";
+require('dayjs/locale/da')
+dayjs.extend(advancedFormat)
+// Set locale for date/time string
+var lc = window._vidiLocale.split("_")[0];
+dayjs.locale(lc);
 
 /**
  * @private
@@ -150,10 +157,6 @@ module.exports = {
         });
 
         cloud.get().map.addLayer(printItems);
-        // Set locale for date/time string
-        var lc = window._vidiLocale.split("_")[0];
-        require('moment/locale/da');
-        moment.locale(lc);
     },
 
     off: function () {
@@ -567,8 +570,8 @@ module.exports = {
             comment: encodeURIComponent($("#print-comment").val()),
             legend: $("#add-legend-btn").is(":checked") ? "inline" : "none",
             header: encodeURIComponent($("#print-title").val()) || encodeURIComponent($("#print-comment").val()) ? "inline" : "none",
-            dateTime: moment().format('Do MMMM YYYY, H:mm'),
-            date: moment().format('Do MMMM YYYY'),
+            dateTime: dayjs().format('Do MMMM YYYY, H:mm'),
+            date: dayjs().format('Do MMMM YYYY'),
             metaData: meta.getMetaData(),
             px: config.print.templates[tmpl][pageSize][printingOrientation].mapsizePx[0],
             py: config.print.templates[tmpl][pageSize][printingOrientation].mapsizePx[1],

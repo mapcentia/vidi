@@ -56,8 +56,6 @@ var uri = null;
 
 let _self = false;
 
-let uriJs = require('urijs');
-
 
 /**
  *
@@ -279,10 +277,12 @@ module.exports = {
                 if (layer === layerKey) {
                     let qgs;
                     if (layerDescription.wmssource && layerDescription.wmssource.includes("qgis_mapserv")) {
-                        let uriObj = new uriJs(layerDescription.wmssource);
-                        let queryStr = uriObj.search();
-                        let parsedQuery = uriJs.parseQuery(queryStr)
-                        qgs = btoa(parsedQuery.map);
+                        let searchParams = new URLSearchParams((new URL(layerDescription.wmssource)).search);
+                        let urlVars = {};
+                        for (let p of searchParams) {
+                            urlVars[p[0]] = p[1];
+                        }
+                        qgs = btoa(urlVars.map);
                         additionalURLParameters.push(`qgs=${qgs}`);
                     }
                     var isBaseLayer = !!layerDescription.baselayer;

@@ -12,6 +12,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - Memory leak fixed when reloading vector layers.
 - Interval reload of vector layers are done with the `load` method instead of switching the layer off and on.
 - Update of interval reloaded vector layers happens only if data has changed.
+- Use native URL API instead of uriJs module.
 
 ## [2020.11.0] - 2020-18-11
 ### Added

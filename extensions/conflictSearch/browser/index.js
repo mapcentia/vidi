@@ -6,8 +6,6 @@
 
 'use strict';
 
-var _ = require("underscore");
-
 /**
  *
  * @type {*|exports|module.exports}
