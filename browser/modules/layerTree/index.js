@@ -32,7 +32,7 @@ const uuidv4 = require('uuid/v4');
 var React = require('react');
 var ReactDOM = require('react-dom');
 
-import moment from 'moment';
+import dayjs from 'dayjs';
 import noUiSlider from 'nouislider';
 import mustache from 'mustache';
 
@@ -47,8 +47,6 @@ import {
     EXPRESSIONS_FOR_BOOLEANS
 } from './filterUtils';
 
-let leafletStream = require('leaflet-geojson-stream');
-window.leafletStream = leafletStream;
 
 /**
  *
@@ -75,7 +73,6 @@ let MarkupGenerator = require('./MarkupGenerator');
 let markupGeneratorInstance = new MarkupGenerator();
 
 import {GROUP_CHILD_TYPE_LAYER, GROUP_CHILD_TYPE_GROUP, LayerSorting} from './LayerSorting';
-import sq from "../../../bower_components/momentjs/src/locale/sq";
 
 let layerSortingInstance = new LayerSorting();
 let latestFullTreeStructure = false;
@@ -2162,7 +2159,7 @@ module.exports = {
 
         // Creating simulated layer description object
         let simulatedMetaData = {
-            f_table_title: (__(`Query on`) + ' ' + layerNamesFromSQL + ' (' + moment(date).format(`YYYY-MM-DD HH:mm`) + '; <a href="javascript:void(0);" class="js-delete-virtual-layer"><i class="fa fa-remove"></i> ' + (__(`Delete`)).toLowerCase() + '</a>)'),
+            f_table_title: (__(`Query on`) + ' ' + layerNamesFromSQL + ' (' + dayjs(date).format(`YYYY-MM-DD HH:mm`) + '; <a href="javascript:void(0);" class="js-delete-virtual-layer"><i class="fa fa-remove"></i> ' + (__(`Delete`)).toLowerCase() + '</a>)'),
             f_table_schema: VIRTUAL_LAYERS_SCHEMA,
             f_table_name: item.key.split(`.`)[1],
             virtual_layer: true,
@@ -2832,7 +2829,7 @@ module.exports = {
                     && parsedMeta.meta_desc !== "") ?
                     marked(parsedMeta.meta_desc) : abstract;
 
-                moment.locale('da');
+                dayjs.locale('da');
 
                 html = html ? mustache.render(html, parsedMeta) : "";
 

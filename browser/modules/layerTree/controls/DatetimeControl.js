@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Datetime from 'react-datetime';
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 const FORMAT = `YYYY-MM-DD HH:mm:ss`;
 
@@ -17,7 +17,7 @@ const FORMAT = `YYYY-MM-DD HH:mm:ss`;
 class DatetimeControl extends React.Component {
     constructor(props) {
         super(props);
-        moment.locale(navigator.language.indexOf(`da_`) === 0 ? "da" : "en");
+        dayjs.locale(navigator.language.indexOf(`da_`) === 0 ? "da" : "en");
     }
 
     render() {
@@ -27,7 +27,7 @@ class DatetimeControl extends React.Component {
                 timeFormat="HH:mm:ss"
                 onChange={(value) => {
                     if (typeof value === `string`) {
-                        if (moment(value, FORMAT).isValid()) {
+                        if (dayjs(value, FORMAT).isValid()) {
                             this.props.onChange(value);
                         } else {
                             this.props.onChange(false);
