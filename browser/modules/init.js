@@ -42,7 +42,7 @@ module.exports = {
     init: function () {
         let me = this, configFile, stop = false;
         (function poll() {
-            if (typeof $().tooltip !== "undefined") {
+            if (typeof L !== "undefined") {
 
                 if (typeof urlVars.session === "string") {
                     cookie.set("connect.gc2", urlVars.session, {expires: 1});
@@ -359,8 +359,8 @@ module.exports = {
 
                     //Hack to compile Glob files. Don´t call this function!
                     function ಠ_ಠ_() {
-                        ///require('./../../extensions/*/browser/*.js', {mode: 'expand'});
-                        //require('./../../extensions/*/browser/*/*.js', {mode: 'expand'});
+                        require('./../../extensions/*/browser/*.js', {mode: 'expand'});
+                        require('./../../extensions/*/browser/*/*.js', {mode: 'expand'});
 
                         // require('./../../extensions/!(watsonc)/browser/*.js', {mode: 'expand'});
                         // require('./../../extensions/!(watsonc)/browser/*/*.js', {mode: 'expand'});
