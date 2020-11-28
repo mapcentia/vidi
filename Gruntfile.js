@@ -252,20 +252,6 @@ module.exports = function (grunt) {
                 },
                 files: {
                     'public/js/build/all.min.js': [
-                        'public/js/lib/leaflet/leaflet-src.js',
-                        'public/js/lib/leaflet-history/leaflet-history.js',
-                        'public/js/lib/leaflet-boxzoom/leaflet-boxzoom.js',
-                        'public/js/lib/leaflet-draw/leaflet.draw.js',
-                        'public/js/lib/leaflet.locatecontrol/L.Control.Locate.js',
-                        'public/js/lib/Leaflet.utfgrid/L.UTFGrid.js',
-                        'public/js/lib/leaflet-plugins/Bing.js',
-                        'public/js/lib/Leaflet.GridLayer.GoogleMutant/Leaflet.GoogleMutant.js',
-                        'public/js/lib/Leaflet.NonTiledLayer/NonTiledLayer.js',
-                        //'public/js/lib/leaflet-glify/glify.js',
-                        'public/js/lib/leaflet-vector-grid/Leaflet.VectorGrid.bundled.min.js',
-                        'public/js/lib/Leaflet.extra-markers/leaflet.extra-markers.js',
-                        'public/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.js',
-                        'public/js/lib/Leaflet.markercluster/leaflet.markercluster.js',
 
                         'public/js/lib/localforage/localforage.js',
 
@@ -284,7 +270,6 @@ module.exports = function (grunt) {
                         "public/js/lib/Leaflet.markercluster/leaflet.markercluster.js",
                         "public/js/lib/Leaflet.extra-markers/leaflet.extra-markers.js",
                         "public/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.js",
-                        "public/js/lib/localforage/localforage.js",
 
                         'public/js/lib/jquery.canvasResize.js/jquery.canvasResize.js',
                         'public/js/lib/jquery.canvasResize.js/jquery.exif.js',
