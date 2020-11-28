@@ -269,20 +269,6 @@ module.exports = function (grunt) {
 
                         'public/js/lib/localforage/localforage.js',
 
-                        'public/js/lib/jquery/jquery-3.4.1.min.js',
-                        'public/js/lib/underscore/underscore.js',
-                        'public/js/lib/backbone/backbone.js',
-
-                        'public/js/lib/typeahead.js/typeahead.jquery.js',
-                        'public/js/lib/bootstrap-material-design/dist/js/ripples.js',
-                        'public/js/lib/bootstrap-material-design/dist/js/material.js',
-                        'public/js/lib/bootstrap-colorpicker/js/bootstrap-colorpicker.js',
-                        'public/js/lib/bootstrap-table/bootstrap-table.js',
-                        'public/js/lib/bootstrap-table/bootstrap-table-locale-all.js',
-                        'public/js/lib/bootstrap-table/extensions/export/bootstrap-table-export.js',
-                        'public/js/lib/bootstrap-table/extensions/filter-control/bootstrap-table-filter-control.js',
-                        'public/js/lib/tableExport.jquery.plugin/tableExport.js',
-
                         'public/js/bundle.js',
                     ],
                     'public/js/build/all.async.min.js': [
@@ -299,7 +285,16 @@ module.exports = function (grunt) {
                         'public/js/lib/snackbarjs/snackbar.min.js',
                         'public/js/lib/jsts/jsts.min.js',
                         'public/js/lib/leaflet-dash-flow/L.Path.DashFlow.js',
-                        'public/js/lib/handlebars/handlebars.js'
+                        'public/js/lib/handlebars/handlebars.js',
+                        'public/js/lib/typeahead.js/typeahead.jquery.js',
+                        'public/js/lib/bootstrap-material-design/dist/js/ripples.js',
+                        'public/js/lib/bootstrap-material-design/dist/js/material.js',
+                        'public/js/lib/bootstrap-colorpicker/js/bootstrap-colorpicker.js',
+                        'public/js/lib/bootstrap-table/bootstrap-table.js',
+                        'public/js/lib/bootstrap-table/bootstrap-table-locale-all.js',
+                        'public/js/lib/bootstrap-table/extensions/export/bootstrap-table-export.js',
+                        'public/js/lib/bootstrap-table/extensions/filter-control/bootstrap-table-filter-control.js',
+                        'public/js/lib/tableExport.jquery.plugin/tableExport.js'
                     ]
                 }
             }

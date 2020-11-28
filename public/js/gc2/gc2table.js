@@ -97,7 +97,8 @@ var gc2table = (function () {
 
         var originalLayers, filters, filterControls, uncheckedIds = [];
 
-        _.extend(object, Backbone.Events);
+        let extend = require('lodash/extend');
+        extend(object, Backbone.Events);
 
         /**
          * Clearing existing feature selection
