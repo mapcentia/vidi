@@ -287,6 +287,7 @@ module.exports = function (grunt) {
                         'public/js/lib/leaflet-dash-flow/L.Path.DashFlow.js',
                         'public/js/lib/handlebars/handlebars.js',
                         'public/js/lib/typeahead.js/typeahead.jquery.js',
+                        'public/js/lib/bootstrap/dist/js/bootstrap.js',
                         'public/js/lib/bootstrap-material-design/dist/js/ripples.js',
                         'public/js/lib/bootstrap-material-design/dist/js/material.js',
                         'public/js/lib/bootstrap-colorpicker/js/bootstrap-colorpicker.js',
