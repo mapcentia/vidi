@@ -14,8 +14,6 @@ var backboneEvents;
 
 const semver = require('semver');
 const md5 = require('md5');
-require("bootstrap");
-
 const cookie = require('js-cookie');
 
 const DEFAULT_STARTUP_MODAL_SUPRESSION_TEMPLATES = ["print.tmpl", "blank.tmpl", {
@@ -353,8 +351,8 @@ module.exports = {
 
                     //Hack to compile Glob files. Don´t call this function!
                     function ಠ_ಠ_() {
-                        require('./../../extensions/*/browser/*.js', {mode: 'expand'});
-                        require('./../../extensions/*/browser/*/*.js', {mode: 'expand'});
+                        //require('./../../extensions/*/browser/*.js', {mode: 'expand'});
+                        //require('./../../extensions/*/browser/*/*.js', {mode: 'expand'});
 
                         // require('./../../extensions/!(watsonc)/browser/*.js', {mode: 'expand'});
                         // require('./../../extensions/!(watsonc)/browser/*/*.js', {mode: 'expand'});
