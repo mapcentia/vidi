@@ -252,6 +252,7 @@ module.exports = function (grunt) {
                 },
                 files: {
                     'public/js/build/all.min.js': [
+                        'public/js/lib/leaflet/leaflet-src.js',
 
                         'public/js/lib/localforage/localforage.js',
 
