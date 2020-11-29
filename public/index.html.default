@@ -131,24 +131,8 @@
 <!-- Dynamic js -->
 <script src="/locale"></script>
 <script src="/api/baselayer"></script>
-<!-- Build -->
 <!-- build:js /js/build/all.min.js -->
-<!-- Leaflet -->
 <script src="/js/lib/leaflet/leaflet-src.js"></script>
-<script src="/js/lib/leaflet-history/leaflet-history.js"></script>
-<script src="/js/lib/leaflet-boxzoom/leaflet-boxzoom.js"></script>
-<script src="/js/lib/leaflet-draw/leaflet.draw.js"></script>
-<script src="/js/lib/leaflet.locatecontrol/L.Control.Locate.js"></script>
-<script src="/js/lib/Leaflet.utfgrid/L.UTFGrid.js"></script>
-<script src="/js/lib/leaflet-plugins/Bing.js"></script>
-<script src="/js/lib/Leaflet.GridLayer.GoogleMutant/Leaflet.GoogleMutant.js"></script>
-<script src="/js/lib/Leaflet.NonTiledLayer/NonTiledLayer.js"></script>
-<script src="/js/lib/leaflet-vector-grid/Leaflet.VectorGrid.bundled.min.js"></script>
-<script src="/js/lib/Leaflet.markercluster/leaflet.markercluster.js"></script>
-<script src="/js/lib/Leaflet.extra-markers/leaflet.extra-markers.js"></script>
-<script src="/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.js"></script>
-<script src="/js/lib/localforage/localforage.js"></script>
-<!-- Browserify modules-->
 <script src="/js/bundle.js"></script>
 <!-- /build -->
 <script>
