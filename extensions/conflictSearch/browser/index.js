@@ -158,6 +158,8 @@ var searchLoadedLayers = true;
  */
 var Terraformer = require('terraformer-wkt-parser');
 
+var debounce = require('lodash/debounce');
+
 var _result;
 
 /**
@@ -331,7 +333,7 @@ module.exports = module.exports = {
                     max: 500
                 }
             });
-            bufferSlider.noUiSlider.on('update', _.debounce(function (values, handle) {
+            bufferSlider.noUiSlider.on('update', debounce(function (values, handle) {
                 bufferValue.value = values[handle];
                 bufferItems.clearLayers();
                 me.makeSearch()

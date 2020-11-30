@@ -131,38 +131,8 @@
 <!-- Dynamic js -->
 <script src="/locale"></script>
 <script src="/api/baselayer"></script>
-<!-- Build -->
 <!-- build:js /js/build/all.min.js -->
-<!-- Leaflet -->
 <script src="/js/lib/leaflet/leaflet-src.js"></script>
-<script src="/js/lib/leaflet-history/leaflet-history.js"></script>
-<script src="/js/lib/leaflet-boxzoom/leaflet-boxzoom.js"></script>
-<script src="/js/lib/leaflet-draw/leaflet.draw.js"></script>
-<script src="/js/lib/leaflet.locatecontrol/L.Control.Locate.js"></script>
-<script src="/js/lib/Leaflet.utfgrid/L.UTFGrid.js"></script>
-<script src="/js/lib/leaflet-plugins/Bing.js"></script>
-<script src="/js/lib/Leaflet.GridLayer.GoogleMutant/Leaflet.GoogleMutant.js"></script>
-<script src="/js/lib/Leaflet.NonTiledLayer/NonTiledLayer.js"></script>
-<script src="/js/lib/leaflet-vector-grid/Leaflet.VectorGrid.bundled.min.js"></script>
-<script src="/js/lib/Leaflet.markercluster/leaflet.markercluster.js"></script>
-<script src="/js/lib/Leaflet.extra-markers/leaflet.extra-markers.js"></script>
-<script src="/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.js"></script>
-<script src="/js/lib/localforage/localforage.js"></script>
-<!-- Core -->
-<script src="/js/lib/jquery/jquery-3.4.1.min.js"></script>
-<script src="/js/lib/underscore/underscore.js"></script>
-<script src="/js/lib/backbone/backbone.js"></script>
-<!-- Bootstrap -->
-<script src="/js/lib/typeahead.js/typeahead.jquery.js"></script>
-<script src="/js/lib/bootstrap-material-design/dist/js/ripples.js"></script>
-<script src="/js/lib/bootstrap-material-design/dist/js/material.js"></script>
-<script src="/js/lib/bootstrap-colorpicker/js/bootstrap-colorpicker.js"></script>
-<script src="/js/lib/bootstrap-table/bootstrap-table.js"></script>
-<script src="/js/lib/bootstrap-table/bootstrap-table-locale-all.js"></script>
-<script src="/js/lib/bootstrap-table/extensions/export/bootstrap-table-export.js"></script>
-<script src="/js/lib/bootstrap-table/extensions/filter-control/bootstrap-table-filter-control.js"></script>
-<script src="/js/lib/tableExport.jquery.plugin/tableExport.js"></script>
-<!-- Browserify modules-->
 <script src="/js/bundle.js"></script>
 <!-- /build -->
 <script>
