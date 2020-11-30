@@ -282,7 +282,6 @@ module.exports = function (grunt) {
                         'public/js/lib/leaflet-side-by-side/leaflet-side-by-side.min.js',
                         'public/js/lib/jquery-ui/jquery-ui.min.js',
                         'public/js/lib/jquery-ui-touch/jquery.ui.touch-punch.min.js',
-                        'public/js/lib/snackbarjs/snackbar.min.js',
                         'public/js/lib/jsts/jsts.min.js',
                         'public/js/lib/leaflet-dash-flow/L.Path.DashFlow.js',
                         'public/js/lib/handlebars/handlebars.js',
