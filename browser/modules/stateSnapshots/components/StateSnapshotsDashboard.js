@@ -58,23 +58,27 @@ class StateSnapshotsDashboard extends React.Component {
 
         // Figuring out if we are in a session. If so, don't refresh snapshots, because the session will also do this.
         // This way we only load snapshots once
-        try {
-            let session = require('../../../../extensions/session/browser');
-            if (window.vidiConfig.enabledExtensions.includes('session')) {
-                (function poll() {
-                    if (session.isStatusChecked()) {
-                        if (!session.isAuthenticated()) {
-                            _self.refreshSnapshotsList(); // Status is checked and we're not a session
+        if (this.props.force) {
+            _self.refreshSnapshotsList();
+        } else {
+            try {
+                let session = require('../../../../extensions/session/browser');
+                if (window.vidiConfig.enabledExtensions.includes('session')) {
+                    (function poll() {
+                        if (session.isStatusChecked()) {
+                            if (!session.isAuthenticated()) {
+                                _self.refreshSnapshotsList(); // Status is checked and we're not a session
+                            }
+                        } else {
+                            setTimeout(() => poll(), 100)
                         }
-                    } else {
-                        setTimeout(() => poll(), 100)
-                    }
-                }())
-            } else {
+                    }())
+                } else {
+                    _self.refreshSnapshotsList();
+                }
+            } catch (e) {
                 _self.refreshSnapshotsList();
             }
-        } catch (e) {
-            _self.refreshSnapshotsList();
         }
     }
 
@@ -606,6 +610,7 @@ class StateSnapshotsDashboard extends React.Component {
 }
 
 StateSnapshotsDashboard.defaultProps = {
+    force: false,
     readOnly: false,
     playOnly: false,
     customSetOfTitles: false,
