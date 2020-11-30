@@ -39,6 +39,7 @@ module.exports = {
         "From object in layer": "From object in layer",
         "Waiting to start": "Waiting to start",
         "Error or timeout on": "Error or timeout on",
+        "Couldn't get the data. Trying again...": "Couldn't get the data. Trying again...",
 
         // Drawing
         "Cancel drawing": "Cancel drawing",

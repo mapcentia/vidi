@@ -39,6 +39,7 @@ module.exports = {
         "From object in layer": "Fra objekt i lag",
         "Waiting to start": "Venter på at starte",
         "Error or timeout on": "Fejl eller timeout på",
+        "Couldn't get the data. Trying again": "Kunne ikke hente data. Prøver igen...",
 
         // Drawing
         "Cancel drawing": " Afbryd tegning",
