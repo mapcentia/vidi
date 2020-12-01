@@ -120,13 +120,14 @@ module.exports = {
         state.listen(MODULE_ID, `state_change`);
 
         backboneEvents.get().on("end:print", function (response) {
+            console.log("Response", response)
             $("#get-print-fieldset").prop("disabled", false);
             $("#download-pdf, #open-pdf").attr("href", "/tmp/print/pdf/" + response.key + ".pdf");
             $("#download-pdf").attr("download", response.key);
             $("#open-html").attr("href", response.url);
             $("#start-print-btn").button('reset');
             // GeoEnviron
-            console.log("GEMessage:LaunchURL:" + urlparser.uriObj.protocol() + "://" + urlparser.uriObj.host() + "/tmp/print/pdf/" + response.key + ".pdf");
+            console.log("GEMessage:LaunchURL:" + urlparser.urlObj.protocol+ "://" + urlparser.urlObj.host + "/tmp/print/pdf/" + response.key + ".pdf");
         });
 
         $("#start-print-btn").on("click", function () {
