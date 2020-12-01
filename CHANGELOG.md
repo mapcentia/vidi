@@ -7,7 +7,7 @@ and this project adheres to [CalVer](https://calver.org/).
 ## [UNRELEASED]
 ### Fixed
 - MapCache layer now works. Both raster and vector tiles.
-- Timeout (5.000ms) on sqlStore. Feature info will now handle errors or cancels (e.g. due to timeout) on SQL requests and a "toast" will inform the user.
+- Timeout (10.000ms) on sqlStore. Feature info will now handle errors or cancels (e.g. due to timeout) on SQL requests and a "toast" will inform the user. If timeout happens the request will be re-tried.
 - `crossMultiSelect` will always show vector feature info if a simultaneously raster SQL request fails or timeouts.
 - Memory leak fixed when reloading vector layers.
 - Interval reload of vector layers are done with the `load` method instead of switching the layer off and on.

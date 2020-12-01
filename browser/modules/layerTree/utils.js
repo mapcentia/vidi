@@ -340,7 +340,7 @@ const getPossibleLayerTypes = (layerDescription) => {
 const storeErrorHandler = (store, response) => {
     if (response && response.statusText === `timeout`) {
         jquery.snackbar({
-            content: `<span>${__('Couldn\'t get the data. Trying again')}</span>`,
+            content: `<span>${__("Couldn't get the data. Trying again...")}</span>`,
             htmlAllowed: true,
             timeout: 6000
         });
