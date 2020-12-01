@@ -240,8 +240,8 @@ module.exports = function (grunt) {
         uglify: {
             publish: {
                 options: {
-                    sourceMap: false,
-                    sourceMapIncludeSources: false,
+                    sourceMap: true,
+                    sourceMapIncludeSources: true,
                     compress: {
                         dead_code: true,
                         drop_debugger: true,
