@@ -13,6 +13,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - Interval reload of vector layers are now done with the `load` method instead of switching the layer off and on.
 - Update of interval reloaded vector layers happens only if data has changed.
 - Use native URL API instead of uriJs module.
+- Still resolve promise in `localforage.setItem`, to avoid a net:ERR_FAILED in the browser when e.g. getting feature info. The issue with not being able to setItem persist.
 
 ## [2020.11.0] - 2020-18-11
 ### Added

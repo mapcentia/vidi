@@ -175,7 +175,7 @@ set(key, value) {
                         resolve();
                     } else {
                         let timeout = 300;
-                        console.warn(`Value was not really saved in localforage (${storedValue.created} vs ${initialCreated}), trying again in ${timeout} ms`, JSON.stringify(value));
+                        console.error(`Value was not really saved in localforage (${storedValue.created} vs ${initialCreated}), trying again in ${timeout} ms`, JSON.stringify(value));
                         setTimeout(() => {
                             localforage.setItem(this._cacheKey, valueCopy).then(() => {
                                 // Checking if value was really saved second time
@@ -184,7 +184,7 @@ set(key, value) {
                                         resolve();
                                     } else {
                                         console.error(`Still unable to save the value`);
-                                        reject();
+                                        resolve(); // We still resolve, because otherwise we ge a net:ERR_FAILED in browser
                                     }
                                 });
                             });
