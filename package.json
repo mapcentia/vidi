@@ -134,7 +134,7 @@
     "nouislider": "^8.5.1",
     "pdf-merge": "^1.2.0",
     "pg-escape": "^0.2.0",
-    "plotly.js": "^1.57.1",
+    "plotly.js-basic-dist": "^1.57.1",
     "pretty-units": "^0.1.0",
     "proj4": "^2.6.3",
     "prop-types": "^15.7.2",
