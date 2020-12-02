@@ -58,6 +58,9 @@ let defaultSelectedStyle = {
 
 let backArrowIsAdded = false;
 
+let jquery = require('jquery');
+require('snackbarjs');
+
 
 /**
  * A default template for GC2, with a loop
@@ -477,7 +480,7 @@ module.exports = {
                     if (count.index === layers.length) {
                         if (!hit) {
                             $(`#${elementPrefix}modal-info-body`).hide();
-                            $.snackbar({
+                            jquery.snackbar({
                                 content: "<span id=`conflict-progress`>" + __("Didn't find anything") + "</span>",
                                 htmlAllowed: true,
                                 timeout: 2000
@@ -516,7 +519,7 @@ module.exports = {
                 base64: true,
                 styleMap: styleForSelectedFeatures,
                 error: () => {
-                    $.snackbar({
+                    jquery.snackbar({
                         content: "<span>" + __("Error or timeout on") + " " + layerTitel + "</span>",
                         htmlAllowed: true,
                         timeout: 2000

@@ -25,7 +25,6 @@ let utils, backboneEvents, layerTree, meta, cloud, sqlQuery, layers;
 let apiBridgeInstance = false;
 
 let multiply = require('geojson-multiply');
-let moment = require('moment');
 
 let JSONSchemaForm = require("react-jsonschema-form");
 
@@ -77,6 +76,8 @@ let embedIsEnabled = false;
 let _self = false;
 
 let vectorLayers;
+
+import dayjs from 'dayjs';
 
 /**
  *
@@ -310,13 +311,13 @@ module.exports = {
                             uiSchema[key] = {
                                 'ui:widget': 'datetime'
                             };
-                            properties[key].default = moment().format("YYYY-MM-DDTHH:mm"); // Default is required in IOS Safari
+                            properties[key].default = dayjs().format("YYYY-MM-DDTHH:mm"); // Default is required in IOS Safari
                             break;
                         case `timestamp with time zone`:
                             uiSchema[key] = {
                                 'ui:widget': 'datetime'
                             };
-                            properties[key].default = moment().format("YYYY-MM-DDTHH:mmZ"); // Default is required in IOS Safari
+                            properties[key].default = dayjs().format("YYYY-MM-DDTHH:mmZ"); // Default is required in IOS Safari
                             break;
                         case `boolean`:
                             properties[key].type = `boolean`;
@@ -872,10 +873,10 @@ module.exports = {
             let eventFeatureParsed = {};
             for (let [key, value] of Object.entries(eventFeatureCopy.properties)) {
                 if (fields[key].type.includes("timestamp with time zone")) {
-                    value = value ? moment(value).format("YYYY-MM-DDTHH:mmZ") : moment().format("YYYY-MM-DDTHH:mmZ"); // Default is required in IOS Safari
+                    value = value ? dayjs(value).format("YYYY-MM-DDTHH:mmZ") : dayjs().format("YYYY-MM-DDTHH:mmZ"); // Default is required in IOS Safari
                     console.log(value);
                 } else if (fields[key].type.includes("timestamp without time zone")) {
-                    value = value ? moment(value).format("YYYY-MM-DDTHH:mm") : moment().format("YYYY-MM-DDTHH:mm"); // Default is required in IOS Safari
+                    value = value ? dayjs(value).format("YYYY-MM-DDTHH:mm") : dayjs().format("YYYY-MM-DDTHH:mm"); // Default is required in IOS Safari
                     console.log(value);
                 }
                 eventFeatureParsed[key] = value;

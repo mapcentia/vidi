@@ -10,11 +10,13 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ### Fixed
 - MapCache layer now works. Both raster and vector tiles.
-- Timeout (5.000ms) on sqlStore. Feature info will now handle errors or cancels (e.g. due to timeout) on SQL requests and a "toast" will inform the user.
-- `crossMultiSelect` will always show vector feature info if a simultaneously raster SQL request fails or timeouts.
+- Timeout (10.000ms) on sqlStore. Feature info will now handle errors or cancels (e.g. due to timeout) on SQL requests and a "toast" will inform the user. If timeout happens the request will be re-tried.
+- `crossMultiSelect` will always show vector feature info if a simultaneous raster SQL request fails or timeouts.
 - Memory leak fixed when reloading vector layers.
-- Interval reload of vector layers are done with the `load` method instead of switching the layer off and on.
+- Interval reload of vector layers are now done with the `load` method instead of switching the layer off and on.
 - Update of interval reloaded vector layers happens only if data has changed.
+- Use native URL API instead of uriJs module.
+- Still resolve promise in `localforage.setItem`, to avoid a net:ERR_FAILED in the browser when e.g. getting feature info. The issue with not being able to setItem persist.
 
 ## [2020.11.0] - 2020-18-11
 ### Added

@@ -25,6 +25,7 @@ require('./../public/js/gc2/geocloud.js');
 require('./../public/js/gc2/gc2table.js');
 require('./../public/js/vidi.js');
 
+window.$ = window.jQuery = require('jquery');
 
 // Hack to compile Glob files. Don´t call this function!
 function ಠ_ಠ() {

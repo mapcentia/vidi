@@ -299,7 +299,7 @@ geocloud = (function () {
                 jsonp: (this.defaults.jsonp) ? 'jsonp_callback' : false,
                 url: this.host + this.uri + '/' + this.db,
                 type: this.defaults.method,
-                timeout: 5000,
+                timeout: 10000,
                 success: function (response) {
 
                     if (response.success === false && doNotShowAlertOnError === undefined) {
@@ -354,7 +354,7 @@ geocloud = (function () {
                         }
                     }
                 },
-                error: this.defaults.error.bind(this),
+                error: this.defaults.error.bind(this, me),
                 complete: function (e) {
                     if (me.dataHasChanged) {
                         me.onLoad(me);
