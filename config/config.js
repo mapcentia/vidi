@@ -869,10 +869,10 @@ module.exports = {
             },
             {
                 "graveAssistent": ["index"]
-            },
+            }/*,
             {
                 "geosag": ["index"]
-            }/*,
+            },
             {
                 "MapGOMenu": ["index", "reportRender", "infoClick", "controller"]
             }*/
@@ -889,7 +889,7 @@ module.exports = {
             },
             {
                 "graveAssistent": ["index"]
-            },
+            }/*,
             {
                 "geosag": ["index"]
             }/*,
