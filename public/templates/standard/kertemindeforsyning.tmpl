@@ -150,6 +150,7 @@
 
             <div id="module-container" class="slide-right">
                 <div class="modal-header">
+                    <label style="margin-bottom: 0px; margin-top: 4px;" class="js-module-title"></label>
                     <button type="button" class="close" aria-hidden="true">×</button>
                     <h2 class="modal-title"></h2>
                 </div>
@@ -158,21 +159,19 @@
                         <!-- Tab panes -->
                         <div class="tab-content main-content">
                             <div role="tabpanel" class="tab-pane active" id="search-content">
+                                <div class="help-btn" onclick="javascript:createAlert($(this), '{{Search places}}')">
+                                    <i class="material-icons help-btn">help_outline</i></div>
+                                <div></div>
                                 <div id="place-search">
-                                    <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{Search places}}</div>')">
-                                        <i class="material-icons help-btn">help_outline</i></div>
-                                    <div></div>
                                     <div class="places">
-                                        <div class="btn-group">
-                                            <input id="custom-search" class="custom-search typeahead" type="text"
-                                                   placeholder="{{Address}}">
-                                            <span id="searchclear" class="glyphicon glyphicon-remove-circle"></span>
-                                        </div>
+                                        <input id="custom-search" class="custom-search typeahead" type="text"
+                                               placeholder="{{Address}}">
+                                        <span id="searchclear" class="glyphicon glyphicon-remove-circle"></span>
                                     </div>
                                 </div>
                             </div>
                             <div role="tabpanel" class="tab-pane fade" id="info-content">
-                                <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{Info text}}</div>')">
+                                <div class="help-btn" onclick="javascript:createAlert($(this), '{{Info text}}')">
                                     <i class="material-icons help-btn">help_outline</i></div>
                                 <div></div>
                                 <div class="togglebutton">
@@ -187,36 +186,31 @@
                                         <div id="buffer-slider" class="slider shor"></div>
                                     </div>
                                 </div>
-                                <div id="info-box">
-                                    <div id="modal-info-body">
-                                        <ul class="nav nav-tabs" id="info-tab"></ul>
-                                        <div class="tab-content" id="info-pane"></div>
-                                    </div>
-                                </div>
+                                <div id="info-box"></div>
                                 <table id="dtable" data-show-toggle="true"></table>
 
                             </div>
                             <div role="tabpanel" class="tab-pane fade" id="layer-content">
-                                <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{Help text overlays}}</div>')">
+                                <div class="help-btn" onclick="javascript:createAlert($(this), '{{Help text overlays}}')">
                                     <i class="material-icons help-btn">help_outline</i></div>
                                 <div></div>
                                 <div class="form-group" id="layers" role="tablist"></div>
                             </div>
                             <div role="tabpanel" class="tab-pane fade" id="baselayer-content">
-                                <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{Help text baselayers}}</div>')">
+                                <div class="help-btn" onclick="javascript:createAlert($(this), '{{Help text baselayers}}')">
                                     <i class="material-icons help-btn">help_outline</i></div>
                                 <div></div>
                                 <div class="form-group" id="base-layer-list"></div>
                             </div>
                             <div role="tabpanel" class="tab-pane fade" id="legend-content">
-                                <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{Help text legend}}</div>')">
+                                <div class="help-btn" onclick="javascript:createAlert($(this), '{{Help text legend}}')">
                                     <i class="material-icons help-btn">help_outline</i></div>
                                 <div></div>
                                 <a href="#legend-dialog" id="btn-show-legend-in-map" data-module="legend" class="btn btn-raised btn-xs map-tool-btn">{{Show legend on top the map}}</a>
                                 <div id="legend" class="legend"></div>
                             </div>
                             <div role="tabpanel" class="tab-pane fade" id="draw-content">
-                                <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{Help text draw}}</div>')">
+                                <div class="help-btn" onclick="javascript:createAlert($(this), '{{Help text draw}}')">
                                     <i class="material-icons help-btn">help_outline</i>
                                 </div>
                                 <div></div>
@@ -414,34 +408,46 @@
 
                                     </div>
                                 </div>
-                                <a class="btn btn-sm btn-raised" id="_draw_download_geojson" target="_blank" href="javascript:void(0)">
+                                <button class="btn btn-sm btn-raised" id="_draw_download_geojson" target="_blank" href="javascript:void(0)">
                                     <i class="fa fa-download" aria-hidden="true"></i> GeoJson
-                                </a>
+                                </button>
+                                <button class="btn btn-sm btn-raised" style="display: none" id="_draw_make_conflict_with_selected" target="_blank" href="javascript:void(0)">
+                                    <i class="fa fa-download" aria-hidden="true"></i> {{Conflict with selected}}
+                                </button>
+                                <button class="btn btn-sm btn-raised" style="display: none" id="_draw_make_conflict_with_all" target="_blank" href="javascript:void(0)">
+                                    <i class="fa fa-download" aria-hidden="true"></i> {{Conflict with all}}
+                                </button>
                                 <div id="draw-table"></div>
 
                             </div>
                             <div role="tabpanel" class="tab-pane fade" id="state-snapshots-content">
-                                <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{StateSnapshots description}}</div>')">
+                                <div class="help-btn" onclick="javascript:createAlert($(this), '{{StateSnapshots description}}')">
                                     <i class="material-icons help-btn">help_outline</i></div>
                                 <div></div>
                                 <div class="form-group" id="state-snapshots" role="tablist"></div>
                             </div>
                             <div role="tabpanel" class="tab-pane fade" id="print-content">
-                                <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{Help text print}}</div>')">
+                                <div class="help-btn" onclick="javascript:createAlert($(this), '{{Help text print}}')">
                                     <i class="material-icons help-btn">help_outline</i></div>
                                 <div></div>
                                 <div class="btn-toolbar bs-component" style="margin: 0;">
                                     <div class="btn-group">
-                                        <button id="start-print-btn" class="btn btn-raised" style="width: 130px"
+                                        <button id="start-print-btn" class="btn btn-raised start-print-btn" style="width: 130px"
                                                 data-loading-text="<i class='fa fa-cog fa-spin fa-lg'></i> {{Make PDF}}" disabled>
                                             <i class='fa fa-cog fa-lg'></i> {{Make PDF}}
                                         </button>
+                                        <button
+                                           class="btn btn-raised dropdown-toggle start-print-btn"
+                                           data-toggle="dropdown"><span class="caret"></span></button>
+                                        <ul class="dropdown-menu">
+                                            <li><a href="javascript:void(0)" id="start-print-png-btn">PNG</a></li>
+                                        </ul>
                                     </div>
                                     <fieldset disabled id="get-print-fieldset">
                                         <div class="btn-group">
                                             <a target="_blank" href="javascript:void(0)"
                                                class="btn btn-primary btn-raised"
-                                               id="open-pdf">{{Open PDF}}</a>
+                                               id="open-pdf">{{Open}}</a>
                                             <a href="bootstrap-elements.html"
                                                class="btn btn-primary btn-raised dropdown-toggle"
                                                data-toggle="dropdown"><span class="caret"></span></a>
@@ -453,6 +459,19 @@
                                             </ul>
                                         </div>
                                     </fieldset>
+                                </div>
+                                <div class="form-group" style="display:none;">
+                                    <div class="togglebutton">
+                                        <label>
+                                            <input id="print-sticky" type="checkbox">{{Sticky}}
+                                        </label>
+                                    </div>
+                                    <button id="add-print-box-btn" class="btn btn-xs">
+                                        {{Add new box}}
+                                    </button>
+                                    <button id="remove-print-box-btn" class="btn btn-xs">
+                                        {{Remove last box}}
+                                    </button>
                                 </div>
                                 <div>
                                     <form class="form-horizontal" id="print-form" role="form" data-toggle="validator">
@@ -514,7 +533,7 @@
                                             <div class="form-group">
                                                 <div class="togglebutton">
                                                     <label>
-                                                        <input id="add-legend-btn" type="checkbox" 
+                                                        <input id="add-legend-btn" type="checkbox"
                                                                disabled> {{Show legend on print}}
                                                     </label>
                                                 </div>
@@ -542,7 +561,7 @@
                     <!-- Nav tabs -->
                     <ul class="" role="tablist" id="main-tabs">
                         <li role="presentation">
-                            <a href="#search-content" aria-controls="search-content" role="tab" data-toggle="tab">
+                            <a href="#search-content" aria-controls="search-content" data-module-title="{{Search}}" role="tab" data-toggle="tab">
                                 <i data-container="body" data-toggle="tooltip" data-placement="left"
                                     title="{{Search}}" class="material-icons">search</i>
                                 <span class="module-title">{{Search}}</span>
@@ -550,7 +569,7 @@
                         </li>
 
                         <li role="presentation">
-                            <a data-module-id="infoClick" href="#info-content" aria-controls="info-content" role="tab" data-toggle="tab">
+                            <a data-module-id="infoClick" href="#info-content" data-module-title="{{Info}}"  aria-controls="info-content" role="tab" data-toggle="tab">
                                 <i data-container="body" data-toggle="tooltip" data-placement="left"
                                     title="{{Info}}" class="material-icons">info</i>
                                 <span class="module-title">{{Info}}</span>
@@ -558,7 +577,7 @@
                         </li>
 
                         <li role="presentation">
-                            <a data-module-id="layerTree" href="#layer-content" aria-controls="" role="tab" data-toggle="tab">
+                            <a data-module-id="layerTree" href="#layer-content" data-module-title="{{Layers}}" aria-controls="" role="tab" data-toggle="tab">
                                 <i data-container="body" data-toggle="tooltip" data-placement="left"
                                     title="{{Layers}}" class="material-icons">layers</i>
                                 <span class="module-title">{{Layers}}</span>
@@ -566,7 +585,7 @@
                         </li>
 
                         <li role="presentation">
-                            <a data-module-id="baseLayer" href="#baselayer-content" aria-controls="" role="tab" data-toggle="tab">
+                            <a data-module-id="baseLayer" href="#baselayer-content" data-module-title="{{Baselayers}}"  aria-controls="" role="tab" data-toggle="tab">
                                 <i data-container="body" data-toggle="tooltip" data-placement="left"
                                     title="{{Baselayers}}" class="material-icons">map</i>
                                 <span class="module-title">{{Baselayers}}</span>
@@ -574,7 +593,7 @@
                         </li>
 
                         <li role="presentation">
-                            <a data-module-id="legend" href="#legend-content" aria-controls="" role="tab" data-toggle="tab">
+                            <a data-module-id="legend" href="#legend-content" aria-controls="" data-module-title="{{Legend}}" role="tab" data-toggle="tab">
                                 <i data-container="body" data-toggle="tooltip" data-placement="left"
                                     title="{{Legend}}" class="material-icons">format_color_text</i>
                                 <span class="module-title">{{Legend}}</span>
@@ -582,7 +601,7 @@
                         </li>
 
                         <li role="presentation">
-                            <a data-module-id="draw" href="#draw-content" aria-controls="" role="tab" data-toggle="tab">
+                            <a data-module-id="draw" href="#draw-content" aria-controls="" data-module-title="{{Draw}}" role="tab" data-toggle="tab">
                                 <i data-container="body" data-toggle="tooltip" data-placement="left"
                                     title="{{Draw}}" class="material-icons">create</i>
                                 <span class="module-title">{{Draw}}</span>
@@ -590,7 +609,7 @@
                         </li>
 
                         <li role="presentation">
-                            <a data-module-id="stateSnapshots" href="#state-snapshots-content" aria-controls="" role="tab" data-toggle="tab">
+                            <a data-module-id="stateSnapshots" href="#state-snapshots-content" aria-controls="" data-module-title="{{State snapshots}}" role="tab" data-toggle="tab">
                                 <i data-container="body" data-toggle="tooltip" data-placement="left"
                                     title="{{State snapshots}}" class="material-icons">folder</i>
                                 <span class="module-title">{{State snapshots}}</span>
@@ -598,7 +617,7 @@
                         </li>
 
                         <li role="presentation">
-                            <a data-module-id="print" href="#print-content" aria-controls="" role="tab" data-toggle="tab">
+                            <a data-module-id="print" href="#print-content" aria-controls="" data-module-title="{{Print}}" role="tab" data-toggle="tab">
                                 <i data-container="body" data-toggle="tooltip" data-placement="left"
                                     title="{{Print}}" class="material-icons">print</i>
                                 <span class="module-title">{{Print}}</span>
