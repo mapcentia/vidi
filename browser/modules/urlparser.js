@@ -22,7 +22,8 @@ let _obj = {
     schema: pathArray[3],
     staticRoute: pathArray[4],
     urlVars: urlVars,
-    search: url.search
+    search: url.search,
+    urlObj: url
 };
 
 module.exports = _obj;

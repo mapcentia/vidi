@@ -13,7 +13,7 @@
 var gc2table = (function () {
     "use strict";
     var isLoaded, object, init;
-
+    const MAXZOOM = 17;
     isLoaded = function () {
         return true;
     };
@@ -237,13 +237,13 @@ var gc2table = (function () {
                             if (setViewOnSelect) {
                                 try {
                                     if (setZoom) {
-                                        m.map.fitBounds(layer.getBounds(), {maxZoom: 16});
+                                        m.map.fitBounds(layer.getBounds(), {maxZoom: MAXZOOM});
                                     } else {
                                         m.map.panTo(layer.getBounds().getCenter());
                                     }
                                 } catch (e) {
                                     if (setZoom) {
-                                        m.map.setView(layer.getLatLng(), 16);
+                                        m.map.setView(layer.getLatLng(), MAXZOOM);
                                     } else {
                                         m.map.panTo(layer.getLatLng());
                                     }

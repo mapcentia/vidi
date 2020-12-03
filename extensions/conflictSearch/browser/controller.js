@@ -57,7 +57,7 @@ module.exports = {
             $("#conflict-open-html").prop("href", response.url);
             $("#conflict-print-btn").button('reset');
             backboneEvents.get().trigger("end:conflictSearchPrint", response);
-            console.log("GEMessage:LaunchURL:" + urlparser.uriObj.protocol() + "://" +  urlparser.uriObj.host() + "/tmp/print/pdf/" + response.key + ".pdf");
+            console.log("GEMessage:LaunchURL:" + urlparser.urlObj.protocol + "://" +  urlparser.urlObj.host + "/tmp/print/pdf/" + response.key + ".pdf");
 
         });
 
