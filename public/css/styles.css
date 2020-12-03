@@ -751,7 +751,7 @@ body {
 }
 .slide-left {
   left: -100%;
-  box-shadow: rgba(0, 0, 0, 0.2) 0px 27px 24px 0px, rgba(0, 0, 0, 0.22) 0px 40px 77px 0px;
+  box-shadow: rgba(0, 0, 0, 0.2) 0 27px 24px 0, rgba(0, 0, 0, 0.22) 0 40px 77px 0;
 }
 .nav-tabs {
   border-bottom: 0;
@@ -1208,7 +1208,7 @@ h4 small {
   height: 100%;
 }
 .slider-btn span {
-  padding-top: 11px;
+  padding-top: 12px;
 }
 #search-content {
   height: calc(100vh - 78px);
