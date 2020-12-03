@@ -43,6 +43,9 @@ var sqlQuery;
 var applicationModules = false;
 var isStarted = false;
 
+const LEFT_SLIDE_WIDTHS = [350, 400, 550];
+const BUTTON_WITH = 24;
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -308,19 +311,19 @@ module.exports = {
         });
 
         let setWidth = function (width) {
-            $("#search-ribbon").css("width", width + "px").css("right", "-" + (width - 40) + "px");
-            $("#module-container").css("width", (width - 100) + "px");
-            $("#info-modal").css("width", (width - 100) + "px");
+            $("#search-ribbon").css("width", width + "px").css("right", "-" + (width - BUTTON_WITH) + "px");
+            $("#module-container").css("width", (width - 84) + "px");
+            $("#info-modal").css("width", (width - 84) + "px");
             $(".navmenu").css("width", (width) + "px");
-            $(".slide-right").css("right", "-" + (width - 100) + "px");
+            $(".slide-right").css("right", "-" + (width - 84) + "px");
         };
 
         var infoModalHide = function () {
-            $("#info-modal").css("right", "-" + (width - 100) + "px");
+            $("#info-modal").css("right", "-" + (width - 84) + "px");
         }
 
         var moduleContainerHide = function () {
-            $("#module-container.slide-right").css("right", "-" + (width - 100) + "px");
+            $("#module-container.slide-right").css("right", "-" + (width - 84) + "px");
         }
 
         var searchShow = function () {
@@ -335,14 +338,14 @@ module.exports = {
             }
 
             $("#search-ribbon").css("right", "-" + (width - localCollapsedWidth) + "px");
-            $("#pane").css("right", (localCollapsedWidth - 40) + "px");
+            $("#pane").css("right", (localCollapsedWidth - BUTTON_WITH) + "px");
             $('#map').css("width", "calc(100% - " + (localCollapsedWidth / 2) + "px)");
             searchPanelOpen = true;
         }
 
         var searchShowFull = function () {
             $("#search-ribbon").css("right", "0");
-            $("#pane").css("right", (width - 40) + "px");
+            $("#pane").css("right", (width - BUTTON_WITH) + "px");
             $('#map').css("width", "calc(100% - " + (width / 2) + "px");
             searchPanelOpen = true;
         }
@@ -350,7 +353,7 @@ module.exports = {
         var searchHide = function () {
             $("#pane").css("right", "0");
             $('#map').css("width", "100%");
-            $("#search-ribbon").css("right", "-" + (width - 40) + "px");
+            $("#search-ribbon").css("right", "-" + (width - BUTTON_WITH) + "px");
             searchPanelOpen = false;
             $("#side-panel ul li").removeClass("active");
         };
@@ -377,7 +380,7 @@ module.exports = {
             breakpoint: ['phone'],
             enter: function () {
                 searchHide()
-                width = 400;
+                width = LEFT_SLIDE_WIDTHS[0];
                 setWidth(width)
             },
             exit: function () {
@@ -389,7 +392,7 @@ module.exports = {
             breakpoint: ['tablet'],
             enter: function () {
                 searchHide()
-                width = 500;
+                width = LEFT_SLIDE_WIDTHS[1];
                 setWidth(width)
             },
             exit: function () {
@@ -401,12 +404,11 @@ module.exports = {
             breakpoint: ['desktop'],
             enter: function () {
                 searchHide()
-                width = 700;
+                width = LEFT_SLIDE_WIDTHS[2];
                 setWidth(width)
             },
             exit: function () {
                 console.log("Exit desktop");
-
             }
         });
 
@@ -416,14 +418,14 @@ module.exports = {
                 searchHide();
                 infoModalHide();
                 moduleContainerHide();
-                id.removeClass("fa-times");
-                id.addClass("fa-reorder");
+                $(".slide-collapsed").show();
+                $(".slide-expanded").hide();
                 id.css("padding-left", "12px")
 
             } else {
                 searchShow();
-                id.removeClass("fa-reorder");
-                id.addClass("fa-times");
+                $(".slide-collapsed").hide();
+                $(".slide-expanded").show();
                 id.css("padding-left", "14px")
             }
         });
