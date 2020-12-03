@@ -27,6 +27,16 @@ module.exports = {
     "gc2": {
         "host": "https://mapgogc2.geopartner.dk"
     },
+    
+    // ===============================================================
+    // Limits for puppeteer processes
+    // numbers work on a per thread basis.
+    // ===============================================================
+    
+    "puppeteerProcesses": {
+        "min": 1,
+        "max": 5
+    },
 
     // ===============================================================
     // Configuration of print templates.
