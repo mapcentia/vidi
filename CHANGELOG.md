@@ -15,6 +15,20 @@ and this project adheres to [CalVer](https://calver.org/).
 - Use native URL API instead of uriJs module.
 - Still resolve promise in `localforage.setItem`, to avoid a net:ERR_FAILED in the browser when e.g. getting feature info. The issue with not being able to setItem persist.
 
+### Changed
+- The standard template for feature info is changed, so empty fields are omitted. It's now:
+```handlebars
+<div class="vidi-popup-content">
+    <h3 class="popup-title">{{_vidi_content.title}}</h3>
+    {{#_vidi_content.fields}}
+        {{#if value}}
+            <h4>{{title}}</h4>
+            <p {{#if type}}class="{{type}}"{{/if}}>{{{value}}}</p>
+        {{/if}}
+    {{/_vidi_content.fields}}
+</div>
+```  
+
 ## [2020.11.0] - 2020-18-11
 ### Added
 - The awesome Leaflet plugin Leaflet.markercluster is added, so by setting the meta property `use_clustering` to `true` clustering can be enabled on single point vector layers. No other setting for Leaflet.markercluster is available for now.
