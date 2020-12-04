@@ -67,7 +67,7 @@ require('snackbarjs');
  * @type {string}
  */
 var defaultTemplate =
-    `<div class="cartodb-popup-content">
+    `<div class="vidi-popup-content">
         <div class="form-group gc2-edit-tools" style="display: none; width: 90%;">
             <div class="btn-group btn-group-justified">
                 <div class="btn-group">
@@ -84,17 +84,15 @@ var defaultTemplate =
         </div>
         <h3 class="popup-title">{{_vidi_content.title}}</h3>
         {{#_vidi_content.fields}}
-            <h4>{{title}}</h4>
             {{#if value}}
+                <h4>{{title}}</h4>
                 <p {{#if type}}class="{{type}}"{{/if}}>{{{value}}}</p>
-            {{else}}
-                <p class="empty">null</p>
             {{/if}}
         {{/_vidi_content.fields}}
     </div>`;
 
 var defaultTemplateForCrossMultiSelect =
-    `<div class="cartodb-popup-content">
+    `<div class="vidi-popup-content">
         {{#_vidi_content.fields}}
             <h4>{{title}}</h4>
             {{#if value}}
@@ -110,7 +108,7 @@ var defaultTemplateForCrossMultiSelect =
  * @type {string}
  */
 var defaultTemplateRaster =
-    `<div class="cartodb-popup-content">
+    `<div class="vidi-popup-content">
                 <h4>Class</h4>
                 <p>{{{class}}}</p>
                 <h4>Value</h4>
