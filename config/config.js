@@ -733,11 +733,11 @@ module.exports = {
                 },
                 A3: {
                     l: {
-                        mapsizePx: [1499, 1065],
-                        mapsizeMm: [401, 282]
+                        mapsizePx: [1525, 1032],
+                        mapsizeMm: [401, 1525]
                     },
                     p: {
-                        mapsizePx: [1065, 1499],
+                        mapsizePx: [1032, 1525],
                         mapsizeMm: [282, 401]
                     }
                 }
@@ -756,11 +756,11 @@ module.exports = {
                 },
                 A3: {
                     l: {
-                        mapsizePx: [1499, 1065],
-                        mapsizeMm: [401, 282]
+                        mapsizePx: [1525, 1032],
+                        mapsizeMm: [401, 1525]
                     },
                     p: {
-                        mapsizePx: [1065, 1499],
+                        mapsizePx: [1032, 1525],
                         mapsizeMm: [282, 401]
                     }
                 }
@@ -779,11 +779,11 @@ module.exports = {
                 },
                 A3: {
                     l: {
-                        mapsizePx: [1499, 1065],
-                        mapsizeMm: [401, 282]
+                        mapsizePx: [1525, 1032],
+                        mapsizeMm: [401, 1525]
                     },
                     p: {
-                        mapsizePx: [1065, 1499],
+                        mapsizePx: [1032, 1525],
                         mapsizeMm: [282, 401]
                     }
                 }
@@ -802,11 +802,11 @@ module.exports = {
                 },
                 A3: {
                     l: {
-                        mapsizePx: [1499, 1065],
-                        mapsizeMm: [401, 282]
+                        mapsizePx: [1525, 1032],
+                        mapsizeMm: [401, 1525]
                     },
                     p: {
-                        mapsizePx: [1065, 1499],
+                        mapsizePx: [1032, 1525],
                         mapsizeMm: [282, 401]
                     }
                 }
