@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [2020.12.0] - 2020-7-12
+## [UNRELEASED]
 ### Changed
 - The standard template for feature info is changed, so empty fields are omitted. It's now:
 ```handlebars
@@ -31,7 +31,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - Update of interval reloaded vector layers happens only if data has changed.
 - Use native URL API instead of uriJs module.
 - Still resolve promise in `localforage.setItem`, to avoid a net:ERR_FAILED in the browser when e.g. getting feature info. The issue with not being able to setItem persist.
-
+- Some fixes regarding Internet Explorer.
 
 ## [2020.11.0] - 2020-18-11
 ### Added
