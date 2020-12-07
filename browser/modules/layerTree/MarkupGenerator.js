@@ -207,7 +207,7 @@ class MarkupGenerator {
     }
 
     getEditingButtons() {
-        return `<div class="cartodb-popup-content">
+        return `<div class="vidi-popup-content">
                     <button class="btn btn-primary btn-xs ge-start-edit">
                         <i class="fa fa-pencil-alt" aria-hidden="true" ></i>
                     </button>

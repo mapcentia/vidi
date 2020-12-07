@@ -6,7 +6,7 @@
 
 var express = require('express');
 var router = express.Router();
-var config = require('../config/config.js').gc2;
+var config = require('../../config/config.js').gc2;
 var request = require('request');
 
 router.put('/api/feature/:db/:layer/:srs', function (req, response) {

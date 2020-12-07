@@ -9,11 +9,12 @@ var request = require("request");
 var router = express.Router();
 var http = require('http');
 var fs = require('fs');
-var moment = require('moment');
+var dayjs = require('dayjs');
 var config = require('../../../config/config.js');
 
 // Set locale for date/time string
-moment.locale("da_DK");
+
+dayjs.locale("da_DK");
 
 var BACKEND = config.backend;
 
@@ -38,7 +39,7 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                 hits: {},
                 file: null,
                 text: null,
-                dateTime: moment().format('MMMM Do YYYY, H:mm')
+                dateTime: dayjs().format('MMMM Do YYYY, H:mm')
             };
 
             try {
@@ -168,7 +169,7 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                             hits: hits,
                             file: fileName,
                             text: text,
-                            dateTime: moment().format('MMMM Do YYYY, H:mm')
+                            dateTime: dayjs().format('MMMM Do YYYY, H:mm')
                         };
                         response.send(report);
                         // Add meta data and date/time to report before writing to file

@@ -240,8 +240,8 @@ module.exports = function (grunt) {
         uglify: {
             publish: {
                 options: {
-                    sourceMap: false,
-                    sourceMapIncludeSources: false,
+                    sourceMap: true,
+                    sourceMapIncludeSources: true,
                     compress: {
                         dead_code: true,
                         drop_debugger: true,
@@ -253,6 +253,12 @@ module.exports = function (grunt) {
                 files: {
                     'public/js/build/all.min.js': [
                         'public/js/lib/leaflet/leaflet-src.js',
+
+
+                        'public/js/bundle.js',
+                    ],
+                    'public/js/build/all.async.min.js': [
+                        'public/js/lib/localforage/localforage.js',
                         'public/js/lib/leaflet-history/leaflet-history.js',
                         'public/js/lib/leaflet-boxzoom/leaflet-boxzoom.js',
                         'public/js/lib/leaflet-draw/leaflet.draw.js',
@@ -261,31 +267,11 @@ module.exports = function (grunt) {
                         'public/js/lib/leaflet-plugins/Bing.js',
                         'public/js/lib/Leaflet.GridLayer.GoogleMutant/Leaflet.GoogleMutant.js',
                         'public/js/lib/Leaflet.NonTiledLayer/NonTiledLayer.js',
-                        //'public/js/lib/leaflet-glify/glify.js',
                         'public/js/lib/leaflet-vector-grid/Leaflet.VectorGrid.bundled.min.js',
+                        'public/js/lib/Leaflet.markercluster/leaflet.markercluster.js',
                         'public/js/lib/Leaflet.extra-markers/leaflet.extra-markers.js',
                         'public/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.js',
-                        'public/js/lib/Leaflet.markercluster/leaflet.markercluster.js',
 
-                        'public/js/lib/localforage/localforage.js',
-
-                        'public/js/lib/jquery/jquery-3.4.1.min.js',
-                        'public/js/lib/underscore/underscore.js',
-                        'public/js/lib/backbone/backbone.js',
-
-                        'public/js/lib/typeahead.js/typeahead.jquery.js',
-                        'public/js/lib/bootstrap-material-design/dist/js/ripples.js',
-                        'public/js/lib/bootstrap-material-design/dist/js/material.js',
-                        'public/js/lib/bootstrap-colorpicker/js/bootstrap-colorpicker.js',
-                        'public/js/lib/bootstrap-table/bootstrap-table.js',
-                        'public/js/lib/bootstrap-table/bootstrap-table-locale-all.js',
-                        'public/js/lib/bootstrap-table/extensions/export/bootstrap-table-export.js',
-                        'public/js/lib/bootstrap-table/extensions/filter-control/bootstrap-table-filter-control.js',
-                        'public/js/lib/tableExport.jquery.plugin/tableExport.js',
-
-                        'public/js/bundle.js',
-                    ],
-                    'public/js/build/all.async.min.js': [
                         'public/js/lib/jquery.canvasResize.js/jquery.canvasResize.js',
                         'public/js/lib/jquery.canvasResize.js/jquery.exif.js',
                         'public/js/lib/leaflet-snap/leaflet.snap.js',
@@ -296,10 +282,20 @@ module.exports = function (grunt) {
                         'public/js/lib/leaflet-side-by-side/leaflet-side-by-side.min.js',
                         'public/js/lib/jquery-ui/jquery-ui.min.js',
                         'public/js/lib/jquery-ui-touch/jquery.ui.touch-punch.min.js',
-                        'public/js/lib/snackbarjs/snackbar.min.js',
                         'public/js/lib/jsts/jsts.min.js',
                         'public/js/lib/leaflet-dash-flow/L.Path.DashFlow.js',
-                        'public/js/lib/handlebars/handlebars.js'
+                        'public/js/lib/handlebars/handlebars.js',
+                        'public/js/lib/typeahead.js/typeahead.jquery.js',
+                        'public/js/lib/bootstrap/dist/js/bootstrap.js',
+                        'public/js/lib/bootstrap-material-design/dist/js/ripples.js',
+                        'public/js/lib/bootstrap-material-design/dist/js/material.js',
+                        'public/js/lib/bootstrap-colorpicker/js/bootstrap-colorpicker.js',
+                        'public/js/lib/bootstrap-table/bootstrap-table.js',
+                        'public/js/lib/bootstrap-table/bootstrap-table-locale-all.js',
+                        'public/js/lib/bootstrap-table/extensions/export/bootstrap-table-export.js',
+                        'public/js/lib/bootstrap-table/extensions/filter-control/bootstrap-table-filter-control.js',
+                        'public/js/lib/tableExport.jquery.plugin/tableExport.js',
+
                     ]
                 }
             }
@@ -407,7 +403,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-version');
 
     grunt.registerTask('default', ['prepareAssets', 'browserify:publish', 'browserify:publish_sw_dev', 'extension-css', 'shell', 'hogan', 'version']);
-    grunt.registerTask('production', ['env:prod', 'gitreset', 'hogan', 'prepareAssets', 'browserify:publish', 'browserify:publish_sw', 'extension-css', 'shell', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust', 'version', 'appendBuildHashToVersion']);
+    grunt.registerTask('production', ['env:prod', 'hogan', 'prepareAssets', 'browserify:publish', 'browserify:publish_sw', 'extension-css', 'shell', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust', 'version', 'appendBuildHashToVersion']);
     grunt.registerTask('production-test', ['env:prod', 'hogan', 'browserify:publish', 'browserify:publish_sw', 'extension-css', 'shell', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust', 'version', 'appendBuildHashToVersion']);
     grunt.registerTask('extension-css', ['less', 'cssmin:extensions']);
 };

@@ -58,13 +58,16 @@ let defaultSelectedStyle = {
 
 let backArrowIsAdded = false;
 
+let jquery = require('jquery');
+require('snackbarjs');
+
 
 /**
  * A default template for GC2, with a loop
  * @type {string}
  */
 var defaultTemplate =
-    `<div class="cartodb-popup-content">
+    `<div class="vidi-popup-content">
         <div class="form-group gc2-edit-tools" style="display: none; width: 90%;">
             <div class="btn-group btn-group-justified">
                 <div class="btn-group">
@@ -81,17 +84,15 @@ var defaultTemplate =
         </div>
         <h3 class="popup-title">{{_vidi_content.title}}</h3>
         {{#_vidi_content.fields}}
-            <h4>{{title}}</h4>
             {{#if value}}
+                <h4>{{title}}</h4>
                 <p {{#if type}}class="{{type}}"{{/if}}>{{{value}}}</p>
-            {{else}}
-                <p class="empty">null</p>
             {{/if}}
         {{/_vidi_content.fields}}
     </div>`;
 
 var defaultTemplateForCrossMultiSelect =
-    `<div class="cartodb-popup-content">
+    `<div class="vidi-popup-content">
         {{#_vidi_content.fields}}
             <h4>{{title}}</h4>
             {{#if value}}
@@ -107,7 +108,7 @@ var defaultTemplateForCrossMultiSelect =
  * @type {string}
  */
 var defaultTemplateRaster =
-    `<div class="cartodb-popup-content">
+    `<div class="vidi-popup-content">
                 <h4>Class</h4>
                 <p>{{{class}}}</p>
                 <h4>Value</h4>
@@ -477,7 +478,7 @@ module.exports = {
                     if (count.index === layers.length) {
                         if (!hit) {
                             $(`#${elementPrefix}modal-info-body`).hide();
-                            $.snackbar({
+                            jquery.snackbar({
                                 content: "<span id=`conflict-progress`>" + __("Didn't find anything") + "</span>",
                                 htmlAllowed: true,
                                 timeout: 2000
@@ -516,7 +517,7 @@ module.exports = {
                 base64: true,
                 styleMap: styleForSelectedFeatures,
                 error: () => {
-                    $.snackbar({
+                    jquery.snackbar({
                         content: "<span>" + __("Error or timeout on") + " " + layerTitel + "</span>",
                         htmlAllowed: true,
                         timeout: 2000
