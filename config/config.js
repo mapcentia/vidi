@@ -733,11 +733,11 @@ module.exports = {
                 },
                 A3: {
                     l: {
-                        mapsizePx: [1525, 1065],
+                        mapsizePx: [1499, 1065],
                         mapsizeMm: [401, 282]
                     },
                     p: {
-                        mapsizePx: [1065, 1525],
+                        mapsizePx: [1065, 1499],
                         mapsizeMm: [282, 401]
                     }
                 }
@@ -756,11 +756,11 @@ module.exports = {
                 },
                 A3: {
                     l: {
-                        mapsizePx: [1525, 1065],
+                        mapsizePx: [1499, 1065],
                         mapsizeMm: [401, 282]
                     },
                     p: {
-                        mapsizePx: [1065, 1525],
+                        mapsizePx: [1065, 1499],
                         mapsizeMm: [282, 401]
                     }
                 }
@@ -779,11 +779,11 @@ module.exports = {
                 },
                 A3: {
                     l: {
-                        mapsizePx: [1525, 1065],
+                        mapsizePx: [1499, 1065],
                         mapsizeMm: [401, 282]
                     },
                     p: {
-                        mapsizePx: [1065, 1525],
+                        mapsizePx: [1065, 1499],
                         mapsizeMm: [282, 401]
                     }
                 }
@@ -802,11 +802,11 @@ module.exports = {
                 },
                 A3: {
                     l: {
-                        mapsizePx: [1525, 1065],
+                        mapsizePx: [1499, 1065],
                         mapsizeMm: [401, 282]
                     },
                     p: {
-                        mapsizePx: [1065, 1525],
+                        mapsizePx: [1065, 1499],
                         mapsizeMm: [282, 401]
                     }
                 }
