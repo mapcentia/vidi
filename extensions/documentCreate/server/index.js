@@ -115,6 +115,7 @@ router.post('/api/extension/documentCreateSendFeature', function (req, response)
  //                   }
 
                     postCaseToGc2Promise.then(function(result){
+                        console.log(result)
                         response.status(200).send(resultjson)
                     }, function(err) {
                         response.status(500).send('ikke oprettet')
@@ -164,6 +165,7 @@ router.post('/api/extension/documentCreateSendFeature', function (req, response)
                             //response.status(200).send('Sag oprettet i DN med journalnummer: ' +result.caseId )
                             req.body.features[0].properties.fileident = resultpostdn.caseId
                             req.body.features[0].properties.casenumber = resultpostdn.number
+                            var resultjson = {"message":"Sag oprettet","casenumber": resultpostdn.number}
 
                             // tilføj part
                             //partbody = makePartBodyHenvendelse(result.caseId,req.body.features[0].properties.adresseid)
@@ -179,12 +181,11 @@ router.post('/api/extension/documentCreateSendFeature', function (req, response)
                                 } else {
                                     addPartRequestCase(resultpostdn.caseId,req.body.features[0].properties.adresseid)
                                 }
-
                             }
 
                             var postCaseToGc2Promise = postToGC2(req, req.body.db);
-                            var resultjson = {"message":"Sag oprettet","casenumber": resultpostdn.number}
                             postCaseToGc2Promise.then(function(result){
+                                console.log(result)
                                 response.status(200).send(resultjson)
                             }, function(err) {
                                 response.status(500).send('ikke oprettet')
