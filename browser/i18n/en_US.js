@@ -38,6 +38,8 @@ module.exports = {
         "From drawing": "From drawing",
         "From object in layer": "From object in layer",
         "Waiting to start": "Waiting to start",
+        "Error or timeout on": "Error or timeout on",
+        "Couldn't get the data. Trying again...": "Couldn't get the data. Trying again...",
 
         // Drawing
         "Cancel drawing": "Cancel drawing",
@@ -87,7 +89,7 @@ module.exports = {
         "No Conflicts": "No Conflicts",
         "Conflict with selected": "Conflict with selected",
         "Conflict with all": "Conflict with all",
-
+        "Prints completed": "Prints completed",
         "Print": "Print",
         "Search places": "Search places",
         "Activate advanced query": "Activate advanced query",
@@ -99,8 +101,10 @@ module.exports = {
         "Activate drawing tools": "Activate drawing tools",
         "Activate print tools": "Activate print tools",
         "Make PDF": "Make PDF",
+        "Make PNG": "Make PNG",
         "Download": "Download",
         "Open PDF": "Open PDF",
+        "Open": "Open",
         "Open HTML page": "Open HTML page",
         "Scale": "Scale",
         "Template": "Template",

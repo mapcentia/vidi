@@ -15,6 +15,7 @@ var utils;
 var backboneEvents;
 var sessionInstance = false;
 var userName = null;
+var isStatusChecked = false;
 
 
 var exId = `login-modal-body`;
@@ -32,6 +33,7 @@ module.exports = {
         return this;
     },
     init: function () {
+
 
         var parent = this;
 
@@ -193,7 +195,7 @@ module.exports = {
                             $(".gc2-session-lock").hide();
                             $(".gc2-session-unlock").show();
                         }
-
+                        isStatusChecked = true;
                     },
                     error: function (error) {
                         console.error(error.responseJSON);
@@ -267,6 +269,10 @@ module.exports = {
 
     getUserName: function () {
         return userName;
+    },
+
+    isStatusChecked: () => {
+        return isStatusChecked;
     }
 
 };

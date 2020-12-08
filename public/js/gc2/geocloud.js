@@ -151,6 +151,7 @@ geocloud = (function () {
 
     // Base class for stores
     storeClass = function () {
+        var parentThis = this;
         //this.defaults = STOREDEFAULTS;
         this.hide = function () {
             this.layer.setVisibility(false);
@@ -198,6 +199,7 @@ geocloud = (function () {
                     this.layer.clearLayers();
                     break;
             }
+            parentThis.geoJSON = null;
         };
         this.isEmpty = function () {
             switch (MAPLIB) {
@@ -249,6 +251,8 @@ geocloud = (function () {
         this.featuresLimitReached = false;
 
         this.buffered_bbox = false;
+        this.currentGeoJsonHash = null;
+        this.dataHasChanged = false;
 
         this.load = function (doNotShowAlertOnError) {
             try {
@@ -295,6 +299,7 @@ geocloud = (function () {
                 jsonp: (this.defaults.jsonp) ? 'jsonp_callback' : false,
                 url: this.host + this.uri + '/' + this.db,
                 type: this.defaults.method,
+                timeout: 10000,
                 success: function (response) {
 
                     if (response.success === false && doNotShowAlertOnError === undefined) {
@@ -305,10 +310,22 @@ geocloud = (function () {
                         if (response.features !== null) {
                             response = me.transformResponse(response, me.id);
 
-                            me.geoJSON = response;
-                            if (dynamicQueryIsUsed) {
-                                me.layer.clearLayers();
+                            let clone = JSON.parse(JSON.stringify(response));
+                            delete clone.peak_memory_usage;
+                            delete clone._execution_time;
+                            let newHash = md5(JSON.stringify(clone));
+                            if (me.currentGeoJsonHash && me.currentGeoJsonHash === newHash) {
+                                console.log("Hashes match. Not reloading");
+                                me.dataHasChanged = false;
+                                return
                             }
+                            me.geoJSON = clone;
+                            me.currentGeoJsonHash = newHash
+                            me.dataHasChanged = true;
+
+                            //if (dynamicQueryIsUsed) {
+                            me.layer.clearLayers();
+                            //}
 
                             if (me.maxFeaturesLimit !== false && me.onMaxFeaturesLimitReached !== false && parseInt(me.maxFeaturesLimit) > 0) {
                                 if (me.geoJSON.features.length >= parseInt(me.maxFeaturesLimit)) {
@@ -324,22 +341,24 @@ geocloud = (function () {
 
                             if (!me.clustering) {
                                 // In this case me.layer is L.geoJson
-                                me.layer.addData(response);
+                                me.layer.addData(clone);
                             } else {
                                 // In this case me.layer is L.markerClusterGroup
-                                me.geoJsonLayer.addData(response);
+                                me.geoJsonLayer.addData(clone);
                                 me.layer.addLayer(me.geoJsonLayer);
                             }
                             me.layer.defaultOptions = me.layer.options; // So layer can be reset
-
+                            response = null;
                         } else {
                             me.geoJSON = null;
                         }
                     }
                 },
-                error: this.defaults.error.bind(this),
-                complete: function () {
-                    me.onLoad(me);
+                error: this.defaults.error.bind(this, me),
+                complete: function (e) {
+                    if (me.dataHasChanged) {
+                        me.onLoad(me);
+                    }
                 }
             });
 
@@ -349,6 +368,13 @@ geocloud = (function () {
         this.abort = function () {
             xhr.abort();
         }
+        this.destroy = function () {
+            this.reset();
+            xhr = {
+                abort: function () {/* stub */
+                }
+            };
+        };
     };
 
     /**
@@ -752,7 +778,10 @@ geocloud = (function () {
                 url = defaults.mapRequestProxy + uri;
             }
         } else {
-            url = defaults.host + "/mapcache/" + defaults.db + "/wms";
+            url = "/mapcache/" + defaults.db + "/wms";
+            if ('mapRequestProxy' in defaults && defaults.mapRequestProxy !== false) {
+                url = defaults.mapRequestProxy + url;
+            }
             var url1 = url;
             var url2 = url;
             var url3 = url;
@@ -983,8 +1012,8 @@ geocloud = (function () {
             url = defaults.host + uri;
             if ('mapRequestProxy' in defaults && defaults.mapRequestProxy !== false) {
                 // The LayerVectorGrid needs to have {x|y|z} templates in the URL, which will disappear after encodeURIComponent(), so need to store them temporary
+                url = defaults.mapRequestProxy + uri;
                 url = url.replace('{x}', 'REPLACE_THE_X').replace('{y}', 'REPLACE_THE_Y').replace('{z}', 'REPLACE_THE_Z');
-                url = defaults.mapRequestProxy + '?request=' + encodeURIComponent(url);
                 url = url.replace('REPLACE_THE_X', '{x}').replace('REPLACE_THE_Y', '{y}').replace('REPLACE_THE_Z', '{z}');
             }
         }
@@ -2065,7 +2094,7 @@ geocloud = (function () {
             var l = new L.TileLayer(url, conf);
             l.id = conf.name;
             l.baseLayer = true;
-            lControl.addBaseLayer(l, conf.name) ;
+            lControl.addBaseLayer(l, conf.name);
             this.showLayer(conf.name)
             return [l];
 
@@ -2075,7 +2104,7 @@ geocloud = (function () {
             var l = new L.TileLayer.WMS(url, conf);
             l.id = conf.name;
             l.baseLayer = true;
-            lControl.addBaseLayer(l, conf.name) ;
+            lControl.addBaseLayer(l, conf.name);
             this.showLayer(conf.name)
             return [l];
         }

@@ -21,6 +21,9 @@ router.get('/api/key-value/:dataBase', (req, res) => {
     if (req.query && req.query.like) {
         params = `like=${req.query.like} `;
     }
+    if (req.query && req.query.filter) {
+        params+= `&filter=${req.query.filter} `;
+    }
 
     request({
         method: 'GET',

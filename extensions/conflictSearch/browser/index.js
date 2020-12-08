@@ -6,8 +6,6 @@
 
 'use strict';
 
-var _ = require("underscore");
-
 /**
  *
  * @type {*|exports|module.exports}
@@ -159,6 +157,8 @@ var searchLoadedLayers = true;
  *
  */
 var Terraformer = require('terraformer-wkt-parser');
+
+var debounce = require('lodash/debounce');
 
 var _result;
 
@@ -344,7 +344,7 @@ module.exports = module.exports = {
                     max: 500
                 }
             });
-            bufferSlider.noUiSlider.on('update', _.debounce(function (values, handle) {
+            bufferSlider.noUiSlider.on('update', debounce(function (values, handle) {
                 bufferValue.value = values[handle];
                 bufferItems.clearLayers();
                 me.makeSearch()
@@ -890,7 +890,6 @@ var dom = `
                                 <a href="bootstrap-elements.html" class="btn btn-primary btn-raised dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></a>
                                 <ul class="dropdown-menu">
                                     <li><a href="javascript:void(0)" id="conflict-download-pdf">Download PDF</a></li>
-                                    <li><a target="_blank" href="javascript:void(0)" id="conflict-open-html">Open HTML page</a></li>
                                 </ul>
                             </div>
                         </fieldset>

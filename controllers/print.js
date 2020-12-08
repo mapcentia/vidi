@@ -12,6 +12,7 @@ var headless = require('./headlessBrowserPool').pool;
 const shared = require('./gc2/shared');
 const request = require('request');
 const PDFMerge = require('pdf-merge');
+const AdmZip = require('adm-zip');
 
 
 /**
@@ -21,6 +22,8 @@ const PDFMerge = require('pdf-merge');
 router.post('/api/print', function (req, response) {
         req.setTimeout(0); // no timeout
         var body = req.body;
+        var outputPng = body.png === true; // Should format be PNG?
+        var returnImage = body.image === undefined ? true : body.image !== false; // Should return image if PNG is requested?
         var count = {"n": 0}; // Must be passed as copy of a reference
         var files = [];
         var poll = () => {
@@ -31,11 +34,20 @@ router.post('/api/print', function (req, response) {
                         var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
                         return v.toString(16);
                     });
-                    PDFMerge(files, {output: `${__dirname}/../public/tmp/print/pdf/${key}.pdf`})
-                        .then((buffer) => {
-                            response.send({success: true, key});
-                        });
+                    if (!outputPng) {
+                        PDFMerge(files, {output: `${__dirname}/../public/tmp/print/pdf/${key}.pdf`})
+                            .then((buffer) => {
+                                response.send({success: true, key, "format": "pdf"});
+                            });
+                    } else {
+                        const zip = new AdmZip();
 
+                        files.forEach(path => {
+                            zip.addLocalFile(path);
+                        });
+                        zip.writeZip(`${__dirname}/../public/tmp/print/png/${key}.zip`);
+                        response.send({success: true, key, "format": "zip"});
+                    }
                 } else {
                     poll();
                 }
@@ -49,8 +61,12 @@ router.post('/api/print', function (req, response) {
                 var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
                 return v.toString(16);
             });
-            files.push(`${__dirname}/../public/tmp/print/pdf/${key}.pdf`);
-            print(key, body, req, response, false, i, count);
+            if (!outputPng) {
+                files.push(`${__dirname}/../public/tmp/print/pdf/${key}.pdf`);
+            } else {
+                files.push(`${__dirname}/../public/tmp/print/png/${key}.png`);
+            }
+            print(key, body, req, response, outputPng, i, count, returnImage);
         }
     }
 );
@@ -97,7 +113,7 @@ router.get('/api/postdata', function (req, response) {
     });
 });
 
-function print(key, q, req, response, outputPng = false, frame = 0, count) {
+function print(key, q, req, response, outputPng = false, frame = 0, count, returnImage = true) {
     fs.writeFile(__dirname + "/../public/tmp/print/json/" + key, JSON.stringify(q), async (err) => {
         if (err) {
             response.send({success: true, error: err});
@@ -137,7 +153,7 @@ function print(key, q, req, response, outputPng = false, frame = 0, count) {
                                                     console.log('Done #', count.n);
                                                     if (q.bounds.length === 1) { // Only one page. No need to merge
                                                         console.log('Only one page. No need to merge.');
-                                                        response.send({success: true, key, url});
+                                                        response.send({success: true, key, url, "format": "pdf"});
                                                     }
                                                     headless.destroy(browser);
                                                     count.n++;
@@ -164,18 +180,66 @@ function print(key, q, req, response, outputPng = false, frame = 0, count) {
                         });
                     } else {
                         browser.newPage().then(page => {
-                            let width;
-                            let height;
+                            const pxWidth = 790;
+                            const pxHeight = 1116;
                             switch (q.pageSize) {
                                 case "A4":
                                     switch (q.orientation) {
                                         case "p":
-                                            width = 790;
-                                            height = 1116;
+                                            width = pxWidth;
+                                            height = pxHeight;
                                             break;
                                         case "l":
-                                            width = 1116;
-                                            height = 790;
+                                            width = pxHeight;
+                                            height = pxWidth;
+                                            break;
+                                    }
+                                    break;
+                                case "A3":
+                                    switch (q.orientation) {
+                                        case "p":
+                                            width = pxWidth * 1.5;
+                                            height = pxHeight * 1.5;
+                                            break;
+                                        case "l":
+                                            width = pxHeight * 1.5;
+                                            height = pxWidth * 1.5;
+                                            break;
+                                    }
+                                    break;
+                                case "A2":
+                                    switch (q.orientation) {
+                                        case "p":
+                                            width = pxWidth * 2;
+                                            height = pxHeight * 2;
+                                            break;
+                                        case "l":
+                                            width = pxHeight * 2;
+                                            height = pxWidth * 2;
+                                            break;
+                                    }
+                                    break;
+                                case "A1":
+                                    switch (q.orientation) {
+                                        case "p":
+                                            width = pxWidth * 2.5;
+                                            height = pxHeight * 2.5;
+                                            break;
+                                        case "l":
+                                            width = pxHeight * 2.5;
+                                            height = pxWidth * 2.5;
+                                            break;
+                                    }
+                                    break;
+                                case "A0":
+                                    switch (q.orientation) {
+                                        case "p":
+                                            width = pxWidth * 3;
+                                            height = pxHeight * 3;
+                                            break;
+                                        case "l":
+                                            width = pxHeight * 3;
+                                            height = pxWidth * 3;
                                             break;
                                     }
                                     break;
@@ -198,20 +262,33 @@ function print(key, q, req, response, outputPng = false, frame = 0, count) {
                                                     encoding: `base64`
                                                 }).then(data => {
                                                     let img = new Buffer.from(data, 'base64');
-                                                    response.writeHead(200, {
-                                                        'Content-Type': 'image/png',
-                                                        'Content-Length': img.length
-                                                    });
-                                                    headless.destroy(browser);
-                                                    response.end(img);
+
+                                                    console.log('Only one page. No need to merge.');
+                                                    if (!returnImage) {
+                                                        fs.writeFile(`${__dirname}/../public/tmp/print/png/${key}.png`, img, (err) => {
+                                                            if (q.bounds.length === 1) { // Only one page. No need to merge
+                                                                response.send({success: true, key, url, "format": "png"});
+                                                            }
+                                                            headless.destroy(browser);
+                                                            console.log('Done #', count.n);
+                                                            count.n++;
+                                                        })
+                                                    } else {
+                                                        response.writeHead(200, {
+                                                            'Content-Type': 'image/png',
+                                                            'Content-Length': img.length
+                                                        });
+                                                        headless.destroy(browser);
+                                                        response.end(img);
+                                                    }
                                                 }).catch(error => {
-                                                    console.log('Error while creating PDF');
+                                                    console.log(error);
                                                     headless.destroy(browser);
                                                     response.status(500);
                                                     response.send(error);
                                                 });
                                             }).catch(error => {
-                                                console.log('Error while creating PDF');
+                                                console.log('Error while creating PNG');
                                                 headless.destroy(browser);
                                                 response.status(500);
                                                 response.send(error);

@@ -6,6 +6,20 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ## [UNRELEASED]
 ### Added
+- Print can now output to PNG. If multiple pages when the PNG files are added to a zip file.
+
+### Fixed
+- MapCache layer now works. Both raster and vector tiles.
+- Timeout (10.000ms) on sqlStore. Feature info will now handle errors or cancels (e.g. due to timeout) on SQL requests and a "toast" will inform the user. If timeout happens the request will be re-tried.
+- `crossMultiSelect` will always show vector feature info if a simultaneous raster SQL request fails or timeouts.
+- Memory leak fixed when reloading vector layers.
+- Interval reload of vector layers are now done with the `load` method instead of switching the layer off and on.
+- Update of interval reloaded vector layers happens only if data has changed.
+- Use native URL API instead of uriJs module.
+- Still resolve promise in `localforage.setItem`, to avoid a net:ERR_FAILED in the browser when e.g. getting feature info. The issue with not being able to setItem persist.
+
+## [2020.11.0] - 2020-18-11
+### Added
 - The awesome Leaflet plugin Leaflet.markercluster is added, so by setting the meta property `use_clustering` to `true` clustering can be enabled on single point vector layers. No other setting for Leaflet.markercluster is available for now.
 - With the `cssFiles` config it's possible to load external css file from the `configUrl`. E.g.:
 ```json
@@ -130,7 +144,7 @@ and this project adheres to [CalVer](https://calver.org/).
 ```json
 {
   "puppeteerProcesses": {
-        "min": 2,
+        "min": 1,
         "max": 5
     }
 }
@@ -144,7 +158,6 @@ and this project adheres to [CalVer](https://calver.org/).
 - Turning on a vector layer will now load the legend of the raster tile representation of the layer.
 - Conflict search now are able to make a print with each hit and merge the PDFs together.
 
-
 ### Fixed
 - Using `indexOf` instead of `includes`, because the latter is not transpiled in Babel. It's an Internet Explorer issue.
 - `embed.js` now works in IE11.
@@ -153,9 +166,9 @@ and this project adheres to [CalVer](https://calver.org/).
 - Text in editor is now url encoded.
 - Quotes are now escaped for text in the editor.
 - All numeric Postgres types are now handled correct in the editor.
-- Puppeteer processes are now destroyed if an exception is thrown during print. This prevents leak of processes.
+- Puppeteer processes are now destroyed, if an exception is thrown during print. This prevents leak of processes.
 - Re-acquirement of a Puppeteer process is done if timeout, so the print will eventual be finished.
-- Puppeteer processes will be destroyed after 60 seconds. This prevents hanging processes, which blocks further prints.
+- Puppeteer processes will be destroyed after 60 seconds no matter what. This prevents hanging processes, which could blocks further prints.
 
 ## [2020.2.0]
 ### Added

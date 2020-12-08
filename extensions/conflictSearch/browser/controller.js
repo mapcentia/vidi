@@ -55,7 +55,12 @@ module.exports = {
 
         // Handle GUI when print is done. Using at custom event, so standard print is not triggered
         backboneEvents.get().on(endPrintEventName, function (response) {
-            console.log("GEMessage:LaunchURL:" + urlparser.uriObj.protocol() + "://" + urlparser.uriObj.host() + "/tmp/print/pdf/" + response.key + ".pdf");
+            $("#conflict-get-print-fieldset").prop("disabled", false);
+            $("#conflict-download-pdf, #conflict-open-pdf").prop("href", "/tmp/print/pdf/" + response.key + ".pdf");
+            $("#conflict-open-html").prop("href", response.url);
+            $("#conflict-print-btn").button('reset');
+            backboneEvents.get().trigger("end:conflictSearchPrint", response);
+            console.log("GEMessage:LaunchURL:" + urlparser.urlObj.protocol + "://" +  urlparser.urlObj.host + "/tmp/print/pdf/" + response.key + ".pdf");
 
         });
 

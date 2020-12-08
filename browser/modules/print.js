@@ -32,7 +32,6 @@ var pageSize;
 var printingOrientation;
 var backboneEvents;
 var legend;
-var moment = require('moment');
 var meta;
 var state;
 var _self = false;
@@ -40,6 +39,14 @@ var callBack = () => {
 };
 var alreadySetFromState = false;
 var paramsFromDb;
+
+import dayjs from 'dayjs';
+import advancedFormat from "dayjs/plugin/advancedFormat";
+require('dayjs/locale/da')
+dayjs.extend(advancedFormat)
+// Set locale for date/time string
+var lc = window._vidiLocale.split("_")[0];
+dayjs.locale(lc);
 
 /**
  * @private
@@ -113,18 +120,34 @@ module.exports = {
         state.listen(MODULE_ID, `state_change`);
 
         backboneEvents.get().on("end:print", function (response) {
+            console.log("Response", response)
             $("#get-print-fieldset").prop("disabled", false);
-            $("#download-pdf, #open-pdf").attr("href", "/tmp/print/pdf/" + response.key + ".pdf");
+            if (response.format === "pdf") {
+                $("#download-pdf, #open-pdf").attr("href", "/tmp/print/pdf/" + response.key + ".pdf");
+            } else if (response.format === "png"){
+                $("#download-pdf, #open-pdf").attr("href", "/tmp/print/png/" + response.key + ".png");
+            } else {
+                $("#download-pdf, #open-pdf").attr("href", "/tmp/print/png/" + response.key + ".zip");
+            }
             $("#download-pdf").attr("download", response.key);
             $("#open-html").attr("href", response.url);
             $("#start-print-btn").button('reset');
+            $(".dropdown-toggle.start-print-btn").prop("disabled", false);
             // GeoEnviron
-            console.log("GEMessage:LaunchURL:" + urlparser.uriObj.protocol() + "://" + urlparser.uriObj.host() + "/tmp/print/pdf/" + response.key + ".pdf");
+            console.log("GEMessage:LaunchURL:" + urlparser.urlObj.protocol+ "://" + urlparser.urlObj.host + "/tmp/print/pdf/" + response.key + ".pdf");
         });
 
         $("#start-print-btn").on("click", function () {
             if (_self.print()) {
                 $(this).button('loading');
+                $(".dropdown-toggle.start-print-btn").prop("disabled", true);
+                $("#get-print-fieldset").prop("disabled", true);
+            }
+        });
+        $("#start-print-png-btn").on("click", function () {
+            if (_self.print("end:print", null, true)) {
+                $("#start-print-btn").button('loading');
+                $(".dropdown-toggle.start-print-btn").prop("disabled", true);
                 $("#get-print-fieldset").prop("disabled", true);
             }
         });
@@ -150,15 +173,11 @@ module.exports = {
         });
 
         cloud.get().map.addLayer(printItems);
-        // Set locale for date/time string
-        var lc = window._vidiLocale.split("_")[0];
-        require('moment/locale/da');
-        moment.locale(lc);
     },
 
     off: function () {
         _cleanUp(true);
-        $("#print-form :input, #start-print-btn, #select-scale").prop("disabled", true);
+        $("#print-form :input, .start-print-btn, #select-scale").prop("disabled", true);
     },
 
     setCallBack: function (fn) {
@@ -171,7 +190,7 @@ module.exports = {
     on: function () {
         let numOfPrintTmpl = 0;
         alreadySetFromState = false;
-        $("#print-form :input, #start-print-btn, #select-scale").prop("disabled", false);
+        $("#print-form :input, .start-print-btn, #select-scale").prop("disabled", false);
         $("#print-tmpl").empty();
         $("#print-size").empty();
         $("#print-orientation").empty();
@@ -304,9 +323,9 @@ module.exports = {
         }, 5);
     },
 
-    print: (endEventName = "end:print", customData) => {
+    print: (endEventName = "end:print", customData, png = false) => {
         return new Promise((resolve, reject) => {
-            state.bookmarkState(customData).then(response => {
+            state.bookmarkState(customData, png).then(response => {
                 backboneEvents.get().trigger(endEventName, response);
                 callBack(response.responseJSON);
                 resolve(response);
@@ -580,8 +599,8 @@ module.exports = {
             comment: encodeURIComponent($("#print-comment").val()),
             legend: $("#add-legend-btn").is(":checked") ? "inline" : "none",
             header: encodeURIComponent($("#print-title").val()) || encodeURIComponent($("#print-comment").val()) ? "inline" : "none",
-            dateTime: moment().format('Do MMMM YYYY, H:mm'),
-            date: moment().format('Do MMMM YYYY'),
+            dateTime: dayjs().format('Do MMMM YYYY, H:mm'),
+            date: dayjs().format('Do MMMM YYYY'),
             metaData: meta.getMetaData(),
             px: config.print.templates[tmpl][pageSize][printingOrientation].mapsizePx[0],
             py: config.print.templates[tmpl][pageSize][printingOrientation].mapsizePx[1],

@@ -32,7 +32,7 @@ const uuidv4 = require('uuid/v4');
 var React = require('react');
 var ReactDOM = require('react-dom');
 
-import moment from 'moment';
+import dayjs from 'dayjs';
 import noUiSlider from 'nouislider';
 import mustache from 'mustache';
 
@@ -47,8 +47,6 @@ import {
     EXPRESSIONS_FOR_BOOLEANS
 } from './filterUtils';
 
-let leafletStream = require('leaflet-geojson-stream');
-window.leafletStream = leafletStream;
 
 /**
  *
@@ -75,7 +73,6 @@ let MarkupGenerator = require('./MarkupGenerator');
 let markupGeneratorInstance = new MarkupGenerator();
 
 import {GROUP_CHILD_TYPE_LAYER, GROUP_CHILD_TYPE_GROUP, LayerSorting} from './LayerSorting';
-import sq from "../../../bower_components/momentjs/src/locale/sq";
 
 let layerSortingInstance = new LayerSorting();
 let latestFullTreeStructure = false;
@@ -242,6 +239,10 @@ module.exports = {
      */
     getStores: () => {
         return moduleState.vectorStores;
+    },
+
+    getTables: () => {
+        return tables;
     },
 
     /**
@@ -836,6 +837,10 @@ module.exports = {
                             || (layerKeyNoPrefix in moduleState.dynamicLoad && moduleState.dynamicLoad[layerKeyNoPrefix] === true)) {
                             needToReload = true;
                             let currentMapBBox = cloud.get().map.getBounds();
+                            // TODO bug the layer is available as webGL
+                            console.log(localTypeStores[layerKey])
+                            console.log(localTypeStores)
+                            console.log(layerKey)
                             if (`buffered_bbox` in localTypeStores[layerKey]) {
                                 if (localTypeStores[layerKey].buffered_bbox === false || localTypeStores[layerKey].buffered_bbox && localTypeStores[layerKey].buffered_bbox.contains(currentMapBBox)) {
                                     needToReload = false;
@@ -1466,13 +1471,13 @@ module.exports = {
             sql,
             clustering: layerTreeUtils.getIfClustering(meta.parseLayerMeta(layerKey)),
             onLoad: (l) => {
-                let tableElement = meta.parseLayerMeta(layerKey)?.show_table_on_side;
                 let reloadInterval = meta.parseLayerMeta(layerKey)?.reload_interval;
-                if (tableElement) {
+                let tableElement = meta.parseLayerMeta(layerKey)?.show_table_on_side;
+                // Create side table once
+                if (tableElement && !$('#vector-side-table').length) {
                     $("#pane").css("left", "0");
                     $("#pane").css("width", "70%");
                     $("#map").css("width", "115%");
-                    $("#vector-side-table").remove();
                     $("#pane").before(`<div id="vector-side-table" style="width: 30%; float: right; background-color: white"></div>`)
                     _self.createTable(layerKey, true, "#vector-side-table", {
                         showToggle: false,
@@ -1486,8 +1491,7 @@ module.exports = {
                 if (reloadInterval && reloadInterval !== "") {
                     clearInterval(reloadIntervals[layerKey]);
                     reloadIntervals[layerKey] = setInterval(() => {
-                        _self.reloadLayer(LAYER.VECTOR + ":" + layerKey)
-
+                        l.load();
                     }, parseInt(reloadInterval));
                 }
                 layers.decrementCountLoading(l.id);
@@ -1596,14 +1600,16 @@ module.exports = {
                         if (activeTilelayers.length > 0) {
                             sqlQuery.init(qstore, wkt, "3857", (store) => {
                                 setTimeout(() => {
-                                    sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + store.key, store.geoJSON.features);
-                                    store.layer.eachLayer((layer) => {
-                                        intersectingFeatures.push({
-                                            feature: layer.feature,
-                                            layer: layer,
-                                            layerKey: store.key
-                                        });
-                                    })
+                                    if (store.geoJSON) {
+                                        sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + store.key, store.geoJSON.features);
+                                        store.layer.eachLayer((layer) => {
+                                            intersectingFeatures.push({
+                                                feature: layer.feature,
+                                                layer: layer,
+                                                layerKey: store.key
+                                            });
+                                        })
+                                    }
                                     layers.decrementCountLoading("_vidi_sql_" + store.id);
                                     backboneEvents.get().trigger("doneLoading:layers", "_vidi_sql_" + store.id);
                                     if (layers.getCountLoading() === 0) {
@@ -1754,7 +1760,6 @@ module.exports = {
      * @param {String}  layerKey      Layer key
      * @param {Boolean} forceDataLoad Specifies if the data load should be forced
      *
-     * @returns {void}
      */
     createTable(layerKey, forceDataLoad = false, element = null, conf) {
         let prop, defaults = {
@@ -1815,6 +1820,7 @@ module.exports = {
 
             localTable.loadDataInTable(true, forceDataLoad);
             tables[LAYER.VECTOR + ':' + layerKey] = localTable;
+            return localTable;
         } else {
             throw new Error(`Unable to create gc2table, as the data is not loaded yet`);
         }
@@ -2146,14 +2152,14 @@ module.exports = {
     createSimulatedLayerDescriptionForVirtualLayer: (item) => {
         let creationTime = parseInt(item.key.split(`.`)[1].replace(`query`, ``));
         let date = new Date(+creationTime);
-        let layerNamesFromSQL = item.store.sql.substring(item.store.sql.indexOf(`FROM`) + 4, item.store.sql.indexOf(`WHERE`)).trim();
+        let layerNamesFromSQL = item.store.sql.substring(item.store.sql.indexOf(`" FROM`) + 6, item.store.sql.indexOf(`WHERE`)).trim();
 
         // Find the corresponding layer
         let correspondingLayer = meta.getMetaByKey(layerNamesFromSQL);
 
         // Creating simulated layer description object
         let simulatedMetaData = {
-            f_table_title: (__(`Query on`) + ' ' + layerNamesFromSQL + ' (' + moment(date).format(`YYYY-MM-DD HH:mm`) + '; <a href="javascript:void(0);" class="js-delete-virtual-layer"><i class="fa fa-remove"></i> ' + (__(`Delete`)).toLowerCase() + '</a>)'),
+            f_table_title: (__(`Query on`) + ' ' + layerNamesFromSQL + ' (' + dayjs(date).format(`YYYY-MM-DD HH:mm`) + '; <a href="javascript:void(0);" class="js-delete-virtual-layer"><i class="fa fa-remove"></i> ' + (__(`Delete`)).toLowerCase() + '</a>)'),
             f_table_schema: VIRTUAL_LAYERS_SCHEMA,
             f_table_name: item.key.split(`.`)[1],
             virtual_layer: true,
@@ -2823,7 +2829,7 @@ module.exports = {
                     && parsedMeta.meta_desc !== "") ?
                     marked(parsedMeta.meta_desc) : abstract;
 
-                moment.locale('da');
+                dayjs.locale('da');
 
                 html = html ? mustache.render(html, parsedMeta) : "";
 
@@ -3113,9 +3119,14 @@ module.exports = {
                     // Table view
                     $(layerContainer).find(`.js-toggle-table`).click(() => {
                         let tableContainerId = `#table_view-${layerKey.replace(".", "_")}`;
-                        if ($(tableContainerId + ` table`).length === 1) $(tableContainerId + ` table`).empty();
-                        _self.createTable(layerKey, true);
-
+                        // If table is open, then destroy it so it doesn't leak
+                        if ($(tableContainerId + ` .bootstrap-table`).length > 0) {
+                            tables[LAYER.VECTOR + ':' + layerKey].destroy();
+                            delete tables[LAYER.VECTOR + ':' + layerKey];
+                            $(tableContainerId + ` .bootstrap-table`).remove();
+                        } else {
+                            _self.createTable(layerKey, true);
+                        }
                         _self._selectIcon($(layerContainer).find('.js-toggle-table'));
                         $(layerContainer).find('.js-layer-settings-table').toggle();
 

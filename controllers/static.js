@@ -36,7 +36,7 @@ const returnPNGForStateSnapshot = (localRequest, localResponse) => {
         const func = () => {
             headless.acquire().then(browser => {
                 setTimeout(() => {
-                    if(headless.isBorrowedResource(browser)) {
+                    if (headless.isBorrowedResource(browser)) {
                         headless.destroy(browser);
                         console.log("Destroying browser after 60 secs");
                     }

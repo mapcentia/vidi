@@ -58,6 +58,9 @@ let defaultSelectedStyle = {
 
 let backArrowIsAdded = false;
 
+let jquery = require('jquery');
+require('snackbarjs');
+
 
 /**
  * A default template for GC2, with a loop
@@ -186,7 +189,7 @@ module.exports = {
         layers = _layers.getLayers() ? _layers.getLayers().split(",") : [];
 
         // Filter layers without pixels from
-        layers = layers.filter((key)=>{
+        layers = layers.filter((key) => {
             if (typeof moduleState.tileContentCache[key] === "boolean" && moduleState.tileContentCache[key] === true) {
                 return true;
             }
@@ -304,8 +307,8 @@ module.exports = {
                                     .setLatLng(infoClickPoint)
                                     .setContent(`<div id="info-box-pop-up"></div>`)
                                     .openOn(cloud.get().map)
-                                    .on('remove', ()=>{
-                                       _self.resetAll();
+                                    .on('remove', () => {
+                                        _self.resetAll();
                                     });
                                 $("#info-box-pop-up").html(popUpInner);
 
@@ -477,7 +480,7 @@ module.exports = {
                     if (count.index === layers.length) {
                         if (!hit) {
                             $(`#${elementPrefix}modal-info-body`).hide();
-                            $.snackbar({
+                            jquery.snackbar({
                                 content: "<span id=`conflict-progress`>" + __("Didn't find anything") + "</span>",
                                 htmlAllowed: true,
                                 timeout: 2000
@@ -495,7 +498,7 @@ module.exports = {
                                 $(`#${elementPrefix}modal-info-body table`).bootstrapTable('resetView');
                                 // If only one hit across all layers, the click the only row
                                 if (count.hits === 1) {
-                                    $("#info-box [data-uniqueid]").trigger("click");
+                                    $("#_0 [data-uniqueid]").trigger("click");
                                     $(".show-when-multiple-hits").hide();
                                 }
                             }, 100);
@@ -515,6 +518,13 @@ module.exports = {
                 key: value,
                 base64: true,
                 styleMap: styleForSelectedFeatures,
+                error: () => {
+                    jquery.snackbar({
+                        content: "<span>" + __("Error or timeout on") + " " + layerTitel + "</span>",
+                        htmlAllowed: true,
+                        timeout: 2000
+                    })
+                },
                 // Set _vidi_type on all vector layers,
                 // so they can be recreated as query layers
                 // after serialization

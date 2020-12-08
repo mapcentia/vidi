@@ -82,7 +82,7 @@ var _clearDrawItems = function () {
 
 var backboneEvents;
 
-
+var debounce = require('lodash/debounce');
 /**
  *
  * @private
@@ -188,7 +188,7 @@ module.exports = {
                     max: 500
                 }
             });
-            bufferSlider.noUiSlider.on('update', _.debounce(function (values, handle) {
+            bufferSlider.noUiSlider.on('update', debounce(function (values, handle) {
                 bufferValue.value = values[handle];
                 if (typeof bufferItems._layers[Object.keys(bufferItems._layers)[0]] !== "undefined" && typeof bufferItems._layers[Object.keys(bufferItems._layers)[0]]._leaflet_id !== "undefined") {
                     bufferItems.clearLayers();
@@ -313,6 +313,7 @@ module.exports = {
     },
 
     off: function () {
+        searchOn = false;
         // Clean up
         _clearDrawItems();
         $("#advanced-info-btn").prop("checked", false);

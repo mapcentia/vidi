@@ -13,7 +13,7 @@
 var gc2table = (function () {
     "use strict";
     var isLoaded, object, init;
-
+    const MAXZOOM = 17;
     isLoaded = function () {
         return true;
     };
@@ -99,7 +99,8 @@ var gc2table = (function () {
 
         var originalLayers, filters, filterControls, uncheckedIds = [];
 
-        _.extend(object, Backbone.Events);
+        let extend = require('lodash/extend');
+        extend(object, Backbone.Events);
 
         /**
          * Clearing existing feature selection
@@ -241,13 +242,13 @@ var gc2table = (function () {
                             if (setViewOnSelect) {
                                 try {
                                     if (setZoom) {
-                                        m.map.fitBounds(layer.getBounds(), {maxZoom: 16});
+                                        m.map.fitBounds(layer.getBounds(), {maxZoom: MAXZOOM});
                                     } else {
                                         m.map.panTo(layer.getBounds().getCenter());
                                     }
                                 } catch (e) {
                                     if (setZoom) {
-                                        m.map.setView(layer.getLatLng(), 16);
+                                        m.map.setView(layer.getLatLng(), MAXZOOM);
                                     } else {
                                         m.map.panTo(layer.getLatLng());
                                     }
@@ -360,10 +361,20 @@ var gc2table = (function () {
                     }
                 });
             });
+            moveEndOff();
 
             if (customOnLoad) {
                 store.onLoad = customOnLoad;
             }
+
+            // Unbind event so no references are left to object
+            object.unbind("clearSelection_" + uid);
+            object.unbind("selected_" + uid);
+
+            $(el).bootstrapTable('removeAll')
+            $(el).bootstrapTable('destroy')
+            originalLayers = null;
+            store = null;
         };
 
         assignEventListeners = function () {
@@ -482,7 +493,8 @@ var gc2table = (function () {
             uid: uid,
             store: store,
             moveEndOff: moveEndOff,
-            moveEndOn: moveEndOn
+            moveEndOn: moveEndOn,
+            bootStrapTable : $(el).bootstrapTable
         };
     };
     return {
