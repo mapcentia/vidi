@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [UNRELEASED]
+### Changed
+- Docker files are added.
+- It's now possible to set `gc2.host` through the environment variable `GC2_HOST`. If set in `config/config.js` it will have precedence.
+
 ## [2020.12.0] - 2020-8-12
 ### Changed
 - The standard template for feature info is changed, so empty fields are omitted. It's now:
