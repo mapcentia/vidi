@@ -8,7 +8,7 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get -y update --fix-missing
 RUN apt-get -y install wget curl vim git supervisor postgresql-client nodejs default-jre gnupg2 locales libssl-dev libxss-dev pdftk
 
-RUN curl -sL https://deb.nodesource.com/setup_12.x -o nodesource_setup.sh &&\
+RUN curl -sL https://deb.nodesource.com/setup_14.x -o nodesource_setup.sh &&\
     bash nodesource_setup.sh &&\
     apt-get install -y nodejs
 

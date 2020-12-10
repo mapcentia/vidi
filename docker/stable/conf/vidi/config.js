@@ -248,13 +248,13 @@ module.exports = {
     // Extensions are enabled both browser and server side
     // ===================================================
     "enabledExtensions": [
-        "conflictSearch",
+        // "conflictSearch",
         "streetView",
         "session",
         "coordinates",
         "offlineMap",
         "editor",
-        "configSwitcher",
+        // "configSwitcher",
     ],
 
     // ====================================
