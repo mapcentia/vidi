@@ -82,7 +82,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - Print setup is now stored in state snapshots. After state snapshot is activated the print setup will use the stored settings. The sticky toggle must be set to on or else the default print settings will be used.
 - New print API `/api/print/[database]/?state=[state id]` which will return the stored print from a snapshot as PNG (PDF is coming). The print will be created on the fly.
 - `embed.js` has two new attributes: `data-vidi-use-config` and `data-vidi-use-schema`. These will trigger the use of schema and/or config from the token if present.
-- New GC2 Meta property which automatically can open a layer tool when the layer is switch on:
+- New GC2 Meta property which automatically can open a layer tool when the layer is switched on:
     - *default_open_tools*: JSON array with tools to open. Available options: `["filters","opacity","load-strategy","search"]` ("table" are not supported)
 - New GC2 Meta properties:
     - *disable_check_box*: boolean, disables the layer check box:
