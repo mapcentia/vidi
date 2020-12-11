@@ -6,7 +6,8 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ## [UNRELEASED]
 ### Changed
-- Docker files are added.
+- Node >= 14 er required. 
+- Docker files are added to the project.
 - It's now possible to set `gc2.host` through the environment variable `GC2_HOST`. If set in `config/config.js` it will have precedence.
 
 ## [2020.12.0] - 2020-8-12
