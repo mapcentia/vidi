@@ -133,7 +133,7 @@ function print(key, q, req, response, outputPng = false, frame = 0, count, retur
                             headless.destroy(browser);
                             console.log("Destroying browser after 60 secs");
                         }
-                    }, 120000);
+                    }, 60000);
                     if (!outputPng) {
                         browser.newPage().then(async (page) => {
                             await page.emulateMedia('screen');
