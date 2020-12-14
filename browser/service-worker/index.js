@@ -193,11 +193,11 @@ set(key, value) {
                 });
             }).catch(error => {
                 console.error(`localforage failed to perform operation`, error);
-                reject();
+                resolve(); // We still resolve, because otherwise we ge a net:ERR_FAILED in browser
             });
         }).catch(error => {
             console.error(`localforage failed to perform operation`, error);
-            reject();
+            resolve(); // We still resolve, because otherwise we ge a net:ERR_FAILED in browser
         });
     });
 }
