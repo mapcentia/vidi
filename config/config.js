@@ -821,8 +821,8 @@ module.exports = {
             "_conflictPrint": {
                 "A4": {
                     "p": {
-                        "mapsizePx": [438, 313],
-                        "mapsizeMm": [119, 75]
+                        "mapsizePx": [350, 250],
+                        "mapsizeMm": [95, 60]
                     }
                 }
             }/*,
