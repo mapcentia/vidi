@@ -331,7 +331,7 @@ module.exports = {
                 resolve(response);
             }).catch(response => {
                 backboneEvents.get().trigger(endEventName, response);
-                callBack(response.responseJSON);
+                callBack(response);
                 reject();
             });
         });
