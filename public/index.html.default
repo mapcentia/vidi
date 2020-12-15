@@ -21,7 +21,7 @@
   ~ @author     Martin Høgh <mh@mapcentia.com>
   ~ @copyright  2013-2020 MapCentia ApS
   ~ @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
-  ~ @version    UNRELEASED
+  ~ @version    2020.12.0
 
   -->
 <html lang="en">
@@ -125,20 +125,20 @@
         console.info("Using pre-processed load screen template: " + tmpl);
     }
 </script>
-<!-- Shim -->
-<script src="/js/lib/es5-shim/es5-shim.js"></script>
-<script src="/js/lib/es6-shim/es6-shim.js"></script>
+<!-- Polyfill for IE -->
+<script src="https://cdn.polyfill.io/v2/polyfill.min.js"></script>
 <!-- Dynamic js -->
 <script src="/locale"></script>
 <script src="/api/baselayer"></script>
+<!-- Build -->
 <!-- build:js /js/build/all.min.js -->
 <script src="/js/lib/leaflet/leaflet-src.js"></script>
 <script src="/js/bundle.js"></script>
 <!-- /build -->
+<!-- Async load Javascript -->
+<script src="/js/build/all.async.min.js" async></script>
 <script>
     window.MapCentia = new Vidi().init.init();
 </script>
-<!-- Async load Javascript -->
-<script src="/js/build/all.async.min.js" async></script>
 </body>
 </html>

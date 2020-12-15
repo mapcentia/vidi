@@ -5,19 +5,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
 ## [UNRELEASED]
-### Added
-- Print can now output to PNG. If multiple pages when the PNG files are added to a zip file.
+### Changed
+- Node >= 14 er required. 
+- Docker files are added to the project.
+- It's now possible to set `gc2.host` through the environment variable `GC2_HOST`. If set in `config/config.js` it will have precedence.
 
-### Fixed
-- MapCache layer now works. Both raster and vector tiles.
-- Timeout (10.000ms) on sqlStore. Feature info will now handle errors or cancels (e.g. due to timeout) on SQL requests and a "toast" will inform the user. If timeout happens the request will be re-tried.
-- `crossMultiSelect` will always show vector feature info if a simultaneous raster SQL request fails or timeouts.
-- Memory leak fixed when reloading vector layers.
-- Interval reload of vector layers are now done with the `load` method instead of switching the layer off and on.
-- Update of interval reloaded vector layers happens only if data has changed.
-- Use native URL API instead of uriJs module.
-- Still resolve promise in `localforage.setItem`, to avoid a net:ERR_FAILED in the browser when e.g. getting feature info. The issue with not being able to setItem persist.
-
+## [2020.12.0] - 2020-8-12
 ### Changed
 - The standard template for feature info is changed, so empty fields are omitted. It's now:
 ```handlebars
@@ -31,6 +24,20 @@ and this project adheres to [CalVer](https://calver.org/).
     {{/_vidi_content.fields}}
 </div>
 ```  
+
+### Added
+- `searchConfig.placeholderText` added to config, so the search placeholder can be customized.
+
+### Fixed
+- MapCache layers now work. Both raster and vector tiles.
+- Timeout (10.000ms) on sqlStore. Feature info will now handle errors or cancels (e.g. due to timeout) on SQL requests and a "toast" will inform the user. If timeout happens the request will be re-tried.
+- `crossMultiSelect` will always show vector feature info if a simultaneous raster SQL request fails or timeouts.
+- Memory leak fixed when reloading vector layers.
+- Interval reload of vector layers are now done with the `load` method instead of switching the layer off and on.
+- Update of interval reloaded vector layers happens only if data has changed.
+- Use native URL API instead of uriJs module.
+- Still resolve promise in `localforage.setItem`, to avoid a net:ERR_FAILED in the browser when e.g. getting feature info. The issue about error on setItem persist.
+- Some fixes regarding Internet Explorer.
 
 ## [2020.11.0] - 2020-18-11
 ### Added
@@ -75,7 +82,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - Print setup is now stored in state snapshots. After state snapshot is activated the print setup will use the stored settings. The sticky toggle must be set to on or else the default print settings will be used.
 - New print API `/api/print/[database]/?state=[state id]` which will return the stored print from a snapshot as PNG (PDF is coming). The print will be created on the fly.
 - `embed.js` has two new attributes: `data-vidi-use-config` and `data-vidi-use-schema`. These will trigger the use of schema and/or config from the token if present.
-- New GC2 Meta property which automatically can open a layer tool when the layer is switch on:
+- New GC2 Meta property which automatically can open a layer tool when the layer is switched on:
     - *default_open_tools*: JSON array with tools to open. Available options: `["filters","opacity","load-strategy","search"]` ("table" are not supported)
 - New GC2 Meta properties:
     - *disable_check_box*: boolean, disables the layer check box:
@@ -97,7 +104,6 @@ and this project adheres to [CalVer](https://calver.org/).
 - New button "Fit bounds to filter" in layer filters, which will set the view extent to the bounds of the filtered layer.
 - New "Labels" panel for raster tile layers with a checkbox for hiding/showing labels on the layer. Works for both MapServer and QGIS back-end (GC2 must support this).
 - Added boolean config `crossMultiSelect` in `config/config.js`. This will enable cross multi select on both vector and raster tile layers. This will result in a unified feature info experience, which are well suited for informative maps using the `embed.tmpl` template. All feature info results will be displayed in an accordion widget. The accordion summary is default layer title, but can be set to an attribute value with the meta config `accordion_summery`. Can be set in runtime config. 
-- It's now possible to start conflict search from Drawing module. A single drawing or all drawings together can be used for search.
 - WMS layers can now be added directly as base layers. A WMS base layer example:
 ```json
 {
@@ -169,8 +175,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - `embed.tmpl` will now show login button if session module is enabled.
 - The WMS requests now has a `qgs` parameter for QGIS backed layers. The value is path to the qgs file for the layer (base64 encoded). In GC2 the path will be used to send the request directly to qgis_serv instead of cascading it through MapServer.
 - Raster tile layers without pixels (invisible in the map) are now not queried by feature info.
-- Turning on a vector layer will now load the legend of the raster tile representation of the layer.
-- Conflict search now are able to make a print with each hit and merge the PDFs together.
+- Turning on a vector layer will now load the legend of the raster tile representation of the layer
 
 ### Fixed
 - Using `indexOf` instead of `includes`, because the latter is not transpiled in Babel. It's an Internet Explorer issue.
@@ -182,7 +187,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - All numeric Postgres types are now handled correct in the editor.
 - Puppeteer processes are now destroyed, if an exception is thrown during print. This prevents leak of processes.
 - Re-acquirement of a Puppeteer process is done if timeout, so the print will eventual be finished.
-- Puppeteer processes will be destroyed after 60 seconds no matter what. This prevents hanging processes, which could blocks further prints.
+- Puppeteer processes will be destroyed after 60 seconds. This prevents hanging processes, which blocks further prints.
 
 ## [2020.2.0]
 ### Added

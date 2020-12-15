@@ -163,47 +163,47 @@ class Keeper {
         });
     }
 
-    set(key, value) {
-        this._inputParameterCheckFunction(key, value);
-        let initialCreated = value.created;
-        return new Promise((resolve, reject) => {
-            localforage.getItem(this._cacheKey).then(storedValue => {
-                if (!storedValue) storedValue = {};
-                let valueCopy = JSON.parse(JSON.stringify(storedValue));
-                valueCopy[key] = JSON.parse(JSON.stringify(value));
-                localforage.setItem(this._cacheKey, valueCopy).then(() => {
-                    // Checking if value was really saved first time
-                    this.get(key).then(storedValue => {
-                        if (!storedValue.created || (storedValue.created && storedValue.created === initialCreated)) {
-                            resolve();
-                        } else {
-                            let timeout = 300;
-                            console.error(`Value was not really saved in localforage (${storedValue.created} vs ${initialCreated}), trying again in ${timeout} ms`, JSON.stringify(value));
-                            setTimeout(() => {
-                                localforage.setItem(this._cacheKey, valueCopy).then(() => {
-                                    // Checking if value was really saved second time
-                                    this.get(key).then(storedValue => {
-                                        if (storedValue.created !== initialCreated) {
-                                            resolve();
-                                        } else {
-                                            console.error(`Still unable to save the value`);
-                                            resolve(); // We still resolve, because otherwise we ge a net:ERR_FAILED in browser
-                                        }
-                                    });
+set(key, value) {
+    this._inputParameterCheckFunction(key, value);
+    let initialCreated = value.created;
+    return new Promise((resolve, reject) => {
+        localforage.getItem(this._cacheKey).then(storedValue => {
+            if (!storedValue) storedValue = {};
+            let valueCopy = JSON.parse(JSON.stringify(storedValue));
+            valueCopy[key] = JSON.parse(JSON.stringify(value));
+            localforage.setItem(this._cacheKey, valueCopy).then(() => {
+                // Checking if value was really saved first time
+                this.get(key).then(storedValue => {
+                    if (!storedValue.created || (storedValue.created && storedValue.created === initialCreated)) {
+                        resolve();
+                    } else {
+                        let timeout = 300;
+                        console.error(`Value was not really saved in localforage (${storedValue.created} vs ${initialCreated}), trying again in ${timeout} ms`, JSON.stringify(value));
+                        setTimeout(() => {
+                            localforage.setItem(this._cacheKey, valueCopy).then(() => {
+                                // Checking if value was really saved second time
+                                this.get(key).then(storedValue => {
+                                    if (storedValue.created !== initialCreated) {
+                                        resolve();
+                                    } else {
+                                        console.error(`Still unable to save the value`);
+                                        resolve(); // We still resolve, because otherwise we ge a net:ERR_FAILED in browser
+                                    }
                                 });
-                            }, timeout);
-                        }
-                    });
-                }).catch(error => {
-                    console.error(`localforage failed to perform operation`, error);
-                    reject();
+                            });
+                        }, timeout);
+                    }
                 });
             }).catch(error => {
                 console.error(`localforage failed to perform operation`, error);
-                reject();
+                resolve(); // We still resolve, because otherwise we ge a net:ERR_FAILED in browser
             });
+        }).catch(error => {
+            console.error(`localforage failed to perform operation`, error);
+            resolve(); // We still resolve, because otherwise we ge a net:ERR_FAILED in browser
         });
-    }
+    });
+}
 
     get(key) {
         this._inputParameterCheckFunction(key);

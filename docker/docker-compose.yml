@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  base:
+    build: ./base
+    image: mapcentia/vidi:base
+  vidi:
+    build: ./stable
+    image: mapcentia/vidi:latest
+    depends_on:
+      - base

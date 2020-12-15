@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2020 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -63,7 +63,7 @@ module.exports = {
     },
     init: function (onLoad, el, onlyAddress, getProperty, caller) {
         var type1, type2, type3, type4, gids = {}, searchString, dslM, shouldA = [], shouldM = [], dsl1, dsl2, size,
-            komKode = window.vidiConfig.searchConfig.komkode, placeStores = {}, maxZoom,
+            komKode = window.vidiConfig.searchConfig.komkode, placeStores = {}, maxZoom, searchTxt,
             esrSearchActive = typeof (window.vidiConfig.searchConfig.esrSearchActive) !== "undefined" ? window.vidiConfig.searchConfig.esrSearchActive : false,
             sfeSearchActive = typeof (window.vidiConfig.searchConfig.sfeSearchActive) !== "undefined" ? window.vidiConfig.searchConfig.sfeSearchActive : false,
             advanced = typeof (window.vidiConfig.searchConfig.advanced) !== "undefined" ? window.vidiConfig.searchConfig.advanced : false,
@@ -71,15 +71,23 @@ module.exports = {
 
         if (caller !== 'init') advanced = false;
         // adjust search text
-        var searchTxt = "Adresse, matr. nr.";
-        if (sfeSearchActive) {
+        let placeholder =window.vidiConfig?.searchConfig?.placeholderText;
+        if (placeholder) {
+            searchTxt = placeholder;
             $("#custom-search").attr("placeholder",
                 searchTxt
-                + (esrSearchActive ? ", ESR nr. " : "")
-                + " eller SFE nr.");
-        } else if (esrSearchActive) {
-            $("#custom-search").attr("placeholder",
-                searchTxt + " eller ESR nr.");
+            );
+        } else {
+            searchTxt = "Adresse, matr. nr.";
+            if (sfeSearchActive) {
+                $("#custom-search").attr("placeholder",
+                    searchTxt
+                    + (esrSearchActive ? ", ESR nr. " : "")
+                    + " eller SFE nr.");
+            } else if (esrSearchActive) {
+                $("#custom-search").attr("placeholder",
+                    searchTxt + " eller ESR nr.");
+            }
         }
 
         let colorPicker = ` 

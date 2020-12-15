@@ -23,6 +23,17 @@ var config = require('./config/config.js');
 var store;
 var app = express();
 
+if (!config?.gc2?.host) {
+    if (!config?.gc2) {
+        config.gc2 = {};
+    }
+    config.gc2.host = process.env.GC2_HOST;
+}
+if (!config?.gc2?.host) {
+    console.error("No GC2 host set. Set it through the environment variable GC2_HOST or in config/config.js");
+    process.exit(0)
+}
+
 app.use(compression());
 app.use(cors());
 app.use(cookieParser());
