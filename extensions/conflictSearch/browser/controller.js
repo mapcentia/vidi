@@ -55,12 +55,7 @@ module.exports = {
 
         // Handle GUI when print is done. Using at custom event, so standard print is not triggered
         backboneEvents.get().on(endPrintEventName, function (response) {
-            $("#conflict-get-print-fieldset").prop("disabled", false);
-            $("#conflict-download-pdf, #conflict-open-pdf").prop("href", "/tmp/print/pdf/" + response.key + ".pdf");
-            $("#conflict-open-html").prop("href", response.url);
-            $("#conflict-print-btn").button('reset');
-            backboneEvents.get().trigger("end:conflictSearchPrint", response);
-            console.log("GEMessage:LaunchURL:" + urlparser.urlObj.protocol + "://" +  urlparser.urlObj.host + "/tmp/print/pdf/" + response.key + ".pdf");
+            console.log("GEMessage:LaunchURL:" + urlparser.urlObj.protocol + "://" + urlparser.urlObj.host + "/tmp/print/pdf/" + response.key + ".pdf");
 
         });
 
@@ -118,56 +113,18 @@ module.exports = {
                     htmlAllowed: true,
                     timeout: 1000000
                 });
-                // let iter = (n) => {
-                //     let clone = JSON.parse(JSON.stringify(positiveHits));
-                //     let hit = Object.keys(hits)[n]
-                //     console.log(hit)
-                //     clone.hits = {};
-                //     clone.layer = hit;
-                //     clone.hits[hit] = positiveHits.hits[hit];
-                //     print.print(endPrintEventName, clone).then((res) => {
-                //         track.push(res.key);
-                //         count++
-                //         $("#conflict-print-progress").html(`${count}/${numOfHits}`);
-                //         if (numOfHits === count) {
-                //             print.cleanUp(true);
-                //             $("#conflict-set-print-area-btn").prop("disabled", false);
-                //             $.ajax({
-                //                 dataType: `json`,
-                //                 method: `POST`,
-                //                 url: `/api/mergePrint/`,
-                //                 contentType: `application/json`,
-                //                 data: JSON.stringify(track),
-                //                 scriptCharset: `utf-8`,
-                //                 success: (response) => {
-                //                     $("#conflict-get-print-fieldset").prop("disabled", false);
-                //                     $("#conflict-download-pdf, #conflict-open-pdf").prop("href", "/tmp/print/pdf/" + response.key + ".pdf");
-                //                     $("#conflict-print-btn").button('reset');
-                //                     backboneEvents.get().trigger("end:conflictSearchPrint", response);
-                //                     setTimeout(function () {
-                //                         $("#snackbar-conflict-print").snackbar("hide");
-                //                     }, 200);
-                //                 },
-                //                 //error: reject
-                //             });
-                //         } else {
-                //             iter(count)
-                //         }
-                //     });
-                // }
-                // iter(count)
-
-                for (const property in positiveHits.hits) {
+                let iter = n => {
                     let clone = JSON.parse(JSON.stringify(positiveHits));
+                    let hit = Object.keys(hits)[n]
+                    console.log(hit)
                     clone.hits = {};
-                    clone.layer = property;
-                    clone.hits[property] = positiveHits.hits[property];
-                    print.print(endPrintEventName, clone).then((res) => {
+                    clone.layer = hit;
+                    clone.hits[hit] = positiveHits.hits[hit];
+                    print.print(endPrintEventName, clone).then(res => {
                         track.push(res.key);
-                        count++
+                        count++;
                         $("#conflict-print-progress").html(`${count}/${numOfHits}`);
                         if (numOfHits === count) {
-                            console.log(track);
                             print.cleanUp(true);
                             $("#conflict-set-print-area-btn").prop("disabled", false);
                             $.ajax({
@@ -178,7 +135,6 @@ module.exports = {
                                 data: JSON.stringify(track),
                                 scriptCharset: `utf-8`,
                                 success: (response) => {
-                                    console.log(response);
                                     $("#conflict-get-print-fieldset").prop("disabled", false);
                                     $("#conflict-download-pdf, #conflict-open-pdf").prop("href", "/tmp/print/pdf/" + response.key + ".pdf");
                                     $("#conflict-print-btn").button('reset');
@@ -186,14 +142,56 @@ module.exports = {
                                     setTimeout(function () {
                                         $("#snackbar-conflict-print").snackbar("hide");
                                     }, 200);
-
                                 },
                                 //error: reject
                             });
                         } else {
+                            iter(count)
                         }
+                    }, err => {
+                        console.log(count)
+                        setTimeout(() => iter(count), 1000);
                     });
                 }
+                iter(count);
+
+                // for (const property in positiveHits.hits) {
+                //     let clone = JSON.parse(JSON.stringify(positiveHits));
+                //     clone.hits = {};
+                //     clone.layer = property;
+                //     clone.hits[property] = positiveHits.hits[property];
+                //     print.print(endPrintEventName, clone).then((res) => {
+                //         track.push(res.key);
+                //         count++
+                //         $("#conflict-print-progress").html(`${count}/${numOfHits}`);
+                //         if (numOfHits === count) {
+                //             console.log(track);
+                //             print.cleanUp(true);
+                //             $("#conflict-set-print-area-btn").prop("disabled", false);
+                //             $.ajax({
+                //                 dataType: `json`,
+                //                 method: `POST`,
+                //                 url: `/api/mergePrint/`,
+                //                 contentType: `application/json`,
+                //                 data: JSON.stringify(track),
+                //                 scriptCharset: `utf-8`,
+                //                 success: (response) => {
+                //                     console.log(response);
+                //                     $("#conflict-get-print-fieldset").prop("disabled", false);
+                //                     $("#conflict-download-pdf, #conflict-open-pdf").prop("href", "/tmp/print/pdf/" + response.key + ".pdf");
+                //                     $("#conflict-print-btn").button('reset');
+                //                     backboneEvents.get().trigger("end:conflictSearchPrint", response);
+                //                     setTimeout(function () {
+                //                         $("#snackbar-conflict-print").snackbar("hide");
+                //                     }, 200);
+                //
+                //                 },
+                //                 //error: reject
+                //             });
+                //         } else {
+                //         }
+                //     });
+                // }
             }
         );
 
