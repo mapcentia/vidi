@@ -9,6 +9,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - Node >= 14 er required. 
 - Docker files are added to the project.
 - It's now possible to set `gc2.host` through the environment variable `GC2_HOST`. If set in `config/config.js` it will have precedence.
+- ConflictSearch is now controlled by state module. It will keep state between on/off and browser refreshes. State in conflictSearch is also applied when running a state-snapshot. 
 
 ## [2020.12.0] - 2020-8-12
 ### Changed
@@ -24,7 +25,6 @@ and this project adheres to [CalVer](https://calver.org/).
     {{/_vidi_content.fields}}
 </div>
 ```  
-- ConflictSearch is now controlled by state module. It will keep state between on/off and browser refreshes. State in conflictSearch is also applied when running a state-snapshot. 
 
 
 ### Added
