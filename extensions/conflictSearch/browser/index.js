@@ -36,6 +36,8 @@ var search;
  */
 var backboneEvents;
 
+var serializeLayers;
+
 /**
  *
  * @type {*|exports|module.exports}
@@ -74,6 +76,7 @@ var bufferSlider;
  * @type {Element}
  */
 var bufferValue;
+var currentBufferValue;
 
 /**
  * @type {*|exports|module.exports}
@@ -237,6 +240,12 @@ var _zoomToFeature = function (table, key, fid) {
     dataStore.load();
 };
 
+var hitsTable;
+var hitsData;
+var noHitsTable;
+var errorTable;
+var visibleLayers;
+var projWktWithBuffer;
 /**
  *
  * @type set: module.exports.set, init: module.exports.init
@@ -254,6 +263,7 @@ module.exports = module.exports = {
         meta = o.meta;
         backboneEvents = o.backboneEvents;
         socketId = o.socketId;
+        serializeLayers = o.serializeLayers;
         print = o.print;
 
         // Hack to compile Glob files. Don´t call this function!
@@ -316,6 +326,7 @@ module.exports = module.exports = {
         search.init(function () {
             _clearDrawItems();
             _clearDataItems();
+            this.layer._layers[Object.keys(this.layer._layers)[0]]._vidi_type = "query_draw"; // Tag it, so it serialized
             drawnItems.addLayer(this.layer._layers[Object.keys(this.layer._layers)[0]]);
             cloud.zoomToExtentOfgeoJsonStore(this, 17);
             me.makeSearch($("#conflict-custom-search").val());
@@ -333,8 +344,12 @@ module.exports = module.exports = {
                     max: 500
                 }
             });
-            bufferSlider.noUiSlider.on('update', debounce(function (values, handle) {
+            bufferSlider.noUiSlider.on('update', function (values, handle) {
                 bufferValue.value = values[handle];
+                currentBufferValue = bufferValue.value;
+            });
+            bufferSlider.noUiSlider.on('change', debounce(function (values, handle) {
+                //currentBufferValue = values[handle];
                 bufferItems.clearLayers();
                 me.makeSearch()
 
@@ -358,6 +373,10 @@ module.exports = module.exports = {
     control: function () {
         var me = this;
 
+        hitsTable = $("#hits-content tbody");
+        hitsData = $("#hits-data");
+        noHitsTable = $("#nohits-content tbody");
+        errorTable = $("#error-content tbody");
         // Start listen to the web socket
         io.connect().on(socketId.get(), function (data) {
             if (typeof data.num !== "undefined") {
@@ -525,13 +544,8 @@ module.exports = module.exports = {
     makeSearch: function (text, callBack, id = null) {
         var primitive, coord,
             layer, buffer = parseFloat($("#conflict-buffer-value").val()), bufferValue = buffer,
-            hitsTable = $("#hits-content tbody"),
-            noHitsTable = $("#nohits-content tbody"),
-            errorTable = $("#error-content tbody"),
-            hitsData = $("#hits-data"),
-            row, fileId, searchFinish, geomStr,
-            metaDataKeys = meta.getMetaDataKeys(),
-            visibleLayers = cloud.getAllTypesOfVisibleLayers().split(";");
+            _self = this;
+        visibleLayers = cloud.getAllTypesOfVisibleLayers().split(";");
         if (text) {
             currentFromText = text;
         }
@@ -584,7 +598,6 @@ module.exports = module.exports = {
 
             var buffer4326 = reproject.reproject(writer.write(geom.geometry.buffer(buffer)), "proj", "unproj", crss);
 
-            var projWktWithBuffer;
             if (buffer === 0) {
                 projWktWithBuffer = Terraformer.convert(writer.write(geom.geometry));
             } else {
@@ -628,164 +641,260 @@ module.exports = module.exports = {
                     url: "/api/extension/conflictSearch",
                     data: "db=" + db + "&schema=" + (searchLoadedLayers ? schemataStr : "") + (searchStr !== "" ? "," + searchStr : "") + "&socketId=" + socketId.get() + "&layers=" + visibleLayers.join(",") + "&buffer=" + bufferValue + "&text=" + currentFromText + "&wkt=" + Terraformer.convert(buffer4326),
                     scriptCharset: "utf-8",
-                    success: function (response) {
-                        var hitsCount = 0, noHitsCount = 0, errorCount = 0, resultOrigin, groups = [];
-                        _result = response;
-                        setTimeout(function () {
-                            $("#snackbar-conflict").snackbar("hide");
-                        }, 200);
-                        $("#spinner span").hide();
-                        $("#result-origin").html(response.text);
-                        $('#conflict-main-tabs a[href="#conflict-result-content"]').tab('show');
-                        $('#conflict-result-content a[href="#hits-content"]').tab('show');
-                        $('#conflict-result .btn:first-child').attr("href", "/html?id=" + response.file)
-                        $("#conflict-download-pdf").prop("download", `Søgning foretaget med ${response.text} d. ${response.dateTime}`);
-
-                        fileId = response.file;
-                        searchFinish = true;
-                        resultOrigin = response.text || "Na";
-
-                        $.each(response.hits, function (i, v) {
-                            v.meta.layergroup = v.meta.layergroup != null ? v.meta.layergroup : "Ungrouped";
-                            groups.push(v.meta.layergroup);
-                        });
-                        groups = array_unique(groups.reverse());
-                        for (let i = 0; i < groups.length; ++i) {
-                            row = "<tr><td><h4 style='font-weight: 400'>" + groups[i] + "</h4></td><td></td><td></td></tr>";
-                            hitsTable.append(row);
-                            let count = 0;
-                            $.each(response.hits, function (u, v) {
-                                if (v.hits > 0) {
-                                    let metaData = v.meta;
-                                    if (metaData.layergroup === groups[i]) {
-                                        count++;
-                                        let title = (typeof metaData.f_table_title !== "undefined" && metaData.f_table_title !== "" && metaData.f_table_title !== null) ? metaData.f_table_title : u;
-                                        row = "<tr><td>" + title + "</td><td>" + v.hits + "</td><td><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + u + "' " + ($.inArray(u, visibleLayers) > -1 ? "checked" : "") + "></label></div></td></tr>";
-                                        hitsTable.append(row);
-                                    }
-                                }
-                            });
-                            // Remove empty groups
-                            if (count === 0) {
-                                hitsTable.find("tr").last().remove();
-                            }
-                        }
-
-                        for (let u = 0; u < groups.length; ++u) {
-                            row = "<h4 style='font-weight: 400'>" + groups[u] + "</h4><hr style='margin-top: 2px; border-top: 1px solid #aaa'>";
-                            hitsData.append(row);
-                            let count = 0;
-                            $.each(response.hits, function (i, v) {
-                                var table = i, table1, table2, tr, td, title, metaData = v.meta;
-                                if (metaData.layergroup === groups[u]) {
-                                    title = (typeof metaData.f_table_title !== "undefined" && metaData.f_table_title !== "" && metaData.f_table_title !== null) ? metaData.f_table_title : table;
-                                    if (v.error === null) {
-                                        if (metaData.meta_url) {
-                                            title = "<a target='_blank' href='" + metaData.meta_url + "'>" + title + "</a>";
-                                        }
-                                        row = "<tr><td>" + title + "</td><td>" + v.hits + "</td><td><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + i + "' " + ($.inArray(i, visibleLayers) > -1 ? "checked" : "") + "></label></div></td></tr>";
-                                        if (v.hits > 0) {
-                                            count++;
-                                            hitsCount++;
-                                            table1 = $("<table class='table table-data'/>");
-                                            hitsData.append("<h5>" + title + " (" + v.hits + ")<div class='checkbox' style='float: right; margin-top: 25px'><label><input type='checkbox' data-gc2-id='" + i + "' " + ($.inArray(i, visibleLayers) > -1 ? "checked" : "") + "></label></div></h5>");
-                                            let conflictForLayer = metaData.meta !== null ? JSON.parse(metaData.meta) : null;
-                                            if (conflictForLayer !== null && 'short_conflict_meta_desc' in conflictForLayer) {
-                                                hitsData.append("<p style='margin: 0'>" + conflictForLayer.short_conflict_meta_desc + "</p>");
-                                            }
-                                            if (conflictForLayer !== null && 'long_conflict_meta_desc' in conflictForLayer && conflictForLayer.long_conflict_meta_desc !== '') {
-                                                $(`<i style="cursor: pointer; color: #999999">Lagbeskrivelse - klik her</i>`).appendTo(hitsData).on("click", function () {
-                                                    let me = this;
-                                                    if ($(me).next().children().length === 0) {
-                                                        $(me).next().html(`<div class="alert alert-dismissible alert-info" role="alert" style="background-color: #d4d4d4; color: #333; padding: 7px 30px 7px 7px">
-                                                                            <button type="button" class="close" data-dismiss="alert">×</button>${conflictForLayer.long_conflict_meta_desc}
-                                                                        </div>`);
-                                                    } else {
-                                                        $(me).next().find(".alert").alert('close');
-                                                    }
-                                                });
-                                                $(`<div></div>`).appendTo(hitsData);
-                                            }
-                                            if (v.data.length > 0) {
-                                                $.each(v.data, function (u, row) {
-                                                    var key = null, fid = null;
-                                                    tr = $("<tr style='border-top: 0px solid #eee'/>");
-                                                    td = $("<td/>");
-                                                    table2 = $("<table style='margin-bottom: 5px; margin-top: 5px;' class='table'/>");
-                                                    row.sort((a, b) => (a.sort_id > b.sort_id) ? 1 : ((b.sort_id > a.sort_id) ? -1 : 0));
-                                                    $.each(row, function (n, field) {
-                                                        if (!field.key) {
-                                                            if (!field.link) {
-                                                                table2.append("<tr><td class='conflict-heading-cell' '>" + field.alias + "</td><td class='conflict-value-cell'>" + (field.value !== null ? field.value : "&nbsp;") + "</td></tr>");
-                                                            } else {
-                                                                let link = "&nbsp;";
-                                                                if (field.value && field !== "") {
-                                                                    link = "<a target='_blank' rel='noopener' href='" + (field.linkprefix ? field.linkprefix : "") + field.value + "'>Link</a>"
-                                                                }
-                                                                table2.append("<tr><td class='conflict-heading-cell'>" + field.alias + "</td><td class='conflict-value-cell'>" + link + "</td></tr>")
-                                                            }
-                                                        } else {
-                                                            key = field.name;
-                                                            fid = field.value;
-                                                        }
-                                                    });
-                                                    td.append(table2);
-                                                    tr.append("<td style='width: 60px'><button type='button' class='btn btn-default btn-xs zoom-to-feature' data-gc2-sf-table='" + i + "' data-gc2-sf-key='" + key + "' data-gc2-sf-fid='" + fid + "'>#" + (u + 1) + " <i class='fa fa-search'></i></button></td>");
-                                                    tr.append(td);
-                                                    table1.append(tr);
-                                                });
-                                            }
-                                            hitsData.append(table1);
-                                        } else {
-                                            noHitsTable.append(row);
-                                            noHitsCount++;
-                                        }
-                                    } else {
-                                        row = "<tr><td>" + title + "</td><td>" + v.error + "</td></tr>";
-                                        errorTable.append(row);
-                                        errorCount++;
-                                    }
-                                    $('#conflict-result-content a[href="#hits-content"] span').html(" (" + hitsCount + ")");
-                                    $('#conflict-result-content a[href="#nohits-content"] span').html(" (" + noHitsCount + ")");
-                                    $('#conflict-result-content a[href="#error-content"] span').html(" (" + errorCount + ")");
-                                    $('#conflict-result-origin').html(`Søgning foretaget med: <b>${resultOrigin}</b>`);
-                                }
-
-                            });
-
-                            // Remove empty groups
-                            if (count === 0) {
-                                hitsData.find("h4").last().remove();
-                                hitsData.find("hr").last().remove();
-                            }
-
-                        }
-                        $(".zoom-to-feature").click(function (e) {
-                            _zoomToFeature($(this).data('gc2-sf-table'), $(this).data('gc2-sf-key'), $(this).data('gc2-sf-fid'));
-                            e.stopPropagation();
-                        });
-
-                        backboneEvents.get().trigger("end:conflictSearch", {
-                            "projWktWithBuffer": projWktWithBuffer,
-                            "file": response.file
-                        });
-
-                        L.geoJson(response.geom, {
-                            "color": "#ff7800",
-                            "weight": 1,
-                            "opacity": 0.65,
-                            "dashArray": '5,3'
-                        });
-                        geomStr = response.geom;
-                        if (callBack) {
-                            callBack();
-                        }
-                    },
+                    success: _self.handleResult,
                     error: function () {
                         $("#snackbar-conflict").snackbar("hide");
                     }
                 })
             })
+        }
+    },
+    recreateDrawings: (parr, l) => {
+        let GeoJsonAdded = false;
+        let v = parr;
+
+        if (parr.length === 1) {
+            $.each(v[0].geojson.features, function (n, m) {
+                // If polyline or polygon
+                // ======================
+                if (m.type === "Feature" && GeoJsonAdded === false) {
+                    var json = L.geoJson(m, {
+                        style: function (f) {
+                            return f.style;
+                        }
+                    });
+
+                    var g = json._layers[Object.keys(json._layers)[0]];
+
+                    // Adding vidi-specific properties
+                    g._vidi_type = m._vidi_type;
+
+                    l.addLayer(g);
+                }
+
+                // If circle
+                // =========
+                if (m.type === "Circle") {
+                    g = L.circle(m._latlng, m._mRadius, m.style);
+                    g.feature = m.feature;
+
+                    // Adding vidi-specific properties
+                    g._vidi_type = m._vidi_type;
+
+                    l.addLayer(g);
+                }
+
+                // If rectangle
+                // ============
+                if (m.type === "Rectangle") {
+                    g = L.rectangle([m._latlngs[0], m._latlngs[2]], m.style);
+                    g.feature = m.feature;
+
+                    // Adding vidi-specific properties
+                    g._vidi_type = m._vidi_type;
+
+                    l.addLayer(g);
+                }
+
+                // If circle marker
+                // ================
+                if (m.type === "CircleMarker") {
+                    g = L.circleMarker(m._latlng, m.options);
+                    g.feature = m.feature;
+
+                    // Add label
+                    if (m._vidi_marker_text) {
+                        g.bindTooltip(m._vidi_marker_text, {permanent: true}).on("click", () => {
+                        }).openTooltip();
+                    }
+
+                    // Adding vidi-specific properties
+                    g._vidi_marker = true;
+                    g._vidi_type = m._vidi_type;
+                    g._vidi_marker_text = m._vidi_marker_text;
+
+                    l.addLayer(g);
+                }
+
+                // If marker
+                // =========
+                if (m.type === "Marker") {
+                    g = L.marker(m._latlng, m.style);
+                    g.feature = m.feature;
+
+                    // Add label
+                    if (m._vidi_marker_text) {
+                        g.bindTooltip(m._vidi_marker_text, {permanent: true}).on("click", function () {
+                        }).openTooltip();
+                    }
+
+                    // Adding vidi-specific properties
+                    g._vidi_marker = true;
+                    g._vidi_type = m._vidi_type;
+                    g._vidi_marker_text = null;
+
+                    l.addLayer(g);
+                }
+            });
+        }
+    },
+    handleResult: function (response) {
+        visibleLayers = cloud.getAllTypesOfVisibleLayers().split(";"); // Must be set here also, if result is coming from state
+        var hitsCount = 0, noHitsCount = 0, errorCount = 0, resultOrigin, groups = [];
+        _result = response;
+        setTimeout(function () {
+            $("#snackbar-conflict").snackbar("hide");
+        }, 200);
+        $("#spinner span").hide();
+        $("#result-origin").html(response.text);
+        $('#conflict-main-tabs a[href="#conflict-result-content"]').tab('show');
+        $('#conflict-result-content a[href="#hits-content"]').tab('show');
+        $('#conflict-result .btn:first-child').attr("href", "/html?id=" + response.file)
+        $("#conflict-download-pdf").prop("download", `Søgning foretaget med ${response.text} d. ${response.dateTime}`);
+
+        if ('bufferItems' in response) {
+            this.recreateDrawings(JSON.parse(response.bufferItems), bufferItems);
+        }
+        if ('drawnItems' in response) {
+            this.recreateDrawings(JSON.parse(response.drawnItems), drawnItems);
+        }
+
+        resultOrigin = response.text || "Na";
+
+        $.each(response.hits, function (i, v) {
+            v.meta.layergroup = v.meta.layergroup != null ? v.meta.layergroup : "Ungrouped";
+            groups.push(v.meta.layergroup);
+        });
+        groups = array_unique(groups.reverse());
+        for (let i = 0; i < groups.length; ++i) {
+            let row = "<tr><td><h4 style='font-weight: 400'>" + groups[i] + "</h4></td><td></td><td></td></tr>";
+            hitsTable.append(row);
+            let count = 0;
+            $.each(response.hits, function (u, v) {
+                if (v.hits > 0) {
+                    let metaData = v.meta;
+                    if (metaData.layergroup === groups[i]) {
+                        count++;
+                        let title = (typeof metaData.f_table_title !== "undefined" && metaData.f_table_title !== "" && metaData.f_table_title !== null) ? metaData.f_table_title : u;
+                        row = "<tr><td>" + title + "</td><td>" + v.hits + "</td><td><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + u + "' " + ($.inArray(u, visibleLayers) > -1 ? "checked" : "") + "></label></div></td></tr>";
+                        hitsTable.append(row);
+                    }
+                }
+            });
+            // Remove empty groups
+            if (count === 0) {
+                hitsTable.find("tr").last().remove();
+            }
+        }
+
+        for (let u = 0; u < groups.length; ++u) {
+            let row = "<h4 style='font-weight: 400'>" + groups[u] + "</h4><hr style='margin-top: 2px; border-top: 1px solid #aaa'>";
+            hitsData.append(row);
+            let count = 0;
+            $.each(response.hits, function (i, v) {
+                var table = i, table1, table2, tr, td, title, metaData = v.meta;
+                if (metaData.layergroup === groups[u]) {
+                    title = (typeof metaData.f_table_title !== "undefined" && metaData.f_table_title !== "" && metaData.f_table_title !== null) ? metaData.f_table_title : table;
+                    if (v.error === null) {
+                        if (metaData.meta_url) {
+                            title = "<a target='_blank' href='" + metaData.meta_url + "'>" + title + "</a>";
+                        }
+                        row = "<tr><td>" + title + "</td><td>" + v.hits + "</td><td><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + i + "' " + ($.inArray(i, visibleLayers) > -1 ? "checked" : "") + "></label></div></td></tr>";
+                        if (v.hits > 0) {
+                            count++;
+                            hitsCount++;
+                            table1 = $("<table class='table table-data'/>");
+                            hitsData.append("<h5>" + title + " (" + v.hits + ")<div class='checkbox' style='float: right; margin-top: 25px'><label><input type='checkbox' data-gc2-id='" + i + "' " + ($.inArray(i, visibleLayers) > -1 ? "checked" : "") + "></label></div></h5>");
+                            let conflictForLayer = metaData.meta !== null ? JSON.parse(metaData.meta) : null;
+                            if (conflictForLayer !== null && 'short_conflict_meta_desc' in conflictForLayer) {
+                                hitsData.append("<p style='margin: 0'>" + conflictForLayer.short_conflict_meta_desc + "</p>");
+                            }
+                            if (conflictForLayer !== null && 'long_conflict_meta_desc' in conflictForLayer && conflictForLayer.long_conflict_meta_desc !== '') {
+                                $(`<i style="cursor: pointer; color: #999999">Lagbeskrivelse - klik her</i>`).appendTo(hitsData).on("click", function () {
+                                    let me = this;
+                                    if ($(me).next().children().length === 0) {
+                                        $(me).next().html(`<div class="alert alert-dismissible alert-info" role="alert" style="background-color: #d4d4d4; color: #333; padding: 7px 30px 7px 7px">
+                                                                            <button type="button" class="close" data-dismiss="alert">×</button>${conflictForLayer.long_conflict_meta_desc}
+                                                                        </div>`);
+                                    } else {
+                                        $(me).next().find(".alert").alert('close');
+                                    }
+                                });
+                                $(`<div></div>`).appendTo(hitsData);
+                            }
+                            if (v.data.length > 0) {
+                                $.each(v.data, function (u, row) {
+                                    var key = null, fid = null;
+                                    tr = $("<tr style='border-top: 0px solid #eee'/>");
+                                    td = $("<td/>");
+                                    table2 = $("<table style='margin-bottom: 5px; margin-top: 5px;' class='table'/>");
+                                    row.sort((a, b) => (a.sort_id > b.sort_id) ? 1 : ((b.sort_id > a.sort_id) ? -1 : 0));
+                                    $.each(row, function (n, field) {
+                                        if (!field.key) {
+                                            if (!field.link) {
+                                                table2.append("<tr><td class='conflict-heading-cell' '>" + field.alias + "</td><td class='conflict-value-cell'>" + (field.value !== null ? field.value : "&nbsp;") + "</td></tr>");
+                                            } else {
+                                                let link = "&nbsp;";
+                                                if (field.value && field !== "") {
+                                                    link = "<a target='_blank' rel='noopener' href='" + (field.linkprefix ? field.linkprefix : "") + field.value + "'>Link</a>"
+                                                }
+                                                table2.append("<tr><td class='conflict-heading-cell'>" + field.alias + "</td><td class='conflict-value-cell'>" + link + "</td></tr>")
+                                            }
+                                        } else {
+                                            key = field.name;
+                                            fid = field.value;
+                                        }
+                                    });
+                                    td.append(table2);
+                                    tr.append("<td style='width: 60px'><button type='button' class='btn btn-default btn-xs zoom-to-feature' data-gc2-sf-table='" + i + "' data-gc2-sf-key='" + key + "' data-gc2-sf-fid='" + fid + "'>#" + (u + 1) + " <i class='fa fa-search'></i></button></td>");
+                                    tr.append(td);
+                                    table1.append(tr);
+                                });
+                            }
+                            hitsData.append(table1);
+                        } else {
+                            noHitsTable.append(row);
+                            noHitsCount++;
+                        }
+                    } else {
+                        row = "<tr><td>" + title + "</td><td>" + v.error + "</td></tr>";
+                        errorTable.append(row);
+                        errorCount++;
+                    }
+                    $('#conflict-result-content a[href="#hits-content"] span').html(" (" + hitsCount + ")");
+                    $('#conflict-result-content a[href="#nohits-content"] span').html(" (" + noHitsCount + ")");
+                    $('#conflict-result-content a[href="#error-content"] span').html(" (" + errorCount + ")");
+                    $('#conflict-result-origin').html(`Søgning foretaget med: <b>${resultOrigin}</b>`);
+                }
+
+            });
+
+            // Remove empty groups
+            if (count === 0) {
+                hitsData.find("h4").last().remove();
+                hitsData.find("hr").last().remove();
+            }
+
+        }
+        $(".zoom-to-feature").click(function (e) {
+            _zoomToFeature($(this).data('gc2-sf-table'), $(this).data('gc2-sf-key'), $(this).data('gc2-sf-fid'));
+            e.stopPropagation();
+        });
+
+        backboneEvents.get().trigger("end:conflictSearch", {
+            "projWktWithBuffer": projWktWithBuffer,
+            "file": response.file
+        });
+
+        L.geoJson(response.geom, {
+            "color": "#ff7800",
+            "weight": 1,
+            "opacity": 0.65,
+            "dashArray": '5,3'
+        });
+        let geomStr = response.geom;
+        if (callBack) {
+            callBack();
         }
     },
     addDrawing: function (layer) {
@@ -795,6 +904,11 @@ module.exports = module.exports = {
         _clearDrawItems(clearOnlyBuffer);
     },
     getResult: function () {
+        let drawnItems = JSON.stringify(serializeLayers.serializeQueryDrawnItems(true));
+        let bufferItems = JSON.stringify(serializeLayers.serializeQueryBufferItems(true));
+        _result.drawnItems = drawnItems;
+        _result.bufferItems = bufferItems;
+        _result.bufferValue = parseFloat(currentBufferValue);
         return _result;
     },
     setPreProcessor: function (fn) {
@@ -805,6 +919,9 @@ module.exports = module.exports = {
     },
     getBufferItems: function () {
         return bufferItems;
+    },
+    setValueForNoUiSlider: function (v) {
+        bufferSlider.noUiSlider.set([v]);
     }
 };
 

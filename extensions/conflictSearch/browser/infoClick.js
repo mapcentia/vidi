@@ -58,10 +58,10 @@ module.exports = {
                     wkt = "POINT(" + coords.x + " " + coords.y + ")";
                     sqlQuery.init(qstore, wkt, "3857", null, null, [coords.lat, coords.lng], false, false, false, () => {
                     }, (id, layer) => {
-                        conflictSearch.clearDrawing(true);
+                        conflictSearch.clearDrawing(false);
                         conflictSearch.addDrawing(layer);
                         conflictSearch.makeSearch(fromObjectText, ()=>{}, id);
-                    }, "conflict-", true, "Klik på et resultat for at foretage en søgning indenfor afgrænsningen");
+                    }, "conflict-", true, "Klik på et resultat for at foretage en søgning indenfor afgrænsningen", "query_draw");
                 }, 250);
             }
         });

@@ -24,6 +24,8 @@ and this project adheres to [CalVer](https://calver.org/).
     {{/_vidi_content.fields}}
 </div>
 ```  
+- ConflictSearch is now controlled by state module. It will keep state between on/off and browser refreshes. State in conflictSearch is also applied when running a state-snapshot. 
+
 
 ### Added
 - `searchConfig.placeholderText` added to config, so the search placeholder can be customized.
