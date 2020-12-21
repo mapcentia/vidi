@@ -82,7 +82,7 @@ class DAWASearch extends React.Component {
     };
 
     autocompleteSearch = q => {
-        console.log(`Query: ${q}`)
+        //console.log(`Query: ${q}`)
         this._fetch(q);
     };
 
@@ -105,7 +105,7 @@ class DAWASearch extends React.Component {
         }
 
         this.waitingFor = term;
-        console.log(this.waitingFor)
+        //console.log(this.waitingFor)
         
         // Call the stuff
         Promise.all(calls)
@@ -123,9 +123,9 @@ class DAWASearch extends React.Component {
                             cleaned.push(obj);
                         }
                     });
-                    console.log(cleaned);
+                    //console.log(cleaned);
                     //Only do something with the term we're expecting
-                    console.log(term)
+                    //console.log(term)
                     if (term === this.waitingFor){
                         _self.setState({
                             searchTerm: term,
