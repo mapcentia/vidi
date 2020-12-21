@@ -5,6 +5,9 @@
  */
 
 import React from 'react';
+import { throttle, debounce } from "throttle-debounce";
+import IconButton from '@material-ui/core/IconButton';
+import ClearIcon from '@material-ui/icons/Clear';
 
 function uniqBy(a, key) {
     var seen = {};
@@ -35,9 +38,11 @@ class DAWASearch extends React.Component {
             enableSFE: (props.enableSFE === undefined ) ? true : props.enableSFE,
 
             placeholder: this.buildPlaceholder(),
-            triggerAtChar: (props.triggerAtChar === undefined ) ? 4 : parseInt(props.triggerAtChar)
+            triggerAtChar: (props.triggerAtChar === undefined ) ? 0 : parseInt(props.triggerAtChar)
 
         };
+        this.autocompleteSearchDebounced = debounce(650, this.autocompleteSearch);
+        this.autocompleteSearchThrottled = throttle(650, this.autocompleteSearch);
 
     }
 
@@ -63,62 +68,82 @@ class DAWASearch extends React.Component {
         var s = _self.state;
         var term = event.target.value;
 
-        //TODO: do smth when there is only 1 result.
-
-        // If not at triggerChar, do nothing
-        if (term.length < s.triggerAtChar) {
-            _self.setState({
-                searchTerm: term,
-                searchResults: []
-            });
-        } else {
-            // run promises here to return stuff from somewhere
-            var calls = [];
-
-            // Anything
-            if (s.enableAdresse) { calls.push(this.callDawa('adresser',term));}
-            if (s.enableMatrikel) { calls.push(this.callDawa('jordstykker',term));}
-
-            // only integers
-            if (!isNaN(parseInt(term))) {
-                if (s.enableESR) { calls.push(this.callDawa('jordstykker',term, 'udvidet_esrejendomsnr'));}
-                if (s.enableBFE) { calls.push(this.callDawa('jordstykker',term, 'bfenummer'));}
-                if (s.enableSFE) { calls.push(this.callDawa('jordstykker',term, 'sfeejendomsnr'));}
+        _self.setState({
+            searchTerm: term,
+            }, () => {
+                const q = s.searchTerm;
+                if (q.length < s.triggerAtChar) {
+                    _self.autocompleteSearchThrottled(s.searchTerm);
+                } else {
+                    _self.autocompleteSearchDebounced(s.searchTerm);
             }
-            
-            // Call the stuff
-            Promise.all(calls)
-                .then( r => {
-                    var results = r;
-                    // Merge all the things
-                    try {
-                        var all = results.flat(1);
-                        var cleaned = [];
+        });
+        
+    };
 
-                        // Dont bring errors
-                        all.forEach(obj => {
-                            if (obj.hasOwnProperty('tekst')) {
-                                cleaned.push(obj);
-                            }
-                        });
+    autocompleteSearch = q => {
+        console.log(`Query: ${q}`)
+        this._fetch(q);
+    };
 
+    _fetch = (q) => {
+        var _self = this;
+        var s = _self.state;
+        var term = s.searchTerm;
+        // run promises here to return stuff from somewhere
+        var calls = [];
+
+        // Anything
+        if (s.enableAdresse) { calls.push(this.callDawa('adresser',term));}
+        if (s.enableMatrikel) { calls.push(this.callDawa('jordstykker',term));}
+
+        // only integers
+        if (!isNaN(parseInt(term))) {
+            if (s.enableESR) { calls.push(this.callDawa('jordstykker',term, 'udvidet_esrejendomsnr'));}
+            if (s.enableBFE) { calls.push(this.callDawa('jordstykker',term, 'bfenummer'));}
+            if (s.enableSFE) { calls.push(this.callDawa('jordstykker',term, 'sfeejendomsnr'));}
+        }
+
+        this.waitingFor = term;
+        console.log(this.waitingFor)
+        
+        // Call the stuff
+        Promise.all(calls)
+            .then( r => {
+                var results = r;
+                
+                // Merge all the things
+                try {
+                    var all = results.flat(1);
+                    var cleaned = [];
+
+                    // Dont bring errors
+                    all.forEach(obj => {
+                        if (obj.hasOwnProperty('tekst')) {
+                            cleaned.push(obj);
+                        }
+                    });
+                    console.log(cleaned);
+                    //Only do something with the term we're expecting
+                    console.log(term)
+                    if (term === this.waitingFor){
                         _self.setState({
                             searchTerm: term,
                             searchResults: uniqBy(cleaned, JSON.stringify).slice(0, s.resultsMax)
                         });
-                    } catch (e) {
-                        _self.setState({
-                            error: e.toString()
-                        });
-                    } 
-                })
-                .catch(err => {
+                    }
+                } catch (e) {
                     _self.setState({
                         error: e.toString()
                     });
+                } 
+            })
+            .catch(err => {
+                _self.setState({
+                    error: e.toString()
                 });
-        }
-    };
+            });
+    }
 
     callDawa = (service, term, specific = undefined) => {
         var s = this.state;
@@ -168,15 +193,25 @@ class DAWASearch extends React.Component {
         var p = this.props;
         var s = this.state;
 
+
         return (
             <div>
-                <input type='text' value= { s.searchTerm } onChange={ this.dynamicSearch } placeholder={ s.placeholder } />
+                <input id="geosag-input" type='text' value= { s.searchTerm } onChange={ this.dynamicSearch } placeholder={ s.placeholder } />
                 <ResultsList
                     results= { s.searchResults }
                     _handleResult={ _self._handleResult }
                     q={ s.searchTerm }
                     t={ s.triggerAtChar }
                 />
+                {s.searchTerm.length > 0 && 
+                <IconButton
+                    onClick={event => _self.setState({ searchResults: [], searchTerm: '' })}
+                    size= {'small'}
+                    >
+                    <ClearIcon />
+                </IconButton>
+                }
+                
             </div>
         );
     }
@@ -197,13 +232,13 @@ class ResultsList extends React.Component {
         if (this.props.results.length > 0) {
             return (
                 <div id="geosag-results">
-                    {this.props.results.map(r => <div class="geosag-result" onClick={_self._handleResult.bind(this, r)} key={r.tekst}>{r.tekst}</div>)}
+                    {this.props.results.map(r => <div className="geosag-result" onClick={_self._handleResult.bind(this, r)} key={r.tekst}>{r.tekst}</div>)}
                 </div> 
             );
         } else {
-            if (this.props.q.length > 0 && this.props.q.length > this.props.t) {
-                return <p>Der er ikke fundet noget, prøv igen.</p>
-            }
+            //if (this.props.q.length > 0 && this.props.q.length > this.props.t) {
+            //    return <p>Der er ikke fundet noget, prøv igen.</p>
+            //}
             return '';
         }
     }

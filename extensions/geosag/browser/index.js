@@ -29,6 +29,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import CheckIcon from '@material-ui/icons/Check';
 import ErrorIcon from '@material-ui/icons/Error';
 import Tooltip from '@material-ui/core/Tooltip';
+import { reject } from 'async';
 
 /**
  *
@@ -231,6 +232,7 @@ module.exports = {
                             })
                             .catch(e => {
                                 console.log(e)
+
                                 reject(e)
                             });
                     })
@@ -399,7 +401,8 @@ module.exports = {
                             matrList: [],
                             existingMatrList: [],
                             error: '',
-                            saveState: ''
+                            saveState: '',
+                            showForm: false
                         };
 
                         this.readContents = this.readContents.bind(this);
@@ -437,12 +440,12 @@ module.exports = {
                             console.log(`Starting ${exId}`)
 
                             // If neither is set, error out
-                            console.log(`user: ${user}`)
-                            console.log(`sagsnr: ${sagsnr}`)
-                            if (user == undefined && sagsnr == undefined) {
+                            //console.log(`user: ${user}`)
+                            //console.log(`sagsnr: ${sagsnr}`)
+                            if (sagsnr == undefined) {
                                 me.setState({
                                     allow: false,
-                                    error: "Mangler bruger og journalnummer."
+                                    error: "Mangler sagsnr."
                                 })
                             } else {
                                 me.refreshFromDocunote(sagsnr, user)
@@ -556,10 +559,18 @@ module.exports = {
                         getCase(sagsnr)
                         .then(r => {
                             console.log(r)
-                            _self.setState({
-                                case: r
-                            })
-                            return getExistingMatr(r.caseId)
+                            // Has error? 
+                            if (r == 'Unauthorized request') {
+                                throw 'Unauthorized request'
+                            } else if ('ErrorCode' in r){
+                                throw r["Message"]
+                            } else {
+                                _self.setState({
+                                    case: r
+                                })
+                                return getExistingMatr(r.caseId)
+                            }
+                            
                         })
                         .then(r => {
                             //console.log(r)
@@ -584,7 +595,7 @@ module.exports = {
                             console.log(e)
                             _self.setState({
                                 allow: false,
-                                error: e
+                                error: e.toString()
                             })
                         })
                     }
@@ -609,10 +620,17 @@ module.exports = {
                         _self.triggerMatrikel(id.key);
                     }
 
-                    zoomToMatrikel(key, maxZoom = 16, padding = 50) {
+                    zoomToMatrikel(key, maxZoom = 17, padding = 50) {
                         const _self = this;
                         var layer = _self.getCustomLayer(key);
-                        cloud.get().map.fitBounds(layer.getBounds(), {padding: [padding, padding], maxZoom: maxZoom});
+                        var currentZoom = cloud.get().getZoom()
+
+                        // If we're already zoomed in, keep that zoom - but center
+                        if (currentZoom > maxZoom) {
+                            cloud.get().map.fitBounds(layer.getBounds(), {padding: [padding, padding], maxZoom: currentZoom});
+                        } else {
+                            cloud.get().map.fitBounds(layer.getBounds(), {padding: [padding, padding], maxZoom: maxZoom});
+                        }
                     }
 
                     zoomToLayer() {
@@ -864,26 +882,34 @@ module.exports = {
                         const _self = this;
 
                         let basic = {
-                            fillColor: 'green', 
-                            fillOpacity: 0.5,  
+                            fillColor: '#009688',
                             weight: 2,
-                            opacity: 1,
-                            color: '#ffffff',
-                            dashArray: '3'
+                            color: '#009688',
+                            dashArray: 3
                         };
 
                         // TODO: If matrikel is in active list, show it
                         if (_self.alreadyInActive(feature.properties.key)){
-                            basic.fillColor = 'red'
-                            basic.fillOpacity = 0.75
+                            // In list
+                            basic.fillOpacity = 0.50
+                            basic.opacity = 1
+                        } else {
+                            // In "memory"
+                            basic.fillOpacity = 0
+                            basic.opacity = 0.5
+                            basic.color = '#009688'
                         }
                         return basic;
                     };
 
                     matrikelHighlightStyle = {
-                        'fillColor': 'yellow',
-                        'weight': 2,
-                        'opacity': 1
+                        fillColor: '#009688',
+                        weight: 2,
+                        opacity: 1,
+                        fillOpacity: 0.75,
+                        color: '#009688',
+                        dashArray: 3,
+                        fillOpacity: 3
                     };
 
                     matrikelOnEachFeature(feature, layer) {
@@ -891,18 +917,27 @@ module.exports = {
                         var p = feature.properties
 
                         // Construct popup content
+                        var closeAndRedraw =  () => {
+                            layer.closePopup();
+                            //layer.setStyle(_self.matrikelHighlightStyle);
+                            //matrikelLayer.setStyle(_self.matrikelStyle);
+                        }
 
                         var container = $('<div />');
                         container.on('click', '.addMatrikel', function() {
+                            closeAndRedraw();
                             _self.addMatrikel({matrikelnr: p.matrikelnr, ejerlav: p.ejerlavkode}, true);
                         });
                         container.on('click', '.addEjendom', function() {
+                            closeAndRedraw();
                             _self.addEjendom(p.bfenummer);
                         });
                         container.on('click', '.deleteMatrikel', function() {
+                            closeAndRedraw();
                             _self.deleteMatrikel({key:p.key});
                         });
                         container.on('click', '.deleteEjendom', function() {
+                            closeAndRedraw();
                             _self.deleteEjendom(p.bfenummer);
                         });
 
@@ -998,18 +1033,25 @@ module.exports = {
                             textAlign: 'center',
                             fontSize: '2rem',
                             margin: '1rem',
-                            height: '50px',
                             backgroundColor: '#eda72d'
+                        }
+                        const tooltipStyle = {
+                            fontSize: '1rem'
+                        }
+
+                        const flexStyle = {
+                            display: 'flex',
+                            alignItems: 'center',
                         }
 
                         var saveButton = () => {
                             switch(s.saveState) {
                                 case 'saving':
-                                    return <Tooltip title={'Gemmer i på sagen'}><CircularProgress color={"primary"}/></Tooltip>
+                                    return <Tooltip title={<span style={tooltipStyle}>Gemmer på sagen</span>}><CircularProgress color={"primary"}/></Tooltip>
                                 case 'done':
-                                    return <Tooltip title={'Alt OK'}><CheckIcon /></Tooltip>
+                                    return <Tooltip title={<span style={tooltipStyle}>Alt OK</span>}><CheckIcon /></Tooltip>
                                 default:
-                                    return <Tooltip title={'Gem ændringer'}><IconButton color={"primary"} onClick={_self.saveChangesHandler.bind(this, s.matrList)}><SaveIcon /></IconButton></Tooltip>
+                                    return <Tooltip title={<span style={tooltipStyle}>Gem ændringer</span>}><IconButton color={"primary"} onClick={_self.saveChangesHandler.bind(this, s.matrList)}><SaveIcon /></IconButton></Tooltip>
                             }
                         }
 
@@ -1020,11 +1062,14 @@ module.exports = {
                                         {s.error.length > 0 && <div style={error} >{s.error}</div>}
                                         <h4>Journalnummer: {s.case.number} {_self.hasChanges() && saveButton()}</h4>
                                         <p>{s.case.title}</p>
-                                        <DAWASearch 
+                                        <div style={flexStyle}>
+                                            <div style={{alignSelf: 'center'}}>
+                                            <DAWASearch 
                                             _handleResult = {_self.findMatrikel}
-                                            triggerAtChar = {3}
                                             nocache = {true}
-                                        />
+                                            />
+                                            </div>
+                                        </div>
                                         <MatrikelTable
                                             matrListe = {s.matrList}
                                             shorterLength = {40}
@@ -1038,8 +1083,7 @@ module.exports = {
                             return (
                                 <div role = "tabpanel" >
                                     <div className = "form-group" >
-                                        {s.error.length > 0 && <div style={error} >{s.error}</div>}
-                                        Indlæser.
+                                        {s.error.length > 0 ? <div style={error} >{s.error}</div> : 'Indlæser...'}
                                     </div>
                                 </div>
                             )

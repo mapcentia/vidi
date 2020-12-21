@@ -11,6 +11,14 @@ var fetch = require('node-fetch');
 const wkt = require('wkt');
 
 
+const debug = false;
+var yell = function(obj) {
+    if (debug) {
+        console.log(obj)
+    }
+}
+
+
 /**
  *
  * @type {string}
@@ -55,16 +63,18 @@ var docunote = function(endpoint, method, body=undefined) {
 function getDocunote(endpoint) {
     var api = docunote(endpoint, 'GET');
 
-    //console.log(api.method + ': ' + api.url + ' - Calling');
+    yell(api.method + ': ' + api.url + ' - Calling');
     // Return new promise 
     return new Promise(function(resolve, reject) {
         // Do async job
         request.get(api, function(err, resp, body) {
             if (err) {
-                //console.log(api.method + ': ' + api.url + ' - Recieved - ERROR');
+                yell(err)
+                yell(api.method + ': ' + api.url + ' - Recieved - ERROR');
                 reject(err);
             } else {
-                //console.log(api.method + ': ' + api.url + ' - Recieved - OK');
+                yell(body)
+                yell(api.method + ': ' + api.url + ' - Recieved - OK');
                 resolve(body);
             }
         });
@@ -73,16 +83,16 @@ function getDocunote(endpoint) {
 function postDocunote(endpoint, body) { 
     var api = docunote(endpoint, 'POST', body);
 
-    //console.log(api.method + ': ' + api.url + ' - Calling');
+    yell(api.method + ': ' + api.url + ' - Calling');
     // Return new promise 
     return new Promise(function(resolve, reject) {
         // Do async job
         request.post(api, function(err, resp, body) {
             if (err) {
-                //console.log(api.method + ': ' + api.url + ' - Recieved - ERROR');
+                yell(api.method + ': ' + api.url + ' - Recieved - ERROR');
                 reject(err);
             } else {
-                //console.log(api.method + ': ' + api.url + ' - Recieved - OK');
+                yell(api.method + ': ' + api.url + ' - Recieved - OK');
                 resolve(body);
             }
         });
@@ -92,7 +102,7 @@ function postDocunote(endpoint, body) {
 // Checks if user is allowed to use endpoints
 function verifyUser(request) {
     return new Promise(function(resolve, reject) {
-            //console.log(request)
+            //yell(request)
             
             //try {
             //    console.log('Incomming: '+request.body.user.toString())
@@ -106,6 +116,7 @@ function verifyUser(request) {
                 resolve({success: true, message:'User allowed'});
             } else {
                 console.log(`GeoSag: Blocked access for ${request.connection.remoteAddress}/${request.headers['x-forwarded-for']}`)
+                console.log(`GeoSag: Address not in ${dn.allow_from}`)
                 reject({success: false, message:'User not allowed'});
             }
     });  
@@ -135,7 +146,7 @@ router.post('/api/extension/getExistingMatr', function (req, response) {
         return;
     }
     } catch (error) {
-        //console.log(error)
+        yell(error)
         response.status(500).json(error);
     }
 
@@ -144,12 +155,12 @@ router.post('/api/extension/getExistingMatr', function (req, response) {
         verifyUser(req)
             .then(function(user) {
                 // user is allowed
-                //console.log(user);
+                yell(user);
                 return getDocunote('Cases/'+ req.body.sagsnr.toString()+'/parts');
             })
             .then(function(docunoteCaseParts) {
                 // Got parts, get information on each person
-                //console.log(docunoteCaseParts);
+                yell(docunoteCaseParts);
 
                 // Get the right picker
                 var picker = docunoteCaseParts.find(function(obj) {
@@ -189,7 +200,7 @@ router.post('/api/extension/getExistingMatr', function (req, response) {
             });
 
     } catch (error) {
-        //console.log(error)
+        yell(error)
         response.status(500).json(error);
     }
 });
@@ -214,7 +225,7 @@ router.post('/api/extension/getCase', function (req, response) {
         return;
     }
     } catch (error) {
-        //console.log(error)
+        yell(error)
         response.status(500).json(error);
     }
 
@@ -223,7 +234,7 @@ router.post('/api/extension/getCase', function (req, response) {
         verifyUser(req)
             .then(function(user) {
                 // user is allowed
-                //console.log(user);
+                yell(user);
                 return getDocunote('Cases/number/'+ req.body.sagsnr.toString());
             })
             .then(function(Case) {
@@ -237,7 +248,7 @@ router.post('/api/extension/getCase', function (req, response) {
             });
 
     } catch (error) {
-        //console.log(error)
+        yell(error)
         response.status(500).json(error);
     }
 });
@@ -261,7 +272,7 @@ function createMatrikelPart(matr) {
     // creates matrikel part
     return new Promise(function(resolve, reject) {
 
-        //console.log(matr)
+        yell(matr)
 
         var newMatr = {
             firstName: matr.matrikelnr,
@@ -323,7 +334,7 @@ router.post('/api/extension/saveMatrChanges', function (req, response) {
         return;
     }
     } catch (error) {
-        //console.log(error)
+        yell(error)
         response.status(500).json(error);
     }
 
@@ -415,7 +426,7 @@ router.post('/api/extension/saveMatrChanges', function (req, response) {
             });
 
     } catch (error) {
-        //console.log(error)
+        yell(error)
         response.status(500).json(error);
     }
 });
