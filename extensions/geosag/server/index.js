@@ -11,14 +11,14 @@ var fetch = require('node-fetch');
 const wkt = require('wkt');
 
 
-const debug = true;
+const debug = false;
 function addZero(i) {
     if (i < 10) {
       i = "0" + i;
     }
     return i;
   }
-var yell = function(obj) {
+var yell = function(obj, override=false) {
 
     var today = new Date();
     var date = today.getFullYear()+'-'+addZero((today.getMonth()+1))+'-'+addZero(today.getDate());
@@ -26,7 +26,9 @@ var yell = function(obj) {
     var dateTime = date+' '+time;
 
     if (debug) {
-        console.log(`[${dateTime}] [ex:GeoSag] : ${obj}`)
+        console.log(`[${dateTime}] [ex:GeoSag] : ${JSON.stringify(obj, undefined, 2)}`)
+    } else if (override) {
+        console.log(`[${dateTime}] [ex:GeoSag] : ${JSON.stringify(obj, undefined, 2)}`)
     }
 }
 
@@ -127,8 +129,8 @@ function verifyUser(request) {
             if (dn.allow_from.includes(request.headers['x-forwarded-for']) || request.connection.remoteAddress == '::1') {
                 resolve({success: true, message:'User allowed'});
             } else {
-                console.log(`GeoSag: Blocked access for ${request.connection.remoteAddress}/${request.headers['x-forwarded-for']}`)
-                console.log(`GeoSag: Address not in ${dn.allow_from}`)
+                yell(`Blocked access for ${request.connection.remoteAddress}/${request.headers['x-forwarded-for']}`, true)
+                yell(`Address not in ${dn.allow_from}`, true)
                 reject({success: false, message:'User not allowed'});
             }
     });  
@@ -181,7 +183,7 @@ router.post('/api/extension/getExistingMatr', function (req, response) {
 
                 // If defined parts dont exist?
                 if (picker == undefined) {
-                    yell('Defined PartsPicker not found! - returning empty')
+                    yell('Defined PartsPicker not found! - returning empty', true)
                     throw({"matrikler": []})
                 } 
 
@@ -374,6 +376,7 @@ router.post('/api/extension/saveMatrChanges', function (req, response) {
             })
             .then(function(exists) {
                 // Move existing into parts
+                yell(exists)
                 parts = exists;
 
                 // If matr not in exists, create.
@@ -419,19 +422,33 @@ router.post('/api/extension/saveMatrChanges', function (req, response) {
                     return obj.pickerName === dn.partsPicker;
                 });
 
-                // Get anything but matrikel-persons
-                var keepParts = picker.parts.filter(function(obj) {
-                    return obj.partNodeType !== dn.partsType;
-                });
+                // If we already have picker in case, keep these
+                if (picker !== undefined) {
+                    yell('Defined PartsPicker found! - merging', true)
+                    var keepParts = picker.parts.filter(function(obj) {
+                        return obj.partNodeType !== dn.partsType;
+                    });
+                    // Merge with new stuff
+                    Array.prototype.push.apply(keepParts, parts)
+                    var newPicker = [
+                        {
+                            pickerName: dn.partsPicker,
+                            parts: keepParts
+                        }
+                    ]
+                } else {
+                    // picker didn't already exist
+                    var newPicker = [
+                        {
+                            pickerName: dn.partsPicker,
+                            parts: parts
+                        }
+                    ]
+                }
+                
+                yell(newPicker)
 
-                // Glorious end result!
-                Array.prototype.push.apply(keepParts, parts)
-                var newPicker = [
-                    {
-                        pickerName: dn.partsPicker,
-                        parts: keepParts
-                    }
-                ]
+
                 return postDocunote('Cases/'+ caseId+'/pickers', newPicker);
             })
             .then(function(savedParts) {
