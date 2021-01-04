@@ -11,10 +11,22 @@ var fetch = require('node-fetch');
 const wkt = require('wkt');
 
 
-const debug = false;
+const debug = true;
+function addZero(i) {
+    if (i < 10) {
+      i = "0" + i;
+    }
+    return i;
+  }
 var yell = function(obj) {
+
+    var today = new Date();
+    var date = today.getFullYear()+'-'+addZero((today.getMonth()+1))+'-'+addZero(today.getDate());
+    var time = addZero(today.getHours()) + ":" + addZero(today.getMinutes()) + ":" + addZero(today.getSeconds());
+    var dateTime = date+' '+time;
+
     if (debug) {
-        console.log(obj)
+        console.log(`[${dateTime}] [ex:GeoSag] : ${obj}`)
     }
 }
 
@@ -166,6 +178,12 @@ router.post('/api/extension/getExistingMatr', function (req, response) {
                 var picker = docunoteCaseParts.find(function(obj) {
                     return obj.pickerName === dn.partsPicker;
                 });
+
+                // If defined parts dont exist?
+                if (picker == undefined) {
+                    yell('Defined PartsPicker not found! - returning empty')
+                    throw({"matrikler": []})
+                } 
 
                 // Get the right parts
                 var parts = picker.parts.filter(function(obj) {
