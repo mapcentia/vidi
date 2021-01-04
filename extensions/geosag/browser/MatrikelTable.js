@@ -86,7 +86,7 @@ class MatrikelTable extends React.Component {
                         <TableRow key={'geosag-matrikelliste-'+matr.ejerlavskode+matr.kommunenr+matr.matrikelnr}>
                             <TableCell align="left" style={ cellStyle }>
                             <div style={{display: 'flex', alignItems: 'center'}}>
-                                <Grid><Tooltip title={'Vis matrikel i kortet'}><IconButton size={'small'} onClick={this._handleFocus.bind(this, matr)}><PageviewIcon /></IconButton></Tooltip></Grid>
+                                <Grid><Tooltip title={'Vis matrikel i kortet'}><IconButton size={'small'} onClick={this._handleFocus.bind(this, matr)} disabled={!matr.hasGeometry}><PageviewIcon /></IconButton></Tooltip></Grid>
                                 <Grid><Tooltip title={'Fjern matrikel fra listen.'}><IconButton size={'small'} onClick={this._handleDelete.bind(this, matr)}><DeleteIcon /></IconButton></Tooltip></Grid>
                             </div>
                             </TableCell>

@@ -357,8 +357,24 @@ module.exports = {
                         fetch(hostName + new URLSearchParams(params))
                             .then(r => r.json())
                             .then(d => {
-                                d.properties.key = elavkode+matr
-                                resolve(d);
+                                // If no found, handle
+                                console.log(d)
+
+                                if (d.type == 'Feature') {
+                                    d.properties.key = elavkode+matr
+                                    resolve(d);
+                                } else {
+                                    let feat = {
+                                        type: 'Feature',
+                                        properties: {
+                                            ejerlavskode: elavkode,
+                                            matrikelnr: matr,
+                                            key: elavkode+matr
+                                        }
+                                    }
+                                    resolve(feat)
+                                }
+
                             })
                             .catch(e => {
                                 console.log(e)
@@ -706,13 +722,22 @@ module.exports = {
                             })
                             .then(clean => {
                                 if (addToList) {
-                                    console.log('adding to list');
                                     _self.addMatrikelToList(clean);
                                 }
                                 return getJordstykkeGeom(clean.matrikelnr, clean.ejerlavskode)
                             })
                             .then(feat => {
-                                return _self.addMatrikelToMap(feat)
+                                // If feat has no geometry, make sure list knows it!
+                                if (!('geometry' in feat)) {
+                                    let k = feat.properties.key;
+                                    _self.setState(prevState => ({
+                                        matrList: prevState.matrList.map(
+                                            el => el.key === k ? { ...el, hasGeometry: false } : el
+                                        )
+                                    }))
+                                } else {
+                                    return _self.addMatrikelToMap(feat)
+                                }
                             })
                             .then(layer => {
                                 resolve(layer);
@@ -779,7 +804,8 @@ module.exports = {
                             kommune: unableToGetValue,
                             kommunekode: unableToGetValue,
                             bfe: unableToGetValue,
-                            esr: unableToGetValue
+                            esr: unableToGetValue,
+                            hasGeometry: true
                         }
                         
 
