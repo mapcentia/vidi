@@ -4,10 +4,12 @@ MAINTAINER Martin Høgh<mh@mapcentia.com>
 RUN export DEBIAN_FRONTEND=noninteractive
 ENV DEBIAN_FRONTEND noninteractive
 
-
 # Clone Vidi from GitHub
-RUN cd  ~ &&\
-	git  clone https://github.com/mapcentia/vidi.git
+RUN export VERSION="2020.12.0" &&\
+    cd ~ &&\
+	git clone https://github.com/mapcentia/vidi.git &&\
+    cd ~/vidi &&\
+	git checkout tags/${VERSION}
 
 # Install grunt
 RUN cd ~/vidi &&\
