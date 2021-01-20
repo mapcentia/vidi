@@ -1103,7 +1103,18 @@ module.exports = {
             "maxZoom":21,
             "maxNativeZoom":19,
             "attribution":"&copy; Styrelsen for Dataforsyning og Effektivisering og Danske kommuner."
-         }
+         },
+         "overlays":[
+            {
+               "id":"public.mvw_adgangsadresser",
+               "db":"mapconnectbase",
+               "host":"https://mapgogc2.geopartner.dk/",
+               "config":{
+                  "maxZoom":21,
+                  "maxNativeZoom":19
+               }
+            }
+         ]
       },      
       {
          "id":"luftfotoserier.geodanmark_2018_12_5cm",
