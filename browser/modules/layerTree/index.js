@@ -29,8 +29,9 @@ var onEachFeature = [], pointToLayer = [], onSelectedStyle = [], onLoad = [], on
     onMouseOver = [], cm = [], styles = [], tables = {}, childLayersThatShouldBeEnabled = [];
 
 const uuidv4 = require('uuid/v4');
-var React = require('react');
-var ReactDOM = require('react-dom');
+const React = require('react');
+const ReactDOM = require('react-dom');
+const base64url = require('base64url');
 
 import dayjs from 'dayjs';
 import noUiSlider from 'nouislider';
@@ -299,7 +300,7 @@ module.exports = {
         if (overallFilters.length > 0) {
             let data = {};
             data[layerKey] = overallFilters;
-            parameterString = `filters=` + encodeURIComponent(Base64.encode(JSON.stringify(data)));
+            parameterString = `filters=` + base64url(JSON.stringify(data));
         }
         $(`[data-gc2-layer-key^="${layerKey}"]`).find(`.js-toggle-filters-number-of-filters`).text(overallFilters.length);
         return parameterString;
@@ -602,7 +603,7 @@ module.exports = {
         let preparedVirtualLayers = [];
         moduleState.virtualLayers.map(layer => {
             let localLayer = Object.assign({}, layer);
-            localLayer.store.sqlEncoded = Base64.encode(localLayer.store.sql).replace(/=/g, "");
+            localLayer.store.sqlEncoded = base64url(localLayer.store.sql);
             preparedVirtualLayers.push(localLayer);
         });
 
@@ -3295,7 +3296,7 @@ module.exports = {
                     ST_Ymax(ST_Extent(extent)) AS tymax
                 FROM (SELECT ST_astext(ST_Transform(ST_setsrid(ST_Extent(${metaData.f_geometry_column}),${metaData.srid}),4326)) AS extent FROM ${layerKey} WHERE ${whereClause}) as foo`;
         let q = {
-            q: base64.encode(sql),
+            q: base64url(sql),
             base64: true
         }
         $.ajax({

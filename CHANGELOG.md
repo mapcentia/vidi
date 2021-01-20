@@ -10,6 +10,9 @@ and this project adheres to [CalVer](https://calver.org/).
 - Docker files are added to the project.
 - It's now possible to set `gc2.host` through the environment variable `GC2_HOST`. If set in `config/config.js` it will have precedence.
 
+### Fixed
+- Base64url are now used to encode filters instead of base64, so + and / sign doesn't mess things up.
+
 ## [2020.12.0] - 2020-8-12
 ### Changed
 - The standard template for feature info is changed, so empty fields are omitted. It's now:
