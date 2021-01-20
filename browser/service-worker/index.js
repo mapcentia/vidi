@@ -356,7 +356,7 @@ const normalizeTheURLForFetch = (event) => {
                                 record.cleanedRequestURL = cleanedRequestURL;
                                 record.bbox = false;
                                 if (decodedQuery.indexOf(`ST_Intersects`) !== -1 && decodedQuery.indexOf(`ST_Transform`) && decodedQuery.indexOf(`ST_MakeEnvelope`)) {
-                                    let bboxCoordinates = decodeURIComponent(decodedQuery.substring((decodedQuery.indexOf(`(`, decodedQuery.indexOf(`ST_MakeEnvelope`)) + 1), decodedQuery.indexOf(`)`, decodedQuery.indexOf(`ST_MakeEnvelope`)))).split(`,`).map(a => a.trim());
+                                    let bboxCoordinates = decodedQuery.substring((decodedQuery.indexOf(`(`, decodedQuery.indexOf(`ST_MakeEnvelope`)) + 1), decodedQuery.indexOf(`)`, decodedQuery.indexOf(`ST_MakeEnvelope`))).split(`,`).map(a => a.trim());
                                     if (bboxCoordinates.length === 5) {
                                         record.bbox = {
                                             north: parseFloat(bboxCoordinates[3]),
