@@ -1089,7 +1089,7 @@ module.exports = {
          "abstract":"<p>Topografisk kort baseret på GeoDanmark data, som opdateres årligt.</p><p>Copyright: Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.</p><p>Baggrundskortet må frit anvendes, men følgende skal angives 'Indeholder GeoDanmark-data fra Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.'. </p><br>",
          "config":{
             "maxZoom":21,
-            "maxNativeZoom":21,
+            "maxNativeZoom":19,
             "attribution":"&copy; Styrelsen for Dataforsyning og Effektivisering og Danske kommuner."
          }
       },
@@ -1098,42 +1098,22 @@ module.exports = {
          "name":"Luftfoto 2019",
          "db":"baselayers",
          "host":"https://dk.gc2.io",
-         "abstract":"<p>Oprettede luftfoto (ortofoto) marts/april 2019 (15 cm pixels).</p><p>Copyright: Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.</p><p>Luftfotoet må frit anvendes, men følgende skal angives 'Indeholder GeoDanmark-data fra Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.'.</p><br>",
+         "abstract":"<p>Oprettede luftfoto (ortofoto) marts/april 2019 (12,5 cm pixels).</p><p>Copyright: Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.</p><p>Luftfotoet må frit anvendes, men følgende skal angives 'Indeholder GeoDanmark-data fra Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.'.</p><br>",
          "config":{
             "maxZoom":21,
-            "maxNativeZoom":21,
+            "maxNativeZoom":19,
             "attribution":"&copy; Styrelsen for Dataforsyning og Effektivisering og Danske kommuner."
-         },
-         "overlays":[
-            {
-               "id":"dar.adgangsadresser_husnr",
-               "db":"baselayers",
-               "host":"https://dk.gc2.io",
-               "config":{
-                  "maxZoom":21,
-                  "maxNativeZoom":21
-               }
-            },
-            {
-               "id":"geodk.vejmidte_brudt_m_navn",
-               "db":"baselayers",
-               "host":"https://dk.gc2.io",
-               "config":{
-                  "maxZoom":21,
-                  "maxNativeZoom":21
-               }
-            }
-         ]
+         }
       },      
       {
          "id":"luftfotoserier.geodanmark_2018_12_5cm",
          "name":"Luftfoto 2018",
          "db":"baselayers",
          "host":"https://dk.gc2.io",
-         "abstract":"<p>Oprettede luftfoto (ortofoto) marts/april 2018 (15 cm pixels).</p><p>Copyright: Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.</p><p>Luftfotoet må frit anvendes, men følgende skal angives 'Indeholder GeoDanmark-data fra Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.'.</p><br>",
+         "abstract":"<p>Oprettede luftfoto (ortofoto) marts/april 2018 (12,5 cm pixels).</p><p>Copyright: Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.</p><p>Luftfotoet må frit anvendes, men følgende skal angives 'Indeholder GeoDanmark-data fra Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.'.</p><br>",
          "config":{
             "maxZoom":21,
-            "maxNativeZoom":21,
+            "maxNativeZoom":19,
             "attribution":"&copy; Styrelsen for Dataforsyning og Effektivisering og Danske kommuner."
          }
       },
@@ -1142,10 +1122,10 @@ module.exports = {
          "name":"Luftfoto 2017",
          "db":"baselayers",
          "host":"https://dk.gc2.io",
-         "abstract":"<p>Oprettede luftfoto (ortofoto) marts/april 2017 (15 cm pixels).</p><p>Copyright: Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.</p><p>Luftfotoet må frit anvendes, men følgende skal angives 'Indeholder GeoDanmark-data fra Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.'.</p><br>",
+         "abstract":"<p>Oprettede luftfoto (ortofoto) marts/april 2017 (12,5 cm pixels).</p><p>Copyright: Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.</p><p>Luftfotoet må frit anvendes, men følgende skal angives 'Indeholder GeoDanmark-data fra Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.'.</p><br>",
          "config":{
             "maxZoom":21,
-            "maxNativeZoom":21,
+            "maxNativeZoom":19,
             "attribution":"&copy; Styrelsen for Dataforsyning og Effektivisering og Danske kommuner."
          }
       },
@@ -1157,7 +1137,7 @@ module.exports = {
          "abstract":"<p>Skærmkort, som opdateres årligt.</p><p>Copyright: Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.</p><p>Baggrundskortet må frit anvendes, men følgende skal angives 'Indeholder data fra Styrelsen for Dataforsyning og Effektivisering.'. </p><br>",
          "config":{
             "maxZoom":21,
-            "maxNativeZoom":21,
+            "maxNativeZoom":19,
             "attribution":"&copy; Styrelsen for Dataforsyning og Effektivisering."
          }
       },
@@ -1167,7 +1147,7 @@ module.exports = {
          "abstract":"<p>Kortet hentes fra Open Street Map.</p><br>",
          "config":{
             "maxZoom":21,
-            "maxNativeZoom":21,
+            "maxNativeZoom":19,
             "attribution":"&copy; Open Street Map"
          }
       },      
@@ -1177,7 +1157,7 @@ module.exports = {
         "abstract":"<p>Kortet hentes fra Stamen Toner.</p><br>",
         "config":{
           "maxZoom":21,
-          "maxNativeZoom":21,
+          "maxNativeZoom":19,
           "attribution":"&copy; Stamen Toner"
         }
       },      
@@ -1187,7 +1167,7 @@ module.exports = {
         "abstract":"<p>Kortet hentes fra Stamen Toner.</p><br>",
         "config":{
           "maxZoom":21,
-          "maxNativeZoom":21,
+          "maxNativeZoom":19,
           "attribution":"&copy; Stamen Toner"
         }
       },
@@ -1198,7 +1178,7 @@ module.exports = {
          "host": "https://gc2.io",
          "config": {
             "maxZoom":21,
-            "maxNativeZoom":21,
+            "maxNativeZoom":19,
             "attribution":"&copy; Styrelsen for Dataforsyning og Effektivisering." 
          }
       }
