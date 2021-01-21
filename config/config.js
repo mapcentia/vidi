@@ -1104,17 +1104,26 @@ module.exports = {
             "maxNativeZoom":19,
             "attribution":"&copy; Styrelsen for Dataforsyning og Effektivisering og Danske kommuner."
          },
-         "overlays":[
-            {
-               "id":"public.mvw_adgangsadresser",
-               "db":"mapconnectbase",
-               "host":"https://mapgogc2.geopartner.dk/",
-               "config":{
-                  "maxZoom":21,
-                  "maxNativeZoom":19
-               }
-            }
-         ]
+            "overlays": [
+                {
+                    "id": "public.mvw_adgangsadresser",
+                    "db": "mapconnectbase",
+                    "host": "https://mapgogc2.geopartner.dk",
+                    "config": {
+                        "maxZoom": 21,
+                        "maxNativeZoom": 19
+                    }
+                },
+                {
+                    "id": "public.mvw_vejnavne",
+                    "db": "mapconnectbase",
+                    "host": "https://mapgogc2.geopartner.dk",
+                    "config": {
+                        "maxZoom": 21,
+                        "maxNativeZoom": 19
+                    }
+                }
+            ]
       },      
       {
          "id":"luftfotoserier.geodanmark_2018_12_5cm",
@@ -1126,7 +1135,27 @@ module.exports = {
             "maxZoom":21,
             "maxNativeZoom":19,
             "attribution":"&copy; Styrelsen for Dataforsyning og Effektivisering og Danske kommuner."
-         }
+         },
+            "overlays": [
+                {
+                    "id": "public.mvw_adgangsadresser",
+                    "db": "mapconnectbase",
+                    "host": "https://mapgogc2.geopartner.dk",
+                    "config": {
+                        "maxZoom": 21,
+                        "maxNativeZoom": 19
+                    }
+                },
+                {
+                    "id": "public.mvw_vejnavne",
+                    "db": "mapconnectbase",
+                    "host": "https://mapgogc2.geopartner.dk",
+                    "config": {
+                        "maxZoom": 21,
+                        "maxNativeZoom": 19
+                    }
+                }
+            ]
       },
       {
          "id":"luftfotoserier.geodanmark_2017_12_5cm",
@@ -1138,7 +1167,27 @@ module.exports = {
             "maxZoom":21,
             "maxNativeZoom":19,
             "attribution":"&copy; Styrelsen for Dataforsyning og Effektivisering og Danske kommuner."
-         }
+         },
+            "overlays": [
+                {
+                    "id": "public.mvw_adgangsadresser",
+                    "db": "mapconnectbase",
+                    "host": "https://mapgogc2.geopartner.dk",
+                    "config": {
+                        "maxZoom": 21,
+                        "maxNativeZoom": 19
+                    }
+                },
+                {
+                    "id": "public.mvw_vejnavne",
+                    "db": "mapconnectbase",
+                    "host": "https://mapgogc2.geopartner.dk",
+                    "config": {
+                        "maxZoom": 21,
+                        "maxNativeZoom": 19
+                    }
+                }
+            ]
       },
       {
          "id": "kortforsyningen.dtk_skaermkort_daempet",
