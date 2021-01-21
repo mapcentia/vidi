@@ -709,34 +709,47 @@ module.exports = {
                     for (let layerKey in filter) {
                         console.log('graveAssistent - Apply filter to ' + layerKey)
 
-                        //Make sure layer is on
-                        //TODO tænd laget hvis det ikke allerede er tændt! - skal være tændt før man kan ApplyFilter
-                        layerTree.reloadLayer(layerKey)
+                        try {
+                            //Make sure layer is on
+                            //TODO tænd laget hvis det ikke allerede er tændt! - skal være tændt før man kan ApplyFilter
+                            layerTree.reloadLayer(layerKey)
+                            //Toggle the filter
 
-                        //Toggle the filter
-                        if (filter[layerKey].columns.length == 0) {
-                            // insert fixed dummy filter
-                            // in order to filter out all features from layer
-                            //var blankfeed = {expression: "=",
-                            //                fieldname: "forespnummer",
-                            //                restriction: false,
-                            //                value: "0"};
-                            //filter[layerKey].columns.push(blankfeed);
-
-                            layerTree.onApplyArbitraryFiltersHandler({
+                            let options = {
                                 layerKey,
                                 filters: filter[layerKey]
-                            }, 't');
-                        } else {
-                            layerTree.onApplyArbitraryFiltersHandler({
-                                layerKey,
-                                filters: filter[layerKey]
-                            }, 't');
+                            }
+
+                            console.log(options)
+
+                            layerTree.onApplyArbitraryFiltersHandler(options, false);
+
+                            //if (filter[layerKey].columns.length == 0) {
+                            //    // insert fixed dummy filter
+                            //    // in order to filter out all features from layer
+                            //    //var blankfeed = {expression: "=",
+                            //    //                fieldname: "forespnummer",
+                            //    //                restriction: false,
+                            //    //                value: "0"};
+                            //    //filter[layerKey].columns.push(blankfeed);
+                            //    layerTree.onApplyArbitraryFiltersHandler({
+                            //        layerKey,
+                            //        filters: filter[layerKey]
+                            //    }, false);
+                            //} else {
+                            //    layerTree.onApplyArbitraryFiltersHandler({
+                            //        layerKey,
+                            //        filters: filter[layerKey]
+                            //    }, false);
+                            //}
+                            //Reload
+                            layerTree.reloadLayerOnFiltersChange(layerKey)
+                            
+                        } catch (error) {
+                            console.log(error)
+                        } finally {
+                            continue
                         }
-                        //Reload
-                        layerTree.reloadLayerOnFiltersChange(layerKey)
-
-                        continue;
                     }
                 };
 

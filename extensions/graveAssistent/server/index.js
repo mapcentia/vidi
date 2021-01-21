@@ -9,6 +9,23 @@ var he = require('he');
 var fetch = require('node-fetch');
 const wkt = require('wkt');
 
+// Function for getting ISO with TZ
+function toISOLocal(d) {
+    var z  = n =>  ('0' + n).slice(-2);
+    var zz = n => ('00' + n).slice(-3);
+    var off = d.getTimezoneOffset();
+    var sign = off < 0? '+' : '-';
+    off = Math.abs(off);
+  
+    return d.getFullYear() + '-'
+           + z(d.getMonth()+1) + '-' +
+           z(d.getDate()) + 'T' +
+           z(d.getHours()) + ':'  + 
+           z(d.getMinutes()) + ':' +
+           z(d.getSeconds()) + '.' +
+           zz(d.getMilliseconds()) 
+           // + sign + z(off/60|0) + ':' + z(off%60); 
+  }
 
 /**
  *
@@ -91,7 +108,8 @@ var buildSQLArray = function (features, table, geom_col, crs, timestamp, statusK
         })
         // Append geometry & uploadtime
         nestedValues.push("ST_SetSRID(ST_GeomFromGeoJSON('" + JSON.stringify(f.geometry) + "')," + crs + ")")
-        nestedValues.push("'" + he.decode(String(timestamp)) + "'")
+        //nestedValues.push("'" + he.decode(String(timestamp)) + "'")
+        nestedValues.push("'" + timestamp + "'")
         nestedValues.push("'" + statusKey + "'")
 
         // Add to values
@@ -111,6 +129,8 @@ var buildSQLArray = function (features, table, geom_col, crs, timestamp, statusK
 
     // Build final string
     let str = 'INSERT INTO ' + table + ' (' + into.join(',') + ') VALUES ' + values.join(',')
+
+    console.log(str)
     return str
 }
 
@@ -277,6 +297,9 @@ router.post('/api/extension/getForespoergselOption', function (req, response) {
 
     // Go ahead with the logic
     let q = "SELECT forespnummer, bemaerkning, svar_uploadtime, statuskey FROM " + s.screenName + '.' + TABLEPREFIX + "graveforespoergsel where svar_uploadtime > now() - INTERVAL '30 days' ORDER by forespnummer DESC"
+    
+    
+
     try {
         SQLAPI(q, req)
             .then(r => {
@@ -474,7 +497,7 @@ router.post('/api/extension/upsertForespoergsel', function (req, response) {
     })
 
     //console.log('Got: ' + b.forespNummer + '. statusKey: ' + b.statusKey + '. Lines: ' + lines.length + ', Polygons: ' + polys.length + ', Points: ' + pts.length)
-    let uploadTime = new Date().toLocaleString()
+    let uploadTime = toISOLocal(new Date())
 
     try {
         lines = {
@@ -596,7 +619,7 @@ router.post('/api/extension/upsertStatus', function (req, response) {
         // Build featurecollection
         var ejere = b.Ledningsejerliste
         var f = []
-        let uploadTime = new Date().toLocaleString()
+        let uploadTime = toISOLocal(new Date())
         let post = []
 
 
@@ -685,6 +708,7 @@ function FeatureAPI(req, featurecollection, table, crs) {
 
 // Use SQLAPI
 function SQLAPI(q, req) {
+    console.log(GC2_HOST)
     var userstr = userString(req)
     var postData = JSON.stringify({
         key: req.session.gc2ApiKey,
@@ -718,6 +742,7 @@ function SQLAPI(q, req) {
                 }
             })
             .catch(error => {
+                console.log(error)
                 reject(error)
             })
     });
