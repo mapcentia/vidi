@@ -10,6 +10,16 @@ and this project adheres to [CalVer](https://calver.org/).
 - Docker files are added to the project.
 - It's now possible to set `gc2.host` through the environment variable `GC2_HOST`. If set in `config/config.js` it will have precedence.
 
+### Added
+- It's possible to lock UTM zone in coordinate module, so it's possible to project to a specific zone outside the actual zone. Useful for e.g. Denmark, which are using zone 32 for the whole country but is located in both 32 and 33.
+```JSON
+{
+    "coordinates": {
+      "lockUtmZoneTo": 32
+    }
+}
+```
+
 ### Fixed
 - Base64url are now used to encode filters instead of base64, so + and / sign doesn't mess things up.
 
