@@ -42,7 +42,7 @@ module.exports = {
     init: function () {
         let me = this, configFile, stop = false;
         (function poll() {
-            if (typeof L !== "undefined") {
+            if (typeof L.control.locate !== "undefined") {
 
                 if (typeof urlVars.session === "string") {
                     cookie.set("connect.gc2", urlVars.session, {expires: 1});
@@ -111,6 +111,7 @@ module.exports = {
                     me.getVersion();
                 }
             } else {
+                console.log("polling...");
                 setTimeout(()=>{
                     poll();
                 }, 10)
