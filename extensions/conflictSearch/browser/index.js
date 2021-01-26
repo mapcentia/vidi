@@ -698,18 +698,6 @@ module.exports = module.exports = {
                     url: "/api/extension/conflictSearch",
                     data: "db=" + db + "&schema=" + (searchLoadedLayers ? schemataStr : "") + (searchStr !== "" ? "," + searchStr : "") + "&socketId=" + socketId.get() + "&layers=" + visibleLayers.join(",") + "&buffer=" + bufferValue + "&text=" + currentFromText + "&wkt=" + Terraformer.convert(buffer4326),
                     scriptCharset: "utf-8",
-                    success: function (response) {
-                        var hitsCount = 0, noHitsCount = 0, errorCount = 0, resultOrigin, groups = [];
-                        _result = response;
-                        setTimeout(function () {
-                            $("#snackbar-conflict").snackbar("hide");
-                        }, 200);
-                        $("#spinner span").hide();
-                        $("#result-origin").html(response.text);
-                        $('#conflict-main-tabs a[href="#conflict-result-content"]').tab('show');
-                        $('#conflict-result-content a[href="#hits-content"]').tab('show');
-                        $('#conflict-result .btn:first-child').attr("href", "/html?id=" + response.file)
-                        $("#conflict-download-pdf").prop("download", `Søgning foretaget med ${response.text} d. ${response.dateTime}.pdf`);
                     success: _self.handleResult,
                     error: function () {
                         $("#snackbar-conflict").snackbar("hide");

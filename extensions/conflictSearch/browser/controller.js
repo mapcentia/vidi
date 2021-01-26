@@ -19,7 +19,6 @@ var printC = config.print.templates;
 var scales = config.print.scales;
 var urlparser = require('../../../browser/modules/urlparser');
 
-let state;
 let _self;
 let stateFromDb;
 
