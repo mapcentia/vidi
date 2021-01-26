@@ -5,6 +5,7 @@
  */
 
 'use strict';
+const MODULE_ID = `conflict`;
 
 var print;
 var conflictSearch;
@@ -17,6 +18,10 @@ var config = require('../../../config/config.js');
 var printC = config.print.templates;
 var scales = config.print.scales;
 var urlparser = require('../../../browser/modules/urlparser');
+
+let state;
+let _self;
+let stateFromDb;
 
 /**
  *
@@ -31,9 +36,14 @@ module.exports = {
         backboneEvents = o.backboneEvents;
         conflictSearch = o.extensions.conflictSearch.index;
         cloud = o.cloud;
+        state = o.state;
+        _self = this;
         return this;
     },
     init: function () {
+        state.listenTo(MODULE_ID, _self);
+        state.listen(MODULE_ID, `state_change`);
+
         var endPrintEventName = "end:conflictPrint";
 
         // Stop listening to any events, deactivate controls, but
@@ -44,6 +54,18 @@ module.exports = {
         // Activates module
         backboneEvents.get().on("on:conflictSearch", () => {
             conflictSearch.control();
+            if (stateFromDb) {
+                setTimeout(() => {
+                    stateFromDb = null;
+                }, 0);
+                conflictSearch.setValueForNoUiSlider(stateFromDb.bufferValue);
+                conflictSearch.handleResult(stateFromDb);
+                return;
+            }
+            state.getModuleState(MODULE_ID).then(initialState => {
+                conflictSearch.setValueForNoUiSlider(initialState.bufferValue);
+                conflictSearch.handleResult(initialState);
+            });
         });
 
         // Deactivates module
@@ -55,6 +77,11 @@ module.exports = {
 
         // Handle GUI when print is done. Using at custom event, so standard print is not triggered
         backboneEvents.get().on(endPrintEventName, function (response) {
+            $("#conflict-get-print-fieldset").prop("disabled", false);
+            $("#conflict-download-pdf, #conflict-open-pdf").prop("href", "/tmp/print/pdf/" + response.key + ".pdf");
+            $("#conflict-open-html").prop("href", response.url);
+            $("#conflict-print-btn").button('reset');
+            backboneEvents.get().trigger("end:conflictSearchPrint", response);
             console.log("GEMessage:LaunchURL:" + urlparser.urlObj.protocol + "://" + urlparser.urlObj.host + "/tmp/print/pdf/" + response.key + ".pdf");
 
         });
@@ -63,6 +90,7 @@ module.exports = {
         backboneEvents.get().on("end:conflictSearch", function () {
             $("#conflict-print-btn").prop("disabled", false);
             $("#conflict-set-print-area-btn").prop("disabled", false);
+            backboneEvents.get().trigger(`${MODULE_ID}:state_change`);
         });
 
         // Handle conflict info click events
@@ -203,5 +231,14 @@ module.exports = {
                 print.control(printC, scales, "_conflictPrint", "A4", "p", "inline");
             }, 500);
         });
+    },
+
+    getState: () => {
+        let state = conflictSearch.getResult();
+        return state;
+    },
+
+    applyState: (newState) => {
+        stateFromDb = newState;
     }
 };

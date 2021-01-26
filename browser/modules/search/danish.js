@@ -74,7 +74,7 @@ module.exports = {
         let placeholder =window.vidiConfig?.searchConfig?.placeholderText;
         if (placeholder) {
             searchTxt = placeholder;
-            $("#custom-search").attr("placeholder",
+            $("#custom-search, #conflict-custom-search").attr("placeholder",
                 searchTxt
             );
         } else {
