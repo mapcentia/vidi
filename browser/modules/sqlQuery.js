@@ -171,7 +171,7 @@ module.exports = {
      * @param {Function} onPopupCloseButtonClick Fires when feature popup is closed by clicking the Close button
      */
     init: function (qstore, wkt, proj, callBack, num, infoClickPoint, whereClause, includes, zoomToResult, onPopupCloseButtonClick, selectCallBack = () => {
-    }, prefix = "", simple = false, infoText = null) {
+    }, prefix = "", simple = false, infoText = null, layerTag = "query_result") {
         let layers, count = {index: 0, hits: 0}, hit = false, distance, editor = false,
             metaDataKeys = meta.getMetaDataKeys(), firstLoop = true;
         elementPrefix = prefix;
@@ -529,10 +529,10 @@ module.exports = {
                 onEachFeature: function (f, l) {
                     if (typeof l._layers !== "undefined") {
                         $.each(l._layers, function (i, v) {
-                            v._vidi_type = "query_result";
+                            v._vidi_type = layerTag;
                         })
                     } else {
-                        l._vidi_type = "query_result";
+                        l._vidi_type = layerTag;
                     }
 
                     l.on("click", function (e) {

@@ -9,6 +9,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - Node >= 14 er required. 
 - Docker files are added to the project.
 - It's now possible to set `gc2.host` through the environment variable `GC2_HOST`. If set in `config/config.js` it will have precedence.
+- ConflictSearch is now controlled by state module. It will keep state between on/off and browser refreshes. State in conflictSearch is also applied when running a state-snapshot. 
 
 ### Added
 - It's possible to lock UTM zone in coordinate module, so it's possible to project to a specific zone outside the actual zone. Useful for e.g. Denmark, which are using zone 32 for the whole country but is located in both 32 and 33.
@@ -37,6 +38,7 @@ and this project adheres to [CalVer](https://calver.org/).
     {{/_vidi_content.fields}}
 </div>
 ```  
+
 
 ### Added
 - `searchConfig.placeholderText` added to config, so the search placeholder can be customized.
