@@ -1,26 +1,27 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2020 MapCentia ApS
+ * @copyright  2013-2021 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
 const MODULE_ID = `conflict`;
 
-var print;
-var conflictSearch;
-var backboneEvents;
-var reportRender;
-var infoClick;
-var cloud;
-var state;
-var config = require('../../../config/config.js');
-var printC = config.print.templates;
-var scales = config.print.scales;
-var urlparser = require('../../../browser/modules/urlparser');
-
-let _self;
+let print;
+let conflictSearch;
+let backboneEvents;
+let reportRender;
+let infoClick;
+let cloud;
+let state;
 let stateFromDb;
+let reportType;
+let _self;
+const config = require('../../../config/config.js');
+const printC = config.print.templates;
+const scales = config.print.scales;
+const urlparser = require('../../../browser/modules/urlparser');
+
 
 /**
  *
@@ -35,7 +36,6 @@ module.exports = {
         backboneEvents = o.backboneEvents;
         conflictSearch = o.extensions.conflictSearch.index;
         cloud = o.cloud;
-        state = o.state;
         _self = this;
         return this;
     },
@@ -43,7 +43,12 @@ module.exports = {
         state.listenTo(MODULE_ID, _self);
         state.listen(MODULE_ID, `state_change`);
 
-        var endPrintEventName = "end:conflictPrint";
+        let endPrintEventName = "end:conflictPrint";
+
+        $('input[name="conflict-report-type"]').on("change", () =>{
+            reportType = $('input[name="conflict-report-type"]:checked').val();
+            backboneEvents.get().trigger(`${MODULE_ID}:state_change`);
+        })
 
         // Stop listening to any events, deactivate controls, but
         // keep effects of the module until they are deleted manually or reset:all is emitted
@@ -59,12 +64,17 @@ module.exports = {
                 }, 0);
                 conflictSearch.setValueForNoUiSlider(stateFromDb.bufferValue);
                 conflictSearch.handleResult(stateFromDb);
+                reportType = stateFromDb.reportType;
+                $("input[name='conflict-report-type'][value='" + reportType +"']").prop("checked",true);
                 return;
             }
             state.getModuleState(MODULE_ID).then(initialState => {
                 conflictSearch.setValueForNoUiSlider(initialState.bufferValue);
                 conflictSearch.handleResult(initialState);
+                reportType = initialState.reportType;
+                $("input[name='conflict-report-type'][value='" + reportType +"']").prop("checked",true);
             });
+
         });
 
         // Deactivates module
@@ -76,13 +86,7 @@ module.exports = {
 
         // Handle GUI when print is done. Using at custom event, so standard print is not triggered
         backboneEvents.get().on(endPrintEventName, function (response) {
-            $("#conflict-get-print-fieldset").prop("disabled", false);
-            $("#conflict-download-pdf, #conflict-open-pdf").prop("href", "/tmp/print/pdf/" + response.key + ".pdf");
-            $("#conflict-open-html").prop("href", response.url);
-            $("#conflict-print-btn").button('reset');
-            backboneEvents.get().trigger("end:conflictSearchPrint", response);
             console.log("GEMessage:LaunchURL:" + urlparser.urlObj.protocol + "://" + urlparser.urlObj.host + "/tmp/print/pdf/" + response.key + ".pdf");
-
         });
 
         // When conflict search is done, enable the print button
@@ -123,64 +127,73 @@ module.exports = {
                 $(this).button('loading');
                 print.control(printC, scales, "_conflictPrint", "A4", "p", "inline");
 
-                let results = conflictSearch.getResult();
-                let positiveHits = JSON.parse(JSON.stringify(results));
-                for (const property in results.hits) {
-                    if (results.hits[property].hits === 0) {
-                        // delete positiveHits.hits[property];
-                    }
-                }
-                let hits = positiveHits.hits
-                let numOfHits = Object.keys(hits).length;
-                let track = [];
-                let count = 0;
-                $.snackbar({
-                    id: "snackbar-conflict-print",
-                    content: "<span>" + __("Prints completed") + " <span id='conflict-print-progress'>0/" + numOfHits + "</span></span>",
-                    htmlAllowed: true,
-                    timeout: 1000000
-                });
-                let iter = n => {
-                    let clone = JSON.parse(JSON.stringify(positiveHits));
-                    let hit = Object.keys(hits)[n]
-                    console.log(hit)
-                    clone.hits = {};
-                    clone.layer = hit;
-                    clone.hits[hit] = positiveHits.hits[hit];
-                    print.print(endPrintEventName, clone).then(res => {
-                        track.push(res.key);
-                        count++;
-                        $("#conflict-print-progress").html(`${count}/${numOfHits}`);
-                        if (numOfHits === count) {
-                            print.cleanUp(true);
-                            $("#conflict-set-print-area-btn").prop("disabled", false);
-                            $.ajax({
-                                dataType: `json`,
-                                method: `POST`,
-                                url: `/api/mergePrint/`,
-                                contentType: `application/json`,
-                                data: JSON.stringify(track),
-                                scriptCharset: `utf-8`,
-                                success: (response) => {
-                                    $("#conflict-get-print-fieldset").prop("disabled", false);
-                                    $("#conflict-download-pdf, #conflict-open-pdf").prop("href", "/tmp/print/pdf/" + response.key + ".pdf");
-                                    $("#conflict-print-btn").button('reset');
-                                    backboneEvents.get().trigger("end:conflictSearchPrint", response);
-                                    setTimeout(function () {
-                                        $("#snackbar-conflict-print").snackbar("hide");
-                                    }, 200);
-                                },
-                                //error: reject
-                            });
-                        } else {
-                            iter(count)
-                        }
-                    }, err => {
-                        console.log(count)
-                        setTimeout(() => iter(count), 1000);
+                if (reportType === "1") {
+                    print.print(endPrintEventName, conflictSearch.getResult()).then(res => {
+                        print.cleanUp(true);
+                        $("#conflict-get-print-fieldset").prop("disabled", false);
+                        $("#conflict-download-pdf, #conflict-open-pdf").prop("href", "/tmp/print/pdf/" + res.key + ".pdf");
+                        $("#conflict-print-btn").button('reset');
+                        backboneEvents.get().trigger("end:conflictSearchPrint", res);
+                        $("#conflict-set-print-area-btn").prop("disabled", false);
                     });
+                } else {
+                    let results = conflictSearch.getResult();
+                    let positiveHits = JSON.parse(JSON.stringify(results));
+                    for (const property in results.hits) {
+                        if (reportType === "2" && results.hits[property].hits === 0) {
+                            delete positiveHits.hits[property];
+                        }
+                    }
+                    let hits = positiveHits.hits
+                    let numOfHits = Object.keys(hits).length;
+                    let track = [];
+                    let count = 0;
+                    $.snackbar({
+                        id: "snackbar-conflict-print",
+                        content: "<span>" + __("Prints completed") + " <span id='conflict-print-progress'>0/" + numOfHits + "</span></span>",
+                        htmlAllowed: true,
+                        timeout: 1000000
+                    });
+                    let iter = n => {
+                        let clone = JSON.parse(JSON.stringify(positiveHits));
+                        let hit = Object.keys(hits)[n]
+                        clone.hits = {};
+                        clone.layer = hit;
+                        clone.hits[hit] = positiveHits.hits[hit];
+                        print.print(endPrintEventName, clone).then(res => {
+                            track.push(res.key);
+                            count++;
+                            $("#conflict-print-progress").html(`${count}/${numOfHits}`);
+                            if (numOfHits === count) {
+                                print.cleanUp(true);
+                                $("#conflict-set-print-area-btn").prop("disabled", false);
+                                $.ajax({
+                                    dataType: `json`,
+                                    method: `POST`,
+                                    url: `/api/mergePrint/`,
+                                    contentType: `application/json`,
+                                    data: JSON.stringify(track),
+                                    scriptCharset: `utf-8`,
+                                    success: (response) => {
+                                        $("#conflict-get-print-fieldset").prop("disabled", false);
+                                        $("#conflict-download-pdf, #conflict-open-pdf").prop("href", "/tmp/print/pdf/" + response.key + ".pdf");
+                                        $("#conflict-print-btn").button('reset');
+                                        backboneEvents.get().trigger("end:conflictSearchPrint", response);
+                                        setTimeout(function () {
+                                            $("#snackbar-conflict-print").snackbar("hide");
+                                        }, 200);
+                                    },
+                                    //error: reject
+                                });
+                            } else {
+                                iter(count)
+                            }
+                        }, () => {
+                            setTimeout(() => iter(count), 1000);
+                        });
+                    }
+                    iter(count);
                 }
-                iter(count);
 
                 // for (const property in positiveHits.hits) {
                 //     let clone = JSON.parse(JSON.stringify(positiveHits));
@@ -233,8 +246,9 @@ module.exports = {
     },
 
     getState: () => {
-        let state = conflictSearch.getResult();
-        return state;
+        let res = conflictSearch.getResult();
+        res.reportType = reportType;
+        return res;
     },
 
     applyState: (newState) => {

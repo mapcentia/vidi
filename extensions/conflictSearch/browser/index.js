@@ -575,7 +575,7 @@ module.exports = module.exports = {
             };
         }
 
-            _self = this;
+        let _self = this;
         visibleLayers = cloud.getAllTypesOfVisibleLayers().split(";");
         if (text) {
             currentFromText = text;
@@ -1008,20 +1008,36 @@ var dom = `
 
                     <div class="btn-toolbar bs-component" style="margin: 0;">
                         <div class="btn-group">
-                            <button disabled class="btn btn-raised" id="conflict-print-btn" data-loading-text="<i class='fa fa-cog fa-spin fa-lg'></i> PDF rapport"><i class='fa fa-cog fa-lg'></i> Print rapport</button>
+                            <button disabled class="btn btn-sm btn-raised" id="conflict-print-btn" data-loading-text="<i class='fa fa-cog fa-spin fa-lg'></i> PDF rapport"><i class='fa fa-cog fa-lg'></i> Print rapport</button>
                         </div>
                         <div class="btn-group">
-                            <button disabled class="btn btn-raised" id="conflict-set-print-area-btn"><i class='fas fa-expand'></i></button>
+                            <button disabled class="btn btn-sm btn-raised" id="conflict-set-print-area-btn"><i class='fas fa-expand'></i></button>
                         </div>
                         <fieldset disabled id="conflict-get-print-fieldset">
                             <div class="btn-group">
-                                <a target="_blank" href="javascript:void(0)" class="btn btn-primary btn-raised" id="conflict-open-pdf">Åben PDF</a>
-                                <a href="bootstrap-elements.html" class="btn btn-primary btn-raised dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></a>
+                                <a target="_blank" href="javascript:void(0)" class="btn btn-sm btn-primary btn-raised" id="conflict-open-pdf">Åben PDF</a>
+                                <a href="bootstrap-elements.html" class="btn btn-sm btn-primary btn-raised dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></a>
                                 <ul class="dropdown-menu">
                                     <li><a href="javascript:void(0)" id="conflict-download-pdf">Download PDF</a></li>
                                 </ul>
                             </div>
                         </fieldset>
+                        <div>
+                            <span class="radio radio-primary">
+                                <label>
+                                    <input type="radio" name="conflict-report-type" value="1" checked>
+                                    Kompakt
+                                </label>
+                                <label>
+                                    <input type="radio" name="conflict-report-type" value="2">
+                                    Lang, kun hits
+                                </label>
+                                <label>
+                                    <input type="radio" name="conflict-report-type" value="3">
+                                    Lang, alle
+                                </label>
+                            </span>
+                        </div>
                     </div>
 
                     <div role="tabpanel">
