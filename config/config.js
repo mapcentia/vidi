@@ -1062,6 +1062,10 @@ module.exports = {
         {
             "regExp": true,
             "requested": "docunoteapi.geopartner.dk"
+        },
+        {
+            "regExp": true,
+            "requested": "services.hxgncontent.com"
         }
     ],
 
