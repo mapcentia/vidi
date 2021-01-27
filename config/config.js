@@ -1285,16 +1285,19 @@ module.exports = {
           "attribution":"&copy; Stamen Toner"
         }
       },
-      {
-         "id": "kortforsyningen.topo25", 
-         "name": "Klassisk 4cm kort", 
-         "db": "baselayers", 
-         "host": "https://gc2.io",
-         "config": {
-            "maxZoom":21,
-            "maxNativeZoom":19,
-            "attribution":"&copy; Styrelsen for Dataforsyning og Effektivisering." 
-         }
+       {
+        "type": "wms",
+        "url": "https://services.datafordeler.dk/DKtopokort/dtk_25/1.0.0/WMS?username=XMERXHKAVN&password=Geop1234!",
+        "layers": [
+            "dtk25"
+        ],
+        "id": "DTK_Kort25",
+        "name": "Klassisk 4cm kort",
+        "attribution": "&copy; Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.",
+        "abstract": "<p>Klassisk 4 cm kort</p><p>Copyright: Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.</p><br>",
+        "minZoom": 4,
+        "maxZoom": 24,
+        "maxNativeZoom": 20
       }
    ]
 }
