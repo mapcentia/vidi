@@ -1094,6 +1094,44 @@ module.exports = {
          }
       },
       {
+        "type": "wms",
+        "url": "https://services.kortforsyningen.dk/service?SERVICENAME=forvaltning2&token=2edaf0d4a10f052d184f2d4fcafcbfd6",
+        "layers": [
+            "Basis_kort",
+            "Navne_basis_kort",
+            "Husnummer"
+        ],
+        "id": "Basis_kort",
+        "name": "Basiskort (GST)",
+        "description": "Forvaltningskort fra kortforsyningen",
+        "attribution": "Kortforsyningen",
+        "abstract": "<p>Forvaltningskort.</p><p>Copyright: Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.</p><p>Baggrundskortet må frit anvendes, men følgende skal angives 'Indeholder data fra Styrelsen for Dataforsyning og Effektivisering.'. </p><br>",
+        "minZoom": 4,
+        "maxZoom": 21,
+        "maxNativeZoom": 21
+        },
+        {
+        "type": "wms",
+        "url": "https://services.kortforsyningen.dk/mat?TRANSPARENT=TRUE&STYLE=default&SERVICE=WMS&VERSION=1.1.1&STYLES=&FORMAT=image/png&token=2edaf0d4a10f052d184f2d4fcafcbfd6",
+        "layers": [
+            "Klitfredning",
+            "Strandbeskyttelse",
+            "Fredskov",
+            "Majoratskov",
+            "Stormfald",
+            "OptagetVej",
+            "MatrikelSkel"
+        ],
+        "id": "Matrikel_kort",
+        "name": "Matrikelkort (GST)",
+        "description": "Matrikelkort fra kortforsyningen",
+        "attribution": "Kortforsyningen",
+        "abstract": "<p>Dagligt ajourført matrikelkort.</p><p>Copyright: Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.</p><p>Baggrundskortet må frit anvendes, men følgende skal angives 'Indeholder data fra Styrelsen for Dataforsyning og Effektivisering.'. </p><br>",
+        "minZoom": 4,
+        "maxZoom": 21,
+        "maxNativeZoom": 21
+      },
+      {
          "id":"luftfotoserier.geodanmark_2019_12_5cm",
          "name":"Luftfoto 2019",
          "db":"baselayers",
@@ -1200,6 +1238,18 @@ module.exports = {
             "maxNativeZoom":19,
             "attribution":"&copy; Styrelsen for Dataforsyning og Effektivisering."
          }
+      },
+      {
+        "type": "wms",
+        "url": "https://services.kortforsyningen.dk/service?SERVICENAME=forvaltning2&",
+        "layers": ["Basis_kort","Navne_basis_kort","Husnummer"],
+        "id": "Basis_kort",
+        "name": "Basiskort",
+        "description": "Basiskort fra kortforsyningen",
+        "attribution": "Kortforsyningen",
+        "minZoom": 4,
+        "maxZoom": 21,
+        "maxNativeZoom": 21
       },
       {
           "id": "osm",
