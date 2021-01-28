@@ -1088,7 +1088,7 @@ module.exports = {
       {
          "id":"geodk.bright",
          "name":"Topografisk kort",
-         "db":"baselayers",
+         "db":"baselayers", 
          "host":"https://dk.gc2.io",
          "abstract":"<p>Topografisk kort baseret på GeoDanmark data, som opdateres årligt.</p><p>Copyright: Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.</p><p>Baggrundskortet må frit anvendes, men følgende skal angives 'Indeholder GeoDanmark-data fra Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.'. </p><br>",
          "config":{
