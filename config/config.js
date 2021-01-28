@@ -1124,7 +1124,8 @@ module.exports = {
             "Majoratskov",
             "Stormfald",
             "OptagetVej",
-            "MatrikelSkel"
+            "MatrikelSkel",
+            "Ejerlav"
         ],
         "id": "Matrikel_kort",
         "name": "Matrikelkort (GST)",
