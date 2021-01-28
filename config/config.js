@@ -1118,14 +1118,14 @@ module.exports = {
         "type": "wms",
         "url": "https://services.kortforsyningen.dk/mat?TRANSPARENT=TRUE&STYLE=default&SERVICE=WMS&VERSION=1.1.1&STYLES=&FORMAT=image/png&token=2edaf0d4a10f052d184f2d4fcafcbfd6",
         "layers": [
+            "Ejerlav",
             "Klitfredning",
             "Strandbeskyttelse",
             "Fredskov",
             "Majoratskov",
             "Stormfald",
             "OptagetVej",
-            "MatrikelSkel",
-            "Ejerlav"
+            "MatrikelSkel"            
         ],
         "id": "Matrikel_kort",
         "name": "Matrikelkort (GST)",
