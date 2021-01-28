@@ -1132,7 +1132,7 @@ module.exports = {
         "attribution": "Kortforsyningen",
         "abstract": "<p>Dagligt ajourført matrikelkort.</p><p>Copyright: Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.</p><p>Baggrundskortet må frit anvendes, men følgende skal angives 'Indeholder data fra Styrelsen for Dataforsyning og Effektivisering.'. </p><br>",
         "minZoom": 4,
-        "maxZoom": 21,
+        "maxZoom": 21, 
         "maxNativeZoom": 21
       },
       {
