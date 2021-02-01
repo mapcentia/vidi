@@ -1245,18 +1245,6 @@ module.exports = {
          }
       },
       {
-        "type": "wms",
-        "url": "https://services.kortforsyningen.dk/service?SERVICENAME=forvaltning2&",
-        "layers": ["Basis_kort","Navne_basis_kort","Husnummer"],
-        "id": "Basis_kort",
-        "name": "Basiskort",
-        "description": "Basiskort fra kortforsyningen",
-        "attribution": "Kortforsyningen",
-        "minZoom": 4,
-        "maxZoom": 21,
-        "maxNativeZoom": 21
-      },
-      {
           "id": "osm",
          "name":"Topografisk kort - Open Street Map",
          "abstract":"<p>Kortet hentes fra Open Street Map.</p><br>",
