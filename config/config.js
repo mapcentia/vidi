@@ -1137,16 +1137,19 @@ module.exports = {
         "maxNativeZoom": 21
       },
       {
-         "id":"luftfotoserier.geodanmark_2019_12_5cm",
-         "name":"Luftfoto 2019",
-         "db":"baselayers",
-         "host":"https://dk.gc2.io",
-         "abstract":"<p>Oprettede luftfoto (ortofoto) marts/april 2019 (12,5 cm pixels).</p><p>Copyright: Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.</p><p>Luftfotoet må frit anvendes, men følgende skal angives 'Indeholder GeoDanmark-data fra Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.'.</p><br>",
-         "config":{
-            "maxZoom":21,
-            "maxNativeZoom":19,
-            "attribution":"&copy; Styrelsen for Dataforsyning og Effektivisering og Danske kommuner."
-         },
+        "type": "wms",
+        "url": "https://services.kortforsyningen.dk/service?SERVICENAME=forvaltning2&token=2edaf0d4a10f052d184f2d4fcafcbfd6",
+        "layers": [
+            "Basis_ortofoto"
+        ],
+        "id": "Luftfoto_2019",
+        "name":"Luftfoto 2019",
+        "description": "Luftfotokort fra kortforsyningen",
+        "attribution": "&copy; Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.",
+        "abstract":"<p>Oprettede luftfoto (ortofoto) marts/april 2019 (12,5 cm pixels).</p><p>Copyright: Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.</p><p>Luftfotoet må frit anvendes, men følgende skal angives 'Indeholder GeoDanmark-data fra Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.'.</p><br>",
+        "minZoom": 4,
+        "maxZoom": 22,
+        "maxNativeZoom": 20,
             "overlays": [
                 {
                     "id": "public.mvw_adgangsadresser",
@@ -1167,8 +1170,8 @@ module.exports = {
                     }
                 }
             ]
-      },      
-      {
+        },      
+        {
          "id":"luftfotoserier.geodanmark_2018_12_5cm",
          "name":"Luftfoto 2018",
          "db":"baselayers",
