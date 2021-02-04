@@ -765,30 +765,20 @@ geocloud = (function () {
         var parts, l, url, urlArray, uri;
         parts = layer.split(".");
 
-        if (!defaults.tileCached) {
-            if (!defaults.uri) {
+        if (!defaults.uri) {
+            if (!defaults.tileCached) {
                 uri = "/wms/" + defaults.db + "/" + parts[0] + "?" + (defaults.additionalURLParameters.length > 0 ? defaults.additionalURLParameters.join('&') : '');
             } else {
-                uri = defaults.uri;
-            }
-            url = defaults.host + uri;
-            urlArray = [url];
-
-            if ('mapRequestProxy' in defaults && defaults.mapRequestProxy !== false) {
-                url = defaults.mapRequestProxy + uri;
+                uri = "/mapcache/" + defaults.db + "/wms?" + (defaults.additionalURLParameters.length > 0 ? defaults.additionalURLParameters.join('&') : '');
             }
         } else {
-            url = "/mapcache/" + defaults.db + "/wms";
-            if ('mapRequestProxy' in defaults && defaults.mapRequestProxy !== false) {
-                url = defaults.mapRequestProxy + url;
-            }
-            var url1 = url;
-            var url2 = url;
-            var url3 = url;
-            // For ol2
-            urlArray = [url1.replace("cdn.", "cdn1."), url2.replace("cdn.", "cdn2."), url3.replace("cdn.", "cdn3.")];
-            // For leaflet
-            url = url.replace("cdn.", "{s}.");
+            uri = defaults.uri;
+        }
+        url = defaults.host + uri;
+        urlArray = [url];
+
+        if ('mapRequestProxy' in defaults && defaults.mapRequestProxy !== false) {
+            url = defaults.mapRequestProxy + uri;
         }
 
         switch (MAPLIB) {
