@@ -834,14 +834,10 @@ module.exports = {
                         // Reload should always occur except times when current bbox is completely inside
                         // of the previously requested bbox (extended one in gc2cloud.js) kept in corresponding store
                         let needToReload;
-                        if ((parsedMeta && `load_strategy` in parsedMeta && parsedMeta.load_strategy === `d`)
-                            || (layerKeyNoPrefix in moduleState.dynamicLoad && moduleState.dynamicLoad[layerKeyNoPrefix] === true)) {
+                        if (layerPrefix === LAYER.VECTOR && ((parsedMeta && `load_strategy` in parsedMeta && parsedMeta.load_strategy === `d`)
+                            || (layerKeyNoPrefix in moduleState.dynamicLoad && moduleState.dynamicLoad[layerKeyNoPrefix] === true))) {
                             needToReload = true;
                             let currentMapBBox = cloud.get().map.getBounds();
-                            // TODO bug the layer is available as webGL
-                            console.log(localTypeStores[layerKey])
-                            console.log(localTypeStores)
-                            console.log(layerKey)
                             if (`buffered_bbox` in localTypeStores[layerKey]) {
                                 if (localTypeStores[layerKey].buffered_bbox === false || localTypeStores[layerKey].buffered_bbox && localTypeStores[layerKey].buffered_bbox.contains(currentMapBBox)) {
                                     needToReload = false;
