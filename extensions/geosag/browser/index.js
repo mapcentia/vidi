@@ -358,7 +358,7 @@ module.exports = {
                             .then(r => r.json())
                             .then(d => {
                                 // If no found, handle
-                                console.log(d)
+                                //console.log(d)
 
                                 if (d.type == 'Feature') {
                                     d.properties.key = elavkode+matr
@@ -519,26 +519,41 @@ module.exports = {
                         const _self = this;
                         let l1 = _self.state.existingMatrList;
                         let l2 = _self.state.matrList;
+                        
+                        // set default
+                        let result = false
 
                         if (l1.length != l2.length) {
                             // Do we even have the same number?
-                            return true;
+                            result = true;
                         } else {
-                            l1.forEach(f => {
-                                // Are existing a part of the list?
-                                let k = f.synchronizeIdentifier;
-                                if (!l2.find(x => x.key == f )) {
-                                    return true;
-                                };
-                            })
+
+                            // Compare lists
                             l2.forEach(f => {
-                                // Are new part of existing?
+                                // does this already exist?
                                 let k = f.key;
-                                if (!l2.find(x => x.key == f )) {
-                                    return true;
-                                };
+                                l1.forEach(ex => {
+                                    //console.log(k)
+                                    //console.log(ex.synchronizeIdentifier)
+                                    if (k != ex.synchronizeIdentifier) {
+                                        result = true;
+                                    }
+                                });
+                            });
+
+                            l1.forEach(f => {
+                                // or the other way around?
+                                let k = f.synchronizeIdentifier;
+                                l2.forEach(ex => {
+                                    if (k != ex.key) {
+                                        result = true;
+                                    }
+                                })
                             })
+
                         };
+                        //console.log(result)
+                        return result
                     };
 
                     saveChangesHandler(id) {
@@ -574,7 +589,7 @@ module.exports = {
                         // Get case
                         getCase(sagsnr)
                         .then(r => {
-                            console.log(r)
+                            //console.log(r)
                             // Has error? 
                             if (r == 'Unauthorized request') {
                                 throw 'Unauthorized request'
@@ -711,8 +726,8 @@ module.exports = {
                                 })
 
                             } else {
-                                console.log('unknown')
-                                console.log(id)
+                                //console.log('unknown')
+                                //console.log(id)
                                 getJordstykkeByMatr(id.matrikelnr, id.ejerlav.toString())
                                 .then(r => {
                                     resolve(r)
@@ -805,6 +820,12 @@ module.exports = {
                                 matrList: prev,
                                 saveState: ''
                             })
+                        } else {
+                            // Let user know it's already in list!
+                            //console.log(id)
+                            let x = id
+                            let msg = `${x.matrikelnr}, ${x.ejerlavsnavn} er allerede valgt.`
+                            snack(msg)
                         }
                     }
 
@@ -1105,8 +1126,8 @@ module.exports = {
                                         <div style={flexStyle}>
                                             <div style={{alignSelf: 'center'}}>
                                             <DAWASearch 
-                                            _handleResult = {_self.findMatrikel}
-                                            nocache = {true}
+                                                _handleResult = {_self.findMatrikel}
+                                                nocache = {true}
                                             />
                                             </div>
                                         </div>
