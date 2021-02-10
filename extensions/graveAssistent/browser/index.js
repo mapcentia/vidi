@@ -225,6 +225,7 @@ module.exports = {
                  * @param {*} obj 
                  */
                 var flattenObject = function (obj) {
+                    //console.log(obj)
                     let flattened = {}
 
                     Object.keys(obj).forEach((key) => {
@@ -340,7 +341,7 @@ module.exports = {
                 }
 
                 var handleGeometry = function (obj) {
-                    //console.table()
+                    //console.table(object)
                     let geomObj = {}
                     let flat = flattenObject(obj)
 
@@ -459,7 +460,6 @@ module.exports = {
                         try {
                             foresp.forEach(function (item) {
                                 //console.log(item)
-
                                 //console.log(item.polygonProperty)
                                 let geom = handleGeometry(item.polygonProperty)
                                 //console.log(geom)
@@ -494,8 +494,15 @@ module.exports = {
 
                         /* Enrich each data value with contant, package and owner information - overwrite duplicate information */
                         if (data.length > 1) {
+                            //console.log(data)
                             try {
                                 data.forEach(function (item) {
+
+                                    // Skip "ler:Informationsressource"
+                                    if (item.objectType == "ler:Informationsressource"){
+                                        console.log(item)
+                                        return;
+                                    }
     
                                     let obj = {}
                                     obj = Object.assign(obj, item)
@@ -720,7 +727,7 @@ module.exports = {
                                 filters: filter[layerKey]
                             }
 
-                            console.log(options)
+                            //console.log(options)
 
                             layerTree.onApplyArbitraryFiltersHandler(options, false);
 
