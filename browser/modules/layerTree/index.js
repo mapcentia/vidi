@@ -1486,6 +1486,9 @@ module.exports = {
                     });
                 }
                 if (reloadInterval && reloadInterval !== "") {
+                    let reloadCallback = meta.parseLayerMeta(layerKey)?.reload_callback;
+                    let func = reloadCallback && reloadCallback !== "" ? Function('"use strict";return (' + reloadCallback + ')')() : ()=>{};
+                    func(l);
                     clearInterval(reloadIntervals[layerKey]);
                     reloadIntervals[layerKey] = setInterval(() => {
                         l.load();
@@ -1812,7 +1815,8 @@ module.exports = {
                 locale: window._vidiLocale.replace("_", "-"),
                 template: template,
                 styleSelected,
-                setZoom: parsedMeta?.zoom_on_table_click ? parsedMeta.zoom_on_table_click : false
+                setZoom: parsedMeta?.zoom_on_table_click ? parsedMeta.zoom_on_table_click : false,
+                maxZoom: parsedMeta?.max_zoom_level_table_click && parsedMeta.max_zoom_level_table_click !== "" ? parsedMeta.max_zoom_level_table_click: 17
             });
 
             localTable.loadDataInTable(true, forceDataLoad);

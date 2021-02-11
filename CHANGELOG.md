@@ -42,6 +42,15 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ### Added
 - `searchConfig.placeholderText` added to config, so the search placeholder can be customized.
+- A callback function can now be added to interval reload of vector layers. The callback will be fires when layer changes. Meta option is `reload_callback`:
+```javascript
+function(store) {
+  var audio = new Audio('https://ccrma.stanford.edu/~jos/mp3/gtr-nylon22.mp3');
+  audio.play();
+  console.log(store)
+}
+```
+- The max zoom level when selecting a row in a layer table can be with `setmax_zoom_level_table_click`. If not set or is NaN the max zoom level will default to 17.
 
 ### Fixed
 - MapCache layers now work. Both raster and vector tiles.

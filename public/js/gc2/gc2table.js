@@ -13,7 +13,6 @@
 var gc2table = (function () {
     "use strict";
     var isLoaded, object, init;
-    const MAXZOOM = 17;
     isLoaded = function () {
         return true;
     };
@@ -51,6 +50,7 @@ var gc2table = (function () {
                 renderInfoIn: null,
                 key: null,
                 caller: null,
+                maxZoom: 17
             }, prop,
             uid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
                 var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
@@ -89,7 +89,8 @@ var gc2table = (function () {
             checkBox = defaults.checkBox,
             renderInfoIn = defaults.renderInfoIn,
             key = defaults.key,
-            caller = defaults.caller;
+            caller = defaults.caller,
+            maxZoom = parseInt(defaults.maxZoom) || 17
 
         var customOnLoad = false, destroy, assignEventListeners, clickedFlag = false;
 
@@ -237,13 +238,13 @@ var gc2table = (function () {
                             if (setViewOnSelect) {
                                 try {
                                     if (setZoom) {
-                                        m.map.fitBounds(layer.getBounds(), {maxZoom: MAXZOOM});
+                                        m.map.fitBounds(layer.getBounds(), {maxZoom: maxZoom});
                                     } else {
                                         m.map.panTo(layer.getBounds().getCenter());
                                     }
                                 } catch (e) {
                                     if (setZoom) {
-                                        m.map.setView(layer.getLatLng(), MAXZOOM);
+                                        m.map.setView(layer.getLatLng(), maxZoom);
                                     } else {
                                         m.map.panTo(layer.getLatLng());
                                     }
