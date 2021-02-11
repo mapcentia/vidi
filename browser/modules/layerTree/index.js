@@ -1488,7 +1488,7 @@ module.exports = {
                 if (reloadInterval && reloadInterval !== "") {
                     let reloadCallback = meta.parseLayerMeta(layerKey)?.reload_callback;
                     let func = reloadCallback && reloadCallback !== "" ? Function('"use strict";return (' + reloadCallback + ')')() : ()=>{};
-                    func(l);
+                    func(l, cloud.get().map);
                     clearInterval(reloadIntervals[layerKey]);
                     reloadIntervals[layerKey] = setInterval(() => {
                         l.load();

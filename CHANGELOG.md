@@ -44,10 +44,14 @@ and this project adheres to [CalVer](https://calver.org/).
 - `searchConfig.placeholderText` added to config, so the search placeholder can be customized.
 - A callback function can now be added to interval reload of vector layers. The callback will be fires when layer changes. Meta option is `reload_callback`:
 ```javascript
-function(store) {
+function(store, map) {
   var audio = new Audio('https://ccrma.stanford.edu/~jos/mp3/gtr-nylon22.mp3');
   audio.play();
-  console.log(store)
+  var latest;
+  store.geoJsonLayer.eachLayer(function (layer) {
+    latest = layer
+  })
+  map.setView(latest.getLatLng(), 18)
 }
 ```
 - The max zoom level when selecting a row in a layer table can be with `setmax_zoom_level_table_click`. If not set or is NaN the max zoom level will default to 17.
