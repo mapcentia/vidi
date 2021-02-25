@@ -866,6 +866,11 @@ module.exports = {
 
                     }
 
+                    humanTime(timestamp){
+                        let d = new Date(timestamp)
+                        return d.toLocaleString(window._vidiLocale.replace('_','-'))
+                    }
+
                     /**
                      * Handle file selected
                      * @param {*} files 
@@ -1187,7 +1192,7 @@ module.exports = {
                                     return ( 
                                         <div role = "tabpanel">
                                             <div className = "form-group">
-                                                <p>{__("uploadtime") + ': ' + s.svarUploadTime}</p>
+                                                <p>{__("uploadtime") + ': ' + this.humanTime(s.svarUploadTime)}</p>
                                                 <div style = {{display: 'flex'}}>
                                                     <Button size = "large" color = "default" variant = "contained" style = {margin} onClick = {_self.onBackClickHandler.bind(this)}>
                                                         <ArrowBackIcon fontSize = "small" />{__("backbutton")}
