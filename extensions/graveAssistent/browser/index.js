@@ -57,6 +57,12 @@ var layers = require('./../../../browser/modules/layers');
 
 /**
  *
+ * @type {*|exports|module.exports}
+ */
+var switchLayer = require('./../../../browser/modules/switchLayer');
+
+/**
+ *
  * @type {string}
  */
 var exId = "graveAssistent";
@@ -717,16 +723,15 @@ module.exports = {
                         console.log('graveAssistent - Apply filter to ' + layerKey)
 
                         try {
-                            //Make sure layer is on
-                            //TODO tænd laget hvis det ikke allerede er tændt! - skal være tændt før man kan ApplyFilter
-                            layerTree.reloadLayer(layerKey)
+                            //Make sure layer is on, don't reload
+                            switchLayer.init(layerKey, true)
+                            //layerTree.reloadLayer(layerKey)
                             //Toggle the filter
 
                             let options = {
                                 layerKey,
                                 filters: filter[layerKey]
                             }
-
                             //console.log(options)
 
                             layerTree.onApplyArbitraryFiltersHandler(options, false);
@@ -794,7 +799,8 @@ module.exports = {
                             foresp: '',
                             overskredetDato: false,
                             harFarlig: false,
-                            harMegetFarlig: false
+                            harMegetFarlig: false,
+                            lastBounds: ''
                         };
 
                         this.readContents = this.readContents.bind(this)
@@ -839,7 +845,10 @@ module.exports = {
                                 }, () => {
                                     // Get foresp. if we really logged in.
                                     // TODO: check we're in the right schema!
+                                    // TODO: turn on all 'dem layers
+
                                     if (me.state.authed) {
+                                        me.populateDClayers()
                                         me.populateForespoergselOption() //
                                     }
                                 }))
@@ -883,6 +892,7 @@ module.exports = {
                         var r = new FileReader();
                         r.readAsDataURL(files[0])
                         r.onloadend = function() {
+
                             let b64 = r.result
                             _self.readContents(b64)
                         }
@@ -899,6 +909,8 @@ module.exports = {
                             ejerliste: [],
                         }, () => {
                             _self.populateForespoergselOption() // On back click, populate select with new foresp
+                            // move to last location and clear filters
+                            cloud.get().map.fitBounds(_self.state.lastBounds)
                             clearFilters()
                         })
                     }
@@ -906,7 +918,8 @@ module.exports = {
                     handleForespSelectChange(event) {
                         const _self = this
                         _self.setState({
-                            foresp: String(event.target.value)
+                            foresp: String(event.target.value),
+                            lastBounds: cloud.get().map.getBounds()
                         })
                         _self.getForespoergsel(String(event.target.value))
                         _self.setState({
@@ -1003,7 +1016,8 @@ module.exports = {
                         try {
                             metaData.data.forEach(function (d) {
                                 if (d.f_table_name) {
-                                    if (d.f_table_name.includes('graveassistent_')) {
+                                    //console.log(d.f_table_name + ': ' + d.f_table_name.includes('graveassistent_') + '|' + !d.f_table_name.includes('_status'))
+                                    if (d.f_table_name.includes('graveassistent_') && !d.f_table_name.includes('_status')) {
                                         DClayers.push(d.f_table_schema + '.' + d.f_table_name);
                                     }
                                 }
