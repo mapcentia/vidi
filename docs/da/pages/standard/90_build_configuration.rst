@@ -18,7 +18,7 @@ Systemkonfiguration
 Systemkonfiguration
 ***************************************************************** 
 
-Vidi kan konfigureres under opstart. Denne konfiguration indehodler information om hvilke extensions der skal indlæses, hvilke print-skabeloner der er tilgængelige med mere.
+Vidi kan konfigureres under opstart. Denne konfiguration kan indeholde information om hvilke extensions, der skal indlæses, hvilke print-skabeloner der er tilgængelige med mere.
 
 Laves der en ændring, skal vidi startes igen.
 
@@ -83,4 +83,4 @@ Herunder er et eksempel på en opsætning der kun giver mulighed for print i ``1
 Komplet eksempel
 =================================================================
 
-For at se et komplet eksempel på en konfiguration henvises til default config i repo. `Den kan du finde her <https://github.com/mapcentia/vidi/blob/master/config/config.embed.dist.js>`_
+For at se et komplet eksempel på en konfiguration henvises til default config i repo. `Den kan du finde her <https://github.com/mapcentia/vidi/blob/master/docker/stable/conf/vidi/config.js>`_
