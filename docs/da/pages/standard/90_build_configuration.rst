@@ -8,10 +8,10 @@ Systemkonfiguration
 
     :Date: |today|
     :Vidi-version: 2020.11.0
-    :Forfatter: `giovanniborella <https://github.com/giovanniborella>`_
+    :Forfattere: `giovanniborella <https://github.com/giovanniborella>`_ | `mapcentia <https://github.com/mapcentia>`_
 
 .. contents:: 
-    :depth: 3
+    :depth: 4
 
 
 *****************************************************************
@@ -52,23 +52,11 @@ print
 
 Denne nøgle indeholder opsætningen af print. Den består af underdele som alle er obligatoriske. 
 
-.. _configjs_print_templates:
 
-templates
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-TBD
-
-For at sikre mulighed for at printe, selv om vidi startes uden opsætning, indsættes følgende for at definere hvilken skabelon der er tilgængelig. Denne liste kan udvides med flere templates som er defineret i :ref:`configjs_print_templates`.
-
-.. code-block:: json
-
-    "enabledPrints": ["print"],
-
-.. _configjs_print_scales:
+.. _configjs_scales:
 
 scales
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+-----------------------------------------------------------------
 
 ``scales`` er en array af heltal der definérer hvilke zoom-forhold det er muligt at lave print i.
 
@@ -77,6 +65,30 @@ Herunder er et eksempel på en opsætning der kun giver mulighed for print i ``1
 .. code-block:: json
 
     "scales": [1000, 2000, 10000]
+
+.. _configjs_configurl:
+
+configUrl
+-----------------------------------------------------------------
+
+HTTP server hvor eksterne resourcer findes. Resourcer kan være:
+
+* :ref:`Kørselskonfigurationer<configjson>`
+* :ref:`Templates<configjs_template>`
+* :ref:`CSS filer<configjs_cssfiles>`
+
+.. code-block:: json
+
+    "configUrl": "https://mapcentia.github.io/vidi_configs",
+
+Der kan angives forskellige URLer til forskellige databaser. ``_default`` betyder alle andre.
+
+.. code-block:: json
+
+    "configUrl": {
+        "mydb": "https://mapcentia.github.io/vidi_configs_for_mydb",
+        "_default": "https://mdapcentia.github.io/vidi_configs_default"
+    },
 
 .. _configjs_complete_example:
 

@@ -8,9 +8,7 @@ Kørselskonfiguration
 
     :Date: |today|
     :Vidi-version: 2020.11.0
-    :Forfatter: `giovanniborella <https://github.com/giovanniborella>`_
-
-                `mapcentia <https://github.com/mapcentia>`_
+    :Forfattere: `giovanniborella <https://github.com/giovanniborella>`_ | `mapcentia <https://github.com/mapcentia>`_
 
 .. contents:: 
     :depth: 4
@@ -126,7 +124,7 @@ Her kan det valgte søgemodul konfigureres.
         "esrSearchActive": true,
         "sfeSearchActive": true,
         "placeholderText": "Søg på et eller andet",
-        "google": {"apiKey": "AIzaSyBB1r76SA6z1oEScmh6Td_v59KR1dIgv9c"}
+        "google": {"apiKey": "abc123"}
     },
 
 .. note::
@@ -138,6 +136,7 @@ template
 -----------------------------------------------------------------
 
 Her angives hvilken template, som skal bruges. Angives det ikke, bruges standard-templaten ``default.tmpl``.
+Egne Templates kan placeres på egen server ved angivelse af :ref:`configUrl<configjs_configurl>` indstillingen.
 
 .. code-block:: json
 
@@ -299,14 +298,73 @@ Ovenstående sættes i GC2 Meta.
     :align: center
     :name: cross-multi-select
     :figclass: align-center
+
 .. code-block:: json
 
     "crossMultiSelect": true,
 
-
 .. note::
     Hvis et lag er editerbart, vises "blyant" og "skraldespand" ikonerne ikke i pop-up'en.
 
+.. _configjs_activatemaintab:
+
+activateMainTab
+----------------------------------------------------------------
+
+Sæt hvilket modul, som skal være aktivt fra starten. Mulighederne er:
+
+* search
+* info
+* layer
+* baselayer
+* legend
+* draw
+* state-snapshot
+* print
+* conflict
+* streetView
+* coordinates
+
+.. code-block:: json
+
+    "activateMainTab:: "info"
+
+.. _configjs_cssfiles:
+
+cssFiles
+----------------------------------------------------------------
+
+Load eksterne CSS filer. Filerne skal placeres på en HTTP server, som forbindes til vha. :ref:`configUrl<configjs_configurl>`
+
+.. code-block:: json
+
+  "cssFiles": [
+       "myStyles1.css",
+       "myStyles2.css"
+  ]
+
+.. _configjs_dontuseadvancedbaselayerswitcher:
+
+dontUseAdvancedBaseLayerSwitcher
+----------------------------------------------------------------
+
+Deaktiver dobbeltgrundskort funktionen.
+
+.. code-block:: json
+
+    "dontUseAdvancedBaseLayerSwitcher": true
+
+.. _configjs_infoclickcursorstyle:
+
+infoClickCursorStyle
+----------------------------------------------------------------
+Sæt hvilken CSS cursor style markøren skal have når feature-info modulet er aktivt. Default er "crosshair".
+
+Andre muligheder kan ses `her <https://developer.mozilla.org/en-US/docs/Web/CSS/cursor>`_.
+
+.. code-block:: json
+
+    "infoClickCursorStyle": "crosshair"
 
 .. rubric:: Fodnoter
 
