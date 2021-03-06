@@ -43,6 +43,9 @@ var sqlQuery;
 var applicationModules = false;
 var isStarted = false;
 
+const LEFT_SLIDE_WIDTHS = [300, 400, 550];
+const BUTTON_WITH = 24;
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -276,6 +279,33 @@ module.exports = {
         // Set up the open/close functions for side panel
         var searchPanelOpen, width, defaultCollapsedWidth = 260;
 
+        backboneEvents.get().on(`show:leftSlidePanel`, () => {
+            let localCollapsedWidth = Math.max.apply(Math, $('#side-panel #main-tabs > li > a, #side-panel #main-tabs > li [role="tab"]').map(function () {
+                return $(this).width();
+            }).get());
+            if (localCollapsedWidth > 0) {
+                if (localCollapsedWidth < 170) localCollapsedWidth = 170;
+                localCollapsedWidth = localCollapsedWidth + 80;
+            } else {
+                localCollapsedWidth = defaultCollapsedWidth + 80;
+            }
+            $("#search-ribbon").css("right", "-" + (width - localCollapsedWidth) + "px");
+            $("#pane").css("right", (localCollapsedWidth - BUTTON_WITH) + "px");
+            $('#map').css("width", "calc(100% - " + (localCollapsedWidth / 2) + "px)");
+            searchPanelOpen = true;
+            $(".slide-collapsed").hide();
+            $(".slide-expanded").show();
+        });
+        backboneEvents.get().on(`hide:leftSlidePanel`, () => {
+            $("#pane").css("right", "0");
+            $('#map').css("width", "100%");
+            $("#search-ribbon").css("right", "-" + (width - BUTTON_WITH) + "px");
+            searchPanelOpen = false;
+            $("#side-panel ul li").removeClass("active");
+            $(".slide-collapsed").show();
+            $(".slide-expanded").hide();
+        });
+
         $("#main-tabs a").on("click", function (e) {
             if ($(this).data(`module-ignore`) !== true && $(this).data(`module-ignore`) !== `true`) {
                 $("#module-container.slide-right").css("right", "0");
@@ -308,51 +338,34 @@ module.exports = {
         });
 
         let setWidth = function (width) {
-            $("#search-ribbon").css("width", width + "px").css("right", "-" + (width - 40) + "px");
-            $("#module-container").css("width", (width - 100) + "px");
-            $("#info-modal").css("width", (width - 100) + "px");
+            $("#search-ribbon").css("width", width + "px").css("right", "-" + (width - BUTTON_WITH) + "px");
+            $("#module-container").css("width", (width - 84) + "px");
+            $("#info-modal").css("width", (width - 84) + "px");
             $(".navmenu").css("width", (width) + "px");
-            $(".slide-right").css("right", "-" + (width - 100) + "px");
+            $(".slide-right").css("right", "-" + (width - 84) + "px");
         };
 
         var infoModalHide = function () {
-            $("#info-modal").css("right", "-" + (width - 100) + "px");
+            $("#info-modal").css("right", "-" + (width - 84) + "px");
         }
 
         var moduleContainerHide = function () {
-            $("#module-container.slide-right").css("right", "-" + (width - 100) + "px");
+            $("#module-container.slide-right").css("right", "-" + (width - 84) + "px");
         }
 
         var searchShow = function () {
-            let localCollapsedWidth = Math.max.apply(Math, $('#side-panel #main-tabs > li > a, #side-panel #main-tabs > li [role="tab"]').map(function () {
-                return $(this).width();
-            }).get());
-            if (localCollapsedWidth > 0) {
-                if (localCollapsedWidth < 170) localCollapsedWidth = 170;
-                localCollapsedWidth = localCollapsedWidth + 80;
-            } else {
-                localCollapsedWidth = defaultCollapsedWidth + 80;
-            }
-
-            $("#search-ribbon").css("right", "-" + (width - localCollapsedWidth) + "px");
-            $("#pane").css("right", (localCollapsedWidth - 40) + "px");
-            $('#map').css("width", "calc(100% - " + (localCollapsedWidth / 2) + "px)");
-            searchPanelOpen = true;
+            backboneEvents.get().trigger(`show:leftSlidePanel`);
         }
 
         var searchShowFull = function () {
             $("#search-ribbon").css("right", "0");
-            $("#pane").css("right", (width - 40) + "px");
+            $("#pane").css("right", (width - BUTTON_WITH) + "px");
             $('#map').css("width", "calc(100% - " + (width / 2) + "px");
             searchPanelOpen = true;
         }
 
         var searchHide = function () {
-            $("#pane").css("right", "0");
-            $('#map').css("width", "100%");
-            $("#search-ribbon").css("right", "-" + (width - 40) + "px");
-            searchPanelOpen = false;
-            $("#side-panel ul li").removeClass("active");
+            backboneEvents.get().trigger(`hide:leftSlidePanel`);
         };
 
         var jRes = jrespond([
@@ -377,7 +390,7 @@ module.exports = {
             breakpoint: ['phone'],
             enter: function () {
                 searchHide()
-                width = 400;
+                width = LEFT_SLIDE_WIDTHS[0];
                 setWidth(width)
             },
             exit: function () {
@@ -389,7 +402,7 @@ module.exports = {
             breakpoint: ['tablet'],
             enter: function () {
                 searchHide()
-                width = 500;
+                width = LEFT_SLIDE_WIDTHS[1];
                 setWidth(width)
             },
             exit: function () {
@@ -401,14 +414,14 @@ module.exports = {
             breakpoint: ['desktop'],
             enter: function () {
                 searchHide()
-                width = 700;
+                width = LEFT_SLIDE_WIDTHS[2];
                 setWidth(width)
             },
             exit: function () {
                 console.log("Exit desktop");
-
             }
         });
+
 
         $('#search-border').click(function () {
             let id = $("#search-border i");
@@ -416,14 +429,12 @@ module.exports = {
                 searchHide();
                 infoModalHide();
                 moduleContainerHide();
-                id.removeClass("fa-times");
-                id.addClass("fa-reorder");
                 id.css("padding-left", "12px")
 
             } else {
                 searchShow();
-                id.removeClass("fa-reorder");
-                id.addClass("fa-times");
+                $(".slide-collapsed").hide();
+                $(".slide-expanded").show();
                 id.css("padding-left", "14px")
             }
         });

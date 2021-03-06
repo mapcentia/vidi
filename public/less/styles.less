@@ -120,7 +120,7 @@ body {
 }
 
 .leaflet-popup-content .tab-pane {
-  padding: 6px 0 0 0  !important;
+  padding: 0  !important;
 }
 
 #pane {
@@ -266,7 +266,7 @@ input[type="checkbox"] {
 }
 
 .nav-tabs > li > a {
-  color: #777 !important;
+  color: #999 !important;
   border-radius: 0;
   border: 1px solid rgba(255, 255, 255, 0) !important;
   border-bottom: 0 !important;
@@ -275,7 +275,7 @@ input[type="checkbox"] {
 .nav-tabs > li.active > a {
   border: 1px solid #ddd !important;
   border-bottom: 0 !important;
-  background-color: white;
+  //background-color: #ddd !important;
   color: #111 !important;
 
 }
@@ -848,6 +848,9 @@ body {
   display: inline;
   box-shadow: 0 1px 12px 0 rgba(0, 0, 0, 0.12);
 }
+#module-container .modal-header {
+  padding: 10px;
+}
 
 .slide-right {
   //right: -100%;
@@ -856,7 +859,7 @@ body {
 
 .slide-left {
   left: -100%;
-  box-shadow: rgba(0, 0, 0, 0.2) 0px 27px 24px 0px, rgba(0, 0, 0, 0.22) 0px 40px 77px 0px;
+  box-shadow: rgba(0, 0, 0, 0.2) 0 27px 24px 0, rgba(0, 0, 0, 0.22) 0 40px 77px 0;
 }
 
 .nav-tabs {
@@ -1406,8 +1409,12 @@ h4 small {
 }
 
 #search-container {
-  padding-left: 40px;
+  padding-left: 24px;
   height: 100%;
+}
+
+.slider-btn span {
+  padding-top: 12px;
 }
 
 #search-content {

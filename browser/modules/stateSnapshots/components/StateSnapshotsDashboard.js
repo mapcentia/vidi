@@ -1,13 +1,16 @@
-var React = require('react');
+const React = require('react');
 import TitleFieldComponent from './../../shared/TitleFieldComponent';
 import LoadingOverlay from './../../shared/LoadingOverlay';
 
 const uuidv4 = require('uuid/v4');
 const cookie = require('js-cookie');
 
-const buttonStyle = { padding: `4px`, margin: `0px` };
+const buttonStyle = {padding: `4px`, margin: `0px`};
 
 const DEFAULT_API_URL = `/api/state-snapshots`;
+
+let jquery = require('jquery');
+require('snackbarjs');
 
 /**
  * State snapshots dashboard
@@ -31,7 +34,7 @@ class StateSnapshotsDashboard extends React.Component {
         this.applySnapshot = this.applySnapshot.bind(this);
         this.createSnapshot = this.createSnapshot.bind(this);
         this.deleteSnapshot = this.deleteSnapshot.bind(this);
-        this.seizeSnapshot = this.seizeSnapshot.bind(this);               
+        this.seizeSnapshot = this.seizeSnapshot.bind(this);
         this.seizeAllSnapshots = this.seizeAllSnapshots.bind(this);
         this.setImageLinkSize = this.setImageLinkSize.bind(this);
         this.copyToClipboard = this.copyToClipboard.bind(this);
@@ -41,7 +44,7 @@ class StateSnapshotsDashboard extends React.Component {
         if (cookie.get('vidi-state-tracker')) {
             trackingCookie = cookie.get('vidi-state-tracker');
         } else {
-            cookie.set('vidi-state-tracker', trackingCookie, { expires: 365 });
+            cookie.set('vidi-state-tracker', trackingCookie, {expires: 365});
         }
     }
 
@@ -51,12 +54,35 @@ class StateSnapshotsDashboard extends React.Component {
         let _self = this;
         this.props.backboneEvents.get().on(`session:authChange`, (authenticated) => {
             if (this.mounted && _self.state.authenticated !== authenticated) {
-                _self.setState({ authenticated });
+                _self.setState({authenticated});
                 _self.refreshSnapshotsList();
             }
         });
 
-        _self.refreshSnapshotsList();
+        // Figuring out if we are in a session. If so, don't refresh snapshots, because the session will also do this.
+        // This way we only load snapshots once
+        if (this.props.force) {
+            _self.refreshSnapshotsList();
+        } else {
+            try {
+                let session = require('../../../../extensions/session/browser');
+                if (window.vidiConfig.enabledExtensions.includes('session')) {
+                    (function poll() {
+                        if (session.isStatusChecked()) {
+                            if (!session.isAuthenticated()) {
+                                _self.refreshSnapshotsList(); // Status is checked and we're not a session
+                            }
+                        } else {
+                            setTimeout(() => poll(), 100)
+                        }
+                    }())
+                } else {
+                    _self.refreshSnapshotsList();
+                }
+            } catch (e) {
+                _self.refreshSnapshotsList();
+            }
+        }
     }
 
     componentWillUnmount() {
@@ -65,14 +91,14 @@ class StateSnapshotsDashboard extends React.Component {
 
     /**
      * Returns the current meta settings of the snapshot
-     * 
+     *
      * Meta remembers current configuration (config, template), so when state snapshots panel, for example,
      * will be opened for the same browser but with different configuration, generated snapshot
      * links will be correct
      */
     getSnapshotMeta() {
         let result = {};
-        let queryParameters = this.props.urlparser.uriObj.search(true);
+        let queryParameters = this.props.urlparser.urlVars;
         if (`config` in queryParameters && queryParameters.config) {
             result.config = queryParameters.config;
         }
@@ -86,15 +112,16 @@ class StateSnapshotsDashboard extends React.Component {
 
     /**
      * Creates snapshot
-     * 
+     *
+     * @param title
      * @param {Boolean} anonymous Specifies if the created snapshot belongs to browser or user
      */
     createSnapshot(title, anonymous = false) {
         let _self = this;
 
-        _self.setState({ loading: true });
+        _self.setState({loading: true});
         this.props.state.getState().then(state => {
-            if ('modules' in state === false) {
+            if (!('modules' in state)) {
                 throw new Error(`No modules data in state`);
             }
 
@@ -116,13 +143,13 @@ class StateSnapshotsDashboard extends React.Component {
                 dataType: 'json',
                 data: JSON.stringify(data)
             }).then((response) => {
-                _self.setState({ loading: false });
+                _self.setState({loading: false});
                 _self.refreshSnapshotsList();
                 let obj = {"stateId": response.id, "data": data};
                 window.parent.postMessage(obj, '*');
             }).catch(error => {
                 console.error(error);
-                _self.setState({ loading: false });
+                _self.setState({loading: false});
                 _self.refreshSnapshotsList();
             });
         });
@@ -130,21 +157,21 @@ class StateSnapshotsDashboard extends React.Component {
 
     /**
      * Applies snapshot
-     * 
+     *
      * @param {Object} item Applies snapshot
      */
     applySnapshot(item) {
         if (this.props.onStateSnapshotApply) this.props.onStateSnapshotApply();
 
-        this.setState({ stateApplyingIsBlocked: true });
+        this.setState({stateApplyingIsBlocked: true});
         this.props.state.applyState(item.snapshot).then(() => {
-            this.setState({ stateApplyingIsBlocked: false });
+            this.setState({stateApplyingIsBlocked: false});
         });
     }
 
     /**
      * Deletes snapshot
-     * 
+     *
      * @param {String} id Snapshot identifier
      */
     deleteSnapshot(id) {
@@ -162,15 +189,16 @@ class StateSnapshotsDashboard extends React.Component {
 
     /**
      * Updates snapshot
-     * 
-     * @param {String} id Snapshot identifier
+     *
+     * @param data
+     * @param title
      */
     updateSnapshot(data, title) {
         let _self = this;
 
-        _self.setState({ loading: true });
+        _self.setState({loading: true});
         this.props.state.getState().then(state => {
-            if ('modules' in state === false) {
+            if (!('modules' in state)) {
                 throw new Error(`No modules data in state`);
             }
 
@@ -197,7 +225,7 @@ class StateSnapshotsDashboard extends React.Component {
 
     /**
      * Enables updat form for snapshot
-     * 
+     *
      * @param {String} id Snapshot identifier
      */
     enableUpdateSnapshotForm(id) {
@@ -236,7 +264,7 @@ class StateSnapshotsDashboard extends React.Component {
                     method: 'PUT',
                     dataType: 'json',
                     contentType: 'application/json; charset=utf-8',
-                    data: JSON.stringify({ anonymous: false })
+                    data: JSON.stringify({anonymous: false})
                 }));
             });
 
@@ -252,7 +280,7 @@ class StateSnapshotsDashboard extends React.Component {
     refreshSnapshotsList() {
         let _self = this;
 
-        this.setState({ loading: true });
+        this.setState({loading: true});
         $.ajax({
             url: this.state.apiUrl + '/' + vidiConfig.appDatabase + '?ownerOnly=true',
             method: 'GET',
@@ -271,7 +299,7 @@ class StateSnapshotsDashboard extends React.Component {
                     }
                 });
 
-                _self.setState({ browserOwnerSnapshots, userOwnerSnapshots, loading: false });
+                _self.setState({browserOwnerSnapshots, userOwnerSnapshots, loading: false});
             }
         }, (jqXHR) => {
             if (jqXHR.responseJSON && jqXHR.responseJSON.error && jqXHR.responseJSON.error === `INVALID_OR_EMPTY_EXTERNAL_API_REPLY`) {
@@ -280,16 +308,21 @@ class StateSnapshotsDashboard extends React.Component {
         });
     }
 
-    copyToClipboard (str) {
+    copyToClipboard(str) {
         const el = document.createElement('textarea');
         el.value = str;
         document.body.appendChild(el);
         el.select();
         document.execCommand('copy');
         document.body.removeChild(el);
+        jquery.snackbar({
+            content: "<span id=`conflict-progress`>" + __("Copied") + "</span>",
+            htmlAllowed: true,
+            timeout: 1000
+        });
     }
 
-    setImageLinkSize (value, id) {
+    setImageLinkSize(value, id) {
         let sizesCopy = JSON.parse(JSON.stringify(this.state.imageLinkSizes));
         sizesCopy[id] = value;
         this.setState({imageLinkSizes: sizesCopy})
@@ -297,7 +330,7 @@ class StateSnapshotsDashboard extends React.Component {
 
     /**
      * Renders the component
-     * 
+     *
      * @returns {XML}
      */
     render() {
@@ -336,7 +369,9 @@ class StateSnapshotsDashboard extends React.Component {
                 options.push(<option key={`${item.id}_size_key_${size}`} value={size}>{size}</option>);
             });
 
-            return (<select className="form-control" value={value} onChange={(event) => { this.setImageLinkSize(event.target.value, item.id); }}>{options}</select>)
+            return (<select style={{height: `25px`, padding: `0`}} className="form-control" value={value} onChange={(event) => {
+                this.setImageLinkSize(event.target.value, item.id);
+            }}>{options}</select>)
         };
 
         const createSnapshotRecord = (item, index, local = false) => {
@@ -345,9 +380,11 @@ class StateSnapshotsDashboard extends React.Component {
 
             let importButton = false;
             if (local && this.state.authenticated) {
-                importButton = (<button type="button" className="btn btn-xs btn-primary" onClick={() => this.seizeSnapshot(item)} style={buttonStyle}>
-                    <i title={titles.seize} className="material-icons">person_add</i>
-                </button>);
+                importButton = (
+                    <button type="button" className="btn btn-xs btn-primary" onClick={() => this.seizeSnapshot(item)}
+                            style={buttonStyle}>
+                        <i title={titles.seize} className="material-icons">person_add</i>
+                    </button>);
             }
 
             let parameters = [];
@@ -355,11 +392,11 @@ class StateSnapshotsDashboard extends React.Component {
 
             // Detecting not prioritized parameters from current URL
             let highPriorityConfigString = false, lowPriorityConfigString = false;
-            let queryParameters = this.props.urlparser.uriObj.search(true);
+            let queryParameters = this.props.urlparser.urlVars;
             if (`config` in queryParameters && queryParameters.config) {
                 lowPriorityConfigString = queryParameters.config;
             }
-            
+
             if (item.snapshot && item.snapshot.meta) {
                 if (item.snapshot.meta.config) {
                     highPriorityConfigString = item.snapshot.meta.config;
@@ -385,7 +422,8 @@ class StateSnapshotsDashboard extends React.Component {
 
             let titleLabel = (<span style={snapshotIdStyle} title={item.id}>{item.id.substring(0, 6)}</span>);
             if (item.title) {
-                titleLabel = (<span style={{marginRight: `10px`}} title={item.title}>{item.title.substring(0, 24)}</span>);
+                titleLabel = (
+                    <span style={{marginRight: `10px`}} title={item.title}>{item.title.substring(0, 24)}</span>);
             }
 
             let updateSnapshotControl = (<button
@@ -400,23 +438,32 @@ class StateSnapshotsDashboard extends React.Component {
                 let type = (local ? 'browserOwned' : 'userOwned')
                 updateSnapshotControl = (<TitleFieldComponent
                     value={item.title}
-                    onAdd={(newTitle) => { this.updateSnapshot(item, newTitle) }}
-                    onCancel={() => { this.setState({ updatedItemId: false }) }}
+                    onAdd={(newTitle) => {
+                        this.updateSnapshot(item, newTitle)
+                    }}
+                    onCancel={() => {
+                        this.setState({updatedItemId: false})
+                    }}
                     type={type}/>);
             }
 
             let tokenField = false;
             if (token) {
-                tokenField = (<div className="input-group form-group snapshot-copy-token">
-                    <a className="input-group-addon" style={{ cursor: `pointer` }} onClick={ () => { this.copyToClipboard(token) }}>{__(`Copy token`)}</a>
-                    <input className="form-control" type="text" defaultValue={token}/>
+                tokenField = (<div className="input-group form-group snapshot-copy-token" style={{paddingTop: `8px`}}>
+                    <div style={{display: `flex`, width: `100%`}}>
+                        <a className="input-group-addon" style={{cursor: `pointer`}} onClick={() => {
+                            this.copyToClipboard(token)
+                        }}><i className="material-icons" style={{fontSize: `18px`}}>content_copy</i>{__(`Copy token`)}</a>
+                    </div>
                 </div>);
             }
 
             let playButton = (<button
                 type="button"
                 className="btn btn-xs btn-primary"
-                onClick={() => { this.applySnapshot(item); }}
+                onClick={() => {
+                    this.applySnapshot(item);
+                }}
                 disabled={this.state.stateApplyingIsBlocked}
                 title={titles.apply}
                 style={buttonStyle}>
@@ -424,7 +471,7 @@ class StateSnapshotsDashboard extends React.Component {
 
             let sizeValue = `1920x1080`;
             if (item.id in this.state.imageLinkSizes) sizeValue = this.state.imageLinkSizes[item.id];
-            
+
             let selectSize = generateSizeSelector(item, sizeValue);
             let imageLink = `${window.location.origin}/api/static/${vidiConfig.appDatabase}/${vidiConfig.appSchema}/?state=${item.id}&width=${sizeValue.split(`x`)[0]}&height=${sizeValue.split(`x`)[1]}${configParameter ? `&${configParameter}` : ``}`;
             return (<div className="panel panel-default" key={index} style={{marginBottom: '8px'}}>
@@ -438,34 +485,37 @@ class StateSnapshotsDashboard extends React.Component {
                         <span className="label label-default">{dateFormatted}</span>
                         {playButton}
                         {updateSnapshotControl}
-                            <button
-                                type="button"
-                                className="btn btn-xs btn-primary"
-                                onClick={() => this.deleteSnapshot(item.id)}
-                                title={titles.remove}
-                                style={buttonStyle}>
-                                <i className="material-icons">delete</i>
-                            </button>
+                        <button
+                            type="button"
+                            className="btn btn-xs btn-primary"
+                            onClick={() => this.deleteSnapshot(item.id)}
+                            title={titles.remove}
+                            style={buttonStyle}>
+                            <i className="material-icons">delete</i>
+                        </button>
                         {importButton}
                     </div>)}
-                    {this.props.playOnly ? false : (<div>
-                        <div className="input-group form-group">
-                            <a className="input-group-addon" style={{ cursor: `pointer` }} onClick={ () => { this.copyToClipboard(permaLink) }}>{__(`Copy Vidi link`)}</a>
-                            <input className="form-control" type="text" defaultValue={permaLink}/>
-                        </div>
-                        {tokenField}
-                        <div className="input-group form-group snapshot-copy-png-link" style={{width: `100%`}}>
-                            <div style={{display: `flex`, width: `100%`}}>
-                                <div style={{paddingTop: `10px`}}>
-                                    <a className="input-group-addon" style={{ cursor: `pointer` }} onClick={ () => { this.copyToClipboard(imageLink) }}>{__(`Copy PNG link`)}</a>
-                                </div>
-                                <div style={{paddingLeft: `10px`, paddingRight: `10px`}}>{selectSize}</div>
-                                <div style={{flexGrow: `1`}}>
-                                    <input className="form-control" type="text" onChange={() => {}} value={imageLink}/>
+                    {this.props.playOnly ? false : (
+                        <div style={{display:`flex`}}>
+                            <div className="input-group form-group" style={{paddingTop: `8px`}}>
+                                <div style={{display: `flex`, width: `100%`}}>
+                                    <a className="input-group-addon" style={{cursor: `pointer`}} onClick={() => {
+                                        this.copyToClipboard(permaLink)
+                                    }}><i className="material-icons" style={{fontSize: `18px`}}>content_copy</i>{__(`Copy Vidi link`)}</a>
                                 </div>
                             </div>
-                        </div>
-                    </div>)}
+                            {tokenField}
+                            <div className="input-group form-group snapshot-copy-png-link" style={{width: `100%`, paddingTop: `8px`}}>
+                                <div style={{display: `flex`, width: `100%`}}>
+                                    <div>
+                                        <a className="input-group-addon" style={{cursor: `pointer`}} onClick={() => {
+                                            this.copyToClipboard(imageLink)
+                                        }}><i className="material-icons" style={{fontSize: `18px`}}>content_copy</i>{__(`Copy PNG link`)}</a>
+                                    </div>
+                                    <div style={{paddingLeft: `10px`, paddingRight: `10px`}}>{selectSize}</div>
+                                </div>
+                            </div>
+                        </div>)}
                 </div>
             </div>);
         };
@@ -513,7 +563,9 @@ class StateSnapshotsDashboard extends React.Component {
                 createNewSnapshotControl = (<div>
                     <h4>
                         {titles.userItems}
-                        <TitleFieldComponent onAdd={(title) => { this.createSnapshot(title) }} type="userOwned"/>
+                        <TitleFieldComponent onAdd={(title) => {
+                            this.createSnapshot(title)
+                        }} type="userOwned"/>
                     </h4>
                 </div>);
             }
@@ -535,14 +587,17 @@ class StateSnapshotsDashboard extends React.Component {
         if (this.props.readOnly) {
             if (this.props.showStateSnapshotTypes) {
                 createNewSnapshotControl = (<h4>
-                    {titles.localItems} 
+                    {titles.localItems}
                 </h4>);
             }
         } else {
             createNewSnapshotControl = (<h4>
-                {titles.localItems} 
-                <TitleFieldComponent onAdd={(title) => { this.createSnapshot(title, true) }} type="browserOwned"/>
-                <button className="btn btn-xs btn-primary" onClick={this.seizeAllSnapshots} disabled={importAllIsDisabled} style={buttonStyle}>
+                {titles.localItems}
+                <TitleFieldComponent onAdd={(title) => {
+                    this.createSnapshot(title, true)
+                }} type="browserOwned"/>
+                <button className="btn btn-xs btn-primary" onClick={this.seizeAllSnapshots}
+                        disabled={importAllIsDisabled} style={buttonStyle}>
                     <i className="material-icons">person_add</i>
                 </button>
             </h4>);
@@ -564,6 +619,7 @@ class StateSnapshotsDashboard extends React.Component {
 }
 
 StateSnapshotsDashboard.defaultProps = {
+    force: false,
     readOnly: false,
     playOnly: false,
     customSetOfTitles: false,

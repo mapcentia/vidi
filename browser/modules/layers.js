@@ -56,8 +56,6 @@ var uri = null;
 
 let _self = false;
 
-let uriJs = require('urijs');
-
 
 /**
  *
@@ -279,10 +277,12 @@ module.exports = {
                 if (layer === layerKey) {
                     let qgs;
                     if (layerDescription.wmssource && layerDescription.wmssource.includes("qgis_mapserv")) {
-                        let uriObj = new uriJs(layerDescription.wmssource);
-                        let queryStr = uriObj.search();
-                        let parsedQuery = uriJs.parseQuery(queryStr)
-                        qgs = btoa(parsedQuery.map);
+                        let searchParams = new URLSearchParams((new URL(layerDescription.wmssource)).search);
+                        let urlVars = {};
+                        for (let p of searchParams) {
+                            urlVars[p[0]] = p[1];
+                        }
+                        qgs = btoa(urlVars.map);
                         additionalURLParameters.push(`qgs=${qgs}`);
                     }
                     var isBaseLayer = !!layerDescription.baselayer;
@@ -310,7 +310,7 @@ module.exports = {
                                     canvasHasData = new Uint32Array(canvas.getContext('2d')
                                         .getImageData(0, 0, canvas.width, canvas.height).data.buffer).some(x => x !== 0);
                                 } catch (e) {
-                                    console.error(e);
+                                    canvasHasData = true; // In case of Internet Explorer
                                 }
                             }
                             backboneEvents.get().trigger("tileLayerVisibility:layers", {
@@ -430,7 +430,7 @@ module.exports = {
             useCache = false;
         }
         // Detect if layer is protected and route it through backend if live WMS is used (Mapcache does not need authorization)
-        let mapRequestProxy = useCache ? false : urlparser.hostname + `/api`;
+        let mapRequestProxy = urlparser.hostname + `/api`;
         return {useCache, mapRequestProxy};
     }
 };

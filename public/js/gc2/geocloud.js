@@ -17,12 +17,10 @@
 /*global document:false */
 /*global window:false */
 
-import ndjsonStream from 'can-ndjson-stream';
-
-
 var geocloud;
 geocloud = (function () {
     "use strict";
+    const base64url = require('base64url');
     var scriptSource = (function (scripts) {
             scripts = document.getElementsByTagName('script');
             var script = scripts[scripts.length - 1];
@@ -47,7 +45,6 @@ geocloud = (function () {
         createMVTLayer,
         clickEvent,
         transformPoint,
-        base64,
         MAPLIB,
         host,
         OSM = "osm",
@@ -154,6 +151,7 @@ geocloud = (function () {
 
     // Base class for stores
     storeClass = function () {
+        var parentThis = this;
         //this.defaults = STOREDEFAULTS;
         this.hide = function () {
             this.layer.setVisibility(false);
@@ -201,6 +199,7 @@ geocloud = (function () {
                     this.layer.clearLayers();
                     break;
             }
+            parentThis.geoJSON = null;
         };
         this.isEmpty = function () {
             switch (MAPLIB) {
@@ -252,6 +251,8 @@ geocloud = (function () {
         this.featuresLimitReached = false;
 
         this.buffered_bbox = false;
+        this.currentGeoJsonHash = null;
+        this.dataHasChanged = false;
 
         this.load = function (doNotShowAlertOnError) {
             try {
@@ -292,12 +293,13 @@ geocloud = (function () {
             xhr = $.ajax({
                 dataType: (this.defaults.jsonp) ? 'jsonp' : 'json',
                 async: this.defaults.async,
-                data: ('q=' + (this.base64 ? encodeURIComponent(base64.encode(sql)) + "&base64=true" : encodeURIComponent(sql)) +
+                data: ('q=' + (this.base64 ? base64url(sql) + "&base64=true" : encodeURIComponent(sql)) +
                     '&srs=' + this.defaults.projection + '&lifetime=' + this.defaults.lifetime + '&client_encoding=' + this.defaults.clientEncoding +
                     '&key=' + this.defaults.key + '&custom_data=' + this.custom_data),
                 jsonp: (this.defaults.jsonp) ? 'jsonp_callback' : false,
                 url: this.host + this.uri + '/' + this.db,
                 type: this.defaults.method,
+                timeout: 10000,
                 success: function (response) {
 
                     if (response.success === false && doNotShowAlertOnError === undefined) {
@@ -308,10 +310,22 @@ geocloud = (function () {
                         if (response.features !== null) {
                             response = me.transformResponse(response, me.id);
 
-                            me.geoJSON = response;
-                            if (dynamicQueryIsUsed) {
-                                me.layer.clearLayers();
+                            let clone = JSON.parse(JSON.stringify(response));
+                            delete clone.peak_memory_usage;
+                            delete clone._execution_time;
+                            let newHash = md5(JSON.stringify(clone));
+                            if (me.currentGeoJsonHash && me.currentGeoJsonHash === newHash) {
+                                console.log("Hashes match. Not reloading");
+                                me.dataHasChanged = false;
+                                return
                             }
+                            me.geoJSON = clone;
+                            me.currentGeoJsonHash = newHash
+                            me.dataHasChanged = true;
+
+                            //if (dynamicQueryIsUsed) {
+                            me.layer.clearLayers();
+                            //}
 
                             if (me.maxFeaturesLimit !== false && me.onMaxFeaturesLimitReached !== false && parseInt(me.maxFeaturesLimit) > 0) {
                                 if (me.geoJSON.features.length >= parseInt(me.maxFeaturesLimit)) {
@@ -320,6 +334,8 @@ geocloud = (function () {
                                     response.features = [];
                                     me.featuresLimitReached = true;
                                     me.onMaxFeaturesLimitReached();
+                                } else {
+                                    me.featuresLimitReached = false;
                                 }
                             } else {
                                 me.featuresLimitReached = false;
@@ -327,22 +343,24 @@ geocloud = (function () {
 
                             if (!me.clustering) {
                                 // In this case me.layer is L.geoJson
-                                me.layer.addData(response);
+                                me.layer.addData(clone);
                             } else {
                                 // In this case me.layer is L.markerClusterGroup
-                                me.geoJsonLayer.addData(response);
+                                me.geoJsonLayer.addData(clone);
                                 me.layer.addLayer(me.geoJsonLayer);
                             }
                             me.layer.defaultOptions = me.layer.options; // So layer can be reset
-
+                            response = null;
                         } else {
                             me.geoJSON = null;
                         }
                     }
                 },
-                error: this.defaults.error.bind(this),
-                complete: function () {
-                    me.onLoad(me);
+                error: this.defaults.error.bind(this, me),
+                complete: function (e) {
+                    if (me.dataHasChanged) {
+                        me.onLoad(me);
+                    }
                 }
             });
 
@@ -352,6 +370,13 @@ geocloud = (function () {
         this.abort = function () {
             xhr.abort();
         }
+        this.destroy = function () {
+            this.reset();
+            xhr = {
+                abort: function () {/* stub */
+                }
+            };
+        };
     };
 
     /**
@@ -398,163 +423,107 @@ geocloud = (function () {
 
         this.load = function (showAlertOnError = true, onLoadCallback) {
             try {
-                //             me.abort();
+                me.abort();
             } catch (e) {
                 console.error(e.message);
             }
+
             sql = this.sql;
+
             map = me.defaults.map;
+            if (map) {
+                // Extending the area of the bounding box, (bbox_extended_area = (9 * bbox_initial_area))
+                var extendedBounds = map.getBounds().pad(1);
+                this.buffered_bbox = extendedBounds;
+
+                sql = sql.replace("{centerX}", map.getCenter().lat.toString());
+                sql = sql.replace("{centerY}", map.getCenter().lng.toString());
+                sql = sql.replace("{maxY}", extendedBounds.getNorth());
+                sql = sql.replace("{maxX}", extendedBounds.getEast());
+                sql = sql.replace("{minY}", extendedBounds.getSouth());
+                sql = sql.replace("{minX}", extendedBounds.getWest());
+
+                if (sql.indexOf("{bbox}") !== -1) {
+                    console.warn("The bounding box ({bbox}) was not replaced in SQL query");
+                }
+            } else {
+                console.error("Unable to get map object");
+            }
+
             me.loading();
-            let geoJSON = {features: [], type: "FeatureCollection"};
-            let url = this.host + this.uri + '/' + this.db + '?q=' + (this.base64 ? encodeURIComponent(base64.encode(sql)) + "&base64=true" : encodeURIComponent(sql)) +
-                '&srs=4326&client_encoding=' + this.defaults.clientEncoding +
-                '&key=' + this.defaults.key + '&format=ndjson';
-
-            fetch(url)  // make a fetch request to a NDJSON stream service
-                .then((response) => {
-                    return ndjsonStream(response.body); //ndjsonStream parses the response.body
-                }).then((exampleStream) => {
-                const reader = exampleStream.getReader();
-                let read;
-                reader.read().then(read = (result) => {
-                    if (result.done) {
-                        let layer = false;
-                        geoJSON = me.transformResponse(geoJSON, me.id);
-                        if (me.defaults.type === 'POINT') {
-                            layer = L.glify.points({
-                                latitudeKey: 1,
-                                longitudeKey: 0,
-                                map: me.defaults.map,
-                                size: 8,
-                                data: geoJSON,
-                            });
-                        } else if (me.defaults.type === 'LINESTRING') {
-                            layer = L.glify.lines({
-                                latitudeKey: 1,
-                                longitudeKey: 0,
-                                map: me.defaults.map,
-                                data: geoJSON,
-                            });
-                        } else if (me.defaults.type === 'POLYGON' || me.defaults.type === 'MULTIPOLYGON') {
-                            layer = L.glify.shapes({
-                                map: me.defaults.map,
-                                data: geoJSON,
-                                color: () => {
-                                    return {
-                                        r: 1,
-                                        g: 0,
-                                        b: 0,
-                                    };
-                                },
-                                hover: (e, feature) => {
-                                    console.log(feature)
-                                },
-                                click: (e, feature) => {
-                                    //set up a standalone popup (use a popup as a layer)
-                                    console.log(e)
-                                    L.popup()
-                                        .setLatLng(e.latlng)
-                                        .setContent('You clicked the point at longitude:')
-                                        .openOn(me.defaults.map);
-
-                                    console.log(feature);
-                                },
-                                border: false
-                            })
-                        } else {
-                            throw new Error('Layer features type (' + this.defaults.type + ') is not supported by WebGL');
-                        }
-                        me.layer = layer.layer;
-                        me.layer.id = me.defaults.name;
-
-                        if (me.onLoad) me.onLoad();
-                        me.onLoad(me);
-                        if (onLoadCallback) onLoadCallback();
-                        return;
+            xhr = $.ajax({
+                dataType: (this.defaults.jsonp) ? 'jsonp' : 'json',
+                async: this.defaults.async,
+                data: ('q=' + (this.base64 ? base64url(sql) + "&base64=true" : encodeURIComponent(sql)) +
+                    '&srs=' + this.defaults.projection + '&lifetime=' + this.defaults.lifetime + '&client_encoding=' + this.defaults.clientEncoding +
+                    '&key=' + this.defaults.key + '&custom_data=' + this.custom_data),
+                jsonp: (this.defaults.jsonp) ? 'jsonp_callback' : false,
+                url: this.host + this.uri + '/' + this.db,
+                type: this.defaults.method,
+                success: function (response) {
+                    if (response.success === false && showAlertOnError) {
+                        alert(response.message);
                     }
-                    geoJSON.features.push(result.value)
-                    reader.read().then(read);
-                });
+
+                    if (response.success === true) {
+                        if (response.features !== null) {
+                            response = me.transformResponse(response, me.id);
+                            me.geoJSON = response;
+                            if (me.maxFeaturesLimit !== false && me.onMaxFeaturesLimitReached !== false && parseInt(me.maxFeaturesLimit) > 0) {
+                                if (me.geoJSON.features.length >= parseInt(me.maxFeaturesLimit)) {
+                                    console.warn('WebGL store: number of received features exceeds the specified limit (' + me.maxFeaturesLimit + '). Please use filters or adjust the limit.');
+                                    me.geoJSON.features = [];
+                                    response.features = [];
+                                    me.onMaxFeaturesLimitReached();
+                                }
+                            }
+
+                            let layer = false;
+                            if (me.defaults.type === 'POINT') {
+                                let data = [];
+                                me.geoJSON.features.map(feature => data.push(feature.geometry.coordinates));
+
+                                layer = L.glify.points({
+                                    latitudeKey: 1,
+                                    longitudeKey: 0,
+                                    map: me.defaults.map,
+                                    size: 8,
+                                    data
+                                });
+                            } else if (me.defaults.type === 'LINESTRING') {
+                                layer = L.glify.lines({
+                                    latitudeKey: 1,
+                                    longitudeKey: 0,
+                                    map: me.defaults.map,
+                                    data: me.geoJSON,
+                                });
+                            } else if (me.defaults.type === 'POLYGON') {
+                                layer = L.glify.shapes({
+                                    map: me.defaults.map,
+                                    data: me.geoJSON,
+                                });
+                            } else {
+                                throw new Error('Layer features type (' + this.defaults.type + ') is not supported by WebGL');
+                            }
+
+                            me.layer = layer.glLayer;
+                            me.layer.id = me.defaults.name;
+
+                            if (me.onLoad) me.onLoad();
+                        } else {
+                            me.geoJSON = null;
+                        }
+                    }
+
+                    if (onLoadCallback) onLoadCallback();
+                },
+                error: this.defaults.error,
+                complete: function () {
+                    me.onLoad(me);
+                }
             });
 
-
-            //ndjson(me, url);
-
-            /*
-                        xhr = $.ajax({
-                            dataType: (this.defaults.jsonp) ? 'jsonp' : 'json',
-                            async: this.defaults.async,
-                            data: ('q=' + (this.base64 ? encodeURIComponent(base64.encode(sql)) + "&base64=true" : encodeURIComponent(sql)) +
-                                '&srs=' + this.defaults.projection + '&lifetime=' + this.defaults.lifetime + '&client_encoding=' + this.defaults.clientEncoding +
-                                '&key=' + this.defaults.key + '&custom_data=' + this.custom_data),
-                            jsonp: (this.defaults.jsonp) ? 'jsonp_callback' : false,
-                            url: this.host + this.uri + '/' + this.db,
-                            type: this.defaults.method,
-                            success: function (response) {
-                                if (response.success === false && showAlertOnError) {
-                                    alert(response.message);
-                                }
-
-                                if (response.success === true) {
-                                    if (response.features !== null) {
-                                        response = me.transformResponse(response, me.id);
-                                        me.geoJSON = response;
-                                        if (me.maxFeaturesLimit !== false && me.onMaxFeaturesLimitReached !== false && parseInt(me.maxFeaturesLimit) > 0) {
-                                            if (me.geoJSON.features.length >= parseInt(me.maxFeaturesLimit)) {
-                                                console.warn('WebGL store: number of received features exceeds the specified limit (' + me.maxFeaturesLimit + '). Please use filters or adjust the limit.');
-                                                me.geoJSON.features = [];
-                                                response.features = [];
-                                                me.onMaxFeaturesLimitReached();
-                                            }
-                                        }
-
-                                        let layer = false;
-                                        if (me.defaults.type === 'POINT') {
-                                            let data = [];
-                                            me.geoJSON.features.map(feature => data.push(feature.geometry.coordinates));
-
-                                            layer = L.glify.points({
-                                                latitudeKey: 1,
-                                                longitudeKey: 0,
-                                                map: me.defaults.map,
-                                                size: 8,
-                                                data
-                                            });
-                                        } else if (me.defaults.type === 'LINESTRING') {
-                                            layer = L.glify.lines({
-                                                latitudeKey: 1,
-                                                longitudeKey: 0,
-                                                map: me.defaults.map,
-                                                data: me.geoJSON,
-                                            });
-                                        } else if (me.defaults.type === 'POLYGON') {
-                                            layer = L.glify.shapes({
-                                                map: me.defaults.map,
-                                                data: me.geoJSON,
-                                            });
-                                        } else {
-                                            throw new Error('Layer features type (' + this.defaults.type + ') is not supported by WebGL');
-                                        }
-
-                                        me.layer = layer.glLayer;
-                                        me.layer.id = me.defaults.name;
-
-                                        if (me.onLoad) me.onLoad();
-                                    } else {
-                                        me.geoJSON = null;
-                                    }
-                                }
-
-                                if (onLoadCallback) onLoadCallback();
-                            },
-                            error: this.defaults.error,
-                            complete: function () {
-                                me.onLoad(me);
-                            }
-                        });
-            */
-
-            // return xhr;
+            return xhr;
         };
 
         this.abort = function () {
@@ -798,27 +767,20 @@ geocloud = (function () {
         var parts, l, url, urlArray, uri;
         parts = layer.split(".");
 
-        if (!defaults.tileCached) {
-            if (!defaults.uri) {
+        if (!defaults.uri) {
+            if (!defaults.tileCached) {
                 uri = "/wms/" + defaults.db + "/" + parts[0] + "?" + (defaults.additionalURLParameters.length > 0 ? defaults.additionalURLParameters.join('&') : '');
             } else {
-                uri = defaults.uri;
-            }
-            url = defaults.host + uri;
-            urlArray = [url];
-
-            if ('mapRequestProxy' in defaults && defaults.mapRequestProxy !== false) {
-                url = defaults.mapRequestProxy + uri;
+                uri = "/mapcache/" + defaults.db + "/wms?" + (defaults.additionalURLParameters.length > 0 ? defaults.additionalURLParameters.join('&') : '');
             }
         } else {
-            url = defaults.host + "/mapcache/" + defaults.db + "/wms";
-            var url1 = url;
-            var url2 = url;
-            var url3 = url;
-            // For ol2
-            urlArray = [url1.replace("cdn.", "cdn1."), url2.replace("cdn.", "cdn2."), url3.replace("cdn.", "cdn3.")];
-            // For leaflet
-            url = url.replace("cdn.", "{s}.");
+            uri = defaults.uri;
+        }
+        url = defaults.host + uri;
+        urlArray = [url];
+
+        if ('mapRequestProxy' in defaults && defaults.mapRequestProxy !== false) {
+            url = defaults.mapRequestProxy + uri;
         }
 
         switch (MAPLIB) {
@@ -1042,8 +1004,8 @@ geocloud = (function () {
             url = defaults.host + uri;
             if ('mapRequestProxy' in defaults && defaults.mapRequestProxy !== false) {
                 // The LayerVectorGrid needs to have {x|y|z} templates in the URL, which will disappear after encodeURIComponent(), so need to store them temporary
+                url = defaults.mapRequestProxy + uri;
                 url = url.replace('{x}', 'REPLACE_THE_X').replace('{y}', 'REPLACE_THE_Y').replace('{z}', 'REPLACE_THE_Z');
-                url = defaults.mapRequestProxy + '?request=' + encodeURIComponent(url);
                 url = url.replace('REPLACE_THE_X', '{x}').replace('REPLACE_THE_Y', '{y}').replace('REPLACE_THE_Z', '{z}');
             }
         }
@@ -2120,6 +2082,25 @@ geocloud = (function () {
             }());
         };
 
+        this.addXYZBaselayer = function (url, conf) {
+            var l = new L.TileLayer(url, conf);
+            l.id = conf.name;
+            l.baseLayer = true;
+            lControl.addBaseLayer(l, conf.name);
+            this.showLayer(conf.name)
+            return [l];
+
+        };
+
+        this.addWmsBaseLayer = function (url, conf) {
+            var l = new L.TileLayer.WMS(url, conf);
+            l.id = conf.name;
+            l.baseLayer = true;
+            lControl.addBaseLayer(l, conf.name);
+            this.showLayer(conf.name)
+            return [l];
+        }
+
         this.addBaseLayer = function (l, db, config, h) {
             var o;
             switch (l) {
@@ -2289,8 +2270,8 @@ geocloud = (function () {
                 resolutions: this.map.resolutions,
                 type: "wms",
                 minZoom: 1,
-                maxZoom: 26,
-                maxNativeZoom: 26,
+                maxZoom: 28,
+                maxNativeZoom: 28,
                 tileSize: MAPLIB === "ol2" ? OpenLayers.Size(256, 256) : 256,
                 uri: null
             };
@@ -2683,133 +2664,6 @@ geocloud = (function () {
         let p = proj4(s, d, [parseFloat(lat), parseFloat(lon)]);
         return {x: p[0], y: p[1]}
     };
-
-    base64 = {
-
-        // private property
-        _keyStr: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",
-
-        // public method for encoding
-        encode: function (input) {
-            var output = "";
-            var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
-            var i = 0;
-
-            input = base64._utf8_encode(input);
-
-            while (i < input.length) {
-
-                chr1 = input.charCodeAt(i++);
-                chr2 = input.charCodeAt(i++);
-                chr3 = input.charCodeAt(i++);
-
-                enc1 = chr1 >> 2;
-                enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
-                enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
-                enc4 = chr3 & 63;
-
-                if (isNaN(chr2)) {
-                    enc3 = enc4 = 64;
-                } else if (isNaN(chr3)) {
-                    enc4 = 64;
-                }
-
-                output = output + this._keyStr.charAt(enc1) + this._keyStr.charAt(enc2) + this._keyStr.charAt(enc3) + this._keyStr.charAt(enc4);
-
-            }
-
-            return output;
-        },
-
-        // public method for decoding
-        decode: function (input) {
-            var output = "";
-            var chr1, chr2, chr3;
-            var enc1, enc2, enc3, enc4;
-            var i = 0;
-
-            input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
-
-            while (i < input.length) {
-
-                enc1 = this._keyStr.indexOf(input.charAt(i++));
-                enc2 = this._keyStr.indexOf(input.charAt(i++));
-                enc3 = this._keyStr.indexOf(input.charAt(i++));
-                enc4 = this._keyStr.indexOf(input.charAt(i++));
-
-                chr1 = (enc1 << 2) | (enc2 >> 4);
-                chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
-                chr3 = ((enc3 & 3) << 6) | enc4;
-
-                output = output + String.fromCharCode(chr1);
-
-                if (enc3 != 64) {
-                    output = output + String.fromCharCode(chr2);
-                }
-                if (enc4 != 64) {
-                    output = output + String.fromCharCode(chr3);
-                }
-
-            }
-
-            output = base64._utf8_decode(output);
-
-            return output;
-
-        },
-
-        // private method for UTF-8 encoding
-        _utf8_encode: function (string) {
-            string = string.replace(/\r\n/g, "\n");
-            var utftext = "";
-
-            for (var n = 0; n < string.length; n++) {
-
-                var c = string.charCodeAt(n);
-
-                if (c < 128) {
-                    utftext += String.fromCharCode(c);
-                } else if ((c > 127) && (c < 2048)) {
-                    utftext += String.fromCharCode((c >> 6) | 192);
-                    utftext += String.fromCharCode((c & 63) | 128);
-                } else {
-                    utftext += String.fromCharCode((c >> 12) | 224);
-                    utftext += String.fromCharCode(((c >> 6) & 63) | 128);
-                    utftext += String.fromCharCode((c & 63) | 128);
-                }
-
-            }
-
-            return utftext;
-        },
-
-        // private method for UTF-8 decoding
-        _utf8_decode: function (utftext) {
-            var string = "", i, c2, c3, c;
-            c = 0;
-            c2 = 0;
-            c3 = 0;
-
-            while (i < utftext.length) {
-                c = utftext.charCodeAt(i);
-                if (c < 128) {
-                    string += String.fromCharCode(c);
-                    i++;
-                } else if ((c > 191) && (c < 224)) {
-                    c2 = utftext.charCodeAt(i + 1);
-                    string += String.fromCharCode(((c & 31) << 6) | (c2 & 63));
-                    i += 2;
-                } else {
-                    c2 = utftext.charCodeAt(i + 1);
-                    c3 = utftext.charCodeAt(i + 2);
-                    string += String.fromCharCode(((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63));
-                    i += 3;
-                }
-
-            }
-            return string;
-        }
-    }
 
     return {
         geoJsonStore: geoJsonStore,

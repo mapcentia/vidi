@@ -5,6 +5,71 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
 ## [UNRELEASED]
+### Changed
+- Node >= 14 er required. 
+- Docker files are added to the project.
+- It's now possible to set `gc2.host` through the environment variable `GC2_HOST`. If set in `config/config.js` it will have precedence.
+- ConflictSearch is now controlled by state module. It will keep state between on/off and browser refreshes. State in conflictSearch is also applied when running a state-snapshot. 
+- Changes in Snapshot UI. The UI is now more clean.
+
+### Added
+- It's possible to lock UTM zone in coordinate module, so it's possible to project to a specific zone outside the actual zone. Useful for e.g. Denmark, which are using zone 32 for the whole country but is located in both 32 and 33.
+```JSON
+{
+    "coordinates": {
+      "lockUtmZoneTo": 32
+    }
+}
+```
+
+### Fixed
+- Base64url are now used to encode filters instead of base64, so + and / sign doesn't mess things up.
+- Changes to Snapshot UI, which fixes an issue with wrong URLs in input fields.
+
+## [2020.12.0] - 2020-8-12
+### Changed
+- The standard template for feature info is changed, so empty fields are omitted. It's now:
+```handlebars
+<div class="vidi-popup-content">
+    <h3 class="popup-title">{{_vidi_content.title}}</h3>
+    {{#_vidi_content.fields}}
+        {{#if value}}
+            <h4>{{title}}</h4>
+            <p {{#if type}}class="{{type}}"{{/if}}>{{{value}}}</p>
+        {{/if}}
+    {{/_vidi_content.fields}}
+</div>
+```  
+
+
+### Added
+- `searchConfig.placeholderText` added to config, so the search placeholder can be customized.
+- A callback function can now be added to interval reload of vector layers. The callback will be fires when layer changes. Meta option is `reload_callback`:
+```javascript
+function(store, map) {
+  var audio = new Audio('https://ccrma.stanford.edu/~jos/mp3/gtr-nylon22.mp3');
+  audio.play();
+  var latest;
+  store.geoJsonLayer.eachLayer(function (layer) {
+    latest = layer
+  })
+  map.setView(latest.getLatLng(), 18)
+}
+```
+- The max zoom level when selecting a row in a layer table can be with `setmax_zoom_level_table_click`. If not set or is NaN the max zoom level will default to 17.
+
+### Fixed
+- MapCache layers now work. Both raster and vector tiles.
+- Timeout (10.000ms) on sqlStore. Feature info will now handle errors or cancels (e.g. due to timeout) on SQL requests and a "toast" will inform the user. If timeout happens the request will be re-tried.
+- `crossMultiSelect` will always show vector feature info if a simultaneous raster SQL request fails or timeouts.
+- Memory leak fixed when reloading vector layers.
+- Interval reload of vector layers are now done with the `load` method instead of switching the layer off and on.
+- Update of interval reloaded vector layers happens only if data has changed.
+- Use native URL API instead of uriJs module.
+- Still resolve promise in `localforage.setItem`, to avoid a net:ERR_FAILED in the browser when e.g. getting feature info. The issue about error on setItem persist.
+- Some fixes regarding Internet Explorer.
+
+## [2020.11.0] - 2020-18-11
 ### Added
 - The awesome Leaflet plugin Leaflet.markercluster is added, so by setting the meta property `use_clustering` to `true` clustering can be enabled on single point vector layers. No other setting for Leaflet.markercluster is available for now.
 - With the `cssFiles` config it's possible to load external css file from the `configUrl`. E.g.:
@@ -47,7 +112,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - Print setup is now stored in state snapshots. After state snapshot is activated the print setup will use the stored settings. The sticky toggle must be set to on or else the default print settings will be used.
 - New print API `/api/print/[database]/?state=[state id]` which will return the stored print from a snapshot as PNG (PDF is coming). The print will be created on the fly.
 - `embed.js` has two new attributes: `data-vidi-use-config` and `data-vidi-use-schema`. These will trigger the use of schema and/or config from the token if present.
-- New GC2 Meta property which automatically can open a layer tool when the layer is switch on:
+- New GC2 Meta property which automatically can open a layer tool when the layer is switched on:
     - *default_open_tools*: JSON array with tools to open. Available options: `["filters","opacity","load-strategy","search"]` ("table" are not supported)
 - New GC2 Meta properties:
     - *disable_check_box*: boolean, disables the layer check box:
@@ -69,6 +134,35 @@ and this project adheres to [CalVer](https://calver.org/).
 - New button "Fit bounds to filter" in layer filters, which will set the view extent to the bounds of the filtered layer.
 - New "Labels" panel for raster tile layers with a checkbox for hiding/showing labels on the layer. Works for both MapServer and QGIS back-end (GC2 must support this).
 - Added boolean config `crossMultiSelect` in `config/config.js`. This will enable cross multi select on both vector and raster tile layers. This will result in a unified feature info experience, which are well suited for informative maps using the `embed.tmpl` template. All feature info results will be displayed in an accordion widget. The accordion summary is default layer title, but can be set to an attribute value with the meta config `accordion_summery`. Can be set in runtime config. 
+- WMS layers can now be added directly as base layers. A WMS base layer example:
+```json
+{
+    "type": "wms",
+    "url": "https://services.kortforsyningen.dk/service?SERVICENAME=forvaltning2&",
+    "layers": ["Basis_kort","Navne_basis_kort","Husnummer"],
+    "id": "Basis_kort",
+    "name": "Basiskort",
+    "description": "Basiskort fra kortforsyningen",
+    "attribution": "Kortforsyningen",
+    "minZoom": 4,
+    "maxZoom": 22,
+    "maxNativeZoom": 22
+}
+```
+- XYZ layer can be added as base layer like this (old feature but was undocumented and buggy):
+```json
+{
+    "type": "XYZ",
+    "url": "https://m3.mapserver.mapy.cz/base-m/{z}-{x}-{y}?s=0.3&dm=Luminosity",
+    "id": "mapy",
+    "name": "Mapy",
+    "description": "Map from Mapy",
+    "attribution": "Mapy",
+    "minZoom": 1,
+    "maxZoom": 20,
+    "maxNativeZoom": 19
+}
+```
 
 ### Changed
 - `public\js\vidi.js`is now required instead of loaded in a script tag. This way it's transpiled and can contain new JavaScript syntax.
@@ -100,7 +194,7 @@ and this project adheres to [CalVer](https://calver.org/).
 ```json
 {
   "puppeteerProcesses": {
-        "min": 2,
+        "min": 1,
         "max": 5
     }
 }
@@ -119,8 +213,11 @@ and this project adheres to [CalVer](https://calver.org/).
 - Accept 'da' locale in request headers. Only da-DK worked so far.
 - If the Service Worker doesn't get registered when Vidi will now start anyways without the Service Worker. On a hard refresh (Ctrl-f5) the Service Worker will claim the clients, so a hard refresh will not unregister Service Worker, but the cache will be deleted. 
 - Text in editor is now url encoded.
-- Quotes are now escaped for text in editor.
-- All numeric Postgres types are now handled correct in editor 
+- Quotes are now escaped for text in the editor.
+- All numeric Postgres types are now handled correct in the editor.
+- Puppeteer processes are now destroyed, if an exception is thrown during print. This prevents leak of processes.
+- Re-acquirement of a Puppeteer process is done if timeout, so the print will eventual be finished.
+- Puppeteer processes will be destroyed after 60 seconds. This prevents hanging processes, which blocks further prints.
 
 ## [2020.2.0]
 ### Added

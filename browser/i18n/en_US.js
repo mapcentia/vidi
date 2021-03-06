@@ -38,6 +38,8 @@ module.exports = {
         "From drawing": "From drawing",
         "From object in layer": "From object in layer",
         "Waiting to start": "Waiting to start",
+        "Error or timeout on": "Error or timeout on",
+        "Couldn't get the data. Trying again...": "Couldn't get the data. Trying again...",
 
         // Drawing
         "Cancel drawing": "Cancel drawing",
@@ -304,6 +306,7 @@ module.exports = {
         "copy token": "Copy token",
         "New title": "New title",
         "StateSnapshots description": "Save, restore and share projects. A project contains the extent of the map, which background map is visible and which layers are turned on, which filters are active as well as your drawings. You can share a project by sharing the displayed URL. If you are not logged in, projects will be linked to the browser you are using. Otherwise, they will be stored under your user login. It is possible to transfer projects from browser to login.",
+        "Copied": "Copied",
 
         //Measurements
         "Expand measurements control": "Activate measurements control",

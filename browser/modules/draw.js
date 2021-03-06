@@ -316,7 +316,7 @@ module.exports = {
 
                 drawLayer.feature = {
                     properties: {
-                        type: __(type),
+                        type: type,
                         area: area,
                         distance: distance
                     }
@@ -603,7 +603,7 @@ module.exports = {
 
         if (type === 'polyline') {
 
-            window.lag = l.showExtremities($("#draw-line-extremity").val(), $("#draw-line-extremity-size").val(), $("#draw-line-extremity-where").val());
+            l.showExtremities($("#draw-line-extremity").val(), $("#draw-line-extremity-size").val(), $("#draw-line-extremity-where").val());
 
             l._extremities = {
                 pattern: $("#draw-line-extremity").val(),

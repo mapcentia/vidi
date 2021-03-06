@@ -4,11 +4,10 @@
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
-var express = require('express');
-var router = express.Router();
-var config = require('../../config/config.js').gc2;
-var request = require('request');
-var fs = require('fs');
+const express = require('express');
+const router = express.Router();
+const config = require('../../config/config.js').gc2;
+const request = require('request');
 
 const proxifyRequest = (req, response) => {
     let requestURL = config.host + decodeURIComponent(req.url.substr(4));
@@ -34,5 +33,6 @@ const proxifyRequest = (req, response) => {
 };
 
 router.all('/api/wms/:db/:schema', proxifyRequest);
+router.all('/api/mapcache/:db/wms', proxifyRequest);
 
 module.exports = router;

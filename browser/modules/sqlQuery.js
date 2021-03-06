@@ -58,13 +58,16 @@ let defaultSelectedStyle = {
 
 let backArrowIsAdded = false;
 
+let jquery = require('jquery');
+require('snackbarjs');
+
 
 /**
  * A default template for GC2, with a loop
  * @type {string}
  */
 var defaultTemplate =
-    `<div class="cartodb-popup-content">
+    `<div class="vidi-popup-content">
         <div class="form-group gc2-edit-tools" style="display: none; width: 90%;">
             <div class="btn-group btn-group-justified">
                 <div class="btn-group">
@@ -81,17 +84,15 @@ var defaultTemplate =
         </div>
         <h3 class="popup-title">{{_vidi_content.title}}</h3>
         {{#_vidi_content.fields}}
-            <h4>{{title}}</h4>
             {{#if value}}
+                <h4>{{title}}</h4>
                 <p {{#if type}}class="{{type}}"{{/if}}>{{{value}}}</p>
-            {{else}}
-                <p class="empty">null</p>
             {{/if}}
         {{/_vidi_content.fields}}
     </div>`;
 
 var defaultTemplateForCrossMultiSelect =
-    `<div class="cartodb-popup-content">
+    `<div class="vidi-popup-content">
         {{#_vidi_content.fields}}
             <h4>{{title}}</h4>
             {{#if value}}
@@ -107,7 +108,7 @@ var defaultTemplateForCrossMultiSelect =
  * @type {string}
  */
 var defaultTemplateRaster =
-    `<div class="cartodb-popup-content">
+    `<div class="vidi-popup-content">
                 <h4>Class</h4>
                 <p>{{{class}}}</p>
                 <h4>Value</h4>
@@ -170,7 +171,7 @@ module.exports = {
      * @param {Function} onPopupCloseButtonClick Fires when feature popup is closed by clicking the Close button
      */
     init: function (qstore, wkt, proj, callBack, num, infoClickPoint, whereClause, includes, zoomToResult, onPopupCloseButtonClick, selectCallBack = () => {
-    }, prefix = "", simple = false, infoText = null) {
+    }, prefix = "", simple = false, infoText = null, layerTag = "query_result") {
         let layers, count = {index: 0, hits: 0}, hit = false, distance, editor = false,
             metaDataKeys = meta.getMetaDataKeys(), firstLoop = true;
         elementPrefix = prefix;
@@ -186,7 +187,7 @@ module.exports = {
         layers = _layers.getLayers() ? _layers.getLayers().split(",") : [];
 
         // Filter layers without pixels from
-        layers = layers.filter((key)=>{
+        layers = layers.filter((key) => {
             if (typeof moduleState.tileContentCache[key] === "boolean" && moduleState.tileContentCache[key] === true) {
                 return true;
             }
@@ -304,8 +305,8 @@ module.exports = {
                                     .setLatLng(infoClickPoint)
                                     .setContent(`<div id="info-box-pop-up"></div>`)
                                     .openOn(cloud.get().map)
-                                    .on('remove', ()=>{
-                                       _self.resetAll();
+                                    .on('remove', () => {
+                                        _self.resetAll();
                                     });
                                 $("#info-box-pop-up").html(popUpInner);
 
@@ -371,7 +372,7 @@ module.exports = {
                             responsive: false,
                             callCustomOnload: false,
                             checkBox: !simple,
-                            height: null,
+                            height: featureInfoTableOnMap ? 150 : 350,
                             locale: window._vidiLocale.replace("_", "-"),
                             template: template,
                             pkey: pkey,
@@ -476,7 +477,7 @@ module.exports = {
                     if (count.index === layers.length) {
                         if (!hit) {
                             $(`#${elementPrefix}modal-info-body`).hide();
-                            $.snackbar({
+                            jquery.snackbar({
                                 content: "<span id=`conflict-progress`>" + __("Didn't find anything") + "</span>",
                                 htmlAllowed: true,
                                 timeout: 2000
@@ -494,7 +495,7 @@ module.exports = {
                                 $(`#${elementPrefix}modal-info-body table`).bootstrapTable('resetView');
                                 // If only one hit across all layers, the click the only row
                                 if (count.hits === 1) {
-                                    $("[data-uniqueid]").trigger("click");
+                                    $("#_0 [data-uniqueid]").trigger("click");
                                     $(".show-when-multiple-hits").hide();
                                 }
                             }, 100);
@@ -514,6 +515,13 @@ module.exports = {
                 key: value,
                 base64: true,
                 styleMap: styleForSelectedFeatures,
+                error: () => {
+                    jquery.snackbar({
+                        content: "<span>" + __("Error or timeout on") + " " + layerTitel + "</span>",
+                        htmlAllowed: true,
+                        timeout: 2000
+                    })
+                },
                 // Set _vidi_type on all vector layers,
                 // so they can be recreated as query layers
                 // after serialization
@@ -521,10 +529,10 @@ module.exports = {
                 onEachFeature: function (f, l) {
                     if (typeof l._layers !== "undefined") {
                         $.each(l._layers, function (i, v) {
-                            v._vidi_type = "query_result";
+                            v._vidi_type = layerTag;
                         })
                     } else {
-                        l._vidi_type = "query_result";
+                        l._vidi_type = layerTag;
                     }
 
                     l.on("click", function (e) {

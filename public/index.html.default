@@ -1,9 +1,28 @@
 <!DOCTYPE html>
 <!--
+
+    .----------------.  .----------------.  .----------------.  .----------------.
+    | .--------------. || .--------------. || .--------------. || .--------------. |
+    | | ____   ____  | || |     _____    | || |  ________    | || |     _____    | |
+    | ||_  _| |_  _| | || |    |_   _|   | || | |_   ___ `.  | || |    |_   _|   | |
+    | |  \ \   / /   | || |      | |     | || |   | |   `. \ | || |      | |     | |
+    | |   \ \ / /    | || |      | |     | || |   | |    | | | || |      | |     | |
+    | |    \ ' /     | || |     _| |_    | || |  _| |___.' / | || |     _| |_    | |
+    | |     \_/      | || |    |_____|   | || | |________.'  | || |    |_____|   | |
+    | |              | || |              | || |              | || |              | |
+    | '--------------' || '--------------' || '--------------' || '--------------' |
+    '----------------'  '----------------'  '----------------'  '----------------'
+    Ring the bells that still can ring
+    Forget your perfect offering
+    There is a crack, a crack in everything
+    That's how the light gets in
+
+
   ~ @author     Martin Høgh <mh@mapcentia.com>
-  ~ @copyright  2013-2019 MapCentia ApS
+  ~ @copyright  2013-2020 MapCentia ApS
   ~ @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
-  ~ @version    2019.2.0
+  ~ @version    UNRELEASED
+
   -->
 <html lang="en">
 <head>
@@ -106,9 +125,8 @@
         console.info("Using pre-processed load screen template: " + tmpl);
     }
 </script>
-<!-- Shim -->
-<script src="/js/lib/es5-shim/es5-shim.js"></script>
-<script src="/js/lib/es6-shim/es6-shim.js"></script>
+<!-- Polyfill for IE -->
+<script src="https://cdn.polyfill.io/v2/polyfill.min.js"></script>
 <!-- Dynamic js -->
 <script src="/locale"></script>
 <script src="/api/baselayer"></script>
@@ -146,6 +164,8 @@
 <!-- Browserify modules-->
 <script src="/js/bundle.js"></script>
 <!-- /build -->
+<!-- Async load Javascript -->
+<script src="/js/build/all.async.min.js" async></script>
 <script>
     window.MapCentia = new Vidi().init.init();
 </script>

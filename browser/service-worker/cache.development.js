@@ -130,7 +130,6 @@ let urlsToCache = [
     '/fonts/roboto-v18-latin-300.woff2',
     '/js/point-clusterer.js',
     '/js/leaflet-easybutton/easy-button.js',
-    '/js/proj4js-combined.js',
     '/js/point-clusterer.js',
     '/js/bundle.js',
     '/js/lib/jquery-ui/jquery-ui.min.css',

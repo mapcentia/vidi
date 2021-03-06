@@ -38,6 +38,8 @@ module.exports = {
         "From drawing": "Fra tegning",
         "From object in layer": "Fra objekt i lag",
         "Waiting to start": "Venter på at starte",
+        "Error or timeout on": "Fejl eller timeout på",
+        "Couldn't get the data. Trying again...": "Kunne ikke hente data. Prøver igen...",
 
         // Drawing
         "Cancel drawing": " Afbryd tegning",
@@ -297,13 +299,14 @@ module.exports = {
         "Delete state snapshot": "Slet projekt",
         "Add local state snapshots to user's ones": "Overfør lokale projekter til bruger",
         "Add local state snapshot to user's ones": "Overfør lokal projekter til bruger",
-        "Copy token": "Kopier token",
-        "Copy Vidi link": "Kopier Vidi link",
-        "Copy PNG link": "Kopier PNG link",
-        "copy link": "Kopier link",
-        "copy token": "Kopier token",
+        "Copy token": "Token",
+        "Copy Vidi link": "Vidi link",
+        "Copy PNG link": "PNG link",
+        "copy link": "Link",
+        "copy token": "Token",
         "New title": "Ny titel",
         "StateSnapshots description": "Gem, genskab og del projekter. Et projekt indeholder kortets udstrækning, hvilket baggrundskort er tændt og hvilke lag er vist, hvilke filtre er aktive samt dine tegninger. Du kan dele et projekt ved at dele den viste URL. Hvis du ikke er logget ind, vil projekter blive knyttet den den browser du bruger. Ellers vil de blive gemt under dit bruger login. Det er muligt at overføre projekter fra browser til login",
+        "Copied": "Kopieret",
 
         //Measurements
         "Measure distance": "Mål afstand",

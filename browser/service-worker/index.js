@@ -1,8 +1,8 @@
 /*
- * @author     Alexander Shumilov
- * @copyright  2013-2018 MapCentia ApS
- * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
- */
+* @author     Alexander Shumilov
+* @copyright  2013-2018 MapCentia ApS
+* @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
+*/
 
 const CACHE_NAME = 'vidi-static-cache';
 const API_ROUTES_START = 'api';
@@ -14,231 +14,226 @@ const CONFIG = require('../../config/config.js');
 
 
 /**
- * Browser detection
- */
+* Browser detection
+*/
 const {detect} = require('detect-browser');
 const browser = detect();
-
-/**
- * Parsing URLs
- */
-const uriJs = require('urijs');
 
 const localforage = require('localforage');
 
 /**
- * ServiceWorker. Caches all requests, some requests are processed in specific way:
- * 1. API calls are always performed, the cached response is retured only if the app is offline or
- * there is a API-related problem;
- * 2. Files with {extensionsIgnoredForCaching} are not cached, unless it is forced externally using
- * the 'message' event.
- *
- * Update mechanism. There should be an API method that returns the current application version. If it differs
- * from the previous one that is stored in localforage, then user should be notified about the update. If
- * user agrees to the update, then the current service worker is unregistered, cache wiped out and page
- * is reloaded (as well as all assets). This way the application update will not be dependent on the
- * actual service worker file change. The update will be centralized and performed by setting the different
- * app version in the configuration file.
- */
+* ServiceWorker. Caches all requests, some requests are processed in specific way:
+* 1. API calls are always performed, the cached response is retured only if the app is offline or
+* there is a API-related problem;
+* 2. Files with {extensionsIgnoredForCaching} are not cached, unless it is forced externally using
+* the 'message' event.
+*
+* Update mechanism. There should be an API method that returns the current application version. If it differs
+* from the previous one that is stored in localforage, then user should be notified about the update. If
+* user agrees to the update, then the current service worker is unregistered, cache wiped out and page
+* is reloaded (as well as all assets). This way the application update will not be dependent on the
+* actual service worker file change. The update will be centralized and performed by setting the different
+* app version in the configuration file.
+*/
 
 /**
- *
- */
+*
+*/
 let ignoredExtensionsRegExps = [];
 
 /**
- *
- */
+*
+*/
 let forceIgnoredExtensionsCaching = false;
 
 let urlsToCache = require(`urls-to-cache`);
 
 const urlSubstitution = [{
-    requested: 'https://netdna.bootstrapcdn.com/font-awesome/4.5.0/fonts/fontawesome-webfont.ttf?v=4.5.0',
-    local: '/fonts/fontawesome-webfont.ttf'
+requested: 'https://netdna.bootstrapcdn.com/font-awesome/4.5.0/fonts/fontawesome-webfont.ttf?v=4.5.0',
+local: '/fonts/fontawesome-webfont.ttf'
 }, {
-    requested: 'https://themes.googleusercontent.com/static/fonts/opensans/v8/cJZKeOuBrn4kERxqtaUH3bO3LdcAZYWl9Si6vvxL-qU.woff',
-    local: '/fonts/cJZKeOuBrn4kERxqtaUH3bO3LdcAZYWl9Si6vvxL-qU.woff'
+requested: 'https://themes.googleusercontent.com/static/fonts/opensans/v8/cJZKeOuBrn4kERxqtaUH3bO3LdcAZYWl9Si6vvxL-qU.woff',
+local: '/fonts/cJZKeOuBrn4kERxqtaUH3bO3LdcAZYWl9Si6vvxL-qU.woff'
 }, {
-    requested: 'https://netdna.bootstrapcdn.com/font-awesome/4.5.0/fonts/fontawesome-webfont.woff?v=4.5.0',
-    local: '/fonts/fontawesome-webfont.woff'
+requested: 'https://netdna.bootstrapcdn.com/font-awesome/4.5.0/fonts/fontawesome-webfont.woff?v=4.5.0',
+local: '/fonts/fontawesome-webfont.woff'
 }, {
-    requested: 'https://netdna.bootstrapcdn.com/font-awesome/4.5.0/fonts/fontawesome-webfont.woff2?v=4.5.0',
-    local: '/fonts/fontawesome-webfont.woff2'
+requested: 'https://netdna.bootstrapcdn.com/font-awesome/4.5.0/fonts/fontawesome-webfont.woff2?v=4.5.0',
+local: '/fonts/fontawesome-webfont.woff2'
 }, {
-    requested: '/app/alexshumilov/public/favicon.ico',
-    local: '/favicon.ico'
+requested: '/app/alexshumilov/public/favicon.ico',
+local: '/favicon.ico'
 }, {
-    requested: 'https://rsdemo.alexshumilov.ru/app/alexshumilov/public/favicon.ico',
-    local: '/favicon.ico'
+requested: 'https://rsdemo.alexshumilov.ru/app/alexshumilov/public/favicon.ico',
+local: '/favicon.ico'
 }, {
-    requested: 'https://gc2.io/apps/widgets/gc2table/js/gc2table.js',
-    local: '/js/gc2/gc2table.js'
+requested: 'https://gc2.io/apps/widgets/gc2table/js/gc2table.js',
+local: '/js/gc2/gc2table.js'
 }, {
-    requested: 'https://js-agent.newrelic.com/nr-1071.min.js',
-    local: '/js/nr-1071.min.js'
+requested: 'https://js-agent.newrelic.com/nr-1071.min.js',
+local: '/js/nr-1071.min.js'
 }, {
-    regExp: true,
-    requested: '/[\\w]*/[\\w]*/[\\w]*/#',
-    local: '/index.html'
+regExp: true,
+requested: '/[\\w]*/[\\w]*/[\\w]*/#',
+local: '/index.html'
 }, {
-    regExp: true,
-    requested: '/js/lib/leaflet/images/marker-icon.png',
-    local: '/js/lib/leaflet/images/marker-icon.png'
+regExp: true,
+requested: '/js/lib/leaflet/images/marker-icon.png',
+local: '/js/lib/leaflet/images/marker-icon.png'
 }, {
-    regExp: true,
-    requested: '/js/lib/leaflet/images/marker-shadow.png',
-    local: '/js/lib/leaflet/images/marker-shadow.png'
+regExp: true,
+requested: '/js/lib/leaflet/images/marker-shadow.png',
+local: '/js/lib/leaflet/images/marker-shadow.png'
 }];
 
 let extensionsIgnoredForCaching = ['JPEG', 'jpeg', 'jpg', 'PNG', 'TIFF', 'BMP'];
 
 let urlsIgnoredForCaching = [{
-    regExp: true,
-    requested: '/api/sql/nocache/'
+regExp: true,
+requested: '/api/sql/nocache/'
 }, {
-    regExp: true,
-    requested: 'bam.nr-data.net'
+regExp: true,
+requested: 'bam.nr-data.net'
 }, {
-    regExp: true,
-    requested: 'https://gc2.io/api'
+regExp: true,
+requested: 'https://gc2.io/api'
 }, {
-    regExp: true,
-    requested: '/version.json'
+regExp: true,
+requested: '/version.json'
 }, {
-    regExp: true,
-    requested: 'geocloud.envirogissolutions.co.za/api'
+regExp: true,
+requested: 'geocloud.envirogissolutions.co.za/api'
 }, {
-    regExp: true,
-    requested: 'geofyn.mapcentia.com/api'
+regExp: true,
+requested: 'geofyn.mapcentia.com/api'
 }, {
-    regExp: true,
-    requested: 'https://rm.mapcentia.com/api'
+regExp: true,
+requested: 'https://rm.mapcentia.com/api'
 }, {
-    regExp: true,
-    requested: 'google'
+regExp: true,
+requested: 'google'
 }, {
-    regExp: true,
-    requested: '/api/v1/'
+regExp: true,
+requested: '/api/v1/'
 }, {
-    regExp: true,
-    requested: '/api/v2/'
+regExp: true,
+requested: '/api/v2/'
 }, {
-    regExp: true,
-    requested: '/wms/'
+regExp: true,
+requested: '/wms/'
 }];
 
 if (typeof CONFIG.urlsIgnoredForCaching === "object") {
-    urlsIgnoredForCaching = urlsIgnoredForCaching.concat(CONFIG.urlsIgnoredForCaching);
+urlsIgnoredForCaching = urlsIgnoredForCaching.concat(CONFIG.urlsIgnoredForCaching);
 }
 
 /**
- * Broadcasting service messages to clients, mostly used for debugging and validation
- */
+* Broadcasting service messages to clients, mostly used for debugging and validation
+*/
 const sendMessageToClients = (data) => {
-    self.clients.matchAll().then(clients => {
-        clients.forEach(client => {
-            client.postMessage({msg: data});
-        });
+self.clients.matchAll().then(clients => {
+    clients.forEach(client => {
+        client.postMessage({msg: data});
     });
+});
 };
 
 /**
- * Storing key-value pairs in memory
- */
+* Storing key-value pairs in memory
+*/
 class Keeper {
-    constructor(cacheKey, inputParameterCheckFunction) {
-        this._cacheKey = cacheKey;
-        this._inputParameterCheckFunction = inputParameterCheckFunction;
-    }
+constructor(cacheKey, inputParameterCheckFunction) {
+    this._cacheKey = cacheKey;
+    this._inputParameterCheckFunction = inputParameterCheckFunction;
+}
 
-    batchSet(records) {
-        return new Promise((resolve, reject) => {
-            localforage.setItem(this._cacheKey, records).then(() => {
-                //this.get(key).then(storedValue => {
-                resolve();
-                //});
-            }).catch(error => {
-                console.error(`localforage failed to perform operation`, error);
-                reject();
-            });
+batchSet(records) {
+    return new Promise((resolve, reject) => {
+        localforage.setItem(this._cacheKey, records).then(() => {
+            //this.get(key).then(storedValue => {
+            resolve();
+            //});
+        }).catch(error => {
+            console.error(`localforage failed to perform operation`, error);
+            reject();
         });
-    }
+    });
+}
 
-    set(key, value) {
-        this._inputParameterCheckFunction(key, value);
-        let initialCreated = value.created;
-        return new Promise((resolve, reject) => {
-            localforage.getItem(this._cacheKey).then(storedValue => {
-                if (!storedValue) storedValue = {};
-                let valueCopy = JSON.parse(JSON.stringify(storedValue));
-                valueCopy[key] = JSON.parse(JSON.stringify(value));
-                localforage.setItem(this._cacheKey, valueCopy).then(() => {
-                    // Checking if value was really saved first time
-                    this.get(key).then(storedValue => {
-                        if (!storedValue.created || (storedValue.created && storedValue.created === initialCreated)) {
-                            resolve();
-                        } else {
-                            let timeout = 300;
-                            console.warn(`Value was not really saved in localforage (${storedValue.created} vs ${initialCreated}), trying again in ${timeout} ms`, JSON.stringify(value));
-                            setTimeout(() => {
-                                localforage.setItem(this._cacheKey, valueCopy).then(() => {
-                                    // Checking if value was really saved second time
-                                    this.get(key).then(storedValue => {
-                                        if (storedValue.created !== initialCreated) {
-                                            resolve();
-                                        } else {
-                                            console.error(`Still unable to save the value`);
-                                            reject();
-                                        }
-                                    });
+set(key, value) {
+    this._inputParameterCheckFunction(key, value);
+    let initialCreated = value.created;
+    return new Promise((resolve, reject) => {
+        localforage.getItem(this._cacheKey).then(storedValue => {
+            if (!storedValue) storedValue = {};
+            let valueCopy = JSON.parse(JSON.stringify(storedValue));
+            valueCopy[key] = JSON.parse(JSON.stringify(value));
+            localforage.setItem(this._cacheKey, valueCopy).then(() => {
+                // Checking if value was really saved first time
+                this.get(key).then(storedValue => {
+                    if (!storedValue.created || (storedValue.created && storedValue.created === initialCreated)) {
+                        resolve();
+                    } else {
+                        let timeout = 300;
+                        console.error(`Value was not really saved in localforage (${storedValue.created} vs ${initialCreated}), trying again in ${timeout} ms`, JSON.stringify(value));
+                        setTimeout(() => {
+                            localforage.setItem(this._cacheKey, valueCopy).then(() => {
+                                // Checking if value was really saved second time
+                                this.get(key).then(storedValue => {
+                                    if (storedValue.created !== initialCreated) {
+                                        resolve();
+                                    } else {
+                                        console.error(`Still unable to save the value`);
+                                        resolve(); // We still resolve, because otherwise we ge a net:ERR_FAILED in browser
+                                    }
                                 });
-                            }, timeout);
-                        }
-                    });
-                }).catch(error => {
-                    console.error(`localforage failed to perform operation`, error);
-                    reject();
+                            });
+                        }, timeout);
+                    }
                 });
             }).catch(error => {
                 console.error(`localforage failed to perform operation`, error);
-                reject();
+                resolve(); // We still resolve, because otherwise we ge a net:ERR_FAILED in browser
             });
+        }).catch(error => {
+            console.error(`localforage failed to perform operation`, error);
+            resolve(); // We still resolve, because otherwise we ge a net:ERR_FAILED in browser
         });
-    }
+    });
+}
 
-    get(key) {
-        this._inputParameterCheckFunction(key);
-        return new Promise((resolve, reject) => {
-            localforage.getItem(this._cacheKey).then(storedValue => {
-                if (!storedValue) storedValue = {};
-                if (key in storedValue) {
-                    resolve(storedValue[key]);
-                } else {
-                    resolve(false);
-                }
-            }).catch(error => {
-                console.error(`localforage failed to perform operation`, error);
-                reject();
-            });
+get(key) {
+    this._inputParameterCheckFunction(key);
+    return new Promise((resolve, reject) => {
+        localforage.getItem(this._cacheKey).then(storedValue => {
+            if (!storedValue) storedValue = {};
+            if (key in storedValue) {
+                resolve(storedValue[key]);
+            } else {
+                resolve(false);
+            }
+        }).catch(error => {
+            console.error(`localforage failed to perform operation`, error);
+            reject();
         });
-    }
+    });
+}
 
-    getAll() {
-        return new Promise((resolve, reject) => {
-            localforage.getItem(this._cacheKey).then(storedValue => {
-                if (!storedValue) storedValue = {};
-                resolve(storedValue);
-            }).catch(error => {
-                console.error(`localforage failed to perform operation`, error);
-                reject();
-            });
+getAll() {
+    return new Promise((resolve, reject) => {
+        localforage.getItem(this._cacheKey).then(storedValue => {
+            if (!storedValue) storedValue = {};
+            resolve(storedValue);
+        }).catch(error => {
+            console.error(`localforage failed to perform operation`, error);
+            reject();
         });
-    }
+    });
+}
 };
 
 /**
- * Key-value store for keeping extracted POST data for the specific URL
+* Key-value store for keeping extracted POST data for the specific URL
  */
 let URLToPostDataKeeper = new Keeper(`VIDI_URL_TO_POST_DATA_KEY`, (key) => {
     if (!key || key.indexOf(`api/sql`) === -1) {
@@ -306,9 +301,9 @@ const normalizeTheURL = (URL) => {
  * @return {Promise}
  */
 const normalizeTheURLForFetch = (event) => {
-    let URL = event.request.url;
+    let _URL = event.request.url;
     let result = new Promise((resolve, reject) => {
-        let cleanedRequestURL = normalizeTheURL(URL);
+        let cleanedRequestURL = normalizeTheURL(_URL);
         if (event && event.request.url.indexOf('/api/sql') !== -1) {
             let clonedRequest = event.request.clone();
 
@@ -361,7 +356,7 @@ const normalizeTheURLForFetch = (event) => {
                                 record.cleanedRequestURL = cleanedRequestURL;
                                 record.bbox = false;
                                 if (decodedQuery.indexOf(`ST_Intersects`) !== -1 && decodedQuery.indexOf(`ST_Transform`) && decodedQuery.indexOf(`ST_MakeEnvelope`)) {
-                                    let bboxCoordinates = decodeURIComponent(decodedQuery.substring((decodedQuery.indexOf(`(`, decodedQuery.indexOf(`ST_MakeEnvelope`)) + 1), decodedQuery.indexOf(`)`, decodedQuery.indexOf(`ST_MakeEnvelope`)))).split(`,`).map(a => a.trim());
+                                    let bboxCoordinates = decodedQuery.substring((decodedQuery.indexOf(`(`, decodedQuery.indexOf(`ST_MakeEnvelope`)) + 1), decodedQuery.indexOf(`)`, decodedQuery.indexOf(`ST_MakeEnvelope`))).split(`,`).map(a => a.trim());
                                     if (bboxCoordinates.length === 5) {
                                         record.bbox = {
                                             north: parseFloat(bboxCoordinates[3]),
@@ -407,12 +402,16 @@ const normalizeTheURLForFetch = (event) => {
              */
             const processGETRequest = (clonedRequest) => {
                 let mappedObject = {};
-                let parsedQuery = new uriJs(clonedRequest.url);
-                let queryParameters = parsedQuery.search(true);
-                if (`q` in queryParameters && queryParameters.q) {
-                    mappedObject.q = queryParameters.q;
+                let url = new URL(clonedRequest.url)
+                let searchParams = new URLSearchParams(url.search);
+                let urlVars = {};
+                for (let p of searchParams) {
+                    urlVars[p[0]] = p[1];
                 }
-
+                console.log("GET in SW", urlVars);
+                if (`q` in urlVars && urlVars.q) {
+                    mappedObject.q = urlVars.q;
+                }
                 proceedWithRequestData(clonedRequest.method, mappedObject, cleanedRequestURL);
             };
 

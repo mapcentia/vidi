@@ -1,27 +1,29 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2019 MapCentia ApS
+ * @copyright  2013-2020 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
 
-let uriJs = require('urijs');
-let uriObj = new uriJs(window.location.href);
-let queryStr = uriObj.search();
 
-/**
- *
- * @type {{hostname: *, hash: string, db: *, schema: *, urlVars: *}}
- */
-module.exports = {
-    hostname: uriObj.protocol() + "://" + uriObj.hostname() + ":" + uriObj.port(),
+let url = new URL(window.location.href)
+let pathArray = url.pathname.split('/');
+let searchParams = new URLSearchParams(url.search);
+let urlVars = {};
+for (let p of searchParams) {
+    urlVars[p[0]] = p[1];
+}
+
+let _obj = {
+    hostname: url.protocol + "//" + url.hostname + ":" + url.port,
     hash: decodeURIComponent(geocloud.urlHash),
-    db: uriObj.segmentCoded(1),
-    schema: uriObj.segmentCoded(2),
-    staticRoute: uriObj.segmentCoded(3),
-    urlVars: uriJs.parseQuery(queryStr),
-    search: queryStr,
-    uriJs: uriJs,
-    uriObj: uriObj
+    db: pathArray[2],
+    schema: pathArray[3],
+    staticRoute: pathArray[4],
+    urlVars: urlVars,
+    search: url.search,
+    urlObj: url
 };
+
+module.exports = _obj;

@@ -44,6 +44,7 @@ module.exports = {
             numZoomLevels: 21,
             // Set CSS animation true if not print
             fadeAnimation: (window.vidiTimeout === 0),
+            //zoomAnimation: false, // https://github.com/Leaflet/Leaflet/issues/3249
             zoomAnimation: (window.vidiTimeout === 0),
             editable: true,
             maxBoundsViscosity: 1.0
