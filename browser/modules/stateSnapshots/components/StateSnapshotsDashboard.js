@@ -121,10 +121,6 @@ class StateSnapshotsDashboard extends React.Component {
 
         _self.setState({loading: true});
         this.props.state.getState().then(state => {
-            if (!('modules' in state)) {
-                throw new Error(`No modules data in state`);
-            }
-
             state.map = this.props.anchor.getCurrentMapParameters();
             state.meta = _self.getSnapshotMeta();
             let data = {
@@ -195,15 +191,9 @@ class StateSnapshotsDashboard extends React.Component {
      */
     updateSnapshot(data, title) {
         let _self = this;
-
         _self.setState({loading: true});
         this.props.state.getState().then(state => {
-            if (!('modules' in state)) {
-                throw new Error(`No modules data in state`);
-            }
-
             state.map = this.props.anchor.getCurrentMapParameters();
-
             data.title = title;
             data.snapshot = state;
             data.snapshot.meta = _self.getSnapshotMeta();
