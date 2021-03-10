@@ -94,6 +94,10 @@ module.exports = {
         state.listenTo(MODULE_NAME, _self);
         state.listen(MODULE_NAME, `update`);
 
+        state.getModuleState(MODULE_NAME).then(initialState => {
+            _self.applyState(initialState)
+        });
+
         $("#draw-line-extremity").on("change", function () {
             var b = $("#draw-line-extremity").val() === "none";
             $("#draw-line-extremity-size").prop("disabled", b);
@@ -160,7 +164,6 @@ module.exports = {
         cloud.get().map.off('draw:deletestart');
         cloud.get().map.off('draw:deletestop');
         cloud.get().map.off('draw:deleted');
-        cloud.get().map.off('draw:created');
         cloud.get().map.off('draw:edited');
 
         // Call destruct functions
@@ -246,7 +249,6 @@ module.exports = {
             cloud.get().map.off('draw:deletestart');
             cloud.get().map.off('draw:deletestop');
             cloud.get().map.off('draw:deleted');
-            cloud.get().map.off('draw:created');
             cloud.get().map.off('draw:edited');
 
             // Bind events
@@ -411,8 +413,8 @@ module.exports = {
      */
     applyState: (newState) => {
         return new Promise((resolve, reject) => {
+            store.reset();
             _self.control(false);
-            _self.removeFeatures();
             if (newState.drawnItems && newState.drawnItems !== `false`) {
                 setTimeout(() => {
                     _self.recreateDrawnings(JSON.parse(newState.drawnItems), false);
@@ -542,7 +544,6 @@ module.exports = {
         }
 
         t.loadDataInTable(false, true);
-
         if (enableControl) {
             _self.control(true);
         }

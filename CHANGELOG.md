@@ -25,6 +25,7 @@ and this project adheres to [CalVer](https://calver.org/).
 ### Fixed
 - Base64url are now used to encode filters instead of base64, so + and / sign doesn't mess things up.
 - Changes to Snapshot UI, which fixes an issue with wrong URLs in input fields.
+- Drawing is stored in state, but was not recreated after refresh of browser. This could get "invisible" drawings stored in snapshots.
 
 ## [2020.12.0] - 2020-8-12
 ### Changed

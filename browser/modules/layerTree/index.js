@@ -201,6 +201,13 @@ module.exports = {
         });
 
         state.listenTo('layerTree', _self);
+        state.listen(MODULE_NAME, `sorted`);
+        state.listen(MODULE_NAME, `layersOfflineModeChange`);
+        state.listen(MODULE_NAME, `activeLayersChange`);
+        state.listen(MODULE_NAME, `changed`);
+        state.listen(MODULE_NAME, `opacityChange`);
+        state.listen(MODULE_NAME, `dynamicLoadLayersChange`);
+        state.listen(MODULE_NAME, `settleForcedState`);
     },
 
     /**
@@ -1042,13 +1049,6 @@ module.exports = {
                                     }
 
                                     layers.reorderLayers();
-                                    state.listen(MODULE_NAME, `sorted`);
-                                    state.listen(MODULE_NAME, `layersOfflineModeChange`);
-                                    state.listen(MODULE_NAME, `activeLayersChange`);
-                                    state.listen(MODULE_NAME, `changed`);
-                                    state.listen(MODULE_NAME, `opacityChange`);
-                                    state.listen(MODULE_NAME, `dynamicLoadLayersChange`);
-                                    state.listen(MODULE_NAME, `settleForcedState`);
 
                                     backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
                                     setTimeout(() => {
