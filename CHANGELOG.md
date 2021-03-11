@@ -11,6 +11,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - It's now possible to set `gc2.host` through the environment variable `GC2_HOST`. If set in `config/config.js` it will have precedence.
 - ConflictSearch is now controlled by state module. It will keep state between on/off and browser refreshes. State in conflictSearch is also applied when running a state-snapshot. 
 - Changes in Snapshot UI. The UI is now more clean.
+- When the `session=[id]` URL key/value is used, it will now reset the `connect.gc2` session cookie, even if it's set through the sign-in UI. To do that the HttpOnly cookie flag is removed, which will aggravate the risk of client side script accessing the cookie. The cookie is also removed when sign-out is done through the UI.
 
 ### Added
 - It's possible to lock UTM zone in coordinate module, so it's possible to project to a specific zone outside the actual zone. Useful for e.g. Denmark, which are using zone 32 for the whole country but is located in both 32 and 33.
@@ -26,7 +27,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - Base64url are now used to encode filters instead of base64, so + and / sign doesn't mess things up.
 - Changes to Snapshot UI, which fixes an issue with wrong URLs in input fields.
 - Drawing is stored in state, but was not recreated after refresh of browser. This could get "invisible" drawings stored in snapshots.
-- If a state snapshot layer is for some reason not available (protected, deleted), the build of the layer tree ever resolved. Now it'll resolve.  
+- If a layer in a state snapshot is for some reason not available (protected, deleted), the build of the layer tree was ever resolved. Now it'll resolve.  
 
 ## [2020.12.0] - 2020-8-12
 ### Changed
