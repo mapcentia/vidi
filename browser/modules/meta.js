@@ -114,77 +114,76 @@ module.exports = {
 
             try {
 
-            /**
-             * Loads meta objects from the backend Meta API
-             * 
-             * @param {String} schemataStr Schemata string
-             * 
-             * @returns {void}
-             */
-            const loadMeta = (schemataStr) => {
-                $.ajax({
-                    url: '/api/meta/' + db + '/' + schemataStr,
-                    scriptCharset: "utf-8",
-                    success: function (response) {
-                        if (response.data && response.data.length > 0) {
-                            me.addMetaData(response);
-                            ready = true;
-                            resolve(schemataStr);
-                        } else {
+                /**
+                 * Loads meta objects from the backend Meta API
+                 *
+                 * @param {String} schemataStr Schemata string
+                 *
+                 * @returns {void}
+                 */
+                const loadMeta = (schemataStr) => {
+                    $.ajax({
+                        url: '/api/meta/' + db + '/' + schemataStr,
+                        scriptCharset: "utf-8",
+                        success: function (response) {
+                            if (response.data && response.data.length > 0) {
+                                me.addMetaData(response);
+                                ready = true;
+                                resolve(schemataStr);
+                            } else {
+                                reject();
+                            }
+                        },
+                        error: function (response) {
                             reject();
+                            alert(JSON.parse(response.responseText).message);
                         }
-                    },
-                    error: function (response) {
-                        reject();
-                        alert(JSON.parse(response.responseText).message);
-                    }
-                });
-
-            };
-
-            var schemata;
-            if (!doNotLoadExisting) {
-                if (`snapshot` in window.vidiConfig && window.vidiConfig.snapshot && window.vidiConfig.snapshot.indexOf(`state_snapshot_`) === 0) {
-                    stateSnapshots.getSnapshotByID(window.vidiConfig.snapshot).then(snapshot => {
-                        if (snapshot && snapshot.schema) {
-                            loadMeta(snapshot.schema);
-                        } else {
-                            console.warn(`Unable to get "schema" from snapshot, loading the fallback schemata "${str}"`);
-                            loadMeta(str);
-                        }
-                    }).catch(error => {
-                        console.error(`Error occured when getting state snapshot ${window.vidiConfig.snapshot} instead of schemata`);
-                        console.error(error);
-                        loadMeta(str);
                     });
-                } else {
-                    if (str) {
-                        schemataStr = str;
+                };
+
+                var schemata;
+                if (!doNotLoadExisting) {
+                    if (`snapshot` in window.vidiConfig && window.vidiConfig.snapshot && window.vidiConfig.snapshot.indexOf(`state_snapshot_`) === 0) {
+                        stateSnapshots.getSnapshotByID(window.vidiConfig.snapshot).then(snapshot => {
+                            if (snapshot && snapshot.schema) {
+                                loadMeta(snapshot.schema);
+                            } else {
+                                console.warn(`Unable to get "schema" from snapshot, loading the fallback schemata "${str}"`);
+                                loadMeta(str);
+                            }
+                        }).catch(error => {
+                            console.error(`Error occured when getting state snapshot ${window.vidiConfig.snapshot} instead of schemata`);
+                            console.error(error);
+                            loadMeta(str);
+                        });
                     } else {
-                        schemataStr = (window.gc2Options.mergeSchemata === null ? "" : window.gc2Options.mergeSchemata.join(",") + ',') + (typeof urlVars.i === "undefined" ? "" : urlVars.i.split("#")[1] + ',') + schemataStr;
-                    }
-
-                    if (typeof window.vidiConfig.schemata === "object" && window.vidiConfig.schemata.length > 0) {
-                        if (schemataStr !== "") {
-                            schemata = schemataStr.split(",").concat(window.vidiConfig.schemata);
+                        if (str) {
+                            schemataStr = str;
                         } else {
-                            schemata = window.vidiConfig.schemata;
+                            schemataStr = (window.gc2Options.mergeSchemata === null ? "" : window.gc2Options.mergeSchemata.join(",") + ',') + (typeof urlVars.i === "undefined" ? "" : urlVars.i.split("#")[1] + ',') + schemataStr;
                         }
-                        schemataStr = schemata.join(",")
-                    }
 
-                    if (!schemataStr) {
-                        reject(new Error('No schemata'));
-                        return;
-                    }
+                        if (typeof window.vidiConfig.schemata === "object" && window.vidiConfig.schemata.length > 0) {
+                            if (schemataStr !== "") {
+                                schemata = schemataStr.split(",").concat(window.vidiConfig.schemata);
+                            } else {
+                                schemata = window.vidiConfig.schemata;
+                            }
+                            schemataStr = schemata.join(",")
+                        }
 
-                    loadMeta(schemataStr);
+                        if (!schemataStr) {
+                            reject(new Error('No schemata'));
+                            return;
+                        }
+
+                        loadMeta(schemataStr);
+                    }
+                } else {
+                    loadMeta(str);
                 }
-            } else {
-                loadMeta(str);
-            }
 
-            } catch(e) {
+            } catch (e) {
                 console.error(e);
             }
 
@@ -201,7 +200,8 @@ module.exports = {
             try {
                 let localMeta = JSON.parse(data.meta);
                 parsedMeta = localMeta;
-            } catch(e) {}
+            } catch (e) {
+            }
         }
 
         return parsedMeta;
@@ -266,9 +266,9 @@ module.exports = {
 
     /**
      * Returns meta object for the specified layer idenfitier
-     * 
+     *
      * @param {String} layerKey Layer identifier
-     * 
+     *
      * @throws {Exception} If layer with provided key does not exist
      */
     getMetaByKey: (layerKey, throwException = true) => {

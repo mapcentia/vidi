@@ -712,7 +712,6 @@ module.exports = {
         } else if (newState.order && newState.order === 'false') {
             newState.order = false;
         }
-
         return _self.create(newState);
     },
 
@@ -867,7 +866,7 @@ module.exports = {
             cloud.get().map.on(`moveend`, moveEndEvent);
         }
 
-        let result = false;
+        let result;
         if (moduleState.isBeingBuilt) {
             result = new Promise((resolve, reject) => {
                 console.trace(`async`);
@@ -1141,6 +1140,8 @@ module.exports = {
                                 });
 
                                 Promise.all(fetchMetaRequests).then(() => {
+                                    proceedWithBuilding();
+                                }).catch(() => {
                                     proceedWithBuilding();
                                 });
                             } else {
@@ -1487,7 +1488,8 @@ module.exports = {
                 }
                 if (reloadInterval && reloadInterval !== "") {
                     let reloadCallback = meta.parseLayerMeta(layerKey)?.reload_callback;
-                    let func = reloadCallback && reloadCallback !== "" ? Function('"use strict";return (' + reloadCallback + ')')() : ()=>{};
+                    let func = reloadCallback && reloadCallback !== "" ? Function('"use strict";return (' + reloadCallback + ')')() : () => {
+                    };
                     func(l, cloud.get().map);
                     clearInterval(reloadIntervals[layerKey]);
                     reloadIntervals[layerKey] = setInterval(() => {
@@ -1816,7 +1818,7 @@ module.exports = {
                 template: template,
                 styleSelected,
                 setZoom: parsedMeta?.zoom_on_table_click ? parsedMeta.zoom_on_table_click : false,
-                maxZoom: parsedMeta?.max_zoom_level_table_click && parsedMeta.max_zoom_level_table_click !== "" ? parsedMeta.max_zoom_level_table_click: 17
+                maxZoom: parsedMeta?.max_zoom_level_table_click && parsedMeta.max_zoom_level_table_click !== "" ? parsedMeta.max_zoom_level_table_click : 17
             });
 
             localTable.loadDataInTable(true, forceDataLoad);
@@ -2466,7 +2468,10 @@ module.exports = {
                 for (var u = 0; u < layersAndSubgroupsForCurrentGroup.length; ++u) {
                     let localItem = layersAndSubgroupsForCurrentGroup[u];
                     if (localItem.type === GROUP_CHILD_TYPE_LAYER) {
-                        let {layerIsActive, activeLayerName} = _self.checkIfLayerIsActive(forcedState, precheckedLayers, localItem.layer);
+                        let {
+                            layerIsActive,
+                            activeLayerName
+                        } = _self.checkIfLayerIsActive(forcedState, precheckedLayers, localItem.layer);
                         _self.createLayerRecord(localItem.layer, $(virtualLayerTreeNode), layerIsActive, activeLayerName, false, isVirtualGroup);
                     } else if (localItem.type === GROUP_CHILD_TYPE_GROUP) {
                         _self.createSubgroupRecord(localItem, forcedState, precheckedLayers, $(virtualLayerTreeNode), 0);
@@ -2615,7 +2620,10 @@ module.exports = {
         const renderSubgroupChildren = () => {
             subgroup.children.map(child => {
                 if (child.type === GROUP_CHILD_TYPE_LAYER) {
-                    let {layerIsActive, activeLayerName} = _self.checkIfLayerIsActive(forcedState, precheckedLayers, child.layer);
+                    let {
+                        layerIsActive,
+                        activeLayerName
+                    } = _self.checkIfLayerIsActive(forcedState, precheckedLayers, child.layer);
                     _self.createLayerRecord(child.layer, container, layerIsActive, activeLayerName, subgroup.id);
                 } else if (child.type === GROUP_CHILD_TYPE_GROUP) {
                     _self.createSubgroupRecord(child, forcedState, precheckedLayers, container, newLevel);

@@ -158,10 +158,9 @@ module.exports = {
     init: function () {
         _self = this;
         return new Promise((initResolve, initReject) => {
-
             try {
 
-                if ('localforage' in window === false) {
+                if (!('localforage' in window)) {
                     throw new Error('localforage is not defined');
                 }
 
@@ -508,7 +507,9 @@ module.exports = {
                             } else {
                                 console.log("Active layers in snapshot");
                             }
-                            this.applyState(state.snapshot).then(initResolve);
+                            this.applyState(state.snapshot).then(initResolve).catch((error) => {
+                                console.error(error)
+                            });
                         } else {
                             initializeFromHashPart();
                         }
@@ -622,7 +623,6 @@ module.exports = {
                 reject(`Provided state is empty`);
                 return;
             }
-
             const applyStateToModules = () => {
                 let promises = [];
                 let modulesWithAppliedState = [];
@@ -671,7 +671,6 @@ module.exports = {
                 applyStateToModules();
             }
         });
-
         return result;
     },
 

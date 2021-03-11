@@ -417,7 +417,11 @@ module.exports = {
                     console.error("Could not perform application initialization", e.message, e);
                 }
                 $("#loadscreen").fadeOut(200);
+            }).catch((error)=> {
+                console.error(error)
             });
+        }).catch((error)=> {
+            console.error(error)
         });
 
         if ('serviceWorker' in navigator) {
