@@ -77,6 +77,35 @@ Her angives hvilke extensions, som skal aktiveres.
         "embed"
     ],
 
+.. _configjs_extensionconfig:
+
+extensionConfig
+-----------------------------------------------------------------
+Her kan opsætningen af de enkelte extensions laves. Det er ikke alle extensions, som har sine egne indstillinger.
+
+Opsætningen sker efter følgende princip:
+
+.. code-block:: json
+
+    "extensionConfig": {
+        "extensionNavn1": {},
+        "extensionNavn2": {}
+    }
+
+Her følger hvordan de enkelte extensions kan opsættes (Pt. omfatter denne del af dokumentationen ikke alle extensions)
+
+**StreetView**
+
+.. code-block:: json
+
+    "extensionConfig": {
+        "streetView": {
+            "cowi": "https://cmv.cowi.com/?...",
+            "mapillary": "https://mapillary.com/app/?..."
+        },
+    }
+
+
 .. _configjs_enabledprints:
 
 enabledPrints
