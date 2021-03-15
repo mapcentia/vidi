@@ -592,7 +592,13 @@ module.exports = {
                     ];
                 } else {
                     if (geoType !== "POLYGON" && geoType !== "MULTIPOLYGON" && (!advancedInfo.getSearchOn())) {
+                        
+                        // Fix buffer size when in LatLng
+                        if (srid == '4326') {
+                            distance = distance * 0.00001
+                        } 
                         sql = "SELECT * FROM (SELECT " + fieldStr + " FROM " + value + " WHERE " + filters + ") AS foo WHERE ST_Intersects (" + f_geometry_column + ", ST_Buffer(ST_Transform(ST_GeomFromText('" + wkt + "' ," + proj +")," +srid + "), " + distance + "))";
+
                         if (versioning) {
                             sql = sql + " AND gc2_version_end_date IS NULL ";
                         }
