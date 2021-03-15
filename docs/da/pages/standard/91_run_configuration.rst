@@ -94,16 +94,18 @@ Opsætningen sker efter følgende princip:
 
 Her følger hvordan de enkelte extensions kan opsættes (Pt. omfatter denne del af dokumentationen ikke alle extensions)
 
-**StreetView**
-
 .. code-block:: json
 
     "extensionConfig": {
         "streetView": {
             "cowi": "https://cmv.cowi.com/?...",
             "mapillary": "https://mapillary.com/app/?..."
-        },
+        "embed": {
+            "slideOutLayerTree": true,
+            "expandFirstInLayerTree": true
+        }
     }
+
 
 
 .. _configjs_enabledprints:
