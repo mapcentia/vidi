@@ -12,6 +12,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - ConflictSearch is now controlled by state module. It will keep state between on/off and browser refreshes. State in conflictSearch is also applied when running a state-snapshot. 
 - Changes in Snapshot UI. The UI is now more clean.
 - When the `session=[id]` URL key/value is used, it will now reset the `connect.gc2` session cookie, even if it's set through the sign-in UI. To do that the HttpOnly cookie flag is removed, which will aggravate the risk of client side script accessing the cookie. The cookie is also removed when sign-out is done through the UI.
+- CSS files can now be placed in a sub-folder on the `configUrl` host. Only one level deep like `styles/custom.css`.
 
 ### Added
 - It's possible to lock UTM zone in coordinate module, so it's possible to project to a specific zone outside the actual zone. Useful for e.g. Denmark, which are using zone 32 for the whole country but is located in both 32 and 33.
