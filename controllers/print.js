@@ -1,14 +1,15 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2019 MapCentia ApS
+ * @copyright  2013-2021 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
+
 require('dotenv').config();
 
-var express = require('express');
-var router = express.Router();
-var fs = require('fs');
-var headless = require('./headlessBrowserPool').pool;
+const express = require('express');
+const router = express.Router();
+const fs = require('fs');
+const headless = require('./headlessBrowserPool').pool;
 const shared = require('./gc2/shared');
 const request = require('request');
 const PDFMerge = require('pdf-merge');
@@ -20,19 +21,19 @@ const PDFMerge = require('pdf-merge');
  */
 router.post('/api/print', function (req, response) {
         req.setTimeout(0); // no timeout
-        var body = req.body;
-        var count = {"n": 0}; // Must be passed as copy of a reference
-        var files = [];
-        var poll = () => {
+        let body = req.body;
+        let count = {"n": 0}; // Must be passed as copy of a reference
+        let files = [];
+        const poll = () => {
             setTimeout(() => {
                 if (count.n === body.bounds.length) {
                     console.log("Done All. Merging...");
-                    var key = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-                        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                    let key = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                        let r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
                         return v.toString(16);
                     });
                     PDFMerge(files, {output: `${__dirname}/../public/tmp/print/pdf/${key}.pdf`})
-                        .then((buffer) => {
+                        .then(() => {
                             response.send({success: true, key});
                         });
 
@@ -45,8 +46,8 @@ router.post('/api/print', function (req, response) {
             poll()
         }
         for (let i = 0; i < body.bounds.length; i++) {
-            var key = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-                var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+            let key = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                let r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
                 return v.toString(16);
             });
             files.push(`${__dirname}/../public/tmp/print/pdf/${key}.pdf`);
@@ -72,8 +73,8 @@ router.get('/api/print/:database', function (req, res) {
             if (!'print' in parsedBody.snapshot.modules) {
                 shared.throwError(res, 'NO_PRINT_IN_SNAPSHOT');
             }
-            var key = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-                let r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+            let key = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                let r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
                 return v.toString(16);
             });
             // We need to set add necessary modules for printing
@@ -86,7 +87,7 @@ router.get('/api/print/:database', function (req, res) {
 });
 
 router.get('/api/postdata', function (req, response) {
-    var key = req.query.k;
+    let key = req.query.k;
     fs.readFile(__dirname + "/../public/tmp/print/json/" + key, 'utf8', function (err, data) {
         if (err) {
             response.send({success: true, error: err});
