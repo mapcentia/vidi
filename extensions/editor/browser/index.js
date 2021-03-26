@@ -331,30 +331,17 @@ module.exports = {
                 }
 
                 // Properties have priority over default types
-                if (fieldConf[key] && fieldConf[key].properties) {
-                    let parsedProperties = false;
-                    try {
-                        parsedProperties = JSON.parse(fieldConf[key].properties.replace(/'/g, '"'));
-                    } catch (e) {
-                        console.warn(`"properties" of the ${key} field is not a valid JSON`);
+                if (fields[key]?.restriction?.length > 0) {
+                    let restrictions = fields[key].restriction;
+                    let enumNames = [];
+                    let enumValues = [];
+                    for (let i = 0; i < restrictions.length; i++) {
+                        enumNames.push(restrictions[i].alias);
+                        enumValues.push(restrictions[i].value);
                     }
-
-                    if (parsedProperties) {
-                        if (Array.isArray(parsedProperties) && parsedProperties.length > 0) {
-                            properties[key].enum = parsedProperties;
-                        } else {
-                            let enumNames = [];
-                            let enumValues = [];
-                            for (let enumName in parsedProperties) {
-                                enumNames.push(enumName);
-                                enumValues.push(parsedProperties[enumName]);
-                            }
-
-                            if (enumNames.length === enumValues.length) {
-                                properties[key].enumNames = enumNames;
-                                properties[key].enum = enumValues;
-                            }
-                        }
+                    if (enumNames.length === enumValues.length) {
+                        properties[key].enumNames = enumNames;
+                        properties[key].enum = enumValues;
                     }
                 }
             }
