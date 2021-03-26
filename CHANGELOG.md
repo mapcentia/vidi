@@ -13,6 +13,13 @@ and this project adheres to [CalVer](https://calver.org/).
 - Changes in Snapshot UI. The UI is now more clean.
 - When the `session=[id]` URL key/value is used, it will now reset the `connect.gc2` session cookie, even if it's set through the sign-in UI. To do that the HttpOnly cookie flag is removed, which will aggravate the risk of client side script accessing the cookie. The cookie is also removed when sign-out is done through the UI.
 - CSS and templates files can now be placed in a sub-folder on the `configUrl` host. Only one level deep like `styles/custom.css`.
+- Layer tools in the layer tree now have parent span elements with theese ids, so it's easier to to set a css display rule on them:
+  - `#layer-tools-search`
+  - `#layer-tools-opacity`
+  - `#layer-tools-labels`
+  - `#layer-tools-tables`
+  - `#layer-tools-load`
+  - `#layer-tools-filters`
 
 ### Added
 - It's possible to lock UTM zone in coordinate module, so it's possible to project to a specific zone outside the actual zone. Useful for e.g. Denmark, which are using zone 32 for the whole country but is located in both 32 and 33.
