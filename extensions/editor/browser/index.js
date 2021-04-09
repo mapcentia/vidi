@@ -719,7 +719,6 @@ module.exports = {
 
             // Transform field values according to their types
             Object.keys(fields).map(key => {
-                console.log(fields[key].type)
                 switch (fields[key].type) {
                     case `double precision`:
                         if (eventFeatureCopy.properties[key]) {
@@ -748,7 +747,6 @@ module.exports = {
                         break;
                 }
             });
-            console.log(eventFeatureCopy);
 
             /**
              * Commit to GC2
@@ -849,10 +847,8 @@ module.exports = {
             for (let [key, value] of Object.entries(eventFeatureCopy.properties)) {
                 if (fields[key].type.includes("timestamp with time zone")) {
                     value = value ? dayjs(value).format("YYYY-MM-DDTHH:mmZ") : dayjs().format("YYYY-MM-DDTHH:mmZ"); // Default is required in IOS Safari
-                    console.log(value);
                 } else if (fields[key].type.includes("timestamp without time zone")) {
                     value = value ? dayjs(value).format("YYYY-MM-DDTHH:mm") : dayjs().format("YYYY-MM-DDTHH:mm"); // Default is required in IOS Safari
-                    console.log(value);
                 }
                 eventFeatureParsed[key] = value;
             }
