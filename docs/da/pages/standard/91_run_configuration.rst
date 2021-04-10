@@ -13,11 +13,6 @@ Kørselskonfiguration
 .. contents:: 
     :depth: 4
 
-
-*****************************************************************
-Kørselskonfiguration
-***************************************************************** 
-
 Når vidi startes i browseren læses værdier ind fra :ref:`configjs`. I flere tilfælde kan denne konfiguration ændres til eksempelvis at inkludere bestemte extensions, eller print-templates.
 
 Vidi startes med en URL som denne (uden fragments [#fragment]_):
@@ -29,12 +24,12 @@ Som kan læses sådan:
 ``https://<host>/app/<database>/?config=<kørselskonfiguration>.json``
 
 Opbygning
-=================================================================
+*****************************************************************
 
 .. _configjs_schemata:
 
 schemata
------------------------------------------------------------------
+=================================================================
 
 Her angives hvilke lag, der skal hente ind i lagtræet. Der er tre måder at angive på:
 
@@ -60,7 +55,7 @@ De tre måder kan kombineres.
 .. _configjs_enabledextensions:
 
 enabledExtensions
------------------------------------------------------------------
+=================================================================
 
 Her angives hvilke extensions, som skal aktiveres.
 
@@ -80,7 +75,8 @@ Her angives hvilke extensions, som skal aktiveres.
 .. _configjs_extensionconfig:
 
 extensionConfig
------------------------------------------------------------------
+=================================================================
+
 Her kan opsætningen af de enkelte extensions laves. Det er ikke alle extensions, som har sine egne indstillinger.
 
 Opsætningen sker efter følgende princip:
@@ -111,7 +107,7 @@ Her følger hvordan de enkelte extensions kan opsættes (Pt. omfatter denne del 
 .. _configjs_enabledprints:
 
 enabledPrints
------------------------------------------------------------------
+=================================================================
 
 Her angives hvilke print-templates der skal være adgang til. Angives flere end én kan brugeren vælge mellem dem i print-dialogen.
 
@@ -122,7 +118,7 @@ Her angives hvilke print-templates der skal være adgang til. Angives flere end 
 .. _configjs_enabledsearch:
 
 enabledSearch
------------------------------------------------------------------
+=================================================================
 
 Her angives hvilket søgemodul, der skal være aktiveret. Pt. er der to standard moduler:
 
@@ -136,7 +132,7 @@ Her angives hvilket søgemodul, der skal være aktiveret. Pt. er der to standard
 .. _configjs_searchconfig:
 
 searchConfig
------------------------------------------------------------------
+=================================================================
 
 Her kan det valgte søgemodul konfigureres.
 
@@ -164,7 +160,7 @@ Her kan det valgte søgemodul konfigureres.
 .. _configjs_template:
 
 template
------------------------------------------------------------------
+=================================================================
 
 Her angives hvilken template, som skal bruges. Angives det ikke, bruges standard-templaten ``default.tmpl``.
 Egne Templates kan placeres på egen server ved angivelse af :ref:`configUrl<configjs_configurl>` indstillingen.
@@ -176,7 +172,7 @@ Egne Templates kan placeres på egen server ved angivelse af :ref:`configUrl<con
 .. _configjs_brandname:
 
 brandName
------------------------------------------------------------------
+=================================================================
 
 Her kan sættes en tekst som placeres vha. en placeholder i templates.
 
@@ -187,7 +183,7 @@ Her kan sættes en tekst som placeres vha. en placeholder i templates.
 .. _configjs_baselayers:
 
 baseLayers
------------------------------------------------------------------
+=================================================================
 
 Opsætning af tilgængelige base layers kan ske på fire forskellige metoder:
 
@@ -257,7 +253,7 @@ Opsætning af tilgængelige base layers kan ske på fire forskellige metoder:
 .. _configjs_aboutbox:
 
 aboutBox
------------------------------------------------------------------
+=================================================================
 
 Her kan sættes en tekst eller HTML som vises i About Box.
 
@@ -268,7 +264,7 @@ Her kan sættes en tekst eller HTML som vises i About Box.
 .. _configjs_startupmodal:
 
 startUpModal
------------------------------------------------------------------
+=================================================================
 
 Hvis angivet, vil et modal-vindue vises ved opstart med tekst eller HTML. Vinduet kan skjules en gang eller for altid (indtil cookies nulstilles eller indeholdet ændres).
 
@@ -279,7 +275,7 @@ Hvis angivet, vil et modal-vindue vises ved opstart med tekst eller HTML. Vindue
 .. _configjs_startupmodalsupressiontemplates:
 
 startupModalSupressionTemplates
-----------------------------------------------------------------
+=================================================================
 
 :ref:`startUpModal <configjs_startupmodal>` kan undertrykkes ved udvalgte templates. Templates kan angives ved navn eller regular expression.
 
@@ -293,7 +289,7 @@ startupModalSupressionTemplates
 .. _configjs_featureinfoonmap:
 
 featureInfoTableOnMap
-----------------------------------------------------------------
+=================================================================
 
 Når denne er sat til ``true`` vises feature-info tabellerne i en popup på kortet i stedet for i sidepanelet. Det gør indstillingen veleget til embed template.
 Ved brug af "avanceret forespørgelse" vises tabellerne dog stadig i sidepanelet.
@@ -314,7 +310,7 @@ Ved brug af "avanceret forespørgelse" vises tabellerne dog stadig i sidepanelet
 .. _configjs_crossmultiselect:
 
 crossMultiSelect
-----------------------------------------------------------------
+=================================================================
 
 Når denne er sat til ``true`` vil feature info klik fange både raster- og vektor-lag og opstille de enkelte resultater i en "harmonika". Derved inddeles resultatet ikke efter hvilke lag de tilhører.
 Overskrifterne har to dele:
@@ -340,7 +336,7 @@ Ovenstående sættes i GC2 Meta.
 .. _configjs_activatemaintab:
 
 activateMainTab
-----------------------------------------------------------------
+=================================================================
 
 Sæt hvilket modul, som skal være aktivt fra starten. Mulighederne er:
 
@@ -363,7 +359,7 @@ Sæt hvilket modul, som skal være aktivt fra starten. Mulighederne er:
 .. _configjs_cssfiles:
 
 cssFiles
-----------------------------------------------------------------
+=================================================================
 
 Load eksterne CSS filer. Filerne skal placeres på en HTTP server, som forbindes til vha. :ref:`configUrl<configjs_configurl>`
 
@@ -377,7 +373,7 @@ Load eksterne CSS filer. Filerne skal placeres på en HTTP server, som forbindes
 .. _configjs_dontuseadvancedbaselayerswitcher:
 
 dontUseAdvancedBaseLayerSwitcher
-----------------------------------------------------------------
+=================================================================
 
 Deaktiver dobbeltgrundskort funktionen.
 
@@ -388,7 +384,8 @@ Deaktiver dobbeltgrundskort funktionen.
 .. _configjs_infoclickcursorstyle:
 
 infoClickCursorStyle
-----------------------------------------------------------------
+=================================================================
+
 Sæt hvilken CSS cursor style markøren skal have når feature-info modulet er aktivt. Default er "crosshair".
 
 Andre muligheder kan ses `her <https://developer.mozilla.org/en-US/docs/Web/CSS/cursor>`_.
