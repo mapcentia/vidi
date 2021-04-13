@@ -1173,7 +1173,7 @@ module.exports = {
 
 
     _statisticsHandler: (statistics, forceLayerUpdate, skipLastStatisticsCheck) => {
-        if (moduleState.wasBuilt === false || _self.isReady() == false) {
+        if (moduleState.wasBuilt === false || _self.isReady() === false) {
             return;
         } else {
             _self._setupToggleOfflineModeControlsForLayers().then(() => {

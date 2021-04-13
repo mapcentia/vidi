@@ -36,6 +36,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - Changes to Snapshot UI, which fixes an issue with wrong URLs in input fields.
 - Drawing is stored in state, but was not recreated after refresh of browser. This could get "invisible" drawings stored in snapshots.
 - If a layer in a state snapshot is for some reason not available (protected, deleted), the build of the layer tree was ever resolved. Now it'll resolve.  
+- The queueStatisticsWatcher now uses 3. party module for base64 encoding, because windows.btoa fails on non-latin characters.
 
 ## [2020.12.0] - 2020-8-12
 ### Changed
