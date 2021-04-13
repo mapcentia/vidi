@@ -776,7 +776,7 @@ module.exports = {
                 }
 
                 // Set GeoJSON properties from form values
-                Object.keys(eventFeatureCopy.properties).map(function (key) {
+                Object.keys(fields).map(function (key) {
                     if (!key.startsWith("gc2_")) {
                         GeoJSON.properties[key] = formData.formData[key];
                         // Set undefined values back to NULL
