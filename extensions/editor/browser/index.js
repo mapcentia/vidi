@@ -777,7 +777,7 @@ module.exports = {
 
                 // Set GeoJSON properties from form values
                 Object.keys(fields).map(function (key) {
-                    if (!key.startsWith("gc2_")) {
+                    if (!key.startsWith("gc2_") && fields[key].type !== "geometry") {
                         GeoJSON.properties[key] = formData.formData[key];
                         // Set undefined values back to NULL
                         if (GeoJSON.properties[key] === undefined) {
