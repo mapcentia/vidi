@@ -267,9 +267,9 @@ module.exports = {
         let uiSchema = {};
 
         Object.keys(fields).map(function (key) {
-            if (key !== pkey && key !== f_geometry_column && (key.indexOf(SYSTEM_FIELD_PREFIX) !== 0 || (typeof fieldConf[key] !== "undefined" && fieldConf[key].querable === true))) {
+            if (key !== pkey && key !== f_geometry_column && (key.indexOf(SYSTEM_FIELD_PREFIX) !== 0 && !fieldConf[key]?.filter)) {
                 let title = key;
-                if (fieldConf[key] !== undefined && fieldConf[key].alias) {
+                if (fieldConf[key]?.alias) {
                     title = fieldConf[key].alias;
                 }
 
