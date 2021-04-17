@@ -497,16 +497,15 @@ module.exports = {
 
         // Module icons
         $('#side-panel ul li a').on('click', function () {
-            backboneEvents.get().trigger(`off:all`);
-            let moduleTitle = $(this).data(`module-title`);
+            backboneEvents.get().trigger('off:all');
+            let moduleTitle = $(this).data('module-title');
             let e=  $('#module-container');
-            e.find(`.js-module-title`).text('');
-            if (moduleTitle) e.find(`.js-module-title`).text(moduleTitle);
-
-            let moduleId = $(this).data(`module-id`);
-            //let moduleIgnoreErrors = !!$(this).data(`module-ignore-errors`);
-            let moduleIgnoreErrors = ($(this).data(`module-ignore-errors`) ? true : false);
-
+            e.find('.js-module-title').text('');
+            if (moduleTitle) {
+                e.find('.js-module-title').text(moduleTitle);
+            }
+            let moduleId = $(this).data('module-id');
+            let moduleIgnoreErrors = !!$(this).data('module-ignore-errors');
             setTimeout(() => {
                 if (moduleId && moduleId !== '') {
                     if (moduleId in applicationModules) {
