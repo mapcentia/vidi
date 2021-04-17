@@ -504,10 +504,11 @@ module.exports = {
             if (moduleTitle) e.find(`.js-module-title`).text(moduleTitle);
 
             let moduleId = $(this).data(`module-id`);
-            let moduleIgnoreErrors = !!$(this).data(`module-ignore-errors`);
+            //let moduleIgnoreErrors = !!$(this).data(`module-ignore-errors`);
+            let moduleIgnoreErrors = ($(this).data(`module-ignore-errors`) ? true : false);
 
             setTimeout(() => {
-                if (moduleId && moduleId !== ``) {
+                if (moduleId && moduleId !== '') {
                     if (moduleId in applicationModules) {
                         backboneEvents.get().trigger(`on:${moduleId}`);
                     } else {
@@ -546,9 +547,9 @@ module.exports = {
                 setTimeout(() => {
                     if (moduleId && moduleId !== '') {
                         if (moduleId in applicationModules.extensions) {
-                            backboneEvents.get().trigger('on:${moduleId}');
+                            backboneEvents.get().trigger(`on:${moduleId}`);
                         } else {
-                            console.error('Module ${moduleId} was not found');
+                            console.error(`Module ${moduleId} was not found`);
                         }
                     }
                 }, 100);
@@ -557,7 +558,6 @@ module.exports = {
                 id.addClass('active');
             });
         })
-
         // Listen for fullscreen changes
         document.addEventListener('fullscreenchange', function () {
             if (document.fullscreenElement) {
