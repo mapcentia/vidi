@@ -85,6 +85,19 @@ Der kan angives forskellige URLer til forskellige databaser. ``_default`` betyde
         "_default": "https://mdapcentia.github.io/vidi_configs_default"
     },
 
+.. _configjs_leftslidewidths:
+
+leftSlideWidths
+*****************************************************************
+
+Angivelse af bredder i det venstre slide-ud panel i default template.
+
+Tallene angiver brededer i hhv. phone, tablet og desktop.
+
+.. code-block:: json
+
+    "leftSlideWidths": [300, 400, 550]
+
 .. _configjs_complete_example:
 
 Komplet eksempel

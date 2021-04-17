@@ -30,6 +30,10 @@ and this project adheres to [CalVer](https://calver.org/).
     }
 }
 ```
+- A new build configuration for setting withs for the left slide-out panel in default template.
+  - ```json
+    "leftSlideWidths": [300, 400, 550]
+    ```
 
 ### Fixed
 - Base64url are now used to encode filters instead of base64, so + and / sign doesn't mess things up.

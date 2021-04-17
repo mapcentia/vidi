@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2021 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -10,7 +10,8 @@ import {LAYER_TYPE_DEFAULT} from './layerTree/constants';
 
 require('dom-shims');
 require('arrive');
-const LEFT_SLIDE_WIDTHS = [300, 400, 550];
+const config = require('../../config/config.js');
+const LEFT_SLIDE_WIDTHS = config?.leftSlideWidths || [300, 400, 550];
 const BUTTON_WITH = 24;
 const mobile = require('is-mobile');
 const jrespond = require('jrespond'); //TODO Change to Window.matchMedia()
