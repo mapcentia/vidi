@@ -20,6 +20,7 @@ and this project adheres to [CalVer](https://calver.org/).
   - `#layer-tools-tables`
   - `#layer-tools-load`
   - `#layer-tools-filters`
+- `repeatMode` is set to `true` for tools in Draw.
 
 ### Added
 - It's possible to lock UTM zone in coordinate module, so it's possible to project to a specific zone outside the actual zone. Useful for e.g. Denmark, which are using zone 32 for the whole country but is located in both 32 and 33.
