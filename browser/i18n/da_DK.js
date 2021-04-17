@@ -169,7 +169,7 @@ module.exports = {
         "Total distance": "Totalmål",
         "Color": "Farve",
         "Enter a text for the marker or cancel to add without text": "Indtast en tekst til markøren eller annuller for at tilføje uden tekst",
-        "Cancel": "Cancel",
+        "Cancel": "Afbryd",
         "Ok": "Ok",
         "Apply default style settings for this drawing?": "Anvend standard stilindstillinger til denne tegning?",
 
