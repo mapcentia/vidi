@@ -20,6 +20,10 @@ module.exports = {
             if (request.status === 200) {
                 let filename, type;
                 switch (format) {
+                    case "csv":
+                        filename = 'file.csv';
+                        type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+                        break;
                     case "excel":
                         filename = 'file.xlsx';
                         type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
