@@ -354,7 +354,7 @@ Sæt hvilket modul, som skal være aktivt fra starten. Mulighederne er:
 
 .. code-block:: json
 
-    "activateMainTab:: "info"
+    "activateMainTab": "info"
 
 .. _configjs_cssfiles:
 
