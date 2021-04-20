@@ -1,6 +1,6 @@
 /*
  * @author     Alexander Shumilov
- * @copyright  2013-2020 MapCentia ApS
+ * @copyright  2013-2021 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -12,8 +12,7 @@ import {
     EXPRESSIONS_FOR_STRINGS,
     EXPRESSIONS_FOR_NUMBERS,
     EXPRESSIONS_FOR_DATES,
-    EXPRESSIONS_FOR_BOOLEANS,
-    EXPRESSIONS
+    EXPRESSIONS_FOR_BOOLEANS
 } from './filterUtils';
 import {
     StringControl,
@@ -75,8 +74,8 @@ class VectorLayerFilter extends React.Component {
         }
 
         let arbitraryFilters = props.arbitraryFilters || {};
-        if (`match` in arbitraryFilters === false) arbitraryFilters[`match`] = (props.layerMeta && `default_match` in props.layerMeta && MATCHES.indexOf(props.layerMeta.default_match) > -1 ? props.layerMeta.default_match : MATCHES[0]);
-        if (`columns` in arbitraryFilters === false) arbitraryFilters[`columns`] = new Array();
+        if (!(`match` in arbitraryFilters)) arbitraryFilters[`match`] = (props.layerMeta && `default_match` in props.layerMeta && MATCHES.indexOf(props.layerMeta.default_match) > -1 ? props.layerMeta.default_match : MATCHES[0]);
+        if (!(`columns` in arbitraryFilters)) arbitraryFilters[`columns`] = [];
 
         if (this.props.presetFilters.length > 0) {
             this.props.presetFilters.map(item => {
@@ -111,7 +110,8 @@ class VectorLayerFilter extends React.Component {
             disabledPredefinedFilters,
             editorFilters: props.editorFilters,
             editorFiltersActive: props.editorFiltersActive,
-            fitBoundsActiveOnLayer: props.fitBoundsActiveOnLayer
+            fitBoundsActiveOnLayer: props.fitBoundsActiveOnLayer,
+            downLoadFormat: 'geojson'
         };
     }
 
@@ -221,6 +221,10 @@ class VectorLayerFilter extends React.Component {
         return valueIsValid;
     }
 
+    changeDownLoadFormat(value) {
+        this.setState({downLoadFormat: value});
+    }
+
     /**
      * Constructing select control for column fieldname
      *
@@ -254,7 +258,7 @@ class VectorLayerFilter extends React.Component {
             }
         }
 
-        let fieldControl = (<select
+        return (<select
             id={`column_select_` + layerKey + `_` + index}
             className="form-control"
             onChange={(event) => {
@@ -262,8 +266,6 @@ class VectorLayerFilter extends React.Component {
             }}
             value={column.fieldname}
             style={{width: `100px`}}>{columnOptions}</select>);
-
-        return fieldControl;
     }
 
     /**
@@ -274,7 +276,7 @@ class VectorLayerFilter extends React.Component {
      * @param {*} layerKey
      */
     renderExpressionControl(column, index, layerKey) {
-        let expressionControl = false;
+        let expressionControl;
         if (column.fieldname === DUMMY_RULE.fieldname || column.expression === DUMMY_RULE.expression) {
             expressionControl = (<p className="text-secondary" style={{paddingTop: `12px`}}>{__(`Select field`)}</p>);
         } else {
@@ -364,6 +366,10 @@ class VectorLayerFilter extends React.Component {
 
     handleFitBounds() {
         this.props.onApplyFitBounds(this.props.layer.f_table_schema + `.` + this.props.layer.f_table_name);
+    }
+
+    handleDownload() {
+        this.props.onApplyDownload(this.props.layer.f_table_schema + `.` + this.props.layer.f_table_name, this.state.downLoadFormat);
     }
 
     render() {
@@ -617,17 +623,43 @@ class VectorLayerFilter extends React.Component {
             )
         };
 
-        const buildResetButton = (props) => {
+        const buildResetButton = () => {
             return (<button className="btn btn-xs btn-danger" onClick={this.handleReset.bind(this)}>
                 <i className="fa fa-reply"></i> {__(`Reset filter`)}</button>)
         };
 
-        const buildFitBoundsButton = (props) => {
-            return (<button disabled={!this.state.fitBoundsActiveOnLayer} className="btn btn-xs btn-info" onClick={this.handleFitBounds.bind(this)}>
+        const buildFitBoundsButton = () => {
+            return (<button disabled={!this.state.fitBoundsActiveOnLayer} className="btn btn-xs btn-info"
+                            onClick={this.handleFitBounds.bind(this)}>
                 <i className="fa fa-arrows-alt"></i> {__(`Fit bounds to filter`)}</button>)
         };
 
-        let activeFiltersTab = false;
+        const buildDownloadButton = () => {
+            return (
+                <span className='form-inline'>
+                    <span className='form-group' style={{paddingBottom: "0px"}}>
+                        <button
+                            disabled={!this.state.fitBoundsActiveOnLayer} className="btn btn-xs btn-info"
+                            onClick={this.handleDownload.bind(this)}>
+                            <i className="fa fa-download"></i> {__(`Download`)}
+                        </button>
+                        <select
+                            className="form-control"
+                            onChange={(event) => {
+                                this.changeDownLoadFormat(event.target.value)
+                            }}
+                            disabled={!this.state.fitBoundsActiveOnLayer}
+                        >
+                            <option value={'geojson'}>GeoJson</option>
+                            <option value={'csv'}>Csv</option>
+                            <option value={'excel'}>Excel</option>
+                        </select>
+                    </span>
+                </span>
+            )
+        };
+
+        let activeFiltersTab;
         let tabControl = false;
         if (Object.keys(this.state.predefinedFilters).length > 0) {
             tabControl = (<div>
@@ -661,6 +693,7 @@ class VectorLayerFilter extends React.Component {
                 {buildWhereClauseField()}
                 {buildResetButton()}
                 {buildFitBoundsButton()}
+                {buildDownloadButton()}
             </div>
         );
     }
@@ -677,6 +710,7 @@ VectorLayerFilter.propTypes = {
     onApplyArbitrary: PropTypes.func.isRequired,
     onDisableArbitrary: PropTypes.func.isRequired,
     onApplyFitBounds: PropTypes.func.isRequired,
+    onApplyDownload: PropTypes.func.isRequired,
     onChangeEditor: PropTypes.func.isRequired,
     onActivateEditor: PropTypes.func.isRequired,
     onApplyEditor: PropTypes.func.isRequired,
