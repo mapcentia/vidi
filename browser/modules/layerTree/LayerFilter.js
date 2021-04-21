@@ -636,13 +636,16 @@ class VectorLayerFilter extends React.Component {
 
         const buildDownloadButton = () => {
             return (
-                <span className='form-inline'>
-                    <span className='form-group' style={{paddingBottom: "0px"}}>
+                <div className='row'>
+                    <div className='form-group col-md-6' style={{paddingBottom: "0px"}}>
                         <button
-                            disabled={!this.state.fitBoundsActiveOnLayer} className="btn btn-xs btn-info"
+                            disabled={!this.state.fitBoundsActiveOnLayer}
+                            className="btn btn-xs btn-info"
                             onClick={this.handleDownload.bind(this)}>
                             <i className="fa fa-download"></i> {__(`Download`)}
                         </button>
+                    </div>
+                    <div className='form-group col-md-6'>
                         <select
                             className="form-control"
                             onChange={(event) => {
@@ -654,8 +657,8 @@ class VectorLayerFilter extends React.Component {
                             <option value={'csv'}>Csv</option>
                             <option value={'excel'}>Excel</option>
                         </select>
-                    </span>
-                </span>
+                    </div>
+                </div>
             )
         };
 
@@ -691,9 +694,13 @@ class VectorLayerFilter extends React.Component {
                 {tabControl}
                 {activeFiltersTab}
                 {buildWhereClauseField()}
-                {buildResetButton()}
-                {buildFitBoundsButton()}
-                {buildDownloadButton()}
+                <div className="row">
+                    <div className="col-md-6">{buildResetButton()}</div>
+                    <div className="col-md-6">{buildFitBoundsButton()}</div>
+                </div>
+                <div className="row">
+                    <div className="col-md-6">{buildDownloadButton()}</div>
+                </div>
             </div>
         );
     }
