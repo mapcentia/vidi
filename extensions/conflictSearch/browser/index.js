@@ -925,7 +925,7 @@ module.exports = module.exports = {
     }
 };
 
-var dom = `
+let dom = `
 <div role="tabpanel">
     <div id="conflict-buffer" style="display: none">
         <div>
@@ -1011,7 +1011,7 @@ var dom = `
                         <ul class="nav nav-tabs" id="conflict-info-tab"></ul>
                         <div class="tab-content" id="conflict-info-pane"></div>
                     </div>
-                </div>
+                </div><button class="btn btn-default btn-xs" id="conflict-search-with-feature">Søg med valgte</button>
             </div>
             <div role="tabpanel" class="tab-pane" id="conflict-log-content">
                 <textarea style="width: 100%" rows="8" id="conflict-console"></textarea>
