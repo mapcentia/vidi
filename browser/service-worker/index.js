@@ -330,7 +330,7 @@ const normalizeTheURLForFetch = (event) => {
                             if (`q` in mappedObject && mappedObject.q) {
                                 if (method === `POST`) {
                                     let cleanedString = mappedObject.q.replace(/%3D/g, '');
-                                    decodedQuery = base64url(cleanedString);
+                                    decodedQuery = base64url.decode(cleanedString);
                                 } else if (method === `GET`) {
                                     decodedQuery = mappedObject.q;
                                 } else {
