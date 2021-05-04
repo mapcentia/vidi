@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [UNRELEASED]
+## [2021.5.0] - 2021-4-5
 ### Changed
 - Node >= 14 er required. 
 - Docker files are added to the project.
@@ -31,7 +31,7 @@ and this project adheres to [CalVer](https://calver.org/).
     }
 }
 ```
-- A new build configuration for setting withs for the left slide-out panel in default template.
+- A new build configuration for setting widths for the left slide-out panel in default template.
   - ```json
     "leftSlideWidths": [300, 400, 550]
     ```
@@ -43,6 +43,8 @@ and this project adheres to [CalVer](https://calver.org/).
 - Drawing is stored in state, but was not recreated after refresh of browser. This could get "invisible" drawings stored in snapshots.
 - If a layer in a state snapshot is for some reason not available (protected, deleted), the build of the layer tree was ever resolved. Now it'll resolve.  
 - The queueStatisticsWatcher and Service Worker now uses 3. party module for base64 decoding, because windows.btoa fails on non-latin characters.
+- COWI Gade foto named properly in Streetview module.
+- Alot of fixes in the Editor module.
 
 ## [2020.12.0] - 2020-8-12
 ### Changed
