@@ -607,6 +607,10 @@ module.exports = {
         return store.layer;
     },
 
+    getDrawItems: function () {
+        return drawnItems;
+    },
+
     /**
      *
      * @returns {gc2table}
