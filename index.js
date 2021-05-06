@@ -87,7 +87,7 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     name: "connect.gc2",
-    cookie: {secure: false}
+    cookie: {secure: false, httpOnly: false}
 }));
 
 app.use('/app/:db/:schema?', express.static(path.join(__dirname, 'public'), {maxage: '60s'}));

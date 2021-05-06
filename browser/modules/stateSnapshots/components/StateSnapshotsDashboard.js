@@ -1,4 +1,4 @@
-var React = require('react');
+const React = require('react');
 import TitleFieldComponent from './../../shared/TitleFieldComponent';
 import LoadingOverlay from './../../shared/LoadingOverlay';
 
@@ -8,6 +8,9 @@ const cookie = require('js-cookie');
 const buttonStyle = {padding: `4px`, margin: `0px`};
 
 const DEFAULT_API_URL = `/api/state-snapshots`;
+
+let jquery = require('jquery');
+require('snackbarjs');
 
 /**
  * State snapshots dashboard
@@ -110,6 +113,7 @@ class StateSnapshotsDashboard extends React.Component {
     /**
      * Creates snapshot
      *
+     * @param title
      * @param {Boolean} anonymous Specifies if the created snapshot belongs to browser or user
      */
     createSnapshot(title, anonymous = false) {
@@ -117,10 +121,6 @@ class StateSnapshotsDashboard extends React.Component {
 
         _self.setState({loading: true});
         this.props.state.getState().then(state => {
-            if ('modules' in state === false) {
-                throw new Error(`No modules data in state`);
-            }
-
             state.map = this.props.anchor.getCurrentMapParameters();
             state.meta = _self.getSnapshotMeta();
             let data = {
@@ -186,19 +186,14 @@ class StateSnapshotsDashboard extends React.Component {
     /**
      * Updates snapshot
      *
-     * @param {String} id Snapshot identifier
+     * @param data
+     * @param title
      */
     updateSnapshot(data, title) {
         let _self = this;
-
         _self.setState({loading: true});
         this.props.state.getState().then(state => {
-            if ('modules' in state === false) {
-                throw new Error(`No modules data in state`);
-            }
-
             state.map = this.props.anchor.getCurrentMapParameters();
-
             data.title = title;
             data.snapshot = state;
             data.snapshot.meta = _self.getSnapshotMeta();
@@ -310,6 +305,11 @@ class StateSnapshotsDashboard extends React.Component {
         el.select();
         document.execCommand('copy');
         document.body.removeChild(el);
+        jquery.snackbar({
+            content: "<span id=`conflict-progress`>" + __("Copied") + "</span>",
+            htmlAllowed: true,
+            timeout: 1000
+        });
     }
 
     setImageLinkSize(value, id) {
@@ -359,7 +359,7 @@ class StateSnapshotsDashboard extends React.Component {
                 options.push(<option key={`${item.id}_size_key_${size}`} value={size}>{size}</option>);
             });
 
-            return (<select className="form-control" value={value} onChange={(event) => {
+            return (<select style={{height: `25px`, padding: `0`}} className="form-control" value={value} onChange={(event) => {
                 this.setImageLinkSize(event.target.value, item.id);
             }}>{options}</select>)
         };
@@ -439,11 +439,12 @@ class StateSnapshotsDashboard extends React.Component {
 
             let tokenField = false;
             if (token) {
-                tokenField = (<div className="input-group form-group snapshot-copy-token">
-                    <a className="input-group-addon" style={{cursor: `pointer`}} onClick={() => {
-                        this.copyToClipboard(token)
-                    }}>{__(`Copy token`)}</a>
-                    <input className="form-control" type="text" defaultValue={token}/>
+                tokenField = (<div className="input-group form-group snapshot-copy-token" style={{paddingTop: `8px`}}>
+                    <div style={{display: `flex`, width: `100%`}}>
+                        <a className="input-group-addon" style={{cursor: `pointer`}} onClick={() => {
+                            this.copyToClipboard(token)
+                        }}><i className="material-icons" style={{fontSize: `18px`}}>content_copy</i>{__(`Copy token`)}</a>
+                    </div>
                 </div>);
             }
 
@@ -484,29 +485,27 @@ class StateSnapshotsDashboard extends React.Component {
                         </button>
                         {importButton}
                     </div>)}
-                    {this.props.playOnly ? false : (<div>
-                        <div className="input-group form-group">
-                            <a className="input-group-addon" style={{cursor: `pointer`}} onClick={() => {
-                                this.copyToClipboard(permaLink)
-                            }}>{__(`Copy Vidi link`)}</a>
-                            <input className="form-control" type="text" defaultValue={permaLink}/>
-                        </div>
-                        {tokenField}
-                        <div className="input-group form-group snapshot-copy-png-link" style={{width: `100%`}}>
-                            <div style={{display: `flex`, width: `100%`}}>
-                                <div style={{paddingTop: `10px`}}>
+                    {this.props.playOnly ? false : (
+                        <div style={{display:`flex`}}>
+                            <div className="input-group form-group" style={{paddingTop: `8px`}}>
+                                <div style={{display: `flex`, width: `100%`}}>
                                     <a className="input-group-addon" style={{cursor: `pointer`}} onClick={() => {
-                                        this.copyToClipboard(imageLink)
-                                    }}>{__(`Copy PNG link`)}</a>
-                                </div>
-                                <div style={{paddingLeft: `10px`, paddingRight: `10px`}}>{selectSize}</div>
-                                <div style={{flexGrow: `1`}}>
-                                    <input className="form-control" type="text" onChange={() => {
-                                    }} value={imageLink}/>
+                                        this.copyToClipboard(permaLink)
+                                    }}><i className="material-icons" style={{fontSize: `18px`}}>content_copy</i>{__(`Copy Vidi link`)}</a>
                                 </div>
                             </div>
-                        </div>
-                    </div>)}
+                            {tokenField}
+                            <div className="input-group form-group snapshot-copy-png-link" style={{width: `100%`, paddingTop: `8px`}}>
+                                <div style={{display: `flex`, width: `100%`}}>
+                                    <div>
+                                        <a className="input-group-addon" style={{cursor: `pointer`}} onClick={() => {
+                                            this.copyToClipboard(imageLink)
+                                        }}><i className="material-icons" style={{fontSize: `18px`}}>content_copy</i>{__(`Copy PNG link`)}</a>
+                                    </div>
+                                    <div style={{paddingLeft: `10px`, paddingRight: `10px`}}>{selectSize}</div>
+                                </div>
+                            </div>
+                        </div>)}
                 </div>
             </div>);
         };

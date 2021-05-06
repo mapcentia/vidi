@@ -239,8 +239,8 @@ module.exports = {
     // disabled. Can be a plain template name or the RegExp
     // ===============================================================
     "startupModalSupressionTemplates": ["print.tmpl", "blank.tmpl", {
-        regularExpression: true,
-        name: "print_[\\w]+\\.tmpl"
+        "regularExpression": true,
+        "name": "print_[\\w]+\\.tmpl"
     }],
 
     // ===================================================
@@ -281,7 +281,14 @@ module.exports = {
     // Configurations for search modules
     // =================================
     "searchConfig": {
-        "komkode": ["851", "151"], // Example of config for danish search
+        // Example of config for danish search
+        "komkode": ["851", "151"],
+        "advanced": true,
+        "size": 10,
+        "esrSearchActive": true,
+        "sfeSearchActive": true,
+        "placeholderText": "My placeholder text",
+        // Google
         "google": {"apiKey": "GOOGLE_MAPS_API_KEY"}
     },
 

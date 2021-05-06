@@ -1,24 +1,18 @@
 /*
  * @author     Alexander Shumilov
- * @copyright  2013-2019 MapCentia ApS
+ * @copyright  2013-2021 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
 
+
 import StateSnapshotsDashboard from './components/StateSnapshotsDashboard';
 
-/**
- * @type {*|exports|module.exports}
- */
-var anchor, state, urlparser, backboneEvents;
-
+let anchor, state, urlparser, backboneEvents;
 const API_URL = `/api/state-snapshots`;
-
 const exId = `state-snapshots`;
-
 let customSetOfTitles = false;
-
 let extensions;
 
 /**
@@ -44,8 +38,8 @@ module.exports = {
      * Module initialization
      */
     init: function () {
-        var React = require('react');
-        var ReactDOM = require('react-dom');
+        const React = require('react');
+        const ReactDOM = require('react-dom');
 
         if (vidiConfig.enabledExtensions.indexOf(`watsonc`) > -1) {
             customSetOfTitles = true;
@@ -78,15 +72,12 @@ module.exports = {
         if (!id) {
             throw new Error(`Snapshot identifier was not provided`);
         }
-
-        let result = new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             $.getJSON(`${API_URL}/${vidiConfig.appDatabase}/${id}`).done((data) => {
                 resolve(data);
             }).fail(() => {
                 resolve(false);
             });
         });
-
-        return result;
     }
 };

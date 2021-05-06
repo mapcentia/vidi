@@ -43,11 +43,11 @@ module.exports = {
         let me = this, configFile, stop = false;
         (function poll() {
             if (typeof L.control.locate !== "undefined") {
-
                 if (typeof urlVars.session === "string") {
-                    cookie.set("connect.gc2", urlVars.session, {expires: 1});
+                    // Try to remove existing cookie
+                    document.cookie = 'connect.gc2=; Max-Age=0; path=/; domain=' + location.host;
+                    cookie.set("connect.gc2", urlVars.session);
                 }
-
                 let loadConfig = function () {
                     let configParam;
                     if (configFile.startsWith("/")) {
@@ -417,7 +417,11 @@ module.exports = {
                     console.error("Could not perform application initialization", e.message, e);
                 }
                 $("#loadscreen").fadeOut(200);
+            }).catch((error)=> {
+                console.error(error)
             });
+        }).catch((error)=> {
+            console.error(error)
         });
 
         if ('serviceWorker' in navigator) {

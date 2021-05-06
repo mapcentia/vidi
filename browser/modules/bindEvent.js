@@ -1,50 +1,34 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2021 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
 
-import {LAYER, LAYER_TYPE_DEFAULT} from './layerTree/constants';
-
-var mobile = require('is-mobile');
-var jrespond = require('jrespond');
-
-/**
- *
- * @type {*|exports|module.exports}
- */
-var advancedInfo, cloud, switchLayer, meta, utils;
-
-/**
- *
- * @type {*|exports|module.exports}
- */
-let APIBridgeSingletone = require('./api-bridge');
-
-/**
- *
- * @type {APIBridge}
- */
-var apiBridgeInstance = false;
+import {LAYER_TYPE_DEFAULT} from './layerTree/constants';
 
 require('dom-shims');
 require('arrive');
-
-var backboneEvents;
-var pushState;
-var layerTree;
-var layers;
-var infoClick;
-var setting;
-var state;
-var sqlQuery;
-var applicationModules = false;
-var isStarted = false;
-
-const LEFT_SLIDE_WIDTHS = [300, 400, 550];
+const config = require('../../config/config.js');
+const LEFT_SLIDE_WIDTHS = config?.leftSlideWidths || [300, 400, 550];
 const BUTTON_WITH = 24;
+const mobile = require('is-mobile');
+const jrespond = require('jrespond'); //TODO Change to Window.matchMedia()
+const APIBridgeSingletone = require('./api-bridge');
+let advancedInfo, cloud, switchLayer, meta, utils;
+let apiBridgeInstance = false;
+let backboneEvents;
+let pushState;
+let layerTree;
+let layers;
+let infoClick;
+let setting;
+let state;
+let sqlQuery;
+let applicationModules = false;
+let isStarted = false;
+
 
 /**
  *
@@ -69,29 +53,30 @@ module.exports = {
         sqlQuery = modules.sqlQuery;
         return this;
     },
-    init: function (str) {
+    init: function () {
         apiBridgeInstance = APIBridgeSingletone();
 
-        var doneL = false, doneB = false, loadingL = 0, loadingB = 0;
+        let doneL = false, doneB = false, loadingL = 0, loadingB = 0;
+        const fadeWhenDraggingClass = $(".fade-then-dragging");
 
-        cloud.get().on("dragend", function () {
+        cloud.get().on('dragend', function () {
             pushState.init();
         });
-        cloud.get().on("moveend", function () {
+        cloud.get().on('moveend', function () {
             pushState.init();
         });
-        cloud.get().on("move", function () {
-            $("#tail").fadeOut(100);
+        cloud.get().on('move', function () {
+            $('#tail').fadeOut(100);
         });
 
-        cloud.get().on("dragstart", function () {
-            $(".fade-then-dragging").animate({opacity: "0.3"}, 200);
-            $(".fade-then-dragging").css("pointer-events", "none");
+        cloud.get().on('dragstart', function () {
+            fadeWhenDraggingClass.animate({opacity: '0.3'}, 200);
+            fadeWhenDraggingClass.css('pointer-events', 'none');
         });
 
-        cloud.get().on("dragend", function () {
-            $(".fade-then-dragging").animate({opacity: "1"}, 200);
-            $(".fade-then-dragging").css("pointer-events", "all");
+        cloud.get().on('dragend', function () {
+            fadeWhenDraggingClass.animate({opacity: '1'}, 200);
+            fadeWhenDraggingClass.css('pointer-events', 'all');
 
         });
 
@@ -99,7 +84,7 @@ module.exports = {
          * Triggered when the layer control is changed in any module
          */
         $(document).arrive('[data-gc2-id]', function (e, data) {
-            $(this).on("change", function (e) {
+            $(this).on('change', function (e) {
                 let prefix = '';
                 let doNotLegend = false;
                 if ($(this).data(`gc2-layer-type`)) {
@@ -120,8 +105,8 @@ module.exports = {
             });
         });
 
-        $("#searchclear").on("click", function () {
-            backboneEvents.get().trigger("clear:search");
+        $('#searchclear').on('click', function () {
+            backboneEvents.get().trigger('clear:search');
         });
 
         backboneEvents.get().on("allDoneLoading:layers", function () {
@@ -129,24 +114,23 @@ module.exports = {
                 if (mobile()) {
                     $('ul[role="tablist"]:last-child').attr('style', 'padding-bottom: 100px');
                 }
-
                 isStarted = true;
                 setTimeout(
                     function () {
-                        if ($(document).width() > 1024 && typeof window.vidiConfig.activateMainTab === "undefined") {
-                            $("#search-border").trigger("click");
+                        if ($(document).width() > 1024 && typeof window.vidiConfig.activateMainTab === 'undefined') {
+                            $('#search-border').trigger('click');
                         }
-                        if (typeof window.vidiConfig.extensionConfig !== "undefined" &&
-                            typeof window.vidiConfig.extensionConfig.embed !== "undefined" &&
+                        if (typeof window.vidiConfig.extensionConfig !== 'undefined' &&
+                            typeof window.vidiConfig.extensionConfig.embed !== 'undefined' &&
                             window.vidiConfig.extensionConfig.embed.slideOutLayerTree === true
                         ) {
-                            $("#burger-btn").trigger("click");
+                            $('#burger-btn').trigger('click');
                         }
-                        if (typeof window.vidiConfig.extensionConfig !== "undefined" &&
-                            typeof window.vidiConfig.extensionConfig.embed !== "undefined" &&
+                        if (typeof window.vidiConfig.extensionConfig !== 'undefined' &&
+                            typeof window.vidiConfig.extensionConfig.embed !== 'undefined' &&
                             window.vidiConfig.extensionConfig.embed.expandFirstInLayerTree === true
                         ) {
-                            $(".js-toggle-layer-panel:first").trigger('click');
+                            $('.js-toggle-layer-panel:first').trigger('click');
                         }
                     }, 200
                 );
@@ -155,8 +139,8 @@ module.exports = {
 
         // Clear all query layers and deactivate tools
         // ===========================================
-        backboneEvents.get().on("sqlQuery:clear", () => {
-            console.info("Resting SQL Query");
+        backboneEvents.get().on('sqlQuery:clear', () => {
+            console.info('Resting SQL Query');
             infoClick.reset();
             advancedInfo.reset();
             layerTree.resetSearch();
@@ -164,51 +148,51 @@ module.exports = {
 
         // Layer loading
         // =============
-        backboneEvents.get().on("startLoading:layers", function (e) {
-            console.log("Start loading: " + e);
+        backboneEvents.get().on('startLoading:layers', function (e) {
+            console.log('Start loading: ' + e);
             doneL = false;
             loadingL = true;
-            $(".loadingIndicator").fadeIn(200);
+            $('.loadingIndicator').fadeIn(200);
         });
 
-        backboneEvents.get().on("startLoading:setBaselayer", function (e) {
-            console.log("Start loading base layer: " + e);
+        backboneEvents.get().on('startLoading:setBaselayer', function (e) {
+            console.log('Start loading base layer: ' + e);
             doneB = false;
             loadingB = true;
-            $(".loadingIndicator").fadeIn(200);
+            $('.loadingIndicator').fadeIn(200);
         });
 
-        backboneEvents.get().on("doneLoading:layers", function (e) {
-            console.log("Done loading: " + e);
+        backboneEvents.get().on('doneLoading:layers', function (e) {
+            console.log('Done loading: ' + e);
             if (layers.getCountLoading() === 0) {
                 layers.resetCount();
                 doneL = true;
                 loadingL = false;
 
                 if ((doneL && doneB) || loadingB === false) {
-                    console.log("Setting timeout to " + window.vidiTimeout + "ms");
+                    console.log('Setting timeout to ' + window.vidiTimeout + 'ms');
                     setTimeout(function () {
-                        console.info("Layers all loaded L");
-                        backboneEvents.get().trigger("allDoneLoading:layers");
+                        console.info('Layers all loaded L');
+                        backboneEvents.get().trigger('allDoneLoading:layers');
                         doneB = doneL = false;
-                        $(".loadingIndicator").fadeOut(200);
+                        $('.loadingIndicator').fadeOut(200);
                     }, window.vidiTimeout)
                 }
             }
         });
 
-        backboneEvents.get().on("doneLoading:setBaselayer", function (e) {
-            console.log("Done loading base layer: " + e);
+        backboneEvents.get().on('doneLoading:setBaselayer', function (e) {
+            console.log('Done loading base layer: ' + e);
             doneB = true;
             loadingB = false;
 
             if ((doneL && doneB) || loadingL === false || layers.getCountLoading() === 0) {
-                console.log("Setting timeout to " + window.vidiTimeout + "ms");
+                console.log('Setting timeout to ' + window.vidiTimeout + 'ms');
                 setTimeout(function () {
-                    console.info("Layers all loaded B");
-                    backboneEvents.get().trigger("allDoneLoading:layers");
+                    console.info('Layers all loaded B');
+                    backboneEvents.get().trigger('allDoneLoading:layers');
                     doneB = doneL = false;
-                    $(".loadingIndicator").fadeOut(200);
+                    $('.loadingIndicator').fadeOut(200);
                 }, window.vidiTimeout)
             }
         });
@@ -220,19 +204,19 @@ module.exports = {
             });
         });
 
-        backboneEvents.get().on("refresh:auth", function (response) {
+        backboneEvents.get().on('refresh:auth', function () {
             apiBridgeInstance.resubmitSkippedFeatures();
         });
 
         // Refresh browser state. E.g. after a session start
         // =================================================
-        backboneEvents.get().on("refresh:meta", function (response) {
+        backboneEvents.get().on('refresh:meta', function () {
             meta.init().then(() => {
                 return setting.init();
             }, (error) => {
                 console.log(error); // Stacktrace
-                //alert("Vidi is loaded without schema. Can't set extent or add layers");
-                backboneEvents.get().trigger("ready:meta");
+                //alert('Vidi is loaded without schema. Can't set extent or add layers');
+                backboneEvents.get().trigger('ready:meta');
                 state.init();
             }).then(() => {
                 layerTree.create(false, [], true);
@@ -243,22 +227,23 @@ module.exports = {
 
         // Init some GUI stuff after modules are loaded
         // ============================================
-        $("[data-toggle=tooltip]").tooltip();
+        $('[data-toggle=tooltip]').tooltip();
         try {
             $.material.init();
         } catch (e) {
-            console.warn("Material Design could not be initiated");
+            console.warn('Material Design could not be initiated');
         }
 
-        touchScroll(".tab-pane");
-        touchScroll("#info-modal-body-wrapper");
-        $("#loadscreentext").html(__("Loading data"));
+        touchScroll('.tab-pane');
+        touchScroll('#info-modal-body-wrapper');
+        $('#loadscreentext').html(__('Loading data'));
 
         backboneEvents.get().on(`extensions:initialized`, () => {
             if (window.vidiConfig.activateMainTab) {
                 setTimeout(function () {
-                    if ($('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]').length === 1) {
-                        $('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]').trigger('click');
+                    const e = $('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]');
+                    if (e.length === 1) {
+                        e.trigger('click');
                     } else {
                         console.warn(`Unable to locate specified activateMainTab ${window.vidiConfig.activateMainTab}`)
                     }
@@ -271,15 +256,15 @@ module.exports = {
         });
 
         $(document).arrive('[data-scale-ul]', function () {
-            $(this).on("click", function (e) {
-                $("#select-scale").val($(this).data('scale-ul')).trigger("change");
+            $(this).on('click', function () {
+                $('#select-scale').val($(this).data('scale-ul')).trigger('change');
             });
         });
 
         // Set up the open/close functions for side panel
-        var searchPanelOpen, width, defaultCollapsedWidth = 260;
+        let searchPanelOpen, width, defaultCollapsedWidth = 260;
 
-        backboneEvents.get().on(`show:leftSlidePanel`, () => {
+        backboneEvents.get().on('show:leftSlidePanel', () => {
             let localCollapsedWidth = Math.max.apply(Math, $('#side-panel #main-tabs > li > a, #side-panel #main-tabs > li [role="tab"]').map(function () {
                 return $(this).width();
             }).get());
@@ -289,86 +274,85 @@ module.exports = {
             } else {
                 localCollapsedWidth = defaultCollapsedWidth + 80;
             }
-            $("#search-ribbon").css("right", "-" + (width - localCollapsedWidth) + "px");
-            $("#pane").css("right", (localCollapsedWidth - BUTTON_WITH) + "px");
-            $('#map').css("width", "calc(100% - " + (localCollapsedWidth / 2) + "px)");
+            $('#search-ribbon').css('right', '-' + (width - localCollapsedWidth) + 'px');
+            $('#pane').css('right', (localCollapsedWidth - BUTTON_WITH) + 'px');
+            $('#map').css('width', 'calc(100% - ' + (localCollapsedWidth / 2) + 'px)');
             searchPanelOpen = true;
-            $(".slide-collapsed").hide();
-            $(".slide-expanded").show();
+            $('.slide-collapsed').hide();
+            $('.slide-expanded').show();
         });
         backboneEvents.get().on(`hide:leftSlidePanel`, () => {
-            $("#pane").css("right", "0");
-            $('#map').css("width", "100%");
-            $("#search-ribbon").css("right", "-" + (width - BUTTON_WITH) + "px");
+            $('#pane').css('right', '0');
+            $('#map').css('width', '100%');
+            $('#search-ribbon').css('right', '-' + (width - BUTTON_WITH) + 'px');
             searchPanelOpen = false;
-            $("#side-panel ul li").removeClass("active");
-            $(".slide-collapsed").show();
-            $(".slide-expanded").hide();
+            $('#side-panel ul li').removeClass('active');
+            $('.slide-collapsed').show();
+            $('.slide-expanded').hide();
         });
 
-        $("#main-tabs a").on("click", function (e) {
+        $('#main-tabs a').on('click', function () {
             if ($(this).data(`module-ignore`) !== true && $(this).data(`module-ignore`) !== `true`) {
-                $("#module-container.slide-right").css("right", "0");
+                $('#module-container.slide-right').css('right', '0');
                 searchShowFull();
             }
         });
 
-        $(document).arrive("#main-tabs a", function () {
-            $(this).on("click", function (e) {
+        $(document).arrive('#main-tabs a', function () {
+            $(this).on('click', function () {
                 if ($(this).data(`module-ignore`) !== true && $(this).data(`module-ignore`) !== `true`) {
-                    $("#module-container.slide-right").css("right", "0");
+                    $('#module-container.slide-right').css('right', '0');
                     searchShowFull();
                 }
             });
         });
 
-        $("#info-modal .modal-header button").on("click", function () {
-            if (!$(this).data("extraClickHandlerIsEnabled")) {
+        $('#info-modal .modal-header button').on('click', function () {
+            if (!$(this).data('extraClickHandlerIsEnabled')) {
                 infoModalHide();
-                // Ikke den
             }
         });
 
-        $("#module-container .modal-header button").on("click", function () {
+        $('#module-container .modal-header button').on('click', function () {
             searchShow();
-            if (!$(this).data("extraClickHandlerIsEnabled")) {
+            if (!$(this).data('extraClickHandlerIsEnabled')) {
                 moduleContainerHide();
-                $("#side-panel ul li").removeClass("active");
+                $('#side-panel ul li').removeClass('active');
             }
         });
 
-        let setWidth = function (width) {
-            $("#search-ribbon").css("width", width + "px").css("right", "-" + (width - BUTTON_WITH) + "px");
-            $("#module-container").css("width", (width - 84) + "px");
-            $("#info-modal").css("width", (width - 84) + "px");
-            $(".navmenu").css("width", (width) + "px");
-            $(".slide-right").css("right", "-" + (width - 84) + "px");
+        const setWidth = function (width) {
+            $('#search-ribbon').css('width', width + 'px').css('right', '-' + (width - BUTTON_WITH) + 'px');
+            $('#module-container').css('width', (width - 84) + 'px');
+            $('#info-modal').css('width', (width - 84) + 'px');
+            $('.navmenu').css('width', (width) + 'px');
+            $('.slide-right').css('right', '-' + (width - 84) + 'px');
         };
 
-        var infoModalHide = function () {
-            $("#info-modal").css("right", "-" + (width - 84) + "px");
+        const infoModalHide = function () {
+            $('#info-modal').css('right', '-' + (width - 84) + 'px');
         }
 
-        var moduleContainerHide = function () {
-            $("#module-container.slide-right").css("right", "-" + (width - 84) + "px");
+        const moduleContainerHide = function () {
+            $('#module-container.slide-right').css('right', '-' + (width - 84) + 'px');
         }
 
-        var searchShow = function () {
-            backboneEvents.get().trigger(`show:leftSlidePanel`);
+        const searchShow = function () {
+            backboneEvents.get().trigger('show:leftSlidePanel');
         }
 
-        var searchShowFull = function () {
-            $("#search-ribbon").css("right", "0");
-            $("#pane").css("right", (width - BUTTON_WITH) + "px");
-            $('#map').css("width", "calc(100% - " + (width / 2) + "px");
+        const searchShowFull = function () {
+            $('#search-ribbon').css('right', '0');
+            $('#pane').css('right', (width - BUTTON_WITH) + 'px');
+            $('#map').css('width', 'calc(100% - ' + (width / 2) + 'px');
             searchPanelOpen = true;
         }
 
-        var searchHide = function () {
-            backboneEvents.get().trigger(`hide:leftSlidePanel`);
+        const searchHide = function () {
+            backboneEvents.get().trigger('hide:leftSlidePanel');
         };
 
-        var jRes = jrespond([
+        const jRes = jrespond([
             {
                 label: 'phone',
                 enter: 0,
@@ -394,7 +378,7 @@ module.exports = {
                 setWidth(width)
             },
             exit: function () {
-                console.log("Exit phone");
+                console.log('Exit phone');
 
             }
         });
@@ -406,8 +390,7 @@ module.exports = {
                 setWidth(width)
             },
             exit: function () {
-                console.log("Exit tablet");
-
+                console.log('Exit tablet');
             }
         });
         jRes.addFunc({
@@ -418,127 +401,114 @@ module.exports = {
                 setWidth(width)
             },
             exit: function () {
-                console.log("Exit desktop");
+                console.log('Exit desktop');
             }
         });
 
 
         $('#search-border').click(function () {
-            let id = $("#search-border i");
+            const id = $('#search-border i');
             if (searchPanelOpen) {
                 searchHide();
                 infoModalHide();
                 moduleContainerHide();
-                id.css("padding-left", "12px")
-
+                id.css('padding-left', '12px')
             } else {
                 searchShow();
-                $(".slide-collapsed").hide();
-                $(".slide-expanded").show();
-                id.css("padding-left", "14px")
+                $('.slide-collapsed').hide();
+                $('.slide-expanded').show();
+                id.css('padding-left', '14px')
             }
         });
 
         // Bottom dialog
-        $(".close-hide").on("click touchstart", function (e) {
-            var id = ($(this)).parent().parent().attr('id');
-
+        $('.close-hide').on('click touchstart', function () {
+            const id = ($(this)).parent().parent().attr('id');
             // If print when deactivate
-            if ($(this).data('module') === "print") {
+            if ($(this).data('module') === 'print') {
                 backboneEvents.get().trigger(`off:print`);
             }
-
             // If legend when deactivate
-            if ($(this).data('module') === "legend") {
-                $("#legend-content").append($("#legend"));
-                $("#btn-show-legend-in-map").prop("disabled", false);
+            if ($(this).data('module') === 'legend') {
+                $('#legend-content').append($('#legend'));
+                $('#btn-show-legend-in-map').prop('disabled', false);
             }
-
-            $("#" + id).animate({
-                bottom: "-100%"
+            $('#' + id).animate({
+                bottom: '-100%'
             }, 500, function () {
-                $(id + " .expand-less").show();
-                $(id + " .expand-more").hide();
+                $(id + ' .expand-less').show();
+                $(id + ' .expand-more').hide();
             });
         });
 
-        $(".expand-less").on("click touchstart", function () {
-
-            var id = ($(this)).parent().parent().attr('id');
-
-            $("#" + id).animate({
-                bottom: (($("#" + id).height() * -1) + 10) + "px"
+        $('.expand-less').on('click touchstart', function () {
+            const id = '#' + ($(this)).parent().parent().attr('id');
+            $(id).animate({
+                bottom: (($(id).height() * -1) + 10) + 'px'
             }, 500, function () {
-                $("#" + id + " .expand-less").hide();
-                $("#" + id + " .expand-more").show();
+                $(id + ' .expand-less').hide();
+                $(id + ' .expand-more').show();
             });
         });
 
-        $(".expand-more").on("click touchstart", function () {
-
-            var id = ($(this)).parent().parent().attr('id');
-
-            $("#" + id).animate({
-                bottom: "0"
+        $('.expand-more').on('click touchstart', function () {
+            const id = ($(this)).parent().parent().attr('id');
+            $('#' + id).animate({
+                bottom: '0'
             }, 500, function () {
-                $("#" + id + " .expand-less").show();
-                $("#" + id + " .expand-more").hide();
+                $('#' + id + ' .expand-less').show();
+                $('#' + id + ' .expand-more').hide();
             });
         });
 
-        $(".map-tool-btn").on("click", function (e) {
-
+        $('.map-tool-btn').on('click', function (e) {
             e.preventDefault();
-
-            var id = ($(this)).attr('href');
-
-            if (id === "#full-screen") {
+            const id = ($(this)).attr('href');
+            if (id === '#full-screen') {
                 utils.toggleFullScreen();
             }
-
             // If print when activate
-            if ($(this).data('module') === "print") {
+            if ($(this).data('module') === 'print') {
                 backboneEvents.get().trigger(`on:print`);
             }
-
             // If legend when deactivate
-            if ($(this).data('module') === "legend") {
-                $("#legend-dialog .modal-body").append($("#legend"));
-                $("#btn-show-legend-in-map").prop("disabled", true);
+            if ($(this).data('module') === 'legend') {
+                $('#legend-dialog .modal-body').append($('#legend'));
+                $('#btn-show-legend-in-map').prop('disabled', true);
             }
-
             $(id).animate({
-                bottom: "0"
+                bottom: '0'
             }, 500, function () {
-                $(id + " .expand-less").show();
-                $(id + " .expand-more").hide();
+                $(id + ' .expand-less').show();
+                $(id + ' .expand-more').hide();
             })
         });
 
         // Hiding all panels with visible modules
-        backboneEvents.get().on(`hide:all`, () => {
-            if ($(`.modal-header > button[class="close"]`).is(`:visible`)) {
-                $(`.modal-header > button[class="close"]`).trigger(`click`);
+        backboneEvents.get().on('hide:all', () => {
+            const e = $('.modal-header > button[class="close"]');
+            if (e.is(':visible')) {
+                e.trigger(`click`);
             }
         });
 
-        $(`.slide-right > .modal-header > button[class="close"]`).click(() => {
-            backboneEvents.get().trigger(`off:all`);
+        $('.slide-right > .modal-header > button[class="close"]').click(() => {
+            backboneEvents.get().trigger('off:all');
         });
 
         // Module icons
-        $("#side-panel ul li a").on("click", function (e) {
-            backboneEvents.get().trigger(`off:all`);
-
-            let moduleTitle = $(this).data(`module-title`);
-            $('#module-container').find(`.js-module-title`).text('');
-            if (moduleTitle) $('#module-container').find(`.js-module-title`).text(moduleTitle);
-
-            let moduleId = $(this).data(`module-id`);
-            let moduleIgnoreErrors = ($(this).data(`module-ignore-errors`) ? true : false);
-
+        $('#side-panel ul li a').on('click', function () {
+            backboneEvents.get().trigger('off:all');
+            let moduleTitle = $(this).data('module-title');
+            let e=  $('#module-container');
+            e.find('.js-module-title').text('');
+            if (moduleTitle) {
+                e.find('.js-module-title').text(moduleTitle);
+            }
+            let moduleId = $(this).data('module-id');
+            let moduleIgnoreErrors = !!$(this).data('module-ignore-errors');
             setTimeout(() => {
-                if (moduleId && moduleId !== ``) {
+                if (moduleId && moduleId !== '') {
                     if (moduleId in applicationModules) {
                         backboneEvents.get().trigger(`on:${moduleId}`);
                     } else {
@@ -552,28 +522,30 @@ module.exports = {
             }, 100);
 
             let id = ($(this));
-            $("#side-panel ul li").removeClass("active");
-            id.addClass("active");
+            $('#side-panel ul li').removeClass('active');
+            id.addClass('active');
         });
 
-        $("#click-for-info-slide.slide-left .close").on("click", function () {
-            $("#click-for-info-slide.slide-left").animate({
-                left: "-100%"
+        $('#click-for-info-slide.slide-left .close').on('click', function () {
+            $('#click-for-info-slide.slide-left').animate({
+                left: '-100%'
             }, 500)
             sqlQuery.resetAll();
         });
 
         // Listen for extensions
-        $(document).arrive("#side-panel ul li a", function (e, data) {
-            $(this).on("click", function (e) {
-                backboneEvents.get().trigger(`off:all`);
-                let moduleId = $(this).data(`module-id`);
-                let moduleTitle = $(this).data(`module-title`);
-                $('#module-container').find(`.js-module-title`).text('');
-                if (moduleTitle) $('#module-container').find(`.js-module-title`).text(moduleTitle);
-
+        $(document).arrive('#side-panel ul li a', function () {
+            $(this).on('click', function () {
+                backboneEvents.get().trigger('off:all');
+                const moduleId = $(this).data('module-id');
+                const moduleTitle = $(this).data('module-title');
+                const e =$('#module-container');
+                e.find('.js-module-title').text('');
+                if (moduleTitle) {
+                    e.find('.js-module-title').text(moduleTitle);
+                }
                 setTimeout(() => {
-                    if (moduleId && moduleId !== ``) {
+                    if (moduleId && moduleId !== '') {
                         if (moduleId in applicationModules.extensions) {
                             backboneEvents.get().trigger(`on:${moduleId}`);
                         } else {
@@ -582,17 +554,16 @@ module.exports = {
                     }
                 }, 100);
                 let id = ($(this));
-                $("#side-panel ul li").removeClass("active");
-                id.addClass("active");
+                $('#side-panel ul li').removeClass('active');
+                id.addClass('active');
             });
         })
-
         // Listen for fullscreen changes
-        document.addEventListener("fullscreenchange", function (event) {
+        document.addEventListener('fullscreenchange', function () {
             if (document.fullscreenElement) {
-                $("#full-screen-btn i").html("fullscreen_exit")
+                $('#full-screen-btn i').html('fullscreen_exit')
             } else {
-                $("#full-screen-btn i").html("fullscreen")
+                $('#full-screen-btn i').html('fullscreen')
             }
         });
     }

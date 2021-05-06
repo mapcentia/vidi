@@ -14,154 +14,152 @@ const CONFIG = require('../../config/config.js');
 
 
 /**
- * Browser detection
- */
+* Browser detection
+*/
 const {detect} = require('detect-browser');
 const browser = detect();
 
 const localforage = require('localforage');
 
 /**
- * ServiceWorker. Caches all requests, some requests are processed in specific way:
- * 1. API calls are always performed, the cached response is retured only if the app is offline or
- * there is a API-related problem;
- * 2. Files with {extensionsIgnoredForCaching} are not cached, unless it is forced externally using
- * the 'message' event.
- *
- * Update mechanism. There should be an API method that returns the current application version. If it differs
- * from the previous one that is stored in localforage, then user should be notified about the update. If
- * user agrees to the update, then the current service worker is unregistered, cache wiped out and page
- * is reloaded (as well as all assets). This way the application update will not be dependent on the
- * actual service worker file change. The update will be centralized and performed by setting the different
- * app version in the configuration file.
- */
+* ServiceWorker. Caches all requests, some requests are processed in specific way:
+* 1. API calls are always performed, the cached response is retured only if the app is offline or
+* there is a API-related problem;
+* 2. Files with {extensionsIgnoredForCaching} are not cached, unless it is forced externally using
+* the 'message' event.
+*
+* Update mechanism. There should be an API method that returns the current application version. If it differs
+* from the previous one that is stored in localforage, then user should be notified about the update. If
+* user agrees to the update, then the current service worker is unregistered, cache wiped out and page
+* is reloaded (as well as all assets). This way the application update will not be dependent on the
+* actual service worker file change. The update will be centralized and performed by setting the different
+* app version in the configuration file.
+*/
 
 /**
- *
- */
+*
+*/
 let ignoredExtensionsRegExps = [];
 
 /**
- *
- */
+*
+*/
 let forceIgnoredExtensionsCaching = false;
 
-let urlsToCache = require(`urls-to-cache`);
+const urlsToCache = require(`urls-to-cache`);
+const base64url = require("base64url");
 
 const urlSubstitution = [{
-    requested: 'https://netdna.bootstrapcdn.com/font-awesome/4.5.0/fonts/fontawesome-webfont.ttf?v=4.5.0',
-    local: '/fonts/fontawesome-webfont.ttf'
+requested: 'https://netdna.bootstrapcdn.com/font-awesome/4.5.0/fonts/fontawesome-webfont.ttf?v=4.5.0',
+local: '/fonts/fontawesome-webfont.ttf'
 }, {
-    requested: 'https://themes.googleusercontent.com/static/fonts/opensans/v8/cJZKeOuBrn4kERxqtaUH3bO3LdcAZYWl9Si6vvxL-qU.woff',
-    local: '/fonts/cJZKeOuBrn4kERxqtaUH3bO3LdcAZYWl9Si6vvxL-qU.woff'
+requested: 'https://themes.googleusercontent.com/static/fonts/opensans/v8/cJZKeOuBrn4kERxqtaUH3bO3LdcAZYWl9Si6vvxL-qU.woff',
+local: '/fonts/cJZKeOuBrn4kERxqtaUH3bO3LdcAZYWl9Si6vvxL-qU.woff'
 }, {
-    requested: 'https://netdna.bootstrapcdn.com/font-awesome/4.5.0/fonts/fontawesome-webfont.woff?v=4.5.0',
-    local: '/fonts/fontawesome-webfont.woff'
+requested: 'https://netdna.bootstrapcdn.com/font-awesome/4.5.0/fonts/fontawesome-webfont.woff?v=4.5.0',
+local: '/fonts/fontawesome-webfont.woff'
 }, {
-    requested: 'https://netdna.bootstrapcdn.com/font-awesome/4.5.0/fonts/fontawesome-webfont.woff2?v=4.5.0',
-    local: '/fonts/fontawesome-webfont.woff2'
+requested: 'https://netdna.bootstrapcdn.com/font-awesome/4.5.0/fonts/fontawesome-webfont.woff2?v=4.5.0',
+local: '/fonts/fontawesome-webfont.woff2'
 }, {
-    requested: '/app/alexshumilov/public/favicon.ico',
-    local: '/favicon.ico'
+requested: '/app/alexshumilov/public/favicon.ico',
+local: '/favicon.ico'
 }, {
-    requested: 'https://rsdemo.alexshumilov.ru/app/alexshumilov/public/favicon.ico',
-    local: '/favicon.ico'
+requested: 'https://rsdemo.alexshumilov.ru/app/alexshumilov/public/favicon.ico',
+local: '/favicon.ico'
 }, {
-    requested: 'https://gc2.io/apps/widgets/gc2table/js/gc2table.js',
-    local: '/js/gc2/gc2table.js'
+requested: 'https://gc2.io/apps/widgets/gc2table/js/gc2table.js',
+local: '/js/gc2/gc2table.js'
 }, {
-    requested: 'https://js-agent.newrelic.com/nr-1071.min.js',
-    local: '/js/nr-1071.min.js'
+requested: 'https://js-agent.newrelic.com/nr-1071.min.js',
+local: '/js/nr-1071.min.js'
 }, {
-    regExp: true,
-    requested: '/[\\w]*/[\\w]*/[\\w]*/#',
-    local: '/index.html'
+regExp: true,
+requested: '/[\\w]*/[\\w]*/[\\w]*/#',
+local: '/index.html'
 }, {
-    regExp: true,
-    requested: '/js/lib/leaflet/images/marker-icon.png',
-    local: '/js/lib/leaflet/images/marker-icon.png'
+regExp: true,
+requested: '/js/lib/leaflet/images/marker-icon.png',
+local: '/js/lib/leaflet/images/marker-icon.png'
 }, {
-    regExp: true,
-    requested: '/js/lib/leaflet/images/marker-shadow.png',
-    local: '/js/lib/leaflet/images/marker-shadow.png'
+regExp: true,
+requested: '/js/lib/leaflet/images/marker-shadow.png',
+local: '/js/lib/leaflet/images/marker-shadow.png'
 }];
 
 let extensionsIgnoredForCaching = ['JPEG', 'jpeg', 'jpg', 'PNG', 'TIFF', 'BMP'];
 
 let urlsIgnoredForCaching = [{
-    regExp: true,
-    requested: '/api/sql/nocache/'
+regExp: true,
+requested: '/api/sql/nocache/'
 }, {
-    regExp: true,
-    requested: 'bam.nr-data.net'
+regExp: true,
+requested: 'bam.nr-data.net'
 }, {
-    regExp: true,
-    requested: 'https://gc2.io/api'
+regExp: true,
+requested: 'https://gc2.io/api'
 }, {
-    regExp: true,
-    requested: '/version.json'
+regExp: true,
+requested: '/version.json'
 }, {
-    regExp: true,
-    requested: 'geocloud.envirogissolutions.co.za/api'
+regExp: true,
+requested: 'geocloud.envirogissolutions.co.za/api'
 }, {
-    regExp: true,
-    requested: 'geofyn.mapcentia.com/api'
+regExp: true,
+requested: 'geofyn.mapcentia.com/api'
 }, {
-    regExp: true,
-    requested: 'https://rm.mapcentia.com/api'
+regExp: true,
+requested: 'https://rm.mapcentia.com/api'
 }, {
-    regExp: true,
-    requested: 'google'
+regExp: true,
+requested: 'google'
 }, {
-    regExp: true,
-    requested: '/api/v1/'
+regExp: true,
+requested: '/api/v1/'
 }, {
-    regExp: true,
-    requested: '/api/v2/'
+regExp: true,
+requested: '/api/v2/'
 }, {
-    regExp: true,
-    requested: '/wms/'
-}, {
-    regExp: true,
-    requested: '/api/print/'
+regExp: true,
+requested: '/wms/'
 }];
 
 if (typeof CONFIG.urlsIgnoredForCaching === "object") {
-    urlsIgnoredForCaching = urlsIgnoredForCaching.concat(CONFIG.urlsIgnoredForCaching);
+urlsIgnoredForCaching = urlsIgnoredForCaching.concat(CONFIG.urlsIgnoredForCaching);
 }
 
 /**
- * Broadcasting service messages to clients, mostly used for debugging and validation
- */
+* Broadcasting service messages to clients, mostly used for debugging and validation
+*/
 const sendMessageToClients = (data) => {
-    self.clients.matchAll().then(clients => {
-        clients.forEach(client => {
-            client.postMessage({msg: data});
-        });
+self.clients.matchAll().then(clients => {
+    clients.forEach(client => {
+        client.postMessage({msg: data});
     });
+});
 };
 
 /**
- * Storing key-value pairs in memory
- */
+* Storing key-value pairs in memory
+*/
 class Keeper {
-    constructor(cacheKey, inputParameterCheckFunction) {
-        this._cacheKey = cacheKey;
-        this._inputParameterCheckFunction = inputParameterCheckFunction;
-    }
+constructor(cacheKey, inputParameterCheckFunction) {
+    this._cacheKey = cacheKey;
+    this._inputParameterCheckFunction = inputParameterCheckFunction;
+}
 
-    batchSet(records) {
-        return new Promise((resolve, reject) => {
-            localforage.setItem(this._cacheKey, records).then(() => {
-                //this.get(key).then(storedValue => {
-                resolve();
-                //});
-            }).catch(error => {
-                console.error(`localforage failed to perform operation`, error);
-                reject();
-            });
+batchSet(records) {
+    return new Promise((resolve, reject) => {
+        localforage.setItem(this._cacheKey, records).then(() => {
+            //this.get(key).then(storedValue => {
+            resolve();
+            //});
+        }).catch(error => {
+            console.error(`localforage failed to perform operation`, error);
+            reject();
         });
-    }
+    });
+}
 
 set(key, value) {
     this._inputParameterCheckFunction(key, value);
@@ -205,38 +203,38 @@ set(key, value) {
     });
 }
 
-    get(key) {
-        this._inputParameterCheckFunction(key);
-        return new Promise((resolve, reject) => {
-            localforage.getItem(this._cacheKey).then(storedValue => {
-                if (!storedValue) storedValue = {};
-                if (key in storedValue) {
-                    resolve(storedValue[key]);
-                } else {
-                    resolve(false);
-                }
-            }).catch(error => {
-                console.error(`localforage failed to perform operation`, error);
-                reject();
-            });
+get(key) {
+    this._inputParameterCheckFunction(key);
+    return new Promise((resolve, reject) => {
+        localforage.getItem(this._cacheKey).then(storedValue => {
+            if (!storedValue) storedValue = {};
+            if (key in storedValue) {
+                resolve(storedValue[key]);
+            } else {
+                resolve(false);
+            }
+        }).catch(error => {
+            console.error(`localforage failed to perform operation`, error);
+            reject();
         });
-    }
+    });
+}
 
-    getAll() {
-        return new Promise((resolve, reject) => {
-            localforage.getItem(this._cacheKey).then(storedValue => {
-                if (!storedValue) storedValue = {};
-                resolve(storedValue);
-            }).catch(error => {
-                console.error(`localforage failed to perform operation`, error);
-                reject();
-            });
+getAll() {
+    return new Promise((resolve, reject) => {
+        localforage.getItem(this._cacheKey).then(storedValue => {
+            if (!storedValue) storedValue = {};
+            resolve(storedValue);
+        }).catch(error => {
+            console.error(`localforage failed to perform operation`, error);
+            reject();
         });
-    }
-};
+    });
+}
+}
 
 /**
- * Key-value store for keeping extracted POST data for the specific URL
+* Key-value store for keeping extracted POST data for the specific URL
  */
 let URLToPostDataKeeper = new Keeper(`VIDI_URL_TO_POST_DATA_KEY`, (key) => {
     if (!key || key.indexOf(`api/sql`) === -1) {
@@ -332,8 +330,7 @@ const normalizeTheURLForFetch = (event) => {
                             if (`q` in mappedObject && mappedObject.q) {
                                 if (method === `POST`) {
                                     let cleanedString = mappedObject.q.replace(/%3D/g, '');
-                                    decodedQuery = atob(cleanedString);
-                                    ;
+                                    decodedQuery = base64url.decode(cleanedString);
                                 } else if (method === `GET`) {
                                     decodedQuery = mappedObject.q;
                                 } else {

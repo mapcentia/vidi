@@ -334,6 +334,8 @@ geocloud = (function () {
                                     response.features = [];
                                     me.featuresLimitReached = true;
                                     me.onMaxFeaturesLimitReached();
+                                } else {
+                                    me.featuresLimitReached = false;
                                 }
                             } else {
                                 me.featuresLimitReached = false;

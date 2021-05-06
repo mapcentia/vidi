@@ -20,6 +20,10 @@ module.exports = {
             if (request.status === 200) {
                 let filename, type;
                 switch (format) {
+                    case "csv":
+                        filename = 'file.csv';
+                        type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+                        break;
                     case "excel":
                         filename = 'file.xlsx';
                         type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
@@ -40,7 +44,7 @@ module.exports = {
             // some error handling should be done here...
         };
 
-        let uri = 'format=' + format + '&client_encoding=UTF8&&srs=4326&q=' + sql;
+        let uri = 'geoformat=wkt&format=' + format + '&client_encoding=UTF8&&srs=4326&q=' + sql;
         request.send(uri);
     }
 };
