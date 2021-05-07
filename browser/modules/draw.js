@@ -21,6 +21,7 @@ let destructFunctions = [];
 let backboneEvents;
 let editing = false;
 let _self = false;
+var conflictSearch;
 
 module.exports = {
     set: function (o) {
@@ -643,6 +644,10 @@ module.exports = {
         });
         let blob = new Blob([JSON.stringify(geojson)], {type: "text/plain;charset=utf-8"});
         fileSaver.saveAs(blob, "drawings.geojson");
+    },
+
+    setConflictSearch: function (o) {
+        conflictSearch = o;
     }
 };
 
