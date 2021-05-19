@@ -21,7 +21,8 @@ let destructFunctions = [];
 let backboneEvents;
 let editing = false;
 let _self = false;
-var conflictSearch;
+let conflictSearch;
+let selectedDrawing;
 
 module.exports = {
     set: function (o) {
@@ -109,10 +110,37 @@ module.exports = {
                     openPopUp: false
                 });
 
+                $("#_draw_make_conflict_with_selected").on("click", () => {
+                    _self.makeConflictSearchWithSelected();
+                })
+                $("#_draw_make_conflict_with_all").on("click", () => {
+                    _self.makeConflictSearchWithAll();
+                })
+                table.object.on("selected_" + table.uid, (e) => {
+                    selectedDrawing = e;
+                })
             } else {
                 setTimeout(poll, 30);
             }
         }());
+    },
+
+    makeConflictSearchWithSelected: () => {
+        if (!selectedDrawing) {
+            alert("Vælg en tegning")
+            return;
+        }
+        // Switch on Conflict
+        // $('#main-tabs a[href="#conflict-content"]').trigger('click');
+        conflictSearch.makeSearch("Fra tegning", null, selectedDrawing, true);
+    },
+
+
+
+    makeConflictSearchWithAll: () => {
+        // Switch on Conflict
+        // $('#main-tabs a[href="#conflict-content"]').trigger('click');
+        conflictSearch.makeSearch("Fra tegning", null, null, true);
     },
 
     off: () => {
@@ -618,6 +646,10 @@ module.exports = {
      */
     getTable: function () {
         return table;
+    },
+
+    getStore: function () {
+        return store;
     },
 
     /**
