@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [UNRELEASED]
+### Changed
+- No MapCentia logo in default and conflict print template. Logo can be set with external css sheet. Some thing like this:
+```css
+#print-header-logo{
+  background-image: url('https://.....');
+  background-repeat: no-repeat;
+  background-position: 50% 50%;
+  background-size: 80%;
+}
+```
+- embed.js: If host in token is http, then make it protocol relative, so tokens created on http still works when embedded on https sites.
+
 ## [2021.5.0] - 2021-4-5
 ### Changed
 - Node >= 14 er required. 
@@ -22,7 +35,7 @@ and this project adheres to [CalVer](https://calver.org/).
   - `#layer-tools-load`
   - `#layer-tools-filters`
 - `repeatMode` is set to `true` for tools in Draw, so tools stay active.
-
+ 
 ### Added
 - It's possible to lock UTM zone in coordinate module, so it's possible to project to a specific zone outside the actual zone. Useful for e.g. Denmark, which are using zone 32 for the whole country but is located in both 32 and 33.
 ```JSON

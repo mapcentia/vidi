@@ -28,6 +28,8 @@
                     alert("Could not parse token");
                 }
                 var host = (configHost || obj.host) + ""; // Port ?
+                // If host is http, then make it protocol relative, so tokens created on http still works when embedded on https sites.
+                host = host.replace("http:", "");
                 var id = obj.id;
                 var database = obj.database;
                 var schema = obj.schema !== undefined && useSchema ? obj.schema + "/" : "";
