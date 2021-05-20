@@ -38,12 +38,6 @@ router.post('/api/print', function (req, response) {
                             response.send({success: true, key});
                         });
 
-                        files.forEach(path => {
-                            zip.addLocalFile(path);
-                        });
-                        zip.writeZip(`${__dirname}/../public/tmp/print/png/${key}.zip`);
-                        response.send({success: true, key, "format": "zip"});
-                    }
                 } else {
                     poll();
                 }
