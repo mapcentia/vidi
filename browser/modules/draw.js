@@ -1,69 +1,25 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2021 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
 
 const MODULE_NAME = `draw`;
-
 const drawTools = require(`./drawTools`);
-
 const fileSaver = require(`file-saver`);
-
-/**
- * @type {*|exports|module.exports}
- */
-var cloud, utils, state, serializeLayers;
-
-/**
- *
- * @type {boolean}
- */
-var drawOn = false;
-
-var selectedDrawing;
-
-/**
- *
- * @type {L.FeatureGroup}
- */
-var drawnItems = new L.FeatureGroup();
-
-/**
- * @type {*|exports|module.exports}
- */
-var drawControl;
-
-/**
- * @type {gc2table}
- */
-var table;
-
-/**
- *
- * @type {geocloud.get().sqlStore}
- */
-var store = new geocloud.sqlStore({
+let cloud, utils, state, serializeLayers;
+let drawOn = false;
+let drawnItems = new L.FeatureGroup();
+let drawControl;
+let table;
+const store = new geocloud.sqlStore({
     clickable: true
 });
-
-/**
- *
- * @type {Array}
- */
-var destructFunctions = [];
-
-/**
- * @type {*|exports|module.exports}
- */
-var backboneEvents;
-
-var editing = false;
-
-var conflictSearch;
-
+let destructFunctions = [];
+let backboneEvents;
+let editing = false;
 let _self = false;
 
 module.exports = {
@@ -101,6 +57,10 @@ module.exports = {
 
         state.listenTo(MODULE_NAME, _self);
         state.listen(MODULE_NAME, `update`);
+
+        state.getModuleState(MODULE_NAME).then(initialState => {
+            _self.applyState(initialState)
+        });
 
         $("#draw-line-extremity").on("change", function () {
             var b = $("#draw-line-extremity").val() === "none";
@@ -213,7 +173,6 @@ module.exports = {
         cloud.get().map.off('draw:deletestart');
         cloud.get().map.off('draw:deletestop');
         cloud.get().map.off('draw:deleted');
-        cloud.get().map.off('draw:created');
         cloud.get().map.off('draw:edited');
 
         // Call destruct functions
@@ -268,16 +227,23 @@ module.exports = {
 
             drawControl.setDrawingOptions({
                 polygon: {
+                    repeatMode: true,
                     icon: cloud.iconSmall
                 },
                 polyline: {
-                    icon: cloud.iconSmall
+                    repeatMode: true,
+                    icon: cloud.iconSmall,
                 },
                 rectangle: {
+                    repeatMode: true,
                     icon: cloud.iconSmall
                 },
                 circle: {
+                    repeatMode: true,
                     icon: cloud.iconSmall
+                },
+                marker: {
+                    repeatMode: true
                 }
             });
 
@@ -295,24 +261,23 @@ module.exports = {
             cloud.get().map.off('draw:deletestart');
             cloud.get().map.off('draw:deletestop');
             cloud.get().map.off('draw:deleted');
-            cloud.get().map.off('draw:created');
             cloud.get().map.off('draw:edited');
 
             // Bind events
-            cloud.get().map.on('draw:editstart', function (e) {
+            cloud.get().map.on('draw:editstart', function () {
                 editing = true;
             });
 
-            cloud.get().map.on('draw:editstop', function (e) {
+            cloud.get().map.on('draw:editstop', function () {
                 editing = false;
                 backboneEvents.get().trigger(`${MODULE_NAME}:update`);
             });
 
-            cloud.get().map.on('draw:deletestart', function (e) {
+            cloud.get().map.on('draw:deletestart', function () {
                 editing = true;
             });
 
-            cloud.get().map.on('draw:deletestop', function (e) {
+            cloud.get().map.on('draw:deletestop', function () {
                 editing = false;
                 backboneEvents.get().trigger(`${MODULE_NAME}:update`);
             });
@@ -351,7 +316,6 @@ module.exports = {
 
                 if (type === "polygon" || type === "rectangle") {
                     area = drawTools.getArea(drawLayer);
-                    //distance = getDistance(drawLayer);
                 }
                 if (type === 'polyline') {
                     distance = drawTools.getDistance(drawLayer);
@@ -376,7 +340,7 @@ module.exports = {
                 backboneEvents.get().trigger(`${MODULE_NAME}:update`);
                 table.loadDataInTable(false, true);
             });
-            cloud.get().map.on('draw:deleted', function (e) {
+            cloud.get().map.on('draw:deleted', function () {
                 backboneEvents.get().trigger(`${MODULE_NAME}:update`);
                 table.loadDataInTable(false, true);
             });
@@ -442,7 +406,7 @@ module.exports = {
      * Resets state to default value
      */
     resetState: () => {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             _self.control(false);
             _self.removeFeatures();
             resolve();
@@ -465,9 +429,9 @@ module.exports = {
      * Applies externally provided state
      */
     applyState: (newState) => {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
+            store.reset();
             _self.control(false);
-            _self.removeFeatures();
             if (newState.drawnItems && newState.drawnItems !== `false`) {
                 setTimeout(() => {
                     _self.recreateDrawnings(JSON.parse(newState.drawnItems), false);
@@ -484,7 +448,7 @@ module.exports = {
      * Recreates drawnings on the map
      *
      * @param {Object} parr Features to draw
-     *
+     * @param enableControl
      * @return {void}
      */
     recreateDrawnings: (parr, enableControl = true) => {
@@ -598,7 +562,6 @@ module.exports = {
         }
 
         t.loadDataInTable(false, true);
-
         if (enableControl) {
             _self.control(true);
         }
@@ -844,22 +807,6 @@ module.exports = {
                 return this;
             }
 
-            var svg = this._map._pathRoot;
-
-            // Check if the defs node is already created
-            /* var defsNode;
-             if (L.DomUtil.hasClass(svg, 'defs')) {
-                 defsNode = svg.getElementById('defs');
-             } else {
-                 L.DomUtil.addClass(svg, 'defs');
-                 defsNode = L.Path.prototype._createElement('defs');
-                 defsNode.setAttribute('id', 'defs');
-                 var svgFirstChild = svg.childNodes[0];
-                 svg.insertBefore(defsNode, svgFirstChild);
-             }*/
-
-            //
-
             var svg = this._map._renderer._container;
 
             // Check if the defs node is already created
@@ -894,7 +841,7 @@ module.exports = {
             // Create the markers definition
             markersNode.setAttribute('id', id);
             for (var attr in symbol) {
-                if (attr != 'path') {
+                if (attr !== 'path') {
                     markersNode.setAttribute(attr, symbol[attr]);
                 } else {
                     markerPath.setAttribute('d', symbol[attr]);

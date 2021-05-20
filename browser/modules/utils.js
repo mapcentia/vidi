@@ -35,7 +35,7 @@ module.exports = {
     createMainTab: function (id, name, info, height, icon, rawIconWasProvided = false, moduleId = false) {
         let el = `#${id}-content`;
 
-        let iconRaw = ``;
+        let iconRaw;
         if (rawIconWasProvided) {
             iconRaw = icon;
         } else {
@@ -87,7 +87,7 @@ module.exports = {
     },
 
     popupCenter: function (url, width, height, name) {
-        var leftPosition, topPosition;
+        let leftPosition, topPosition;
         //Allow for borders.
         leftPosition = (window.screen.width / 2) - ((width / 2) + 10);
         //Allow for title and status bars.
@@ -124,14 +124,16 @@ module.exports = {
     },
 
     toggleFullScreen: function() {
-        let fullScreenMode;
+        let fullScreenMode = false;
         if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen();
-            fullScreenMode = true;
+            document.documentElement.requestFullscreen().then(()=>{
+                fullScreenMode = true;
+            });
         } else {
             if (document.exitFullscreen) {
-                document.exitFullscreen();
-                fullScreenMode = false;
+                document.exitFullscreen().then(()=>{
+                    fullScreenMode = false;
+                });
             }
         }
         return fullScreenMode;

@@ -114,6 +114,7 @@ const _setInternalState = (value) => {
                 throw new Error('State: error occured while storing the state');
             } else {
                 if (LOG) console.log('State: saved', value);
+                resolve();
             }
         });
     });
@@ -160,10 +161,9 @@ module.exports = {
     init: function () {
         _self = this;
         return new Promise((initResolve, initReject) => {
-
             try {
 
-                if ('localforage' in window === false) {
+                if (!('localforage' in window)) {
                     throw new Error('localforage is not defined');
                 }
 
@@ -510,7 +510,9 @@ module.exports = {
                             } else {
                                 console.log("Active layers in snapshot");
                             }
-                            this.applyState(state.snapshot).then(initResolve);
+                            this.applyState(state.snapshot).then(initResolve).catch((error) => {
+                                console.error(error)
+                            });
                         } else {
                             initializeFromHashPart();
                         }
@@ -555,7 +557,7 @@ module.exports = {
      * @return {Promise}
      */
     resetState: (customModulesToReset = []) => {
-        backboneEvents.get().trigger(`reset:infoClick`);
+//        backboneEvents.get().trigger(`reset:infoClick`);
         let appliedStatePromises = [];
         if (customModulesToReset.length > 0) {
             for (let key in listened) {
@@ -568,7 +570,6 @@ module.exports = {
                 appliedStatePromises.push(listened[key].applyState(false));
             }
         }
-
         return Promise.all(appliedStatePromises).then(() => {
             return _setInternalState({});
         });
@@ -625,7 +626,6 @@ module.exports = {
                 reject(`Provided state is empty`);
                 return;
             }
-
             const applyStateToModules = () => {
                 let promises = [];
                 let modulesWithAppliedState = [];
@@ -674,7 +674,6 @@ module.exports = {
                 applyStateToModules();
             }
         });
-
         return result;
     },
 
@@ -788,5 +787,9 @@ module.exports = {
         }).catch(error => {
             console.error(error);
         });
+    },
+
+    resetStore: () => {
+        _setInternalState({});
     }
 };

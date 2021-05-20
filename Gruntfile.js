@@ -264,8 +264,6 @@ module.exports = function (grunt) {
                 files: {
                     'public/js/build/all.min.js': [
                         'public/js/lib/leaflet/leaflet-src.js',
-
-
                         'public/js/bundle.js',
                     ],
                     'public/js/build/all.async.min.js': [

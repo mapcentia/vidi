@@ -1,16 +1,21 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2021 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
-var express = require('express');
-var router = express.Router();
-var configUrl = require('../config/config.js').configUrl;
-var fetchUrl = require('fetch').fetchUrl;
+let express = require('express');
+let router = express.Router();
+let configUrl = require('../config/config.js').configUrl;
+let fetchUrl = require('fetch').fetchUrl;
 
-router.get('/api/template/:db/:file', function (req, response) {
-    var file = req.params.file, db = req.params.db, url, rem;
+router.get('/api/template/:db/:folder?/:file', function (req, response) {
+    let file = req.params.file, db = req.params.db, url, rem;
+    let folder = req.params?.folder;
+
+    if (folder) {
+        file = folder + "/" + file;
+    }
 
     if (typeof configUrl === "object") {
         url = configUrl[db] || configUrl._default;
@@ -19,11 +24,6 @@ router.get('/api/template/:db/:file', function (req, response) {
     }
 
     console.log(url + "/" + file);
-
-    options = {
-        method: 'GET',
-        uri: url + "/" + file
-    };
 
     fetchUrl(url + "/" + file, function (err, meta, body) {
         if (err || meta.status !== 200) {

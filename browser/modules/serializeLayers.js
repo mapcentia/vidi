@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2020 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -72,6 +72,48 @@ module.exports = module.exports = {
             "print": true,
             "measurement": true,
             "draw": false
+        }, strictMode);
+
+        $.each(e, (i, v) => {
+            if (v.type === "Vector") {
+                layerDraw.push({geojson: v.geoJson})
+            }
+        });
+
+        return layerDraw;
+    },
+    serializeQueryDrawnItems: (strictMode = false) => {
+        let layerDraw = [];
+
+        let e = _self.serialize({
+            "printHelper": true,
+            "query_draw": false,
+            "query_buffer": true,
+            "query_result": true,
+            "print": true,
+            "measurement": true,
+            "draw": true
+        }, strictMode);
+
+        $.each(e, (i, v) => {
+            if (v.type === "Vector") {
+                layerDraw.push({geojson: v.geoJson})
+            }
+        });
+
+        return layerDraw;
+    },
+    serializeQueryBufferItems: (strictMode = false) => {
+        let layerDraw = [];
+
+        let e = _self.serialize({
+            "printHelper": true,
+            "query_draw": true,
+            "query_buffer": false,
+            "query_result": true,
+            "print": true,
+            "measurement": true,
+            "draw": true
         }, strictMode);
 
         $.each(e, (i, v) => {
@@ -329,7 +371,7 @@ var _encoders = {
                     featureGeoJson = {_latlngs: feature._latlngs};
                     featureGeoJson.type = "Rectangle";
                     featureGeoJson.feature = feature.feature;
-                } else if (`feature` in feature && `properties` in feature.feature && feature.feature.properties.type === "circlemarker") {
+                } else if (feature?.properties?.type === "circlemarker") {
                     featureGeoJson = {_latlng: feature._latlng};
                     featureGeoJson.type = "CircleMarker";
                     featureGeoJson.feature = feature.feature;

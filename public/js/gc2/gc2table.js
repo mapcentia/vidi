@@ -13,7 +13,6 @@
 var gc2table = (function () {
     "use strict";
     var isLoaded, object, init;
-    const MAXZOOM = 17;
     isLoaded = function () {
         return true;
     };
@@ -51,7 +50,7 @@ var gc2table = (function () {
                 renderInfoIn: null,
                 key: null,
                 caller: null,
-                dashSelected: false
+                maxZoom: 17
             }, prop,
             uid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
                 var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
@@ -91,7 +90,7 @@ var gc2table = (function () {
             renderInfoIn = defaults.renderInfoIn,
             key = defaults.key,
             caller = defaults.caller,
-            dashSelected = defaults.dashSelected;
+            maxZoom = parseInt(defaults.maxZoom) || 17
 
         var customOnLoad = false, destroy, assignEventListeners, clickedFlag = false;
 
@@ -129,7 +128,7 @@ var gc2table = (function () {
         object.on("selected" + "_" + uid, function (id) {
             clearSelection();
             if (id === undefined) return;
-            var row = $('*[data-uniqueid="' + id + '"]');
+            let row = $('*[data-uniqueid="' + id + '"]');
             row.addClass("selected");
             let style = {
                 opacity: 1,
@@ -148,7 +147,7 @@ var gc2table = (function () {
             onSelect(id, m.map._layers[id], key, caller);
 
             if (openPopUp) {
-                var str = "<table>", renderedText;
+                let str = "<table>", renderedText;
                 $.each(cm, function (i, v) {
                     if (typeof v.showInPopup === "undefined" || (typeof v.showInPopup === "boolean" && v.showInPopup === true)) {
                         str = str + "<tr><td>" + v.header + "</td><td>" + m.map._layers[id].feature.properties[v.dataIndex] + "</td></tr>";
@@ -159,7 +158,6 @@ var gc2table = (function () {
                 if (template) {
                     renderedText = Handlebars.compile(template)(m.map._layers[id].feature.properties);
                 }
-
                 if (!renderInfoIn) {
                     m.map._layers[id].bindPopup("<div id='popup-test'></div>" + renderedText || str, {
                         className: "custom-popup gc2table-custom-popup",
@@ -173,7 +171,7 @@ var gc2table = (function () {
 
                 m.map._layers[id].on('popupclose', function (e) {
                     // Removing the selectedStyle from feature
-                    var databaseIdentifier = getDatabaseIdForLayerId(id);
+                    let databaseIdentifier = getDatabaseIdForLayerId(id);
                     if (uncheckedIds.indexOf(databaseIdentifier) > -1) {
                         store.layer._layers[id].setStyle(uncheckedStyle);
                     } else {
@@ -242,13 +240,13 @@ var gc2table = (function () {
                             if (setViewOnSelect) {
                                 try {
                                     if (setZoom) {
-                                        m.map.fitBounds(layer.getBounds(), {maxZoom: MAXZOOM});
+                                        m.map.fitBounds(layer.getBounds(), {maxZoom: maxZoom});
                                     } else {
                                         m.map.panTo(layer.getBounds().getCenter());
                                     }
                                 } catch (e) {
                                     if (setZoom) {
-                                        m.map.setView(layer.getLatLng(), MAXZOOM);
+                                        m.map.setView(layer.getLatLng(), maxZoom);
                                     } else {
                                         m.map.panTo(layer.getLatLng());
                                     }

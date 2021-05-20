@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2021 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -15,8 +15,8 @@
  * @private
  */
 const getDistance = e => {
-    var tempLatLng = null;
-    var totalDistance = 0.00000;
+    let tempLatLng = null;
+    let totalDistance = 0.00000;
     $.each(e._latlngs, function (i, latlng) {
         if (tempLatLng == null) {
             tempLatLng = latlng;

@@ -168,7 +168,7 @@ const setupLayerNumberIndicator = (base64GroupName, numberOfActiveLayers, number
  * Default template for feature popup
  */
 const getDefaultTemplate = () => {
-    return `<div class="cartodb-popup-content">
+    return `<div class="vidi-popup-content">
         <div class="form-group gc2-edit-tools">
             {{#_vidi_content.fields}}
                 {{#title}}<h4>{{title}}</h4>{{/title}}

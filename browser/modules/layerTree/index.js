@@ -1,6 +1,6 @@
 /*
  * @author     Alexander Shumilov
- * @copyright  2013-2020 MapCentia ApS
+ * @copyright  2013-2021 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -21,21 +21,18 @@ import {
     MAP_RESOLUTIONS
 } from './constants';
 
-import {OPEN_INFO_IN_ELEMENT} from './../sqlQuery'
-
-var _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEvents;
-
-var onEachFeature = [], pointToLayer = [], onSelectedStyle = [], onLoad = [], onSelect = [],
+let _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEvents,
+    onEachFeature = [], pointToLayer = [], onSelectedStyle = [], onLoad = [], onSelect = [],
     onMouseOver = [], cm = [], styles = [], tables = {}, childLayersThatShouldBeEnabled = [];
 
 const uuidv4 = require('uuid/v4');
-var React = require('react');
-var ReactDOM = require('react-dom');
+const React = require('react');
+const ReactDOM = require('react-dom');
+const base64url = require('base64url');
 
 import dayjs from 'dayjs';
 import noUiSlider from 'nouislider';
 import mustache from 'mustache';
-
 import LayerFilter from './LayerFilter';
 import LoadStrategyToggle from './LoadStrategyToggle';
 import LabelSettingToggle from './LabelSettingToggle';
@@ -46,71 +43,29 @@ import {
     EXPRESSIONS_FOR_DATES,
     EXPRESSIONS_FOR_BOOLEANS
 } from './filterUtils';
-
-
-/**
- *
- * @type {*|exports|module.exports}
- */
-let urlparser = require('./../urlparser');
-
-/**
- *
- * @type {*|exports|module.exports}
- */
 import OfflineModeControlsManager from './OfflineModeControlsManager';
-
-let offlineModeControlsManager = false;
-
-let moveEndEvent = () => {
-};
-
-/**
- *
- * @type {*|exports|module.exports}
- */
-let MarkupGenerator = require('./MarkupGenerator');
-let markupGeneratorInstance = new MarkupGenerator();
-
 import {GROUP_CHILD_TYPE_LAYER, GROUP_CHILD_TYPE_GROUP, LayerSorting} from './LayerSorting';
 
+const urlparser = require('./../urlparser');
+const download = require('./../download');
+const MarkupGenerator = require('./MarkupGenerator');
+const marked = require('marked');
+
+let offlineModeControlsManager = false;
+let markupGeneratorInstance = new MarkupGenerator();
 let layerSortingInstance = new LayerSorting();
 let latestFullTreeStructure = false;
-
-/**
- *
- * @type {*|exports|module.exports}
- */
+let moveEndEvent = () => {
+};
 let queueStatistsics = false;
 let QueueStatisticsWatcher = require('./QueueStatisticsWatcher');
-
-/**
- *
- * @type {*|exports|module.exports}
- */
 let APIBridgeSingletone = require('./../api-bridge');
-
-/**
- *
- * @type {*|exports|module.exports}
- */
 let layerTreeUtils = require('./utils');
-
-/**
- *
- * @type {APIBridge}
- */
-var apiBridgeInstance = false;
-
-/**
- * Specifies if layer tree is ready
- * @todo Minimize number of global variables
- */
+let apiBridgeInstance = false;
 let extensions = false, editor = false, qstore = [], reloadIntervals = [], vectorPopUp;
-
-/**
- * Getting ready for React future of the layerTree by implementing single source-of-truth
- */
+let filterComp = {};
+let lastFilter;
+let utils;
 let moduleState = {
     isReady: false,
     wasBuilt: false,
@@ -133,12 +88,6 @@ let moduleState = {
     fitBoundsActiveOnLayers: {},
     labelSettings: {}
 };
-
-const marked = require('marked');
-
-let filterComp = {};
-let lastFilter;
-let utils;
 
 /**
  *
@@ -200,6 +149,13 @@ module.exports = {
         });
 
         state.listenTo('layerTree', _self);
+        state.listen(MODULE_NAME, `sorted`);
+        state.listen(MODULE_NAME, `layersOfflineModeChange`);
+        state.listen(MODULE_NAME, `activeLayersChange`);
+        state.listen(MODULE_NAME, `changed`);
+        state.listen(MODULE_NAME, `opacityChange`);
+        state.listen(MODULE_NAME, `dynamicLoadLayersChange`);
+        state.listen(MODULE_NAME, `settleForcedState`);
     },
 
     /**
@@ -299,7 +255,7 @@ module.exports = {
         if (overallFilters.length > 0) {
             let data = {};
             data[layerKey] = overallFilters;
-            parameterString = `filters=` + encodeURIComponent(Base64.encode(JSON.stringify(data)));
+            parameterString = `filters=` + base64url(JSON.stringify(data));
         }
         $(`[data-gc2-layer-key^="${layerKey}"]`).find(`.js-toggle-filters-number-of-filters`).text(overallFilters.length);
         return parameterString;
@@ -602,7 +558,7 @@ module.exports = {
         let preparedVirtualLayers = [];
         moduleState.virtualLayers.map(layer => {
             let localLayer = Object.assign({}, layer);
-            localLayer.store.sqlEncoded = Base64.encode(localLayer.store.sql).replace(/=/g, "");
+            localLayer.store.sqlEncoded = base64url(localLayer.store.sql);
             preparedVirtualLayers.push(localLayer);
         });
 
@@ -704,7 +660,6 @@ module.exports = {
         } else if (newState.order && newState.order === 'false') {
             newState.order = false;
         }
-
         return _self.create(newState);
     },
 
@@ -833,14 +788,10 @@ module.exports = {
                         // Reload should always occur except times when current bbox is completely inside
                         // of the previously requested bbox (extended one in gc2cloud.js) kept in corresponding store
                         let needToReload;
-                        if ((parsedMeta && `load_strategy` in parsedMeta && parsedMeta.load_strategy === `d`)
-                            || (layerKeyNoPrefix in moduleState.dynamicLoad && moduleState.dynamicLoad[layerKeyNoPrefix] === true)) {
+                        if (layerPrefix === LAYER.VECTOR && ((parsedMeta && `load_strategy` in parsedMeta && parsedMeta.load_strategy === `d`)
+                            || (layerKeyNoPrefix in moduleState.dynamicLoad && moduleState.dynamicLoad[layerKeyNoPrefix] === true))) {
                             needToReload = true;
                             let currentMapBBox = cloud.get().map.getBounds();
-                            // TODO bug the layer is available as webGL
-                            console.log(localTypeStores[layerKey])
-                            console.log(localTypeStores)
-                            console.log(layerKey)
                             if (`buffered_bbox` in localTypeStores[layerKey]) {
                                 if (localTypeStores[layerKey].buffered_bbox === false || localTypeStores[layerKey].buffered_bbox && localTypeStores[layerKey].buffered_bbox.contains(currentMapBBox)) {
                                     needToReload = false;
@@ -863,7 +814,7 @@ module.exports = {
             cloud.get().map.on(`moveend`, moveEndEvent);
         }
 
-        let result = false;
+        let result;
         if (moduleState.isBeingBuilt) {
             result = new Promise((resolve, reject) => {
                 console.trace(`async`);
@@ -1045,13 +996,6 @@ module.exports = {
                                     }
 
                                     layers.reorderLayers();
-                                    state.listen(MODULE_NAME, `sorted`);
-                                    state.listen(MODULE_NAME, `layersOfflineModeChange`);
-                                    state.listen(MODULE_NAME, `activeLayersChange`);
-                                    state.listen(MODULE_NAME, `changed`);
-                                    state.listen(MODULE_NAME, `opacityChange`);
-                                    state.listen(MODULE_NAME, `dynamicLoadLayersChange`);
-                                    state.listen(MODULE_NAME, `settleForcedState`);
 
                                     backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
                                     setTimeout(() => {
@@ -1145,6 +1089,8 @@ module.exports = {
 
                                 Promise.all(fetchMetaRequests).then(() => {
                                     proceedWithBuilding();
+                                }).catch(() => {
+                                    proceedWithBuilding();
                                 });
                             } else {
                                 proceedWithBuilding();
@@ -1175,7 +1121,7 @@ module.exports = {
 
 
     _statisticsHandler: (statistics, forceLayerUpdate, skipLastStatisticsCheck) => {
-        if (moduleState.wasBuilt === false || _self.isReady() == false) {
+        if (moduleState.wasBuilt === false || _self.isReady() === false) {
             return;
         } else {
             _self._setupToggleOfflineModeControlsForLayers().then(() => {
@@ -1489,6 +1435,10 @@ module.exports = {
                     });
                 }
                 if (reloadInterval && reloadInterval !== "") {
+                    let reloadCallback = meta.parseLayerMeta(layerKey)?.reload_callback;
+                    let func = reloadCallback && reloadCallback !== "" ? Function('"use strict";return (' + reloadCallback + ')')() : () => {
+                    };
+                    func(l, cloud.get().map);
                     clearInterval(reloadIntervals[layerKey]);
                     reloadIntervals[layerKey] = setInterval(() => {
                         l.load();
@@ -1815,7 +1765,8 @@ module.exports = {
                 locale: window._vidiLocale.replace("_", "-"),
                 template: template,
                 styleSelected,
-                setZoom: parsedMeta?.zoom_on_table_click ? parsedMeta.zoom_on_table_click : false
+                setZoom: parsedMeta?.zoom_on_table_click ? parsedMeta.zoom_on_table_click : false,
+                maxZoom: parsedMeta?.max_zoom_level_table_click && parsedMeta.max_zoom_level_table_click !== "" ? parsedMeta.max_zoom_level_table_click : 17
             });
 
             localTable.loadDataInTable(true, forceDataLoad);
@@ -2465,7 +2416,10 @@ module.exports = {
                 for (var u = 0; u < layersAndSubgroupsForCurrentGroup.length; ++u) {
                     let localItem = layersAndSubgroupsForCurrentGroup[u];
                     if (localItem.type === GROUP_CHILD_TYPE_LAYER) {
-                        let {layerIsActive, activeLayerName} = _self.checkIfLayerIsActive(forcedState, precheckedLayers, localItem.layer);
+                        let {
+                            layerIsActive,
+                            activeLayerName
+                        } = _self.checkIfLayerIsActive(forcedState, precheckedLayers, localItem.layer);
                         _self.createLayerRecord(localItem.layer, $(virtualLayerTreeNode), layerIsActive, activeLayerName, false, isVirtualGroup);
                     } else if (localItem.type === GROUP_CHILD_TYPE_GROUP) {
                         _self.createSubgroupRecord(localItem, forcedState, precheckedLayers, $(virtualLayerTreeNode), 0);
@@ -2614,7 +2568,10 @@ module.exports = {
         const renderSubgroupChildren = () => {
             subgroup.children.map(child => {
                 if (child.type === GROUP_CHILD_TYPE_LAYER) {
-                    let {layerIsActive, activeLayerName} = _self.checkIfLayerIsActive(forcedState, precheckedLayers, child.layer);
+                    let {
+                        layerIsActive,
+                        activeLayerName
+                    } = _self.checkIfLayerIsActive(forcedState, precheckedLayers, child.layer);
                     _self.createLayerRecord(child.layer, container, layerIsActive, activeLayerName, subgroup.id);
                 } else if (child.type === GROUP_CHILD_TYPE_GROUP) {
                     _self.createSubgroupRecord(child, forcedState, precheckedLayers, container, newLevel);
@@ -3069,6 +3026,7 @@ module.exports = {
                                     onApplyArbitrary={_self.onApplyArbitraryFiltersHandler}
                                     onDisableArbitrary={_self.onDisableArbitraryFiltersHandler}
                                     onApplyFitBounds={_self.onApplyFitBoundsFiltersHandler}
+                                    onApplyDownload={_self.onApplyDownloadHandler}
                                     onApplyEditor={_self.onApplyEditorFiltersHandler}
                                     onActivateEditor={_self.onActivateEditorFiltersHandler}
                                     onChangeEditor={_self.onChangeEditorFiltersHandler}
@@ -3295,7 +3253,7 @@ module.exports = {
                     ST_Ymax(ST_Extent(extent)) AS tymax
                 FROM (SELECT ST_astext(ST_Transform(ST_setsrid(ST_Extent(${metaData.f_geometry_column}),${metaData.srid}),4326)) AS extent FROM ${layerKey} WHERE ${whereClause}) as foo`;
         let q = {
-            q: base64.encode(sql),
+            q: base64url(sql),
             base64: true
         }
         $.ajax({
@@ -3313,6 +3271,11 @@ module.exports = {
             }
         });
         moduleState.fitBoundsActiveOnLayers[layerKey] = true;
+    },
+    onApplyDownloadHandler: (layerKey, format) => {
+        let whereClause = _self.getActiveLayerFilters(layerKey)[0];
+        let sql = `SELECT * FROM ${layerKey} WHERE ${whereClause}`;
+        download.download(sql, format)
     },
 
     onApplyPredefinedFiltersHandler: ({layerKey, filters}, forcedReloadLayerType = false) => {

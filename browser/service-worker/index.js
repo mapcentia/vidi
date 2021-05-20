@@ -46,7 +46,8 @@ let ignoredExtensionsRegExps = [];
  */
 let forceIgnoredExtensionsCaching = false;
 
-let urlsToCache = require(`urls-to-cache`);
+const urlsToCache = require(`urls-to-cache`);
+const base64url = require("base64url");
 
 const urlSubstitution = [{
     requested: 'https://netdna.bootstrapcdn.com/font-awesome/4.5.0/fonts/fontawesome-webfont.ttf?v=4.5.0',
@@ -200,8 +201,11 @@ class Keeper {
                 });
             }).catch(error => {
                 console.error(`localforage failed to perform operation`, error);
-                reject();
+                resolve(); // We still resolve, because otherwise we ge a net:ERR_FAILED in browser
             });
+        }).catch(error => {
+            console.error(`localforage failed to perform operation`, error);
+            resolve(); // We still resolve, because otherwise we ge a net:ERR_FAILED in browser
         });
     }
 
@@ -232,8 +236,9 @@ class Keeper {
                 reject();
             });
         });
-    }
-};
+    });
+}
+}
 
 /**
  * Key-value store for keeping extracted POST data for the specific URL
@@ -332,8 +337,7 @@ const normalizeTheURLForFetch = (event) => {
                             if (`q` in mappedObject && mappedObject.q) {
                                 if (method === `POST`) {
                                     let cleanedString = mappedObject.q.replace(/%3D/g, '');
-                                    decodedQuery = atob(cleanedString);
-                                    ;
+                                    decodedQuery = base64url.decode(cleanedString);
                                 } else if (method === `GET`) {
                                     decodedQuery = mappedObject.q;
                                 } else {
@@ -359,7 +363,7 @@ const normalizeTheURLForFetch = (event) => {
                                 record.cleanedRequestURL = cleanedRequestURL;
                                 record.bbox = false;
                                 if (decodedQuery.indexOf(`ST_Intersects`) !== -1 && decodedQuery.indexOf(`ST_Transform`) && decodedQuery.indexOf(`ST_MakeEnvelope`)) {
-                                    let bboxCoordinates = decodeURIComponent(decodedQuery.substring((decodedQuery.indexOf(`(`, decodedQuery.indexOf(`ST_MakeEnvelope`)) + 1), decodedQuery.indexOf(`)`, decodedQuery.indexOf(`ST_MakeEnvelope`)))).split(`,`).map(a => a.trim());
+                                    let bboxCoordinates = decodedQuery.substring((decodedQuery.indexOf(`(`, decodedQuery.indexOf(`ST_MakeEnvelope`)) + 1), decodedQuery.indexOf(`)`, decodedQuery.indexOf(`ST_MakeEnvelope`))).split(`,`).map(a => a.trim());
                                     if (bboxCoordinates.length === 5) {
                                         record.bbox = {
                                             north: parseFloat(bboxCoordinates[3]),
