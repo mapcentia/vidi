@@ -19,6 +19,7 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ### Fixed
 - Feature info click wouldn't open the pop-up if multiple layers was switch on.
+- Drawings are not longer dashed, when selected.
 
 ## [2021.5.0] - 2021-4-5
 ### Changed
