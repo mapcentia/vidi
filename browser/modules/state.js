@@ -69,7 +69,7 @@ var p, hashArr = hash.replace("#", "").split("/");
 // Because extensions are not being set before State resolves.
 // So we hard code reportRender, which sets up a listener on event "on:customData"
 // and hard code the call to reportRender.render in state::initializeFromHashPart
-var reportRender = require('../../extensions/conflictSearch/browser/reportRender');
+let reportRender = require('../../extensions/conflictSearch/browser/reportRenderAlt');
 
 /**
  * Returns internaly stored global state
