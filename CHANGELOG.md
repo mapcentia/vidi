@@ -17,6 +17,9 @@ and this project adheres to [CalVer](https://calver.org/).
 ```
 - embed.js: If host in token is http, then make it protocol relative, so tokens created on http still works when embedded on https sites.
 
+### Fixed
+- Feature info click wouldn't open the pop-up if multiple layers was switch on.
+
 ## [2021.5.0] - 2021-4-5
 ### Changed
 - Node >= 14 er required. 

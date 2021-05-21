@@ -337,7 +337,7 @@ module.exports = {
 
                         $(`#${elementPrefix}modal-info-body`).show();
                         $(`#${elementPrefix}info-tab`).append(`<li><a onclick="setTimeout(()=>{$('#${elementPrefix}modal-info-body table').bootstrapTable('resetView'),100})" id="tab_${storeId}" data-toggle="tab" href="#_${storeId}">${layerTitel}</a></li>`);
-                        $(`#${elementPrefix}info-pane`).append(`<div class="tab-pane" id="_${storeId}">
+                        $(`#${elementPrefix}info-pane`).append(`<div class="tab-pane _sql_query" id="_${storeId}">
                             <div style="display: ${display}">
                                 <a class="btn btn-sm btn-raised" id="_download_geojson_${storeId}" target="_blank" href="javascript:void(0)">
                                     <i class="fa fa-download" aria-hidden="true"></i> GeoJson
@@ -404,7 +404,9 @@ module.exports = {
                                 let popup = e.getPopup();
                                 if (popup?._closeButton) {
                                     popup._closeButton.onclick = function () {
-                                        if (onPopupCloseButtonClick) onPopupCloseButtonClick(e._leaflet_id);
+                                        if (onPopupCloseButtonClick) {
+                                            onPopupCloseButtonClick(e._leaflet_id);
+                                        }
                                     }
                                 }
                                 setTimeout(() => {
@@ -498,7 +500,7 @@ module.exports = {
                                 $(`#${elementPrefix}modal-info-body table`).bootstrapTable('resetView');
                                 // If only one hit across all layers, the click the only row
                                 if (count.hits === 1) {
-                                    $("#_0 [data-uniqueid]").trigger("click");
+                                    $(`._sql_query [data-uniqueid]`).trigger("click");
                                     $(".show-when-multiple-hits").hide();
                                 }
                             }, 100);
