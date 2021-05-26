@@ -41,7 +41,7 @@ module.exports = {
 
         window.addEventListener('DOMContentLoaded', () => {
             // Get the element by id
-            const element = document.getElementById("p1");
+            const element = document.getElementById("drag-test");
             // Add the ondragstart event listener
             element.addEventListener("dragstart", dragstart_handler);
         });
@@ -65,22 +65,35 @@ module.exports = {
             var marker = L.marker(coord, {icon: icon, draggable: true}).addTo(map);
             var img = $('.pointer');
 
-            var offset = img.offset();
             var mouseDown = false;
 
             function mouse(evt) {
-                if (mouseDown == true) {
+                if (mouseDown === true) {
+                    console.log(evt)
+                    var offset = img.offset();
                     var center_x = (offset.left) + (img.width() / 2);
                     var center_y = (offset.top) + (img.height() / 2);
-                    var mouse_x = evt.pageX;
-                    var mouse_y = evt.pageY;
-                    var radians = Math.atan2(mouse_x - center_x, mouse_y - center_y);
-                    var degree = (radians * (180 / Math.PI) * -1) + 90;
-                    console.log(degree)
-                    img.css('-moz-transform', 'rotate(' + degree + 'deg)');
-                    img.css('-webkit-transform', 'rotate(' + degree + 'deg)');
-                    img.css('-o-transform', 'rotate(' + degree + 'deg)');
-                    img.css('-ms-transform', 'rotate(' + degree + 'deg)');
+                    //var mouse_x = evt.pageX;
+                    //var mouse_x = evt.pageX;
+                    var mouse_x = evt.originalEvent.changedTouches[0].clientX;
+                    var mouse_y = evt.originalEvent.changedTouches[0].clientY;
+
+                    var diffX = mouse_x - center_x;
+                    var diffY = mouse_y - center_y;
+                    var tan = diffY / diffX;
+
+
+                    var atan = Math.atan(tan)* 180 / Math.PI;;
+                    if(diffY > 0 && diffX > 0) {
+
+                        atan += 180;
+                    }
+                    else if(diffY < 0 && diffX > 0) {
+
+                        atan -= 180;
+                    }
+                    console.log(atan)
+                    img.css('transform', 'rotate(' + atan + 'deg)');
                 }
             }
 
@@ -88,12 +101,25 @@ module.exports = {
                 marker.dragging.disable();
                 map.dragging.disable();
                 map.touchZoom.disable();
-
-
                 mouseDown = true;
                 $(document).mousemove(mouse);
             });
             $(document).mouseup(function (e) {
+                marker.dragging.enable();
+                map.dragging.enable();
+                map.touchZoom.enable();
+
+                mouseDown = false;
+            })
+            img.on("touchstart", function (e) {
+                console.log("Touchkstart")
+                marker.dragging.disable();
+                map.dragging.disable();
+                map.touchZoom.disable();
+                mouseDown = true;
+                $(document).on("touchmove", mouse);
+            });
+            $(document).on("touchend", function (e) {
                 marker.dragging.enable();
                 map.dragging.enable();
                 map.touchZoom.enable();
