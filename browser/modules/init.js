@@ -14,8 +14,6 @@ var backboneEvents;
 
 const semver = require('semver');
 const md5 = require('md5');
-require("bootstrap");
-
 const cookie = require('js-cookie');
 
 const DEFAULT_STARTUP_MODAL_SUPRESSION_TEMPLATES = ["print.tmpl", "blank.tmpl", {
@@ -43,73 +41,82 @@ module.exports = {
      */
     init: function () {
         let me = this, configFile, stop = false;
-
-        if (typeof urlVars.session === "string") {
-            cookie.set("connect.gc2", urlVars.session, {expires: 1});
-        }
-
-        let loadConfig = function () {
-            let configParam;
-            if (configFile.startsWith("/")) {
-                configParam = "/api/localconfig?file=" + configFile
-            } else {
-                configParam = "/api/config/" + urlparser.db + "/" + configFile;
-            }
-            $.getJSON(configParam, function (data) {
-                window.vidiConfig.brandName = data.brandName ? data.brandName : window.vidiConfig.brandName;
-                window.vidiConfig.startUpModal = data.startUpModal ? data.startUpModal : window.vidiConfig.startUpModal;
-                window.vidiConfig.baseLayers = data.baseLayers ? data.baseLayers : window.vidiConfig.baseLayers;
-                window.vidiConfig.enabledExtensions = data.enabledExtensions ? data.enabledExtensions : window.vidiConfig.enabledExtensions;
-                window.vidiConfig.searchConfig = data.searchConfig ? data.searchConfig : window.vidiConfig.searchConfig;
-                window.vidiConfig.aboutBox = data.aboutBox ? data.aboutBox : window.vidiConfig.aboutBox;
-                window.vidiConfig.enabledSearch = data.enabledSearch ? data.enabledSearch : window.vidiConfig.enabledSearch;
-                window.vidiConfig.removeDisabledLayersFromLegend = data.removeDisabledLayersFromLegend ? data.removeDisabledLayersFromLegend : window.vidiConfig.removeDisabledLayersFromLegend;
-                window.vidiConfig.snapshot = data.snapshot ? data.snapshot : window.vidiConfig.snapshot;
-                window.vidiConfig.schemata = data.schemata ? data.schemata : window.vidiConfig.schemata;
-                window.vidiConfig.template = data.template ? data.template : window.vidiConfig.template;
-                window.vidiConfig.enabledPrints = data.enabledPrints ? data.enabledPrints : window.vidiConfig.enabledPrints;
-                window.vidiConfig.activateMainTab = data.activateMainTab ? data.activateMainTab : window.vidiConfig.activateMainTab;
-                window.vidiConfig.extensionConfig = data.extensionConfig ? data.extensionConfig : window.vidiConfig.extensionConfig;
-                window.vidiConfig.singleTiled = data.singleTiled ? data.singleTiled : window.vidiConfig.singleTiled;
-                window.vidiConfig.doNotCloseLoadScreen = data.doNotCloseLoadScreen ? data.doNotCloseLoadScreen : window.vidiConfig.doNotCloseLoadScreen;
-                window.vidiConfig.startupModalSupressionTemplates = data.startupModalSupressionTemplates ? data.startupModalSupressionTemplates : window.vidiConfig.startupModalSupressionTemplates;
-                window.vidiConfig.cssFiles = data.cssFiles ? data.cssFiles : window.vidiConfig.cssFiles;
-                window.vidiConfig.dontUseAdvancedBaseLayerSwitcher = data.dontUseAdvancedBaseLayerSwitcher ? data.dontUseAdvancedBaseLayerSwitcher : window.vidiConfig.dontUseAdvancedBaseLayerSwitcher;
-                window.vidiConfig.wmsUriReplace = data.wmsUriReplace ? data.wmsUriReplace : window.vidiConfig.wmsUriReplace;
-                window.vidiConfig.infoClickCursorStyle = data.infoClickCursorStyle ? data.infoClickCursorStyle : window.vidiConfig.infoClickCursorStyle;
-                window.vidiConfig.crossMultiSelect = data.crossMultiSelect ? data.crossMultiSelect : window.vidiConfig.crossMultiSelect;
-                window.vidiConfig.featureInfoTableOnMap = data.featureInfoTableOnMap ? data.featureInfoTableOnMap : window.vidiConfig.featureInfoTableOnMap;
-            }).fail(function () {
-                console.log("Could not load: " + configFile);
-                if (window.vidiConfig.defaultConfig && (window.vidiConfig.defaultConfig !== configFile)) {
-                    configFile = window.vidiConfig.defaultConfig;
-                    if (!stop) {
-                        stop = true;
-                        loadConfig();
+        (function poll() {
+            if (typeof L.control.locate !== "undefined") {
+                if (typeof urlVars.session === "string") {
+                    // Try to remove existing cookie
+                    document.cookie = 'connect.gc2=; Max-Age=0; path=/; domain=' + location.host;
+                    cookie.set("connect.gc2", urlVars.session);
+                }
+                let loadConfig = function () {
+                    let configParam;
+                    if (configFile.startsWith("/")) {
+                        configParam = "/api/localconfig?file=" + configFile
                     } else {
-                        me.getVersion();
+                        configParam = "/api/config/" + urlparser.db + "/" + configFile;
                     }
+                    $.getJSON(configParam, function (data) {
+                        window.vidiConfig.brandName = data.brandName ? data.brandName : window.vidiConfig.brandName;
+                        window.vidiConfig.startUpModal = data.startUpModal ? data.startUpModal : window.vidiConfig.startUpModal;
+                        window.vidiConfig.baseLayers = data.baseLayers ? data.baseLayers : window.vidiConfig.baseLayers;
+                        window.vidiConfig.enabledExtensions = data.enabledExtensions ? data.enabledExtensions : window.vidiConfig.enabledExtensions;
+                        window.vidiConfig.searchConfig = data.searchConfig ? data.searchConfig : window.vidiConfig.searchConfig;
+                        window.vidiConfig.aboutBox = data.aboutBox ? data.aboutBox : window.vidiConfig.aboutBox;
+                        window.vidiConfig.enabledSearch = data.enabledSearch ? data.enabledSearch : window.vidiConfig.enabledSearch;
+                        window.vidiConfig.removeDisabledLayersFromLegend = data.removeDisabledLayersFromLegend ? data.removeDisabledLayersFromLegend : window.vidiConfig.removeDisabledLayersFromLegend;
+                        window.vidiConfig.snapshot = data.snapshot ? data.snapshot : window.vidiConfig.snapshot;
+                        window.vidiConfig.schemata = data.schemata ? data.schemata : window.vidiConfig.schemata;
+                        window.vidiConfig.template = data.template ? data.template : window.vidiConfig.template;
+                        window.vidiConfig.enabledPrints = data.enabledPrints ? data.enabledPrints : window.vidiConfig.enabledPrints;
+                        window.vidiConfig.activateMainTab = data.activateMainTab ? data.activateMainTab : window.vidiConfig.activateMainTab;
+                        window.vidiConfig.extensionConfig = data.extensionConfig ? data.extensionConfig : window.vidiConfig.extensionConfig;
+                        window.vidiConfig.singleTiled = data.singleTiled ? data.singleTiled : window.vidiConfig.singleTiled;
+                        window.vidiConfig.doNotCloseLoadScreen = data.doNotCloseLoadScreen ? data.doNotCloseLoadScreen : window.vidiConfig.doNotCloseLoadScreen;
+                        window.vidiConfig.startupModalSupressionTemplates = data.startupModalSupressionTemplates ? data.startupModalSupressionTemplates : window.vidiConfig.startupModalSupressionTemplates;
+                        window.vidiConfig.cssFiles = data.cssFiles ? data.cssFiles : window.vidiConfig.cssFiles;
+                        window.vidiConfig.dontUseAdvancedBaseLayerSwitcher = data.dontUseAdvancedBaseLayerSwitcher ? data.dontUseAdvancedBaseLayerSwitcher : window.vidiConfig.dontUseAdvancedBaseLayerSwitcher;
+                        window.vidiConfig.wmsUriReplace = data.wmsUriReplace ? data.wmsUriReplace : window.vidiConfig.wmsUriReplace;
+                        window.vidiConfig.infoClickCursorStyle = data.infoClickCursorStyle ? data.infoClickCursorStyle : window.vidiConfig.infoClickCursorStyle;
+                        window.vidiConfig.crossMultiSelect = data.crossMultiSelect ? data.crossMultiSelect : window.vidiConfig.crossMultiSelect;
+                        window.vidiConfig.featureInfoTableOnMap = data.featureInfoTableOnMap ? data.featureInfoTableOnMap : window.vidiConfig.featureInfoTableOnMap;
+                    }).fail(function () {
+                        console.log("Could not load: " + configFile);
+                        if (window.vidiConfig.defaultConfig && (window.vidiConfig.defaultConfig !== configFile)) {
+                            configFile = window.vidiConfig.defaultConfig;
+                            if (!stop) {
+                                stop = true;
+                                loadConfig();
+                            } else {
+                                me.getVersion();
+                            }
+                        } else {
+                            me.getVersion();
+                        }
+                    }).done(function () {
+                        me.getVersion();
+                    });
+                };
+
+                if (urlVars.config) {
+                    configFile = urlVars.config;
+                } else if (window.vidiConfig.autoLoadingConfig) {
+                    configFile = urlparser.db + ".json";
+                } else if (window.vidiConfig.defaultConfig) {
+                    configFile = window.vidiConfig.defaultConfig;
+                }
+
+                if (configFile) {
+                    loadConfig();
                 } else {
                     me.getVersion();
                 }
-            }).done(function () {
-                me.getVersion();
-            });
-        };
-
-        if (urlVars.config) {
-            configFile = urlVars.config;
-        } else if (window.vidiConfig.autoLoadingConfig) {
-            configFile = urlparser.db + ".json";
-        } else if (window.vidiConfig.defaultConfig) {
-            configFile = window.vidiConfig.defaultConfig;
-        }
-
-        if (configFile) {
-            loadConfig();
-        } else {
-            me.getVersion();
-        }
+            } else {
+                console.log("polling...");
+                setTimeout(()=>{
+                    poll();
+                }, 10)
+            }
+        }());
     },
 
     getVersion: function () {
@@ -410,7 +417,11 @@ module.exports = {
                     console.error("Could not perform application initialization", e.message, e);
                 }
                 $("#loadscreen").fadeOut(200);
+            }).catch((error)=> {
+                console.error(error)
             });
+        }).catch((error)=> {
+            console.error(error)
         });
 
         if ('serviceWorker' in navigator) {

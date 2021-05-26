@@ -310,7 +310,7 @@ module.exports = {
                                     canvasHasData = new Uint32Array(canvas.getContext('2d')
                                         .getImageData(0, 0, canvas.width, canvas.height).data.buffer).some(x => x !== 0);
                                 } catch (e) {
-                                    console.error(e);
+                                    canvasHasData = true; // In case of Internet Explorer
                                 }
                             }
                             backboneEvents.get().trigger("tileLayerVisibility:layers", {

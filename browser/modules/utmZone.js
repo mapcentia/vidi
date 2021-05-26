@@ -1,17 +1,18 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2021 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
+
 
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init, getZone: module.exports.getZone}}
  */
 module.exports = {
-    set: function (o) {
+    set: function () {
         return this;
     },
     init: function () {
@@ -24,7 +25,7 @@ module.exports = {
      */
     getZone: function (lat, lng) {
         // Get the UTM zone
-        var zoneNumber = Math.floor((lng + 180) / 6) + 1;
+        let zoneNumber = Math.floor((lng + 180) / 6) + 1;
 
         if (lat >= 56.0 && lat < 64.0 && lng >= 3.0 && lng < 12.0) {
             zoneNumber = 32;

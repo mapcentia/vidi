@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2021 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -45,6 +45,9 @@ var proj4 = require('proj4');
  */
 var exId = "coordinates";
 
+
+let config = require('../../../config/config.js');
+const lockedUtmZone = config?.extensionConfig?.coordinates?.lockUtmZoneTo
 
 /**
  *
@@ -181,8 +184,8 @@ module.exports = {
 
                 cloud.get().map.on('mousemove', function (e) {
 
-                    let z = utmZone.getZone(e.latlng.lat, e.latlng.lng), crss = {
-                        "dest": "+proj=utm +zone=" + z + " +ellps=WGS84 +datum=WGS84 +units=m +no_defs",
+                    let z = lockedUtmZone || utmZone.getZone(e.latlng.lat, e.latlng.lng), crss = {
+                        "dest": "+proj=utm +zone=" + z.toString() + " +ellps=WGS84 +datum=WGS84 +units=m +no_defs",
                         "source": "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
                     }, coords = proj4(crss.source, crss.dest, [e.latlng.lng, e.latlng.lat]);
 
