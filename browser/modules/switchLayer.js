@@ -183,9 +183,7 @@ module.exports = module.exports = {
                 labelsEnabled = "true";
             }
             layers.addLayer(gc2Id, [layerTree.getLayerFilterString(gc2Id), `labels=${labelsEnabled}`]).then(() => {
-
                 _self.checkLayerControl(gc2Id, doNotLegend, setupControls);
-
                 let cacheBuster = ``;
                 if (forceReload) {
                     cacheBuster = Math.random();
@@ -197,7 +195,6 @@ module.exports = module.exports = {
                         }
                     }
                 }
-
                 // The WMS tile layer and single-tiled at the same time creates the L.nonTiledLayer.wms
                 // which does not have the setUrl() method
                 let rasterTileLayer = cloud.get().getLayersByName(gc2Id, false);
