@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2020 MapCentia ApS
+ * @copyright  2013-2021 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -12,32 +12,27 @@ import {LAYER, SYSTEM_FIELD_PREFIX, MAP_RESOLUTIONS} from './layerTree/constants
 /**
  * @type {*|exports|module.exports}
  */
-var cloud, backboneEvents, meta, layerTree, advancedInfo, switchLayer;
+let cloud, backboneEvents, meta, layerTree, advancedInfo, switchLayer;
 
 /**
  * @type {*|exports|module.exports}
  */
-var _layers;
-
-/**
- * @type {*|exports|module.exports}
- */
-var editor;
+let _layers;
 
 /**
  *
  * @type {*|exports|module.exports}
  */
-var urlparser = require('./urlparser');
+const urlparser = require('./urlparser');
 
-var download = require('./download');
+const download = require('./download');
 
 /**
  * @type {string}
  */
-var db = urlparser.db;
+let db = urlparser.db;
 
-var extensions;
+let extensions;
 
 let _self = false;
 
@@ -58,7 +53,7 @@ let defaultSelectedStyle = {
 
 let backArrowIsAdded = false;
 
-let jquery = require('jquery');
+const jquery = require('jquery');
 require('snackbarjs');
 
 
@@ -66,7 +61,7 @@ require('snackbarjs');
  * A default template for GC2, with a loop
  * @type {string}
  */
-var defaultTemplate =
+let defaultTemplate =
     `<div class="vidi-popup-content">
         <div class="form-group gc2-edit-tools" style="display: none; width: 90%;">
             <div class="btn-group btn-group-justified">
@@ -91,7 +86,7 @@ var defaultTemplate =
         {{/_vidi_content.fields}}
     </div>`;
 
-var defaultTemplateForCrossMultiSelect =
+const defaultTemplateForCrossMultiSelect =
     `<div class="vidi-popup-content">
         {{#_vidi_content.fields}}
             <h4>{{title}}</h4>
@@ -107,7 +102,7 @@ var defaultTemplateForCrossMultiSelect =
  * Default template for raster layers
  * @type {string}
  */
-var defaultTemplateRaster =
+const defaultTemplateRaster =
     `<div class="vidi-popup-content">
                 <h4>Class</h4>
                 <p>{{{class}}}</p>
@@ -168,7 +163,13 @@ module.exports = {
      * @param infoClickPoint
      * @param whereClause
      * @param includes
+     * @param zoomToResult
      * @param {Function} onPopupCloseButtonClick Fires when feature popup is closed by clicking the Close button
+     * @param selectCallBack
+     * @param prefix
+     * @param simple
+     * @param infoText
+     * @param layerTag
      */
     init: function (qstore, wkt, proj, callBack, num, infoClickPoint, whereClause, includes, zoomToResult, onPopupCloseButtonClick, selectCallBack = () => {
     }, prefix = "", simple = false, infoText = null, layerTag = "query_result") {
@@ -197,7 +198,7 @@ module.exports = {
         layers = includes || layers;
 
         // Remove not queryable layers from array
-        for (var i = layers.length - 1; i >= 0; i--) {
+        for (let i = layers.length - 1; i >= 0; i--) {
             if (typeof metaDataKeys[layers[i]] !== "undefined" && metaDataKeys[layers[i]].not_querable) {
                 layers.splice(i, 1);
             }
@@ -211,28 +212,38 @@ module.exports = {
                 return true;
             }
 
-            value = layerTreeUtils.stripPrefix(value);
-
             if (layers[0] === "") {
                 return false;
             }
 
+            value = layerTreeUtils.stripPrefix(value);
             if (!metaDataKeys[value]) {
                 throw new Error(`metaDataKeys[${value}] is undefined`);
             }
 
-            var isEmpty = true;
-            var srid = metaDataKeys[value].srid;
-            var key = "_vidi_sql_" + index;
-            var _key_ = metaDataKeys[value]._key_;
-            var keyWithoutGeom = metaDataKeys[value].f_table_schema + "." + metaDataKeys[value].f_table_name;
-            var pkey = metaDataKeys[value].pkey;
-            var geoType = metaDataKeys[value].type;
-            var layerTitel = (metaDataKeys[value].f_table_title !== null && metaDataKeys[value].f_table_title !== "") ? metaDataKeys[value].f_table_title : metaDataKeys[value].f_table_name;
-            var not_querable = metaDataKeys[value].not_querable;
-            var versioning = metaDataKeys[value].versioning;
-            var fields = typeof metaDataKeys[value].fields !== "undefined" ? metaDataKeys[value].fields : null;
-            var onLoad;
+            let layerIsEditable = false;
+            if (metaDataKeys[value].meta) {
+                let parsedMeta = JSON.parse(metaDataKeys[value].meta);
+                if (parsedMeta && typeof parsedMeta === `object`) {
+                    if (`vidi_layer_editable` in parsedMeta && parsedMeta.vidi_layer_editable) {
+                        layerIsEditable = true;
+                    }
+                }
+            }
+
+            let editingStarted = false;
+            let isEmpty = true;
+            let srid = metaDataKeys[value].srid;
+            let key = "_vidi_sql_" + index;
+            let _key_ = metaDataKeys[value]._key_;
+            let keyWithoutGeom = metaDataKeys[value].f_table_schema + "." + metaDataKeys[value].f_table_name;
+            let pkey = metaDataKeys[value].pkey;
+            let geoType = metaDataKeys[value].type;
+            let layerTitel = (metaDataKeys[value].f_table_title !== null && metaDataKeys[value].f_table_title !== "") ? metaDataKeys[value].f_table_title : metaDataKeys[value].f_table_name;
+            let not_querable = metaDataKeys[value].not_querable;
+            let versioning = metaDataKeys[value].versioning;
+            let fields = typeof metaDataKeys[value].fields !== "undefined" ? metaDataKeys[value].fields : null;
+            let onLoad;
             let fieldConf = (typeof metaDataKeys[value].fieldconf !== "undefined"
                 && metaDataKeys[value].fieldconf !== "")
                 ? $.parseJSON(metaDataKeys[value].fieldconf) : null;
@@ -240,6 +251,7 @@ module.exports = {
 
             let featureInfoTableOnMap = (typeof window.vidiConfig.featureInfoTableOnMap !== "undefined" && window.vidiConfig.featureInfoTableOnMap === true && simple);
             let f_geometry_column = metaDataKeys[value].f_geometry_column
+            let styleForSelectedFeatures;
 
             // Back arrow to template if featureInfoTableOnMap is true
             if (featureInfoTableOnMap && !backArrowIsAdded) {
@@ -255,7 +267,6 @@ module.exports = {
                 $(parsedMeta.info_element_selector).empty();
             }
 
-            let styleForSelectedFeatures;
             if (typeof parsedMeta.tiles_selected_style !== "undefined" && parsedMeta.tiles_selected_style !== "") {
                 try {
                     styleForSelectedFeatures = JSON.parse(parsedMeta.tiles_selected_style);
@@ -276,7 +287,7 @@ module.exports = {
 
             if (!callBack) {
                 onLoad = function () {
-                    var layerObj = this, cm = [], storeId = this.id, sql = this.sql;
+                    let layerObj = this, cm = [], storeId = this.id, sql = this.sql;
 
                     _layers.decrementCountLoading("_vidi_sql_" + storeId);
                     backboneEvents.get().trigger("doneLoading:layers", "_vidi_sql_" + storeId);
@@ -299,14 +310,18 @@ module.exports = {
 
                             // Add alternative-info-container to pop-up if featureInfoTableOnMap or else in left slide panel
                             if (featureInfoTableOnMap) {
-                                let popup = L.popup({
+                                L.popup({
                                     minWidth: 350
                                 })
                                     .setLatLng(infoClickPoint)
                                     .setContent(`<div id="info-box-pop-up"></div>`)
                                     .openOn(cloud.get().map)
                                     .on('remove', () => {
-                                        _self.resetAll();
+                                        if (!editingStarted) {
+                                            _self.resetAll();
+                                        } else {
+                                            editingStarted = false;
+                                        }
                                     });
                                 $("#info-box-pop-up").html(popUpInner);
 
@@ -322,7 +337,7 @@ module.exports = {
 
                         $(`#${elementPrefix}modal-info-body`).show();
                         $(`#${elementPrefix}info-tab`).append(`<li><a onclick="setTimeout(()=>{$('#${elementPrefix}modal-info-body table').bootstrapTable('resetView'),100})" id="tab_${storeId}" data-toggle="tab" href="#_${storeId}">${layerTitel}</a></li>`);
-                        $(`#${elementPrefix}info-pane`).append(`<div class="tab-pane" id="_${storeId}">
+                        $(`#${elementPrefix}info-pane`).append(`<div class="tab-pane _sql_query" id="_${storeId}">
                             <div style="display: ${display}">
                                 <a class="btn btn-sm btn-raised" id="_download_geojson_${storeId}" target="_blank" href="javascript:void(0)">
                                     <i class="fa fa-download" aria-hidden="true"></i> GeoJson
@@ -359,7 +374,7 @@ module.exports = {
                         hit = true;
                         count.hits = count.hits + Object.keys(layerObj.layer._layers).length;
 
-                        var _table = gc2table.init({
+                        let _table = gc2table.init({
                             el: "#_" + storeId + " table",
                             ns: "#_" + storeId,
                             geocloud2: cloud.get(),
@@ -376,33 +391,24 @@ module.exports = {
                             locale: window._vidiLocale.replace("_", "-"),
                             template: template,
                             pkey: pkey,
-                            renderInfoIn: parsedMeta.info_element_selector || featureInfoTableOnMap ? "#alternative-info-container" : null,
+                            renderInfoIn: !!parsedMeta.info_element_selector || featureInfoTableOnMap ? "#alternative-info-container" : null,
                             onSelect: selectCallBack,
                             key: keyWithoutGeom,
                             caller: _self,
                             styleSelected: styleForSelectedFeatures,
-                            setZoom: parsedMeta?.zoom_on_table_click ? parsedMeta.zoom_on_table_click : false
+                            setZoom: parsedMeta?.zoom_on_table_click ? parsedMeta.zoom_on_table_click : false,
+                            dashSelected: true
                         });
-
                         if (!parsedMeta.info_element_selector) {
                             _table.object.on("openpopup" + "_" + _table.uid, function (e) {
                                 let popup = e.getPopup();
                                 if (popup?._closeButton) {
-                                    popup._closeButton.onclick = function (clickEvent) {
-                                        if (onPopupCloseButtonClick) onPopupCloseButtonClick(e._leaflet_id);
-                                    }
-                                }
-
-                                let layerIsEditable = false;
-                                if (metaDataKeys[value].meta) {
-                                    let parsedMeta = JSON.parse(metaDataKeys[value].meta);
-                                    if (parsedMeta && typeof parsedMeta === `object`) {
-                                        if (`vidi_layer_editable` in parsedMeta && parsedMeta.vidi_layer_editable) {
-                                            layerIsEditable = true;
+                                    popup._closeButton.onclick = function () {
+                                        if (onPopupCloseButtonClick) {
+                                            onPopupCloseButtonClick(e._leaflet_id);
                                         }
                                     }
                                 }
-
                                 setTimeout(() => {
                                     if (editingIsEnabled && layerIsEditable) {
                                         $(".gc2-edit-tools").css(`display`, `inline`);
@@ -417,6 +423,7 @@ module.exports = {
 
                                 $(".popup-edit-btn").unbind("click.popup-edit-btn").bind("click.popup-edit-btn", function () {
                                     editor.edit(e, _key_, qstore);
+                                    editingStarted = true;
                                 });
 
                                 $(".popup-delete-btn").unbind("click.popup-delete-btn").bind("click.popup-delete-btn", function () {
@@ -429,12 +436,10 @@ module.exports = {
                         // Here inside onLoad we call loadDataInTable(), so the table is populated
                         _table.loadDataInTable(false, true);
 
-                        let showTableInPopup = typeof window.vidiConfig.showTableInPopUp === "boolean" && window.vidiConfig.showTableInPopUp === true;
-
                         if (typeof parsedMeta.info_function !== "undefined" && parsedMeta.info_function !== "") {
                             try {
                                 let func = Function('"use strict";return (' + parsedMeta.info_function + ')')();
-                                func(this.layer.toGeoJSON(), this.layer, keyWithoutGeom, _self, this, cloud.get().map);
+                                func(this.layer.toGeoJSON().features[0], this.layer, keyWithoutGeom, _self, this, cloud.get().map);
                             } catch (e) {
                                 console.info("Error in click function for: " + _key_);
                                 console.error(e.message);
@@ -495,7 +500,7 @@ module.exports = {
                                 $(`#${elementPrefix}modal-info-body table`).bootstrapTable('resetView');
                                 // If only one hit across all layers, the click the only row
                                 if (count.hits === 1) {
-                                    $("#_0 [data-uniqueid]").trigger("click");
+                                    $(`._sql_query [data-uniqueid]`).trigger("click");
                                     $(".show-when-multiple-hits").hide();
                                 }
                             }, 100);
@@ -535,26 +540,29 @@ module.exports = {
                         l._vidi_type = layerTag;
                     }
 
-                    l.on("click", function (e) {
-                        setTimeout(function () {
-                            $(".popup-edit-btn").unbind("click.popup-edit-btn").bind("click.popup-edit-btn", function () {
-                                editor.edit(l, _key_, qstore);
-                            });
+                    /*
+                                        l.on("click", function (e) {
+                                            setTimeout(function () {
+                                                $(".popup-edit-btn").unbind("click.popup-edit-btn").bind("click.popup-edit-btn", function () {
+                                                    alert("1")
+                                                    editor.edit(l, _key_, qstore);
+                                                });
 
-                            $(".popup-delete-btn").unbind("click.popup-delete-btn").bind("click.popup-delete-btn", function () {
-                                if (window.confirm("Er du sikker? Dine ændringer vil ikke blive gemt!")) {
-                                    editor.delete(l, _key_, qstore);
-                                }
-                            });
-                        }, 500)
-                    });
+                                                $(".popup-delete-btn").unbind("click.popup-delete-btn").bind("click.popup-delete-btn", function () {
+                                                    if (window.confirm("Er du sikker? Dine ændringer vil ikke blive gemt!")) {
+                                                        editor.delete(l, _key_, qstore);
+                                                    }
+                                                });
+                                            }, 500)
+                                        });
+                    */
 
                 }
             });
 
             cloud.get().addGeoJsonStore(qstore[index]);
 
-            var sql, fieldNames = [], fieldStr;
+            let sql, fieldNames = [], fieldStr;
 
             if (fields) {
                 $.each(fields, function (i, v) {
@@ -612,8 +620,6 @@ module.exports = {
 
             sql = sql + " LIMIT " + (num || 500);
 
-            console.log("Fired SQL:", sql);
-
             qstore[index].onLoad = onLoad || callBack.bind(this, qstore[index], isEmpty, not_querable, layerTitel, fieldConf, layers, count);
             qstore[index].sql = sql;
             qstore[index].load();
@@ -660,7 +666,7 @@ module.exports = {
         let cm = [];
         let out = [];
         $.each(features, function (i, feature) {
-            var fields = [];
+            let fields = [];
             if (fieldConf === null) {
                 $.each(feature.properties, function (name, property) {
                     if (name.indexOf(SYSTEM_FIELD_PREFIX) !== 0 && name !== `_id` && name !== `_vidi_content`) {
@@ -807,8 +813,9 @@ module.exports = {
     },
 
     openInfoSlidePanel: function (layerKey = null) {
-        $("#click-for-info-slide.slide-left").show();
-        $("#click-for-info-slide.slide-left").animate({left: "0"}, 200);
+        let e = $("#click-for-info-slide.slide-left");
+        e.show();
+        e.animate({left: "0"}, 200);
         if (layerKey) {
             let metaDataKeys = meta.getMetaDataKeys();
             let title = typeof metaDataKeys[layerKey].f_table_title !== "undefined" ? metaDataKeys[layerKey].f_table_title : metaDataKeys[layerKey].f_table_name;

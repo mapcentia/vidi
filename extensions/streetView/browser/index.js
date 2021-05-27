@@ -10,47 +10,47 @@
  *
  * @type {*|exports|module.exports}
  */
-var cloud;
+let cloud;
 
 /**
  *
  * @type {*|exports|module.exports}
  */
-var utils;
+let utils;
 
 /**
  *
  * @type {*|exports|module.exports}
  */
-var backboneEvents;
+let backboneEvents;
 
 /**
  *
  */
-var transformPoint;
+let transformPoint;
 
 
 /**
  *
  * @type {string}
  */
-var exId = "streetView";
+let exId = "streetView";
 
 /**
  *
  */
-var clicktimer;
+let clicktimer;
 
 /**
  *
  */
-var mapObj;
+let mapObj;
 
-var cowiUrl;
+let cowiUrl;
 
-var mapillaryUrl = "https://www.mapillary.com/app/?z=17";
+let mapillaryUrl = "https://www.mapillary.com/app/?z=17";
 
-var config = require('../../../config/config.js');
+let config = require('../../../config/config.js');
 
 if (typeof config.extensionConfig !== "undefined" && typeof config.extensionConfig.streetView !== "undefined") {
     if (typeof config.extensionConfig.streetView.mapillary !== "undefined") {
@@ -86,7 +86,7 @@ module.exports = {
      */
     init: function () {
 
-        var parentThis = this;
+        let parentThis = this;
 
         /**
          *
@@ -97,18 +97,17 @@ module.exports = {
         /**
          *
          */
-        var React = require('react');
+        const React = require('react');
 
         /**
          *
          */
-        var ReactDOM = require('react-dom');
+        const ReactDOM = require('react-dom');
 
         /**
          *
-         * @type {{Info: {da_DK: string, en_US: string}, Street View: {da_DK: string, en_US: string}, Choose service: {da_DK: string, en_US: string}, Activate: {da_DK: string, en_US: string}}}
          */
-        var dict = {
+        const dict = {
 
             "Info": {
                 "da_DK": "Start Google Street View, Mapillary eller skråfoto op fra hvor du klikker i kortet. Servicen starter i et nyt browser vindue.",
@@ -137,7 +136,7 @@ module.exports = {
          * @returns {*}
          * @private
          */
-        var __ = function (txt) {
+        const __ = function (txt) {
             if (dict[txt][window._vidiLocale]) {
                 return dict[txt][window._vidiLocale];
             } else {
@@ -209,7 +208,7 @@ module.exports = {
                             return;
                         }
 
-                        clicktimer = setTimeout(function (e) {
+                        clicktimer = setTimeout(function () {
 
                             let coords = event.getCoordinate(), p, url;
                             p = utils.transform("EPSG:3857", "EPSG:4326", coords);
@@ -241,11 +240,10 @@ module.exports = {
 
             /**
              *
-             * @returns {XML}
+             * @returns {JSX.Element}
              */
             render() {
                 return (
-
                     <div role="tabpanel">
                         <div className="form-group">
                             <h3>{__("Choose service")}</h3>
@@ -284,7 +282,7 @@ module.exports = {
                                            name="streetview-service" value="cowi"
                                            checked={this.state.selectedOption === 'cowi'}
                                            onChange={this.onChange}/>
-                                    COWI Skråfoto
+                                    COWI Gadefoto
                                 </label>
                             </div>
 

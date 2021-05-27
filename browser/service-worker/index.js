@@ -46,7 +46,8 @@ let ignoredExtensionsRegExps = [];
 */
 let forceIgnoredExtensionsCaching = false;
 
-let urlsToCache = require(`urls-to-cache`);
+const urlsToCache = require(`urls-to-cache`);
+const base64url = require("base64url");
 
 const urlSubstitution = [{
 requested: 'https://netdna.bootstrapcdn.com/font-awesome/4.5.0/fonts/fontawesome-webfont.ttf?v=4.5.0',
@@ -230,7 +231,7 @@ getAll() {
         });
     });
 }
-};
+}
 
 /**
 * Key-value store for keeping extracted POST data for the specific URL
@@ -329,8 +330,7 @@ const normalizeTheURLForFetch = (event) => {
                             if (`q` in mappedObject && mappedObject.q) {
                                 if (method === `POST`) {
                                     let cleanedString = mappedObject.q.replace(/%3D/g, '');
-                                    decodedQuery = atob(cleanedString);
-                                    ;
+                                    decodedQuery = base64url.decode(cleanedString);
                                 } else if (method === `GET`) {
                                     decodedQuery = mappedObject.q;
                                 } else {

@@ -13,24 +13,19 @@ Systemkonfiguration
 .. contents:: 
     :depth: 4
 
-
-*****************************************************************
-Systemkonfiguration
-***************************************************************** 
-
 Vidi kan konfigureres under opstart. Denne konfiguration kan indeholde information om hvilke extensions, der skal indlæses, hvilke print-skabeloner der er tilgængelige med mere.
 
 Laves der en ændring, skal vidi startes igen.
 
 Opbygning
-=================================================================
+*****************************************************************
 
 Vidi styres af ``config.js``. Denne fil vil være at finde i ``./vidi/config/``. 
 
 .. _configjs_puppeteerprocesses:
 
 puppeteerProcesses
------------------------------------------------------------------
+*****************************************************************
 
 Denne blok styrer hvor mange arbejdere der kan være forbindet til print-køen. 
 
@@ -48,7 +43,7 @@ Antallet af varme puppeteer-instaser vil have en effekt på systemets RAM forbru
 .. _configjs_print:
 
 print
------------------------------------------------------------------
+*****************************************************************
 
 Denne nøgle indeholder opsætningen af print. Den består af underdele som alle er obligatoriske. 
 
@@ -56,7 +51,7 @@ Denne nøgle indeholder opsætningen af print. Den består af underdele som alle
 .. _configjs_scales:
 
 scales
------------------------------------------------------------------
+*****************************************************************
 
 ``scales`` er en array af heltal der definérer hvilke zoom-forhold det er muligt at lave print i.
 
@@ -69,7 +64,7 @@ Herunder er et eksempel på en opsætning der kun giver mulighed for print i ``1
 .. _configjs_configurl:
 
 configUrl
------------------------------------------------------------------
+*****************************************************************
 
 HTTP server hvor eksterne resourcer findes. Resourcer kan være:
 
@@ -90,9 +85,22 @@ Der kan angives forskellige URLer til forskellige databaser. ``_default`` betyde
         "_default": "https://mdapcentia.github.io/vidi_configs_default"
     },
 
+.. _configjs_leftslidewidths:
+
+leftSlideWidths
+*****************************************************************
+
+Angivelse af bredder i det venstre slide-ud panel i default template.
+
+Tallene angiver brededer i hhv. phone, tablet og desktop.
+
+.. code-block:: json
+
+    "leftSlideWidths": [300, 400, 550]
+
 .. _configjs_complete_example:
 
 Komplet eksempel
-=================================================================
+*****************************************************************
 
 For at se et komplet eksempel på en konfiguration henvises til default config i repo. `Den kan du finde her <https://github.com/mapcentia/vidi/blob/master/docker/stable/conf/vidi/config.js>`_

@@ -105,7 +105,7 @@ class MarkupGenerator {
         
                         <div style="display: inline-block;">${layerTypeSelector}</div>
         
-                        <div style="display: inline-block;">
+                        <div style="display: inline-block;" id="layer-information">
                             <span>
                                 ${text}${lockedLayer}
                                 <span class="js-tiles-contain-data" style="visibility: ${moduleState.tileContentCache[layerKey] ? "inline" : "hidden"};" data-toggle="tooltip" data-placement="right"
@@ -150,7 +150,7 @@ class MarkupGenerator {
                         </div>
 
                         <div class="js-toggle-layer-offline-mode-container" style="display: none;">
-                            <div class="btn-group" role="group">
+                            <div class="btn-group" role="group" id="layer-tools-offline">
                                 <button type="button" data-layer-key="${layerKey}" class="btn btn-success btn-xs js-set-online" title="${__(`Fetch layer data from server`)}" style="padding: 4px" disabled>
                                     <i class="fa fa-signal"></i>
                                 </button>
@@ -167,24 +167,37 @@ class MarkupGenerator {
                         </div>
         
                         <div class="js-toggles-container" style="display: none; padding-right: 10px; padding-left: 10px;">
-                            <a href="javascript:void(0);" class="js-toggle-search" >
-                                <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Search`)}" class="material-icons">search</i>
-                            </a>
-                            <a href="javascript:void(0);" class="js-toggle-opacity">
-                                <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Opacity`)}" class="material-icons">opacity</i>
-                            </a>
-                            <a href="javascript:void(0);" class="js-toggle-labels">
-                                <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Labels`)}" class="material-icons">label</i>
-                            </a>
-                            <a href="javascript:void(0);" class="js-toggle-table">
-                                <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Table view`)}" class="material-icons">list</i>
-                            </a>
-                            <a href="javascript:void(0);" class="js-toggle-load-strategy">
-                                <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Load strategy`)}" class="material-icons">branding_watermark</i>
-                            </a>
-                            <a href="javascript:void(0);" class="js-toggle-filters">
-                                <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Filters`)}" class="material-icons">filter_list</i>
-                            </a><span class="js-toggle-filters-number-of-filters">0</span>
+                            <span id="layer-tools-search">
+                                <a href="javascript:void(0);" class="js-toggle-search" >
+                                    <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Search`)}" class="material-icons">search</i>
+                                </a>
+                            </span>
+                            <span id="layer-tools-opacity">
+                                <a href="javascript:void(0);" class="js-toggle-opacity">
+                                    <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Opacity`)}" class="material-icons">opacity</i>
+                                </a>
+                            </span>
+                            <span id="layer-tools-labels">
+                                <a href="javascript:void(0);" class="js-toggle-labels">
+                                    <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Labels`)}" class="material-icons">label</i>
+                                </a>
+                            </span>
+                            <span id="layer-tools-table">
+                                <a href="javascript:void(0);" class="js-toggle-table">
+                                    <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Table view`)}" class="material-icons">list</i>
+                                </a>
+                            </span>
+                            <span id="layer-tools-load">
+                                <a href="javascript:void(0);" class="js-toggle-load-strategy">
+                                    <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Load strategy`)}" class="material-icons">branding_watermark</i>
+                                </a>
+                            </span>
+                            <span id="layer-tools-filters">
+                                <a href="javascript:void(0);" class="js-toggle-filters">
+                                    <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Filters`)}" class="material-icons">filter_list</i>
+                                </a>
+                            <span class="js-toggle-filters-number-of-filters">0</span>
+                            </span>
                         </div>
                         
                         <i style="float: right; padding-top: 9px; font-size: 26px;" class="material-icons layer-move-vert">more_vert</i>

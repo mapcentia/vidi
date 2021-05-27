@@ -6,12 +6,40 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ## [UNRELEASED]
 ### Changed
+- No MapCentia logo in default and conflict print template. Logo can be set with external css sheet. Some thing like this:
+```css
+#print-header-logo{
+  background-image: url('https://.....');
+  background-repeat: no-repeat;
+  background-position: 50% 50%;
+  background-size: 80%;
+}
+```
+- embed.js: If host in token is http, then make it protocol relative, so tokens created on http still works when embedded on https sites.
+
+### Fixed
+- Feature info click wouldn't open the pop-up if multiple layers was switch on.
+- Drawings are not longer dashed, when selected.
+
+## [2021.5.0] - 2021-4-5
+### Changed
 - Node >= 14 er required. 
 - Docker files are added to the project.
 - It's now possible to set `gc2.host` through the environment variable `GC2_HOST`. If set in `config/config.js` it will have precedence.
 - ConflictSearch is now controlled by state module. It will keep state between on/off and browser refreshes. State in conflictSearch is also applied when running a state-snapshot. 
 - Changes in Snapshot UI. The UI is now more clean.
-
+- When the `session=[id]` URL key/value is used, it will now reset the `connect.gc2` session cookie, even if it's set through the sign-in UI. To do that the HttpOnly cookie flag is removed, which will aggravate the risk of client side script accessing the cookie. The cookie is also removed when sign-out is done through the UI.
+- CSS and templates files can now be placed in a sub-folder on the `configUrl` host. Only one level deep like `styles/custom.css`.
+- Layer tools in the layer tree now have parent span elements with theese ids, so it's easier to to set a css display rule on them:
+  - `#layer-tools-offline`
+  - `#layer-tools-search`
+  - `#layer-tools-opacity`
+  - `#layer-tools-labels`
+  - `#layer-tools-tables`
+  - `#layer-tools-load`
+  - `#layer-tools-filters`
+- `repeatMode` is set to `true` for tools in Draw, so tools stay active.
+ 
 ### Added
 - It's possible to lock UTM zone in coordinate module, so it's possible to project to a specific zone outside the actual zone. Useful for e.g. Denmark, which are using zone 32 for the whole country but is located in both 32 and 33.
 ```JSON
@@ -21,10 +49,20 @@ and this project adheres to [CalVer](https://calver.org/).
     }
 }
 ```
+- A new build configuration for setting widths for the left slide-out panel in default template.
+  - ```json
+    "leftSlideWidths": [300, 400, 550]
+    ```
+- Under filters in the layer tree it's now possible to download the layer as either: GeoJSON, Excel or CSV
 
 ### Fixed
 - Base64url are now used to encode filters instead of base64, so + and / sign doesn't mess things up.
 - Changes to Snapshot UI, which fixes an issue with wrong URLs in input fields.
+- Drawing is stored in state, but was not recreated after refresh of browser. This could get "invisible" drawings stored in snapshots.
+- If a layer in a state snapshot is for some reason not available (protected, deleted), the build of the layer tree was ever resolved. Now it'll resolve.  
+- The queueStatisticsWatcher and Service Worker now uses 3. party module for base64 decoding, because windows.btoa fails on non-latin characters.
+- COWI Gade foto named properly in Streetview module.
+- Alot of fixes in the Editor module.
 
 ## [2020.12.0] - 2020-8-12
 ### Changed

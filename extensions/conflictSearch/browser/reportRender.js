@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2020 MapCentia ApS
+ * @copyright  2013-2021 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -11,13 +11,13 @@
  * @returns {*}
  */
 module.exports = {
-    set: function (o) {
+    set: function () {
         return this;
     },
     init: function () {
     },
     render: function (e) {
-        var table = $("#report table"), tr, td, dataTable, dataThead, dataTr, u, m, without = [], groups = [];
+        let table = $("#report table"), tr, dataTable, dataThead, dataTr, u, m, without = [], groups = [];
         $("#conflict-text").html(e.text);
 
         $.each(e.hits, function (i, v) {
@@ -58,7 +58,7 @@ module.exports = {
                                 dataTable.append(dataThead);
                                 for (u = 0; u < v.data[0].length; u++) {
                                     if (!v.data[0][u].key) {
-                                        dataTr.append("<th>" + v.data[0][u].alias  + "</th>");
+                                        dataTr.append("<th>" + v.data[0][u].alias + "</th>");
                                     }
                                 }
                             }
@@ -129,8 +129,9 @@ module.exports = {
             }
         });
         if (without.length > 0) {
-            $("#report #without").append("<caption style='white-space: nowrap;'>Lag uden forekomster i denne søgning</caption>");
-            $("#report #without").append("<div>" + without.join(" | ") + "</div>");
+            let e = $("#report #without");
+            e.append("<caption style='white-space: nowrap;'>Lag uden forekomster i denne søgning</caption>");
+            e.append("<div>" + without.join(" | ") + "</div>");
         }
     }
 };

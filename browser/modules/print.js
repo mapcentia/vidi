@@ -42,6 +42,7 @@ var paramsFromDb;
 
 import dayjs from 'dayjs';
 import advancedFormat from "dayjs/plugin/advancedFormat";
+
 require('dayjs/locale/da')
 dayjs.extend(advancedFormat)
 // Set locale for date/time string
@@ -122,17 +123,32 @@ module.exports = {
         backboneEvents.get().on("end:print", function (response) {
             console.log("Response", response)
             $("#get-print-fieldset").prop("disabled", false);
-            $("#download-pdf, #open-pdf").attr("href", "/tmp/print/pdf/" + response.key + ".pdf");
+            if (response.format === "pdf") {
+                $("#download-pdf, #open-pdf").attr("href", "/tmp/print/pdf/" + response.key + ".pdf");
+            } else if (response.format === "png"){
+                $("#download-pdf, #open-pdf").attr("href", "/tmp/print/png/" + response.key + ".png");
+            } else {
+                $("#download-pdf, #open-pdf").attr("href", "/tmp/print/png/" + response.key + ".zip");
+            }
             $("#download-pdf").attr("download", response.key);
             $("#open-html").attr("href", response.url);
             $("#start-print-btn").button('reset');
+            $(".dropdown-toggle.start-print-btn").prop("disabled", false);
             // GeoEnviron
-            console.log("GEMessage:LaunchURL:" + urlparser.urlObj.protocol+ "://" + urlparser.urlObj.host + "/tmp/print/pdf/" + response.key + ".pdf");
+            console.log("GEMessage:LaunchURL:" + urlparser.urlObj.protocol + "://" + urlparser.urlObj.host + "/tmp/print/pdf/" + response.key + ".pdf");
         });
 
         $("#start-print-btn").on("click", function () {
             if (_self.print()) {
                 $(this).button('loading');
+                $(".dropdown-toggle.start-print-btn").prop("disabled", true);
+                $("#get-print-fieldset").prop("disabled", true);
+            }
+        });
+        $("#start-print-png-btn").on("click", function () {
+            if (_self.print("end:print", null, true)) {
+                $("#start-print-btn").button('loading');
+                $(".dropdown-toggle.start-print-btn").prop("disabled", true);
                 $("#get-print-fieldset").prop("disabled", true);
             }
         });
@@ -162,7 +178,7 @@ module.exports = {
 
     off: function () {
         _cleanUp(true);
-        $("#print-form :input, #start-print-btn, #select-scale").prop("disabled", true);
+        $("#print-form :input, .start-print-btn, #select-scale").prop("disabled", true);
     },
 
     setCallBack: function (fn) {
@@ -175,7 +191,7 @@ module.exports = {
     on: function () {
         let numOfPrintTmpl = 0;
         alreadySetFromState = false;
-        $("#print-form :input, #start-print-btn, #select-scale").prop("disabled", false);
+        $("#print-form :input, .start-print-btn, #select-scale").prop("disabled", false);
         $("#print-tmpl").empty();
         $("#print-size").empty();
         $("#print-orientation").empty();
@@ -308,15 +324,15 @@ module.exports = {
         }, 5);
     },
 
-    print: (endEventName = "end:print", customData) => {
+    print: (endEventName = "end:print", customData, png = false) => {
         return new Promise((resolve, reject) => {
-            state.bookmarkState(customData).then(response => {
+            state.bookmarkState(customData, png).then(response => {
                 backboneEvents.get().trigger(endEventName, response);
                 callBack(response.responseJSON);
-                resolve();
+                resolve(response);
             }).catch(response => {
                 backboneEvents.get().trigger(endEventName, response);
-                callBack(response.responseJSON);
+                callBack(response);
                 reject();
             });
         });
@@ -441,7 +457,13 @@ module.exports = {
         recScale[boxCount] = rectangle(c, recEdit[boxCount], "red");
         recScale[boxCount]._vidi_type = "print";
         printItems.addLayer(recScale[boxCount]);
-        icons[boxCount] = (L.marker(c, {icon: L.divIcon({className: 'print-div-icon', iconSize: null, html: `<span>${(boxCount + 1)}</span>`})}).addTo(cloud.get().map));
+        icons[boxCount] = (L.marker(c, {
+            icon: L.divIcon({
+                className: 'print-div-icon',
+                iconSize: null,
+                html: `<span>${(boxCount + 1)}</span>`
+            })
+        }).addTo(cloud.get().map));
 
         var sw = recEdit[boxCount].getBounds().getSouthWest(), ne = recEdit[boxCount].getBounds().getNorthEast();
         curBounds[boxCount] = [sw.lat, sw.lng, ne.lat, ne.lng];
@@ -451,7 +473,13 @@ module.exports = {
             })
             for (let i = 0; i <= boxCount; i++) {
                 let c = recEdit[i].getBounds().getCenter();
-                icons[i] = (L.marker(c, {icon: L.divIcon({className: 'print-div-icon', iconSize: null, html: `<span>${(i + 1)}</span>`})}).addTo(cloud.get().map));
+                icons[i] = (L.marker(c, {
+                    icon: L.divIcon({
+                        className: 'print-div-icon',
+                        iconSize: null,
+                        html: `<span>${(i + 1)}</span>`
+                    })
+                }).addTo(cloud.get().map));
                 center[i] = c; // re-calculate centers
                 rectangle(c, recEdit[i], "red");
                 //if (curScale !== newScale || (curBounds[i][0] !== newBounds[0] && curBounds[i][1] !== newBounds[1] && curBounds[i][2] !== newBounds[2] && curBounds[i][3] !== newBounds[3])) {
@@ -484,7 +512,8 @@ module.exports = {
             return paramsFromDb;
         }
 
-        var layerQueryDraw = [], layerQueryResult = [], layerQueryBuffer = [], layerPrint = [], e, parr, configFile = null;
+        var layerQueryDraw = [], layerQueryResult = [], layerQueryBuffer = [], layerPrint = [], e, parr,
+            configFile = null;
         if (scale && (isNaN(scale) || scale < 200)) {
             alert(__("Not a valid scale. Must be over 200."));
             return false;
@@ -552,35 +581,40 @@ module.exports = {
             }
         });
 
-        let data = {
-            anchor: anchorRaw,
-            applicationHost: window.location.origin,
-            db: db,
-            schema: schema,
-            draw: (typeof layerDraw[0] !== "undefined" && layerDraw[0].geojson.features.length > 0) ? layerDraw : null,
-            queryDraw: (typeof layerQueryDraw[0] !== "undefined" && layerQueryDraw[0].geojson.features.length > 0) ? layerQueryDraw : null,
-            queryBuffer: (typeof layerQueryBuffer[0] !== "undefined" && layerQueryBuffer[0].geojson.features.length > 0) ? layerQueryBuffer : null,
-            queryResult: (typeof layerQueryResult[0] !== "undefined" && layerQueryResult[0].geojson.features.length > 0) ? layerQueryResult : null,
-            print: (typeof layerPrint[0] !== "undefined" && layerPrint[0].geojson.features.length > 0) ? layerPrint : null,
-            bounds: recScale.map(i => i.getBounds()),
-            scale: scale,
-            tmpl: tmpl,
-            pageSize: pageSize,
-            orientation: printingOrientation,
-            title: encodeURIComponent($("#print-title").val()),
-            comment: encodeURIComponent($("#print-comment").val()),
-            legend: $("#add-legend-btn").is(":checked") ? "inline" : "none",
-            header: encodeURIComponent($("#print-title").val()) || encodeURIComponent($("#print-comment").val()) ? "inline" : "none",
-            dateTime: dayjs().format('Do MMMM YYYY, H:mm'),
-            date: dayjs().format('Do MMMM YYYY'),
-            metaData: meta.getMetaData(),
-            px: config.print.templates[tmpl][pageSize][printingOrientation].mapsizePx[0],
-            py: config.print.templates[tmpl][pageSize][printingOrientation].mapsizePx[1],
-            queryString: urlparser.search,
-            customData: null,
-            scales: scales,
-            sticky: $("#print-sticky").is(":checked")
-        };
+        let data;
+        try {
+            data = {
+                anchor: anchorRaw,
+                applicationHost: window.location.origin,
+                db: db,
+                schema: schema,
+                draw: (typeof layerDraw[0] !== "undefined" && layerDraw[0].geojson.features.length > 0) ? layerDraw : null,
+                queryDraw: (typeof layerQueryDraw[0] !== "undefined" && layerQueryDraw[0].geojson.features.length > 0) ? layerQueryDraw : null,
+                queryBuffer: (typeof layerQueryBuffer[0] !== "undefined" && layerQueryBuffer[0].geojson.features.length > 0) ? layerQueryBuffer : null,
+                queryResult: (typeof layerQueryResult[0] !== "undefined" && layerQueryResult[0].geojson.features.length > 0) ? layerQueryResult : null,
+                print: (typeof layerPrint[0] !== "undefined" && layerPrint[0].geojson.features.length > 0) ? layerPrint : null,
+                bounds: recScale.map(i => i.getBounds()),
+                scale: scale,
+                tmpl: tmpl,
+                pageSize: pageSize,
+                orientation: printingOrientation,
+                title: encodeURIComponent($("#print-title").val()),
+                comment: encodeURIComponent($("#print-comment").val()),
+                legend: $("#add-legend-btn").is(":checked") ? "inline" : "none",
+                header: encodeURIComponent($("#print-title").val()) || encodeURIComponent($("#print-comment").val()) ? "inline" : "none",
+                dateTime: dayjs().format('Do MMMM YYYY, H:mm'),
+                date: dayjs().format('Do MMMM YYYY'),
+                metaData: meta.getMetaData(),
+                px: config.print.templates[tmpl][pageSize][printingOrientation].mapsizePx[0],
+                py: config.print.templates[tmpl][pageSize][printingOrientation].mapsizePx[1],
+                queryString: urlparser.search,
+                customData: null,
+                scales: scales,
+                sticky: $("#print-sticky").is(":checked")
+            };
+        } catch (e) {
+            data = {};
+        }
         if (urlVars.config) {
             parr = urlVars.config.split("#");
             if (parr.length > 1) {
@@ -588,7 +622,7 @@ module.exports = {
             }
             data.config = parr.join();
         }
-        recEdit[recEdit.length - 1].editing.enable();
+        recEdit[recEdit.length - 1]?.editing.enable();
         return data;
     },
 
@@ -603,6 +637,10 @@ module.exports = {
             data.customData = customData || null;
             state.getState().then(applicationState => {
                 data.state = applicationState;
+                // Set layer active if provided
+                if (customData && typeof customData.layer === "string") {
+                    data.state.modules.layerTree.activeLayers = [customData.layer];
+                }
                 resolve(data);
             });
         });
@@ -618,7 +656,10 @@ module.exports = {
     },
 
     applyState: (print) => {
-        paramsFromDb = print;
-        backboneEvents.get().trigger(`${MODULE_ID}:state_change`);
+        return new Promise((resolve) => {
+            paramsFromDb = print;
+            // backboneEvents.get().trigger(`${MODULE_ID}:state_change`);
+            resolve();
+        });
     }
 };

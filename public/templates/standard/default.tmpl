@@ -410,9 +410,15 @@
 
                                     </div>
                                 </div>
-                                <a class="btn btn-sm btn-raised" id="_draw_download_geojson" target="_blank" href="javascript:void(0)">
+                                <button class="btn btn-sm btn-raised" id="_draw_download_geojson" target="_blank" href="javascript:void(0)">
                                     <i class="fa fa-download" aria-hidden="true"></i> GeoJson
-                                </a>
+                                </button>
+                                <button class="btn btn-sm btn-raised" style="display: none" id="_draw_make_conflict_with_selected" target="_blank" href="javascript:void(0)">
+                                    <i class="fa fa-download" aria-hidden="true"></i> {{Conflict with selected}}
+                                </button>
+                                <button class="btn btn-sm btn-raised" style="display: none" id="_draw_make_conflict_with_all" target="_blank" href="javascript:void(0)">
+                                    <i class="fa fa-download" aria-hidden="true"></i> {{Conflict with all}}
+                                </button>
                                 <div id="draw-table"></div>
 
                             </div>
@@ -428,16 +434,22 @@
                                 <div></div>
                                 <div class="btn-toolbar bs-component" style="margin: 0;">
                                     <div class="btn-group">
-                                        <button id="start-print-btn" class="btn btn-raised" style="width: 130px"
+                                        <button id="start-print-btn" class="btn btn-raised start-print-btn" style="width: 130px"
                                                 data-loading-text="<i class='fa fa-cog fa-spin fa-lg'></i> {{Make PDF}}" disabled>
                                             <i class='fa fa-cog fa-lg'></i> {{Make PDF}}
                                         </button>
+                                        <button
+                                           class="btn btn-raised dropdown-toggle start-print-btn"
+                                           data-toggle="dropdown"><span class="caret"></span></button>
+                                        <ul class="dropdown-menu">
+                                            <li><a href="javascript:void(0)" id="start-print-png-btn">PNG</a></li>
+                                        </ul>
                                     </div>
                                     <fieldset disabled id="get-print-fieldset">
                                         <div class="btn-group">
                                             <a target="_blank" href="javascript:void(0)"
                                                class="btn btn-primary btn-raised"
-                                               id="open-pdf">{{Open PDF}}</a>
+                                               id="open-pdf">{{Open}}</a>
                                             <a href="bootstrap-elements.html"
                                                class="btn btn-primary btn-raised dropdown-toggle"
                                                data-toggle="dropdown"><span class="caret"></span></a>

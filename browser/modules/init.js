@@ -43,11 +43,11 @@ module.exports = {
         let me = this, configFile, stop = false;
         (function poll() {
             if (typeof L.control.locate !== "undefined") {
-
                 if (typeof urlVars.session === "string") {
-                    cookie.set("connect.gc2", urlVars.session, {expires: 1});
+                    // Try to remove existing cookie
+                    document.cookie = 'connect.gc2=; Max-Age=0; path=/; domain=' + location.host;
+                    cookie.set("connect.gc2", urlVars.session);
                 }
-
                 let loadConfig = function () {
                     let configParam;
                     if (configFile.startsWith("/")) {
@@ -352,7 +352,7 @@ module.exports = {
                             modules.search[v] = require('./search/' + v + '.js');
                             modules.search[v].set(modules);
                         });
-                        modules.search[window.vidiConfig.enabledSearch].init();
+                        modules.search[window.vidiConfig.enabledSearch].init(null, null, null, null, 'init');
                     }
 
                     // Require extensions modules
@@ -384,7 +384,9 @@ module.exports = {
                                         try {
                                             modules.extensions[Object.keys(v)[0]][m].init();
                                         } catch (e) {
+
                                             console.warn(`Module ${Object.keys(v)[0]} could not be initiated`)
+                                            console.error(e);
                                         }
 
                                         let enabledExtensionIndex = enabledExtensionsCopy.indexOf(Object.keys(v)[0]);
@@ -417,7 +419,11 @@ module.exports = {
                     console.error("Could not perform application initialization", e.message, e);
                 }
                 $("#loadscreen").fadeOut(200);
+            }).catch((error)=> {
+                console.error(error)
             });
+        }).catch((error)=> {
+            console.error(error)
         });
 
         if ('serviceWorker' in navigator) {

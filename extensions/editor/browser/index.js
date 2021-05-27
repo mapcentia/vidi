@@ -7,6 +7,7 @@
 'use strict';
 
 import {LAYER, SYSTEM_FIELD_PREFIX} from '../../../browser/modules/layerTree/constants';
+import dayjs from 'dayjs';
 
 /**
  *
@@ -42,8 +43,6 @@ let nonCommitedEditedFeature = false;
 
 let switchLayer;
 
-let managePopups = [];
-
 const ImageUploadWidget = require('./ImageUploadWidget');
 
 const widgets = {'imageupload': ImageUploadWidget};
@@ -53,7 +52,7 @@ const EDITOR_FORM_CONTAINER_ID = 'editor-attr-form';
 const EDITOR_CONTAINER_ID = 'editor-attr-dialog';
 
 const serviceWorkerCheck = () => {
-    if (('serviceWorker' in navigator) === false || !navigator.serviceWorker || !navigator.serviceWorker.controller) {
+    if (!('serviceWorker' in navigator) || !navigator.serviceWorker || !navigator.serviceWorker.controller) {
         const message = __(`The page was loaded without service workers enabled, features editing is not available (the page was loaded via plain HTTP or browser does not support service workers)`);
         console.warn(message);
         alert(message);
@@ -76,8 +75,6 @@ let embedIsEnabled = false;
 let _self = false;
 
 let vectorLayers;
-
-import dayjs from 'dayjs';
 
 /**
  *
@@ -133,21 +130,22 @@ module.exports = {
                     isVectorLayer = true;
                 }
 
-                var t = ($(this).data('gc2-key'));
+                let t = ($(this).data('gc2-key'));
                 _self.add(t, null, true, isVectorLayer);
                 e.stopPropagation();
             });
         });
 
         // Listen to close of attr box
-        $(".editor-attr-dialog__close-hide").on("click", function (e) {
+        $(".editor-attr-dialog__close-hide").on("click", function () {
             _self.stopEdit(editedFeature);
             backboneEvents.get().trigger("sqlQuery:clear");
         });
 
         $(".editor-attr-dialog__expand-less").on("click", function () {
-            $("#" + EDITOR_CONTAINER_ID).animate({
-                bottom: (($("#" + EDITOR_CONTAINER_ID).height() * -1) + 30) + "px"
+            let e = $("#" + EDITOR_CONTAINER_ID);
+            e.animate({
+                bottom: ((e.height() * -1) + 30) + "px"
             }, 500, function () {
                 $(".editor-attr-dialog__expand-less").hide();
                 $(".editor-attr-dialog__expand-more").show();
@@ -175,7 +173,6 @@ module.exports = {
     },
 
     setHandlersForVectorLayers: () => {
-        let metaDataKeys = meta.getMetaDataKeys();
         let metaData = meta.getMetaData();
         metaData.data.map(v => {
             let layerName = v.f_table_schema + "." + v.f_table_name;
@@ -189,7 +186,7 @@ module.exports = {
                 }
             }
 
-            if (layerMeta && layerMeta.vidi_layer_editable) {
+            if (layerMeta?.vidi_layer_editable) {
                 // Set popup with Edit and Delete buttons
                 layerTree.setOnEachFeature("v:" + layerName, (feature, layer) => {
                     if (feature.meta) {
@@ -235,15 +232,7 @@ module.exports = {
                             throw new Error(`Invalid API recognition status value`);
                         }
 
-                        layer.on("add", function (e) {
-                            let latLng = false;
-                            if (feature.geometry && feature.geometry.type === 'Point') {
-                                latLng = layer.getLatLng();
-                            } else {
-                                let bounds = layer.getBounds();
-                                latLng = bounds.getCenter()
-                            }
-
+                        layer.on("add", function () {
                             let tooltip = L.tooltip(tooltipSettings).setContent(content);
                             layer.bindTooltip(tooltip);
                         });
@@ -266,6 +255,7 @@ module.exports = {
 
     /**
      * Create the attribute form
+     * @param fields
      * @param fieldConf
      * @param pkey
      * @param f_geometry_column
@@ -277,9 +267,9 @@ module.exports = {
         let uiSchema = {};
 
         Object.keys(fields).map(function (key) {
-            if (key !== pkey && key !== f_geometry_column && (key.indexOf(SYSTEM_FIELD_PREFIX) !== 0 || (typeof fieldConf[key] !== "undefined" && fieldConf[key].querable === true))) {
+            if (key !== pkey && key !== f_geometry_column && (key.indexOf(SYSTEM_FIELD_PREFIX) !== 0 && !fieldConf[key]?.filter)) {
                 let title = key;
-                if (fieldConf[key] !== undefined && fieldConf[key].alias) {
+                if (fieldConf[key]?.alias) {
                     title = fieldConf[key].alias;
                 }
 
@@ -331,30 +321,17 @@ module.exports = {
                 }
 
                 // Properties have priority over default types
-                if (fieldConf[key] && fieldConf[key].properties) {
-                    let parsedProperties = false;
-                    try {
-                        parsedProperties = JSON.parse(fieldConf[key].properties.replace(/'/g, '"'));
-                    } catch (e) {
-                        console.warn(`"properties" of the ${key} field is not a valid JSON`);
+                if (fields[key]?.restriction?.length > 0) {
+                    let restrictions = fields[key].restriction;
+                    let enumNames = [];
+                    let enumValues = [];
+                    for (let i = 0; i < restrictions.length; i++) {
+                        enumNames.push(restrictions[i].alias);
+                        enumValues.push(restrictions[i].value);
                     }
-
-                    if (parsedProperties) {
-                        if (Array.isArray(parsedProperties) && parsedProperties.length > 0) {
-                            properties[key].enum = parsedProperties;
-                        } else {
-                            let enumNames = [];
-                            let enumValues = [];
-                            for (let enumName in parsedProperties) {
-                                enumNames.push(enumName);
-                                enumValues.push(parsedProperties[enumName]);
-                            }
-
-                            if (enumNames.length === enumValues.length) {
-                                properties[key].enumNames = enumNames;
-                                properties[key].enum = enumValues;
-                            }
-                        }
+                    if (enumNames.length === enumValues.length) {
+                        properties[key].enumNames = enumNames;
+                        properties[key].enum = enumValues;
                     }
                 }
             }
@@ -376,6 +353,7 @@ module.exports = {
      * @param k
      * @param qstore
      * @param doNotRemoveEditor
+     * @param isVectorLayer
      */
     add: function (k, qstore, doNotRemoveEditor, isVectorLayer = false) {
         editedFeature = false;
@@ -432,7 +410,7 @@ module.exports = {
                     geoJson = multiply([geoJson]);
                 }
 
-                Object.keys(formData.formData).map(function (key, index) {
+                Object.keys(formData.formData).map(function (key) {
                     geoJson.properties[key] = formData.formData[key];
                     if (geoJson.properties[key] === undefined) {
                         geoJson.properties[key] = null;
@@ -458,9 +436,8 @@ module.exports = {
                 /**
                  * Feature saving callback
                  *
-                 * @param {Object} result Saving result
                  */
-                const featureIsSaved = (result) => {
+                const featureIsSaved = () => {
                     console.log('Editor: featureIsSaved, updating', schemaQualifiedName);
 
                     switchLayer.registerLayerDataAlternation(schemaQualifiedName);
@@ -533,10 +510,9 @@ module.exports = {
      *
      * @param {String}  geometryType        Geometry type of created / edited feature
      * @param {Boolean} featureAlreadyExist Specifies if feature already exists
-     * @param {String}  enabledLayerName    Specifies what layer is enabled for snapping
-     * @param {String}  enabledFeatureId    Specifies what layer feature identifier is enabled for snapping
+     * @param enabledFeature
      */
-    enableSnapping: function (geometryType, featureAlreadyExist = true, enabledFeature = false) {
+    enableSnapping: function (geometryType, featureAlreadyExist = true, enabledFeature) {
         let guideLayers = [];
         layers.getMapLayers().map(layer => {
             if (`id` in layer && layer.id && layer.id.indexOf(`v:`) === 0 && guideLayers.indexOf(layer.id) === -1) {
@@ -559,11 +535,11 @@ module.exports = {
                     enabledFeature._snapping_active = true;
                 }
 
-                var snap = new L.Handler.MarkerSnap(cloud.get().map);
+                let snap = new L.Handler.MarkerSnap(cloud.get().map);
                 guideLayers.map(layer => {
                     snap.addGuideLayer(layer);
                 });
-                var snapMarker = L.marker(cloud.get().map.getCenter(), {
+                let snapMarker = L.marker(cloud.get().map.getCenter(), {
                     icon: cloud.get().map.editTools.createVertexIcon({className: 'leaflet-div-icon leaflet-drawing-icon'}),
                     opacity: 1,
                     zIndexOffset: 1000
@@ -589,18 +565,18 @@ module.exports = {
                     // so the event object we have here is not the one fired by
                     // Leaflet.Editable; it's not a deep copy though, so we can change
                     // the other objects that have a reference here.
-                    var latlng = snapMarker.getLatLng();
+                    let latlng = snapMarker.getLatLng();
                     e.latlng.lat = latlng.lat;
                     e.latlng.lng = latlng.lng;
                 });
 
-                snapMarker.on('snap', function (e) {
+                snapMarker.on('snap', function () {
                     snapMarker.addTo(cloud.get().map);
                 });
-                snapMarker.on('unsnap', function (e) {
+                snapMarker.on('unsnap', function () {
                     snapMarker.remove();
                 });
-                var followMouse = function (e) {
+                let followMouse = function (e) {
                     snapMarker.setLatLng(e.latlng);
                 }
             }
@@ -624,7 +600,7 @@ module.exports = {
             let hashTable = {};
             polygonCoordinates.map(coordinates => {
                 let key = (coordinates[0] + `:` + coordinates[1]);
-                if (key in hashTable === false) {
+                if (!(key in hashTable)) {
                     result.push(coordinates);
                     hashTable = {};
                     hashTable[key] = true;
@@ -642,6 +618,7 @@ module.exports = {
      * @param e
      * @param k
      * @param qstore
+     * @param isVectorLayer
      */
     edit: function (e, k, qstore, isVectorLayer = false) {
         editedFeature = e;
@@ -654,9 +631,7 @@ module.exports = {
             let ReactDOM = require('react-dom');
 
             let me = this, schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
-                metaDataKeys = meta.getMetaDataKeys(),
-                type = metaDataKeys[schemaQualifiedName].type,
-                properties;
+                metaDataKeys = meta.getMetaDataKeys();
 
             let fields = false;
             if (metaDataKeys[schemaQualifiedName].fields) {
@@ -744,7 +719,6 @@ module.exports = {
 
             // Transform field values according to their types
             Object.keys(fields).map(key => {
-                console.log(fields[key].type)
                 switch (fields[key].type) {
                     case `double precision`:
                         if (eventFeatureCopy.properties[key]) {
@@ -773,7 +747,6 @@ module.exports = {
                         break;
                 }
             });
-            console.log(eventFeatureCopy);
 
             /**
              * Commit to GC2
@@ -803,8 +776,8 @@ module.exports = {
                 }
 
                 // Set GeoJSON properties from form values
-                Object.keys(eventFeatureCopy.properties).map(function (key) {
-                    if (!key.startsWith("gc2_")) {
+                Object.keys(fields).map(function (key) {
+                    if (!key.startsWith("gc2_") && fields[key].type !== "geometry") {
                         GeoJSON.properties[key] = formData.formData[key];
                         // Set undefined values back to NULL
                         if (GeoJSON.properties[key] === undefined) {
@@ -874,10 +847,8 @@ module.exports = {
             for (let [key, value] of Object.entries(eventFeatureCopy.properties)) {
                 if (fields[key].type.includes("timestamp with time zone")) {
                     value = value ? dayjs(value).format("YYYY-MM-DDTHH:mmZ") : dayjs().format("YYYY-MM-DDTHH:mmZ"); // Default is required in IOS Safari
-                    console.log(value);
                 } else if (fields[key].type.includes("timestamp without time zone")) {
                     value = value ? dayjs(value).format("YYYY-MM-DDTHH:mm") : dayjs().format("YYYY-MM-DDTHH:mm"); // Default is required in IOS Safari
-                    console.log(value);
                 }
                 eventFeatureParsed[key] = value;
             }
@@ -927,8 +898,9 @@ module.exports = {
      */
     openAttributesDialog: () => {
         if (embedIsEnabled && ($(window).width() < PANEL_DOCKING_PARAMETER || $(window).height() < (PANEL_DOCKING_PARAMETER / 2))) {
-            $("#" + EDITOR_CONTAINER_ID).animate({
-                bottom: (($("#" + EDITOR_CONTAINER_ID).height() * -1) + 30) + "px"
+            let e = $("#" + EDITOR_CONTAINER_ID);
+            e.animate({
+                bottom: ((e.height() * -1) + 30) + "px"
             }, 500, () => {
                 $(".editor-attr-dialog__expand-less").hide();
                 $(".editor-attr-dialog__expand-more").show();
@@ -950,11 +922,10 @@ module.exports = {
      * @param e
      * @param k
      * @param qstore
+     * @param isVectorLayer
      */
     delete: function (e, k, qstore, isVectorLayer = false) {
         editedFeature = false;
-
-        let me = this;
 
         let schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
             metaDataKeys = meta.getMetaDataKeys(),
@@ -1011,7 +982,7 @@ module.exports = {
 
     /**
      * Stop editing and clean up
-     * @param e
+     * @param editedFeature
      */
     stopEdit: function (editedFeature) {
         cloud.get().map.editTools.stopDrawing();
@@ -1058,7 +1029,7 @@ module.exports = {
      * Checks if application is online.
      */
     checkIfAppIsOnline: () => {
-        let result = new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             $.ajax({
                 method: 'GET',
                 url: '/connection-check.ico'
@@ -1073,8 +1044,6 @@ module.exports = {
                 }
             });
         });
-
-        return result;
     },
 };
 
