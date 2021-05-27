@@ -436,6 +436,7 @@ geocloud = (function () {
                 '&srs=4326&client_encoding=' + this.defaults.clientEncoding +
                 '&key=' + this.defaults.key + '&format=ndjson';
 
+            let i = 0;
             fetch(url)  // make a fetch request to a NDJSON stream service
                 .then((response) => {
                     return ndjsonStream(response.body); //ndjsonStream parses the response.body
@@ -445,7 +446,6 @@ geocloud = (function () {
                 reader.read().then(read = (result) => {
                     if (result.done) {
                         let layer = false;
-                        console.log(geoJSON)
                         geoJSON = me.transformResponse(geoJSON, me.id);
                         if (me.defaults.type === 'POINT') {
                             layer = L.glify.points({
@@ -503,6 +503,10 @@ geocloud = (function () {
                         if (onLoadCallback) onLoadCallback();
                         return;
                     }
+                    if (Number.isInteger(i/1000)) {
+                        console.log(i)
+                    }
+                    i++
                     geoJSON.features.push(result.value)
                     reader.read().then(read);
                 });
