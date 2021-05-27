@@ -845,9 +845,8 @@ geocloud = (function () {
 			{{this.title}}: {{this.value}} <br>
         {{/each}}
         </div>`;
-        //var uri = defaults.host + "/wms/" + defaults.db + "/" + layer.split(".")[0] + "?mode=tile&tilemode=gmap&tile={x}+{y}+{z}&layers=" + layer + "&format=json&map.imagetype=application/json&";
-        // http://127.0.0.1:8080/mapcache/mydb/gmaps/test.city_center.json/12/2160/1271.json
-        var uri = defaults.host + "/mapcache/" + defaults.db + "/gmaps/" + layer + ".json@g20/{z}/{x}/{y}.json";
+        //var uri = "/api/wms/" + defaults.db + "/" + layer.split(".")[0] + "?mode=tile&tilemode=gmap&tile={x}+{y}+{z}&layers=" + layer + "&format=json&map.imagetype=application/json&";
+        var uri = "/api/mapcache/" + defaults.db + "/gmaps/" + layer + ".json@g20/{z}/{x}/{y}.json";
         var utfGrid = new L.utfGrid(uri, {
             resolution: 4,
             pointerCursor: true,
