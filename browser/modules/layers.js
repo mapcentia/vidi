@@ -233,12 +233,58 @@ module.exports = {
                     reject();
                     return;
                 }
-                cloud.get().addUTFGridLayers({
-                    host: host,
-                    layers: [layerKey],
-                    db: db,
-                    uri: uri,
-                    fieldConf: fieldConf
+                const defaultTemplate =
+                    `<div>
+                        {{#each data}}
+                            {{this.title}}: {{this.value}} <br>
+                        {{/each}}
+                </div>`;
+                let flag = false, template, tooltipHtml, tail = $("#tail"),
+                    utfGrid = cloud.get().addUTFGridLayers({
+                        layers: [layerKey],
+                        db: db
+                    })[0];
+
+                utfGrid.on('mouseover', function (e) {
+                    let tmp = $.extend(true, {}, e.data), fi = [];
+                    flag = true;
+                    $.each(tmp, function (name, property) {
+                        if (typeof fieldConf[name] !== "undefined" && fieldConf[name].mouseover) {
+                            let title;
+                            if (
+                                typeof fieldConf[name] !== "undefined" &&
+                                typeof fieldConf[name].alias !== "undefined" &&
+                                fieldConf[name].alias !== ""
+                            ) {
+                                title = fieldConf[name].alias
+                            } else {
+                                title = name;
+                            }
+                            fi.push({
+                                title: title,
+                                value: property
+                            });
+                        }
+                    });
+                    tmp.data = fi; // Used in a "loop" template
+                    template = Handlebars.compile(defaultTemplate);
+                    tooltipHtml = template(tmp);
+                    tail.fadeIn(100);
+                    tail.html(tooltipHtml);
+
+                });
+                utfGrid.on('mouseout', function (e) {
+                    flag = false;
+                    setTimeout(function () {
+                        if (!flag) {
+                            $("#tail").fadeOut(100);
+                        }
+                    }, 200)
+
+                });
+                utfGrid.on('click', function (e) {
+                    let tmp = $.extend(true, {}, e.data), fi = [];
+                    console.log(tmp);
                 });
                 console.info(`${layerKey} UTFgrid was added to the map`);
                 resolve();
@@ -273,7 +319,10 @@ module.exports = {
 
             $.each(metaData.data, function (i, layerDescription) {
                 let layer = layerDescription.f_table_schema + "." + layerDescription.f_table_name;
-                let {useCache, mapRequestProxy} = _self.getCachingDataForLayer(layerDescription, additionalURLParameters);
+                let {
+                    useCache,
+                    mapRequestProxy
+                } = _self.getCachingDataForLayer(layerDescription, additionalURLParameters);
                 if (layer === layerKey) {
                     let qgs;
                     if (layerDescription.wmssource && layerDescription.wmssource.includes("qgis_mapserv")) {
@@ -362,7 +411,10 @@ module.exports = {
             let layerWasAdded = false;
             $.each(metaData.data, function (i, layerDescription) {
                 var layer = layerDescription.f_table_schema + "." + layerDescription.f_table_name;
-                let {useCache, mapRequestProxy} = _self.getCachingDataForLayer(layerDescription, additionalURLParameters);
+                let {
+                    useCache,
+                    mapRequestProxy
+                } = _self.getCachingDataForLayer(layerDescription, additionalURLParameters);
 
                 if (layer === layerKey) {
                     // Check if the opacity value differs from the default one
