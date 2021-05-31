@@ -22,6 +22,7 @@
                 var useSchema = targetDiv.getAttribute("data-vidi-use-schema") === "true";
                 var useConfig = targetDiv.getAttribute("data-vidi-use-config") === "true";
                 var configHost = targetDiv.getAttribute("data-vidi-host") || null;
+                var frameName = targetDiv.getAttribute("data-vidi-frame-name") || null;
                 try {
                     var obj = JSON.parse(atob(token));
                 } catch (e) {
@@ -39,6 +40,9 @@
                 iframe.setAttribute("style", "width:" + width + ";height:" + height + ";border: 1px solid rgba(0,0,0,0.1)");
                 iframe.setAttribute("allowfullscreen", "");
                 iframe.setAttribute("src", src);
+                if (frameName) {
+                    iframe.setAttribute("name", frameName);
+                }
                 targetDiv.appendChild(iframe);
             } else {
                 setTimeout(poll, 100);
@@ -70,3 +74,49 @@
         console.info("Browser doesn't support MutationObsderver. Please upgrade to modern browser.")
     }
 }());
+
+/**
+ *
+ * @type {{switchLayer: Window.embedApi.switchLayer, _noFrame: Window.embedApi._noFrame, switchAllOff: Window.embedApi.switchAllOff}}
+ */
+window.embedApi = {
+    /**
+     * Private function
+     *
+     * @param frame
+     * @private
+     */
+    _noFrame: function (frame) {
+        alert("Could not get frame: " + frame)
+    },
+
+    /**
+     * Switch on raster layer
+     *
+     * @param layerId string Id of layer in the form schema.relation
+     * @param state boolean on/off
+     * @param frame string The name of the iframe targed
+     */
+    switchLayer: function (layerId, state, frame) {
+        var win = window.frames[frame];
+        try {
+            win.postMessage({layerId: layerId, state: state, method: "switchLayer"}, "*");
+        } catch (e) {
+            this._noFrame(frame);
+        }
+    },
+
+    /**
+     * Switch all layers off
+     *
+     * @param frame string The name of the iframe targed
+     */
+    switchAllOff: function (frame) {
+        var win = window.frames[frame];
+        try {
+            win.postMessage({method: "switchAllOff"}, "*");
+        } catch (e) {
+            this._noFrame(frame);
+        }
+    }
+};
