@@ -82,4 +82,4 @@ Pt. er der to funktioner udstillet gennem API'et:
    :header: "Funktion", "Beskrivelse"
 
    "embedApi.switchLayer(<string> *layername*, <bool> *on*, <string> *frame*)", "Tænder/slukker et lag. :raw-html:`<br />`  :raw-html:`<br />` Fx ``embedApi.switchLayer('planer.lokalplan', true, 'plankort')``"
-   "embedApi.allOff(<string> *frame*)", "Slukker alle tændte lag :raw-html:`<br />`  :raw-html:`<br />` Fx ``embedApi.allOff('planer.lokalplan', true, 'plankort')``"
+   "embedApi.allOff(<string> *frame*)", "Slukker alle tændte lag :raw-html:`<br />`  :raw-html:`<br />` Fx ``embedApi.allOff('plankort')``"
