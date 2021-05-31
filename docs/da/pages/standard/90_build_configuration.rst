@@ -17,10 +17,7 @@ Vidi kan konfigureres under opstart. Denne konfiguration kan indeholde informati
 
 Laves der en ændring, skal vidi startes igen.
 
-Opbygning
-*****************************************************************
-
-Vidi styres af ``config.js``. Denne fil vil være at finde i ``./vidi/config/``. 
+Vidi styres af ``config.js``. Denne fil vil være at finde i ``./vidi/config/``.
 
 .. _configjs_puppeteerprocesses:
 
