@@ -839,8 +839,12 @@ geocloud = (function () {
      * @returns {*}
      */
     createUTFGridLayer = function (layer, defaults) {
-        //var uri = "/api/wms/" + defaults.db + "/" + layer.split(".")[0] + "?mode=tile&tilemode=gmap&tile={x}+{y}+{z}&layers=" + layer + "&format=json&map.imagetype=application/json&";
-        var uri = "/api/mapcache/" + defaults.db + "/gmaps/" + layer + ".json@g20/{z}/{x}/{y}.json";
+        var uri;
+        if (defaults.cache) {
+            uri = "/api/mapcache/" + defaults.db + "/gmaps/" + layer + ".json@g20/{z}/{x}/{y}.json";
+        } else {
+            uri = "/api/wms/" + defaults.db + "/" + layer.split(".")[0] + "?mode=tile&tilemode=gmap&tile={x}+{y}+{z}&layers=" + layer + "&format=json&map.imagetype=application/json&";
+        }
         var utfGrid = new L.utfGrid(uri, {
             resolution: 4,
             pointerCursor: true,
@@ -2191,7 +2195,8 @@ geocloud = (function () {
                     name: null,
                     names: [],
                     uri: null,
-                    fieldConf: {}
+                    fieldConf: {},
+                    cache: false
                 };
 
             if (config) {

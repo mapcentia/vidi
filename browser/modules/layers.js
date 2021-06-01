@@ -179,7 +179,7 @@ module.exports = {
                 order.map((item) => {
                     if (item.type && item.type === GROUP_CHILD_TYPE_LAYER) {
                         layers.map(layer => {
-                            let itemId = false;
+                            let itemId;
                             if (item.layer) {
                                 itemId = item.layer.f_table_schema + '.' + item.layer.f_table_name;
                             } else {
@@ -214,6 +214,7 @@ module.exports = {
      */
     addUTFGridLayer: function (layerKey) {
         let metaData = meta.getMetaDataKeys(), fieldConf, useUTFGrid = false, result = false;
+        let parsedMeta = layerTree.parseLayerMeta(metaData[layerKey]), template;
         try {
             fieldConf = JSON.parse(metaData[layerKey].fieldconf);
         } catch (e) {
@@ -227,7 +228,7 @@ module.exports = {
                 }
             }
         }
-        if (useUTFGrid) {
+        if (useUTFGrid && parsedMeta?.hover_active) {
             result = new Promise((resolve, reject) => {
                 if (metaData[layerKey].type === "RASTER") {
                     reject();
@@ -239,53 +240,17 @@ module.exports = {
                             {{this.title}}: {{this.value}} <br>
                         {{/each}}
                 </div>`;
-                let flag = false, template, tooltipHtml, tail = $("#tail"),
-                    utfGrid = cloud.get().addUTFGridLayers({
-                        layers: [layerKey],
-                        db: db
-                    })[0];
-
-                utfGrid.on('mouseover', function (e) {
-                    let tmp = $.extend(true, {}, e.data), fi = [];
-                    flag = true;
-                    $.each(tmp, function (name, property) {
-                        if (typeof fieldConf[name] !== "undefined" && fieldConf[name].mouseover) {
-                            let title;
-                            if (
-                                typeof fieldConf[name] !== "undefined" &&
-                                typeof fieldConf[name].alias !== "undefined" &&
-                                fieldConf[name].alias !== ""
-                            ) {
-                                title = fieldConf[name].alias
-                            } else {
-                                title = name;
-                            }
-                            fi.push({
-                                title: title,
-                                value: property
-                            });
-                        }
-                    });
-                    tmp.data = fi; // Used in a "loop" template
-                    template = Handlebars.compile(defaultTemplate);
-                    tooltipHtml = template(tmp);
-                    tail.fadeIn(100);
-                    tail.html(tooltipHtml);
-
-                });
-                utfGrid.on('mouseout', function (e) {
-                    flag = false;
-                    setTimeout(function () {
-                        if (!flag) {
-                            $("#tail").fadeOut(100);
-                        }
-                    }, 200)
-
-                });
-                utfGrid.on('click', function (e) {
-                    let tmp = $.extend(true, {}, e.data), fi = [];
-                    console.log(tmp);
-                });
+                if (parsedMeta?.info_template_hover && parsedMeta.info_template_hover !== "") {
+                    template = parsedMeta.info_template_hover;
+                } else {
+                    template = defaultTemplate;
+                }
+                let utfGrid = cloud.get().addUTFGridLayers({
+                    layers: [layerKey],
+                    db: db,
+                    cache: parsedMeta?.cache_utf_grid
+                })[0];
+                layerTree.mouseOver(utfGrid, fieldConf, template)
                 console.info(`${layerKey} UTFgrid was added to the map`);
                 resolve();
             });
@@ -312,10 +277,8 @@ module.exports = {
             }
         }
 
-        let result = new Promise((resolve, reject) => {
-            var layers = [], metaData = meta.getMetaData();
-
-            let layerWasAdded = false;
+        return new Promise((resolve, reject) => {
+            let layers = [], metaData = meta.getMetaData(), layerWasAdded = false;
 
             $.each(metaData.data, function (i, layerDescription) {
                 let layer = layerDescription.f_table_schema + "." + layerDescription.f_table_name;
@@ -392,8 +355,6 @@ module.exports = {
                 reject(`${layerKey} was not added to the map`);
             }
         });
-
-        return result;
     },
 
     /**
@@ -406,7 +367,7 @@ module.exports = {
      */
     addVectorTileLayer: function (layerKey, additionalURLParameters = []) {
         let me = this;
-        let result = new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             let isBaseLayer, layers = [], metaData = meta.getMetaData();
             let layerWasAdded = false;
             $.each(metaData.data, function (i, layerDescription) {
@@ -462,8 +423,6 @@ module.exports = {
                 reject();
             }
         });
-
-        return result;
     },
 
     /**
@@ -476,8 +435,7 @@ module.exports = {
      */
     getCachingDataForLayer: (layerDescription, appendedFiltersString = []) => {
         // If filters are applied or single_tile is true, then request should not be cached
-        let setAsCached = (JSON.parse(layerDescription.meta) !== null && JSON.parse(layerDescription.meta).single_tile !== undefined && JSON.parse(layerDescription.meta).single_tile === true);
-        let useCache = setAsCached;
+        let useCache = (JSON.parse(layerDescription.meta) !== null && JSON.parse(layerDescription.meta).single_tile !== undefined && JSON.parse(layerDescription.meta).single_tile === true);
         if (appendedFiltersString.length > 0 && appendedFiltersString[0] !== "") {
             useCache = false;
         }

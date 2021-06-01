@@ -19,6 +19,10 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ### Added
 - An API loaded with the `embed.js` script. Two methods are available: `embedApi.switchLayer` and `embedApi.allOff`. See docs for details.
+- Mouse over no vector and raster tile layers. The latter using UTF Grid. These GC2 Meta properties are controling the mouse over:
+ - `hover_active` Boolean. Should mouse over be switch on?
+ - `info_template_hover` String. Handlebars template to use in label. If not set a default template will be used, which loops through fields with the `Show in mouse-over` property checked.
+ - `cache_utf_grid` Boolean. Wether to cache UTF grid tiles. Only apply to raster tile layers.
 
 ### Fixed
 - Feature info click wouldn't open the pop-up if multiple layers was switch on.
