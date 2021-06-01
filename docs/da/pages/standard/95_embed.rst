@@ -47,7 +47,7 @@ Der en række data attributer, som skal/kan sættes:
  * Projektets "token" som indeholder state-id, host, database mv. Skal angives.
 * **data-vidi-width (valgfri)**
  * Bredde på kort. Standard 100%
-* **data-vidi-height (valgfri,)**
+* **data-vidi-height (valgfri)**
  * Højde på kort. standard 100%
 * **data-vidi-tmpl (valgfri)**
  * Hvilken template kortet skal bruge. Standard embed.tmpl, som er en template beregnet til indlejring.
