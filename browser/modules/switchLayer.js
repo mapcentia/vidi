@@ -128,7 +128,6 @@ module.exports = module.exports = {
                 } else {
                     console.error(`Unknown switch layer failure for ${vectorLayerId}`, failedBefore);
                 }
-
                 resolve();
             } else {
                 _self.loadMissingMeta(gc2Id).then(() => {
