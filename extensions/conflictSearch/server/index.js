@@ -1,57 +1,63 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2021 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
-var express = require('express');
-var request = require("request");
-var router = express.Router();
-var http = require('http');
-var fs = require('fs');
-var dayjs = require('dayjs');
-var config = require('../../../config/config.js');
+let express = require('express');
+let request = require("request");
+let router = express.Router();
+let fs = require('fs');
+let dayjs = require('dayjs');
+let config = require('../../../config/config.js');
 
+let utf8 = require('utf8');
 // Set locale for date/time string
 
 dayjs.locale("da_DK");
 
-var BACKEND = config.backend;
+let BACKEND = config.backend;
 
 router.post('/api/extension/conflictSearch', function (req, response) {
     req.setTimeout(0); // no timeout
-    var db = req.body.db;
-    var schema = req.body.schema;
-    var wkt = req.body.wkt;
-    var socketId = req.body.socketId;
-    var buffer = req.body.buffer;
-    var text = req.body.text;
-    var fileName = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    let db = req.body.db;
+    let schema = req.body.schema;
+    let wkt = req.body.wkt;
+    let socketId = req.body.socketId;
+    let text = req.body.text;
+    let fileName = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        let r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
     });
-    var url = "http://127.0.0.1:3000/api/meta/" + db + "/" + schema, count = 0, table, sql, geomField, srid,
+    let addedSchemata = typeof config.addedSchemata !== "undefined" ? "," + config.addedSchemata : "";
+    let url = config.gc2.host + "/api/v1/meta/" + db + "/" + utf8.encode(schema) + addedSchemata;
+    let count = 0, table, sql, geomField, srid,
         startTime, hits = {}, hit, metaDataFinal = {data: []}, metaDataKeys = [], queryables = [];
-
-    request.get(url, function (err, res, body) {
+    let options = {
+        uri: url,
+        encoding: 'utf8',
+        headers: {
+            Cookie: "PHPSESSID=" + req.session.gc2SessionId + ";" // GC2's Meta API is session based
+        }
+    };
+    request.get(options, function (err, res, body) {
         if (!err) {
-            var emptyReport = {
+            let emptyReport = {
                 hits: {},
                 file: null,
                 text: null,
                 dateTime: dayjs().format('MMMM Do YYYY, H:mm')
-            };
-
+            }, metaData;
             try {
-                var metaData = JSON.parse(body);
+                metaData = JSON.parse(body);
             } catch (e) {
                 response.send(emptyReport);
                 return;
             }
             // Sort alpha by layer title. This only works in Node v12+ with stable sort
-            metaData.data.sort((a,b) => (a.f_table_title > b.f_table_title) ? 1 : ((b.f_table_title > a.f_table_title) ? -1 : 0));
+            metaData.data.sort((a, b) => (a.f_table_title > b.f_table_title) ? 1 : ((b.f_table_title > a.f_table_title) ? -1 : 0));
             metaData.data.reverse();
-            metaData.data.sort((a,b) => (a.layergroup > b.layergroup) ? 1 : ((b.layergroup > a.layergroup) ? -1 : 0));
+            metaData.data.sort((a, b) => (a.layergroup > b.layergroup) ? 1 : ((b.layergroup > a.layergroup) ? -1 : 0));
             metaData.data.reverse();
 
             if (metaData.data === undefined || metaData.data.length === 0) {
@@ -60,7 +66,7 @@ router.post('/api/extension/conflictSearch', function (req, response) {
             }
 
             // Count layers
-            for (var i = 0; i < metaData.data.length; i = i + 1) {
+            for (let i = 0; i < metaData.data.length; i = i + 1) {
                 if (metaData.data[i].type !== "RASTER" &&
                     metaData.data[i].baselayer !== true &&
                     metaData.data[i].skipconflict !== true) {
@@ -69,24 +75,15 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                 }
             }
             (function iter() {
-
                 startTime = new Date().getTime();
                 table = metaDataFinal.data[count].f_table_schema + "." + metaDataFinal.data[count].f_table_name;
-
                 geomField = metaDataFinal.data[count].f_geometry_column;
                 srid = metaDataFinal.data[count].srid;
-
-                console.log(table);
-
-                sql = "SELECT * FROM " + table + " WHERE  ST_intersects(" + geomField + ", ST_Transform(ST_geomfromtext('" + wkt + "',4326)," + srid +"))";
-
+                sql = "SELECT * FROM " + table + " WHERE  ST_intersects(" + geomField + ", ST_Transform(ST_geomfromtext('" + wkt + "',4326)," + srid + "))";
                 queryables = JSON.parse(metaDataKeys[table.split(".")[1]].fieldconf);
-
-                var postData = "client_encoding=UTF8&srs=4326&lifetime=0&q=" + sql,
-
-
+                let postData = "client_encoding=UTF8&srs=4326&lifetime=0&q=" + sql + "&key=" + "&key=" + (typeof req.session.gc2ApiKey !== "undefined" ? req.session.gc2ApiKey : "xxxxx" /*Dummy key is sent to prevent start of session*/),
                     options = {
-                        uri: "http://127.0.0.1:3000/api/sql/" + db,
+                        uri: config.gc2.host + "/api/v2/sql/" + db,
                         encoding: 'utf8',
                         body: postData,
                         headers: {
@@ -94,11 +91,8 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                             'Content-Length': postData.length,
                         }
                     };
-
                 request.post(options, function (err, res, body) {
-
-                    var jsfile, message = null, result, time;
-
+                    let jsfile, message = null, result, time, data = [], tmp = [];
                     try {
                         jsfile = JSON.parse(body);
                     } catch (e) {
@@ -110,16 +104,13 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                         });
                         return;
                     }
-
                     result = jsfile;
                     message = result.message;
-                    time = new Date().getTime() - startTime, data = [], tmp = [];
-
+                    time = new Date().getTime() - startTime;
                     count++;
                     if (result.features) {
-                        for (var i = 0; i < result.features.length; i++) {
-
-                            for (var prop in queryables) {
+                        for (let i = 0; i < result.features.length; i++) {
+                            for (let prop in queryables) {
                                 if (queryables.hasOwnProperty(prop)) {
                                     if (queryables[prop].conflict || (BACKEND === "cartodb" && queryables[prop].querable)) {
                                         tmp.push({
@@ -134,7 +125,6 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                                     }
                                 }
                             }
-
                             if (tmp.length > 0) {
                                 tmp.push({
                                     name: metaDataKeys[table.split(".")[1]].pkey,
@@ -152,7 +142,7 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                         table: table,
                         title: metaDataKeys[table.split(".")[1]].f_table_title,
                         group: metaDataKeys[table.split(".")[1]].layergroup,
-                            hits: (typeof result.features !== "undefined" && result.features !== null) ? result.features.length : 0,
+                        hits: (typeof result.features !== "undefined" && result.features !== null) ? result.features.length : 0,
                         data: data,
                         num: count + "/" + metaDataFinal.data.length,
                         time: time,
@@ -165,7 +155,7 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                     hits[table] = hit;
                     io.emit(socketId, hit);
                     if (metaDataFinal.data.length === count) {
-                        var report = {
+                        let report = {
                             hits: hits,
                             file: fileName,
                             text: text,
