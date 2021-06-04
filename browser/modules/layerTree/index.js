@@ -1410,19 +1410,11 @@ module.exports = {
         } else {
             template = defaultTemplate;
         }
-        let fieldConf, doMouseOver = false
+        let fieldConf;
         try {
             fieldConf = JSON.parse(metaData[layerKey].fieldconf);
         } catch (e) {
             fieldConf = {};
-        }
-        for (let key in fieldConf) {
-            if (fieldConf.hasOwnProperty(key)) {
-                if (typeof fieldConf[key].mouseover !== "undefined" && fieldConf[key].mouseover === true) {
-                    doMouseOver = true;
-                    break;
-                }
-            }
         }
 
         moduleState.vectorStores[trackingLayerKey] = new geocloud.sqlStore({
@@ -1489,7 +1481,7 @@ module.exports = {
                 return apiBridgeInstance.transformResponseHandler(response, id);
             },
             onEachFeature: (feature, layer) => {
-                if (doMouseOver && parsedMeta?.hover_active) {
+                if (parsedMeta?.hover_active) {
                         _self.mouseOver(layer, fieldConf, template);
                 }
                 if ((LAYER.VECTOR + ':' + layerKey) in onEachFeature) {
