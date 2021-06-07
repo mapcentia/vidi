@@ -954,7 +954,7 @@ geocloud = (function () {
         };
 
         if (defaults.tileCached) {
-            url = defaults.host + "/mapcache/" + defaults.db + "/gmaps/" + layer + ".mvt/{z}/{x}/{y}.png";
+            url = defaults.host + "/mapcache/" + defaults.db + "/gmaps/" + layer + ".mvt/{z}/{x}/{y}.mvt";
         } else {
             if (!defaults.uri) {
                 uri = "/wms/" + defaults.db + "/" + parts[0] + "?mode=tile&tilemode=gmap&tile={x}+{y}+{z}&layers=" + layer
@@ -1063,12 +1063,17 @@ geocloud = (function () {
         };
 
         this.zoomToExtentOfgeoJsonStore = function (store, maxZoom) {
+            var parentThis = this;
             switch (MAPLIB) {
                 case "ol2":
                     this.map.zoomToExtent(store.layer.getDataExtent());
                     break;
                 case "leaflet":
                     this.map.fitBounds(store.layer.getBounds(), {maxZoom: maxZoom});
+                    // Pan map one pixel to defeat a strange bug, which causes a freeze
+                    setTimeout(function () {
+                        parentThis.map.panBy([1, 0]);
+                    }, 100);
                     break;
             }
         };
