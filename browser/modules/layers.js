@@ -213,22 +213,14 @@ module.exports = {
      * @returns {boolean}
      */
     addUTFGridLayer: function (layerKey) {
-        let metaData = meta.getMetaDataKeys(), fieldConf, useUTFGrid = false, result = false;
+        let metaData = meta.getMetaDataKeys(), fieldConf,  result = false;
         let parsedMeta = layerTree.parseLayerMeta(metaData[layerKey]), template;
         try {
             fieldConf = JSON.parse(metaData[layerKey].fieldconf);
         } catch (e) {
             fieldConf = {};
         }
-        for (let key in fieldConf) {
-            if (fieldConf.hasOwnProperty(key)) {
-                if (typeof fieldConf[key].mouseover !== "undefined" && fieldConf[key].mouseover === true) {
-                    useUTFGrid = true;
-                    break;
-                }
-            }
-        }
-        if (useUTFGrid && parsedMeta?.hover_active) {
+        if (parsedMeta?.hover_active) {
             result = new Promise((resolve, reject) => {
                 if (metaData[layerKey].type === "RASTER") {
                     reject();
