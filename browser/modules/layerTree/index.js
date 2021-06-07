@@ -1892,7 +1892,7 @@ module.exports = {
                 } else {
                     vectorPopUp = L.popup({
                         autoPan: true,
-                        minWidth: 300,
+                        minWidth: 450,
                         className: `js-vector-layer-popup custom-popup`
                     }).setLatLng(event.latlng).setContent(`<div>
                                                                 ${additionalControls}
