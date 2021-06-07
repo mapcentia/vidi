@@ -954,7 +954,7 @@ geocloud = (function () {
         };
 
         if (defaults.tileCached) {
-            url = defaults.host + "/mapcache/" + defaults.db + "/gmaps/" + layer + ".mvt/{z}/{x}/{y}.png";
+            url = defaults.host + "/mapcache/" + defaults.db + "/gmaps/" + layer + ".mvt/{z}/{x}/{y}.mvt";
         } else {
             if (!defaults.uri) {
                 uri = "/wms/" + defaults.db + "/" + parts[0] + "?mode=tile&tilemode=gmap&tile={x}+{y}+{z}&layers=" + layer
