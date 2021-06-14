@@ -11,6 +11,7 @@ import {LAYER_TYPE_DEFAULT} from './layerTree/constants';
 require('dom-shims');
 require('arrive');
 const config = require('../../config/config.js');
+const layerTreeUtils = require('./layerTree/utils');
 const LEFT_SLIDE_WIDTHS = config?.leftSlideWidths || [300, 400, 550];
 const BUTTON_WITH = 24;
 const mobile = require('is-mobile');
@@ -102,6 +103,37 @@ module.exports = {
                 e.stopPropagation();
 
                 backboneEvents.get().trigger(`layerTree:activeLayersChange`);
+            });
+        });
+
+        $(document).arrive('[data-gc2-group-name]', function () {
+            $(this).on('change', function (e) {
+                let prefix = '';
+                let isChecked = $(e.target).prop(`checked`);
+                if ($(this).data(`gc2-layer-type`)) {
+                    prefix = $(e.target).data('gc2-layer-type') + `:`;
+                    if (prefix === LAYER_TYPE_DEFAULT + `:`) {
+                        prefix = ``;
+                    }
+                }
+                let groupName = $(this).data(`gc2-group-name`);
+                let layers = meta.getMetaData().data.filter((e) => {
+                    if (e.layergroup === groupName) {
+                        return true;
+                    }
+                })
+                layers.forEach((l) => {
+                    switchLayer.init(prefix + l.f_table_schema + "." + l.f_table_name, isChecked, false);
+
+                })
+                e.stopPropagation();
+                backboneEvents.get().trigger(`layerTree:activeLayersChange`);
+                let base64GroupName = Base64.encode(groupName).replace(/=/g, "");
+                if (isChecked) {
+                    layerTreeUtils.setupLayerNumberIndicator(base64GroupName, layers.length, layers.length);
+                } else {
+                    $("#layer-panel-" + base64GroupName + " span:eq(0)").html(0);
+                }
             });
         });
 
@@ -500,7 +532,7 @@ module.exports = {
         $('#side-panel ul li a').on('click', function () {
             backboneEvents.get().trigger('off:all');
             let moduleTitle = $(this).data('module-title');
-            let e=  $('#module-container');
+            let e = $('#module-container');
             e.find('.js-module-title').text('');
             if (moduleTitle) {
                 e.find('.js-module-title').text(moduleTitle);
@@ -539,7 +571,7 @@ module.exports = {
                 backboneEvents.get().trigger('off:all');
                 const moduleId = $(this).data('module-id');
                 const moduleTitle = $(this).data('module-title');
-                const e =$('#module-container');
+                const e = $('#module-container');
                 e.find('.js-module-title').text('');
                 if (moduleTitle) {
                     e.find('.js-module-title').text(moduleTitle);

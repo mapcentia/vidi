@@ -23,6 +23,7 @@ and this project adheres to [CalVer](https://calver.org/).
  - `hover_active` Boolean. Should mouse over be switch on?
  - `info_template_hover` String. Handlebars template to use in label. If not set a default template will be used, which loops through fields with the `Show in mouse-over` property checked.
  - `cache_utf_grid` Boolean. Wether to cache UTF grid tiles. Only apply to raster tile layers.
+- It's now possible to switch all layers on/off in a layer group.
 
 ### Fixed
 - Feature info click wouldn't open the pop-up if multiple layers was switch on.
@@ -71,7 +72,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - If a layer in a state snapshot is for some reason not available (protected, deleted), the build of the layer tree was ever resolved. Now it'll resolve.  
 - The queueStatisticsWatcher and Service Worker now uses 3. party module for base64 decoding, because windows.btoa fails on non-latin characters.
 - COWI Gade foto named properly in Streetview module.
-- Alot of fixes in the Editor module.
+- A lot of fixes in the Editor module.
 
 ## [2020.12.0] - 2020-8-12
 ### Changed

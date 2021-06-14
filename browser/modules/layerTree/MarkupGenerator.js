@@ -28,14 +28,19 @@ class MarkupGenerator {
     }
 
     getGroupPanel(base64GroupName, name) {
-        return (`<div class="panel panel-default panel-layertree" id="layer-panel-${base64GroupName}">
+        return (`<div class="panel panel-default panel-layertree" id="layer-panel-${base64GroupName}" xmlns="http://www.w3.org/1999/html">
             <div class="panel-heading" role="tab" style="padding: 8px 0px 8px 15px;">
                 <h4 class="panel-title">
                     <i style="float: right;" class="material-icons layer-move-vert">more_vert</i>
                     <div class="layer-count badge">
                         <span>0</span> / <span></span>
                     </div>
-                    <a style="display: block" class="accordion-toggle js-toggle-layer-panel" data-toggle="collapse" data-parent="#layers" href="#collapse${base64GroupName}">${name}</a>
+                    <span style="display: inline" class="checkbox">
+                        <label>
+                            <input type="checkbox" data-gc2-group-name="${name}"
+                        </label>
+                    </span>
+                    <a style="display: inline" class="accordion-toggle js-toggle-layer-panel" data-toggle="collapse" data-parent="#layers" href="#collapse${base64GroupName}">${name}</a>
                 </h4>
             </div>
             <ul class="list-group" id="group-${base64GroupName}" role="tabpanel"></ul>
