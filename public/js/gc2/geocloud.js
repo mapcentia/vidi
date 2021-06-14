@@ -850,7 +850,8 @@ geocloud = (function () {
             pointerCursor: true,
             mouseInterval: 66,  // Delay for mousemove events,
             maxZoom: 22,
-            maxNativeZoom: 20
+            maxNativeZoom: 20,
+            loading: defaults.loading
         });
         utfGrid.id = "__hidden.utfgrid." + layer; // Hide it
         return utfGrid;
@@ -2201,7 +2202,8 @@ geocloud = (function () {
                     names: [],
                     uri: null,
                     fieldConf: {},
-                    cache: false
+                    cache: false,
+                    loading: null
                 };
 
             if (config) {

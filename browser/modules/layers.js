@@ -240,7 +240,8 @@ module.exports = {
                 let utfGrid = cloud.get().addUTFGridLayers({
                     layers: [layerKey],
                     db: db,
-                    cache: parsedMeta?.cache_utf_grid
+                    cache: parsedMeta?.cache_utf_grid,
+                    loading: currentlyLoadedLayers
                 })[0];
                 layerTree.mouseOver(utfGrid, fieldConf, template)
                 console.info(`${layerKey} UTFgrid was added to the map`);
