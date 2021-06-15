@@ -16,6 +16,8 @@ and this project adheres to [CalVer](https://calver.org/).
 }
 ```
 - embed.js: If host in token is http, then make it protocol relative, so tokens created on http still works when embedded on https sites.
+- It's now possible to switch all layers on/off in a layer (sub)group.
+- Some visual improvements to the display of sub-groups in the layer tree.
 
 ### Added
 - An API loaded with the `embed.js` script. Two methods are available: `embedApi.switchLayer` and `embedApi.allOff`. See docs for details.
@@ -23,7 +25,6 @@ and this project adheres to [CalVer](https://calver.org/).
  - `hover_active` Boolean. Should mouse over be switch on?
  - `info_template_hover` String. Handlebars template to use in label. If not set a default template will be used, which loops through fields with the `Show in mouse-over` property checked.
  - `cache_utf_grid` Boolean. Wether to cache UTF grid tiles. Only apply to raster tile layers.
-- It's now possible to switch all layers on/off in a layer group.
 
 ### Fixed
 - Feature info click wouldn't open the pop-up if multiple layers was switch on.

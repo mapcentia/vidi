@@ -2553,17 +2553,12 @@ module.exports = {
      */
     createSubgroupRecord: (subgroup, forcedState, precheckedLayers, parentNode, level = 0, initiallyClosed = true) => {
         let base64SubgroupName = Base64.encode(`subgroup_${subgroup.id}_level_${level}_${uuidv4()}`).replace(/=/g, "");
-        let markup = markupGeneratorInstance.getSubgroupControlRecord(base64SubgroupName, subgroup.id);
+        let markup = markupGeneratorInstance.getSubgroupControlRecord(base64SubgroupName, subgroup.id, level);
 
         $(parentNode).append(markup);
-        $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-id`).append(`<div>
-            <p>
-                <button type="button" class="btn btn-default btn-xs js-subgroup-toggle-button">
-                    <i class="fa fa-arrow-down"></i>
-                </button>
+        $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-id`).append(`<div style="display: inline">
                 ${subgroup.id}
                 <i style="float: right; padding-top: 9px; font-size: 26px;" class="material-icons layer-move-vert layer-move-vert-subgroup">more_vert</i>
-            </p>
         </div>`);
 
         $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-toggle-button`).click((event) => {

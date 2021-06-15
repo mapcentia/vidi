@@ -108,23 +108,16 @@ module.exports = {
 
         $(document).arrive('[data-gc2-group-name]', function () {
             $(this).on('change', function (e) {
-                let prefix = '';
+                let prefix;
                 let isChecked = $(e.target).prop(`checked`);
-                if ($(this).data(`gc2-layer-type`)) {
-                    prefix = $(e.target).data('gc2-layer-type') + `:`;
-                    if (prefix === LAYER_TYPE_DEFAULT + `:`) {
-                        prefix = ``;
-                    }
-                }
                 let groupName = $(this).data(`gc2-group-name`);
                 let layers = meta.getMetaData().data.filter((e) => {
                     if (e.layergroup === groupName) {
+                        let parsedMeta = layerTree.parseLayerMeta(e);
+                        prefix = parsedMeta?.default_layer_type ? parsedMeta.default_layer_type + ':' : '';
+                        switchLayer.init(prefix + e.f_table_schema + "." + e.f_table_name, isChecked, false);
                         return true;
                     }
-                })
-                layers.forEach((l) => {
-                    switchLayer.init(prefix + l.f_table_schema + "." + l.f_table_name, isChecked, false);
-
                 })
                 e.stopPropagation();
                 backboneEvents.get().trigger(`layerTree:activeLayersChange`);
@@ -134,6 +127,25 @@ module.exports = {
                 } else {
                     $("#layer-panel-" + base64GroupName + " span:eq(0)").html(0);
                 }
+            });
+        });
+
+        $(document).arrive('[data-gc2-subgroup-name]', function () {
+            $(this).on('change', function (e) {
+                let prefix = '';
+                let isChecked = $(e.target).prop(`checked`);
+                let subGroupName = $(this).data(`gc2-subgroup-name`);
+                let subGroupLevel = $(this).data(`gc2-subgroup-level`);
+                let layers = meta.getMetaData().data.filter((e) => {
+                    let parsedMeta = layerTree.parseLayerMeta(e);
+                    if (parsedMeta?.vidi_sub_group?.split("|")[subGroupLevel] === subGroupName) {
+                        prefix = parsedMeta?.default_layer_type ? parsedMeta.default_layer_type + ':' : '';
+                        switchLayer.init(prefix + e.f_table_schema + "." + e.f_table_name, isChecked, false);
+                        return true;
+                    }
+                })
+                e.stopPropagation();
+                backboneEvents.get().trigger(`layerTree:activeLayersChange`);
             });
         });
 

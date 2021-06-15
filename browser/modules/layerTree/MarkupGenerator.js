@@ -37,7 +37,7 @@ class MarkupGenerator {
                     </div>
                     <span style="display: inline" class="checkbox">
                         <label>
-                            <input type="checkbox" data-gc2-group-name="${name}"
+                            <input type="checkbox" data-gc2-group-name="${name}">
                         </label>
                     </span>
                     <a style="display: inline" class="accordion-toggle js-toggle-layer-panel" data-toggle="collapse" data-parent="#layers" href="#collapse${base64GroupName}">${name}</a>
@@ -74,13 +74,21 @@ class MarkupGenerator {
         </div>`);
     }
 
-    getSubgroupControlRecord(base64SubgroupName, name) {
+    getSubgroupControlRecord(base64SubgroupName, name, level) {
         return (`<li
-        class="layer-item list-group-item"
+        class="layer-item list-group-item list-subgroup-item"
         data-gc2-subgroup-id="${name}"
-        style="min-height: 40px; margin-top: 10px; background-color: white; border-bottom: 1px solid #CCC;">
-            <div class="js-subgroup-id" style="padding-left: 14px;"></div>
-            <div class="js-subgroup-children" id="${base64SubgroupName}" style="padding-left: 20px;"></div>
+        style="min-height: 36px; margin-top: 1px; background-color: white; border-bottom: 1px solid #CCC;">
+            <span style="display: inline; margin-left: -6px;" class="checkbox">
+                <label>
+                    <input type="checkbox" data-gc2-subgroup-name="${name}" data-gc2-subgroup-level="${level}">
+                </label>
+            </span>
+            <button style="margin-left: -18px" type="button" class="btn btn-default btn-xs js-subgroup-toggle-button">
+                <i class="fa fa-arrow-down"></i>
+            </button>
+            <div class="js-subgroup-id" style="display: inline; margin-left: 0"></div>
+            <div class="js-subgroup-children" id="${base64SubgroupName}" style="padding-left: 30px;"></div>
         </li>`);
     }
 
@@ -91,7 +99,7 @@ class MarkupGenerator {
 
         return (`
         <li class="layer-item list-group-item" data-gc2-layer-key="${layerKeyWithGeom}" style="min-height: 36px; margin-top: 1px; border-bottom: 1px solid #CCC; background-color: white;">
-            <div>
+            <div style="border-left: 0px solid #ccc">
                 <div style="display: flex; min-height: 40px; justify-content: space-between; flex-wrap: wrap;">
                     <div style="margin-top: 4px;">
                         <div style="display: inline-block;">
