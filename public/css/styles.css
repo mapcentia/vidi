@@ -1611,5 +1611,5 @@ td.rdtYear:hover {
   cursor: help;
 }
 .list-subgroup-item {
-  border-left: 6px solid #eee !important;
+  border-left: 2px solid #222 !important;
 }
