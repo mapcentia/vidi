@@ -79,7 +79,7 @@ class MarkupGenerator {
         class="layer-item list-group-item list-subgroup-item"
         data-gc2-subgroup-id="${name}"
         style="min-height: 36px; margin-top: 1px; background-color: white; border-bottom: 1px solid #CCC;">
-            <span style="display: inline; margin-left: -6px;" class="checkbox">
+            <span style="display: inline; margin-left: -2px;" class="checkbox">
                 <label>
                     <input type="checkbox" data-gc2-subgroup-name="${name}" data-gc2-subgroup-level="${level}">
                 </label>
