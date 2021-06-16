@@ -61,9 +61,9 @@ module.exports = {
         backboneEvents = o.backboneEvents;
         return this;
     },
-    init: function (onLoad, el, onlyAddress, getProperty) {
-        let type1, type2, type3, type4, gids = {}, searchString, dslM, shouldA = [], shouldM = [], dsl1, dsl2,
-            komKode = window.vidiConfig.searchConfig.komkode, placeStore, maxZoom, searchTxt,
+    init: function (onLoad, el, onlyAddress, getProperty, caller) {
+        var type1, type2, type3, type4, gids = {}, searchString, dslM, shouldA = [], shouldM = [], dsl1, dsl2,
+            komKode = window.vidiConfig.searchConfig.komkode, placeStores = {}, maxZoom, searchTxt,
             esrSearchActive = typeof (window.vidiConfig.searchConfig.esrSearchActive) !== "undefined" ? window.vidiConfig.searchConfig.esrSearchActive : false,
             sfeSearchActive = typeof (window.vidiConfig.searchConfig.sfeSearchActive) !== "undefined" ? window.vidiConfig.searchConfig.sfeSearchActive : false,
             advanced = typeof (window.vidiConfig.searchConfig.advanced) !== "undefined" ? window.vidiConfig.searchConfig.advanced : false,
@@ -88,6 +88,33 @@ module.exports = {
                 $("#custom-search").attr("placeholder",
                     searchTxt + " eller ESR nr.");
             }
+        }
+
+        let colorPicker = ` 
+                 <div style="padding: 7px">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="well">Søgeresultater i kortet bliver oprettet i Tegningsmodulet, således de efterfølgende kan tilpasses. Herunder kan der vælges hvilke farve nye søgeresultater skal oprettets med. Farve, linjestilart, mål mv. kan ændres i efterfølgende i Tegning.</div>
+                        </div>    
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <label for="search-colorpicker-input" class="col-md-3 control-label">${__('Color')}</label>
+                            <div id="search-colorpicker" class="input-group colorpicker-component col-md-10">
+                                <input id="search-colorpicker-input" name="search-colorpicker-input"
+                                       type="text" value="#ff0000" class="form-control"
+                                       style="margin-left: 15px;"/>
+                                <span class="input-group-addon"><i style="margin-left: 10px;"/></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+
+        if (advanced) {
+            $("#place-search").append(colorPicker)
+            $("#search-colorpicker").colorpicker({
+                container: $("#search-colorpicker")
+            });
         }
 
         // Set max zoom then zooming on target

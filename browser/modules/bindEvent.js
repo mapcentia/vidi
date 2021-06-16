@@ -11,6 +11,7 @@ import {LAYER_TYPE_DEFAULT} from './layerTree/constants';
 require('dom-shims');
 require('arrive');
 const config = require('../../config/config.js');
+const layerTreeUtils = require('./layerTree/utils');
 const LEFT_SLIDE_WIDTHS = config?.leftSlideWidths || [300, 400, 550];
 const BUTTON_WITH = 24;
 const mobile = require('is-mobile');
@@ -101,6 +102,49 @@ module.exports = {
                 switchLayer.init(prefix + $(e.target).attr(`data-gc2-id`), $(e.target).prop(`checked`), doNotLegend);
                 e.stopPropagation();
 
+                backboneEvents.get().trigger(`layerTree:activeLayersChange`);
+            });
+        });
+
+        $(document).arrive('[data-gc2-group-name]', function () {
+            $(this).on('change', function (e) {
+                let prefix;
+                let isChecked = $(e.target).prop(`checked`);
+                let groupName = $(this).data(`gc2-group-name`);
+                let layers = meta.getMetaData().data.filter((e) => {
+                    if (e.layergroup === groupName) {
+                        let parsedMeta = layerTree.parseLayerMeta(e);
+                        prefix = parsedMeta?.default_layer_type ? parsedMeta.default_layer_type + ':' : '';
+                        switchLayer.init(prefix + e.f_table_schema + "." + e.f_table_name, isChecked, false);
+                        return true;
+                    }
+                })
+                e.stopPropagation();
+                backboneEvents.get().trigger(`layerTree:activeLayersChange`);
+                let base64GroupName = Base64.encode(groupName).replace(/=/g, "");
+                if (isChecked) {
+                    layerTreeUtils.setupLayerNumberIndicator(base64GroupName, layers.length, layers.length);
+                } else {
+                    $("#layer-panel-" + base64GroupName + " span:eq(0)").html(0);
+                }
+            });
+        });
+
+        $(document).arrive('[data-gc2-subgroup-name]', function () {
+            $(this).on('change', function (e) {
+                let prefix = '';
+                let isChecked = $(e.target).prop(`checked`);
+                let subGroupName = $(this).data(`gc2-subgroup-name`);
+                let subGroupLevel = $(this).data(`gc2-subgroup-level`);
+                let layers = meta.getMetaData().data.filter((e) => {
+                    let parsedMeta = layerTree.parseLayerMeta(e);
+                    if (parsedMeta?.vidi_sub_group?.split("|")[subGroupLevel] === subGroupName) {
+                        prefix = parsedMeta?.default_layer_type ? parsedMeta.default_layer_type + ':' : '';
+                        switchLayer.init(prefix + e.f_table_schema + "." + e.f_table_name, isChecked, false);
+                        return true;
+                    }
+                })
+                e.stopPropagation();
                 backboneEvents.get().trigger(`layerTree:activeLayersChange`);
             });
         });
@@ -500,7 +544,7 @@ module.exports = {
         $('#side-panel ul li a').on('click', function () {
             backboneEvents.get().trigger('off:all');
             let moduleTitle = $(this).data('module-title');
-            let e=  $('#module-container');
+            let e = $('#module-container');
             e.find('.js-module-title').text('');
             if (moduleTitle) {
                 e.find('.js-module-title').text(moduleTitle);
@@ -539,7 +583,7 @@ module.exports = {
                 backboneEvents.get().trigger('off:all');
                 const moduleId = $(this).data('module-id');
                 const moduleTitle = $(this).data('module-title');
-                const e =$('#module-container');
+                const e = $('#module-container');
                 e.find('.js-module-title').text('');
                 if (moduleTitle) {
                     e.find('.js-module-title').text(moduleTitle);

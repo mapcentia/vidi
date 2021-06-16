@@ -16,6 +16,21 @@ and this project adheres to [CalVer](https://calver.org/).
 }
 ```
 - embed.js: If host in token is http, then make it protocol relative, so tokens created on http still works when embedded on https sites.
+- It's now possible to switch all layers on/off in a layer (sub)group.
+- Some visual improvements to the display of sub-groups in the layer tree.
+
+### Added
+- An API loaded with the `embed.js` script. Two methods are available: `embedApi.switchLayer` and `embedApi.allOff`. See docs for details.
+- Mouse over no vector and raster tile layers. The latter using UTF Grid. These GC2 Meta properties are controling the mouse over:
+ - `hover_active` Boolean. Should mouse over be switch on?
+ - `info_template_hover` String. Handlebars template to use in label. If not set a default template will be used, which loops through fields with the `Show in mouse-over` property checked.
+ - `cache_utf_grid` Boolean. Wether to cache UTF grid tiles. Only apply to raster tile layers.
+
+### Fixed
+- Feature info click wouldn't open the pop-up if multiple layers was switch on.
+- Drawings are not longer dashed, when selected.
+- Conflict search module will now search protected layers if user is signed in.
+- On `zoomToExtentOfgeoJsonStore` in geocloud.js pan map one pixel to defeat a strange bug, which causes a browser freeze.
 
 ## [2021.5.0] - 2021-4-5
 ### Changed
@@ -58,7 +73,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - If a layer in a state snapshot is for some reason not available (protected, deleted), the build of the layer tree was ever resolved. Now it'll resolve.  
 - The queueStatisticsWatcher and Service Worker now uses 3. party module for base64 decoding, because windows.btoa fails on non-latin characters.
 - COWI Gade foto named properly in Streetview module.
-- Alot of fixes in the Editor module.
+- A lot of fixes in the Editor module.
 
 ## [2020.12.0] - 2020-8-12
 ### Changed
@@ -168,7 +183,6 @@ function(store, map) {
 - New button "Fit bounds to filter" in layer filters, which will set the view extent to the bounds of the filtered layer.
 - New "Labels" panel for raster tile layers with a checkbox for hiding/showing labels on the layer. Works for both MapServer and QGIS back-end (GC2 must support this).
 - Added boolean config `crossMultiSelect` in `config/config.js`. This will enable cross multi select on both vector and raster tile layers. This will result in a unified feature info experience, which are well suited for informative maps using the `embed.tmpl` template. All feature info results will be displayed in an accordion widget. The accordion summary is default layer title, but can be set to an attribute value with the meta config `accordion_summery`. Can be set in runtime config. 
-- It's now possible to start conflict search from Drawing module. A single drawing or all drawings together can be used for search.
 - WMS layers can now be added directly as base layers. A WMS base layer example:
 ```json
 {
@@ -240,8 +254,7 @@ function(store, map) {
 - `embed.tmpl` will now show login button if session module is enabled.
 - The WMS requests now has a `qgs` parameter for QGIS backed layers. The value is path to the qgs file for the layer (base64 encoded). In GC2 the path will be used to send the request directly to qgis_serv instead of cascading it through MapServer.
 - Raster tile layers without pixels (invisible in the map) are now not queried by feature info.
-- Turning on a vector layer will now load the legend of the raster tile representation of the layer.
-- Conflict search now are able to make a print with each hit and merge the PDFs together.
+- Turning on a vector layer will now load the legend of the raster tile representation of the layer
 
 ### Fixed
 - Using `indexOf` instead of `includes`, because the latter is not transpiled in Babel. It's an Internet Explorer issue.
@@ -253,7 +266,7 @@ function(store, map) {
 - All numeric Postgres types are now handled correct in the editor.
 - Puppeteer processes are now destroyed, if an exception is thrown during print. This prevents leak of processes.
 - Re-acquirement of a Puppeteer process is done if timeout, so the print will eventual be finished.
-- Puppeteer processes will be destroyed after 60 seconds no matter what. This prevents hanging processes, which could blocks further prints.
+- Puppeteer processes will be destroyed after 60 seconds. This prevents hanging processes, which blocks further prints.
 
 ## [2020.2.0]
 ### Added

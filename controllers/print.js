@@ -22,10 +22,12 @@ const AdmZip = require('adm-zip');
  */
 router.post('/api/print', function (req, response) {
         req.setTimeout(0); // no timeout
-        let body = req.body;
-        let count = {"n": 0}; // Must be passed as copy of a reference
-        let files = [];
-        const poll = () => {
+        var body = req.body;
+        var outputPng = body.png === true; // Should format be PNG?
+        var returnImage = body.image === undefined ? true : body.image !== false; // Should return image if PNG is requested?
+        var count = {"n": 0}; // Must be passed as copy of a reference
+        var files = [];
+        var poll = () => {
             setTimeout(() => {
                 if (count.n === body.bounds.length) {
                     console.log("Done All. Merging...");
@@ -33,11 +35,14 @@ router.post('/api/print', function (req, response) {
                         let r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
                         return v.toString(16);
                     });
-                    PDFMerge(files, {output: `${__dirname}/../public/tmp/print/pdf/${key}.pdf`})
-                        .then(() => {
-                            response.send({success: true, key});
-                        });
-
+                    if (!outputPng) {
+                        PDFMerge(files, {output: `${__dirname}/../public/tmp/print/pdf/${key}.pdf`})
+                            .then((buffer) => {
+                                response.send({success: true, key, "format": "pdf"});
+                            });
+                    } else {
+                        const zip = new AdmZip();
+                    }
                 } else {
                     poll();
                 }

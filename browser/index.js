@@ -42,6 +42,11 @@ window.gc2i18n = require('./i18n/' + window._vidiLocale + '.js');
  */
 window.vidiConfig = require('../config/config.js');
 
+/**
+ * Th global Vidi API
+ */
+window.vidiApi = {};
+
 window.Promise = require('es6-promise').Promise;
 
 

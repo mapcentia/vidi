@@ -384,7 +384,9 @@ module.exports = {
                                         try {
                                             modules.extensions[Object.keys(v)[0]][m].init();
                                         } catch (e) {
+
                                             console.warn(`Module ${Object.keys(v)[0]} could not be initiated`)
+                                            console.error(e);
                                         }
 
                                         let enabledExtensionIndex = enabledExtensionsCopy.indexOf(Object.keys(v)[0]);

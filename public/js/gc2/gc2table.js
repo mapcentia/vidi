@@ -50,7 +50,8 @@ var gc2table = (function () {
                 renderInfoIn: null,
                 key: null,
                 caller: null,
-                maxZoom: 17
+                maxZoom: 17,
+                dashSelected: false
             }, prop,
             uid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
                 var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
@@ -90,7 +91,8 @@ var gc2table = (function () {
             renderInfoIn = defaults.renderInfoIn,
             key = defaults.key,
             caller = defaults.caller,
-            maxZoom = parseInt(defaults.maxZoom) || 17
+            maxZoom = parseInt(defaults.maxZoom) || 17,
+            dashSelected = defaults.dashSelected;
 
         var customOnLoad = false, destroy, assignEventListeners, clickedFlag = false;
 
@@ -130,16 +132,13 @@ var gc2table = (function () {
             if (id === undefined) return;
             let row = $('*[data-uniqueid="' + id + '"]');
             row.addClass("selected");
-            let style = {
-                opacity: 1,
-                lineCap: "butt"
-            }
-            if (dashSelected) {
-                style.dashArray = "5 8";
-                style.dashSpeed = 10;
-            }
             try {
-                m.map._layers[id].setStyle(style);
+                m.map._layers[id].setStyle({
+                    opacity: 1,
+                    dashArray: dashSelected ? "5 8": false,
+                    dashSpeed: 10,
+                    lineCap: "butt"
+                });
             } catch (e) {
                 console.warn("Can't set style on marker")
             }

@@ -555,7 +555,27 @@ module.exports = module.exports = {
     makeSearch: function (text, callBack, id = null, fromDrawing = false) {
         var primitive, coord,
             layer, buffer = parseFloat($("#conflict-buffer-value").val()), bufferValue = buffer,
-            _self = this;
+            hitsTable = $("#hits-content tbody"),
+            noHitsTable = $("#nohits-content tbody"),
+            errorTable = $("#error-content tbody"),
+            hitsData = $("#hits-data"),
+            row, fileId, searchFinish, geomStr,
+            visibleLayers = cloud.getAllTypesOfVisibleLayers().split(";"), crss;
+
+        const setCrss = (layer) => {
+            if (typeof layer.getBounds !== "undefined") {
+                coord = layer.getBounds().getSouthWest();
+            } else {
+                coord = layer.getLatLng();
+            }
+            var zone = require('./../../../browser/modules/utmZone.js').getZone(coord.lat, coord.lng);
+            crss = {
+                "proj": "+proj=utm +zone=" + zone + " +ellps=WGS84 +datum=WGS84 +units=m +no_defs",
+                "unproj": "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
+            };
+        }
+
+        let _self = this;
         visibleLayers = cloud.getAllTypesOfVisibleLayers().split(";");
         if (text) {
             currentFromText = text;
@@ -618,7 +638,6 @@ module.exports = module.exports = {
             }
         }
         primitive = layer.toGeoJSON();
-        console.log(primitive)
         if (typeof primitive.features !== "undefined") {
             primitive = primitive.features[0];
         }
@@ -989,20 +1008,36 @@ let dom = `
 
                     <div class="btn-toolbar bs-component" style="margin: 0;">
                         <div class="btn-group">
-                            <button disabled class="btn btn-raised" id="conflict-print-btn" data-loading-text="<i class='fa fa-cog fa-spin fa-lg'></i> PDF rapport"><i class='fa fa-cog fa-lg'></i> Print rapport</button>
+                            <button disabled class="btn btn-sm btn-raised" id="conflict-print-btn" data-loading-text="<i class='fa fa-cog fa-spin fa-lg'></i> PDF rapport"><i class='fa fa-cog fa-lg'></i> Print rapport</button>
                         </div>
                         <div class="btn-group">
-                            <button disabled class="btn btn-raised" id="conflict-set-print-area-btn"><i class='fas fa-expand'></i></button>
+                            <button disabled class="btn btn-sm btn-raised" id="conflict-set-print-area-btn"><i class='fas fa-expand'></i></button>
                         </div>
                         <fieldset disabled id="conflict-get-print-fieldset">
                             <div class="btn-group">
-                                <a target="_blank" href="javascript:void(0)" class="btn btn-primary btn-raised" id="conflict-open-pdf">Åben PDF</a>
-                                <a href="bootstrap-elements.html" class="btn btn-primary btn-raised dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></a>
+                                <a target="_blank" href="javascript:void(0)" class="btn btn-sm btn-primary btn-raised" id="conflict-open-pdf">Åben PDF</a>
+                                <a href="bootstrap-elements.html" class="btn btn-sm btn-primary btn-raised dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></a>
                                 <ul class="dropdown-menu">
                                     <li><a href="javascript:void(0)" id="conflict-download-pdf">Download PDF</a></li>
                                 </ul>
                             </div>
                         </fieldset>
+                        <div>
+                            <span class="radio radio-primary">
+                                <label>
+                                    <input type="radio" name="conflict-report-type" value="1" checked>
+                                    Kompakt
+                                </label>
+                                <label>
+                                    <input type="radio" name="conflict-report-type" value="2">
+                                    Lang, kun hits
+                                </label>
+                                <label>
+                                    <input type="radio" name="conflict-report-type" value="3">
+                                    Lang, alle
+                                </label>
+                            </span>
+                        </div>
                     </div>
 
                     <div role="tabpanel">
