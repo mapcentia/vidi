@@ -129,7 +129,6 @@ let urlsIgnoredForCaching = [{
     regExp: true,
     requested: '/mapcache/'
 }];
-u
 
 if (typeof CONFIG.urlsIgnoredForCaching === "object") {
     urlsIgnoredForCaching = urlsIgnoredForCaching.concat(CONFIG.urlsIgnoredForCaching);
