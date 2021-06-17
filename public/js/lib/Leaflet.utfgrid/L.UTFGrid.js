@@ -78,8 +78,6 @@ L.UTFGrid = L.TileLayer.extend({
         L.TileLayer.prototype._update.call(this, center, zoom);
     },
     _abortLoading: function () {
-        console.log(this._tiles)
-        console.log(this._xhr)
         var i, tile, xhr;
         for (i in this._tiles) {
             if (this._tiles[i].coords.z !== this._tileZoom) {
@@ -128,7 +126,6 @@ L.UTFGrid = L.TileLayer.extend({
 
     _handleTileLoad: function (key, data) {
         // extension point
-        console.log("TEST")
     },
 
     _onClick: function (e) {
