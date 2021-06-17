@@ -115,7 +115,13 @@ let urlsIgnoredForCaching = [{
     requested: 'google'
 }, {
     regExp: true,
-    requested: '/api/'
+    requested: '/api/sql'
+}, {
+    regExp: true,
+    requested: '/api/feature'
+}, {
+    regExp: true,
+    requested: '/api/elasticsearch'
 }, {
     regExp: true,
     requested: '/wms/'
@@ -123,7 +129,7 @@ let urlsIgnoredForCaching = [{
     regExp: true,
     requested: '/mapcache/'
 }];
-
+u
 
 if (typeof CONFIG.urlsIgnoredForCaching === "object") {
     urlsIgnoredForCaching = urlsIgnoredForCaching.concat(CONFIG.urlsIgnoredForCaching);
