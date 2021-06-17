@@ -16,8 +16,10 @@ L.UTFGrid = L.TileLayer.extend({
     _idIndex: null, // {<featureID>: {<tileKey1>: true, ...<tileKeyN>: true} }
     _throttleMove: null, // holds throttled mousemove handler
     //_throttleConnectEventHandlers: null, // holds throttled connection setup function
+    _xhr: {},
 
-    _updateCursor: function(){ }, //no-op, overridden below
+    _updateCursor: function () {
+    }, //no-op, overridden below
 
     onAdd: function (map) {
         this._cache = {};
@@ -28,7 +30,9 @@ L.UTFGrid = L.TileLayer.extend({
         this._throttleMove = L.Util.throttle(this._move, this.options.mouseInterval, this);
 
         if (this.options.pointerCursor) {
-            this._updateCursor = function(cursor) { this._container.style.cursor = cursor; }
+            this._updateCursor = function (cursor) {
+                this._container.style.cursor = cursor;
+            }
         }
 
         map.on('boxzoomstart', this._disconnectMapEventHandlers, this);
@@ -46,59 +50,85 @@ L.UTFGrid = L.TileLayer.extend({
         L.TileLayer.prototype.onRemove.call(this, map);
     },
 
-    createTile: function(coords) {
+    createTile: function (coords) {
         this._loadTile(coords);
         return document.createElement('div');  // empty DOM node, required because this overrides L.TileLayer
     },
 
-    setUrl: function(url, noRedraw) {
+    setUrl: function (url, noRedraw) {
         this._cache = {};
         return L.TileLayer.prototype.setUrl.call(this, url, noRedraw);
     },
 
-    _connectMapEventHandlers: function(){
+    _connectMapEventHandlers: function () {
         this._map.on('click', this._onClick, this);
         this._map.on('mousemove', this._throttleMove, this);
     },
 
-    _disconnectMapEventHandlers: function(){
+    _disconnectMapEventHandlers: function () {
         this._map.off('click', this._onClick, this);
         this._map.off('mousemove', this._throttleMove, this);
     },
 
-    _throttleConnectEventHandlers: function() {
+    _throttleConnectEventHandlers: function () {
         setTimeout(this._connectMapEventHandlers.bind(this), 100);
     },
 
     _update: function (center, zoom) {
         L.TileLayer.prototype._update.call(this, center, zoom);
     },
+    _abortLoading: function () {
+        console.log(this._tiles)
+        console.log(this._xhr)
+        var i, tile, xhr;
+        for (i in this._tiles) {
+            if (this._tiles[i].coords.z !== this._tileZoom) {
+                tile = this._tiles[i].el;
+                xhr = this._xhr[i];
 
+                tile.onload = L.Util.falseFn;
+                tile.onerror = L.Util.falseFn;
+
+                if (typeof xhr !== "undefined") {
+                    xhr.abort();
+                    L.DomUtil.remove(tile);
+                    delete this._tiles[i];
+                    delete this._xhr[i];
+                }
+            }
+        }
+    },
     _loadTile: function (coords) {
         var me = this;
         var url = this.getTileUrl(coords);
         var key = this._tileCoordsToKey(coords);
         var self = this;
-        if (this._cache[key]) { return }
+        if (this._cache[key]) {
+            return
+        }
         setTimeout(function () {
             (function poll() {
                 if (me.options.loading.length === 0) {
-                    $.ajax({
+                    let xhr = $.ajax({
                         url: url,
                         success: function (data) {
                             self._cache[key] = data;
                             L.Util.bind(self._handleTileLoad, self)(key, data);
                         },
                     });
+                    me._xhr[key] = xhr;
                 } else {
-                    setTimeout(function (){poll()}, 100)
+                    setTimeout(function () {
+                        poll()
+                    }, 100)
                 }
             }());
-        }, 500);
+        }, 500)
     },
 
-    _handleTileLoad: function(key, data) {
+    _handleTileLoad: function (key, data) {
         // extension point
+        console.log("TEST")
     },
 
     _onClick: function (e) {
@@ -106,7 +136,9 @@ L.UTFGrid = L.TileLayer.extend({
     },
 
     _move: function (e) {
-        if (e.latlng == null){ return }
+        if (e.latlng == null) {
+            return
+        }
 
         var on = this._objectForEvent(e);
 
@@ -173,7 +205,7 @@ L.UTFGrid = L.TileLayer.extend({
         return {
             latlng: e.latlng,
             data: result,
-            id: (result)? result.id: null,
+            id: (result) ? result.id : null,
             _tile: tileKey,
             _tileCharCode: tileKey + ':' + charCode
         };
@@ -206,10 +238,10 @@ L.UTFGrid = L.TileLayer.extend({
         //derived from: https://github.com/mapbox/glower/blob/mb-pages/src/glower.js#L37
         var charCode = c + 32;
         if (charCode >= 34) {
-            charCode ++;
+            charCode++;
         }
         if (charCode >= 92) {
-            charCode ++;
+            charCode++;
         }
         return charCode;
     }
