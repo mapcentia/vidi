@@ -16,7 +16,7 @@ and this project adheres to [CalVer](https://calver.org/).
 }
 ```
 - embed.js: If host in token is http, then make it protocol relative, so tokens created on http still works when embedded on https sites.
-- It's now possible to switch all layers on/off in a layer (sub)group.
+- It's now possible to switch all layers on/off in a layer (sub)group. Enable the checkboxes with the `showLayerGroupCheckbox` conflig.
 - Some visual improvements to the display of sub-groups in the layer tree.
 
 ### Added
