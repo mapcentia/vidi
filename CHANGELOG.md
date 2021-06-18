@@ -18,6 +18,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - embed.js: If host in token is http, then make it protocol relative, so tokens created on http still works when embedded on https sites.
 - It's now possible to switch all layers on/off in a layer (sub)group. Enable the checkboxes with the `showLayerGroupCheckbox` conflig.
 - Some visual improvements to the display of sub-groups in the layer tree.
+- Editing of geometry is not possible when number of nodes exceed 2.000. But attribut data can still be edited. A high amount of nodes will hog down the browser and it can crash.
 
 ### Added
 - An API loaded with the `embed.js` script. Two methods are available: `embedApi.switchLayer` and `embedApi.allOff`. See docs for details.
