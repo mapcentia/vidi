@@ -53,7 +53,7 @@ const widgets = {'imageupload': ImageUploadWidget};
 const MODULE_NAME = `editor`;
 const EDITOR_FORM_CONTAINER_ID = 'editor-attr-form';
 const EDITOR_CONTAINER_ID = 'editor-attr-dialog';
-const MAX_NODE_IN_FEATURE = 2000; // If number of nodes exceed this number, when the geometry editor is not enabled.
+const MAX_NODE_IN_FEATURE = 1000; // If number of nodes exceed this number, when the geometry editor is not enabled.
 
 const serviceWorkerCheck = () => {
     if (!('serviceWorker' in navigator) || !navigator.serviceWorker || !navigator.serviceWorker.controller) {
@@ -703,9 +703,13 @@ module.exports = {
                     break;
 
                 default:
-
                     let numberOfNodes = 0;
                     editedFeature.feature.geometry.coordinates.forEach((c) => {
+                        if (typeof c === "object") {
+                            c.forEach((c2) => {
+                                numberOfNodes += c2.length;
+                            });
+                        }
                         numberOfNodes += c.length;
                     })
                     if (numberOfNodes <= MAX_NODE_IN_FEATURE) {
