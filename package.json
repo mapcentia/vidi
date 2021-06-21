@@ -154,7 +154,7 @@
     "react-plotly.js": "^2.4.0",
     "react-router": "^4.3.1",
     "react-router-redux": "^4.0.8",
-    "redis": "^2.8.0",
+    "redis": "^3.1.1",
     "redux-thunk": "^2.3.0",
     "reproject": "^1.2.5",
     "request": "^2.88.2",
