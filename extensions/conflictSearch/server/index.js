@@ -9,6 +9,7 @@ let request = require("request");
 let router = express.Router();
 let fs = require('fs');
 let dayjs = require('dayjs');
+let XLSX = require('xlsx');
 let config = require('../../../config/config.js');
 
 let utf8 = require('utf8');
@@ -171,6 +172,39 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                                 console.log("Report saved");
                             }
                         });
+                        // Create Excel workbook with hits
+                        let wb = XLSX.utils.book_new();
+                        let dataAdded = false;
+                        const obj = report.hits;
+                        for (const hit in obj) {
+                            if (obj.hasOwnProperty(hit)) {
+                                if (obj[hit].hits > 0) {
+                                    let data = [];
+                                    let name = obj[hit].title || obj[hit].table;
+                                    if (obj[hit].data.length > 0) {
+                                        let header = obj[hit].data[0].map((cell) => {
+                                            return cell.alias
+                                        });
+                                        data = obj[hit].data.map((row) => {
+                                            return row.map((cell) => {
+                                                if (!cell.key) {
+                                                    return cell.value
+                                                }
+                                            })
+                                        });
+                                        data.unshift(header)
+                                    }
+                                    let ws = XLSX.utils.aoa_to_sheet(data);
+                                    dataAdded = true;
+                                    XLSX.utils.book_append_sheet(wb, ws, name);
+                                }
+                            }
+                        }
+                        if (!dataAdded) {
+
+                            XLSX.utils.book_append_sheet(wb, [[]]);
+                        }
+                        XLSX.writeFile(wb, __dirname + "/../../../public/tmp/excel/" + fileName + ".xlsb");
                         return;
                     }
                     iter();

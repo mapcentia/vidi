@@ -806,7 +806,7 @@ module.exports = module.exports = {
         $("#result-origin").html(response.text);
         $('#conflict-main-tabs a[href="#conflict-result-content"]').tab('show');
         $('#conflict-result-content a[href="#hits-content"]').tab('show');
-        $('#conflict-result .btn:first-child').attr("href", "/html?id=" + response.file)
+        $('#conflict-open-pdf').attr("href", "/html?id=" + response.file)
         $("#conflict-download-pdf").prop("download", `Søgning foretaget med ${response.text} d. ${response.dateTime}`);
 
         if ('bufferItems' in response) {
@@ -1005,7 +1005,7 @@ let dom = `
             <div role="tabpanel" class="tab-pane active" id="conflict-result-content">
                 <div id="conflict-result">
                     <div><span id="conflict-result-origin"></span></div>
-
+                    <div><a href="" target="_blank" class="btn btn-sm btn-raised" id="conflict-excel-btn">Excel</a></div>
                     <div class="btn-toolbar bs-component" style="margin: 0;">
                         <div class="btn-group">
                             <button disabled class="btn btn-sm btn-raised" id="conflict-print-btn" data-loading-text="<i class='fa fa-cog fa-spin fa-lg'></i> PDF rapport"><i class='fa fa-cog fa-lg'></i> Print rapport</button>

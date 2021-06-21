@@ -171,6 +171,7 @@
     "terraformer-wkt-parser": "^1.2.1",
     "underscore": "^1.10.2",
     "utf8": "^3.0.0",
-    "uuid": "^3.4.0"
+    "uuid": "^3.4.0",
+    "xlsx": "^0.17.0"
   }
 }

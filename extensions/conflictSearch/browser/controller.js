@@ -90,10 +90,12 @@ module.exports = {
         });
 
         // When conflict search is done, enable the print button
-        backboneEvents.get().on("end:conflictSearch", function () {
+        backboneEvents.get().on("end:conflictSearch", function (e) {
             $("#conflict-print-btn").prop("disabled", false);
+            $("#conflict-excel-btn").prop("disabled", false);
             $("#conflict-set-print-area-btn").prop("disabled", false);
             backboneEvents.get().trigger(`${MODULE_ID}:state_change`);
+            $("#conflict-excel-btn").prop("href", "/tmp/excel/" + e.file + ".xlsb");
         });
 
         // Handle conflict info click events
@@ -118,6 +120,7 @@ module.exports = {
         backboneEvents.get().on("on:customData", function (e) {
             reportRender.render(e);
         });
+
 
         // Click event for print button
         $("#conflict-print-btn").on("click", function () {
