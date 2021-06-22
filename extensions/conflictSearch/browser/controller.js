@@ -50,6 +50,12 @@ module.exports = {
             $("#conflict-print-btn").button('reset');
             backboneEvents.get().trigger("end:conflictSearchPrint", response);
             console.log("GEMessage:LaunchURL:" + urlparser.uriObj.protocol() + "://" +  urlparser.uriObj.host() + "/tmp/print/pdf/" + response.key + ".pdf");
+			
+			try {
+			   window.webBrowser.ue_log("LaunchURL:" + urlparser.uriObj.protocol() + "://" +  urlparser.uriObj.host() + "/tmp/print/pdf/" + response.key + ".pdf");
+			} catch (error) {
+				console.error(error);
+			}
 
         });
 
