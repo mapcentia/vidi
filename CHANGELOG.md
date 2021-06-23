@@ -19,7 +19,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - It's now possible to switch all layers on/off in a layer (sub)group. Enable the checkboxes with the `showLayerGroupCheckbox` conflig.
 - Some visual improvements to the display of sub-groups in the layer tree.
 - Editing of geometry is not possible when number of nodes exceed 1.000. But attribut data can still be edited. A high amount of nodes will hog down the browser and it can crash.
-- The Snapshot module will now use base64url encoded body for getting, creating and updating snapshots. This way will a JSON value `ÌLIKE '%12'` not mess things up when decoded server side. This requires an update of GC2. 
+- The Snapshot module will now use base64url encoded body for getting, creating and updating snapshots. This way will a JSON value `ILIKE '%12'` not mess things up when decoded server side. This requires an update of GC2. 
 
 ### Added
 - An API loaded with the `embed.js` script. Two methods are available: `embedApi.switchLayer` and `embedApi.allOff`. See docs for details.
