@@ -26,8 +26,8 @@ and this project adheres to [CalVer](https://calver.org/).
  - `hover_active` Boolean. Should mouse over be switch on?
  - `info_template_hover` String. Handlebars template to use in label. If not set a default template will be used, which loops through fields with the `Show in mouse-over` property checked.
  - `cache_utf_grid` Boolean. Wether to cache UTF grid tiles. Only apply to raster tile layers.
-- Excel report is now available in conflict module.
-- New config option `activeLayers`. It's a array of schema qualified layers with any type prefix (:v, :mvt, :w), which should be switch on from the start. If a snapshot link is used for starting Vidi, this option will be ignored.
+- Excel report is now available in conflict module. Each layer with hits will have its own sheet. For for sheets to get populated with hits the "Show in conflict" option must be checked for a least one field in the Structur tab in GC2 Admin. 
+- New config option `activeLayers`. This option is a array of schema qualified layers with any type prefix (:v, :mvt, :w), which should be switch on from the start. If a snapshot link is used for starting Vidi, this option will be ignored.
 ```json
 {
   "activeLayers": [
