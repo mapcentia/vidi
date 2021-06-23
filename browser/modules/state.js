@@ -196,20 +196,23 @@ module.exports = {
                     return result;
                 };
 
-                const setLayers = () => {
-                    $(".base-map-button").removeClass("active");
-                    $("#" + hashArr[0]).addClass("active");
+                const setLayers = (hash = true) => {
                     let layersToActivate = [];
-
                     let baseLayerId = false;
-                    if (hashArr[1] && hashArr[2] && hashArr[3]) {
-                        baseLayerId = hashArr[0];
+                    if (hash) {
+                        $(".base-map-button").removeClass("active");
+                        if (hashArr[0]) $("#" + hashArr[0]).addClass("active");
 
-                        // Layers to activate
-                        if (hashArr[4]) {
-                            layersToActivate = removeDuplicates(hashArr[4].split(","));
+                        if (hashArr[1] && hashArr[2] && hashArr[3]) {
+                            baseLayerId = hashArr[0];
+
+                            // Layers to activate
+                            if (hashArr[4]) {
+                                layersToActivate = removeDuplicates(hashArr[4].split(","));
+                            }
                         }
                     }
+                    layersToActivate = removeDuplicates(layersToActivate.concat(window?.vidiConfig?.activeLayers || []));
 
                     /**
                      * Creates promise
@@ -270,7 +273,9 @@ module.exports = {
                             } else {
                                 cloud.get().zoomToExtent();
                             }
-
+                            if (window?.vidiConfig?.activeLayers) {
+                                setLayers(false);
+                            }
                             initResolve();
                         }
                     } else {

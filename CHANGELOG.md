@@ -27,6 +27,15 @@ and this project adheres to [CalVer](https://calver.org/).
  - `info_template_hover` String. Handlebars template to use in label. If not set a default template will be used, which loops through fields with the `Show in mouse-over` property checked.
  - `cache_utf_grid` Boolean. Wether to cache UTF grid tiles. Only apply to raster tile layers.
 - Excel report is now available in conflict module.
+- New config option `activeLayers`. It's a array of schema qualified layers with any type prefix (:v, :mvt, :w), which should be switch on from the start. If a snapshot link is used for starting Vidi, this option will be ignored.
+```json
+{
+  "activeLayers": [
+    "schema.layer1",
+    "v:schema.layer2"
+  ]
+}
+```
 
 ### Fixed
 - Feature info click wouldn't open the pop-up if multiple layers was switch on.

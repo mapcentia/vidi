@@ -406,3 +406,16 @@ Viser en tjekboks i hver lag-gruppe og under-gruppe, som tænder/slukker alle la
 
     "showLayerGroupCheckboxe: true
 
+.. _configjs_activelayers:
+
+activeLayers
+*****************************************************************
+
+Liste over lag, som skal tændes fra starten. Lag angives schema qualified og med evt. type præfiks (:v, :mvt, :w). De angivne lag behøver ikke at være includeret i :ref:`schemata<configjs_schemata>`. Hvis Vidi startes med et projekt link, vil denne konfiguration blive ignoreret.
+
+.. code-block:: json
+
+    "activeLayers": [
+        "schema.lag1",
+        "v:schema.lag2"
+    ]
