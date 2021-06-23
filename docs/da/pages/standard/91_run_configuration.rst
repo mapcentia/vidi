@@ -391,10 +391,6 @@ Andre muligheder kan ses `her <https://developer.mozilla.org/en-US/docs/Web/CSS/
 
     "infoClickCursorStyle": "crosshair"
 
-.. rubric:: Fodnoter
-
-.. [#fragment] Et fragment er den del af en URL der kommer efter `#`.
-
 .. _configjs_showlayergroupcheckboxes:
 
 showLayerGroupCheckboxe
@@ -419,3 +415,7 @@ Liste over lag, som skal tændes fra starten. Lag angives schema qualified og me
         "schema.lag1",
         "v:schema.lag2"
     ]
+
+.. rubric:: Fodnoter
+
+.. [#fragment] Et fragment er den del af en URL der kommer efter `#`.
