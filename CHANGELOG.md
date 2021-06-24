@@ -44,6 +44,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - Drawings are not longer dashed, when selected.
 - Conflict search module will now search protected layers if user is signed in.
 - On `zoomToExtentOfgeoJsonStore` in geocloud.js pan map one pixel to defeat a strange bug, which causes a browser freeze.
+- Layer filter auto complete menu is now postioned absolute instead of fixed, so it will not hang in the same place when scrolling layer tree.
 
 ## [2021.5.0] - 2021-4-5
 ### Changed
