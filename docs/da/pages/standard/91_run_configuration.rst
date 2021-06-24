@@ -394,3 +394,15 @@ Andre muligheder kan ses `her <https://developer.mozilla.org/en-US/docs/Web/CSS/
 .. rubric:: Fodnoter
 
 .. [#fragment] Et fragment er den del af en URL der kommer efter `#`.
+
+.. _configjs_showlayergroupcheckboxes:
+
+showLayerGroupCheckboxe
+*****************************************************************
+
+Viser en tjekboks i hver lag-gruppe og under-gruppe, som tænder/slukker alle lag i den pågældende gruppe.
+
+.. code-block:: json
+
+    "showLayerGroupCheckboxe: true
+

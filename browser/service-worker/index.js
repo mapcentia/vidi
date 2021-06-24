@@ -115,16 +115,22 @@ let urlsIgnoredForCaching = [{
     requested: 'google'
 }, {
     regExp: true,
-    requested: '/api/v1/'
+    requested: '/api/sql'
 }, {
     regExp: true,
-    requested: '/api/v2/'
+    requested: '/api/feature'
+}, {
+    regExp: true,
+    requested: '/api/elasticsearch'
 }, {
     regExp: true,
     requested: '/wms/'
 }, {
     regExp: true,
     requested: '/api/print/'
+}, {
+    regExp: true,
+    requested: '/mapcache/'
 }];
 
 if (typeof CONFIG.urlsIgnoredForCaching === "object") {
@@ -197,15 +203,12 @@ class Keeper {
                     });
                 }).catch(error => {
                     console.error(`localforage failed to perform operation`, error);
-                    reject();
+                    resolve(); // We still resolve, because otherwise we ge a net:ERR_FAILED in browser
                 });
             }).catch(error => {
                 console.error(`localforage failed to perform operation`, error);
                 resolve(); // We still resolve, because otherwise we ge a net:ERR_FAILED in browser
             });
-        }).catch(error => {
-            console.error(`localforage failed to perform operation`, error);
-            resolve(); // We still resolve, because otherwise we ge a net:ERR_FAILED in browser
         });
     }
 
@@ -236,7 +239,7 @@ class Keeper {
                 reject();
             });
         });
-    };
+    }
 }
 
 /**
@@ -983,7 +986,7 @@ self.addEventListener('fetch', (event) => {
 
     if (requestShouldBeBypassed) {
         if (LOG_FETCH_EVENTS) console.log(`Service worker: bypassing the ${event.request.url} request`);
-        return fetch(event.request);
+        //return fetch(event.request);
     } else {
         if (LOG_FETCH_EVENTS) console.log(`Service worker: not bypassing the ${event.request.url} request`);
 

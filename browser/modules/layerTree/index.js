@@ -2168,7 +2168,7 @@ module.exports = {
         // Only if container doesn't exist
         // ===============================
         if ($("#layer-panel-" + base64GroupName).length === 0) {
-            $("#layers_list").append(markupGeneratorInstance.getGroupPanel(base64GroupName, groupName));
+            $("#layers_list").append(markupGeneratorInstance.getGroupPanel(base64GroupName, groupName, window.vidiConfig.showLayerGroupCheckbox));
 
             // Append to inner group container
             // ===============================
@@ -2553,7 +2553,7 @@ module.exports = {
      */
     createSubgroupRecord: (subgroup, forcedState, precheckedLayers, parentNode, level = 0, initiallyClosed = true) => {
         let base64SubgroupName = Base64.encode(`subgroup_${subgroup.id}_level_${level}_${uuidv4()}`).replace(/=/g, "");
-        let markup = markupGeneratorInstance.getSubgroupControlRecord(base64SubgroupName, subgroup.id, level);
+        let markup = markupGeneratorInstance.getSubgroupControlRecord(base64SubgroupName, subgroup.id, level, window.vidiConfig.showLayerGroupCheckbox);
 
         $(parentNode).append(markup);
         $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-id`).append(`<div style="display: inline">

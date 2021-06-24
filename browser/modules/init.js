@@ -79,6 +79,7 @@ module.exports = {
                         window.vidiConfig.infoClickCursorStyle = data.infoClickCursorStyle ? data.infoClickCursorStyle : window.vidiConfig.infoClickCursorStyle;
                         window.vidiConfig.crossMultiSelect = data.crossMultiSelect ? data.crossMultiSelect : window.vidiConfig.crossMultiSelect;
                         window.vidiConfig.featureInfoTableOnMap = data.featureInfoTableOnMap ? data.featureInfoTableOnMap : window.vidiConfig.featureInfoTableOnMap;
+                        window.vidiConfig.showLayerGroupCheckbox = data.showLayerGroupCheckbox ? data.showLayerGroupCheckbox : window.vidiConfig.showLayerGroupCheckbox;
                     }).fail(function () {
                         console.log("Could not load: " + configFile);
                         if (window.vidiConfig.defaultConfig && (window.vidiConfig.defaultConfig !== configFile)) {
