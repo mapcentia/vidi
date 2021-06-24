@@ -373,7 +373,7 @@ class StateSnapshotsDashboard extends React.Component {
         };
 
         const createSnapshotRecord = (item, index, local = false) => {
-            let date = new Date(item.created_at);
+            let date = new Date(item.updated_at || item.created_at); // updated_at is a newer property, which may not be present in older snapshots
             let dateFormatted = (`${date.getHours()}:${date.getMinutes()} ${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`);
 
             let importButton = false;

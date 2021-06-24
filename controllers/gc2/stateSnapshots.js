@@ -188,6 +188,7 @@ router.post('/api/state-snapshots/:dataBase', (req, res, next) => {
             let currentDate = new Date();
             stateSnapshotCopy.id = generatedKey;
             stateSnapshotCopy.created_at = currentDate.toISOString();
+            stateSnapshotCopy.updated_at = currentDate.toISOString();
             if (!stateSnapshotCopy.host || !stateSnapshotCopy.database) {
                 shared.throwError(res, 'MISSING_DATA');
             } else {
@@ -305,6 +306,7 @@ router.put('/api/state-snapshots/:dataBase/:stateSnapshotKey', (req, res, next) 
                 shared.throwError(res, 'INVALID_SNAPSHOT_ID');
             } else {
                 let parsedBody = false;
+                let currentDate = new Date();
                 try {
                     let localParsedBody = JSON.parse(base64url.decode(response.body));
                     parsedBody = localParsedBody;
@@ -320,6 +322,7 @@ router.put('/api/state-snapshots/:dataBase/:stateSnapshotKey', (req, res, next) 
 
                         let token = generateToken(parsedSnapshotData);
                         parsedSnapshotData.token = token;
+                        parsedSnapshotData.updated_at = currentDate.toISOString();
                         request({
                             method: 'PUT',
                             encoding: 'utf8',
