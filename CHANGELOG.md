@@ -21,6 +21,11 @@ and this project adheres to [CalVer](https://calver.org/).
 - Editing of geometry is not possible when number of nodes exceed 1.000. But attribut data can still be edited. A high amount of nodes will hog down the browser and it can crash.
 - The Snapshot module will now use base64url encoded body for getting, creating and updating snapshots. This way will a JSON value `ILIKE '%12'` not mess things up when decoded server side. This requires an update of GC2. 
 - Snapshot list is now ordered by update date/time and this is also what's displayed instead of create date/time.
+- Frame number on prints will not be shown when only one frame is printed. Custom print needs an update:
+```
+{{#showFrameNumber}}#{{printFrame}}{{/showFrameNumber}}
+```
+- Frame numbers starts with 1 instead of 0.
 
 ### Added
 - An API loaded with the `embed.js` script. Two methods are available: `embedApi.switchLayer` and `embedApi.allOff`. See docs for details.
