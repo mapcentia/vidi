@@ -26,6 +26,15 @@ and this project adheres to [CalVer](https://calver.org/).
 {{#showFrameNumber}}#{{printFrame}}{{/showFrameNumber}}
 ```
 - Frame numbers starts with 1 instead of 0.
+- New format for setting redis host. Now the database number can be set:
+```JSON
+{
+  "redis": {
+    "host": "127.0.0.1:6379",
+    "db": 2
+  }
+}
+```
 
 ### Added
 - An API loaded with the `embed.js` script. Two methods are available: `embedApi.switchLayer` and `embedApi.allOff`. See docs for details.
