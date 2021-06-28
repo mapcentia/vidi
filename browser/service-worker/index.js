@@ -127,6 +127,9 @@ let urlsIgnoredForCaching = [{
     requested: '/wms/'
 }, {
     regExp: true,
+    requested: '/api/v2'
+}, {
+    regExp: true,
     requested: '/mapcache/'
 }];
 
