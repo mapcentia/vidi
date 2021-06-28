@@ -607,7 +607,7 @@ module.exports = {
                 metaData: meta.getMetaData(),
                 px: config.print.templates[tmpl][pageSize][printingOrientation].mapsizePx[0],
                 py: config.print.templates[tmpl][pageSize][printingOrientation].mapsizePx[1],
-                queryString: urlparser.search,
+                queryString: urlparser.search.replace(/state=[a-z0-9_-]*/g, ""), // remove the state snapshot
                 customData: null,
                 scales: scales,
                 sticky: $("#print-sticky").is(":checked")

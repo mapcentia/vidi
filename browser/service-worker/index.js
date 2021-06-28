@@ -130,6 +130,9 @@ let urlsIgnoredForCaching = [{
     requested: '/api/print/'
 }, {
     regExp: true,
+    requested: '/api/v2'
+}, {
+    regExp: true,
     requested: '/mapcache/'
 }];
 

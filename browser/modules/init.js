@@ -80,6 +80,7 @@ module.exports = {
                         window.vidiConfig.crossMultiSelect = data.crossMultiSelect ? data.crossMultiSelect : window.vidiConfig.crossMultiSelect;
                         window.vidiConfig.featureInfoTableOnMap = data.featureInfoTableOnMap ? data.featureInfoTableOnMap : window.vidiConfig.featureInfoTableOnMap;
                         window.vidiConfig.showLayerGroupCheckbox = data.showLayerGroupCheckbox ? data.showLayerGroupCheckbox : window.vidiConfig.showLayerGroupCheckbox;
+                        window.vidiConfig.activeLayers = data.activeLayers ? data.activeLayers : window.vidiConfig.activeLayers;
                     }).fail(function () {
                         console.log("Could not load: " + configFile);
                         if (window.vidiConfig.defaultConfig && (window.vidiConfig.defaultConfig !== configFile)) {
@@ -113,7 +114,7 @@ module.exports = {
                 }
             } else {
                 console.log("polling...");
-                setTimeout(()=>{
+                setTimeout(() => {
                     poll();
                 }, 10)
             }
@@ -172,7 +173,8 @@ module.exports = {
             gc2i18n.dict.printDataTime = decodeURIComponent(urlVars.td); // TODO typo
             gc2i18n.dict.printDateTime = decodeURIComponent(urlVars.td);
             gc2i18n.dict.printDate = decodeURIComponent(urlVars.d);
-            gc2i18n.dict.printFrame = decodeURIComponent(urlVars.frame);
+            gc2i18n.dict.printFrame = parseInt(decodeURIComponent(urlVars.frame)) + 1;
+            gc2i18n.dict.showFrameNumber = decodeURIComponent(urlVars.frameN) === "1" ? false : true;
             window.vidiTimeout = 1000;
         } else {
             window.vidiTimeout = 0;
@@ -420,10 +422,10 @@ module.exports = {
                     console.error("Could not perform application initialization", e.message, e);
                 }
                 $("#loadscreen").fadeOut(200);
-            }).catch((error)=> {
+            }).catch((error) => {
                 console.error(error)
             });
-        }).catch((error)=> {
+        }).catch((error) => {
             console.error(error)
         });
 

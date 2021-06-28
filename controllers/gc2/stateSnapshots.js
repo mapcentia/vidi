@@ -1,12 +1,13 @@
 /*
  * @author     Alexander Shumilov
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2021 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 let config = require('./../../config/config');
 let express = require('express');
 let router = express.Router();
+const base64url = require('base64url');
 const uuid = require('uuid/v1');
 const request = require('request');
 const shared = require('./shared');
@@ -40,16 +41,45 @@ How state snapshot is stored in the key-value storage:
 */
 
 /**
+ * Generates token for state snapshot
+ *
+ * @param {Object} stateSnapshot Tokenized state snapshot
+ *
+ * @returns {String}
+ */
+const generateToken = (stateSnapshot) => {
+    let stateSnapshotCleanedUpCopy = Object.assign({}, stateSnapshot);
+
+    // Delete the token property, so the token itself is not encoded
+    if (stateSnapshotCleanedUpCopy.token !== undefined) {
+        delete stateSnapshotCleanedUpCopy.token;
+    }
+
+    // No need to carry the "snapshot" property
+    stateSnapshotCleanedUpCopy.snapshot = false;
+
+    // Specifying "config" and "tmpl" options at higher level
+    if (stateSnapshot.snapshot.meta && stateSnapshot.snapshot.meta.config) stateSnapshotCleanedUpCopy.config = stateSnapshot.snapshot.meta.config;
+    if (stateSnapshot.snapshot.meta && stateSnapshot.snapshot.meta.tmpl) stateSnapshotCleanedUpCopy.tmpl = stateSnapshot.snapshot.meta.tmpl;
+
+    let token = Buffer.from(JSON.stringify(stateSnapshotCleanedUpCopy)).toString('base64');
+    return token;
+};
+
+/**
  * List available state snapshots
  */
 router.get('/api/state-snapshots/:dataBase', (req, res) => {
     let {browserId, userId} = shared.getCurrentUserIdentifiers(req);
     let uri = API_LOCATION + `/` + req.params.dataBase + `?like=state_snapshot_%&filter='{userId}'='${userId}' or '{browserId}'='${browserId}'`;
-    console.log(uri);
     request({
         method: 'GET',
         encoding: 'utf8',
-        uri: uri
+        uri: uri,
+        json: false,
+        headers: {
+            'Accept': 'text/plain'
+        }
     }, (error, response) => {
         if (error) {
             shared.throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', {error});
@@ -58,7 +88,7 @@ router.get('/api/state-snapshots/:dataBase', (req, res) => {
 
         let parsedBody = false;
         try {
-            let localParsedBody = JSON.parse(response.body);
+            let localParsedBody = JSON.parse(base64url.decode(response.body));
             parsedBody = localParsedBody;
         } catch (e) {}
 
@@ -86,7 +116,7 @@ router.get('/api/state-snapshots/:dataBase', (req, res) => {
                 }
             });
 
-            res.send(results);
+            res.send(base64url(JSON.stringify(results)));
         } else {
             shared.throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', {
                 body: response.body,
@@ -103,11 +133,14 @@ router.get('/api/state-snapshots/:dataBase/:id', (req, res, next) => {
     request({
         method: 'GET',
         encoding: 'utf8',
-        uri: API_LOCATION + `/` + req.params.dataBase + '/' + req.params.id
+        uri: API_LOCATION + `/` + req.params.dataBase + '/' + req.params.id,
+        headers: {
+            'Accept': 'text/plain'
+        }
     }, (error, response) => {
         let parsedBody = false;
         try {
-            let localParsedBody = JSON.parse(response.body);
+            let localParsedBody = JSON.parse(base64url.decode(response.body));
             parsedBody = localParsedBody;
         } catch (e) {
         }
@@ -124,7 +157,7 @@ router.get('/api/state-snapshots/:dataBase/:id', (req, res, next) => {
                 res.status(404);
                 res.json({error: `NOT_FOUND`});
             } else {
-                res.send(result);
+                res.send(base64url(JSON.stringify(result)));
             }
         } else {
             shared.throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', {body: response.body});
@@ -133,38 +166,12 @@ router.get('/api/state-snapshots/:dataBase/:id', (req, res, next) => {
 });
 
 /**
- * Generates token for state snapshot
- *
- * @param {Object} stateSnapshot Tokenized state snapshot
- *
- * @returns {String}
- */
-const generateToken = (stateSnapshot) => {
-    let stateSnapshotCleanedUpCopy = Object.assign({}, stateSnapshot);
-
-    // Delete the token property, so the token itself is not encoded
-    if (stateSnapshotCleanedUpCopy.token !== undefined) {
-        delete stateSnapshotCleanedUpCopy.token;
-    }
-
-    // No need to carry the "snapshot" property
-    stateSnapshotCleanedUpCopy.snapshot = false;
-
-    // Specifying "config" and "tmpl" options at higher level
-    if (stateSnapshot.snapshot.meta && stateSnapshot.snapshot.meta.config) stateSnapshotCleanedUpCopy.config = stateSnapshot.snapshot.meta.config;
-    if (stateSnapshot.snapshot.meta && stateSnapshot.snapshot.meta.tmpl) stateSnapshotCleanedUpCopy.tmpl = stateSnapshot.snapshot.meta.tmpl;
-
-    let token = Buffer.from(JSON.stringify(stateSnapshotCleanedUpCopy)).toString('base64');
-    return token;
-};
-
-/**
  * Create state snapshot
  */
 router.post('/api/state-snapshots/:dataBase', (req, res, next) => {
+    req.body = JSON.parse(base64url.decode(req.body));
     if (`snapshot` in req.body) {
         let {browserId, userId} = shared.getCurrentUserIdentifiers(req);
-
         let save = false;
         let stateSnapshotCopy = JSON.parse(JSON.stringify(req.body));
         if ((req.body.anonymous === 'true' || req.body.anonymous === true) && browserId) {
@@ -176,28 +183,31 @@ router.post('/api/state-snapshots/:dataBase', (req, res, next) => {
         } else {
             shared.throwError(res, 'INVALID_SNAPSHOT_OWNERSHIP');
         }
-
         if (save) {
             let generatedKey = `state_snapshot_` + uuid();
             let currentDate = new Date();
             stateSnapshotCopy.id = generatedKey;
             stateSnapshotCopy.created_at = currentDate.toISOString();
-
+            stateSnapshotCopy.updated_at = currentDate.toISOString();
             if (!stateSnapshotCopy.host || !stateSnapshotCopy.database) {
                 shared.throwError(res, 'MISSING_DATA');
             } else {
                 let token = generateToken(stateSnapshotCopy);
                 stateSnapshotCopy.token = token;
-
                 request({
                     method: 'POST',
                     encoding: 'utf8',
                     uri: API_LOCATION + `/` + req.params.dataBase + `/` + generatedKey,
-                    form: JSON.stringify(stateSnapshotCopy)
+                    json: false,
+                    body: base64url(JSON.stringify(stateSnapshotCopy)),
+                    headers: {
+                        'Content-Type': 'text/plain',
+                        'Accept': 'text/plain'
+                    }
                 }, (error, response) => {
                     let parsedBody = false;
                     try {
-                        let localParsedBody = JSON.parse(response.body);
+                        let localParsedBody = JSON.parse(base64url.decode(response.body));
                         parsedBody = localParsedBody;
                     } catch (e) {
                     }
@@ -234,13 +244,16 @@ router.put('/api/state-snapshots/:dataBase/:stateSnapshotKey/seize', (req, res, 
             method: 'GET',
             encoding: 'utf8',
             uri: API_LOCATION + `/` + req.params.dataBase + `/` + req.params.stateSnapshotKey,
+            headers: {
+                'Accept': 'text/plain'
+            }
         }, (error, response) => {
             if (response.body.data === false) {
                 shared.throwError(res, 'INVALID_SNAPSHOT_ID');
             } else {
                 let parsedBody = false;
                 try {
-                    let localParsedBody = JSON.parse(response.body);
+                    let localParsedBody = JSON.parse(base64url.decode(response.body));
                     parsedBody = localParsedBody;
                 } catch (e) {
                 }
@@ -254,7 +267,11 @@ router.put('/api/state-snapshots/:dataBase/:stateSnapshotKey/seize', (req, res, 
                         method: 'PUT',
                         encoding: 'utf8',
                         uri: API_LOCATION + `/` + req.params.dataBase + `/` + req.params.stateSnapshotKey,
-                        form: JSON.stringify(parsedSnapshotData)
+                        body: base64url(JSON.stringify(parsedSnapshotData)),
+                        headers: {
+                            'Content-Type': 'text/plain',
+                            'Accept': 'text/plain'
+                        }
                     }, (error, response) => {
                         res.send({status: 'success'});
                     });
@@ -272,6 +289,7 @@ router.put('/api/state-snapshots/:dataBase/:stateSnapshotKey/seize', (req, res, 
  * Update state snapshot
  */
 router.put('/api/state-snapshots/:dataBase/:stateSnapshotKey', (req, res, next) => {
+    req.body = JSON.parse(base64url.decode(req.body));
     if (`snapshot` in req.body) {
         let {browserId, userId} = shared.getCurrentUserIdentifiers(req);
         // Get the specified state snapshot
@@ -279,13 +297,18 @@ router.put('/api/state-snapshots/:dataBase/:stateSnapshotKey', (req, res, next) 
             method: 'GET',
             encoding: 'utf8',
             uri: API_LOCATION + `/` + req.params.dataBase + `/` + req.params.stateSnapshotKey,
+            json: false,
+            headers: {
+                'Accept': 'text/plain'
+            }
         }, (error, response) => {
             if (response.body.data === false) {
                 shared.throwError(res, 'INVALID_SNAPSHOT_ID');
             } else {
                 let parsedBody = false;
+                let currentDate = new Date();
                 try {
-                    let localParsedBody = JSON.parse(response.body);
+                    let localParsedBody = JSON.parse(base64url.decode(response.body));
                     parsedBody = localParsedBody;
                 } catch (e) {
                 }
@@ -299,13 +322,22 @@ router.put('/api/state-snapshots/:dataBase/:stateSnapshotKey', (req, res, next) 
 
                         let token = generateToken(parsedSnapshotData);
                         parsedSnapshotData.token = token;
+                        parsedSnapshotData.updated_at = currentDate.toISOString();
                         request({
                             method: 'PUT',
                             encoding: 'utf8',
                             uri: API_LOCATION + `/` + req.params.dataBase + `/` + req.params.stateSnapshotKey,
-                            form: JSON.stringify(parsedSnapshotData)
+                            body: base64url(JSON.stringify(parsedSnapshotData)),
+                            headers: {
+                                'Content-Type': 'text/plain',
+                                'Accept': 'text/plain'
+                            }
                         }, (error, response) => {
-                            res.send({status: 'success'});
+                            if (error) {
+                                res.send({status: 'error'});
+                            } else {
+                                res.send({status: 'success'});
+                            }
                         });
                     } else {
                         shared.throwError(res, 'ACCESS_DENIED');
@@ -330,13 +362,16 @@ router.delete('/api/state-snapshots/:dataBase/:stateSnapshotKey', (req, res, nex
         method: 'GET',
         encoding: 'utf8',
         uri: API_LOCATION + `/` + req.params.dataBase + `/` + req.params.stateSnapshotKey,
+        headers: {
+            'Accept': 'text/plain'
+        }
     }, (error, response) => {
         if (response.body.data === false) {
             shared.throwError(res, 'INVALID_SNAPSHOT_ID');
         } else {
             let parsedBody = false;
             try {
-                let localParsedBody = JSON.parse(response.body);
+                let localParsedBody = JSON.parse(base64url.decode(response.body));
                 parsedBody = localParsedBody;
             } catch (e) {
             }
