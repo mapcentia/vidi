@@ -288,7 +288,8 @@ module.exports = {
                             urlVars[p[0]] = p[1];
                         }
                         qgs = btoa(urlVars.map);
-                        additionalURLParameters.push(`qgs=${qgs}`);
+                        // Doesn't work in our production env. ! - RGB 29-06-2021
+                        // additionalURLParameters.push(`qgs=${qgs}`);
                     }
                     var isBaseLayer = !!layerDescription.baselayer;
                     layers[[layer]] = cloud.get().addTileLayers({
