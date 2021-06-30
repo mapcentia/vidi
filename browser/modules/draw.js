@@ -131,7 +131,7 @@ module.exports = {
             return;
         }
         // Switch on Conflict
-        // $('#main-tabs a[href="#conflict-content"]').trigger('click');
+        $('#main-tabs a[href="#conflict-content"]').trigger('click');
         conflictSearch.makeSearch("Fra tegning", null, selectedDrawing, true);
     },
 
@@ -139,7 +139,7 @@ module.exports = {
 
     makeConflictSearchWithAll: () => {
         // Switch on Conflict
-        // $('#main-tabs a[href="#conflict-content"]').trigger('click');
+        $('#main-tabs a[href="#conflict-content"]').trigger('click');
         conflictSearch.makeSearch("Fra tegning", null, null, true);
     },
 
