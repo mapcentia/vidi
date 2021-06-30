@@ -132,7 +132,9 @@ module.exports = {
         }
         // Switch on Conflict
         $('#main-tabs a[href="#conflict-content"]').trigger('click');
-        conflictSearch.makeSearch("Fra tegning", null, selectedDrawing, true);
+        setTimeout(()=> {
+            conflictSearch.makeSearch("Fra tegning", null, selectedDrawing, true);
+        }, 1000);
     },
 
 
@@ -140,7 +142,9 @@ module.exports = {
     makeConflictSearchWithAll: () => {
         // Switch on Conflict
         $('#main-tabs a[href="#conflict-content"]').trigger('click');
-        conflictSearch.makeSearch("Fra tegning", null, null, true);
+        setTimeout(()=> {
+            conflictSearch.makeSearch("Fra tegning", null, selectedDrawing, true);
+        }, 1000);
     },
 
     off: () => {
