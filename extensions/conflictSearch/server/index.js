@@ -181,6 +181,7 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                                 if (obj[hit].hits > 0) {
                                     let data = [];
                                     let name = obj[hit].title || obj[hit].table;
+                                    name = name.slice(0,30);
                                     if (obj[hit].data.length > 0) {
                                         let header = obj[hit].data[0].map((cell) => {
                                             return cell.alias
