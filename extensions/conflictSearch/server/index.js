@@ -84,7 +84,7 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                 queryables = JSON.parse(metaDataKeys[table.split(".")[1]].fieldconf);
                 let postData = "client_encoding=UTF8&srs=4326&lifetime=0&q=" + sql + "&key=" + "&key=" + (typeof req.session.gc2ApiKey !== "undefined" ? req.session.gc2ApiKey : "xxxxx" /*Dummy key is sent to prevent start of session*/),
                     options = {
-                        uri: config.gc2.host + "/api/v2/sql/" + db,
+                        uri: config.gc2.host + "/api/v2/sql/" + (req.session.subUser ? req.session.screenName + "@" + req.session.parentDb : db),
                         encoding: 'utf8',
                         body: postData,
                         headers: {
