@@ -69,9 +69,11 @@ module.exports = {
                 return;
             }
             state.getModuleState(MODULE_ID).then(initialState => {
-                conflictSearch.setValueForNoUiSlider(initialState.bufferValue);
-                conflictSearch.handleResult(initialState);
-                reportType = initialState.reportType;
+                if (initialState) {
+                    conflictSearch.setValueForNoUiSlider(initialState.bufferValue);
+                    conflictSearch.handleResult(initialState);
+                    reportType = initialState.reportType;
+                }
                 $("input[name='conflict-report-type'][value='" + reportType +"']").prop("checked",true);
             });
 
@@ -79,9 +81,7 @@ module.exports = {
 
         // Deactivates module
         backboneEvents.get().on("off:conflictSearch off:all reset:all", () => {
-            conflictSearch.off();
-            infoClick.active(false);
-            infoClick.reset();
+            _self.resetState();
         });
 
         // Handle GUI when print is done. Using at custom event, so standard print is not triggered
@@ -245,6 +245,15 @@ module.exports = {
             setTimeout(() => {
                 print.control(printC, scales, "_conflictPrint", "A4", "p", "inline");
             }, 500);
+        });
+    },
+
+    resetState: () => {
+        return new Promise((resolve) => {
+            conflictSearch.off();
+            infoClick.active(false);
+            infoClick.reset();
+            resolve();
         });
     },
 
