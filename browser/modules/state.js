@@ -559,12 +559,15 @@ module.exports = {
      * @return {Promise}
      */
     resetState: (customModulesToReset = []) => {
-//        backboneEvents.get().trigger(`reset:infoClick`);
         let appliedStatePromises = [];
+        let localState = {};
+        localState.modules = {};
         if (customModulesToReset.length > 0) {
             for (let key in listened) {
                 if (customModulesToReset.indexOf(key) !== -1) {
                     appliedStatePromises.push(listened[key].applyState(false));
+                } else {
+                    localState.modules[key] = listened[key].getState();
                 }
             }
         } else {
@@ -573,7 +576,7 @@ module.exports = {
             }
         }
         return Promise.all(appliedStatePromises).then(() => {
-            return _setInternalState({});
+            return _setInternalState(localState);
         });
     },
 
