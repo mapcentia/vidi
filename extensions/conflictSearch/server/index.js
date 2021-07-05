@@ -176,7 +176,7 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                         let wb = XLSX.utils.book_new();
                         let dataAdded = false;
                         let names = [];
-                        let prefixNumber = 1;
+                        let postfixNumber = 1;
                         const obj = report.hits;
                         for (const hit in obj) {
                             if (obj.hasOwnProperty(hit)) {
@@ -185,8 +185,9 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                                     let name = obj[hit].title || obj[hit].table;
                                     name = name.slice(0,30);
                                     if (names.includes(name)) {
-                                        name = name.slice(0, -1) + prefixNumber;
-                                        prefixNumber++;
+                                        name = name.slice(0, -1) + postfixNumber;
+                                        postfixNumber++;
+                                        names.push(name);
                                     }
                                     names.push(name);
                                     if (obj[hit].data.length > 0) {
