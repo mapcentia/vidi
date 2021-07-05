@@ -175,6 +175,8 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                         // Create Excel workbook with hits
                         let wb = XLSX.utils.book_new();
                         let dataAdded = false;
+                        let names = [];
+                        let prefixNumber = 1;
                         const obj = report.hits;
                         for (const hit in obj) {
                             if (obj.hasOwnProperty(hit)) {
@@ -182,6 +184,11 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                                     let data = [];
                                     let name = obj[hit].title || obj[hit].table;
                                     name = name.slice(0,30);
+                                    if (names.includes(name)) {
+                                        name = name.slice(0, -1) + prefixNumber;
+                                        prefixNumber++;
+                                    }
+                                    names.push(name);
                                     if (obj[hit].data.length > 0) {
                                         let header = obj[hit].data[0].map((cell) => {
                                             return cell.alias
@@ -202,7 +209,6 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                             }
                         }
                         if (!dataAdded) {
-
                             XLSX.utils.book_append_sheet(wb, [[]]);
                         }
                         XLSX.writeFile(wb, __dirname + "/../../../public/tmp/excel/" + fileName + ".xlsb");
