@@ -1150,7 +1150,7 @@ module.exports = {
         "minZoom": 4,
         "maxZoom": 22,
         "maxNativeZoom": 20,
-            "overlays": [
+            "_overlays": [
                 {
                     "id": "public.mvw_adgangsadresser",
                     "db": "mapconnectbase",
