@@ -147,21 +147,17 @@ module.exports = {
             alert("Vælg en tegning")
             return;
         }
-        // Switch on Conflict
-        $('#main-tabs a[href="#conflict-content"]').trigger('click');
-        setTimeout(()=> {
+        state.resetState(['conflict']).then(()=>{
+            $('#main-tabs a[href="#conflict-content"]').trigger('click');
             conflictSearch.makeSearch("Fra tegning", null, selectedDrawing, true);
-        }, 1000);
+        });
     },
 
-
-
     makeConflictSearchWithAll: () => {
-        // Switch on Conflict
-        $('#main-tabs a[href="#conflict-content"]').trigger('click');
-        setTimeout(()=> {
-            conflictSearch.makeSearch("Fra tegning", null, selectedDrawing, true);
-        }, 1000);
+        state.resetState(['conflict']).then(()=>{
+            $('#main-tabs a[href="#conflict-content"]').trigger('click');
+            conflictSearch.makeSearch("Fra tegning", null, null, true);
+        });
     },
 
     off: () => {
