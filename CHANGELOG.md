@@ -6,7 +6,8 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ## [2021.7.0] - 2021-5-7
 ### Fixed
-- Conflict Excel output: Two sheets can't get same names, which will result in error. In case of same names, the last char is changed to a number.
+- Conflict Excel output: Two sheets can't have the same name, which will result in error. In case of same names, the last char is changed to a number.
+- Conflict report will now default to "Compact" if non is choosen.
 
 ## [2021.6.0] - 2021-2-7
 ### Changed

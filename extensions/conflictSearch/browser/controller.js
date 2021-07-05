@@ -72,7 +72,7 @@ module.exports = {
                 if (initialState) {
                     conflictSearch.setValueForNoUiSlider(initialState.bufferValue);
                     conflictSearch.handleResult(initialState);
-                    reportType = initialState.reportType;
+                    reportType = initialState.reportType || "1";
                 }
                 $("input[name='conflict-report-type'][value='" + reportType +"']").prop("checked",true);
             });
