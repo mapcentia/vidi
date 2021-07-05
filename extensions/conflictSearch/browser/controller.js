@@ -15,7 +15,7 @@ let infoClick;
 let cloud;
 let state;
 let stateFromDb;
-let reportType;
+let reportType = "1";
 let _self;
 const config = require('../../../config/config.js');
 const printC = config.print.templates;
