@@ -877,7 +877,10 @@ module.exports = {
 
                     humanTime(timestamp){
                         let d = new Date(timestamp)
-                        return d.toLocaleString(window._vidiLocale.replace('_','-'))
+
+                        let humanString = `${d.getDate()}/${d.getMonth()} - ${d.getFullYear()} kl. ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`
+                        return humanString
+                        // return d.toLocaleString(window._vidiLocale.replace('_','-'))
                     }
 
                     /**
@@ -950,6 +953,7 @@ module.exports = {
                                     ejerliste: [],
                                     isError: false,
                                     errorList: [],
+                                    lastBounds: cloud.get().map.getBounds(),
                                     svarUploadTime: ''
                                 })
 
