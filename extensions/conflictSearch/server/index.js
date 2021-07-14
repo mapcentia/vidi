@@ -139,6 +139,7 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                             tmp = [];
                         }
                     }
+                    let meta = metaDataKeys[table.split(".")[1]];
                     hit = {
                         table: table,
                         title: metaDataKeys[table.split(".")[1]].f_table_title,
@@ -150,8 +151,14 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                         id: socketId,
                         error: res.statusCode !== 200 ? JSON.parse(body).message : null,
                         message: message,
-                        sql: metaDataKeys[table.split(".")[1]].sql,
-                        meta: metaDataKeys[table.split(".")[1]]
+                        sql:  meta.sql,
+                        meta: {
+                            meta: meta.meta,
+                            layergroup: meta.layergroup,
+                            f_table_name: meta.layergroup,
+                            f_table_title: meta.f_table_title,
+                            meta_url: meta.meta_url,
+                        }
                     };
                     hits[table] = hit;
                     io.emit(socketId, hit);

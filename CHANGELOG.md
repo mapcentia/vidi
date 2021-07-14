@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [UNRELEASED]
+### Fixed
+- Print and Conflict modules will not longer keep unnecessary Meta data in state. This reduce the data volume. 
+
 ## [2021.7.1] - 2021-8-7
 ### Fixed
 - Regression bug. Draw module labels are now again serialized as labels - not markers.
