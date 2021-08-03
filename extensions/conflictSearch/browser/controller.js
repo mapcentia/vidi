@@ -264,6 +264,9 @@ module.exports = {
     },
 
     applyState: (newState) => {
-        stateFromDb = newState;
+        return new Promise((resolve) => {
+            stateFromDb = newState;
+            resolve();
+        });
     }
 };
