@@ -89,7 +89,7 @@ module.exports = function (grunt) {
                         'public/js/lib/Leaflet.markercluster/MarkerCluster.css',
                         'public/js/lib/Leaflet.markercluster/MarkerCluster.Default.css',
                         // Bootstrap
-                        'public/js/lib/bootstrap/dist/css/bootstrap.css',
+                        // 'public/js/lib/bootstrap/dist/css/bootstrap.css',
                         'public/js/lib/snackbarjs/snackbar.min.css',
                         // 'public/js/lib/bootstrap-material-design/dist/css/ripples.css',
                         'public/js/lib/bootstrap-material-datetimepicker/bootstrap-material-datetimepicker.css',
@@ -290,10 +290,15 @@ module.exports = function (grunt) {
                         // 'public/js/lib/bootstrap-material-design/dist/js/material.js',
                         'public/js/lib/mdb-ui-kit/mdb.min.js',
                         'public/js/lib/bootstrap-colorpicker/js/bootstrap-colorpicker.js',
-                        'public/js/lib/bootstrap-table/bootstrap-table.js',
-                        'public/js/lib/bootstrap-table/bootstrap-table-locale-all.js',
-                        'public/js/lib/bootstrap-table/extensions/export/bootstrap-table-export.js',
-                        'public/js/lib/bootstrap-table/extensions/filter-control/bootstrap-table-filter-control.js',
+                        //'public/js/lib/bootstrap-table/bootstrap-table.js',
+                        //'public/js/lib/bootstrap-table/bootstrap-table-locale-all.js',
+                        //'public/js/lib/bootstrap-table/extensions/export/bootstrap-table-export.js',
+                        //'public/js/lib/bootstrap-table/extensions/filter-control/bootstrap-table-filter-control.js',
+                        //'node_modules/popper.js/dist/popper.js', // Makes the JS invalid
+                        'node_modules/bootstrap-table/dist/bootstrap-table.js',
+                        'node_modules/bootstrap-table/dist/bootstrap-table-locale-all.js',
+                        'node_modules/bootstrap-table/dist/extensions/export/bootstrap-table-export.js',
+                        'node_modules/bootstrap-table/dist/extensions/filter-control/bootstrap-table-filter-control.js',
                         'public/js/lib/tableExport.jquery.plugin/tableExport.js',
 
                     ]
