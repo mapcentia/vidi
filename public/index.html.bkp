@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<!--
+
+    .----------------.  .----------------.  .----------------.  .----------------.
+    | .--------------. || .--------------. || .--------------. || .--------------. |
+    | | ____   ____  | || |     _____    | || |  ________    | || |     _____    | |
+    | ||_  _| |_  _| | || |    |_   _|   | || | |_   ___ `.  | || |    |_   _|   | |
+    | |  \ \   / /   | || |      | |     | || |   | |   `. \ | || |      | |     | |
+    | |   \ \ / /    | || |      | |     | || |   | |    | | | || |      | |     | |
+    | |    \ ' /     | || |     _| |_    | || |  _| |___.' / | || |     _| |_    | |
+    | |     \_/      | || |    |_____|   | || | |________.'  | || |    |_____|   | |
+    | |              | || |              | || |              | || |              | |
+    | '--------------' || '--------------' || '--------------' || '--------------' |
+    '----------------'  '----------------'  '----------------'  '----------------'
+    Ring the bells that still can ring
+    Forget your perfect offering
+    There is a crack, a crack in everything
+    That's how the light gets in
+
+
+  ~ @author     Martin Høgh <mh@mapcentia.com>
+  ~ @copyright  2013-2020 MapCentia ApS
+  ~ @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
+  ~ @version    2020.12.0
+
+  -->
+<html lang="en">
+<head>
+    <title>MapCentia Vidi</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="google" value="notranslate">
+    <meta name="Description" content="A platform for building spatial data infrastructure and deploying browser based GIS.">
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#00aba9">
+    <meta name="theme-color" content="#ffffff">
+    <!-- Preload fonts. -->
+    <link rel="preload" href="/fonts/roboto-v18-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/roboto-v18-latin-500.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/roboto-v18-latin-300.woff2" as="font" type="font/woff2" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato&display=swap" rel="stylesheet">
+    <link rel="preload" href="/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/icons/MaterialIcons-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/js/lib/bootstrap/dist/fonts/glyphicons-halflings-regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
+    <!-- Build -->
+    <!-- build:css /css/build/all.min.css -->
+    <!-- Material Design fonts -->
+    <link rel="stylesheet" href="/fonts/fonts.css">
+    <link rel="stylesheet" href="/icons/material-icons.css">
+    <!-- jQuery UI -->
+    <link rel="stylesheet" href="/js/lib/jquery-ui/jquery-ui.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="/css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="/css/font-awesome.v520.solid.css"/>
+    <link rel="stylesheet" href="/css/font-awesome.v520.regular.css"/>
+    <link rel="stylesheet" href="/css/font-awesome.v520.css"/>
+    <!-- Leafet -->
+    <link rel="stylesheet" href="/js/lib/leaflet/leaflet.css">
+    <link rel="stylesheet" href="/js/lib/leaflet-history/leaflet-history.css">
+    <link rel="stylesheet" href="/js/lib/leaflet-boxzoom/leaflet-boxzoom.css">
+    <link rel="stylesheet" href="/js/lib/leaflet-draw/leaflet.draw.css">
+    <link rel="stylesheet" href="/js/lib/leaflet.locatecontrol/L.Control.Locate.css">
+    <link rel="stylesheet" href="/js/lib/leaflet.toolbar/leaflet.toolbar.css">
+    <link rel="stylesheet" href="/js/lib/leaflet-measure-path/leaflet-measure-path.css">
+    <link rel="stylesheet" href="/js/lib/Leaflet.extra-markers/css/leaflet.extra-markers.css"/>
+    <link rel="stylesheet" href="/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="/js/lib/Leaflet.markercluster/MarkerCluster.css"/>
+    <link rel="stylesheet" href="/js/lib/Leaflet.markercluster/MarkerCluster.Default.css"/>
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="/js/lib/bootstrap/dist/css/bootstrap.css">
+    <link rel="stylesheet" href="/js/lib/snackbarjs/snackbar.min.css">
+    <link rel="stylesheet" href="/js/lib/bootstrap-material-design/dist/css/ripples.css">
+    <link rel="stylesheet" href="/js/lib/bootstrap-material-datetimepicker/bootstrap-material-datetimepicker.css">
+    <link rel="stylesheet" href="/js/lib/bootstrap-table/bootstrap-table.css"/>
+    <link rel="stylesheet" href="/js/lib/bootstrap-material-design/dist/css/bootstrap-material-design.css">
+    <link rel="stylesheet" href="/js/lib/bootstrap-colorpicker/css/bootstrap-colorpicker.css">
+    <!-- custom -->
+    <link rel="stylesheet" href="/css/styles.min.css">
+    <!-- /build -->
+</head>
+<body>
+<noscript>
+    <p>NO JAVASCRIPT, NO MAP!</p>
+</noscript>
+<div class="loadingIndicator">
+    <div class="loadingIndicator__bar"></div>
+</div>
+<div id="loadscreen">
+    <div class="center text">
+        <div id="loadscreentext"></div>
+    </div>
+    <div class="center bounce">
+        <div class="bouncywrap">
+            <div class="dotcon dc1">
+                <div class="dot"></div>
+            </div>
+            <div class="dotcon dc2">
+                <div class="dot"></div>
+            </div>
+            <div class="dotcon dc3">
+                <div class="dot"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="main-container"></div>
+<script src="/js/lib/hogan.js/hogan-3.0.2.js"></script>
+<script src="/js/templates.js"></script>
+<script>
+    var tmpl = "loadscreen_" + window.location.pathname.split("/")[2] + ".tmpl";
+    window.__ = function (string) {
+        if (typeof gc2i18n !== 'undefined') {
+            if (gc2i18n.dict[string]) {
+                return gc2i18n.dict[string];
+            }
+        }
+        return string;
+    };
+    if (typeof Templates[tmpl] !== "undefined") {
+        document.getElementById("loadscreen").innerHTML = Templates[tmpl].render();
+        console.info("Using pre-processed load screen template: " + tmpl);
+    }
+</script>
+<!-- Polyfill for IE -->
+<script src="https://cdn.polyfill.io/v2/polyfill.min.js"></script>
+<!-- Dynamic js -->
+<script src="/locale"></script>
+<script src="/api/baselayer"></script>
+<!-- Build -->
+<!-- build:js /js/build/all.min.js -->
+<script src="/js/lib/leaflet/leaflet-src.js"></script>
+<script src="/js/bundle.js"></script>
+<!-- /build -->
+<!-- Async load Javascript -->
+<script src="/js/build/all.async.min.js" async></script>
+<script>
+    window.MapCentia = new Vidi().init.init();
+</script>
+</body>
+</html>

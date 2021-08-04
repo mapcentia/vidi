@@ -1,0 +1,2 @@
+nr;navn;legend;farve
+0;Potentialekort_Fyn_2004.asc;Potentiale;rgb(43,40,237)

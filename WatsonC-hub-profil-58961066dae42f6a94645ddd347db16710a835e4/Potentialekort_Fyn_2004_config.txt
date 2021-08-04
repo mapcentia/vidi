@@ -1,0 +1,12 @@
+Title: Potentialekort Fyn, 2004
+Subtitle: Potentialekort for Fyn fra 2004
+Type (geology, terrain, potential): potential
+layerfile: fyn_potential_2004.npy
+layerinfo: Potentialekort_Fyn_2004_inventory.txt
+Dataextend: Potentialekort_Fyn_2004_extent.shp
+Upperleft x: 540000
+Upperleft y: 6167700
+Cell size: 25
+Nx: 3480
+Ny: 4224
+Nz: 1

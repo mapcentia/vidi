@@ -1,0 +1,12 @@
+nr;navn;legend;farve
+0;topo_justeret.asc;Terræn;rgb(0,0,0)
+1;top_bund_tilp.asc;Bund af toplag;rgb(222,255,0)
+2;bund_KL1_tilp.asc;Bund af KL 1;rgb(219,184,0)
+3;bund_KS1_tilp.asc;Bund af KS 1;rgb(191,97,64)
+4;bund_KL2_tilp.asc;Bund af KL 2;rgb(219,184,0)
+5;bund_KS2_tilp.asc;Bund af KS 2;rgb(191,97,64)
+6;bund_KL3_tilp.asc;Bund af KL 3;rgb(219,184,0)
+7;bund_KS3_tilp.asc;Bund af KS 3;rgb(191,97,64)
+8;bund_KL_4_tilp.asc;Bund af Kl 4;rgb(219,184,0)
+9;bund_QL_tilp.asc;Bund af PL 1;rgb(0,155,158)
+10;bund_KALK_tilp.asc;Bund af Kalk (afgrænsning af model kote -400);rgb(128,255,153)

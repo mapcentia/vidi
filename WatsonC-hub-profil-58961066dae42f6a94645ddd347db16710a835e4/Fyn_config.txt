@@ -1,0 +1,12 @@
+Title: Hydrostrategrafisk model Fyn, 2018
+Subtitle: Hydrostratigrafisk model
+Type (geology, terrain, potential): geology
+layerfile: Fyn_model.npy
+layerinfo: Fyn_inventory.txt
+Dataextend: Fyn_extent.shp
+Upperleft x: 538550
+Upperleft y: 6166050
+Cell size: 100
+Nx: 805
+Ny: 676
+Nz: 11

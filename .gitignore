@@ -116,3 +116,5 @@ config/_variables.less
 
 # Environment variables
 .env
+.DS_Store
+extensions/watsonc

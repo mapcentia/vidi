@@ -16,8 +16,7 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
                 <h4 class="modal-title" id="about-modalLabel">{{About}}</h4>
             </div>
             <div class="modal-body">
@@ -35,8 +34,7 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                        aria-hidden="true">&times;</span></button>
+                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
                 <h3 class="modal-title" id="login-modalLabel"></h3>
             </div>
             <div class="modal-body" id="login-modal-body">
@@ -53,8 +51,7 @@
     <div class="modal-dialog" role="document" style="width: 95%; height: 95%;">
         <div class="modal-content" style="height: 100%;">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                        aria-hidden="true">&times;</span></button>
+                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
                 <h3 class="modal-title" id="keplergl-modalLabel">KeplerGL</h3>
             </div>
             <div class="modal-body" id="keplergl-modal-body" style="height: calc(100% - 51px);">
@@ -138,11 +135,11 @@
         <span style="display: none" class="floatRight cursorPointer slide-expanded slider-btn"><span class="material-icons">keyboard_arrow_right</span></span>
     </div>
     <div id="search-container">
-        <nav id="myNavmenu" class="navmenu navmenu-default navmenu-fixed-right offcanvas" role="navigation"
+        <nav id="myNavmenu" class="navmenu navmenu-default navmenu-fixed-right" role="navigation"
              data-autohide="false" data-recalc="true" style="overflow: hidden">
             <div id="info-modal" class="slide-right">
                 <div class="modal-header">
-                    <button type="button" class="close" aria-hidden="true">×</button>
+                    <button type="button" class="btn-close" aria-hidden="true"></button>
                     <h2 class="modal-title"></h2>
                 </div>
                 <div id="info-modal-body-wrapper">
@@ -153,7 +150,7 @@
             <div id="module-container" class="slide-right">
                 <div class="modal-header">
                     <label style="margin-bottom: 0px; margin-top: 4px;" class="js-module-title"></label>
-                    <button type="button" class="close" aria-hidden="true">×</button>
+                    <button type="button" class="btn-close" aria-hidden="true"></button>
                     <h2 class="modal-title"></h2>
                 </div>
                 <div id="module-container-wrapper">
@@ -172,7 +169,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div role="tabpanel" class="tab-pane fade" id="info-content">
+                            <div role="tabpanel" class="tab-pane" id="info-content">
                                 <div class="help-btn" onclick="javascript:createAlert($(this), '{{Info text}}')">
                                     <i class="material-icons help-btn">help_outline</i></div>
                                 <div></div>
@@ -192,26 +189,26 @@
                                 <table id="dtable" data-show-toggle="true"></table>
 
                             </div>
-                            <div role="tabpanel" class="tab-pane fade" id="layer-content">
+                            <div role="tabpanel" class="tab-pane" id="layer-content">
                                 <div class="help-btn" onclick="javascript:createAlert($(this), '{{Help text overlays}}')">
                                     <i class="material-icons help-btn">help_outline</i></div>
                                 <div></div>
                                 <div class="form-group" id="layers" role="tablist"></div>
                             </div>
-                            <div role="tabpanel" class="tab-pane fade" id="baselayer-content">
+                            <div role="tabpanel" class="tab-pane" id="baselayer-content">
                                 <div class="help-btn" onclick="javascript:createAlert($(this), '{{Help text baselayers}}')">
                                     <i class="material-icons help-btn">help_outline</i></div>
                                 <div></div>
                                 <div class="form-group" id="base-layer-list"></div>
                             </div>
-                            <div role="tabpanel" class="tab-pane fade" id="legend-content">
+                            <div role="tabpanel" class="tab-pane" id="legend-content">
                                 <div class="help-btn" onclick="javascript:createAlert($(this), '{{Help text legend}}')">
                                     <i class="material-icons help-btn">help_outline</i></div>
                                 <div></div>
                                 <a href="#legend-dialog" id="btn-show-legend-in-map" data-module="legend" class="btn btn-raised btn-xs map-tool-btn">{{Show legend on top the map}}</a>
                                 <div id="legend" class="legend"></div>
                             </div>
-                            <div role="tabpanel" class="tab-pane fade" id="draw-content">
+                            <div role="tabpanel" class="tab-pane" id="draw-content">
                                 <div class="help-btn" onclick="javascript:createAlert($(this), '{{Help text draw}}')">
                                     <i class="material-icons help-btn">help_outline</i>
                                 </div>
@@ -422,13 +419,13 @@
                                 <div id="draw-table"></div>
 
                             </div>
-                            <div role="tabpanel" class="tab-pane fade" id="state-snapshots-content">
+                            <div role="tabpanel" class="tab-pane" id="state-snapshots-content">
                                 <div class="help-btn" onclick="javascript:createAlert($(this), '{{StateSnapshots description}}')">
                                     <i class="material-icons help-btn">help_outline</i></div>
                                 <div></div>
                                 <div class="form-group" id="state-snapshots" role="tablist"></div>
                             </div>
-                            <div role="tabpanel" class="tab-pane fade" id="print-content">
+                            <div role="tabpanel" class="tab-pane" id="print-content">
                                 <div class="help-btn" onclick="javascript:createAlert($(this), '{{Help text print}}')">
                                     <i class="material-icons help-btn">help_outline</i></div>
                                 <div></div>

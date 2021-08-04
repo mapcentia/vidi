@@ -1,0 +1,12 @@
+Title: Potentialekort Aalborg 2019
+Subtitle: Sammensat potentialekort (Sand og Kalk) for Aalborg omraadet
+Type (geology, terrain, potential): potential
+layerfile: Potentialekort_Aalborg.npy
+layerinfo: Potentialekort_Aalborg_inventory.txt
+Dataextend: Potentialekort_Aalborg_extend.shp
+Upperleft x: 525000.0
+Upperleft y: 6342200.0
+Cell size: 100
+Nx: 598
+Ny: 433
+Nz: 1
