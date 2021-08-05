@@ -84,7 +84,7 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                 queryables = JSON.parse(metaDataKeys[table.split(".")[1]].fieldconf);
                 let postData = "client_encoding=UTF8&srs=4326&lifetime=0&q=" + sql + "&key=" + "&key=" + (typeof req.session.gc2ApiKey !== "undefined" ? req.session.gc2ApiKey : "xxxxx" /*Dummy key is sent to prevent start of session*/),
                     options = {
-                        uri: config.gc2.host + "/api/v2/sql/" + db,
+                        uri: config.gc2.host + "/api/v2/sql/" + (req.session.subUser ? req.session.screenName + "@" + req.session.parentDb : db),
                         encoding: 'utf8',
                         body: postData,
                         headers: {
@@ -175,12 +175,21 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                         // Create Excel workbook with hits
                         let wb = XLSX.utils.book_new();
                         let dataAdded = false;
+                        let names = [];
+                        let postfixNumber = 1;
                         const obj = report.hits;
                         for (const hit in obj) {
                             if (obj.hasOwnProperty(hit)) {
                                 if (obj[hit].hits > 0) {
                                     let data = [];
                                     let name = obj[hit].title || obj[hit].table;
+                                    name = name.slice(0,30);
+                                    if (names.includes(name)) {
+                                        name = name.slice(0, -1) + postfixNumber;
+                                        postfixNumber++;
+                                        names.push(name);
+                                    }
+                                    names.push(name);
                                     if (obj[hit].data.length > 0) {
                                         let header = obj[hit].data[0].map((cell) => {
                                             return cell.alias
@@ -201,7 +210,6 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                             }
                         }
                         if (!dataAdded) {
-
                             XLSX.utils.book_append_sheet(wb, [[]]);
                         }
                         XLSX.writeFile(wb, __dirname + "/../../../public/tmp/excel/" + fileName + ".xlsb");

@@ -130,17 +130,17 @@ module.exports = {
             alert("Vælg en tegning")
             return;
         }
-        // Switch on Conflict
-        // $('#main-tabs a[href="#conflict-content"]').trigger('click');
-        conflictSearch.makeSearch("Fra tegning", null, selectedDrawing, true);
+        state.resetState(['conflict']).then(()=>{
+            $('#main-tabs a[href="#conflict-content"]').trigger('click');
+            conflictSearch.makeSearch("Fra tegning", null, selectedDrawing, true);
+        });
     },
 
-
-
     makeConflictSearchWithAll: () => {
-        // Switch on Conflict
-        // $('#main-tabs a[href="#conflict-content"]').trigger('click');
-        conflictSearch.makeSearch("Fra tegning", null, null, true);
+        state.resetState(['conflict']).then(()=>{
+            $('#main-tabs a[href="#conflict-content"]').trigger('click');
+            conflictSearch.makeSearch("Fra tegning", null, null, true);
+        });
     },
 
     off: () => {

@@ -288,7 +288,10 @@ module.exports = {
                             urlVars[p[0]] = p[1];
                         }
                         qgs = btoa(urlVars.map);
-                        additionalURLParameters.push(`qgs=${qgs}`);
+                        // Composit QGIS layers has to go through MapServer
+                        if (urlVars?.LAYER?.split(',').length === 1) {
+                            additionalURLParameters.push(`qgs=${qgs}`);
+                        }
                     }
                     var isBaseLayer = !!layerDescription.baselayer;
                     layers[[layer]] = cloud.get().addTileLayers({
