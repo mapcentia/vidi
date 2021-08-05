@@ -7,6 +7,7 @@
 'use strict';
 
 import {LAYER_TYPE_DEFAULT} from './layerTree/constants';
+import * as mdb from 'mdb-ui-kit'
 
 require('dom-shims');
 require('arrive');
@@ -271,7 +272,8 @@ module.exports = {
 
         // Init some GUI stuff after modules are loaded
         // ============================================
-        $('[data-toggle=tooltip]').tooltip();
+        // $('[data-toggle=tooltip]').tooltip();
+        const tooltips = new mdb.Tooltip($('[data-toggle=tooltip]'))
         try {
             $.material.init();
         } catch (e) {
@@ -296,7 +298,8 @@ module.exports = {
         });
 
         $(document).arrive('[data-toggle="tooltip"]', function () {
-            $(this).tooltip()
+            // $(this).tooltip()
+            const tooltip = new mdb.Tooltip($(this));
         });
 
         $(document).arrive('[data-scale-ul]', function () {
