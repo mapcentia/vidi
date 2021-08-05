@@ -133,7 +133,6 @@
 <!-- Build -->
 <!-- build:js /js/build/all.min.js -->
 <script src="/js/lib/leaflet/leaflet-src.js"></script>
-<script src="https://unpkg.com/@popperjs/core@2"></script>
 <script src="/js/bundle.js"></script>
 <!-- /build -->
 <!-- Async load Javascript -->

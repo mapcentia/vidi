@@ -272,13 +272,7 @@ module.exports = {
 
         // Init some GUI stuff after modules are loaded
         // ============================================
-        // $('[data-toggle=tooltip]').tooltip();
-        const tooltips = new mdb.Tooltip($('[data-toggle=tooltip]'))
-        try {
-            $.material.init();
-        } catch (e) {
-            console.warn('Material Design could not be initiated');
-        }
+        document.querySelectorAll('[data-toggle="tooltip"]').forEach((e) => new mdb.Tooltip(e));
 
         touchScroll('.tab-pane');
         touchScroll('#info-modal-body-wrapper');
@@ -298,8 +292,7 @@ module.exports = {
         });
 
         $(document).arrive('[data-toggle="tooltip"]', function () {
-            // $(this).tooltip()
-            const tooltip = new mdb.Tooltip($(this));
+            const tooltip = new mdb.Tooltip(this);
         });
 
         $(document).arrive('[data-scale-ul]', function () {
