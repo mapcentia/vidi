@@ -87,6 +87,9 @@ module.exports = {
         "Get as PDF": "Hent som PDF",
         "Conflicts": "Konflikter",
         "No Conflicts": "Ingen konflikter",
+        "Conflict with selected": "Konflikt med valgte",
+        "Conflict with all": "Konflikt med alle",
+        "Prints completed": "Antal print udført",
 
         "Print": "Print",
         "Search places": "Søg på steder",
@@ -99,8 +102,10 @@ module.exports = {
         "Activate drawing tools": "Aktivér tegneværktøjer",
         "Activate print tools": "Aktivér printværktøjer",
         "Make PDF": "Lav PDF",
+        "Make PNG": "Lav PNG",
         "Download": "Download",
         "Open PDF": "Åben PDF",
+        "Open": "Åben",
         "Open HTML page": "Åben HTML side",
         "Scale": "Skala",
         "Template": "Skabelon",
@@ -253,6 +258,7 @@ module.exports = {
         "Application is offline, tiles will not be updated. Proceed?": "App'en er offline og kortlaget vil ikke blive opdateret. Fortsæt?",
         "Are you sure you want to delete the feature?": "Er du sikker på, at du vil slette objektet?",
         "The page was loaded without service workers enabled, features editing is not available (the page was loaded via plain HTTP or browser does not support service workers)": "Siden blev indlæst uden Service Workers aktiveret. Redigering er ikke tilgængelig (siden blev indlæst via almindelig HTTP eller browseren understøtter ikke Service Workers. Brug evt. en moderne browser)",
+        "Editing of geometry is not possible when number of nodes exceed": "Ændring af geometri er ikke mulig, når antallet af knækpunkter overstiger",
 
         // OfflineMap
         "tiles failed to load": "fliser mangler at indlæse",

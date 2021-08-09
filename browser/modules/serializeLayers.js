@@ -371,7 +371,7 @@ var _encoders = {
                     featureGeoJson = {_latlngs: feature._latlngs};
                     featureGeoJson.type = "Rectangle";
                     featureGeoJson.feature = feature.feature;
-                } else if (feature?.properties?.type === "circlemarker") {
+                } else if (feature?.feature?.properties?.type === "circlemarker") {
                     featureGeoJson = {_latlng: feature._latlng};
                     featureGeoJson.type = "CircleMarker";
                     featureGeoJson.feature = feature.feature;

@@ -45,6 +45,22 @@ module.exports = module.exports = {
         backboneEvents = o.backboneEvents;
 
         _self = this;
+
+        // Listen to messages send by the embed API
+        window.addEventListener("message", function (event) {
+            if (event.data?.method === "switchLayer") {
+                _self.init(event.data.layerId, event.data.state);
+            } else if (event.data?.method === "switchAllOff") {
+                let layers = _self.getLayersEnabledStatus();
+                for (const property in layers) {
+                    let prop = layers[property];
+                    console.log(prop);
+                    if (prop.enabled) {
+                        _self.init(prop.fullLayerKey, false);
+                    }
+                }
+            }
+        });
         return this;
     },
 
@@ -82,7 +98,7 @@ module.exports = module.exports = {
      */
     enableVector: (gc2Id, doNotLegend, setupControls, failedBefore) => {
         if (LOG) console.log(`switchLayer: enableVector ${gc2Id}`);
-        _self.enableCheckBoxesOnChildren(gc2Id);
+        //_self.enableCheckBoxesOnChildren(gc2Id);
         let vectorLayerId = LAYER.VECTOR + `:` + gc2Id;
         return new Promise((resolve, reject) => {
             layers.incrementCountLoading(vectorLayerId);
@@ -112,7 +128,6 @@ module.exports = module.exports = {
                 } else {
                     console.error(`Unknown switch layer failure for ${vectorLayerId}`, failedBefore);
                 }
-
                 resolve();
             } else {
                 _self.loadMissingMeta(gc2Id).then(() => {
@@ -152,6 +167,7 @@ module.exports = module.exports = {
             layers.addUTFGridLayer(id).then(() => {
             }).catch((err) => {
                 console.error(`Could not add ${id} UTFGrid tile layer`);
+                console.error(err);
                 resolve();
             });
         });
@@ -182,9 +198,7 @@ module.exports = module.exports = {
                 labelsEnabled = "true";
             }
             layers.addLayer(gc2Id, [layerTree.getLayerFilterString(gc2Id), `labels=${labelsEnabled}`]).then(() => {
-
                 _self.checkLayerControl(gc2Id, doNotLegend, setupControls);
-
                 let cacheBuster = ``;
                 if (forceReload) {
                     cacheBuster = Math.random();
@@ -196,7 +210,6 @@ module.exports = module.exports = {
                         }
                     }
                 }
-
                 // The WMS tile layer and single-tiled at the same time creates the L.nonTiledLayer.wms
                 // which does not have the setUrl() method
                 let rasterTileLayer = cloud.get().getLayersByName(gc2Id, false);
@@ -206,7 +219,7 @@ module.exports = module.exports = {
                 }
                 // Enable the corresponding UTF grid layer
                 // TODO check "mouseover" properties in fieldConf. No need to switch on if mouse over is not wanted
-                //_self.enableUTFGrid(gc2Id);
+                _self.enableUTFGrid(gc2Id);
                 _self.enableCheckBoxesOnChildren(gc2Id);
                 resolve();
             }).catch(err => {
@@ -600,31 +613,31 @@ module.exports = module.exports = {
      * @param {string} layerKey Layer identifier
      */
     enableCheckBoxesOnChildren: (layerKey) => {
-            let childLayersThatShouldBeEnabled = layerTree.getChildLayersThatShouldBeEnabled();
-            let parsedMeta = meta.parseLayerMeta(layerKey);
-            let activeFilters = layerTree.getActiveLayerFilters(layerKey);
-            if (parsedMeta?.referenced_by && activeFilters.length > 0) {
-                JSON.parse(parsedMeta.referenced_by).forEach((i) => {
-                    // Store keys in array, so when re-rendering the layer tree, it can pick up which layers to enable
-                    if (childLayersThatShouldBeEnabled.indexOf(i.rel) === -1) {
-                        childLayersThatShouldBeEnabled.push(i.rel);
-                    }
-                    $(`*[data-gc2-id="${i.rel}"]`).prop(`disabled`, false);
-                    $(`[data-gc2-layer-key^="${i.rel}."]`).find(`.js-layer-is-disabled`).css(`visibility`, `hidden`);
+        let childLayersThatShouldBeEnabled = layerTree.getChildLayersThatShouldBeEnabled();
+        let parsedMeta = meta.parseLayerMeta(layerKey);
+        let activeFilters = layerTree.getActiveLayerFilters(layerKey);
+        if (parsedMeta?.referenced_by && activeFilters.length > 0) {
+            JSON.parse(parsedMeta.referenced_by).forEach((i) => {
+                // Store keys in array, so when re-rendering the layer tree, it can pick up which layers to enable
+                if (childLayersThatShouldBeEnabled.indexOf(i.rel) === -1) {
+                    childLayersThatShouldBeEnabled.push(i.rel);
+                }
+                $(`*[data-gc2-id="${i.rel}"]`).prop(`disabled`, false);
+                $(`[data-gc2-layer-key^="${i.rel}."]`).find(`.js-layer-is-disabled`).css(`visibility`, `hidden`);
 
-                })
-            }
-            if (parsedMeta?.referenced_by && activeFilters.length === 0) {
-                JSON.parse(parsedMeta.referenced_by).forEach((i) => {
-                    let parsedMetaChildLayer = meta.parseLayerMeta(i.rel);
-                    if (parsedMetaChildLayer?.disable_check_box) {
-                        childLayersThatShouldBeEnabled = childLayersThatShouldBeEnabled.filter(item => item !== i.rel);
-                        _self.init(i.rel, false, true, false);
-                        $(`*[data-gc2-id="${i.rel}"]`).prop(`disabled`, true);
-                        $(`[data-gc2-layer-key^="${i.rel}"]`).find(`.js-layer-is-disabled`).css(`visibility`, `visible`);
-                    }
-                })
-            }
-            layerTree.setChildLayersThatShouldBeEnabled(childLayersThatShouldBeEnabled);
+            })
+        }
+        if (parsedMeta?.referenced_by && activeFilters.length === 0) {
+            JSON.parse(parsedMeta.referenced_by).forEach((i) => {
+                let parsedMetaChildLayer = meta.parseLayerMeta(i.rel);
+                if (parsedMetaChildLayer?.disable_check_box) {
+                    childLayersThatShouldBeEnabled = childLayersThatShouldBeEnabled.filter(item => item !== i.rel);
+                    _self.init(i.rel, false, true, false);
+                    $(`*[data-gc2-id="${i.rel}"]`).prop(`disabled`, true);
+                    $(`[data-gc2-layer-key^="${i.rel}"]`).find(`.js-layer-is-disabled`).css(`visibility`, `visible`);
+                }
+            })
+        }
+        layerTree.setChildLayersThatShouldBeEnabled(childLayersThatShouldBeEnabled);
     }
 };

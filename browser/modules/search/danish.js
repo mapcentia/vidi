@@ -17,6 +17,8 @@ var cloud;
  */
 var backboneEvents;
 
+var draw;
+
 /**
  *
  * @type {string}
@@ -41,6 +43,8 @@ var MHOST = "https://dk.gc2.io";
  */
 var MDB = "dk";
 
+const drawTools = require(`./../drawTools`);
+
 /**
  * Global var with config object
  */
@@ -53,16 +57,19 @@ window.vidiConfig = require('../../../config/config.js');
 module.exports = {
     set: function (o) {
         cloud = o.cloud;
+        draw = o.draw;
         backboneEvents = o.backboneEvents;
         return this;
     },
-    init: function (onLoad, el, onlyAddress, getProperty) {
-        let type1, type2, type3, type4, gids = {}, searchString, dslM, shouldA = [], shouldM = [], dsl1, dsl2, size,
-            komKode = window.vidiConfig.searchConfig.komkode, placeStore, maxZoom, searchTxt,
+    init: function (onLoad, el, onlyAddress, getProperty, caller) {
+        var type1, type2, type3, type4, gids = {}, searchString, dslM, shouldA = [], shouldM = [], dsl1, dsl2,
+            komKode = window.vidiConfig.searchConfig.komkode, placeStores = {}, maxZoom, searchTxt,
             esrSearchActive = typeof (window.vidiConfig.searchConfig.esrSearchActive) !== "undefined" ? window.vidiConfig.searchConfig.esrSearchActive : false,
-            sfeSearchActive = typeof (window.vidiConfig.searchConfig.sfeSearchActive) !== "undefined" ? window.vidiConfig.searchConfig.sfeSearchActive : false;
+            sfeSearchActive = typeof (window.vidiConfig.searchConfig.sfeSearchActive) !== "undefined" ? window.vidiConfig.searchConfig.sfeSearchActive : false,
+            advanced = typeof (window.vidiConfig.searchConfig.advanced) !== "undefined" ? window.vidiConfig.searchConfig.advanced : false,
             size = typeof (window.vidiConfig.searchConfig.size) !== "undefined" ? window.vidiConfig.searchConfig.size : 10;
 
+        if (caller !== 'init') advanced = false;
         // adjust search text
         let placeholder =window.vidiConfig?.searchConfig?.placeholderText;
         if (placeholder) {
@@ -83,6 +90,33 @@ module.exports = {
             }
         }
 
+        let colorPicker = ` 
+                 <div style="padding: 7px">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="well">Søgeresultater i kortet bliver oprettet i Tegningsmodulet, således de efterfølgende kan tilpasses. Herunder kan der vælges hvilke farve nye søgeresultater skal oprettets med. Farve, linjestilart, mål mv. kan ændres i efterfølgende i Tegning.</div>
+                        </div>    
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <label for="search-colorpicker-input" class="col-md-3 control-label">${__('Color')}</label>
+                            <div id="search-colorpicker" class="input-group colorpicker-component col-md-10">
+                                <input id="search-colorpicker-input" name="search-colorpicker-input"
+                                       type="text" value="#ff0000" class="form-control"
+                                       style="margin-left: 15px;"/>
+                                <span class="input-group-addon"><i style="margin-left: 10px;"/></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+
+        if (advanced) {
+            $("#place-search").append(colorPicker)
+            $("#search-colorpicker").colorpicker({
+                container: $("#search-colorpicker")
+            });
+        }
+
         // Set max zoom then zooming on target
         // ===================================
 
@@ -93,7 +127,9 @@ module.exports = {
 
         backboneEvents.get().on("clear:search", function () {
             console.info("Clearing search");
-            placeStore.reset();
+            for (const property in placeStores) {
+                placeStores[property].reset();
+            }
             $("#custom-search").val("");
         });
 
@@ -104,10 +140,40 @@ module.exports = {
 
         if (!onLoad) {
             onLoad = function () {
-                var resultLayer = new L.FeatureGroup();
-                cloud.get().map.addLayer(resultLayer);
-                resultLayer.addLayer(this.layer);
                 cloud.get().zoomToExtentOfgeoJsonStore(this, maxZoom);
+                if (advanced) {
+                    this.layer._vidi_type = "draw"
+                    this.layer.eachLayer((l) => {
+                        console.log(l)
+                        l._vidi_type = "draw";
+
+                        if (typeof l._latlng !== "undefined") {
+                            l.feature = {
+                                properties: {
+                                    //vejnavn,husnr,litra,postnr,postnrnavn
+                                    type: l.feature.properties.husnr + ' ' + l.feature.properties.postnr,
+                                }
+                            };
+                        } else {
+                            l.on('click', function (event) {
+                                draw.bindPopup(event);
+                            });
+                            l.feature = {
+                                properties: {
+                                    type: l.feature.properties.matrikelnummer + ' ' + l.feature.properties.ejerlavsnavn,
+                                    area: drawTools.getArea(l)
+                                }
+                            };
+                        }
+
+                        draw.getDrawItems().addLayer(l);
+                    })
+                    draw.getTable().loadDataInTable(false, true);
+                } else {
+                    let resultLayer = new L.FeatureGroup();
+                    cloud.get().map.addLayer(resultLayer);
+                    resultLayer.addLayer(this.layer);
+                }
             }
         }
 
@@ -122,32 +188,34 @@ module.exports = {
         // Define GC2 SQL store
         // ====================
 
-        placeStore = new geocloud.sqlStore({
-            jsonp: false,
-            method: "POST",
-            dataType: "json",
-            sql: null,
-            clickable: false,
-            // Make Awesome Markers
-            pointToLayer: function (feature, latlng) {
-                return L.marker(latlng, {
-                    icon: L.AwesomeMarkers.icon({
-                            icon: 'home',
-                            markerColor: '#C31919',
-                            prefix: 'fa'
-                        }
-                    )
-                });
-            },
-            styleMap: {
-                weight: 3,
-                color: '#C31919',
-                dashArray: '',
-                Opacity: 1,
-                fillOpacity: 0
-            },
-            onLoad: onLoad
-        });
+        let getPlaceStore = () => {
+            return new geocloud.sqlStore({
+                jsonp: false,
+                method: "POST",
+                dataType: "json",
+                sql: null,
+                clickable: true,
+                // Make Awesome Markers
+                pointToLayer: function (feature, latlng) {
+                    return L.marker(latlng, {
+                        icon: L.AwesomeMarkers.icon({
+                                icon: 'home',
+                                markerColor: '#C31919',
+                                prefix: 'fa'
+                            }
+                        )
+                    });
+                },
+                styleMap: {
+                    weight: 3,
+                    color: advanced ? $("#search-colorpicker-input").val() : "#C31919",
+                    dashArray: '',
+                    Opacity: 1,
+                    fillOpacity: 0
+                },
+                onLoad: onLoad
+            });
+        }
 
         if (komKode !== "*") {
             if (typeof komKode === "string") {
@@ -820,52 +888,69 @@ module.exports = {
                 || (type3 === "esr_nr" && name === "esr_ejdnr") || (type4 === "sfe_nr" && name === "sfe_ejdnr")
                 || extraSearchesNames.indexOf(name) !== -1
             ) {
-                placeStore.reset();
+                let key;
+                if (advanced) {
+                    key = datum.value;
+                } else {
+                    key = "simple";
+                    try {
+                        placeStores[key].reset();
+                    } catch (e) {
+                    }
+                }
+                searchString = datum.value;
                 switch (name) {
                     case "esr_ejdnr" :
-                        placeStore.db = MDB;
-                        placeStore.host = MHOST;
-                        searchString = datum.value;
-                        placeStore.sql = "SELECT esr_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE esr_ejendomsnummer = (SELECT esr_ejendomsnummer FROM matrikel.jordstykke WHERE gid=" + gids[type3][datum.value] + ") group by esr_ejendomsnummer";
-                        placeStore.load();
+                        placeStores[key] = getPlaceStore();
+                        placeStores[key].db = MDB;
+                        placeStores[key].host = MHOST;
+                        if (advanced) {
+                            placeStores[key].sql = "SELECT esr_ejendomsnummer,matrikelnummer,ejerlavsnavn,the_geom FROM matrikel.jordstykke WHERE esr_ejendomsnummer = (SELECT esr_ejendomsnummer FROM matrikel.jordstykke WHERE gid=" + gids[type3][datum.value] + ")";
+                        } else {
+                            placeStores[key].sql = "SELECT esr_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE esr_ejendomsnummer = (SELECT esr_ejendomsnummer FROM matrikel.jordstykke WHERE gid=" + gids[type3][datum.value] + ") group by esr_ejendomsnummer";
+                        }
+                        placeStores[key].load();
                         break;
                     case "sfe_ejdnr" :
-                        placeStore.db = MDB;
-                        placeStore.host = MHOST;
-                        searchString = datum.value;
-                        placeStore.sql = "SELECT sfe_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE sfe_ejendomsnummer = (SELECT sfe_ejendomsnummer FROM matrikel.jordstykke WHERE gid=" + gids[type4][datum.value] + ") group by sfe_ejendomsnummer";
-                        placeStore.load();
+                        placeStores[key] = getPlaceStore();
+                        placeStores[key].db = MDB;
+                        placeStores[key].host = MHOST;
+                        if (advanced) {
+                            placeStores[key].sql = "SELECT sfe_ejendomsnummer,matrikelnummer,ejerlavsnavn,the_geom FROM matrikel.jordstykke WHERE sfe_ejendomsnummer = (SELECT sfe_ejendomsnummer FROM matrikel.jordstykke WHERE gid=" + gids[type4][datum.value] + ")";
+                        } else {
+                            placeStores[key].sql = "SELECT sfe_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE sfe_ejendomsnummer = (SELECT sfe_ejendomsnummer FROM matrikel.jordstykke WHERE gid=" + gids[type4][datum.value] + ") group by sfe_ejendomsnummer";
+                        }
+                        placeStores[key].load();
                         break;
                     case "matrikel" :
-                        placeStore.db = MDB;
-                        placeStore.host = MHOST;
-                        searchString = datum.value;
+                        placeStores[key] = getPlaceStore();
+                        placeStores[key].db = MDB;
+                        placeStores[key].host = MHOST;
                         if (getProperty) {
-                            placeStore.sql = "SELECT esr_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE esr_ejendomsnummer = (SELECT esr_ejendomsnummer FROM matrikel.jordstykke WHERE gid=" + gids[type2][datum.value] + ") group by esr_ejendomsnummer";
+                            placeStores[key].sql = "SELECT esr_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE esr_ejendomsnummer = (SELECT esr_ejendomsnummer FROM matrikel.jordstykke WHERE gid=" + gids[type2][datum.value] + ") group by esr_ejendomsnummer";
                         } else {
-                            placeStore.sql = "SELECT gid,the_geom,ST_asgeojson(ST_transform(the_geom,4326)) as geojson FROM matrikel.jordstykke WHERE gid='" + gids[type2][datum.value] + "'";
+                            placeStores[key].sql = "SELECT gid,the_geom,matrikelnummer,ejerlavsnavn, ST_asgeojson(ST_transform(the_geom,4326)) as geojson FROM matrikel.jordstykke WHERE gid='" + gids[type2][datum.value] + "'";
                         }
-                        placeStore.load();
+                        placeStores[key].load();
                         break;
                     case "adresse" :
-                        placeStore.db = ADB;
-                        placeStore.host = AHOST;
+                        placeStores[key] = getPlaceStore();
+                        placeStores[key].db = ADB;
+                        placeStores[key].host = AHOST;
                         if (getProperty) {
-                            placeStore.sql = "SELECT esr_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE esr_ejendomsnummer = (SELECT esr_ejendomsnummer FROM matrikel.jordstykke WHERE (the_geom && (SELECT ST_transform(the_geom, 25832) FROM dar.adgangsadresser WHERE id='" + gids[type1][datum.value] + "')) AND ST_Intersects(the_geom, (SELECT ST_transform(the_geom, 25832) FROM dar.adgangsadresser WHERE id='" + gids[type1][datum.value] + "'))) group by esr_ejendomsnummer";
+                            placeStores[key].sql = "SELECT esr_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE esr_ejendomsnummer = (SELECT esr_ejendomsnummer FROM matrikel.jordstykke WHERE (the_geom && (SELECT ST_transform(the_geom, 25832) FROM dar.adgangsadresser WHERE id='" + gids[type1][datum.value] + "')) AND ST_Intersects(the_geom, (SELECT ST_transform(the_geom, 25832) FROM dar.adgangsadresser WHERE id='" + gids[type1][datum.value] + "'))) group by esr_ejendomsnummer";
                         } else {
-                            placeStore.sql = "SELECT id,kommunekode,the_geom,ST_asgeojson(ST_transform(the_geom,4326)) as geojson FROM dar.adgangsadresser WHERE id='" + gids[type1][datum.value] + "'";
+                            placeStores[key].sql = "SELECT id,husnr,postnr,kommunekode,the_geom,ST_asgeojson(ST_transform(the_geom,4326)) as geojson FROM dar.adgangsadresser WHERE id='" + gids[type1][datum.value] + "'";
                         }
-                        searchString = datum.value;
-                        placeStore.load();
+                        placeStores[key].load();
                         break;
                     default: // Extra searches
-                        placeStore.db = extraSearchesObj[name].db;
-                        placeStore.host = extraSearchesObj[name].host;
-                        searchString = datum.value;
-                        placeStore.sql = "SELECT *,ST_asgeojson(ST_transform(" + extraSearchesObj[name].relation.geom + ",4326)) as geojson FROM " + extraSearchesObj[name].relation.name + " WHERE " + extraSearchesObj[name].relation.key +"='" + gids[name][datum.value] + "'";
-                        placeStore.load();
+                        placeStores[key] = getPlaceStore();
+                        placeStores[key].db = extraSearchesObj[name].db;
+                        placeStores[key].host = extraSearchesObj[name].host;
+                        placeStores[key].sql = "SELECT *,ST_asgeojson(ST_transform(" + extraSearchesObj[name].relation.geom + ",4326)) as geojson FROM " + extraSearchesObj[name].relation.name + " WHERE " + extraSearchesObj[name].relation.key + "='" + gids[name][datum.value] + "'";
+                        placeStores[key].load();
                         break;
-
                 }
             } else {
                 setTimeout(function () {

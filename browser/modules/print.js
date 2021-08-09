@@ -123,10 +123,17 @@ module.exports = {
         backboneEvents.get().on("end:print", function (response) {
             console.log("Response", response)
             $("#get-print-fieldset").prop("disabled", false);
-            $("#download-pdf, #open-pdf").attr("href", "/tmp/print/pdf/" + response.key + ".pdf");
+            if (response.format === "pdf") {
+                $("#download-pdf, #open-pdf").attr("href", "/tmp/print/pdf/" + response.key + ".pdf");
+            } else if (response.format === "png"){
+                $("#download-pdf, #open-pdf").attr("href", "/tmp/print/png/" + response.key + ".png");
+            } else {
+                $("#download-pdf, #open-pdf").attr("href", "/tmp/print/png/" + response.key + ".zip");
+            }
             $("#download-pdf").attr("download", response.key);
             $("#open-html").attr("href", response.url);
             $("#start-print-btn").button('reset');
+            $(".dropdown-toggle.start-print-btn").prop("disabled", false);
             // GeoEnviron
             console.log("GEMessage:LaunchURL:" + urlparser.urlObj.protocol + "://" + urlparser.urlObj.host + "/tmp/print/pdf/" + response.key + ".pdf");
         });
@@ -134,6 +141,14 @@ module.exports = {
         $("#start-print-btn").on("click", function () {
             if (_self.print()) {
                 $(this).button('loading');
+                $(".dropdown-toggle.start-print-btn").prop("disabled", true);
+                $("#get-print-fieldset").prop("disabled", true);
+            }
+        });
+        $("#start-print-png-btn").on("click", function () {
+            if (_self.print("end:print", null, true)) {
+                $("#start-print-btn").button('loading');
+                $(".dropdown-toggle.start-print-btn").prop("disabled", true);
                 $("#get-print-fieldset").prop("disabled", true);
             }
         });
@@ -163,7 +178,7 @@ module.exports = {
 
     off: function () {
         _cleanUp(true);
-        $("#print-form :input, #start-print-btn, #select-scale").prop("disabled", true);
+        $("#print-form :input, .start-print-btn, #select-scale").prop("disabled", true);
     },
 
     setCallBack: function (fn) {
@@ -176,7 +191,7 @@ module.exports = {
     on: function () {
         let numOfPrintTmpl = 0;
         alreadySetFromState = false;
-        $("#print-form :input, #start-print-btn, #select-scale").prop("disabled", false);
+        $("#print-form :input, .start-print-btn, #select-scale").prop("disabled", false);
         $("#print-tmpl").empty();
         $("#print-size").empty();
         $("#print-orientation").empty();
@@ -309,15 +324,15 @@ module.exports = {
         }, 5);
     },
 
-    print: (endEventName = "end:print", customData) => {
+    print: (endEventName = "end:print", customData, png = false) => {
         return new Promise((resolve, reject) => {
-            state.bookmarkState(customData).then(response => {
+            state.bookmarkState(customData, png).then(response => {
                 backboneEvents.get().trigger(endEventName, response);
                 callBack(response.responseJSON);
-                resolve();
+                resolve(response);
             }).catch(response => {
                 backboneEvents.get().trigger(endEventName, response);
-                callBack(response.responseJSON);
+                callBack(response);
                 reject();
             });
         });
@@ -589,10 +604,9 @@ module.exports = {
                 header: encodeURIComponent($("#print-title").val()) || encodeURIComponent($("#print-comment").val()) ? "inline" : "none",
                 dateTime: dayjs().format('Do MMMM YYYY, H:mm'),
                 date: dayjs().format('Do MMMM YYYY'),
-                metaData: meta.getMetaData(),
                 px: config.print.templates[tmpl][pageSize][printingOrientation].mapsizePx[0],
                 py: config.print.templates[tmpl][pageSize][printingOrientation].mapsizePx[1],
-                queryString: urlparser.search,
+                queryString: urlparser.search.replace(/state=[a-z0-9_-]*/g, ""), // remove the state snapshot
                 customData: null,
                 scales: scales,
                 sticky: $("#print-sticky").is(":checked")
@@ -622,6 +636,10 @@ module.exports = {
             data.customData = customData || null;
             state.getState().then(applicationState => {
                 data.state = applicationState;
+                // Set layer active if provided
+                if (customData && typeof customData.layer === "string") {
+                    data.state.modules.layerTree.activeLayers = [customData.layer];
+                }
                 resolve(data);
             });
         });
@@ -639,7 +657,7 @@ module.exports = {
     applyState: (print) => {
         return new Promise((resolve) => {
             paramsFromDb = print;
-            // backboneEvents.get().trigger(`${MODULE_ID}:state_change`);
+            backboneEvents.get().trigger(`${MODULE_ID}:state_change`);
             resolve();
         });
     }

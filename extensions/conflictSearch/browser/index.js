@@ -247,6 +247,11 @@ var errorTable;
 var visibleLayers;
 var projWktWithBuffer;
 /**
+ * Draw module
+ */
+var draw;
+
+/**
  *
  * @type set: module.exports.set, init: module.exports.init
  */
@@ -260,6 +265,7 @@ module.exports = module.exports = {
     set: function (o) {
         cloud = o.cloud.get();
         utils = o.utils;
+        draw = o.draw;
         meta = o.meta;
         backboneEvents = o.backboneEvents;
         socketId = o.socketId;
@@ -311,6 +317,11 @@ module.exports = module.exports = {
         } catch (e) {
             searchLoadedLayers = true;
         }
+
+        // Set up draw module for conflict
+        draw.setConflictSearch(this);
+        $("#_draw_make_conflict_with_selected").show();
+        $("#_draw_make_conflict_with_all").show();
 
         cloud.map.addLayer(drawnItems);
         cloud.map.addLayer(bufferItems);
@@ -541,10 +552,30 @@ module.exports = module.exports = {
      * @param callBack
      * @param id Set specific layer id to use. Else the first in drawnItems will be used
      */
-    makeSearch: function (text, callBack, id = null) {
+    makeSearch: function (text, callBack, id = null, fromDrawing = false) {
         var primitive, coord,
             layer, buffer = parseFloat($("#conflict-buffer-value").val()), bufferValue = buffer,
-            _self = this;
+            hitsTable = $("#hits-content tbody"),
+            noHitsTable = $("#nohits-content tbody"),
+            errorTable = $("#error-content tbody"),
+            hitsData = $("#hits-data"),
+            row, fileId, searchFinish, geomStr,
+            visibleLayers = cloud.getAllTypesOfVisibleLayers().split(";"), crss;
+
+        const setCrss = (layer) => {
+            if (typeof layer.getBounds !== "undefined") {
+                coord = layer.getBounds().getSouthWest();
+            } else {
+                coord = layer.getLatLng();
+            }
+            var zone = require('./../../../browser/modules/utmZone.js').getZone(coord.lat, coord.lng);
+            crss = {
+                "proj": "+proj=utm +zone=" + zone + " +ellps=WGS84 +datum=WGS84 +units=m +no_defs",
+                "unproj": "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
+            };
+        }
+
+        let _self = this;
         visibleLayers = cloud.getAllTypesOfVisibleLayers().split(";");
         if (text) {
             currentFromText = text;
@@ -560,7 +591,37 @@ module.exports = module.exports = {
         } catch (e) {
         }
 
-        if (id) {
+        if (fromDrawing) {
+            layer = draw.getStore().layer;
+            if (id) {
+                layer = layer._layers[id];
+            } else {
+                setCrss(layer);
+                let collection = {
+                    "type": "GeometryCollection",
+                    "geometries": [],
+                    "properties": layer._layers[Object.keys(layer._layers)[0]].feature.properties
+                }
+                layer.eachLayer((l) => {
+                    // We use a buffer to recreate a circle from the GeoJSON point
+                    if (typeof l._mRadius !== "undefined") {
+                        let buffer = l._mRadius;
+                        let primitive = l.toGeoJSON();
+                        primitive.type = "Feature"; // Must be there
+                        // Get utm zone
+                        let reader = new jsts.io.GeoJSONReader();
+                        let writer = new jsts.io.GeoJSONWriter();
+                        let geom = reader.read(reproject.reproject(primitive, "unproj", "proj", crss));
+                        let buffer4326 = reproject.reproject(writer.write(geom.geometry.buffer(buffer)), "proj", "unproj", crss);
+                        collection.geometries.push(buffer4326)
+                    } else {
+                        collection.geometries.push(l.toGeoJSON().geometry)
+                    }
+                })
+                let newLayer = L.geoJSON(collection);
+                layer = newLayer;
+            }
+        } else if (id) {
             layer = drawnItems._layers[id];
         } else {
             for (var prop in drawnItems._layers) {
@@ -581,21 +642,12 @@ module.exports = module.exports = {
             primitive = primitive.features[0];
         }
         if (primitive) {
-            if (typeof layer.getBounds !== "undefined") {
-                coord = layer.getBounds().getSouthWest();
-            } else {
-                coord = layer.getLatLng();
-            }
-            // Get utm zone
-            var zone = require('./../../../browser/modules/utmZone.js').getZone(coord.lat, coord.lng);
-            var crss = {
-                "proj": "+proj=utm +zone=" + zone + " +ellps=WGS84 +datum=WGS84 +units=m +no_defs",
-                "unproj": "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
-            };
+            setCrss(layer);
+            primitive.type = "Feature"; // Must be there
             var reader = new jsts.io.GeoJSONReader();
             var writer = new jsts.io.GeoJSONWriter();
             var geom = reader.read(reproject.reproject(primitive, "unproj", "proj", crss));
-
+            // buffer4326
             var buffer4326 = reproject.reproject(writer.write(geom.geometry.buffer(buffer)), "proj", "unproj", crss);
 
             if (buffer === 0) {
@@ -632,9 +684,14 @@ module.exports = module.exports = {
                 schemataStr = schemata.join(",");
             }
 
+            var projWktWithBuffer;
+            if (buffer === 0) {
+                projWktWithBuffer = Terraformer.convert(writer.write(geom.geometry));
+            } else {
+                projWktWithBuffer = Terraformer.convert(writer.write(geom.geometry.buffer(buffer)));
+            }
             preProcessor({
                 "projWktWithBuffer": projWktWithBuffer
-
             }).then(function () {
                 xhr = $.ajax({
                     method: "POST",
@@ -749,7 +806,7 @@ module.exports = module.exports = {
         $("#result-origin").html(response.text);
         $('#conflict-main-tabs a[href="#conflict-result-content"]').tab('show');
         $('#conflict-result-content a[href="#hits-content"]').tab('show');
-        $('#conflict-result .btn:first-child').attr("href", "/html?id=" + response.file)
+        $('#conflict-open-pdf').attr("href", "/html?id=" + response.file)
         $("#conflict-download-pdf").prop("download", `Søgning foretaget med ${response.text} d. ${response.dateTime}`);
 
         if ('bufferItems' in response) {
@@ -948,24 +1005,39 @@ let dom = `
             <div role="tabpanel" class="tab-pane active" id="conflict-result-content">
                 <div id="conflict-result">
                     <div><span id="conflict-result-origin"></span></div>
-
+                    <div><a href="" target="_blank" class="btn btn-sm btn-raised" id="conflict-excel-btn">Excel</a></div>
                     <div class="btn-toolbar bs-component" style="margin: 0;">
                         <div class="btn-group">
-                            <button disabled class="btn btn-raised" id="conflict-print-btn" data-loading-text="<i class='fa fa-cog fa-spin fa-lg'></i> PDF rapport"><i class='fa fa-cog fa-lg'></i> Print rapport</button>
+                            <button disabled class="btn btn-sm btn-raised" id="conflict-print-btn" data-loading-text="<i class='fa fa-cog fa-spin fa-lg'></i> PDF rapport"><i class='fa fa-cog fa-lg'></i> Print rapport</button>
                         </div>
                         <div class="btn-group">
-                            <button disabled class="btn btn-raised" id="conflict-set-print-area-btn"><i class='fas fa-expand'></i></button>
+                            <button disabled class="btn btn-sm btn-raised" id="conflict-set-print-area-btn"><i class='fas fa-expand'></i></button>
                         </div>
                         <fieldset disabled id="conflict-get-print-fieldset">
                             <div class="btn-group">
-                                <a target="_blank" href="javascript:void(0)" class="btn btn-primary btn-raised" id="conflict-open-pdf">Åben PDF</a>
-                                <a href="bootstrap-elements.html" class="btn btn-primary btn-raised dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></a>
+                                <a target="_blank" href="javascript:void(0)" class="btn btn-sm btn-primary btn-raised" id="conflict-open-pdf">Åben PDF</a>
+                                <a href="bootstrap-elements.html" class="btn btn-sm btn-primary btn-raised dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></a>
                                 <ul class="dropdown-menu">
                                     <li><a href="javascript:void(0)" id="conflict-download-pdf">Download PDF</a></li>
-                                    <li><a target="_blank" href="javascript:void(0)" id="conflict-open-html">Open HTML page</a></li>
                                 </ul>
                             </div>
                         </fieldset>
+                        <div>
+                            <span class="radio radio-primary">
+                                <label>
+                                    <input type="radio" name="conflict-report-type" value="1" checked>
+                                    Kompakt
+                                </label>
+                                <label>
+                                    <input type="radio" name="conflict-report-type" value="2">
+                                    Lang, kun hits
+                                </label>
+                                <label>
+                                    <input type="radio" name="conflict-report-type" value="3">
+                                    Lang, alle
+                                </label>
+                            </span>
+                        </div>
                     </div>
 
                     <div role="tabpanel">

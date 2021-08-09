@@ -87,6 +87,9 @@ module.exports = {
         "Get as PDF": "Get as PDF",
         "Conflicts": "Conflicts",
         "No Conflicts": "No Conflicts",
+        "Conflict with selected": "Conflict with selected",
+        "Conflict with all": "Conflict with all",
+        "Prints completed": "Prints completed",
 
         "Print": "Print",
         "Search places": "Search places",
@@ -99,8 +102,10 @@ module.exports = {
         "Activate drawing tools": "Activate drawing tools",
         "Activate print tools": "Activate print tools",
         "Make PDF": "Make PDF",
+        "Make PNG": "Make PNG",
         "Download": "Download",
         "Open PDF": "Open PDF",
+        "Open": "Open",
         "Open HTML page": "Open HTML page",
         "Scale": "Scale",
         "Template": "Template",
@@ -253,6 +258,7 @@ module.exports = {
         "Application is offline, tiles will not be updated. Proceed?": "Application is offline, tiles will not be updated. Proceed?",
         "Are you sure you want to delete the feature?": "Are you sure you want to delete the feature?",
         "The page was loaded without service workers enabled, features editing is not available (the page was loaded via plain HTTP or browser does not support service workers)": "The page was loaded without service workers enabled, features editing is not available (the page was loaded via plain HTTP or browser does not support service workers)",
+        "Editing of geometry is not possible when number of nodes exceed": "Editing of geometry is not possible when number of nodes exceed",
 
         // OfflineMap
         "tiles failed to load": "tiles failed to load",

@@ -69,7 +69,7 @@ var p, hashArr = hash.replace("#", "").split("/");
 // Because extensions are not being set before State resolves.
 // So we hard code reportRender, which sets up a listener on event "on:customData"
 // and hard code the call to reportRender.render in state::initializeFromHashPart
-var reportRender = require('../../extensions/conflictSearch/browser/reportRender');
+let reportRender = require('../../extensions/conflictSearch/browser/reportRenderAlt');
 
 /**
  * Returns internaly stored global state
@@ -196,20 +196,23 @@ module.exports = {
                     return result;
                 };
 
-                const setLayers = () => {
-                    $(".base-map-button").removeClass("active");
-                    $("#" + hashArr[0]).addClass("active");
+                const setLayers = (hash = true) => {
                     let layersToActivate = [];
-
                     let baseLayerId = false;
-                    if (hashArr[1] && hashArr[2] && hashArr[3]) {
-                        baseLayerId = hashArr[0];
+                    if (hash) {
+                        $(".base-map-button").removeClass("active");
+                        if (hashArr[0]) $("#" + hashArr[0]).addClass("active");
 
-                        // Layers to activate
-                        if (hashArr[4]) {
-                            layersToActivate = removeDuplicates(hashArr[4].split(","));
+                        if (hashArr[1] && hashArr[2] && hashArr[3]) {
+                            baseLayerId = hashArr[0];
+
+                            // Layers to activate
+                            if (hashArr[4]) {
+                                layersToActivate = removeDuplicates(hashArr[4].split(","));
+                            }
                         }
                     }
+                    layersToActivate = removeDuplicates(layersToActivate.concat(window?.vidiConfig?.activeLayers || []));
 
                     /**
                      * Creates promise
@@ -270,7 +273,9 @@ module.exports = {
                             } else {
                                 cloud.get().zoomToExtent();
                             }
-
+                            if (window?.vidiConfig?.activeLayers) {
+                                setLayers(false);
+                            }
                             initResolve();
                         }
                     } else {
@@ -554,12 +559,15 @@ module.exports = {
      * @return {Promise}
      */
     resetState: (customModulesToReset = []) => {
-//        backboneEvents.get().trigger(`reset:infoClick`);
         let appliedStatePromises = [];
+        let localState = {};
+        localState.modules = {};
         if (customModulesToReset.length > 0) {
             for (let key in listened) {
                 if (customModulesToReset.indexOf(key) !== -1) {
                     appliedStatePromises.push(listened[key].applyState(false));
+                } else {
+                    localState.modules[key] = listened[key].getState();
                 }
             }
         } else {
@@ -568,7 +576,7 @@ module.exports = {
             }
         }
         return Promise.all(appliedStatePromises).then(() => {
-            return _setInternalState({});
+            return _setInternalState(localState);
         });
     },
 
@@ -680,7 +688,7 @@ module.exports = {
      * @returns {Promise}
      */
 
-    bookmarkState: (customData) => {
+    bookmarkState: (customData, png = false) => {
         return new Promise((resolve, reject) => {
             // Getting the print data
             print.getPrintData(customData).then(printData => {
@@ -688,6 +696,10 @@ module.exports = {
                 let modulesData = {};
 
                 let overallData = Object.assign({}, printData, modulesData);
+                if (png) {
+                    overallData.png = true;
+                    overallData.image = false;
+                }
                 $.ajax({
                     dataType: `json`,
                     method: `POST`,

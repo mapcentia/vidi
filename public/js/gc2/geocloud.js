@@ -176,7 +176,7 @@ geocloud = (function () {
                 this.layer = this.geoJsonLayer;
             } else {
                 this.layer = L.markerClusterGroup({
-                    maxClusterRadius: 0,
+                    maxClusterRadius: 100,
                     polygonOptions: {
                         weight: 0,
                         fillColor: "#333333",
@@ -839,58 +839,21 @@ geocloud = (function () {
      * @returns {*}
      */
     createUTFGridLayer = function (layer, defaults) {
-        var defaultTemplate =
-            `<div>
-        {{#each data}}
-			{{this.title}}: {{this.value}} <br>
-        {{/each}}
-        </div>`;
-        var uri = defaults.host + "/wms/" + defaults.db + "/" + layer.split(".")[0] + "?mode=tile&tilemode=gmap&tile={x}+{y}+{z}&layers=" + layer
-            + "&format=json&map.imagetype=application/json&";
+        var uri;
+        if (defaults.cache) {
+            uri = "/api/mapcache/" + defaults.db + "/gmaps/" + layer + ".json@g20/{z}/{x}/{y}.json";
+        } else {
+            uri = "/api/wms/" + defaults.db + "/" + layer.split(".")[0] + "?mode=tile&tilemode=gmap&tile={x}+{y}+{z}&layers=" + layer + "&format=json&map.imagetype=application/json&";
+        }
         var utfGrid = new L.utfGrid(uri, {
             resolution: 4,
             pointerCursor: true,
-            //mouseInterval: 66  // Delay for mousemove events
-        }), flag = false;
-        var template, tooltipHtml;
-        utfGrid.id = "__hidden.utfgrid." + layer; // Hide it
-        utfGrid.on('mouseover', _.debounce(function (e) {
-            var tmp = $.extend(true, {}, e.data), fi = [];
-            flag = true;
-            $.each(tmp, function (name, property) {
-                if (typeof defaults.fieldConf[name] !== "undefined" && defaults.fieldConf[name].mouseover) {
-                    let title;
-                    if (
-                        typeof defaults.fieldConf[name] !== "undefined" &&
-                        typeof defaults.fieldConf[name].alias !== "undefined" &&
-                        defaults.fieldConf[name].alias !== ""
-                    ) {
-                        title = defaults.fieldConf[name].alias
-                    } else {
-                        title = name;
-                    }
-                    fi.push({
-                        title: title,
-                        value: property
-                    });
-                }
-            });
-            tmp.data = fi; // Used in a "loop" template
-            template = Handlebars.compile(defaultTemplate);
-            tooltipHtml = template(tmp);
-            $("#tail").fadeIn(100);
-            $("#tail").html(tooltipHtml);
-
-        }, 0));
-        utfGrid.on('mouseout', function (e) {
-            flag = false;
-            setTimeout(function () {
-                if (!flag) {
-                    $("#tail").fadeOut(100);
-                }
-            }, 200)
-
+            mouseInterval: 66,  // Delay for mousemove events,
+            maxZoom: 22,
+            maxNativeZoom: 20,
+            loading: defaults.loading
         });
+        utfGrid.id = "__hidden.utfgrid." + layer; // Hide it
         return utfGrid;
     };
 
@@ -992,7 +955,7 @@ geocloud = (function () {
         };
 
         if (defaults.tileCached) {
-            url = defaults.host + "/mapcache/" + defaults.db + "/gmaps/" + layer + ".mvt/{z}/{x}/{y}.png";
+            url = defaults.host + "/mapcache/" + defaults.db + "/gmaps/" + layer + ".mvt/{z}/{x}/{y}.mvt";
         } else {
             if (!defaults.uri) {
                 uri = "/wms/" + defaults.db + "/" + parts[0] + "?mode=tile&tilemode=gmap&tile={x}+{y}+{z}&layers=" + layer
@@ -1101,12 +1064,17 @@ geocloud = (function () {
         };
 
         this.zoomToExtentOfgeoJsonStore = function (store, maxZoom) {
+            var parentThis = this;
             switch (MAPLIB) {
                 case "ol2":
                     this.map.zoomToExtent(store.layer.getDataExtent());
                     break;
                 case "leaflet":
                     this.map.fitBounds(store.layer.getBounds(), {maxZoom: maxZoom});
+                    // Pan map one pixel to defeat a strange bug, which causes a freeze
+                    setTimeout(function () {
+                        parentThis.map.panBy([1, 0]);
+                    }, 100);
                     break;
             }
         };
@@ -2233,7 +2201,9 @@ geocloud = (function () {
                     name: null,
                     names: [],
                     uri: null,
-                    fieldConf: {}
+                    fieldConf: {},
+                    cache: false,
+                    loading: null
                 };
 
             if (config) {

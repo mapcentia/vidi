@@ -21,6 +21,8 @@ let destructFunctions = [];
 let backboneEvents;
 let editing = false;
 let _self = false;
+let conflictSearch;
+let selectedDrawing;
 
 module.exports = {
     set: function (o) {
@@ -201,10 +203,37 @@ module.exports = {
                     openPopUp: false
                 });
 
+                $("#_draw_make_conflict_with_selected").on("click", () => {
+                    _self.makeConflictSearchWithSelected();
+                })
+                $("#_draw_make_conflict_with_all").on("click", () => {
+                    _self.makeConflictSearchWithAll();
+                })
+                table.object.on("selected_" + table.uid, (e) => {
+                    selectedDrawing = e;
+                })
             } else {
                 setTimeout(poll, 30);
             }
         }());
+    },
+
+    makeConflictSearchWithSelected: () => {
+        if (!selectedDrawing) {
+            alert("Vælg en tegning")
+            return;
+        }
+        state.resetState(['conflict']).then(()=>{
+            $('#main-tabs a[href="#conflict-content"]').trigger('click');
+            conflictSearch.makeSearch("Fra tegning", null, selectedDrawing, true);
+        });
+    },
+
+    makeConflictSearchWithAll: () => {
+        state.resetState(['conflict']).then(()=>{
+            $('#main-tabs a[href="#conflict-content"]').trigger('click');
+            conflictSearch.makeSearch("Fra tegning", null, null, true);
+        });
     },
 
     off: () => {
@@ -702,12 +731,20 @@ module.exports = {
         return store.layer;
     },
 
+    getDrawItems: function () {
+        return drawnItems;
+    },
+
     /**
      *
      * @returns {gc2table}
      */
     getTable: function () {
         return table;
+    },
+
+    getStore: function () {
+        return store;
     },
 
     /**
@@ -734,6 +771,10 @@ module.exports = {
         });
         let blob = new Blob([JSON.stringify(geojson)], {type: "text/plain;charset=utf-8"});
         fileSaver.saveAs(blob, "drawings.geojson");
+    },
+
+    setConflictSearch: function (o) {
+        conflictSearch = o;
     }
 };
 

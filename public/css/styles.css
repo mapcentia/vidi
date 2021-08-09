@@ -1610,3 +1610,6 @@ td.rdtYear:hover {
 .info-icon {
   cursor: help;
 }
+.list-subgroup-item {
+  border-left: 2px solid #222 !important;
+}

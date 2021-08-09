@@ -1336,11 +1336,9 @@ module.exports = {
      */
     createStore: (layer, isVirtual = false, isVectorTile = false) => {
         if (isVirtual && isVectorTile) throw new Error(`Vector tile layer can not be virtual`);
-
         if (layer.virtual_layer) {
             isVirtual = true;
         }
-
         let parentFiltersHash = ``;
         let layerKey = layer.f_table_schema + '.' + layer.f_table_name;
         const layerSpecificQueryLimit = layerTreeUtils.getQueryLimit(meta.parseLayerMeta(layerKey));
@@ -1395,6 +1393,29 @@ module.exports = {
         }
 
         let trackingLayerKey = (LAYER.VECTOR + ':' + layerKey);
+
+        /*
+            Setting up mouse over
+         */
+        let metaData = meta.getMetaDataKeys();
+        let parsedMeta = _self.parseLayerMeta(metaData[layerKey]), template;
+        const defaultTemplate =
+            `<div>
+                        {{#each data}}
+                            {{this.title}}: {{this.value}} <br>
+                        {{/each}}
+                        </div>`;
+        if (parsedMeta?.info_template_hover && parsedMeta.info_template_hover !== "") {
+            template = parsedMeta.info_template_hover;
+        } else {
+            template = defaultTemplate;
+        }
+        let fieldConf;
+        try {
+            fieldConf = JSON.parse(metaData[layerKey].fieldconf);
+        } catch (e) {
+            fieldConf = {};
+        }
 
         moduleState.vectorStores[trackingLayerKey] = new geocloud.sqlStore({
             map: cloud.get().map,
@@ -1460,6 +1481,9 @@ module.exports = {
                 return apiBridgeInstance.transformResponseHandler(response, id);
             },
             onEachFeature: (feature, layer) => {
+                if (parsedMeta?.hover_active) {
+                        _self.mouseOver(layer, fieldConf, template);
+                }
                 if ((LAYER.VECTOR + ':' + layerKey) in onEachFeature) {
                     /*
                         Checking for correct onEachFeature structure
@@ -1468,7 +1492,6 @@ module.exports = {
                         `caller` in onEachFeature[LAYER.VECTOR + ':' + layerKey] === false || !onEachFeature[LAYER.VECTOR + ':' + layerKey].caller) {
                         throw new Error(`Invalid onEachFeature structure`);
                     }
-
                     if (onEachFeature[LAYER.VECTOR + ':' + layerKey].caller === `editor`) {
                         /*
                             If the handler was set by the editor extension, then display the attributes popup and editing buttons
@@ -1476,6 +1499,7 @@ module.exports = {
                         if (`editor` in extensions) {
                             editor = extensions.editor.index;
                         }
+
 
                         layer.on("click", function (e) {
                             let layerIsEditable = false;
@@ -2144,7 +2168,7 @@ module.exports = {
         // Only if container doesn't exist
         // ===============================
         if ($("#layer-panel-" + base64GroupName).length === 0) {
-            $("#layers_list").append(markupGeneratorInstance.getGroupPanel(base64GroupName, groupName));
+            $("#layers_list").append(markupGeneratorInstance.getGroupPanel(base64GroupName, groupName, window.vidiConfig.showLayerGroupCheckbox));
 
             // Append to inner group container
             // ===============================
@@ -2529,17 +2553,12 @@ module.exports = {
      */
     createSubgroupRecord: (subgroup, forcedState, precheckedLayers, parentNode, level = 0, initiallyClosed = true) => {
         let base64SubgroupName = Base64.encode(`subgroup_${subgroup.id}_level_${level}_${uuidv4()}`).replace(/=/g, "");
-        let markup = markupGeneratorInstance.getSubgroupControlRecord(base64SubgroupName, subgroup.id);
+        let markup = markupGeneratorInstance.getSubgroupControlRecord(base64SubgroupName, subgroup.id, level, window.vidiConfig.showLayerGroupCheckbox);
 
         $(parentNode).append(markup);
-        $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-id`).append(`<div>
-            <p>
-                <button type="button" class="btn btn-default btn-xs js-subgroup-toggle-button">
-                    <i class="fa fa-arrow-down"></i>
-                </button>
+        $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-id`).append(`<div style="display: inline">
                 ${subgroup.id}
                 <i style="float: right; padding-top: 9px; font-size: 26px;" class="material-icons layer-move-vert layer-move-vert-subgroup">more_vert</i>
-            </p>
         </div>`);
 
         $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-toggle-button`).click((event) => {
@@ -3457,5 +3476,44 @@ module.exports = {
 
     setChildLayersThatShouldBeEnabled: function (arr) {
         childLayersThatShouldBeEnabled = arr;
+    },
+    mouseOver: function (layer, fieldConf, template){
+        let flag = false, tooltipHtml, tail = $("#tail");
+        layer.on('mouseover', function (e) {
+            let data = e?.sourceTarget?.feature?.properties || e?.data;
+            let tmp = $.extend(true, {}, data), fi = [];
+            flag = true;
+            $.each(tmp, function (name, property) {
+                if (typeof fieldConf[name] !== "undefined" && fieldConf[name].mouseover) {
+                    let title;
+                    if (
+                        typeof fieldConf[name] !== "undefined" &&
+                        typeof fieldConf[name].alias !== "undefined" &&
+                        fieldConf[name].alias !== ""
+                    ) {
+                        title = fieldConf[name].alias
+                    } else {
+                        title = name;
+                    }
+                    fi.push({
+                        title: title,
+                        value: property
+                    });
+                }
+            });
+            tmp.data = fi; // Used in a "loop" template
+            tooltipHtml = Handlebars.compile(template)(tmp);
+            tail.fadeIn(100);
+            tail.html(tooltipHtml);
+        });
+        layer.on('mouseout', function () {
+            flag = false;
+            setTimeout(function () {
+                if (!flag) {
+                    $("#tail").fadeOut(100);
+                }
+            }, 200)
+
+        });
     }
 };
