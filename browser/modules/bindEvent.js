@@ -537,7 +537,7 @@ module.exports = {
         });
 
         // Module icons
-        $('#side-panel ul li a').on('click', function () {
+        $('#v-tabs-tab a').on('click', function () {
             backboneEvents.get().trigger('off:all');
             let moduleTitle = $(this).data('module-title');
             let e = $('#module-container');
