@@ -48,24 +48,25 @@ module.exports = {
             element.addEventListener("dragstart", dragstart_handler);
         });
 
-        $("#drag-test").on("dragend", (e) => {
-            event.preventDefault();
+        $(".drag-marker").on("dragend", (e) => {
+            e.preventDefault();
             let map = cloud.get().map;
             console.log(e)
             let conPoint = map.containerPointToLayerPoint([e.screenX, e.screenY]);
             let coord = map.mouseEventToLatLng(e);
             console.log(coord)
-
+            let classStr = "dm_" + Math.random().toString(36).substr(2, 5);
+            let handleStr = "h_" + Math.random().toString(36).substr(2, 5);
             var icon = L.divIcon({
-                iconSize: new L.Point(100, 100),
-                html: `<div class="pointer">
-                        <div class="marker" style="padding: 10px; box-sizing: border-box; background-color: #0d47a1">
-                            TEST
-                        </div>
-                    </div>`
+                // className: "drag-marker",
+                iconSize: new L.Point(72, 72),
+                html: `<div class="pointer ${classStr}">
+                            <div class="marker ${handleStr}"></div>
+                        </div>`
             });
             var marker = L.marker(coord, {icon: icon, draggable: true}).addTo(map);
-            var img = $('.pointer');
+            var img = $(`.${classStr}`);
+            var handle = $(`.${handleStr}`);
 
             var mouseDown = false;
 
@@ -75,31 +76,18 @@ module.exports = {
                     var offset = img.offset();
                     var center_x = (offset.left) + (img.width() / 2);
                     var center_y = (offset.top) + (img.height() / 2);
-                    //var mouse_x = evt.pageX;
-                    //var mouse_x = evt.pageX;
-                    var mouse_x = evt.originalEvent.changedTouches[0].clientX;
-                    var mouse_y = evt.originalEvent.changedTouches[0].clientY;
+                    var mouse_x = evt.pageX;
+                    var mouse_y = evt.pageY;
+                    // var mouse_x = evt.originalEvent.changedTouches[0].clientX;
+                    // var mouse_y = evt.originalEvent.changedTouches[0].clientY;
 
-                    var diffX = mouse_x - center_x;
-                    var diffY = mouse_y - center_y;
-                    var tan = diffY / diffX;
-
-
-                    var atan = Math.atan(tan)* 180 / Math.PI;;
-                    if(diffY > 0 && diffX > 0) {
-
-                        atan += 180;
-                    }
-                    else if(diffY < 0 && diffX > 0) {
-
-                        atan -= 180;
-                    }
-                    console.log(atan)
-                    img.css('transform', 'rotate(' + atan + 'deg)');
+                    var radians = Math.atan2(mouse_x - center_x, mouse_y - center_y);
+                    var degree = (radians * (180 / Math.PI) * -1) + 90;
+                    img.css('transform', 'rotate(' + degree + 'deg)');
                 }
             }
 
-            img.mousedown(function (e) {
+            handle.mousedown(function (e) {
                 marker.dragging.disable();
                 map.dragging.disable();
                 map.touchZoom.disable();
@@ -113,7 +101,7 @@ module.exports = {
 
                 mouseDown = false;
             })
-            img.on("touchstart", function (e) {
+            handle.on("touchstart", function (e) {
                 console.log("Touchkstart")
                 marker.dragging.disable();
                 map.dragging.disable();

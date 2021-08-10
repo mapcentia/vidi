@@ -1613,3 +1613,19 @@ td.rdtYear:hover {
 .list-subgroup-item {
   border-left: 2px solid #222 !important;
 }
+.marker {
+  background: #ED1C24;
+  height: 6px;
+  right: -16px;
+  position: absolute;
+  top: 35px;
+  width: 16px;
+}
+.pointer {
+  height: 72px;
+  position: absolute;
+  top: 0;
+  width: 72px;
+  border: 1px solid red;
+  left: 0;
+}
