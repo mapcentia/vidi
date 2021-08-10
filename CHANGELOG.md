@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
 ## [UNRELEASED]
+### Changed
+- `select_function` is now called when opening a panel in a accordion pop-up.
+
 ### Fixed
 - Print and Conflict modules will not longer keep unnecessary Meta data in state. This reduce the data volume. 
 
