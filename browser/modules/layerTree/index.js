@@ -1482,7 +1482,7 @@ module.exports = {
             },
             onEachFeature: (feature, layer) => {
                 if (parsedMeta?.hover_active) {
-                        _self.mouseOver(layer, fieldConf, template);
+                    _self.mouseOver(layer, fieldConf, template);
                 }
                 if ((LAYER.VECTOR + ':' + layerKey) in onEachFeature) {
                     /*
@@ -1848,6 +1848,10 @@ module.exports = {
                 text = text.replace(/(\r\n|\n|\r)/gm, '<br>');
                 return new Handlebars.SafeString(text);
             });
+            let randText = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                let r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
             try {
                 let tmpl = sqlQuery.getVectorTemplate(layerKey);
                 if (tmpl) {
@@ -1864,16 +1868,12 @@ module.exports = {
                     }
                     //properties.text1 = marked(properties.text1);
                     renderedText = Handlebars.compile(tmpl)(properties);
-                    let randText = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-                        let r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-                        return v.toString(16);
-                    });
                     if (typeof parsedMeta.disable_vector_feature_info === "undefined" || parsedMeta.disable_vector_feature_info === false) {
                         count++;
                         accordion += `<div class="panel panel-default vector-feature-info-panel" id="vector-feature-info-panel-${randText}" style="box-shadow: none;border-radius: 0; margin-bottom: 0">
                                         <div class="panel-heading" role="tab" style="padding: 8px 0px 8px 15px;border-bottom: 1px white solid">
                                             <h4 class="panel-title">
-                                                <a style="display: block; color: black" class="feature-info-accordion-toggle accordion-toggle js-toggle-feature-panel" data-toggle="collapse" data-parent="#layers" href="#collapse${randText}">${title}</a>
+                                                <a style="display: block; color: black" class="feature-info-accordion-toggle accordion-toggle js-toggle-feature-panel" data-toggle="collapse" data-parent="#layers" href="#collapse${randText}" id="a-collapse${randText}">${title}</a>
                                             </h4>
                                         </div>
                                         <ul class="list-group" id="group-${randText}" role="tabpanel"><div id="collapse${randText}" class="feature-info-accordion-body accordion-body collapse" style="padding: 3px 8px 3px 8px">${renderedText}</div></ul>
@@ -1890,6 +1890,27 @@ module.exports = {
                 if (typeof parsedMeta.info_element_selector !== "undefined" && parsedMeta.info_element_selector !== "" && renderedText !== null) {
                     $(parsedMeta.info_element_selector).html(renderedText)
                 } else {
+                    // Set select call when opening a panel
+                    let selectCallBack = () => {};
+                    if (typeof parsedMeta.select_function !== "undefined" && parsedMeta.select_function !== "") {
+                        try {
+                            selectCallBack = Function('"use strict";return (' + parsedMeta.select_function + ')')();
+                        } catch (e) {
+                            console.info("Error in select function for: " + key);
+                            console.error(e.message);
+                        }
+                    }
+                    let func = selectCallBack.bind(this, null, layer, layerKey, _self);
+                    $(document).arrive(`#a-collapse${randText}`, function () {
+                        $(this).on('click', function () {
+                            let e = $(`#collapse${randText}`);
+                            if (!e.hasClass("in")) {
+                                func();
+                            }
+                            $('.feature-info-accordion-body').collapse("hide")
+                        });
+                    });
+
                     vectorPopUp = L.popup({
                         autoPan: true,
                         minWidth: 300,
@@ -1901,10 +1922,6 @@ module.exports = {
                         .on('remove', () => {
                             sqlQuery.resetAll();
                         });
-                    $(".feature-info-accordion-toggle").on("click", () => {
-                        $('.feature-info-accordion-body').collapse("hide")
-                    })
-
                 }
             }
         })
@@ -3477,7 +3494,7 @@ module.exports = {
     setChildLayersThatShouldBeEnabled: function (arr) {
         childLayersThatShouldBeEnabled = arr;
     },
-    mouseOver: function (layer, fieldConf, template){
+    mouseOver: function (layer, fieldConf, template) {
         let flag = false, tooltipHtml, tail = $("#tail");
         layer.on('mouseover', function (e) {
             let data = e?.sourceTarget?.feature?.properties || e?.data;
