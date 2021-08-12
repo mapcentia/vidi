@@ -4,12 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [UNRELEASED]
+## [2021.8.0] - 2021-8-12
 ### Changed
 - `select_function` is now called when opening a panel in a accordion pop-up.
 
 ### Fixed
 - Print and Conflict modules will not longer keep unnecessary Meta data in state. This reduce the data volume. 
+- Layer tree will now build with all valid layers. Before it would start building as soon an invalid layer was proccess leaving out the rest.
 
 ## [2021.7.1] - 2021-8-7
 ### Fixed
