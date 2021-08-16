@@ -1,8 +1,7 @@
-
 @import "_colors.less";
 
 // Typography elements
-@mdb-font-family: 'Open Sans', sans-serif;
+@mdb-font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
 @mdb-text-color-light:  ~"rgba(@{rgb-white}, 0.84)";
 @mdb-text-color-light-hex: @white; // for contrast function in inverse
 @mdb-text-color-primary: ~"rgba(@{rgb-black}, 0.87)";
@@ -14,7 +13,6 @@
 @mdb-label-color-toggle-focus: ~"rgba(@{rgb-black}, .54)";
 
 
-
 // import bs variables for less, last declared wins.
 @import "_import-bs-less.less";
 
@@ -22,18 +20,17 @@
 // Converted bs variables
 
 // Bootstrap brand color customization
-//@brand-primary: @teal;
-@brand-primary: rgb(16, 174, 140);
-@brand-success: rgb(16, 174, 140);
-@brand-danger: rgb(235, 96, 29);
-@brand-warning: rgb(247, 168, 77);
-@brand-info: rgb(19, 128, 196);
+@brand-primary: #222;
+@brand-success: @green;
+@brand-danger: @red;
+@brand-warning: @deep-orange;
+@brand-info: @light-blue;
 
 @border-radius-base: 2px;
 @border-radius-small: 1px;
 
 // Typography
-@font-family-sans-serif: 'Open Sans', sans-serif;
+@font-family-sans-serif: 'Roboto', 'Helvetica', 'Arial', sans-serif;
 @headings-font-weight: 300;
 
 @body-bg: #EEEEEE;
