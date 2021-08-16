@@ -1335,10 +1335,10 @@
     parse-rect "^1.2.0"
     pick-by-alias "^1.2.0"
 
-"@popperjs/core@^2.9.2":
-  version "2.9.2"
-  resolved "https://registry.yarnpkg.com/@popperjs/core/-/core-2.9.2.tgz#adea7b6953cbb34651766b0548468e743c6a2353"
-  integrity sha512-VZMYa7+fXHdwIq1TDhSXoVmSPEGM/aa+6Aiq3nVVJ9bXr24zScr+NlKFKC3iPljA7ho/GAZr+d2jOf5GIRC30Q==
+"@popperjs/core@^2.9.3":
+  version "2.9.3"
+  resolved "https://registry.yarnpkg.com/@popperjs/core/-/core-2.9.3.tgz#8b68da1ebd7fc603999cf6ebee34a4899a14b88e"
+  integrity sha512-xDu17cEfh7Kid/d95kB6tZsLOmSWKCZKtprnhVepjsSaCij+lM3mItSJDuuHDMbCWTh8Ejmebwb+KONcCJ0eXQ==
 
 "@turf/area@^6.0.1":
   version "6.4.0"
@@ -2412,6 +2412,11 @@ bootstrap-select@^1.13.17:
   version "1.13.18"
   resolved "https://registry.yarnpkg.com/bootstrap-select/-/bootstrap-select-1.13.18.tgz#4557119d58dc1159189977161c803962220e4dda"
   integrity sha512-V1IzK4rxBq5FrJtkzSH6RmFLFBsjx50byFbfAf8jYyXROWs7ZpprGjdHeoyq2HSsHyjJhMMwjsQhRoYAfxCGow==
+
+bootstrap-table@^1.18.3:
+  version "1.18.3"
+  resolved "https://registry.yarnpkg.com/bootstrap-table/-/bootstrap-table-1.18.3.tgz#071173f8071235563a7361b5ce7f5ba613eb37b4"
+  integrity sha512-/eFLkldDlNFi37qC/d9THfRVxMUGD34E8fQBFtXJLDHLBOVKWDTq7BV+udoP7k3FfCEyhM1jWQnQ0rMQdBv//w==
 
 bootstrap@^5.0.2:
   version "5.0.2"
