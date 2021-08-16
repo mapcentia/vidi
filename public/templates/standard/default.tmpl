@@ -3,6 +3,14 @@
         height: 48px;
         line-height: 19px;
     }
+
+    .panel-title {
+        font-size: 16px;
+    }
+
+    .panel-heading {
+        padding: 10px 15px;
+    }
 </style>
 <!-- map -->
 <div id="pane">
@@ -213,15 +221,15 @@
                                     <i class="material-icons help-btn">help_outline</i>
                                 </div>
                                 <div></div>
-                                <div class="panel panel-default">
+                                <div class="panel panel-default accordion">
                                     <div class="panel-heading" role="tab">
-                                        <h4 class="panel-title">
+                                        <h4 class="panel-title accordion-header">
                                             <a style="display: block" class="accordion-toggle" data-toggle="collapse" href="#draw-collapse">
                                                 <i class="material-icons">&#xE8B8;</i> {{Line style}}
                                             </a>
                                         </h4>
                                     </div>
-                                    <div id="draw-collapse" class="accordion-body collapse">
+                                    <div id="draw-collapse" class="accordion-collapse collapse">
                                         <div class="row">
                                             <div class="col-lg-12">
                                                 <div style="margin: 15px 0 0 10px ">
