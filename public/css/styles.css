@@ -848,7 +848,7 @@ body {
   background-color: #eeeeee;
 }
 #side-panel ul li.active .material-icons {
-  background-color: #03a9f4;
+  background-color: #1380c4;
   color: white;
 }
 .list-group .list-group-separator:before {
@@ -1320,7 +1320,7 @@ h4 small {
   padding: 1px;
 }
 #layers_list .layer-item.list-group-item .active {
-  background-color: #03a9f4;
+  background-color: #1380c4;
   color: white;
 }
 .layer-move-vert {
@@ -1611,5 +1611,5 @@ td.rdtYear:hover {
   cursor: help;
 }
 .list-subgroup-item {
-  border-left: 2px solid #222 !important;
+  border-left: 2px solid #10ae8c !important;
 }
