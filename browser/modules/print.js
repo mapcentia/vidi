@@ -604,7 +604,6 @@ module.exports = {
                 header: encodeURIComponent($("#print-title").val()) || encodeURIComponent($("#print-comment").val()) ? "inline" : "none",
                 dateTime: dayjs().format('Do MMMM YYYY, H:mm'),
                 date: dayjs().format('Do MMMM YYYY'),
-                metaData: meta.getMetaData(),
                 px: config.print.templates[tmpl][pageSize][printingOrientation].mapsizePx[0],
                 py: config.print.templates[tmpl][pageSize][printingOrientation].mapsizePx[1],
                 queryString: urlparser.search.replace(/state=[a-z0-9_-]*/g, ""), // remove the state snapshot
@@ -658,7 +657,7 @@ module.exports = {
     applyState: (print) => {
         return new Promise((resolve) => {
             paramsFromDb = print;
-            // backboneEvents.get().trigger(`${MODULE_ID}:state_change`);
+            backboneEvents.get().trigger(`${MODULE_ID}:state_change`);
             resolve();
         });
     }
