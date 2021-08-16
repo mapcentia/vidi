@@ -395,16 +395,18 @@
                             <i class="material-icons help-btn">help_outline</i>
                         </div>
                         <div></div>
-                        <div class="panel panel-default">
-                            <div class="panel-heading" role="tab">
-                                <h4 class="panel-title">
-                                    <a style="display: block" class="accordion-toggle" data-toggle="collapse"
-                                       href="#draw-collapse">
-                                        <i class="material-icons">&#xE8B8;</i> {{Line style}}
-                                    </a>
-                                </h4>
-                            </div>
-                            <div id="draw-collapse" class="accordion-body collapse">
+                        <div>
+                            <button
+                                    class="btn btn-primary"
+                                    type="button"
+                                    data-mdb-toggle="collapse"
+                                    data-mdb-target="#draw-collapse"
+                                    aria-expanded="false"
+                                    aria-controls="collapseExample"
+                            >
+                                <i class="material-icons">&#xE8B8;</i> {{Line style}}
+                            </button>
+                            <div id="draw-collapse" class="collapse mt-3">
                                 <div class="row">
                                     <div class="col-lg-12">
                                         <div style="margin: 15px 0 0 10px ">
