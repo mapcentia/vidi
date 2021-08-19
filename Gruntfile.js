@@ -173,7 +173,7 @@ module.exports = function (grunt) {
                     transform: [['babelify', {
                         presets: ["@babel/preset-env", "@babel/preset-react"],
                         plugins: ["@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread"]
-                    }], 'require-globify', 'windowify', 'envify', ['browserify-css', { global: true }]]
+                    }], 'require-globify', 'windowify', 'envify', ['browserify-css', {global: true}]]
                 }
             },
             debug: {
@@ -188,7 +188,7 @@ module.exports = function (grunt) {
                     transform: [['babelify', {
                         presets: ["@babel/preset-env", "@babel/preset-react"],
                         plugins: ["@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread"]
-                    }], 'require-globify', 'windowify', 'envify', ['browserify-css', { global: true }]]
+                    }], 'require-globify', 'windowify', 'envify', ['browserify-css', {global: true}]]
                 }
             },
             publish_sw: {
@@ -231,7 +231,7 @@ module.exports = function (grunt) {
                     transform: [['babelify', {
                         presets: ["@babel/preset-env", "@babel/preset-react"],
                         plugins: ["@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread"]
-                    }], 'require-globify', 'windowify', 'envify', ['browserify-css', { global: true }]],
+                    }], 'require-globify', 'windowify', 'envify', ['browserify-css', {global: true}]],
                     watch: true,
                     keepAlive: true
                 }
@@ -323,6 +323,9 @@ module.exports = function (grunt) {
                     copyBootstrapVariablesCommand,
                     'grunt --gruntfile ./public/js/lib/bootstrap-material-design/Gruntfile.js dist-less'
                 ].join('&&')
+            },
+            buildDocs: {
+                command: 'sphinx-build ./docs/da ./docs/html'
             }
         },
         cacheBust: {
