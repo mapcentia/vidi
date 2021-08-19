@@ -21,7 +21,7 @@ class MarkupGenerator {
 
     getAddButton(layerKeyWithGeom) {
         let addButtonStyle = regularButtonStyle.replace(`padding: 2px 10px 2px 10px;`, `padding: 6px 10px 6px 10px;`);
-        return (`<button type="button" data-gc2-key="${layerKeyWithGeom}" style="${regularButtonStyle} visibility: hidden;" 
+        return (`<button type="button" data-gc2-key="${layerKeyWithGeom}" style="${regularButtonStyle} visibility: hidden;"
             data-toggle="tooltip" data-placement="left" title="Add new feature to layer" data-layer-type="tile" class="btn gc2-add-feature gc2-edit-tools">
             <i class="fa fa-plus"></i>
         </button>`);
@@ -40,7 +40,7 @@ class MarkupGenerator {
                             <input type="checkbox" data-gc2-group-name="${name}">
                         </label>
                     </span>
-                    <a style="display: inline" class="accordion-toggle js-toggle-layer-panel" data-toggle="collapse" data-parent="#layers" href="#collapse${base64GroupName}">${name}</a>
+                    <button class="btn btn-primary accordion-toggle js-toggle-layer-panel" data-mdb-toggle="collapse" data-parent="#layers" data-mdb-target="#collapse${base64GroupName}" aria-expanded="false" aria-control="collapseExample">${name}</a>
                 </h4>
             </div>
             <ul class="list-group" id="group-${base64GroupName}" role="tabpanel"></ul>
@@ -115,9 +115,9 @@ class MarkupGenerator {
                                 </label>
                             </div>
                         </div>
-        
+
                         <div style="display: inline-block;">${layerTypeSelector}</div>
-        
+
                         <div style="display: inline-block;" id="layer-information">
                             <span>
                                 ${text}${lockedLayer}
@@ -132,7 +132,7 @@ class MarkupGenerator {
                                 <span style="display: none" class="_gc2_layer_sort_id">(${layer.sort_id})</span>
                             </span>
                         </div>
-        
+
                         <div style="display: inline-block;">
                             <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-failed-add" style="${queueFailedButtonStyle}" disabled>
                                 <i class="fa fa-plus"></i> <span class="js-value"></span>
@@ -178,7 +178,7 @@ class MarkupGenerator {
                                 </button>
                             </div>
                         </div>
-        
+
                         <div class="js-toggles-container" style="display: none; padding-right: 10px; padding-left: 10px;">
                             <span id="layer-tools-search">
                                 <a href="javascript:void(0);" class="js-toggle-search" >
@@ -212,9 +212,9 @@ class MarkupGenerator {
                             <span class="js-toggle-filters-number-of-filters">0</span>
                             </span>
                         </div>
-                        
+
                         <i style="float: right; padding-top: 9px; font-size: 26px;" class="material-icons layer-move-vert">more_vert</i>
-        
+
                         <div style="float: right; padding-top: 8px; padding-right: 10px;">${addButton}
                             <a href="javascript:void(0);" data-toggle="tooltip" data-placement="left" title="${tooltip}" style="visibility: ${displayInfo};" class="info-label" data-gc2-id="${layerKey}">${__(`Info`)}</a>
                         </div>
