@@ -518,7 +518,7 @@ module.exports = module.exports = {
                     let placeStore = getPlaceStore();
                     placeStore.db = search.getMDB();
                     placeStore.host = search.getMHOST();
-                    placeStore.sql = `SELECT esr_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE esr_ejendomsnummer = (SELECT esr_ejendomsnummer FROM matrikel.jordstykke WHERE landsejerlavskode=${urlparser.urlVars.var_landsejerlavskode} AND matrikelnummer='${urlparser.urlVars.var_matrikelnr}') group by esr_ejendomsnummer`;
+                    placeStore.sql = `SELECT esr_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE esr_ejendomsnummer = (SELECT esr_ejendomsnummer FROM matrikel.jordstykke WHERE landsejerlavskode=${urlparser.urlVars.var_landsejerlavskode} AND matrikelnummer='${urlparser.urlVars.var_matrikelnr.toLowerCase()}') group by esr_ejendomsnummer`;
                     placeStore.load();
                     fromVarsIsDone = true;
                 }
