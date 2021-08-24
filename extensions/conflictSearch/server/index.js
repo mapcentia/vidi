@@ -212,7 +212,11 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                                     }
                                     let ws = XLSX.utils.aoa_to_sheet(data);
                                     dataAdded = true;
-                                    XLSX.utils.book_append_sheet(wb, ws, name);
+                                    try {
+                                        XLSX.utils.book_append_sheet(wb, ws, name);
+                                    } catch (e) {
+                                        console.log(e.message);
+                                    }
                                 }
                             }
                         }
