@@ -29,6 +29,7 @@ let state;
 let sqlQuery;
 let applicationModules = false;
 let isStarted = false;
+let urlVars = urlparser.urlVars;
 
 
 /**
@@ -178,6 +179,15 @@ module.exports = {
                         }
                     }, 200
                 );
+            } else {
+                if (urlVars?.readyCallback) {
+                    try {
+                        if (state.activeLayersInSnapshot()) {
+                            window.parent.postMessage({type: "snapshotLayersCallback", method: urlVars.readyCallback}, "*");
+                        }
+                    } catch (e) {
+                    }
+                }
             }
         });
 

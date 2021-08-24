@@ -5,6 +5,21 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
 ## [UNRELEASED]
+### Added
+- Callback functions in embed.js. Two functions kan be defined in the parent page like this (with ``data-vidi-frame-name="map1"``):
+  - When Vidi is ready:
+  ```JavaScript
+    window.embedApi.vidiReady["map1"] = () => {
+        console.log("Vidi is ready")
+    }
+  ```
+  - When active layers from the snapshot is ready:
+  ```JavaScript
+    window.embedApi.activeLayersReady["map1"] = () => {
+        console.log("Active layers are ready")
+    }
+  ```
+
 ### Fixed
 - In conflictSearch module, the adding of sheets to excel is now in a try/catch so invalid sheet names won't crash the Node process. 
 
