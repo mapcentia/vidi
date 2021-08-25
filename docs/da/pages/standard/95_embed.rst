@@ -92,13 +92,13 @@ Hvis et kort er indlejret med ``data-vidi-frame-name="kort1"`` kan callbacks def
 
 .. code-block:: JavaScript
 
-    window.embedApi.vidiReady["kort1"] = () => {
+    embedApi.vidiReady["kort1"] = () => {
         console.log("Vidi er klar")
     }
 
 .. code-block:: JavaScript
 
-    window.embedApi.activeLayersReady["kort1"] = () => {
+    embedApi.activeLayersReady["kort1"] = () => {
         console.log("Aktive lag er klar")
     }
 

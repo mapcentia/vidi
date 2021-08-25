@@ -12,13 +12,13 @@ and this project adheres to [CalVer](https://calver.org/).
 - Callback functions in embed.js. Two functions kan be defined in the parent page like this (with ``data-vidi-frame-name="map1"``):
   - When Vidi is ready:
   ```JavaScript
-    window.embedApi.vidiReady["map1"] = () => {
+    embedApi.vidiReady["map1"] = () => {
         console.log("Vidi is ready")
     }
   ```
   - When active layers from the snapshot is ready:
   ```JavaScript
-    window.embedApi.activeLayersReady["map1"] = () => {
+    embedApi.activeLayersReady["map1"] = () => {
         console.log("Active layers are ready")
     }
   ```
