@@ -88,7 +88,7 @@ Pt. er der to funktioner udstillet gennem API'et:
 
 Der muligt at definere callback funktioner for 1) når Vidi er loaded og klar og 2) når aktive lag fra projektet er loaded [#readyOrder]_. Callbacks kan anvendes til at automatisk at kalde API metoder, efter Vidi og lag er færdig-loaded.
 
-Hvis et kort er indlejret med ``data-vidi-frame-name="kort"`` kan callbacks defineres på følgende måde:
+Hvis et kort er indlejret med ``data-vidi-frame-name="kort1"`` kan callbacks defineres på følgende måde:
 
 .. code-block:: JavaScript
 
