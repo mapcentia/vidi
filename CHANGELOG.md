@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
 ## [UNRELEASED]
+### Changed
+- Docker base image update to debian:bullseye-slim.
+
 ### Added
 - Callback functions in embed.js. Two functions kan be defined in the parent page like this (with ``data-vidi-frame-name="map1"``):
   - When Vidi is ready:
