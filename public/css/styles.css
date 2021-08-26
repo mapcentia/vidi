@@ -129,7 +129,7 @@ body {
   padding: 0 !important;
 }
 .leaflet-popup-content .tab-pane {
-  padding: 0  !important;
+  padding: 0 !important;
 }
 #pane {
   position: fixed;
@@ -1614,18 +1614,27 @@ td.rdtYear:hover {
   border-left: 2px solid #222 !important;
 }
 .marker {
-  background: #ED1C24;
-  height: 6px;
-  right: -16px;
+  height: 22px;
+  width: 22px;
+  right: -24px;
   position: absolute;
   top: 35px;
-  width: 16px;
+  background-image: url(https://www.svgrepo.com/show/74122/rotating-arrow-symbol.svg);
+  background-size: 20px 20px;
+  background-repeat: no-repeat;
 }
-.pointer {
+.symbols-map,
+.symbols-lib {
   height: 72px;
-  position: absolute;
   top: 0;
   width: 72px;
   border: 1px solid red;
   left: 0;
+  padding: 7px;
+}
+.symbols-map {
+  position: absolute;
+}
+.symbols-lib {
+  position: relative;
 }
