@@ -41,6 +41,21 @@ module.exports = {
             _self.download();
         });
 
+        backboneEvents.get().on(`reset:all`, () => {
+            _self.resetState();
+        });
+
+        backboneEvents.get().on(`off:all`, () => {
+            _self.control(false);
+            _self.off();
+        });
+
+        backboneEvents.get().on(`on:${MODULE_NAME}`, () => {
+            _self.control(true);
+        });
+        backboneEvents.get().on(`off:${MODULE_NAME}`, () => {
+            _self.control(false);
+        });
 
         state.listenTo(MODULE_NAME, _self);
         state.listen(MODULE_NAME, `update`);
@@ -119,14 +134,14 @@ module.exports = {
             alert("Vælg en tegning")
             return;
         }
-        state.resetState(['conflict']).then(()=>{
+        state.resetState(['conflict']).then(() => {
             $('#main-tabs a[href="#conflict-content"]').trigger('click');
             conflictSearch.makeSearch("Fra tegning", null, selectedDrawing, true);
         });
     },
 
     makeConflictSearchWithAll: () => {
-        state.resetState(['conflict']).then(()=>{
+        state.resetState(['conflict']).then(() => {
             $('#main-tabs a[href="#conflict-content"]').trigger('click');
             conflictSearch.makeSearch("Fra tegning", null, null, true);
         });
@@ -868,6 +883,3 @@ module.exports = {
     });
 
 })();
-
-
-
