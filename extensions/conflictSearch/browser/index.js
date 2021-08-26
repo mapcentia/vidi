@@ -251,6 +251,9 @@ var projWktWithBuffer;
  */
 var draw;
 
+let getPlaceStore;
+let fromVarsIsDone = false;
+
 /**
  *
  * @type set: module.exports.set, init: module.exports.init
@@ -334,7 +337,7 @@ module.exports = module.exports = {
         // DOM created
 
         // Init search with custom callback
-        search.init(function () {
+        getPlaceStore = search.init(function () {
             _clearDrawItems();
             _clearDataItems();
             this.layer._layers[Object.keys(this.layer._layers)[0]]._vidi_type = "query_draw"; // Tag it, so it serialized
@@ -508,6 +511,21 @@ module.exports = module.exports = {
         setTimeout(function () {
             po.popover("hide");
         }, 2500);
+
+        if (urlparser.urlVars?.var_landsejerlavskode && urlparser.urlVars?.var_matrikelnr) {
+            setTimeout(()=> {
+                if (!fromVarsIsDone) {
+                    let placeStore = getPlaceStore();
+                    placeStore.db = search.getMDB();
+                    placeStore.host = search.getMHOST();
+                    placeStore.sql = `SELECT esr_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE esr_ejendomsnummer = (SELECT esr_ejendomsnummer FROM matrikel.jordstykke WHERE landsejerlavskode=${urlparser.urlVars.var_landsejerlavskode} AND matrikelnummer='${urlparser.urlVars.var_matrikelnr.toLowerCase()}') group by esr_ejendomsnummer`;
+                    placeStore.load();
+                    fromVarsIsDone = true;
+                }
+            }, 200);
+        } else {
+            fromVarsIsDone = true;
+        }
 
     },
 
@@ -979,6 +997,9 @@ module.exports = module.exports = {
     },
     setValueForNoUiSlider: function (v) {
         bufferSlider.noUiSlider.set([v]);
+    },
+    getFromVarsIsDone: function () {
+        return fromVarsIsDone;
     }
 };
 

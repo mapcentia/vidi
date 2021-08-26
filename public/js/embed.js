@@ -30,12 +30,12 @@
                 }
                 var host = (configHost || obj.host) + ""; // Port ?
                 // If host is http, then make it protocol relative, so tokens created on http still works when embedded on https sites.
-                host = host.replace("http:", "");
+                // host = host.replace("http:", "");
                 var id = obj.id;
                 var database = obj.database;
                 var schema = obj.schema !== undefined && useSchema ? obj.schema + "/" : "";
                 var config = obj.config !== undefined && useConfig ? obj.config : "";
-                var src = host + "/app/" + database + "/" + schema + "?config=" + config + "&state=" + id + "&tmpl=" + tmpl + "&s=" + search + "&his=" + history;
+                var src = host + "/app/" + database + "/" + schema + "?config=" + config + "&state=" + id + "&tmpl=" + tmpl + "&s=" + search + "&his=" + history + (frameName ? "&readyCallback=" + frameName : "");
                 var iframe = document.createElement("iframe");
                 iframe.setAttribute("style", "width:" + width + ";height:" + height + ";border: 1px solid rgba(0,0,0,0.1)");
                 iframe.setAttribute("allowfullscreen", "");
@@ -52,7 +52,7 @@
 
     // If script is loaded at bottom of page, when select above elements
     var tokens = document.querySelectorAll('[data-vidi-token]');
-    for(var i = 0; i < tokens.length; i++){
+    for (var i = 0; i < tokens.length; i++) {
         if (tokens[i].attributes && tokens[i].attributes["data-vidi-token"] && tokens[i].attributes["data-vidi-token"] !== null && tokens[i].attributes["data-vidi-token"].value !== undefined) {
             create(tokens[i]);
         }
@@ -91,6 +91,19 @@ window.embedApi = {
     },
 
     /**
+     * Holds callback functions for when Vidi is ready.
+     * Note, that active layers in a snapshot is loaded after Vidi is ready.
+     * Use activeLayersReady() instead.
+     */
+    vidiReady: {},
+
+    /**
+     * Holds callback functions for when active layers are loaded.
+     * Active layers are loaded after Vidi is ready.
+     */
+    activeLayersReady: {},
+
+    /**
      * Switch on raster layer
      *
      * @param layerId string Id of layer in the form schema.relation
@@ -120,3 +133,23 @@ window.embedApi = {
         }
     }
 };
+
+/**
+ * Listeners for callbacks
+ */
+window.addEventListener("message", (event) => {
+    try {
+        if (event.data.type === "snapshotLayersCallback" && event.data.method) {
+            window.embedApi.activeLayersReady[event.data.method]();
+        }
+    } catch (e) {
+        console.log("No callback function for snapshotLayersCallback");
+    }
+    try {
+        if (event.data.type === "vidiCallback" && event.data.method) {
+            window.embedApi.vidiReady[event.data.method]();
+        }
+    } catch (e) {
+        console.log("No callback function for vidiCallback");
+    }
+});

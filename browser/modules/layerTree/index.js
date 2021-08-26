@@ -1084,12 +1084,10 @@ module.exports = {
                             if (layersThatAreNotInMeta.length > 0) {
                                 let fetchMetaRequests = [];
                                 layersThatAreNotInMeta.map(item => {
-                                    fetchMetaRequests.push(meta.init(item, true, true))
+                                    fetchMetaRequests.push(meta.init(item, true, true).catch(error => { return false }))
                                 });
 
                                 Promise.all(fetchMetaRequests).then(() => {
-                                    proceedWithBuilding();
-                                }).catch(() => {
                                     proceedWithBuilding();
                                 });
                             } else {
@@ -1886,6 +1884,27 @@ module.exports = {
                 console.info("Error in pop-up template for: " + layerKey, e);
             }
 
+            // Set select call when opening a panel
+            let selectCallBack = () => {};
+            if (typeof parsedMeta.select_function !== "undefined" && parsedMeta.select_function !== "") {
+                try {
+                    selectCallBack = Function('"use strict";return (' + parsedMeta.select_function + ')')();
+                } catch (e) {
+                    console.info("Error in select function for: " + key);
+                    console.error(e.message);
+                }
+            }
+            let func = selectCallBack.bind(this, null, layer, layerKey, _self);
+
+            $(document).arrive(`#a-collapse${randText}`, function () {
+                $(this).on('click', function () {
+                    let e = $(`#collapse${randText}`);
+                    if (!e.hasClass("in")) {
+                        func();
+                    }
+                    $('.feature-info-accordion-body').collapse("hide")
+                });
+            });
             if (count > 0) {
                 if (typeof parsedMeta.info_element_selector !== "undefined" && parsedMeta.info_element_selector !== "" && renderedText !== null) {
                     $(parsedMeta.info_element_selector).html(renderedText)
@@ -1926,7 +1945,9 @@ module.exports = {
             }
         })
         if (count === 1) {
-            $(".js-toggle-feature-panel:first").trigger('click');
+            setTimeout(()=> {
+                $(".js-toggle-feature-panel:first").trigger('click');
+            }, 200);
         }
     },
 

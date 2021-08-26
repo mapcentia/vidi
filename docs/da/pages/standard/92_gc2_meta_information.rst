@@ -165,3 +165,60 @@ Her ses alle mulighederne:
 .. code-block:: json
 
     ["filters","opacity","load-strategy","search"]
+
+*****************************************************************
+GC2 Struktur-fanen
+*****************************************************************
+
+I GC2's struktur-fane kan der laves en række indstillinger på feltniveau.
+
+Egenskaber
+=================================================================
+I feltet ``Egenskaber`` kan der defineres hvilke værdier, der kan være i feltet. Hvis dette defineres, vil der i Vidi's filter og editerings funktioner blive dannet en drop-down-liste, hvor værdierne kan vælges. Det vil altså ikke være muligt at indtaste vilkårlige værdier.
+
+.. figure:: ../../../_media/structur-tab-properties.png
+    :width: 700px
+    :align: center
+    :name: cross-multi-select
+    :figclass: align-center
+
+Listen af værdier kan defineres på en række forskellige måder.
+
+**Reference-tabel**
+
+Værdier kan komme fra en anden tabel i databasen. Dette angives ved tre parameter i et JSON objekt:
+
+.. code-block:: json
+
+    {'_rel':'schema.tabel', '_value':'feltnavn', '_text':'feltnavn'}
+
+* ``_rel`` angiver reference-tabellen (eller view) som schema-kvalificeret (schema-navnet skal angives foran tabelnavnet).
+* ``_value`` angiver feltet, som indeholder værdierne.
+* ``_text`` angiver feltet, som indeholder den tekst, der skal vises i drop-down-listen. Dette felt kan godt være det samme som ovenstående _value felt.
+
+**Værdi-tekst liste**
+
+Værdier kan angive som en liste af værdi-tekst par i et JSON objekt. Dvs. at det er teksten (venstre side), som bliver vist i drop-down-listen, mens værdien (højre side) bliver anvendt.
+
+.. code-block:: json
+
+    {'tekst_1':'1','tekst_2':'2','tekst_3':'3'}
+
+**Værdi liste**
+
+Værdier kan angives som en liste i et JSON array. Værdierne bliver vist i drop-down-listen.
+
+.. code-block:: json
+
+    [1,2,3]
+
+Listen kan både bestå af tal og tekster.
+
+**Wild card**
+
+Der kan dannes en drop-down-liste af samtlige unikke værdier som allerede findes i feltet. Det gøres ved at indsætte ``*`` i feltet.
+
+.. note::
+   JSON strengene skal anvende single-qoutes ``'`` og ikke double-qoutes ``"``. Der erbejdes på at double også kan anvendes.
+
+

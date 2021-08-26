@@ -71,7 +71,7 @@ Der en række data attributer, som skal/kan sættes:
 Embed API
 *****************************************************************
 
-Embed scriptet udstiller et API, så det er muligt at ændre Vidi's tilstand fra den hjemmeside det er indlejret på.
+Embed scriptet udstiller et API, så det er muligt at ændre Vidi's tilstand og definere callback funtioner fra den hjemmeside det er indlejret på.
 
 Pt. er der to funktioner udstillet gennem API'et:
 
@@ -83,3 +83,23 @@ Pt. er der to funktioner udstillet gennem API'et:
 
    "embedApi.switchLayer(<string> *layername*, <bool> *on*, <string> *frame*)", "Tænder/slukker et lag. :raw-html:`<br />`  :raw-html:`<br />` Fx ``embedApi.switchLayer('planer.lokalplan', true, 'plankort')``"
    "embedApi.allOff(<string> *frame*)", "Slukker alle tændte lag :raw-html:`<br />`  :raw-html:`<br />` Fx ``embedApi.allOff('plankort')``"
+
+**Callbacks**
+
+Der muligt at definere callback funktioner for 1) når Vidi er loaded og klar og 2) når aktive lag fra projektet er loaded [#readyOrder]_. Callbacks kan anvendes til at automatisk at kalde API metoder, efter Vidi og lag er færdig-loaded.
+
+Hvis et kort er indlejret med ``data-vidi-frame-name="kort1"`` kan callbacks defineres på følgende måde:
+
+.. code-block:: JavaScript
+
+    embedApi.vidiReady["kort1"] = () => {
+        console.log("Vidi er klar")
+    }
+
+.. code-block:: JavaScript
+
+    embedApi.activeLayersReady["kort1"] = () => {
+        console.log("Aktive lag er klar")
+    }
+
+.. [#readyOrder] Et projekts aktive lag loades først efter Vidi har meldt loaded og klar.

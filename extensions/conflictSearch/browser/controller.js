@@ -71,7 +71,9 @@ module.exports = {
             state.getModuleState(MODULE_ID).then(initialState => {
                 if (initialState) {
                     conflictSearch.setValueForNoUiSlider(initialState.bufferValue);
-                    conflictSearch.handleResult(initialState);
+                    if (typeof urlparser.urlVars?.var_landsejerlavskode === "undefined" || conflictSearch.getFromVarsIsDone()) {
+                        conflictSearch.handleResult(initialState);
+                    }
                     reportType = initialState.reportType || "1";
                 }
                 $("input[name='conflict-report-type'][value='" + reportType +"']").prop("checked",true);
