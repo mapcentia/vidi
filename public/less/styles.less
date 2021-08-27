@@ -1903,22 +1903,46 @@ td.rdtYear:hover {
   border-left: 2px solid @brand-primary !important;
 }
 
-.marker {
+.symbols-rotate {
   height: 22px;
   width: 22px;
   right: -24px;
   position: absolute;
-  top: 35px;
+  top: 28px;
   background-image: url(https://www.svgrepo.com/show/74122/rotating-arrow-symbol.svg);
   background-size: 20px 20px;
   background-repeat: no-repeat;
+}
+
+.symbols-delete {
+  height: 22px;
+  width: 22px;
+  right: 24px;
+  position: absolute;
+  bottom: -24px;
+  background-image: url(https://www.svgrepo.com/show/64705/trash-can-with-cover.svg);
+  background-size: 20px 20px;
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
+
+.symbols-scale {
+  height: 22px;
+  width: 22px;
+  right: 24px;
+  position: absolute;
+  top: -24px;
+  background-image: url(https://www.svgrepo.com/show/4900/scale-screen.svg);
+  background-size: 20px 20px;
+  background-repeat: no-repeat;
+  cursor: nesw-resize;
 }
 
 .symbols-map, .symbols-lib {
   height: 72px;
   top: 0;
   width: 72px;
-  border: 1px solid red;
+  border: 1px solid rgba(0, 0, 0, 0.1);
   left: 0;
   padding: 7px;
 }
