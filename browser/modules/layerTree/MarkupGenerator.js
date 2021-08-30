@@ -35,7 +35,7 @@ class MarkupGenerator {
                     <div class="layer-count badge">
                         <span>0</span> / <span></span>
                     </div>
-                    <span style="display: ${addGroupCheckbox ? "inline" : "none"}" class="checkbox">
+                    <span style="display: ${addGroupCheckbox ? "inline" : "none"}" class="checkbox" id="group-check-box-${base64GroupName}">
                         <label>
                             <input type="checkbox" data-gc2-group-name="${name}">
                         </label>
