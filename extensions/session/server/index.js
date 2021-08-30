@@ -4,12 +4,12 @@
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
-var express = require('express');
-var router = express.Router();
-var request = require('request');
-var config = require('../../../config/config.js');
-var autoLogin = false; // Auto login is insecure and sets cookie with login creds. DO NOT USE
-var autoLoginMaxAge = null;
+let express = require('express');
+let router = express.Router();
+let request = require('request');
+let config = require('../../../config/config.js');
+let autoLogin = false; // Auto login is insecure and sets cookie with login creds. DO NOT USE
+let autoLoginMaxAge = null;
 
 if (typeof config.autoLoginPossible !== "undefined" && config.autoLoginPossible === true) {
     if (typeof config.extensionConfig !== "undefined" && typeof config.extensionConfig.session !== "undefined") {
@@ -27,8 +27,8 @@ if (typeof config.autoLoginPossible !== "undefined" && config.autoLoginPossible 
  * @type {module.exports.print|{templates, scales}}
  */
 
-var start = function (dataToAuthorizeWith, req, response, status) {
-    var options = {
+let start = function (dataToAuthorizeWith, req, response, status) {
+    let options = {
         headers: {'content-type': 'application/json'},
         method: 'POST',
         uri: config.gc2.host + "/api/v2/session/start",
@@ -36,7 +36,7 @@ var start = function (dataToAuthorizeWith, req, response, status) {
     };
 
     request(options, function (err, res, body) {
-        var data;
+        let data;
         response.header('content-type', 'application/json');
         response.header('Cache-Control', 'no-cache, no-store, must-revalidate');
         response.header('Expires', '0');
@@ -84,7 +84,7 @@ var start = function (dataToAuthorizeWith, req, response, status) {
 
         console.log("Session started");
 
-        var resBody = {
+        let resBody = {
             success: true,
             message: "Logged in",
             screen_name: data.screen_name,
@@ -110,11 +110,9 @@ var start = function (dataToAuthorizeWith, req, response, status) {
         }
         response.send(resBody);
     });
-
 };
 
 router.post('/api/session/start', function (req, response) {
-    console.log(req.body)
     if (req.body) {
         start(req.body, req, response);
     }
@@ -122,7 +120,8 @@ router.post('/api/session/start', function (req, response) {
 
 router.get('/api/session/stop', function (req, response) {
     console.log("Session stopped");
-    req.session.destroy(function (err) {
+    req.session.destroy(function () {
+        response.cookie('connect.gc2', '', {maxAge: 1})
         response.status(200).send({
             success: true,
             message: "Logged out"

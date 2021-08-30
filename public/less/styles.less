@@ -120,7 +120,7 @@ body {
 }
 
 .leaflet-popup-content .tab-pane {
-  padding: 0  !important;
+  padding: 0 !important;
 }
 
 #pane {
@@ -849,6 +849,10 @@ body {
   box-shadow: 0 1px 12px 0 rgba(0, 0, 0, 0.12);
 }
 
+#module-container .modal-header {
+  padding: 10px;
+}
+
 .slide-right {
   //right: -100%;
   position: fixed;
@@ -856,7 +860,7 @@ body {
 
 .slide-left {
   left: -100%;
-  box-shadow: rgba(0, 0, 0, 0.2) 0px 27px 24px 0px, rgba(0, 0, 0, 0.22) 0px 40px 77px 0px;
+  box-shadow: rgba(0, 0, 0, 0.2) 0 27px 24px 0, rgba(0, 0, 0, 0.22) 0 40px 77px 0;
 }
 
 .nav-tabs {
@@ -1406,8 +1410,12 @@ h4 small {
 }
 
 #search-container {
-  padding-left: 40px;
+  padding-left: 24px;
   height: 100%;
+}
+
+.slider-btn span {
+  padding-top: 12px;
 }
 
 #search-content {
@@ -1904,6 +1912,53 @@ td.rdtYear:hover {
   cursor: help;
 }
 
+.list-subgroup-item {
+  border-left: 2px solid @brand-primary !important;
+}
+
+.symbols-rotate {
+  height: 22px;
+  width: 22px;
+  right: -24px;
+  position: absolute;
+  top: 28px;
+  background-image: url(https://www.svgrepo.com/show/74122/rotating-arrow-symbol.svg);
+  background-size: 20px 20px;
+  background-repeat: no-repeat;
+}
+
+.symbols-delete {
+  height: 22px;
+  width: 22px;
+  right: 24px;
+  position: absolute;
+  bottom: -24px;
+  background-image: url(https://www.svgrepo.com/show/64705/trash-can-with-cover.svg);
+  background-size: 20px 20px;
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
+
+.symbols-scale {
+  height: 22px;
+  width: 22px;
+  right: 24px;
+  position: absolute;
+  top: -24px;
+  background-image: url(https://www.svgrepo.com/show/4900/scale-screen.svg);
+  background-size: 20px 20px;
+  background-repeat: no-repeat;
+  cursor: nesw-resize;
+}
+
+.symbols-map, .symbols-lib {
+  height: 72px;
+  top: 0;
+  width: 72px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  left: 0;
+  padding: 7px;
+}
 
 /* Style for Geosag-extension */
 /* Geopartner, RGB 03/2020 */
@@ -1927,5 +1982,10 @@ td.rdtYear:hover {
   height: 50px;
   font-size: 1.5rem;
   width: 320px;
+.symbols-map {
+  position: absolute;
 }
 
+.symbols-lib {
+  position: relative;
+}

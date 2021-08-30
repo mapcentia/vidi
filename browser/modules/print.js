@@ -42,6 +42,7 @@ var paramsFromDb;
 
 import dayjs from 'dayjs';
 import advancedFormat from "dayjs/plugin/advancedFormat";
+
 require('dayjs/locale/da')
 dayjs.extend(advancedFormat)
 // Set locale for date/time string
@@ -134,7 +135,7 @@ module.exports = {
             $("#start-print-btn").button('reset');
             $(".dropdown-toggle.start-print-btn").prop("disabled", false);
             // GeoEnviron
-            console.log("GEMessage:LaunchURL:" + urlparser.urlObj.protocol+ "://" + urlparser.urlObj.host + "/tmp/print/pdf/" + response.key + ".pdf");
+            console.log("GEMessage:LaunchURL:" + urlparser.urlObj.protocol + "://" + urlparser.urlObj.host + "/tmp/print/pdf/" + response.key + ".pdf");
         });
 
         $("#start-print-btn").on("click", function () {
@@ -580,35 +581,39 @@ module.exports = {
             }
         });
 
-        let data = {
-            anchor: anchorRaw,
-            applicationHost: window.location.origin,
-            db: db,
-            schema: schema,
-            draw: (typeof layerDraw[0] !== "undefined" && layerDraw[0].geojson.features.length > 0) ? layerDraw : null,
-            queryDraw: (typeof layerQueryDraw[0] !== "undefined" && layerQueryDraw[0].geojson.features.length > 0) ? layerQueryDraw : null,
-            queryBuffer: (typeof layerQueryBuffer[0] !== "undefined" && layerQueryBuffer[0].geojson.features.length > 0) ? layerQueryBuffer : null,
-            queryResult: (typeof layerQueryResult[0] !== "undefined" && layerQueryResult[0].geojson.features.length > 0) ? layerQueryResult : null,
-            print: (typeof layerPrint[0] !== "undefined" && layerPrint[0].geojson.features.length > 0) ? layerPrint : null,
-            bounds: recScale.map(i => i.getBounds()),
-            scale: scale,
-            tmpl: tmpl,
-            pageSize: pageSize,
-            orientation: printingOrientation,
-            title: encodeURIComponent($("#print-title").val()),
-            comment: encodeURIComponent($("#print-comment").val()),
-            legend: $("#add-legend-btn").is(":checked") ? "inline" : "none",
-            header: encodeURIComponent($("#print-title").val()) || encodeURIComponent($("#print-comment").val()) ? "inline" : "none",
-            dateTime: dayjs().format('Do MMMM YYYY, H:mm'),
-            date: dayjs().format('Do MMMM YYYY'),
-            metaData: meta.getMetaData(),
-            px: config.print.templates[tmpl][pageSize][printingOrientation].mapsizePx[0],
-            py: config.print.templates[tmpl][pageSize][printingOrientation].mapsizePx[1],
-            queryString: urlparser.search,
-            customData: null,
-            scales: scales,
-            sticky: $("#print-sticky").is(":checked")
-        };
+        let data;
+        try {
+            data = {
+                anchor: anchorRaw,
+                applicationHost: window.location.origin,
+                db: db,
+                schema: schema,
+                draw: (typeof layerDraw[0] !== "undefined" && layerDraw[0].geojson.features.length > 0) ? layerDraw : null,
+                queryDraw: (typeof layerQueryDraw[0] !== "undefined" && layerQueryDraw[0].geojson.features.length > 0) ? layerQueryDraw : null,
+                queryBuffer: (typeof layerQueryBuffer[0] !== "undefined" && layerQueryBuffer[0].geojson.features.length > 0) ? layerQueryBuffer : null,
+                queryResult: (typeof layerQueryResult[0] !== "undefined" && layerQueryResult[0].geojson.features.length > 0) ? layerQueryResult : null,
+                print: (typeof layerPrint[0] !== "undefined" && layerPrint[0].geojson.features.length > 0) ? layerPrint : null,
+                bounds: recScale.map(i => i.getBounds()),
+                scale: scale,
+                tmpl: tmpl,
+                pageSize: pageSize,
+                orientation: printingOrientation,
+                title: encodeURIComponent($("#print-title").val()),
+                comment: encodeURIComponent($("#print-comment").val()),
+                legend: $("#add-legend-btn").is(":checked") ? "inline" : "none",
+                header: encodeURIComponent($("#print-title").val()) || encodeURIComponent($("#print-comment").val()) ? "inline" : "none",
+                dateTime: dayjs().format('Do MMMM YYYY, H:mm'),
+                date: dayjs().format('Do MMMM YYYY'),
+                px: config.print.templates[tmpl][pageSize][printingOrientation].mapsizePx[0],
+                py: config.print.templates[tmpl][pageSize][printingOrientation].mapsizePx[1],
+                queryString: urlparser.search.replace(/state=[a-z0-9_-]*/g, ""), // remove the state snapshot
+                customData: null,
+                scales: scales,
+                sticky: $("#print-sticky").is(":checked")
+            };
+        } catch (e) {
+            data = {};
+        }
         if (urlVars.config) {
             parr = urlVars.config.split("#");
             if (parr.length > 1) {
@@ -616,7 +621,7 @@ module.exports = {
             }
             data.config = parr.join();
         }
-        recEdit[recEdit.length - 1].editing.enable();
+        recEdit[recEdit.length - 1]?.editing.enable();
         return data;
     },
 
@@ -650,7 +655,10 @@ module.exports = {
     },
 
     applyState: (print) => {
-        paramsFromDb = print;
-        backboneEvents.get().trigger(`${MODULE_ID}:state_change`);
+        return new Promise((resolve) => {
+            paramsFromDb = print;
+            backboneEvents.get().trigger(`${MODULE_ID}:state_change`);
+            resolve();
+        });
     }
 };

@@ -42,12 +42,12 @@ module.exports = {
     init: function () {
         let me = this, configFile, stop = false;
         (function poll() {
-            if (typeof L !== "undefined") {
-
+            if (typeof L.control.locate !== "undefined") {
                 if (typeof urlVars.session === "string") {
-                    cookie.set("connect.gc2", urlVars.session, {expires: 1});
+                    // Try to remove existing cookie
+                    document.cookie = 'connect.gc2=; Max-Age=0; path=/; domain=' + location.host;
+                    cookie.set("connect.gc2", urlVars.session);
                 }
-
                 let loadConfig = function () {
                     let configParam;
                     if (configFile.startsWith("/")) {
@@ -79,6 +79,8 @@ module.exports = {
                         window.vidiConfig.infoClickCursorStyle = data.infoClickCursorStyle ? data.infoClickCursorStyle : window.vidiConfig.infoClickCursorStyle;
                         window.vidiConfig.crossMultiSelect = data.crossMultiSelect ? data.crossMultiSelect : window.vidiConfig.crossMultiSelect;
                         window.vidiConfig.featureInfoTableOnMap = data.featureInfoTableOnMap ? data.featureInfoTableOnMap : window.vidiConfig.featureInfoTableOnMap;
+                        window.vidiConfig.showLayerGroupCheckbox = data.showLayerGroupCheckbox ? data.showLayerGroupCheckbox : window.vidiConfig.showLayerGroupCheckbox;
+                        window.vidiConfig.activeLayers = data.activeLayers ? data.activeLayers : window.vidiConfig.activeLayers;
                     }).fail(function () {
                         console.log("Could not load: " + configFile);
                         if (window.vidiConfig.defaultConfig && (window.vidiConfig.defaultConfig !== configFile)) {
@@ -111,7 +113,8 @@ module.exports = {
                     me.getVersion();
                 }
             } else {
-                setTimeout(()=>{
+                console.log("polling...");
+                setTimeout(() => {
                     poll();
                 }, 10)
             }
@@ -170,7 +173,8 @@ module.exports = {
             gc2i18n.dict.printDataTime = decodeURIComponent(urlVars.td); // TODO typo
             gc2i18n.dict.printDateTime = decodeURIComponent(urlVars.td);
             gc2i18n.dict.printDate = decodeURIComponent(urlVars.d);
-            gc2i18n.dict.printFrame = decodeURIComponent(urlVars.frame);
+            gc2i18n.dict.printFrame = parseInt(decodeURIComponent(urlVars.frame)) + 1;
+            gc2i18n.dict.showFrameNumber = decodeURIComponent(urlVars.frameN) === "1" ? false : true;
             window.vidiTimeout = 1000;
         } else {
             window.vidiTimeout = 0;
@@ -383,7 +387,9 @@ module.exports = {
                                         try {
                                             modules.extensions[Object.keys(v)[0]][m].init();
                                         } catch (e) {
+
                                             console.warn(`Module ${Object.keys(v)[0]} could not be initiated`)
+                                            console.error(e);
                                         }
 
                                         let enabledExtensionIndex = enabledExtensionsCopy.indexOf(Object.keys(v)[0]);
@@ -416,7 +422,11 @@ module.exports = {
                     console.error("Could not perform application initialization", e.message, e);
                 }
                 $("#loadscreen").fadeOut(200);
+            }).catch((error) => {
+                console.error(error)
             });
+        }).catch((error) => {
+            console.error(error)
         });
 
         if ('serviceWorker' in navigator) {

@@ -179,7 +179,7 @@ module.exports = {
                 order.map((item) => {
                     if (item.type && item.type === GROUP_CHILD_TYPE_LAYER) {
                         layers.map(layer => {
-                            let itemId = false;
+                            let itemId;
                             if (item.layer) {
                                 itemId = item.layer.f_table_schema + '.' + item.layer.f_table_name;
                             } else {
@@ -213,33 +213,37 @@ module.exports = {
      * @returns {boolean}
      */
     addUTFGridLayer: function (layerKey) {
-        let metaData = meta.getMetaDataKeys(), fieldConf, useUTFGrid = false, result = false;
+        let metaData = meta.getMetaDataKeys(), fieldConf,  result = false;
+        let parsedMeta = layerTree.parseLayerMeta(metaData[layerKey]), template;
         try {
             fieldConf = JSON.parse(metaData[layerKey].fieldconf);
         } catch (e) {
             fieldConf = {};
         }
-        for (let key in fieldConf) {
-            if (fieldConf.hasOwnProperty(key)) {
-                if (typeof fieldConf[key].mouseover !== "undefined" && fieldConf[key].mouseover === true) {
-                    useUTFGrid = true;
-                    break;
-                }
-            }
-        }
-        if (useUTFGrid) {
+        if (parsedMeta?.hover_active) {
             result = new Promise((resolve, reject) => {
                 if (metaData[layerKey].type === "RASTER") {
                     reject();
                     return;
                 }
-                cloud.get().addUTFGridLayers({
-                    host: host,
+                const defaultTemplate =
+                    `<div>
+                        {{#each data}}
+                            {{this.title}}: {{this.value}} <br>
+                        {{/each}}
+                </div>`;
+                if (parsedMeta?.info_template_hover && parsedMeta.info_template_hover !== "") {
+                    template = parsedMeta.info_template_hover;
+                } else {
+                    template = defaultTemplate;
+                }
+                let utfGrid = cloud.get().addUTFGridLayers({
                     layers: [layerKey],
                     db: db,
-                    uri: uri,
-                    fieldConf: fieldConf
-                });
+                    cache: parsedMeta?.cache_utf_grid,
+                    loading: currentlyLoadedLayers
+                })[0];
+                layerTree.mouseOver(utfGrid, fieldConf, template)
                 console.info(`${layerKey} UTFgrid was added to the map`);
                 resolve();
             });
@@ -266,14 +270,15 @@ module.exports = {
             }
         }
 
-        let result = new Promise((resolve, reject) => {
-            var layers = [], metaData = meta.getMetaData();
-
-            let layerWasAdded = false;
+        return new Promise((resolve, reject) => {
+            let layers = [], metaData = meta.getMetaData(), layerWasAdded = false;
 
             $.each(metaData.data, function (i, layerDescription) {
                 let layer = layerDescription.f_table_schema + "." + layerDescription.f_table_name;
-                let {useCache, mapRequestProxy} = _self.getCachingDataForLayer(layerDescription, additionalURLParameters);
+                let {
+                    useCache,
+                    mapRequestProxy
+                } = _self.getCachingDataForLayer(layerDescription, additionalURLParameters);
                 if (layer === layerKey) {
                     let qgs;
                     if (layerDescription.wmssource && layerDescription.wmssource.includes("qgis_mapserv")) {
@@ -283,7 +288,10 @@ module.exports = {
                             urlVars[p[0]] = p[1];
                         }
                         qgs = btoa(urlVars.map);
-                        additionalURLParameters.push(`qgs=${qgs}`);
+                        // Composit QGIS layers has to go through MapServer
+                        if (urlVars?.LAYER?.split(',').length === 1) {
+                            additionalURLParameters.push(`qgs=${qgs}`);
+                        }
                     }
                     var isBaseLayer = !!layerDescription.baselayer;
                     layers[[layer]] = cloud.get().addTileLayers({
@@ -310,7 +318,7 @@ module.exports = {
                                     canvasHasData = new Uint32Array(canvas.getContext('2d')
                                         .getImageData(0, 0, canvas.width, canvas.height).data.buffer).some(x => x !== 0);
                                 } catch (e) {
-                                    console.error(e);
+                                    canvasHasData = true; // In case of Internet Explorer
                                 }
                             }
                             backboneEvents.get().trigger("tileLayerVisibility:layers", {
@@ -343,8 +351,6 @@ module.exports = {
                 reject(`${layerKey} was not added to the map`);
             }
         });
-
-        return result;
     },
 
     /**
@@ -357,12 +363,15 @@ module.exports = {
      */
     addVectorTileLayer: function (layerKey, additionalURLParameters = []) {
         let me = this;
-        let result = new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             let isBaseLayer, layers = [], metaData = meta.getMetaData();
             let layerWasAdded = false;
             $.each(metaData.data, function (i, layerDescription) {
                 var layer = layerDescription.f_table_schema + "." + layerDescription.f_table_name;
-                let {useCache, mapRequestProxy} = _self.getCachingDataForLayer(layerDescription, additionalURLParameters);
+                let {
+                    useCache,
+                    mapRequestProxy
+                } = _self.getCachingDataForLayer(layerDescription, additionalURLParameters);
 
                 if (layer === layerKey) {
                     // Check if the opacity value differs from the default one
@@ -410,8 +419,6 @@ module.exports = {
                 reject();
             }
         });
-
-        return result;
     },
 
     /**
@@ -424,8 +431,7 @@ module.exports = {
      */
     getCachingDataForLayer: (layerDescription, appendedFiltersString = []) => {
         // If filters are applied or single_tile is true, then request should not be cached
-        let setAsCached = (JSON.parse(layerDescription.meta) !== null && JSON.parse(layerDescription.meta).single_tile !== undefined && JSON.parse(layerDescription.meta).single_tile === true);
-        let useCache = setAsCached;
+        let useCache = (JSON.parse(layerDescription.meta) !== null && JSON.parse(layerDescription.meta).single_tile !== undefined && JSON.parse(layerDescription.meta).single_tile === true);
         if (appendedFiltersString.length > 0 && appendedFiltersString[0] !== "") {
             useCache = false;
         }

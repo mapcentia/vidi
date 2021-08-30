@@ -19,16 +19,19 @@ const API_LOCATION = config.gc2.host + `/api/v2/keyvalue`;
 router.get('/api/key-value/:dataBase', (req, res) => {
     let params = ``;
     if (req.query && req.query.like) {
-        params = `like=${req.query.like} `;
+        params = `like=${req.query.like}`;
     }
     if (req.query && req.query.filter) {
-        params+= `&filter=${req.query.filter} `;
+        params+= `&filter=${req.query.filter}`;
     }
+
+    let uri = `${API_LOCATION}/${req.params.dataBase}?${params}`;
+    console.log(uri);
 
     request({
         method: 'GET',
         encoding: 'utf8',
-        uri: `${API_LOCATION}/${req.params.dataBase}?${params}`
+        uri: uri,
     }, (error, response) => {
         let parsedBody = false;
         try {

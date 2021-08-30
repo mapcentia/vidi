@@ -173,7 +173,7 @@ module.exports = {
         "Total distance": "Totalmål",
         "Color": "Farve",
         "Enter a text for the marker or cancel to add without text": "Indtast en tekst til markøren eller annuller for at tilføje uden tekst",
-        "Cancel": "Cancel",
+        "Cancel": "Afbryd",
         "Ok": "Ok",
         "Apply default style settings for this drawing?": "Anvend standard stilindstillinger til denne tegning?",
 
@@ -225,13 +225,13 @@ module.exports = {
         "Refresh existing cache for layer": "Genindlæs eksisterende cache for lag",
         "Dynamic layer is cached only within the last requested bounding box": "Dynamiske lag er kun cached inden for det sidst ønskede udsnit",
         "Apply": "Anvend",
-        "Reset filter": "Nulstil filter",
+        "Reset filter": "Nulstil",
         "Filter editor": "Filter editor",
         "Layer is visible": "Laget er synligt",
         "Parents": "Forældre",
         "Children": "Børn",
         "Back": "Tilbage",
-        "Fit bounds to filter": "Sæt udsnit til filter",
+        "Fit bounds to filter": "Sæt udsnit",
         "Labels": "Labels",
         "Show labels": "Vis labels",
 
@@ -257,6 +257,7 @@ module.exports = {
         "Application is offline, tiles will not be updated. Proceed?": "App'en er offline og kortlaget vil ikke blive opdateret. Fortsæt?",
         "Are you sure you want to delete the feature?": "Er du sikker på, at du vil slette objektet?",
         "The page was loaded without service workers enabled, features editing is not available (the page was loaded via plain HTTP or browser does not support service workers)": "Siden blev indlæst uden Service Workers aktiveret. Redigering er ikke tilgængelig (siden blev indlæst via almindelig HTTP eller browseren understøtter ikke Service Workers. Brug evt. en moderne browser)",
+        "Editing of geometry is not possible when number of nodes exceed": "Ændring af geometri er ikke mulig, når antallet af knækpunkter overstiger",
 
         // OfflineMap
         "tiles failed to load": "fliser mangler at indlæse",
@@ -303,13 +304,14 @@ module.exports = {
         "Delete state snapshot": "Slet projekt",
         "Add local state snapshots to user's ones": "Overfør lokale projekter til bruger",
         "Add local state snapshot to user's ones": "Overfør lokal projekter til bruger",
-        "Copy token": "Kopier token",
-        "Copy Vidi link": "Kopier Vidi link",
-        "Copy PNG link": "Kopier PNG link",
-        "copy link": "Kopier link",
-        "copy token": "Kopier token",
+        "Copy token": "Token",
+        "Copy Vidi link": "Vidi link",
+        "Copy PNG link": "PNG link",
+        "copy link": "Link",
+        "copy token": "Token",
         "New title": "Ny titel",
         "StateSnapshots description": "Gem, genskab og del projekter. Et projekt indeholder kortets udstrækning, hvilket baggrundskort er tændt og hvilke lag er vist, hvilke filtre er aktive samt dine tegninger. Du kan dele et projekt ved at dele den viste URL. Hvis du ikke er logget ind, vil projekter blive knyttet den den browser du bruger. Ellers vil de blive gemt under dit bruger login. Det er muligt at overføre projekter fra browser til login",
+        "Copied": "Kopieret",
 
         //Measurements
         "Measure distance": "Mål afstand",

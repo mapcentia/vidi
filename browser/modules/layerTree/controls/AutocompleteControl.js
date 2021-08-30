@@ -83,7 +83,7 @@ class AutocompleteControl extends React.Component {
                     <div style={{
                         boxShadow: '0 2px 12px rgba(0, 0, 0, 0.1)',
                         padding: '2px 0',
-                        position: 'fixed',
+                        position: 'absolute',
                         width: '100%',
                         maxWidth: '160px',
                         background: 'rgba(255, 255, 255, 1)',

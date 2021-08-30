@@ -184,7 +184,7 @@ module.exports = function (grunt) {
                     transform: [['babelify', {
                         presets: ["@babel/preset-env", "@babel/preset-react"],
                         plugins: ["@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread"]
-                    }], 'require-globify', 'windowify', 'envify', ['browserify-css', { global: true }]]
+                    }], 'require-globify', 'windowify', 'envify', ['browserify-css', {global: true}]]
                 }
             },
             debug: {
@@ -199,7 +199,7 @@ module.exports = function (grunt) {
                     transform: [['babelify', {
                         presets: ["@babel/preset-env", "@babel/preset-react"],
                         plugins: ["@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread"]
-                    }], 'require-globify', 'windowify', 'envify', ['browserify-css', { global: true }]]
+                    }], 'require-globify', 'windowify', 'envify', ['browserify-css', {global: true}]]
                 }
             },
             publish_sw: {
@@ -242,7 +242,7 @@ module.exports = function (grunt) {
                     transform: [['babelify', {
                         presets: ["@babel/preset-env", "@babel/preset-react"],
                         plugins: ["@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread"]
-                    }], 'require-globify', 'windowify', 'envify', ['browserify-css', { global: true }]],
+                    }], 'require-globify', 'windowify', 'envify', ['browserify-css', {global: true}]],
                     watch: true,
                     keepAlive: true
                 }
@@ -264,8 +264,6 @@ module.exports = function (grunt) {
                 files: {
                     'public/js/build/all.min.js': [
                         'public/js/lib/leaflet/leaflet-src.js',
-
-
                         'public/js/bundle.js',
                     ],
                     'public/js/build/all.async.min.js': [
@@ -335,7 +333,10 @@ module.exports = function (grunt) {
                 command: [
                    copyBootstrapVariablesCommand,
                     'grunt --gruntfile ./public/js/lib/bootstrap-material-design/Gruntfile.js dist-less'
-                ].join('&')
+                ].join('&&')
+            },
+            buildDocs: {
+                command: 'sphinx-build ./docs/da ./docs/html'
             }
         },
         cacheBust: {
@@ -416,8 +417,8 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-watchify');
     grunt.loadNpmTasks('grunt-version');
 
-    grunt.registerTask('default', ['prepareAssets', 'browserify:publish','uglify', 'browserify:publish_sw_dev', 'extension-css', 'shell', 'hogan', 'version']);
-    grunt.registerTask('production', ['env:prod', 'hogan', 'prepareAssets', 'browserify:publish', 'browserify:publish_sw', 'extension-css', 'shell', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust', 'version', 'appendBuildHashToVersion']);
-    grunt.registerTask('production-test', ['env:prod', 'hogan', 'browserify:publish', 'browserify:publish_sw', 'extension-css', 'shell', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust', 'version', 'appendBuildHashToVersion']);
+    grunt.registerTask('default', ['prepareAssets', 'browserify:publish', 'browserify:publish_sw_dev', 'extension-css', 'shell:default', 'hogan', 'version']);
+    grunt.registerTask('production', ['env:prod', 'hogan', 'prepareAssets', 'browserify:publish', 'browserify:publish_sw', 'extension-css', 'shell:default', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust', 'version', 'appendBuildHashToVersion']);
+    grunt.registerTask('production-test', ['env:prod', 'hogan', 'browserify:publish', 'browserify:publish_sw', 'extension-css', 'shell:default', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust', 'version', 'appendBuildHashToVersion']);
     grunt.registerTask('extension-css', ['less', 'cssmin:extensions']);
 };

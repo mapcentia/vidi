@@ -257,6 +257,7 @@ module.exports = {
         "Application is offline, tiles will not be updated. Proceed?": "Application is offline, tiles will not be updated. Proceed?",
         "Are you sure you want to delete the feature?": "Are you sure you want to delete the feature?",
         "The page was loaded without service workers enabled, features editing is not available (the page was loaded via plain HTTP or browser does not support service workers)": "The page was loaded without service workers enabled, features editing is not available (the page was loaded via plain HTTP or browser does not support service workers)",
+        "Editing of geometry is not possible when number of nodes exceed": "Editing of geometry is not possible when number of nodes exceed",
 
         // OfflineMap
         "tiles failed to load": "tiles failed to load",
@@ -310,6 +311,7 @@ module.exports = {
         "copy token": "Copy token",
         "New title": "New title",
         "StateSnapshots description": "Save, restore and share projects. A project contains the extent of the map, which background map is visible and which layers are turned on, which filters are active as well as your drawings. You can share a project by sharing the displayed URL. If you are not logged in, projects will be linked to the browser you are using. Otherwise, they will be stored under your user login. It is possible to transfer projects from browser to login.",
+        "Copied": "Copied",
 
         //Measurements
         "Expand measurements control": "Activate measurements control",

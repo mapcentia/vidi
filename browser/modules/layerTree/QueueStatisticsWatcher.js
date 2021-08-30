@@ -6,7 +6,7 @@
 
 /**
  * Watching queue changes and displaying them in layerTree
- * 
+ *
  * @todo Rewrite layerTree using React or Angular
  */
 
@@ -22,6 +22,9 @@ let accumulatedDiff = [];
 let lastStatistics = false;
 
 let switchLayer = false, layerTree = false, offlineModeControlsManager = false;
+
+
+const base64url = require('base64url');
 
 class QueueStatisticsWatcher {
     constructor(o) {
@@ -40,15 +43,14 @@ class QueueStatisticsWatcher {
 
     /**
      * Displays current state of APIBridge feature management
-     * 
-     * @param {*} statistics 
-     * @param {*} forceLayerUpdate 
+     *
+     * @param {*} statistics
+     * @param {*} forceLayerUpdate
      */
     processStatisticsUpdate(statistics, forceLayerUpdate = false, skipLastStatisticsCheck = false, userPreferredForceOfflineMode, apiBridgeInstance) {
         let _self = this;
-
-        let currentStatisticsHash = btoa(JSON.stringify(statistics));
-        let lastStatisticsHash = btoa(JSON.stringify(lastStatistics));
+        let currentStatisticsHash = base64url(JSON.stringify(statistics));
+        let lastStatisticsHash = base64url(JSON.stringify(lastStatistics));
 
         if (skipLastStatisticsCheck || (currentStatisticsHash !== lastStatisticsHash || theStatisticsPanelWasDrawn === false)) {
             let diff = _self.getStatisticsDiff(statistics, lastStatistics);
@@ -140,7 +142,6 @@ class QueueStatisticsWatcher {
                                     }
                                 }
                             });
-
                             $(layerControlContainer).find('.js-rejectedByServerItems').append(errorRecord);
                         });
                     }

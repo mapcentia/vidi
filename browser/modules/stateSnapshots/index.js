@@ -1,25 +1,20 @@
 /*
  * @author     Alexander Shumilov
- * @copyright  2013-2019 MapCentia ApS
+ * @copyright  2013-2021 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
 
+
 import StateSnapshotsDashboard from './components/StateSnapshotsDashboard';
 
-/**
- * @type {*|exports|module.exports}
- */
-var anchor, state, urlparser, backboneEvents;
-
+let anchor, state, urlparser, backboneEvents;
 const API_URL = `/api/state-snapshots`;
-
 const exId = `state-snapshots`;
-
 let customSetOfTitles = false;
-
 let extensions;
+const base64url = require('base64url');
 
 /**
  *
@@ -44,8 +39,8 @@ module.exports = {
      * Module initialization
      */
     init: function () {
-        var React = require('react');
-        var ReactDOM = require('react-dom');
+        const React = require('react');
+        const ReactDOM = require('react-dom');
 
         if (vidiConfig.enabledExtensions.indexOf(`watsonc`) > -1) {
             customSetOfTitles = true;
@@ -69,24 +64,25 @@ module.exports = {
 
     /**
      * Fetches state snapshot by its identifier
-     * 
+     *
      * @param {String} id State snapshot identifier
-     * 
+     *
      * @return {Promise}
      */
     getSnapshotByID: (id) => {
         if (!id) {
             throw new Error(`Snapshot identifier was not provided`);
         }
-
-        let result = new Promise((resolve, reject) => {
-            $.getJSON(`${API_URL}/${vidiConfig.appDatabase}/${id}`).done((data) => {
-                resolve(data);
-            }).fail(() => {
+        return new Promise((resolve) => {
+            $.ajax({
+                url: `${API_URL}/${vidiConfig.appDatabase}/${id}`,
+                method: 'GET',
+                accept: 'text/plain; charset=utf-8',
+            }).then((data) => {
+                resolve(JSON.parse(base64url.decode(data)));
+            }).catch(error => {
                 resolve(false);
             });
         });
-
-        return result;
     }
 };

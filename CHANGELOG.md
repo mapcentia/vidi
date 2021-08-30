@@ -4,19 +4,191 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [UNRELEASED]
+## [2021.8.2] - 2021-30-8
 ### Added
-- Print can now output to PNG. If multiple pages when the PNG files are added to a zip file.
+- The layer-group-checkboxes now have id's, so it's easier to apply css rules. Ids follows this pattern: `group-check-box-[group-id]`. Use the dev tool inspector to get the id.
+
+## [2021.8.1] - 2021-25-8
+### Changed
+- Docker base image update to debian:bullseye-slim.
+
+### Added
+- Callback functions in embed.js. Two functions kan be defined in the parent page like this (with ``data-vidi-frame-name="map1"``):
+  - When Vidi is ready:
+  ```JavaScript
+    embedApi.vidiReady["map1"] = () => {
+        console.log("Vidi is ready")
+    }
+  ```
+  - When active layers from the snapshot is ready:
+  ```JavaScript
+    embedApi.activeLayersReady["map1"] = () => {
+        console.log("Active layers are ready")
+    }
+  ```
 
 ### Fixed
-- MapCache layer now works. Both raster and vector tiles.
+- In conflictSearch module, the adding of sheets to excel is now in a try/catch so invalid sheet names won't crash the Node process. 
+
+## [2021.8.0] - 2021-12-8
+### Changed
+- `select_function` is now called when opening a panel in a accordion pop-up.
+
+### Fixed
+- Print and Conflict modules will not longer keep unnecessary Meta data in state. This reduce the data volume. 
+- Layer tree will now build with all valid layers. Before it would start building as soon an invalid layer was proccess leaving out the rest.
+
+## [2021.7.1] - 2021-8-7
+### Fixed
+- Regression bug. Draw module labels are now again serialized as labels - not markers.
+
+## [2021.7.0] - 2021-5-7
+### Fixed
+- Conflict Excel output: Two sheets can't have the same name, which will result in error. In case of same names, the last char is changed to a number.
+- Conflict report will now default to "Compact" if none is choosen.
+
+## [2021.6.0] - 2021-2-7
+### Changed
+- No MapCentia logo in default and conflict print template. Logo can be set with external css sheet. Some thing like this:
+```css
+#print-header-logo{
+  background-image: url('https://.....');
+  background-repeat: no-repeat;
+  background-position: 50% 50%;
+  background-size: 80%;
+}
+```
+- embed.js: If host in token is http, then make it protocol relative, so tokens created on http still works when embedded on https sites.
+- It's now possible to switch all layers on/off in a layer (sub)group. Enable the checkboxes with the `showLayerGroupCheckbox` conflig.
+- Some visual improvements to the display of sub-groups in the layer tree.
+- Editing of geometry is not possible when number of nodes exceed 1.000. But attribut data can still be edited. A high amount of nodes will hog down the browser and it can crash.
+- The Snapshot module will now use base64url encoded body for getting, creating and updating snapshots. This way will a JSON value `ILIKE '%12'` not mess things up when decoded server side. This requires an update of GC2. 
+- Snapshot list is now ordered by update date/time and this is also what's displayed instead of create date/time.
+- Frame number on prints will not be shown when only one frame is printed. Custom print needs an update:
+```
+{{#showFrameNumber}}#{{printFrame}}{{/showFrameNumber}}
+```
+- Frame numbers starts with 1 instead of 0.
+- New format for setting redis host. Now the database number can be set:
+```JSON
+{
+  "redis": {
+    "host": "127.0.0.1:6379",
+    "db": 2
+  }
+}
+```
+
+### Added
+- An API loaded with the `embed.js` script. Two methods are available: `embedApi.switchLayer` and `embedApi.allOff`. See docs for details.
+- Mouse over on vector and raster tile layers. The latter using UTF Grid. These GC2 Meta properties are controling the mouse over:
+ - `hover_active` Boolean. Should mouse over be switch on?
+ - `info_template_hover` String. Handlebars template to use in label. If not set a default template will be used, which loops through fields with the `Show in mouse-over` property checked.
+ - `cache_utf_grid` Boolean. Wether to cache UTF grid tiles. Only apply to raster tile layers.
+- Excel report is now available in conflict module. Each layer with hits will have its own sheet. For for sheets to get populated with hits the "Show in conflict" option must be checked for a least one field in the Structur tab in GC2 Admin. 
+- New config option `activeLayers`. This option is a array of schema qualified layers with any type prefix (:v, :mvt, :w), which should be switch on from the start. If a snapshot link is used for starting Vidi, this option will be ignored.
+```json
+{
+  "activeLayers": [
+    "schema.layer1",
+    "v:schema.layer2"
+  ]
+}
+```
+
+### Fixed
+- Feature info click wouldn't open the pop-up if multiple layers was switch on.
+- Drawings are not longer dashed, when selected.
+- Conflict search module will now search protected layers if user is signed in.
+- On `zoomToExtentOfgeoJsonStore` in geocloud.js pan map one pixel to defeat a strange bug, which causes a browser freeze.
+- Layer filter auto complete menu is now postioned absolute instead of fixed, so it will not hang in the same place when scrolling layer tree.
+- Composit QGIS Layers now work. They are not longer bypassed by MapServer where the merge request is done.
+
+## [2021.5.0] - 2021-4-5
+### Changed
+- Node >= 14 er required. 
+- Docker files are added to the project.
+- It's now possible to set `gc2.host` through the environment variable `GC2_HOST`. If set in `config/config.js` it will have precedence.
+- ConflictSearch is now controlled by state module. It will keep state between on/off and browser refreshes. State in conflictSearch is also applied when running a state-snapshot. 
+- Changes in Snapshot UI. The UI is now more clean.
+- When the `session=[id]` URL key/value is used, it will now reset the `connect.gc2` session cookie, even if it's set through the sign-in UI. To do that the HttpOnly cookie flag is removed, which will aggravate the risk of client side script accessing the cookie. The cookie is also removed when sign-out is done through the UI.
+- CSS and templates files can now be placed in a sub-folder on the `configUrl` host. Only one level deep like `styles/custom.css`.
+- Layer tools in the layer tree now have parent span elements with theese ids, so it's easier to to set a css display rule on them:
+  - `#layer-tools-offline`
+  - `#layer-tools-search`
+  - `#layer-tools-opacity`
+  - `#layer-tools-labels`
+  - `#layer-tools-tables`
+  - `#layer-tools-load`
+  - `#layer-tools-filters`
+- `repeatMode` is set to `true` for tools in Draw, so tools stay active.
+ 
+### Added
+- It's possible to lock UTM zone in coordinate module, so it's possible to project to a specific zone outside the actual zone. Useful for e.g. Denmark, which are using zone 32 for the whole country but is located in both 32 and 33.
+```JSON
+{
+    "coordinates": {
+      "lockUtmZoneTo": 32
+    }
+}
+```
+- A new build configuration for setting widths for the left slide-out panel in default template.
+  - ```json
+    "leftSlideWidths": [300, 400, 550]
+    ```
+- Under filters in the layer tree it's now possible to download the layer as either: GeoJSON, Excel or CSV
+
+### Fixed
+- Base64url are now used to encode filters instead of base64, so + and / sign doesn't mess things up.
+- Changes to Snapshot UI, which fixes an issue with wrong URLs in input fields.
+- Drawing is stored in state, but was not recreated after refresh of browser. This could get "invisible" drawings stored in snapshots.
+- If a layer in a state snapshot is for some reason not available (protected, deleted), the build of the layer tree was ever resolved. Now it'll resolve.  
+- The queueStatisticsWatcher and Service Worker now uses 3. party module for base64 decoding, because windows.btoa fails on non-latin characters.
+- COWI Gade foto named properly in Streetview module.
+- A lot of fixes in the Editor module.
+
+## [2020.12.0] - 2020-8-12
+### Changed
+- The standard template for feature info is changed, so empty fields are omitted. It's now:
+```handlebars
+<div class="vidi-popup-content">
+    <h3 class="popup-title">{{_vidi_content.title}}</h3>
+    {{#_vidi_content.fields}}
+        {{#if value}}
+            <h4>{{title}}</h4>
+            <p {{#if type}}class="{{type}}"{{/if}}>{{{value}}}</p>
+        {{/if}}
+    {{/_vidi_content.fields}}
+</div>
+```  
+
+
+### Added
+- `searchConfig.placeholderText` added to config, so the search placeholder can be customized.
+- A callback function can now be added to interval reload of vector layers. The callback will be fires when layer changes. Meta option is `reload_callback`:
+```javascript
+function(store, map) {
+  var audio = new Audio('https://ccrma.stanford.edu/~jos/mp3/gtr-nylon22.mp3');
+  audio.play();
+  var latest;
+  store.geoJsonLayer.eachLayer(function (layer) {
+    latest = layer
+  })
+  map.setView(latest.getLatLng(), 18)
+}
+```
+- The max zoom level when selecting a row in a layer table can be with `setmax_zoom_level_table_click`. If not set or is NaN the max zoom level will default to 17.
+
+### Fixed
+- MapCache layers now work. Both raster and vector tiles.
 - Timeout (10.000ms) on sqlStore. Feature info will now handle errors or cancels (e.g. due to timeout) on SQL requests and a "toast" will inform the user. If timeout happens the request will be re-tried.
 - `crossMultiSelect` will always show vector feature info if a simultaneous raster SQL request fails or timeouts.
 - Memory leak fixed when reloading vector layers.
 - Interval reload of vector layers are now done with the `load` method instead of switching the layer off and on.
 - Update of interval reloaded vector layers happens only if data has changed.
 - Use native URL API instead of uriJs module.
-- Still resolve promise in `localforage.setItem`, to avoid a net:ERR_FAILED in the browser when e.g. getting feature info. The issue with not being able to setItem persist.
+- Still resolve promise in `localforage.setItem`, to avoid a net:ERR_FAILED in the browser when e.g. getting feature info. The issue about error on setItem persist.
+- Some fixes regarding Internet Explorer.
 
 ## [2020.11.0] - 2020-18-11
 ### Added
@@ -61,7 +233,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - Print setup is now stored in state snapshots. After state snapshot is activated the print setup will use the stored settings. The sticky toggle must be set to on or else the default print settings will be used.
 - New print API `/api/print/[database]/?state=[state id]` which will return the stored print from a snapshot as PNG (PDF is coming). The print will be created on the fly.
 - `embed.js` has two new attributes: `data-vidi-use-config` and `data-vidi-use-schema`. These will trigger the use of schema and/or config from the token if present.
-- New GC2 Meta property which automatically can open a layer tool when the layer is switch on:
+- New GC2 Meta property which automatically can open a layer tool when the layer is switched on:
     - *default_open_tools*: JSON array with tools to open. Available options: `["filters","opacity","load-strategy","search"]` ("table" are not supported)
 - New GC2 Meta properties:
     - *disable_check_box*: boolean, disables the layer check box:
@@ -83,7 +255,6 @@ and this project adheres to [CalVer](https://calver.org/).
 - New button "Fit bounds to filter" in layer filters, which will set the view extent to the bounds of the filtered layer.
 - New "Labels" panel for raster tile layers with a checkbox for hiding/showing labels on the layer. Works for both MapServer and QGIS back-end (GC2 must support this).
 - Added boolean config `crossMultiSelect` in `config/config.js`. This will enable cross multi select on both vector and raster tile layers. This will result in a unified feature info experience, which are well suited for informative maps using the `embed.tmpl` template. All feature info results will be displayed in an accordion widget. The accordion summary is default layer title, but can be set to an attribute value with the meta config `accordion_summery`. Can be set in runtime config. 
-- It's now possible to start conflict search from Drawing module. A single drawing or all drawings together can be used for search.
 - WMS layers can now be added directly as base layers. A WMS base layer example:
 ```json
 {
@@ -155,8 +326,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - `embed.tmpl` will now show login button if session module is enabled.
 - The WMS requests now has a `qgs` parameter for QGIS backed layers. The value is path to the qgs file for the layer (base64 encoded). In GC2 the path will be used to send the request directly to qgis_serv instead of cascading it through MapServer.
 - Raster tile layers without pixels (invisible in the map) are now not queried by feature info.
-- Turning on a vector layer will now load the legend of the raster tile representation of the layer.
-- Conflict search now are able to make a print with each hit and merge the PDFs together.
+- Turning on a vector layer will now load the legend of the raster tile representation of the layer
 
 ### Fixed
 - Using `indexOf` instead of `includes`, because the latter is not transpiled in Babel. It's an Internet Explorer issue.
@@ -168,7 +338,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - All numeric Postgres types are now handled correct in the editor.
 - Puppeteer processes are now destroyed, if an exception is thrown during print. This prevents leak of processes.
 - Re-acquirement of a Puppeteer process is done if timeout, so the print will eventual be finished.
-- Puppeteer processes will be destroyed after 60 seconds no matter what. This prevents hanging processes, which could blocks further prints.
+- Puppeteer processes will be destroyed after 60 seconds. This prevents hanging processes, which blocks further prints.
 
 ## [2020.2.0]
 ### Added

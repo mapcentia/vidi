@@ -7,26 +7,41 @@
 //process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
 
 
-var path = require('path');
+let path = require('path');
 require('dotenv').config({path: path.join(__dirname, ".env")});
 
-var express = require('express');
-var http = require('http');
-var cluster = require('cluster');
-var sticky = require('sticky-session');
-var compression = require('compression');
-var bodyParser = require('body-parser');
-var cookieParser = require('cookie-parser');
-var session = require('express-session');
-var cors = require('cors');
-var config = require('./config/config.js');
-var store;
-var app = express();
+let express = require('express');
+let http = require('http');
+let cluster = require('cluster');
+let sticky = require('sticky-session');
+let compression = require('compression');
+let bodyParser = require('body-parser');
+let cookieParser = require('cookie-parser');
+let session = require('express-session');
+let cors = require('cors');
+let config = require('./config/config.js');
+let store;
+let app = express();
+
+if (!config?.gc2?.host) {
+    if (!config?.gc2) {
+        config.gc2 = {};
+    }
+    config.gc2.host = process.env.GC2_HOST;
+}
+if (!config?.gc2?.host) {
+    console.error("No GC2 host set. Set it through the environment variable GC2_HOST or in config/config.js");
+    process.exit(0)
+}
 
 app.use(compression());
 app.use(cors());
 app.use(cookieParser());
 app.use(bodyParser.json({
+        limit: '50mb'
+    })
+);
+app.use(bodyParser.text({
         limit: '50mb'
     })
 );
@@ -37,12 +52,13 @@ app.use(bodyParser.urlencoded({
 }));
 app.set('trust proxy', 1); // trust first proxy
 
-if (typeof config.redisHost === "string") {
-    var redis = require("redis");
-    var redisStore = require('connect-redis')(session);
-    var client = redis.createClient({
-        host: config.redisHost.split(":")[0],
-        port: config.redisHost.split(":")[1] || 6379,
+if (typeof config?.redis?.host === "string") {
+    let redis = require("redis");
+    let redisStore = require('connect-redis')(session);
+    let client = redis.createClient({
+        host: config.redis.host.split(":")[0],
+        port: config.redis.host.split(":")[1] || 6379,
+        db: config?.redis?.db || 3,
         retry_strategy: function (options) {
             if (options.error && options.error.code === 'ECONNREFUSED') {
                 return new Error('The server refused the connection');
@@ -58,10 +74,10 @@ if (typeof config.redisHost === "string") {
     });
     store = new redisStore({
         client: client,
-        ttl: 260
+        ttl: 86400
     });
 } else {
-    var fileStore = require('session-file-store')(session);
+    let fileStore = require('session-file-store')(session);
     store = new fileStore({
         ttl: 86400,
         logFn: function () {
@@ -76,12 +92,12 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     name: "connect.gc2",
-    cookie: {secure: false}
+    cookie: {secure: false, httpOnly: false}
 }));
 
 app.use('/app/:db/:schema?', express.static(path.join(__dirname, 'public'), {maxage: '60s'}));
 if (config.staticRoutes) {
-    for (var key in config.staticRoutes) {
+    for (let key in config.staticRoutes) {
         if (config.staticRoutes.hasOwnProperty(key)) {
             console.log(key + " -> " + config.staticRoutes[key]);
             app.use('/app/:db/:schema/' + key, express.static(path.join(__dirname, config.staticRoutes[key]), {maxage: '60s'}));

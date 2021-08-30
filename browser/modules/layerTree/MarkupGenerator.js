@@ -27,15 +27,20 @@ class MarkupGenerator {
         </button>`);
     }
 
-    getGroupPanel(base64GroupName, name) {
-        return (`<div class="panel panel-default panel-layertree" id="layer-panel-${base64GroupName}">
+    getGroupPanel(base64GroupName, name, addGroupCheckbox = false) {
+        return (`<div class="panel panel-default panel-layertree" id="layer-panel-${base64GroupName}" xmlns="http://www.w3.org/1999/html">
             <div class="panel-heading" role="tab" style="padding: 8px 0px 8px 15px;">
                 <h4 class="panel-title">
                     <i style="float: right;" class="material-icons layer-move-vert">more_vert</i>
                     <div class="layer-count badge">
                         <span>0</span> / <span></span>
                     </div>
-                    <a style="display: block" class="accordion-toggle js-toggle-layer-panel" data-toggle="collapse" data-parent="#layers" href="#collapse${base64GroupName}">${name}</a>
+                    <span style="display: ${addGroupCheckbox ? "inline" : "none"}" class="checkbox" id="group-check-box-${base64GroupName}">
+                        <label>
+                            <input type="checkbox" data-gc2-group-name="${name}">
+                        </label>
+                    </span>
+                    <a style="display: inline" class="accordion-toggle js-toggle-layer-panel" data-toggle="collapse" data-parent="#layers" href="#collapse${base64GroupName}">${name}</a>
                 </h4>
             </div>
             <ul class="list-group" id="group-${base64GroupName}" role="tabpanel"></ul>
@@ -69,13 +74,21 @@ class MarkupGenerator {
         </div>`);
     }
 
-    getSubgroupControlRecord(base64SubgroupName, name) {
+    getSubgroupControlRecord(base64SubgroupName, name, level, addGroupCheckbox = false ) {
         return (`<li
-        class="layer-item list-group-item"
+        class="layer-item list-group-item list-subgroup-item"
         data-gc2-subgroup-id="${name}"
-        style="min-height: 40px; margin-top: 10px; background-color: white; border-bottom: 1px solid #CCC;">
-            <div class="js-subgroup-id" style="padding-left: 14px;"></div>
-            <div class="js-subgroup-children" id="${base64SubgroupName}" style="padding-left: 20px;"></div>
+        style="min-height: 36px; margin-top: 1px; background-color: white; border-bottom: 1px solid #CCC;">
+            <span style="display: ${addGroupCheckbox ? "inline" : "none"}; margin-left: -2px" class="checkbox">
+                <label>
+                    <input type="checkbox" data-gc2-subgroup-name="${name}" data-gc2-subgroup-level="${level}">
+                </label>
+            </span>
+            <button style="margin-left: ${addGroupCheckbox ? "-18px" : "0"}" type="button" class="btn btn-default btn-xs js-subgroup-toggle-button">
+                <i class="fa fa-arrow-down"></i>
+            </button>
+            <div class="js-subgroup-id" style="display: inline; margin-left: 0"></div>
+            <div class="js-subgroup-children" id="${base64SubgroupName}" style="padding-left: 30px;"></div>
         </li>`);
     }
 
@@ -86,7 +99,7 @@ class MarkupGenerator {
 
         return (`
         <li class="layer-item list-group-item" data-gc2-layer-key="${layerKeyWithGeom}" style="min-height: 36px; margin-top: 1px; border-bottom: 1px solid #CCC; background-color: white;">
-            <div>
+            <div style="border-left: 0px solid #ccc">
                 <div style="display: flex; min-height: 40px; justify-content: space-between; flex-wrap: wrap;">
                     <div style="margin-top: 4px;">
                         <div style="display: inline-block;">
@@ -105,7 +118,7 @@ class MarkupGenerator {
         
                         <div style="display: inline-block;">${layerTypeSelector}</div>
         
-                        <div style="display: inline-block;">
+                        <div style="display: inline-block;" id="layer-information">
                             <span>
                                 ${text}${lockedLayer}
                                 <span class="js-tiles-contain-data" style="visibility: ${moduleState.tileContentCache[layerKey] ? "inline" : "hidden"};" data-toggle="tooltip" data-placement="right"
@@ -150,7 +163,7 @@ class MarkupGenerator {
                         </div>
 
                         <div class="js-toggle-layer-offline-mode-container" style="display: none;">
-                            <div class="btn-group" role="group">
+                            <div class="btn-group" role="group" id="layer-tools-offline">
                                 <button type="button" data-layer-key="${layerKey}" class="btn btn-success btn-xs js-set-online" title="${__(`Fetch layer data from server`)}" style="padding: 4px" disabled>
                                     <i class="fa fa-signal"></i>
                                 </button>
@@ -167,24 +180,37 @@ class MarkupGenerator {
                         </div>
         
                         <div class="js-toggles-container" style="display: none; padding-right: 10px; padding-left: 10px;">
-                            <a href="javascript:void(0);" class="js-toggle-search" >
-                                <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Search`)}" class="material-icons">search</i>
-                            </a>
-                            <a href="javascript:void(0);" class="js-toggle-opacity">
-                                <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Opacity`)}" class="material-icons">opacity</i>
-                            </a>
-                            <a href="javascript:void(0);" class="js-toggle-labels">
-                                <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Labels`)}" class="material-icons">label</i>
-                            </a>
-                            <a href="javascript:void(0);" class="js-toggle-table">
-                                <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Table view`)}" class="material-icons">list</i>
-                            </a>
-                            <a href="javascript:void(0);" class="js-toggle-load-strategy">
-                                <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Load strategy`)}" class="material-icons">branding_watermark</i>
-                            </a>
-                            <a href="javascript:void(0);" class="js-toggle-filters">
-                                <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Filters`)}" class="material-icons">filter_list</i>
-                            </a><span class="js-toggle-filters-number-of-filters">0</span>
+                            <span id="layer-tools-search">
+                                <a href="javascript:void(0);" class="js-toggle-search" >
+                                    <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Search`)}" class="material-icons">search</i>
+                                </a>
+                            </span>
+                            <span id="layer-tools-opacity">
+                                <a href="javascript:void(0);" class="js-toggle-opacity">
+                                    <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Opacity`)}" class="material-icons">opacity</i>
+                                </a>
+                            </span>
+                            <span id="layer-tools-labels">
+                                <a href="javascript:void(0);" class="js-toggle-labels">
+                                    <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Labels`)}" class="material-icons">label</i>
+                                </a>
+                            </span>
+                            <span id="layer-tools-table">
+                                <a href="javascript:void(0);" class="js-toggle-table">
+                                    <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Table view`)}" class="material-icons">list</i>
+                                </a>
+                            </span>
+                            <span id="layer-tools-load">
+                                <a href="javascript:void(0);" class="js-toggle-load-strategy">
+                                    <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Load strategy`)}" class="material-icons">branding_watermark</i>
+                                </a>
+                            </span>
+                            <span id="layer-tools-filters">
+                                <a href="javascript:void(0);" class="js-toggle-filters">
+                                    <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Filters`)}" class="material-icons">filter_list</i>
+                                </a>
+                            <span class="js-toggle-filters-number-of-filters">0</span>
+                            </span>
                         </div>
                         
                         <i style="float: right; padding-top: 9px; font-size: 26px;" class="material-icons layer-move-vert">more_vert</i>
@@ -207,7 +233,7 @@ class MarkupGenerator {
     }
 
     getEditingButtons() {
-        return `<div class="cartodb-popup-content">
+        return `<div class="vidi-popup-content">
                     <button class="btn btn-primary btn-xs ge-start-edit">
                         <i class="fa fa-pencil-alt" aria-hidden="true" ></i>
                     </button>
