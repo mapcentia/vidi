@@ -6,7 +6,7 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ## [2021.8.2] - 2021-30-8
 ### Added
-- The layer-group-checkboxes now have id's, so it's easier to apply css rules. Ids follows this pattern: `group-check-box-[group-id]`. Use the dev tool inspector to get the id.
+- The layer-group-checkboxes now have id's, so it's easier to apply css rules. Ids follow this pattern: `group-check-box-[group-id]`. Use the dev tool inspector to get the id.
 
 ## [2021.8.1] - 2021-25-8
 ### Changed
