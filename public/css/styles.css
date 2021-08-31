@@ -132,7 +132,7 @@ body {
   padding: 0 !important;
 }
 .leaflet-popup-content .tab-pane {
-  padding: 0  !important;
+  padding: 0 !important;
 }
 #pane {
   position: fixed;
@@ -841,7 +841,7 @@ body {
   background-color: #eeeeee;
 }
 #side-panel ul li.active .material-icons {
-  background-color: #1380c4;
+  background-color: #03a9f4;
   color: white;
 }
 .list-group .list-group-separator:before {
@@ -1294,7 +1294,7 @@ h4 small {
   padding: 1px;
 }
 #layers_list .layer-item.list-group-item .active {
-  background-color: #1380c4;
+  background-color: #03a9f4;
   color: white;
 }
 .layer-move-vert {
@@ -1585,5 +1585,52 @@ td.rdtYear:hover {
   cursor: help;
 }
 .list-subgroup-item {
-  border-left: 2px solid #10ae8c !important;
+  border-left: 2px solid #222 !important;
+}
+.symbols-rotate {
+  height: 16px;
+  width: 16px;
+  right: 0;
+  position: absolute;
+  top: 0;
+  background-image: url(https://www.svgrepo.com/show/74122/rotating-arrow-symbol.svg);
+  background-size: 16px 16px;
+  background-repeat: no-repeat;
+}
+.symbols-delete {
+  height: 16px;
+  width: 16px;
+  right: 0;
+  position: absolute;
+  bottom: 0;
+  background-image: url(https://www.svgrepo.com/show/64705/trash-can-with-cover.svg);
+  background-size: 16px 16px;
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
+.symbols-scale {
+  height: 16px;
+  width: 16px;
+  left: 0;
+  position: absolute;
+  top: 0;
+  background-image: url(https://www.svgrepo.com/show/4900/scale-screen.svg);
+  background-size: 16px 16px;
+  background-repeat: no-repeat;
+  cursor: nesw-resize;
+}
+.symbols-map,
+.symbols-lib {
+  height: 72px;
+  top: 0;
+  width: 72px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  left: 0;
+  padding: 7px;
+}
+.symbols-map {
+  position: absolute;
+}
+.symbols-lib {
+  position: relative;
 }

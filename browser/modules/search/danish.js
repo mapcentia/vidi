@@ -23,25 +23,25 @@ var draw;
  *
  * @type {string}
  */
-var AHOST = "https://dk.gc2.io";
+const AHOST = "https://dk.gc2.io";
 
 /**
  *
  * @type {string}
  */
-var ADB = "dk";
+const ADB = "dk";
 
 /**
  *
  * @type {string}
  */
-var MHOST = "https://dk.gc2.io";
+const MHOST = "https://dk.gc2.io";
 
 /**
  *
  * @type {string}
  */
-var MDB = "dk";
+const MDB = "dk";
 
 const drawTools = require(`./../drawTools`);
 
@@ -61,6 +61,15 @@ module.exports = {
         backboneEvents = o.backboneEvents;
         return this;
     },
+    /**
+     *
+     * @param onLoad
+     * @param el
+     * @param onlyAddress
+     * @param getProperty
+     * @param caller
+     * @returns {function(): geocloud.sqlStore}
+     */
     init: function (onLoad, el, onlyAddress, getProperty, caller) {
         var type1, type2, type3, type4, gids = {}, searchString, dslM, shouldA = [], shouldM = [], dsl1, dsl2,
             komKode = window.vidiConfig.searchConfig.komkode, placeStores = {}, maxZoom, searchTxt,
@@ -71,7 +80,7 @@ module.exports = {
 
         if (caller !== 'init') advanced = false;
         // adjust search text
-        let placeholder =window.vidiConfig?.searchConfig?.placeholderText;
+        let placeholder = window.vidiConfig?.searchConfig?.placeholderText;
         if (placeholder) {
             searchTxt = placeholder;
             $("#custom-search, #conflict-custom-search").attr("placeholder",
@@ -958,6 +967,23 @@ module.exports = {
                 }, 100)
             }
         });
+        return getPlaceStore;
+    },
+
+    /**
+     *
+     * @returns {string}
+     */
+    getMDB: function () {
+        return MDB;
+    },
+
+    /**
+     *
+     * @returns {string}
+     */
+    getMHOST: function () {
+        return MHOST;
     }
 
 };

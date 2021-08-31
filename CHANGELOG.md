@@ -4,6 +4,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2021.8.3] - 2021-30-8
+### Fixed
+- Regression bug regarding print. The metadata object was stripped from the payload in ealier release, but was necessary for recreation of layers. Now a slim down version of meta are send.
+
+## [2021.8.2] - 2021-30-8
+### Added
+- The layer-group-checkboxes now have id's, so it's easier to apply css rules. Ids follow this pattern: `group-check-box-[group-id]`. Use the dev tool inspector to get the id.
+
+## [2021.8.1] - 2021-25-8
+### Changed
+- Docker base image update to debian:bullseye-slim.
+
+### Added
+- Callback functions in embed.js. Two functions kan be defined in the parent page like this (with ``data-vidi-frame-name="map1"``):
+  - When Vidi is ready:
+  ```JavaScript
+    embedApi.vidiReady["map1"] = () => {
+        console.log("Vidi is ready")
+    }
+  ```
+  - When active layers from the snapshot is ready:
+  ```JavaScript
+    embedApi.activeLayersReady["map1"] = () => {
+        console.log("Active layers are ready")
+    }
+  ```
+
+### Fixed
+- In conflictSearch module, the adding of sheets to excel is now in a try/catch so invalid sheet names won't crash the Node process. 
+
 ## [2021.8.0] - 2021-12-8
 ### Changed
 - `select_function` is now called when opening a panel in a accordion pop-up.
