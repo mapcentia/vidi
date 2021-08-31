@@ -134,6 +134,7 @@
     "marked": "^1.1.0",
     "md5": "^2.2.1",
     "mdb-ui-kit": "^3.9.0",
+    "mobile-drag-drop": "^2.3.0-rc.2",
     "moment": "^2.29.1",
     "mustache": "^2.3.0",
     "mutationobserver-shim": "^0.3.7",

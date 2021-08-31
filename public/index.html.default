@@ -19,9 +19,9 @@
 
 
   ~ @author     Martin Høgh <mh@mapcentia.com>
-  ~ @copyright  2013-2021 MapCentia ApS
+  ~ @copyright  2013-2020 MapCentia ApS
   ~ @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
-  ~ @version    UNRELEASED
+  ~ @version    2020.12.0
 
   -->
 <html lang="en">
@@ -43,9 +43,11 @@
     <link rel="preload" href="/fonts/roboto-v18-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/fonts/roboto-v18-latin-500.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/fonts/roboto-v18-latin-300.woff2" as="font" type="font/woff2" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato&display=swap" rel="stylesheet">
     <link rel="preload" href="/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/icons/MaterialIcons-Regular.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/js/lib/bootstrap/dist/fonts/glyphicons-halflings-regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
     <!-- Build -->
     <!-- build:css /css/build/all.min.css -->
     <!-- Material Design fonts -->
@@ -71,12 +73,10 @@
     <link rel="stylesheet" href="/js/lib/Leaflet.markercluster/MarkerCluster.css"/>
     <link rel="stylesheet" href="/js/lib/Leaflet.markercluster/MarkerCluster.Default.css"/>
     <!-- Bootstrap -->
-    <link rel="stylesheet" href="/js/lib/bootstrap/dist/css/bootstrap.css">
     <link rel="stylesheet" href="/js/lib/snackbarjs/snackbar.min.css">
-    <link rel="stylesheet" href="/js/lib/bootstrap-material-design/dist/css/ripples.css">
     <link rel="stylesheet" href="/js/lib/bootstrap-material-datetimepicker/bootstrap-material-datetimepicker.css">
     <link rel="stylesheet" href="/js/lib/bootstrap-table/bootstrap-table.css"/>
-    <link rel="stylesheet" href="/js/lib/bootstrap-material-design/dist/css/bootstrap-material-design.css">
+    <link rel="stylesheet" href="/js/lib/mdb-ui-kit/css/mdb.min.css"/>
     <link rel="stylesheet" href="/js/lib/bootstrap-colorpicker/css/bootstrap-colorpicker.css">
     <!-- custom -->
     <link rel="stylesheet" href="/css/styles.min.css">
@@ -134,6 +134,7 @@
 <!-- build:js /js/build/all.min.js -->
 <script src="/js/lib/leaflet/leaflet-src.js"></script>
 <script src="/js/bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 <!-- /build -->
 <!-- Async load Javascript -->
 <script src="/js/build/all.async.min.js" async></script>
