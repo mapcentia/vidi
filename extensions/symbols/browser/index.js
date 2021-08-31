@@ -106,7 +106,7 @@ module.exports = {
                         mouse_y = e.originalEvent.changedTouches[0].clientY;
                     }
                     let radians = Math.atan2(mouse_x - center_x, mouse_y - center_y);
-                    rotations[id] =  (radians * (180 / Math.PI) * -1) + 90;
+                    rotations[id] =  (radians * (180 / Math.PI) * -1) + 135;
                     img.css('transform', 'rotate(' + rotations[id] + 'deg) scale(' + scales[id] + ')');
                 }
             }
@@ -127,7 +127,7 @@ module.exports = {
                     let a = (mouse_x - center_x);
                     let b = (mouse_y - center_y);
                     let c = Math.sqrt(a * a + b * b);
-                    scales[id] = (c / 50);
+                    scales[id] = (c / 40);
                     img.css('transform', 'rotate(' + rotations[id] + 'deg) scale(' + scales[id] + ')');
                 }
             }
