@@ -16,6 +16,10 @@ var moment = require('moment');
 // Set locale for date/time string
 moment.locale("da_DK");
 
+// Hardcode hose
+var GC2_HOST
+GC2_HOST = 'https://mapgogc2.geopartner.dk'
+
 /**
  *
  * @type {*|exports|module.exports}
@@ -313,7 +317,7 @@ var documentCreateGetFilterBounds = function (key, isfileIdent = false) {map
 
     // query SQL for stuff
     $.ajax({
-        url: gc2host + '/api/v1/sql/' + _USERSTR + '?q='+qrystr,
+        url: GC2_HOST + '/api/v1/sql/' + _USERSTR + '?q='+qrystr,
         type: "get",
         async: false,
         success: function(data) {
@@ -372,7 +376,7 @@ var documentGetExistingCasesFilter = function (key, isfileIdent = false) {
 
     // query SQL for stuff
     $.ajax({
-        url: gc2host + '/api/v1/sql/' +_USERSTR + '?q='+qrystr,
+        url: GC2_HOST + '/api/v1/sql/' +_USERSTR + '?q='+qrystr,
         type: "get",
         async: false,
         success: function(data) {
@@ -1064,7 +1068,7 @@ var loadAndInitFilters = function (active_state) {
                     " limit (1))" + 
                     " select lastSynchronization, lastData, showalert FROM cte1, cte2, cte3"
         $.ajax({
-            url: gc2host + '/api/v1/sql/' + _USERSTR + '?q='+qrystr,
+            url: GC2_HOST + '/api/v1/sql/' + _USERSTR + '?q='+qrystr,
             type: "get",
             async: false,
             success: function(data) {

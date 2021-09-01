@@ -514,10 +514,14 @@ module.exports = {
 
         var layerQueryDraw = [], layerQueryResult = [], layerQueryBuffer = [], layerPrint = [], e, parr,
             configFile = null;
-        if (scale && (isNaN(scale) || scale < 200)) {
-            alert(__("Not a valid scale. Must be over 200."));
-            return false;
-        }
+
+        // We really want to print in 100. so thats OK!
+        // TODO: check in config for applicable scales - RGB
+        // if (scale && (isNaN(scale) || scale < 200)) {
+        //     alert(__("Not a valid scale. Must be over 200."));
+        //     return false;
+        // }
+        
         backboneEvents.get().trigger("start:print");
         try {
             recEdit.editing.disable();
