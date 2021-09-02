@@ -1,6 +1,6 @@
 /*
  * @author     Alexander Shumilov
- * @copyright  2013-2019 MapCentia ApS
+ * @copyright  2013-2021 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -10,6 +10,7 @@ require('snackbarjs');
 
 import {MODULE_NAME, LAYER, SQL_QUERY_LIMIT} from './constants';
 import {GROUP_CHILD_TYPE_LAYER, GROUP_CHILD_TYPE_GROUP} from './LayerSorting';
+const base64url = require('base64url');
 
 /**
  * Communicating with the service workied via MessageChannel interface
@@ -66,7 +67,7 @@ const calculateOrder = (currentOrder) => {
     $(`[id^="layer-panel-"]`).each((index, element) => {
         let id = $(element).attr(`id`).replace(`layer-panel-`, ``);
         let children = [];
-        let readableId = atob(id);
+        let readableId = base64url.decode(id);
 
         let correspondingOrderItem = false;
         if (currentOrder) {
@@ -131,7 +132,7 @@ const calculateOrder = (currentOrder) => {
             }
 
             if (children.length === 0) {
-                console.warn(`Unable to get children for the ${atob(id)} group`);
+                console.warn(`Unable to get children for the ${base64url.decode(id)} group`);
             }
         }
 
