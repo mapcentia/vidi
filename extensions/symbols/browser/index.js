@@ -106,7 +106,7 @@ module.exports = {
                         mouse_y = e.originalEvent.changedTouches[0].clientY;
                     }
                     let radians = Math.atan2(mouse_x - center_x, mouse_y - center_y);
-                    rotations[id] =  (radians * (180 / Math.PI) * -1) + 135;
+                    rotations[id] = (radians * (180 / Math.PI) * -1) + 135;
                     img.css('transform', 'rotate(' + rotations[id] + 'deg) scale(' + scales[id] + ')');
                 }
             }
@@ -201,17 +201,59 @@ module.exports = {
     }
 };
 
-let dom = `<div>
-                                <div class="symbols-lib drag-marker" draggable="true" style="cursor: move">
-                                   <svg height="30" width="30">
-                                        <ellipse cx="20" cy="20" rx="10" ry="5" style="fill:yellow;stroke:purple;stroke-width:2" />
-                                   </svg> 
-                                </div>
-                                <div class="symbols-lib drag-marker" draggable="true" style="cursor: move">
-                                    22222
-                                </div>
-                                <div class="symbols-lib drag-marker" draggable="true" style="cursor: move">
-                                    33333
-                                </div>
-</div>`
+let dom = `
+
+<div>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="symbols-lib drag-marker" draggable="true">
+                <svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><title>
+                    curved-arrow-down-glyph</title>
+                    <path d="M492.93,170.85C492.93,76.64,416.29,0,322.09,0S151.25,76.64,151.25,170.85l-.12,184.77L80.2,284.17a9.83,9.83,0,0,0-13.9,0L21.9,328.57a9.84,9.84,0,0,0,0,13.9L188.54,509.11a9.81,9.81,0,0,0,13.9,0L369.08,342.48a9.83,9.83,0,0,0,0-13.9l-44.4-44.41a10.11,10.11,0,0,0-13.9,0L239.6,355.62l.13-184.77a82.35,82.35,0,1,1,164.7,0l0,159.84a9.94,9.94,0,0,0,9.93,9.93H483a9.94,9.94,0,0,0,9.93-9.93Z"/>
+                </svg>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="symbols-lib drag-marker" draggable="true">
+                <svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><title>
+                    arrow-right-down-glyph</title>
+                    <path d="M487.31,275.08a11.1,11.1,0,0,0-9.61-5.55H421.54V11.1A11.1,11.1,0,0,0,410.44,0H120a11.11,11.11,0,0,0-9,4.64L25.27,124.51a11.1,11.1,0,0,0,9,17.55H279.47V269.53H223.3a11.1,11.1,0,0,0-9.61,16.65L340.9,506.45a11.1,11.1,0,0,0,19.22,0L487.3,286.18A11.09,11.09,0,0,0,487.31,275.08Z"/>
+                </svg>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="symbols-lib drag-marker" draggable="true">
+                <svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><title>
+                    arrow-curved-top-glyph</title>
+                    <path d="M376.06,238.67v104a168.69,168.69,0,0,1-49.83,119.51v.36A169.16,169.16,0,0,1,37.37,342.66V136.12h81.24V342.66a87.53,87.53,0,0,0,88.1,88.1,88.14,88.14,0,0,0,88.1-88.1v-104H199.13l69-119.51L337.06,0l68.6,119.15,69,119.51Z"
+                          fill="#434040"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" style="margin-top: 25px">
+        <div class="col-md-4">
+            <div class="symbols-lib drag-marker" draggable="true">
+                <svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><title>
+                    arrow-left-glyph</title>
+                    <path d="M501.34,62.07h-63a10.66,10.66,0,0,0-10.66,10.66V297.52H193.73V240.13a10.66,10.66,0,0,0-16-9.23L5.33,330.47a10.66,10.66,0,0,0,0,18.46L177.75,448.5a10.66,10.66,0,0,0,16-9.23V381.88H501.34A10.66,10.66,0,0,0,512,371.22V72.73A10.66,10.66,0,0,0,501.34,62.07Z"/>
+                </svg>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="symbols-lib drag-marker" draggable="true">
+                <svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><title>
+                    arrow-top-glyph</title>
+                    <polygon
+                            points="256 0 362.35 115.09 468.7 230.55 338.04 230.55 338.04 512 166.74 512 166.74 230.55 43.3 230.55 149.65 115.09 256 0"
+                            fill="#434040"/>
+                </svg>
+            </div>
+        </div>
+        <div class="col-md-4">
+        </div>
+    </div>
+</div>
+`
 
