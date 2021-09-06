@@ -16,6 +16,18 @@ let cloud;
 let markers = {};
 let rotations = {};
 let scales = {};
+let state;
+let backboneEvents;
+let _self;
+const MODULE_ID = exId;
+
+const store = (id) => {
+    console.log("Id", id)
+    console.log("LatLng", markers[id].getLatLng())
+    console.log("Rotation", rotations[id])
+    console.log("scale", scales[id])
+    backboneEvents.get().trigger(`${MODULE_ID}:state_change`);
+}
 
 module.exports = {
 
@@ -41,6 +53,9 @@ module.exports = {
         }
         utils = o.utils;
         cloud = o.cloud;
+        state = o.state;
+        backboneEvents = o.backboneEvents;
+        _self = this;
         return this;
     },
 
@@ -48,23 +63,30 @@ module.exports = {
      *
      */
     init: function () {
+        state.listenTo(MODULE_ID, _self);
+        state.listen(MODULE_ID, `state_change`);
+
+        state.getModuleState(MODULE_ID).then(initialState => {
+            _self.applyState(initialState)
+        });
+
         utils.createMainTab(exId, __("Symboles"), __("Info"), require('./../../../browser/modules/height')().max, "photo_camera", false, exId);
         $(`#${exId}`).append(dom);
 
-        window.addEventListener('DOMContentLoaded', () => {
-            const element = document.getElementById("drag-test");
-            element.addEventListener("dragstart",
-                (e) => {
-                    e.dataTransfer.setData("text/plain", e.target.id);
-                }
-            );
-        });
+        // window.addEventListener('DOMContentLoaded', () => {
+        //     const element = document.getElementById("drag-test");
+        //     element.addEventListener("dragstart",
+        //         (e) => {
+        //             e.dataTransfer.setData("text/plain", e.target.id);
+        //         }
+        //     );
+        // });
         $(".drag-marker").on("dragend", (e) => {
             e.preventDefault();
             let map = cloud.get().map;
             let markerElement = $(e.target).clone();
             let coord = map.mouseEventToLatLng(e);
-            let id = Math.random().toString(36).substr(2, 5);
+            let id = (+new Date * (Math.random() + 1)).toString(36).substr(2, 5);
             let classStr = "dm_" + id;
             let rotateHandleStr = "r_" + id;
             let deleteHandleStr = "d_" + id;
@@ -83,8 +105,12 @@ module.exports = {
                 html: `${markerElement[0].outerHTML}`
             });
             markers[id] = L.marker(coord, {icon: icon, draggable: true}).addTo(map);
-            rotations[id] = "0";
-            scales[id] = "1";
+            markers[id].on("moveend", () => {
+                store(id);
+            })
+            rotations[id] = 0;
+            scales[id] = 1;
+            store(id);
             let img = $(`.${classStr}`);
             let rotateHandle = $(`.${rotateHandleStr}`);
             let deleteHandle = $(`.${deleteHandleStr}`);
@@ -94,41 +120,41 @@ module.exports = {
             const rotate = (e) => {
                 if (mouseDown === true) {
                     let cRect = document.getElementsByClassName(classStr)[0].getBoundingClientRect();
-                    let center_x = (cRect.left) + (cRect.width / 2);
-                    let center_y = (cRect.top) + (cRect.height / 2);
-                    let mouse_x;
-                    let mouse_y;
+                    let centerX = (cRect.left) + (cRect.width / 2);
+                    let centerY = (cRect.top) + (cRect.height / 2);
+                    let mouseX;
+                    let mouseY;
                     if (!touch) {
-                        mouse_x = e.pageX;
-                        mouse_y = e.pageY;
+                        mouseX = e.pageX;
+                        mouseY = e.pageY;
                     } else {
-                        mouse_x = e.originalEvent.changedTouches[0].clientX;
-                        mouse_y = e.originalEvent.changedTouches[0].clientY;
+                        mouseX = e.originalEvent.changedTouches[0].clientX;
+                        mouseY = e.originalEvent.changedTouches[0].clientY;
                     }
-                    let radians = Math.atan2(mouse_x - center_x, mouse_y - center_y);
+                    let radians = Math.atan2(mouseX - centerX, mouseY - centerY);
                     rotations[id] = (radians * (180 / Math.PI) * -1) + 135;
-                    img.css('transform', 'rotate(' + rotations[id] + 'deg) scale(' + scales[id] + ')');
+                    img.css('transform', 'rotate(' + rotations[id].toString() + 'deg) scale(' + scales[id].toString() + ')');
                 }
             }
             const scale = (e) => {
                 if (mouseDown === true) {
                     let cRect = document.getElementsByClassName(classStr)[0].getBoundingClientRect();
-                    let center_x = (cRect.left) + (cRect.width / 2);
-                    let center_y = (cRect.top) + (cRect.height / 2);
-                    let mouse_x;
-                    let mouse_y;
+                    let centerX = (cRect.left) + (cRect.width / 2);
+                    let centerY = (cRect.top) + (cRect.height / 2);
+                    let mouseX;
+                    let mouseY;
                     if (!touch) {
-                        mouse_x = e.pageX;
-                        mouse_y = e.pageY;
+                        mouseX = e.pageX;
+                        mouseY = e.pageY;
                     } else {
-                        mouse_x = e.originalEvent.changedTouches[0].clientX;
-                        mouse_y = e.originalEvent.changedTouches[0].clientY;
+                        mouseX = e.originalEvent.changedTouches[0].clientX;
+                        mouseY = e.originalEvent.changedTouches[0].clientY;
                     }
-                    let a = (mouse_x - center_x);
-                    let b = (mouse_y - center_y);
+                    let a = (mouseX - centerX);
+                    let b = (mouseY - centerY);
                     let c = Math.sqrt(a * a + b * b);
                     scales[id] = (c / 40);
-                    img.css('transform', 'rotate(' + rotations[id] + 'deg) scale(' + scales[id] + ')');
+                    img.css('transform', 'rotate(' + rotations[id].toString() + 'deg) scale(' + scales[id].toString() + ')');
                 }
             }
 
@@ -198,6 +224,17 @@ module.exports = {
             })
 
         })
+    },
+
+    getState: () => {
+        return {rotations, scales};
+    },
+
+    applyState: (newState) => {
+        console.log("newState", newState)
+        return new Promise((resolve) => {
+            resolve();
+        });
     }
 };
 
