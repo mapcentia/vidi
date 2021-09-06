@@ -20,6 +20,8 @@ let state;
 let backboneEvents;
 let _self;
 const MODULE_ID = exId;
+let mouseDown = false;
+let touch = false;
 
 const store = (id) => {
     console.log("Id", id)
@@ -27,6 +29,131 @@ const store = (id) => {
     console.log("Rotation", rotations[id])
     console.log("scale", scales[id])
     backboneEvents.get().trigger(`${MODULE_ID}:state_change`);
+}
+
+const rotate = (e, img, id, classStr) => {
+    if (mouseDown === true) {
+        let cRect = document.getElementsByClassName(classStr)[0].getBoundingClientRect();
+        let centerX = (cRect.left) + (cRect.width / 2);
+        let centerY = (cRect.top) + (cRect.height / 2);
+        let mouseX;
+        let mouseY;
+        if (!touch) {
+            mouseX = e.pageX;
+            mouseY = e.pageY;
+        } else {
+            mouseX = e.originalEvent.changedTouches[0].clientX;
+            mouseY = e.originalEvent.changedTouches[0].clientY;
+        }
+        let radians = Math.atan2(mouseX - centerX, mouseY - centerY);
+        rotations[id] = (radians * (180 / Math.PI) * -1) + 135;
+        console.log(rotations[id])
+        img.css('transform', 'rotate(' + rotations[id].toString() + 'deg) scale(' + scales[id].toString() + ')');
+    }
+}
+const scale = (e, img, id, classStr) => {
+    if (mouseDown === true) {
+        let cRect = document.getElementsByClassName(classStr)[0].getBoundingClientRect();
+        let centerX = (cRect.left) + (cRect.width / 2);
+        let centerY = (cRect.top) + (cRect.height / 2);
+        let mouseX;
+        let mouseY;
+        if (!touch) {
+            mouseX = e.pageX;
+            mouseY = e.pageY;
+        } else {
+            mouseX = e.originalEvent.changedTouches[0].clientX;
+            mouseY = e.originalEvent.changedTouches[0].clientY;
+        }
+        let a = (mouseX - centerX);
+        let b = (mouseY - centerY);
+        let c = Math.sqrt(a * a + b * b);
+        scales[id] = (c / 40);
+        img.css('transform', 'rotate(' + rotations[id].toString() + 'deg) scale(' + scales[id].toString() + ')');
+    }
+}
+
+/**
+ *
+ * @param e
+ */
+const handleDragEnd = (e) => {
+    e.preventDefault();
+    let map = cloud.get().map;
+    let markerElement = $(e.target).clone();
+    let id = (+new Date * (Math.random() + 1)).toString(36).substr(2, 5);
+    let coord = map.mouseEventToLatLng(e);
+    createSymbol(markerElement, id, coord);
+}
+
+/**
+ *
+ * @param markerElement
+ * @param id
+ * @param coord
+ */
+const createSymbol = (markerElement, id, coord, ro = 0, sc = 1) => {
+    let map = cloud.get().map;
+    let classStr = "dm_" + id;
+    let rotateHandleStr = "r_" + id;
+    let deleteHandleStr = "d_" + id;
+    let scaleHandleStr = "s_" + id;
+    markerElement.removeClass("symbols-lib");
+    markerElement.addClass("symbols-map");
+    markerElement.attr("draggable", "false")
+    markerElement.addClass(classStr);
+    markerElement.append(`<div class="symbols-handles symbols-rotate ${rotateHandleStr}"></div>`);
+    markerElement.append(`<div class="symbols-handles symbols-delete ${deleteHandleStr}" id="${id}"></div>`);
+    markerElement.append(`<div class="symbols-handles symbols-scale ${scaleHandleStr}"></div>`);
+    let icon = L.divIcon({
+        className: "drag-symbole",
+        iconSize: new L.Point(72, 72),
+        // iconAnchor: [26, 26],
+        html: `${markerElement[0].outerHTML}`
+    });
+    markers[id] = L.marker(coord, {icon: icon, draggable: true}).addTo(map);
+    markers[id].on("moveend", () => {
+        store(id);
+    })
+    rotations[id] = ro;
+    scales[id] = sc;
+    store(id);
+    let img = $(`.${classStr}`);
+    let rotateHandle = $(`.${rotateHandleStr}`);
+    let deleteHandle = $(`.${deleteHandleStr}`);
+    let scaleHandle = $(`.${scaleHandleStr}`);
+
+    // Init scale and rotation
+    img.css('transform', 'rotate(' + rotations[id].toString() + 'deg) scale(' + scales[id].toString() + ')');
+
+    // Attach events
+    deleteHandle.on("click touchend", function (e) {
+        e.preventDefault();
+        map.removeLayer(markers[e.target.id]);
+        delete markers[e.target.id];
+    });
+    rotateHandle.on("touchstart mousedown", function (e) {
+        e.preventDefault();
+        touch = e.type === "touchstart";
+        mouseDown = true;
+        markers[id].dragging.disable();
+        map.dragging.disable();
+        map.touchZoom.disable();
+        $(document).on("touchmove mousemove", (e) => {
+            rotate(e, img, id, classStr);
+        });
+    });
+    scaleHandle.on("touchstart mousedown", function (e) {
+        e.preventDefault();
+        touch = e.type === "touchstart";
+        mouseDown = true;
+        markers[id].dragging.disable();
+        map.dragging.disable();
+        map.touchZoom.disable();
+        $(document).on("touchmove mousemove", (e) => {
+            scale(e, img, id, classStr);
+        });
+    });
 }
 
 module.exports = {
@@ -63,6 +190,7 @@ module.exports = {
      *
      */
     init: function () {
+        let map = cloud.get().map;
         state.listenTo(MODULE_ID, _self);
         state.listen(MODULE_ID, `state_change`);
 
@@ -73,157 +201,19 @@ module.exports = {
         utils.createMainTab(exId, __("Symboles"), __("Info"), require('./../../../browser/modules/height')().max, "photo_camera", false, exId);
         $(`#${exId}`).append(dom);
 
-        // window.addEventListener('DOMContentLoaded', () => {
-        //     const element = document.getElementById("drag-test");
-        //     element.addEventListener("dragstart",
-        //         (e) => {
-        //             e.dataTransfer.setData("text/plain", e.target.id);
-        //         }
-        //     );
-        // });
-        $(".drag-marker").on("dragend", (e) => {
-            e.preventDefault();
-            let map = cloud.get().map;
-            let markerElement = $(e.target).clone();
-            let coord = map.mouseEventToLatLng(e);
-            let id = (+new Date * (Math.random() + 1)).toString(36).substr(2, 5);
-            let classStr = "dm_" + id;
-            let rotateHandleStr = "r_" + id;
-            let deleteHandleStr = "d_" + id;
-            let scaleHandleStr = "s_" + id;
-            markerElement.removeClass("symbols-lib");
-            markerElement.addClass("symbols-map");
-            markerElement.attr("draggable", "false")
-            markerElement.addClass(classStr);
-            markerElement.append(`<div class="symbols-handles symbols-rotate ${rotateHandleStr}"></div>`);
-            markerElement.append(`<div class="symbols-handles symbols-delete ${deleteHandleStr}" id="${id}"></div>`);
-            markerElement.append(`<div class="symbols-handles symbols-scale ${scaleHandleStr}"></div>`);
-            let icon = L.divIcon({
-                className: "drag-symbole",
-                iconSize: new L.Point(72, 72),
-                // iconAnchor: [26, 26],
-                html: `${markerElement[0].outerHTML}`
-            });
-            markers[id] = L.marker(coord, {icon: icon, draggable: true}).addTo(map);
-            markers[id].on("moveend", () => {
-                store(id);
-            })
-            rotations[id] = 0;
-            scales[id] = 1;
-            store(id);
-            let img = $(`.${classStr}`);
-            let rotateHandle = $(`.${rotateHandleStr}`);
-            let deleteHandle = $(`.${deleteHandleStr}`);
-            let scaleHandle = $(`.${scaleHandleStr}`);
-            let mouseDown = false;
-            let touch = false;
-            const rotate = (e) => {
-                if (mouseDown === true) {
-                    let cRect = document.getElementsByClassName(classStr)[0].getBoundingClientRect();
-                    let centerX = (cRect.left) + (cRect.width / 2);
-                    let centerY = (cRect.top) + (cRect.height / 2);
-                    let mouseX;
-                    let mouseY;
-                    if (!touch) {
-                        mouseX = e.pageX;
-                        mouseY = e.pageY;
-                    } else {
-                        mouseX = e.originalEvent.changedTouches[0].clientX;
-                        mouseY = e.originalEvent.changedTouches[0].clientY;
-                    }
-                    let radians = Math.atan2(mouseX - centerX, mouseY - centerY);
-                    rotations[id] = (radians * (180 / Math.PI) * -1) + 135;
-                    img.css('transform', 'rotate(' + rotations[id].toString() + 'deg) scale(' + scales[id].toString() + ')');
-                }
+        $(".drag-marker").on("dragend", handleDragEnd)
+        let markerElement = $($(".symbols-lib")[1]).clone();
+        createSymbol(markerElement, "testdsd", [56.409342962389154, 9.407043457031252], 200, 2);
+
+        $(document).on("touchend mouseup", function (e) {
+            for (const id in markers) {
+                markers[id].dragging.enable();
             }
-            const scale = (e) => {
-                if (mouseDown === true) {
-                    let cRect = document.getElementsByClassName(classStr)[0].getBoundingClientRect();
-                    let centerX = (cRect.left) + (cRect.width / 2);
-                    let centerY = (cRect.top) + (cRect.height / 2);
-                    let mouseX;
-                    let mouseY;
-                    if (!touch) {
-                        mouseX = e.pageX;
-                        mouseY = e.pageY;
-                    } else {
-                        mouseX = e.originalEvent.changedTouches[0].clientX;
-                        mouseY = e.originalEvent.changedTouches[0].clientY;
-                    }
-                    let a = (mouseX - centerX);
-                    let b = (mouseY - centerY);
-                    let c = Math.sqrt(a * a + b * b);
-                    scales[id] = (c / 40);
-                    img.css('transform', 'rotate(' + rotations[id].toString() + 'deg) scale(' + scales[id].toString() + ')');
-                }
-            }
-
-            deleteHandle.mousedown(function (e) {
-                e.preventDefault();
-                markers[id].dragging.disable();
-                map.dragging.disable();
-                map.touchZoom.disable();
-            });
-            deleteHandle.on("touchstart", function (e) {
-                e.preventDefault();
-                markers[id].dragging.disable();
-                map.dragging.disable();
-                map.touchZoom.disable();
-            });
-            deleteHandle.on("click touchend", function (e) {
-                e.preventDefault();
-                map.removeLayer(markers[e.target.id]);
-                delete markers[e.target.id];
-            });
-
-            rotateHandle.mousedown(function (e) {
-                e.preventDefault();
-                markers[id].dragging.disable();
-                map.dragging.disable();
-                map.touchZoom.disable();
-                mouseDown = true;
-                touch = false;
-                $(document).mousemove(rotate);
-            });
-            rotateHandle.on("touchstart", function (e) {
-                e.preventDefault();
-                markers[id].dragging.disable();
-                map.dragging.disable();
-                map.touchZoom.disable();
-                mouseDown = true;
-                touch = true;
-                $(document).on("touchmove", rotate);
-            });
-
-            scaleHandle.mousedown(function (e) {
-                e.preventDefault();
-                markers[id].dragging.disable();
-                map.dragging.disable();
-                map.touchZoom.disable();
-                mouseDown = true;
-                touch = false;
-                $(document).mousemove(scale);
-            });
-            scaleHandle.on("touchstart", function (e) {
-                e.preventDefault();
-                markers[id].dragging.disable();
-                map.dragging.disable();
-                map.touchZoom.disable();
-                mouseDown = true;
-                touch = true;
-                $(document).on("touchmove", scale);
-            });
-            $(document).on("touchend mouseup", function (e) {
-                for (const id in markers) {
-                    markers[id].dragging.enable();
-                }
-                map.dragging.enable();
-                map.touchZoom.enable()
-                $(document).off("mousemove touchmove");
-                mouseDown = false;
-            })
-
-        })
+            map.dragging.enable();
+            map.touchZoom.enable()
+            $(document).off("mousemove touchmove");
+            mouseDown = false;
+        });
     },
 
     getState: () => {
