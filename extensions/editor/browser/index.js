@@ -360,6 +360,7 @@ module.exports = {
      * @param isVectorLayer
      */
     add: function (k, qstore, doNotRemoveEditor, isVectorLayer = false) {
+        _self.stopEdit(editedFeature);
         editedFeature = false;
 
         let me = this, React = require('react'), ReactDOM = require('react-dom'),
@@ -625,10 +626,7 @@ module.exports = {
      * @param isVectorLayer
      */
     edit: function (e, k, qstore, isVectorLayer = false) {
-        // If edit is started without stopping the previous
-        if (editedFeature) {
-            _self.stopEdit(editedFeature);
-        }
+        _self.stopEdit(editedFeature);
         editedFeature = e;
         nonCommitedEditedFeature = {};
         const editFeature = () => {
@@ -954,6 +952,7 @@ module.exports = {
      * @param isVectorLayer
      */
     delete: function (e, k, qstore, isVectorLayer = false) {
+        _self.stopEdit(editedFeature);
         editedFeature = false;
 
         let schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
