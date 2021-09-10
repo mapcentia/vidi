@@ -14,8 +14,7 @@ let utils;
 let exId = "symbols";
 let cloud;
 let markers = {};
-let rotations = {};
-let scales = {};
+let symbolState = {}
 let state;
 let backboneEvents;
 let _self;
@@ -24,10 +23,6 @@ let mouseDown = false;
 let touch = false;
 
 const store = (id) => {
-    console.log("Id", id)
-    console.log("LatLng", markers[id].getLatLng())
-    console.log("Rotation", rotations[id])
-    console.log("scale", scales[id])
     backboneEvents.get().trigger(`${MODULE_ID}:state_change`);
 }
 
@@ -46,9 +41,8 @@ const rotate = (e, img, id, classStr) => {
             mouseY = e.originalEvent.changedTouches[0].clientY;
         }
         let radians = Math.atan2(mouseX - centerX, mouseY - centerY);
-        rotations[id] = (radians * (180 / Math.PI) * -1) + 135;
-        console.log(rotations[id])
-        img.css('transform', 'rotate(' + rotations[id].toString() + 'deg) scale(' + scales[id].toString() + ')');
+        symbolState[id].rotation = (radians * (180 / Math.PI) * -1) + 135;
+        img.css('transform', 'rotate(' + symbolState[id].rotation.toString() + 'deg) scale(' + symbolState[id].scale.toString() + ')');
     }
 }
 const scale = (e, img, id, classStr) => {
@@ -68,10 +62,12 @@ const scale = (e, img, id, classStr) => {
         let a = (mouseX - centerX);
         let b = (mouseY - centerY);
         let c = Math.sqrt(a * a + b * b);
-        scales[id] = (c / 40);
-        img.css('transform', 'rotate(' + rotations[id].toString() + 'deg) scale(' + scales[id].toString() + ')');
+        symbolState[id].scale = (c / 40);
+        img.css('transform', 'rotate(' + symbolState[id].rotation.toString() + 'deg) scale(' + symbolState[id].scale.toString() + ')');
     }
 }
+
+const symbolWrapper = $(`<div class="symbols-lib drag-marker" draggable="true"></div>`);
 
 /**
  *
@@ -80,43 +76,51 @@ const scale = (e, img, id, classStr) => {
 const handleDragEnd = (e) => {
     e.preventDefault();
     let map = cloud.get().map;
-    let markerElement = $(e.target).clone();
+    let innerHtml = $(e.target).clone().html();
     let id = (+new Date * (Math.random() + 1)).toString(36).substr(2, 5);
     let coord = map.mouseEventToLatLng(e);
-    createSymbol(markerElement, id, coord);
+    createSymbol(innerHtml, id, coord);
 }
 
 /**
  *
- * @param markerElement
+ * @param innerHtml
  * @param id
  * @param coord
+ * @param ro
+ * @param sc
  */
-const createSymbol = (markerElement, id, coord, ro = 0, sc = 1) => {
+const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1) => {
     let map = cloud.get().map;
     let classStr = "dm_" + id;
     let rotateHandleStr = "r_" + id;
     let deleteHandleStr = "d_" + id;
     let scaleHandleStr = "s_" + id;
-    markerElement.removeClass("symbols-lib");
-    markerElement.addClass("symbols-map");
-    markerElement.attr("draggable", "false")
-    markerElement.addClass(classStr);
-    markerElement.append(`<div class="symbols-handles symbols-rotate ${rotateHandleStr}"></div>`);
-    markerElement.append(`<div class="symbols-handles symbols-delete ${deleteHandleStr}" id="${id}"></div>`);
-    markerElement.append(`<div class="symbols-handles symbols-scale ${scaleHandleStr}"></div>`);
+    let outerHtml = $(symbolWrapper).html(innerHtml);
+    outerHtml.removeClass("symbols-lib");
+    outerHtml.addClass("symbols-map");
+    outerHtml.attr("draggable", "false")
+    outerHtml.addClass(classStr);
+    outerHtml.append(`<div class="symbols-handles symbols-rotate ${rotateHandleStr}"></div>`);
+    outerHtml.append(`<div class="symbols-handles symbols-delete ${deleteHandleStr}" id="${id}"></div>`);
+    outerHtml.append(`<div class="symbols-handles symbols-scale ${scaleHandleStr}"></div>`);
     let icon = L.divIcon({
         className: "drag-symbole",
         iconSize: new L.Point(72, 72),
         // iconAnchor: [26, 26],
-        html: `${markerElement[0].outerHTML}`
+        html: `${outerHtml[0].outerHTML}`
     });
     markers[id] = L.marker(coord, {icon: icon, draggable: true}).addTo(map);
+    symbolState[id] = {};
+    symbolState[id].svg = innerHtml;
+    symbolState[id].coord = markers[id].getLatLng();
     markers[id].on("moveend", () => {
+        symbolState[id].coord = markers[id].getLatLng();
         store(id);
     })
-    rotations[id] = ro;
-    scales[id] = sc;
+    symbolState[id].rotation = ro;
+    symbolState[id].scale = sc;
+
     store(id);
     let img = $(`.${classStr}`);
     let rotateHandle = $(`.${rotateHandleStr}`);
@@ -124,13 +128,15 @@ const createSymbol = (markerElement, id, coord, ro = 0, sc = 1) => {
     let scaleHandle = $(`.${scaleHandleStr}`);
 
     // Init scale and rotation
-    img.css('transform', 'rotate(' + rotations[id].toString() + 'deg) scale(' + scales[id].toString() + ')');
+    img.css('transform', 'rotate(' + symbolState[id].rotation.toString() + 'deg) scale(' + symbolState[id].scale.toString() + ')');
 
     // Attach events
     deleteHandle.on("click touchend", function (e) {
         e.preventDefault();
-        map.removeLayer(markers[e.target.id]);
+        map.removeLayer(markers[id]);
         delete markers[e.target.id];
+        delete symbolState[e.target.id];
+        store(id);
     });
     rotateHandle.on("touchstart mousedown", function (e) {
         e.preventDefault();
@@ -202,11 +208,12 @@ module.exports = {
         $(`#${exId}`).append(dom);
 
         $(".drag-marker").on("dragend", handleDragEnd)
-        let markerElement = $($(".symbols-lib")[1]).clone();
-        createSymbol(markerElement, "testdsd", [56.409342962389154, 9.407043457031252], 200, 2);
+
+        let markerElement = $($(".symbols-lib")[1]).clone().html();
+
 
         $(document).on("touchend mouseup", function (e) {
-            for (const id in markers) {
+            for (const id in symbolState) {
                 markers[id].dragging.enable();
             }
             map.dragging.enable();
@@ -215,14 +222,21 @@ module.exports = {
             mouseDown = false;
         });
     },
+    recreateSymbolsFromState: (state)=>{
+        for (const id in state) {
+            createSymbol(state[id].svg, id, state[id].coord, state[id].rotation, state[id].scale);
+        }
+    },
 
     getState: () => {
-        return {rotations, scales};
+        console.log(symbolState)
+        return symbolState;
     },
 
     applyState: (newState) => {
         console.log("newState", newState)
         return new Promise((resolve) => {
+            _self.recreateSymbolsFromState(newState);
             resolve();
         });
     }
