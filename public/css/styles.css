@@ -664,7 +664,8 @@ inline .leaflet-control-print {
   margin-bottom: 0;
 }
 .custom-popup .leaflet-popup-content-wrapper a {
-  color: rgba(0, 255, 255, 0.5);
+  color: #ff5722;
+  text-decoration: underline;
 }
 .custom-popup .leaflet-popup-tip-container {
   width: 30px !important;
@@ -1611,7 +1612,7 @@ td.rdtYear:hover {
   cursor: help;
 }
 .list-subgroup-item {
-  border-left: 2px solid #222 !important;
+  border-left: 2px solid #ff5722 !important;
 }
 .symbols-rotate {
   height: 16px;
@@ -1659,6 +1660,7 @@ td.rdtYear:hover {
 }
 .symbols-lib {
   position: relative;
+  float: left;
 }
 .drag-marker {
   cursor: move;

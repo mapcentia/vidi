@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [UNRELEASED]
+### Changed
+- Links in pop-ups now gets the primary color of the theme instead of the fixed cyan color.
+
+### Fixed
+- Serveral smaller fixes for the Editor extension.
+
 ## [2021.8.3] - 2021-30-8
 ### Fixed
 - Regression bug regarding print. The metadata object was stripped from the payload in ealier release, but was necessary for recreation of layers. Now a slim down version of meta are send.
