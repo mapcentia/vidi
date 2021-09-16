@@ -298,9 +298,13 @@ module.exports = {
             // Auto scale
             for (const id in symbolState) {
                 if (id && symbolState.hasOwnProperty(id)) {
+                    let scale = symbolState[id].scale;
                     let diff = prevZoom - currZoom;
-                    let scale = diff < 0 ? symbolState[id].scale * 2: symbolState[id].scale / 2;
-                    symbolState[id].scale = scale;
+                    for (let i = 0; i < Math.abs(diff); i++) {
+                        scale = diff < 0 ? symbolState[id].scale * 2 : symbolState[id].scale / 2;
+                        symbolState[id].scale = scale;
+                    }
+                    // console.log(diff, scale)
                     $($(`.dm_${id}`)[0]).css('transform', 'rotate(' + (symbolState[id].rotation).toString() + 'deg) scale(' + scale.toString() + ')');
                     backboneEvents.get().trigger(`${MODULE_ID}:state_change`);
                 }
