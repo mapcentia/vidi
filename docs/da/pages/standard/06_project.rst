@@ -7,11 +7,11 @@ Projekter
 .. topic:: Overview
 
     :Date: |today|
-    :Vidi-version: 2020.11.0
-    :Forfatter: `giovanniborella <https://github.com/giovanniborella>`_
+    :Vidi-version: 2021.9.0
+    :Forfatter: `giovanniborella <https://github.com/giovanniborella>`_ | `mapcentia <https://github.com/mapcentia>`_
 
 .. contents:: 
-    :depth: 3
+    :depth: 1
 
 
 *****************************************************************
@@ -23,7 +23,7 @@ Projekter
 Projekt
 =================================================================
 
-Projekt-værktøjet kan bruges til at gemme og distribuere øjebliksbilleder af kortet.
+Projekt-værktøjet kan bruges til at gemme og distribuere øjebliksbilleder af kortets tilstand.
 
 Når der bliver lavet et projekt, gemmes kort-udstrækningen, tegnede elementer (:ref:`draw`), lag med mere - og kan bruges som en direkte genvej tilbage til hvor man arbejdede tidligere.
 
@@ -36,6 +36,16 @@ Når værktøjet startes, vises en liste med allerede eksisterende projekter.
     :figclass: align-center
 
     Værktøjet er tændt, og klar til at lave projekter.
+
+Projekter kan gemmes på to måder: Lokalt eller under en brugerprofil.
+
+**Lokal gemte projekter**
+
+Projektet bliver gemt på serveren, men referencen til det er knyttet til browser-sessionen. Dvs. at projektet kan ses på listen og ændres så længe der anvendes den samme browser og browser-cachen ikke er ryddet. Mistes referencen til projektet vil det stadig eksistere, men kan ikke ændres eller slettes.
+
+**Bruger gemte projekter**
+
+Er man logget ind i Vidi kan projektet gemmes under ens bruger-profil. På denne måde kan man altid se projektet på listen og det kan ændres/slettes fra en hvilken som helst browser.
 
 Det er muligt at tilgå et projekt på flere måder:
 
