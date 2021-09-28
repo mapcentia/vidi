@@ -503,6 +503,17 @@
         display: {{_displayhistory}};
     }
 </style>
+<script>
+    var done = function () {
+        try {
+            window.parent.postMessage({
+                type: "doneCallback",
+            }, "*");
+        } catch (e) {
+            console.error(e.message);
+        }
+    }
+</script>
 <!-- map -->
 <div id="pane">
     <div id="container">
@@ -599,6 +610,9 @@
         <div id="layer-slide-body-wrapper">
             <div class="modal-body">
                 <div class="form-group" id="symbols"></div>
+                <div>
+                    <button class="btn btn-sm" onclick="javascript:done()">Afslut</button>
+                </div>
             </div>
         </div>
     </div>
