@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
 ## [UNRELEASED]
+### Changed
+- Legend in blank.tmpl (is used in static maps). Also the legend checkboxes are removed from legends in blank.tmpl and print.tmpl.
+
 ### Fixed
 - Serialization of line extremities was buggy when lines was recreated after applying state causing extremities not to be drawn.
 
