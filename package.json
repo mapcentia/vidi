@@ -134,6 +134,7 @@
     "lz-string": "^1.4.4",
     "marked": "^1.1.0",
     "md5": "^2.2.1",
+    "mobile-drag-drop": "^2.3.0-rc.2",
     "moment": "^2.29.1",
     "mustache": "^2.3.0",
     "mutationobserver-shim": "^0.3.7",
@@ -175,6 +176,7 @@
     "terraformer-wkt-parser": "^1.2.1",
     "underscore": "^1.10.2",
     "utf8": "^3.0.0",
-    "uuid": "^3.4.0"
+    "uuid": "^3.4.0",
+    "xlsx": "^0.17.0"
   }
 }

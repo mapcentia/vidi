@@ -1,9 +1,16 @@
+/*
+ * @author     Alexander Shumilov
+ * @copyright  2013-2021 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
+ */
+
 const React = require('react');
 import TitleFieldComponent from './../../shared/TitleFieldComponent';
 import LoadingOverlay from './../../shared/LoadingOverlay';
 
 const uuidv4 = require('uuid/v4');
 const cookie = require('js-cookie');
+const base64url = require('base64url');
 
 const buttonStyle = {padding: `4px`, margin: `0px`};
 
@@ -135,9 +142,9 @@ class StateSnapshotsDashboard extends React.Component {
             $.ajax({
                 url: this.state.apiUrl + '/' + vidiConfig.appDatabase,
                 method: 'POST',
-                contentType: 'application/json; charset=utf-8',
-                dataType: 'json',
-                data: JSON.stringify(data)
+                contentType: 'text/plain; charset=utf-8',
+                dataType: 'text',
+                data: base64url(JSON.stringify(data))
             }).then((response) => {
                 _self.setState({loading: false});
                 _self.refreshSnapshotsList();
@@ -200,9 +207,9 @@ class StateSnapshotsDashboard extends React.Component {
             $.ajax({
                 url: `${this.state.apiUrl}/${vidiConfig.appDatabase}/${data.id}`,
                 method: 'PUT',
-                dataType: 'json',
-                contentType: 'application/json; charset=utf-8',
-                data: JSON.stringify(data)
+                contentType: 'text/plain; charset=utf-8',
+                dataType: 'text',
+                data: base64url(JSON.stringify(data))
             }).then(data => {
                 _self.refreshSnapshotsList();
                 _self.setState({
@@ -274,11 +281,12 @@ class StateSnapshotsDashboard extends React.Component {
         $.ajax({
             url: this.state.apiUrl + '/' + vidiConfig.appDatabase + '?ownerOnly=true',
             method: 'GET',
-            dataType: 'json'
+            dataType: 'text'
         }).then(data => {
             if (this.mounted) {
                 let browserOwnerSnapshots = [];
                 let userOwnerSnapshots = [];
+                data = JSON.parse(base64url.decode(data));
                 data.map(item => {
                     if (item.browserId) {
                         browserOwnerSnapshots.push(item);
@@ -365,7 +373,7 @@ class StateSnapshotsDashboard extends React.Component {
         };
 
         const createSnapshotRecord = (item, index, local = false) => {
-            let date = new Date(item.created_at);
+            let date = new Date(item.updated_at || item.created_at); // updated_at is a newer property, which may not be present in older snapshots
             let dateFormatted = (`${date.getHours()}:${date.getMinutes()} ${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`);
 
             let importButton = false;

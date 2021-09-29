@@ -371,7 +371,7 @@ var _encoders = {
                     featureGeoJson = {_latlngs: feature._latlngs};
                     featureGeoJson.type = "Rectangle";
                     featureGeoJson.feature = feature.feature;
-                } else if (feature?.properties?.type === "circlemarker") {
+                } else if (feature?.feature?.properties?.type === "circlemarker") {
                     featureGeoJson = {_latlng: feature._latlng};
                     featureGeoJson.type = "CircleMarker";
                     featureGeoJson.feature = feature.feature;
@@ -391,7 +391,9 @@ var _encoders = {
 
                 featureGeoJson.style = style;
                 featureGeoJson._vidi_type = feature._vidi_type;
-                featureGeoJson._vidi_extremities = feature._extremities;
+                if (feature._vidi_type === "draw") {
+                    featureGeoJson._vidi_extremities = feature._extremities || feature.feature._vidi_extremities;
+                }
                 featureGeoJson._vidi_measurementLayer = feature._measurementLayer ? true : false;
                 featureGeoJson._vidi_measurementOptions = feature._measurementOptions;
 

@@ -1084,12 +1084,10 @@ module.exports = {
                             if (layersThatAreNotInMeta.length > 0) {
                                 let fetchMetaRequests = [];
                                 layersThatAreNotInMeta.map(item => {
-                                    fetchMetaRequests.push(meta.init(item, true, true))
+                                    fetchMetaRequests.push(meta.init(item, true, true).catch(error => { return false }))
                                 });
 
                                 Promise.all(fetchMetaRequests).then(() => {
-                                    proceedWithBuilding();
-                                }).catch(() => {
                                     proceedWithBuilding();
                                 });
                             } else {
@@ -1336,11 +1334,9 @@ module.exports = {
      */
     createStore: (layer, isVirtual = false, isVectorTile = false) => {
         if (isVirtual && isVectorTile) throw new Error(`Vector tile layer can not be virtual`);
-
         if (layer.virtual_layer) {
             isVirtual = true;
         }
-
         let parentFiltersHash = ``;
         let layerKey = layer.f_table_schema + '.' + layer.f_table_name;
         const layerSpecificQueryLimit = layerTreeUtils.getQueryLimit(meta.parseLayerMeta(layerKey));
@@ -1396,6 +1392,29 @@ module.exports = {
 
         let trackingLayerKey = (LAYER.VECTOR + ':' + layerKey);
 
+        /*
+            Setting up mouse over
+         */
+        let metaData = meta.getMetaDataKeys();
+        let parsedMeta = _self.parseLayerMeta(metaData[layerKey]), template;
+        const defaultTemplate =
+            `<div>
+                        {{#each data}}
+                            {{this.title}}: {{this.value}} <br>
+                        {{/each}}
+                        </div>`;
+        if (parsedMeta?.info_template_hover && parsedMeta.info_template_hover !== "") {
+            template = parsedMeta.info_template_hover;
+        } else {
+            template = defaultTemplate;
+        }
+        let fieldConf;
+        try {
+            fieldConf = JSON.parse(metaData[layerKey].fieldconf);
+        } catch (e) {
+            fieldConf = {};
+        }
+
         moduleState.vectorStores[trackingLayerKey] = new geocloud.sqlStore({
             map: cloud.get().map,
             parentFiltersHash,
@@ -1420,7 +1439,7 @@ module.exports = {
                 let reloadInterval = meta.parseLayerMeta(layerKey)?.reload_interval;
                 let tableElement = meta.parseLayerMeta(layerKey)?.show_table_on_side;
                 // Create side table once
-                if (tableElement && !$('#vector-side-table').length) {
+                if (tableElement && !$('#vector-side-table').length && window.vidiConfig.template === "embed.tmpl") {
                     $("#pane").css("left", "0");
                     $("#pane").css("width", "70%");
                     $("#map").css("width", "115%");
@@ -1460,6 +1479,9 @@ module.exports = {
                 return apiBridgeInstance.transformResponseHandler(response, id);
             },
             onEachFeature: (feature, layer) => {
+                if (parsedMeta?.hover_active) {
+                    _self.mouseOver(layer, fieldConf, template);
+                }
                 if ((LAYER.VECTOR + ':' + layerKey) in onEachFeature) {
                     /*
                         Checking for correct onEachFeature structure
@@ -1468,7 +1490,6 @@ module.exports = {
                         `caller` in onEachFeature[LAYER.VECTOR + ':' + layerKey] === false || !onEachFeature[LAYER.VECTOR + ':' + layerKey].caller) {
                         throw new Error(`Invalid onEachFeature structure`);
                     }
-
                     if (onEachFeature[LAYER.VECTOR + ':' + layerKey].caller === `editor`) {
                         /*
                             If the handler was set by the editor extension, then display the attributes popup and editing buttons
@@ -1476,6 +1497,7 @@ module.exports = {
                         if (`editor` in extensions) {
                             editor = extensions.editor.index;
                         }
+
 
                         layer.on("click", function (e) {
                             let layerIsEditable = false;
@@ -1824,6 +1846,10 @@ module.exports = {
                 text = text.replace(/(\r\n|\n|\r)/gm, '<br>');
                 return new Handlebars.SafeString(text);
             });
+            let randText = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                let r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
             try {
                 let tmpl = sqlQuery.getVectorTemplate(layerKey);
                 if (tmpl) {
@@ -1840,16 +1866,12 @@ module.exports = {
                     }
                     //properties.text1 = marked(properties.text1);
                     renderedText = Handlebars.compile(tmpl)(properties);
-                    let randText = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-                        let r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-                        return v.toString(16);
-                    });
                     if (typeof parsedMeta.disable_vector_feature_info === "undefined" || parsedMeta.disable_vector_feature_info === false) {
                         count++;
                         accordion += `<div class="panel panel-default vector-feature-info-panel" id="vector-feature-info-panel-${randText}" style="box-shadow: none;border-radius: 0; margin-bottom: 0">
                                         <div class="panel-heading" role="tab" style="padding: 8px 0px 8px 15px;border-bottom: 1px white solid">
                                             <h4 class="panel-title">
-                                                <a style="display: block; color: black" class="feature-info-accordion-toggle accordion-toggle js-toggle-feature-panel" data-toggle="collapse" data-parent="#layers" href="#collapse${randText}">${title}</a>
+                                                <a style="display: block; color: black" class="feature-info-accordion-toggle accordion-toggle js-toggle-feature-panel" data-toggle="collapse" data-parent="#layers" href="#collapse${randText}" id="a-collapse${randText}">${title}</a>
                                             </h4>
                                         </div>
                                         <ul class="list-group" id="group-${randText}" role="tabpanel"><div id="collapse${randText}" class="feature-info-accordion-body accordion-body collapse" style="padding: 3px 8px 3px 8px">${renderedText}</div></ul>
@@ -1862,10 +1884,52 @@ module.exports = {
                 console.info("Error in pop-up template for: " + layerKey, e);
             }
 
+            // Set select call when opening a panel
+            let selectCallBack = () => {};
+            if (typeof parsedMeta.select_function !== "undefined" && parsedMeta.select_function !== "") {
+                try {
+                    selectCallBack = Function('"use strict";return (' + parsedMeta.select_function + ')')();
+                } catch (e) {
+                    console.info("Error in select function for: " + key);
+                    console.error(e.message);
+                }
+            }
+            let func = selectCallBack.bind(this, null, layer, layerKey, _self);
+
+            $(document).arrive(`#a-collapse${randText}`, function () {
+                $(this).on('click', function () {
+                    let e = $(`#collapse${randText}`);
+                    if (!e.hasClass("in")) {
+                        func();
+                    }
+                    $('.feature-info-accordion-body').collapse("hide")
+                });
+            });
             if (count > 0) {
                 if (typeof parsedMeta.info_element_selector !== "undefined" && parsedMeta.info_element_selector !== "" && renderedText !== null) {
                     $(parsedMeta.info_element_selector).html(renderedText)
                 } else {
+                    // Set select call when opening a panel
+                    let selectCallBack = () => {};
+                    if (typeof parsedMeta.select_function !== "undefined" && parsedMeta.select_function !== "") {
+                        try {
+                            selectCallBack = Function('"use strict";return (' + parsedMeta.select_function + ')')();
+                        } catch (e) {
+                            console.info("Error in select function for: " + key);
+                            console.error(e.message);
+                        }
+                    }
+                    let func = selectCallBack.bind(this, null, layer, layerKey, _self);
+                    $(document).arrive(`#a-collapse${randText}`, function () {
+                        $(this).on('click', function () {
+                            let e = $(`#collapse${randText}`);
+                            if (!e.hasClass("in")) {
+                                func();
+                            }
+                            $('.feature-info-accordion-body').collapse("hide")
+                        });
+                    });
+
                     vectorPopUp = L.popup({
                         autoPan: true,
                         minWidth: 300,
@@ -1877,15 +1941,13 @@ module.exports = {
                         .on('remove', () => {
                             sqlQuery.resetAll();
                         });
-                    $(".feature-info-accordion-toggle").on("click", () => {
-                        $('.feature-info-accordion-body').collapse("hide")
-                    })
-
                 }
             }
         })
         if (count === 1) {
-            $(".js-toggle-feature-panel:first").trigger('click');
+            setTimeout(()=> {
+                $(".js-toggle-feature-panel:first").trigger('click');
+            }, 200);
         }
     },
 
@@ -2144,7 +2206,7 @@ module.exports = {
         // Only if container doesn't exist
         // ===============================
         if ($("#layer-panel-" + base64GroupName).length === 0) {
-            $("#layers_list").append(markupGeneratorInstance.getGroupPanel(base64GroupName, groupName));
+            $("#layers_list").append(markupGeneratorInstance.getGroupPanel(base64GroupName, groupName, window.vidiConfig.showLayerGroupCheckbox));
 
             // Append to inner group container
             // ===============================
@@ -2529,17 +2591,12 @@ module.exports = {
      */
     createSubgroupRecord: (subgroup, forcedState, precheckedLayers, parentNode, level = 0, initiallyClosed = true) => {
         let base64SubgroupName = Base64.encode(`subgroup_${subgroup.id}_level_${level}_${uuidv4()}`).replace(/=/g, "");
-        let markup = markupGeneratorInstance.getSubgroupControlRecord(base64SubgroupName, subgroup.id);
+        let markup = markupGeneratorInstance.getSubgroupControlRecord(base64SubgroupName, subgroup.id, level, window.vidiConfig.showLayerGroupCheckbox);
 
         $(parentNode).append(markup);
-        $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-id`).append(`<div>
-            <p>
-                <button type="button" class="btn btn-default btn-xs js-subgroup-toggle-button">
-                    <i class="fa fa-arrow-down"></i>
-                </button>
+        $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-id`).append(`<div style="display: inline">
                 ${subgroup.id}
                 <i style="float: right; padding-top: 9px; font-size: 26px;" class="material-icons layer-move-vert layer-move-vert-subgroup">more_vert</i>
-            </p>
         </div>`);
 
         $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-toggle-button`).click((event) => {
@@ -3457,5 +3514,44 @@ module.exports = {
 
     setChildLayersThatShouldBeEnabled: function (arr) {
         childLayersThatShouldBeEnabled = arr;
+    },
+    mouseOver: function (layer, fieldConf, template) {
+        let flag = false, tooltipHtml, tail = $("#tail");
+        layer.on('mouseover', function (e) {
+            let data = e?.sourceTarget?.feature?.properties || e?.data;
+            let tmp = $.extend(true, {}, data), fi = [];
+            flag = true;
+            $.each(tmp, function (name, property) {
+                if (typeof fieldConf[name] !== "undefined" && fieldConf[name].mouseover) {
+                    let title;
+                    if (
+                        typeof fieldConf[name] !== "undefined" &&
+                        typeof fieldConf[name].alias !== "undefined" &&
+                        fieldConf[name].alias !== ""
+                    ) {
+                        title = fieldConf[name].alias
+                    } else {
+                        title = name;
+                    }
+                    fi.push({
+                        title: title,
+                        value: property
+                    });
+                }
+            });
+            tmp.data = fi; // Used in a "loop" template
+            tooltipHtml = Handlebars.compile(template)(tmp);
+            tail.fadeIn(100);
+            tail.html(tooltipHtml);
+        });
+        layer.on('mouseout', function () {
+            flag = false;
+            setTimeout(function () {
+                if (!flag) {
+                    $("#tail").fadeOut(100);
+                }
+            }, 200)
+
+        });
     }
 };

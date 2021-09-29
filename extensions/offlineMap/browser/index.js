@@ -129,7 +129,7 @@ module.exports = {
 
         // Allowed zoom levels
         const minimalZoomLevel = 10;
-        const maximumZoomLevel = 18;
+        const maximumZoomLevel = 21;
 
         /**
          *
@@ -600,7 +600,8 @@ module.exports = {
                         tilesFailed={this.state.mapAreasTilesFailed}/>);
                 }
 
-                let pageIsSecured = ((document.location.protocol.indexOf('https') === 0) ? true : false);
+                //let pageIsSecured = true;
+                let pageIsSecured = ((document.location.protocol.indexOf('https') === 0) || (document.location.href.indexOf('http://127.0.0.1') === 0));
                 let securedPageNotification = false;
                 let cacheNotification = false;
                 let addCachedMapFormPanel = false;

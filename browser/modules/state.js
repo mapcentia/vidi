@@ -71,6 +71,8 @@ var p, hashArr = hash.replace("#", "").split("/");
 // and hard code the call to reportRender.render in state::initializeFromHashPart
 let reportRender = require('../../extensions/conflictSearch/browser/reportRenderAlt');
 
+let activeLayersInSnapshot = false;
+
 /**
  * Returns internaly stored global state
  *
@@ -175,6 +177,15 @@ module.exports = {
                     legend.init().then(function () {
                         console.log("Vidi is now loaded");// Vidi is now fully loaded
                         window.status = "all_loaded";
+                        if (urlVars?.readyCallback) {
+                            try {
+                                window.parent.postMessage({
+                                    type: "vidiCallback",
+                                    method: urlVars.readyCallback
+                                }, "*");
+                            } catch (e) {
+                            }
+                        }
                     });
                 });
 
@@ -196,20 +207,23 @@ module.exports = {
                     return result;
                 };
 
-                const setLayers = () => {
-                    $(".base-map-button").removeClass("active");
-                    $("#" + hashArr[0]).addClass("active");
+                const setLayers = (hash = true) => {
                     let layersToActivate = [];
-
                     let baseLayerId = false;
-                    if (hashArr[1] && hashArr[2] && hashArr[3]) {
-                        baseLayerId = hashArr[0];
+                    if (hash) {
+                        $(".base-map-button").removeClass("active");
+                        if (hashArr[0]) $("#" + hashArr[0]).addClass("active");
 
-                        // Layers to activate
-                        if (hashArr[4]) {
-                            layersToActivate = removeDuplicates(hashArr[4].split(","));
+                        if (hashArr[1] && hashArr[2] && hashArr[3]) {
+                            baseLayerId = hashArr[0];
+
+                            // Layers to activate
+                            if (hashArr[4]) {
+                                layersToActivate = removeDuplicates(hashArr[4].split(","));
+                            }
                         }
                     }
+                    layersToActivate = removeDuplicates(layersToActivate.concat(window?.vidiConfig?.activeLayers || []));
 
                     /**
                      * Creates promise
@@ -270,7 +284,9 @@ module.exports = {
                             } else {
                                 cloud.get().zoomToExtent();
                             }
-
+                            if (window?.vidiConfig?.activeLayers) {
+                                setLayers(false);
+                            }
                             initResolve();
                         }
                     } else {
@@ -506,6 +522,7 @@ module.exports = {
                                 console.log("No active layers in snapshot");
                             } else {
                                 console.log("Active layers in snapshot");
+                                activeLayersInSnapshot = true;
                             }
                             this.applyState(state.snapshot).then(initResolve).catch((error) => {
                                 console.error(error)
@@ -554,12 +571,15 @@ module.exports = {
      * @return {Promise}
      */
     resetState: (customModulesToReset = []) => {
-//        backboneEvents.get().trigger(`reset:infoClick`);
         let appliedStatePromises = [];
+        let localState = {};
+        localState.modules = {};
         if (customModulesToReset.length > 0) {
             for (let key in listened) {
                 if (customModulesToReset.indexOf(key) !== -1) {
                     appliedStatePromises.push(listened[key].applyState(false));
+                } else {
+                    localState.modules[key] = listened[key].getState();
                 }
             }
         } else {
@@ -568,7 +588,7 @@ module.exports = {
             }
         }
         return Promise.all(appliedStatePromises).then(() => {
-            return _setInternalState({});
+            return _setInternalState(localState);
         });
     },
 
@@ -788,5 +808,9 @@ module.exports = {
 
     resetStore: () => {
         _setInternalState({});
+    },
+
+    activeLayersInSnapshot: () => {
+        return activeLayersInSnapshot;
     }
 };

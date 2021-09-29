@@ -15,7 +15,7 @@ let infoClick;
 let cloud;
 let state;
 let stateFromDb;
-let reportType;
+let reportType = "1";
 let _self;
 const config = require('../../../config/config.js');
 const printC = config.print.templates;
@@ -69,9 +69,13 @@ module.exports = {
                 return;
             }
             state.getModuleState(MODULE_ID).then(initialState => {
-                conflictSearch.setValueForNoUiSlider(initialState.bufferValue);
-                conflictSearch.handleResult(initialState);
-                reportType = initialState.reportType;
+                if (initialState) {
+                    conflictSearch.setValueForNoUiSlider(initialState.bufferValue);
+                    if (typeof urlparser.urlVars?.var_landsejerlavskode === "undefined" || conflictSearch.getFromVarsIsDone()) {
+                        conflictSearch.handleResult(initialState);
+                    }
+                    reportType = initialState.reportType || "1";
+                }
                 $("input[name='conflict-report-type'][value='" + reportType +"']").prop("checked",true);
             });
 
@@ -79,9 +83,7 @@ module.exports = {
 
         // Deactivates module
         backboneEvents.get().on("off:conflictSearch off:all reset:all", () => {
-            conflictSearch.off();
-            infoClick.active(false);
-            infoClick.reset();
+            _self.resetState();
         });
 
         // Handle GUI when print is done. Using at custom event, so standard print is not triggered
@@ -90,10 +92,12 @@ module.exports = {
         });
 
         // When conflict search is done, enable the print button
-        backboneEvents.get().on("end:conflictSearch", function () {
+        backboneEvents.get().on("end:conflictSearch", function (e) {
             $("#conflict-print-btn").prop("disabled", false);
+            $("#conflict-excel-btn").prop("disabled", false);
             $("#conflict-set-print-area-btn").prop("disabled", false);
             backboneEvents.get().trigger(`${MODULE_ID}:state_change`);
+            $("#conflict-excel-btn").prop("href", "/tmp/excel/" + e.file + ".xlsb");
         });
 
         // Handle conflict info click events
@@ -118,6 +122,7 @@ module.exports = {
         backboneEvents.get().on("on:customData", function (e) {
             reportRender.render(e);
         });
+
 
         // Click event for print button
         $("#conflict-print-btn").on("click", function () {
@@ -245,6 +250,15 @@ module.exports = {
         });
     },
 
+    resetState: () => {
+        return new Promise((resolve) => {
+            conflictSearch.off();
+            infoClick.active(false);
+            infoClick.reset();
+            resolve();
+        });
+    },
+
     getState: () => {
         let res = conflictSearch.getResult();
         res.reportType = reportType;
@@ -252,6 +266,9 @@ module.exports = {
     },
 
     applyState: (newState) => {
-        stateFromDb = newState;
+        return new Promise((resolve) => {
+            stateFromDb = newState;
+            resolve();
+        });
     }
 };

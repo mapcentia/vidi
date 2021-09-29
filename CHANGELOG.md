@@ -5,6 +5,66 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
 ## [UNRELEASED]
+### Fixed
+- Serialization of line extremities was buggy when lines was recreated after applying state causing extremities not to be drawn.
+
+## [2021.9.0]
+### Changed
+- Links in pop-ups now gets the primary color of the theme instead of the fixed cyan color.
+
+### Fixed
+- Serveral smaller fixes for the Editor extension.
+- embed.js API: Only fire snapshotLayersCallback once.
+- Excel write erors in conflict module is now handled, so Vidi doesn't crash.
+
+## [2021.8.3] - 2021-30-8
+### Fixed
+- Regression bug regarding print. The metadata object was stripped from the payload in ealier release, but was necessary for recreation of layers. Now a slim down version of meta are send.
+
+## [2021.8.2] - 2021-30-8
+### Added
+- The layer-group-checkboxes now have id's, so it's easier to apply css rules. Ids follow this pattern: `group-check-box-[group-id]`. Use the dev tool inspector to get the id.
+
+## [2021.8.1] - 2021-25-8
+### Changed
+- Docker base image update to debian:bullseye-slim.
+
+### Added
+- Callback functions in embed.js. Two functions kan be defined in the parent page like this (with ``data-vidi-frame-name="map1"``):
+  - When Vidi is ready:
+  ```JavaScript
+    embedApi.vidiReady["map1"] = () => {
+        console.log("Vidi is ready")
+    }
+  ```
+  - When active layers from the snapshot is ready:
+  ```JavaScript
+    embedApi.activeLayersReady["map1"] = () => {
+        console.log("Active layers are ready")
+    }
+  ```
+
+### Fixed
+- In conflictSearch module, the adding of sheets to excel is now in a try/catch so invalid sheet names won't crash the Node process. 
+
+## [2021.8.0] - 2021-12-8
+### Changed
+- `select_function` is now called when opening a panel in a accordion pop-up.
+
+### Fixed
+- Print and Conflict modules will not longer keep unnecessary Meta data in state. This reduce the data volume. 
+- Layer tree will now build with all valid layers. Before it would start building as soon an invalid layer was proccess leaving out the rest.
+
+## [2021.7.1] - 2021-8-7
+### Fixed
+- Regression bug. Draw module labels are now again serialized as labels - not markers.
+
+## [2021.7.0] - 2021-5-7
+### Fixed
+- Conflict Excel output: Two sheets can't have the same name, which will result in error. In case of same names, the last char is changed to a number.
+- Conflict report will now default to "Compact" if none is choosen.
+
+## [2021.6.0] - 2021-2-7
 ### Changed
 - No MapCentia logo in default and conflict print template. Logo can be set with external css sheet. Some thing like this:
 ```css
@@ -16,10 +76,50 @@ and this project adheres to [CalVer](https://calver.org/).
 }
 ```
 - embed.js: If host in token is http, then make it protocol relative, so tokens created on http still works when embedded on https sites.
+- It's now possible to switch all layers on/off in a layer (sub)group. Enable the checkboxes with the `showLayerGroupCheckbox` conflig.
+- Some visual improvements to the display of sub-groups in the layer tree.
+- Editing of geometry is not possible when number of nodes exceed 1.000. But attribut data can still be edited. A high amount of nodes will hog down the browser and it can crash.
+- The Snapshot module will now use base64url encoded body for getting, creating and updating snapshots. This way will a JSON value `ILIKE '%12'` not mess things up when decoded server side. This requires an update of GC2. 
+- Snapshot list is now ordered by update date/time and this is also what's displayed instead of create date/time.
+- Frame number on prints will not be shown when only one frame is printed. Custom print needs an update:
+```
+{{#showFrameNumber}}#{{printFrame}}{{/showFrameNumber}}
+```
+- Frame numbers starts with 1 instead of 0.
+- New format for setting redis host. Now the database number can be set:
+```JSON
+{
+  "redis": {
+    "host": "127.0.0.1:6379",
+    "db": 2
+  }
+}
+```
+
+### Added
+- An API loaded with the `embed.js` script. Two methods are available: `embedApi.switchLayer` and `embedApi.allOff`. See docs for details.
+- Mouse over on vector and raster tile layers. The latter using UTF Grid. These GC2 Meta properties are controling the mouse over:
+ - `hover_active` Boolean. Should mouse over be switch on?
+ - `info_template_hover` String. Handlebars template to use in label. If not set a default template will be used, which loops through fields with the `Show in mouse-over` property checked.
+ - `cache_utf_grid` Boolean. Wether to cache UTF grid tiles. Only apply to raster tile layers.
+- Excel report is now available in conflict module. Each layer with hits will have its own sheet. For for sheets to get populated with hits the "Show in conflict" option must be checked for a least one field in the Structur tab in GC2 Admin. 
+- New config option `activeLayers`. This option is a array of schema qualified layers with any type prefix (:v, :mvt, :w), which should be switch on from the start. If a snapshot link is used for starting Vidi, this option will be ignored.
+```json
+{
+  "activeLayers": [
+    "schema.layer1",
+    "v:schema.layer2"
+  ]
+}
+```
 
 ### Fixed
 - Feature info click wouldn't open the pop-up if multiple layers was switch on.
 - Drawings are not longer dashed, when selected.
+- Conflict search module will now search protected layers if user is signed in.
+- On `zoomToExtentOfgeoJsonStore` in geocloud.js pan map one pixel to defeat a strange bug, which causes a browser freeze.
+- Layer filter auto complete menu is now postioned absolute instead of fixed, so it will not hang in the same place when scrolling layer tree.
+- Composit QGIS Layers now work. They are not longer bypassed by MapServer where the merge request is done.
 
 ## [2021.5.0] - 2021-4-5
 ### Changed
@@ -62,7 +162,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - If a layer in a state snapshot is for some reason not available (protected, deleted), the build of the layer tree was ever resolved. Now it'll resolve.  
 - The queueStatisticsWatcher and Service Worker now uses 3. party module for base64 decoding, because windows.btoa fails on non-latin characters.
 - COWI Gade foto named properly in Streetview module.
-- Alot of fixes in the Editor module.
+- A lot of fixes in the Editor module.
 
 ## [2020.12.0] - 2020-8-12
 ### Changed

@@ -582,6 +582,15 @@ module.exports = {
         });
 
         let data;
+        // Slim down the meta data
+        let metaData = meta.getMetaData();
+        for (let i=0; i< metaData.data.length; i++) {
+            delete   metaData.data[i].class;
+            delete   metaData.data[i].classwizard;
+            delete   metaData.data[i].def;
+            delete   metaData.data[i].fieldconf;
+            delete   metaData.data[i].fields;
+        }
         try {
             data = {
                 anchor: anchorRaw,
@@ -604,10 +613,10 @@ module.exports = {
                 header: encodeURIComponent($("#print-title").val()) || encodeURIComponent($("#print-comment").val()) ? "inline" : "none",
                 dateTime: dayjs().format('Do MMMM YYYY, H:mm'),
                 date: dayjs().format('Do MMMM YYYY'),
-                metaData: meta.getMetaData(),
+                metaData: metaData,
                 px: config.print.templates[tmpl][pageSize][printingOrientation].mapsizePx[0],
                 py: config.print.templates[tmpl][pageSize][printingOrientation].mapsizePx[1],
-                queryString: urlparser.search,
+                queryString: urlparser.search.replace(/state=[a-z0-9_-]*/g, ""), // remove the state snapshot
                 customData: null,
                 scales: scales,
                 sticky: $("#print-sticky").is(":checked")
@@ -658,7 +667,7 @@ module.exports = {
     applyState: (print) => {
         return new Promise((resolve) => {
             paramsFromDb = print;
-            // backboneEvents.get().trigger(`${MODULE_ID}:state_change`);
+            backboneEvents.get().trigger(`${MODULE_ID}:state_change`);
             resolve();
         });
     }

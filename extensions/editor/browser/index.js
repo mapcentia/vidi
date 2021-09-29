@@ -9,6 +9,9 @@
 import {LAYER, SYSTEM_FIELD_PREFIX} from '../../../browser/modules/layerTree/constants';
 import dayjs from 'dayjs';
 
+const jquery = require('jquery');
+require('snackbarjs');
+
 /**
  *
  * @type {*|exports|module.exports}
@@ -50,6 +53,7 @@ const widgets = {'imageupload': ImageUploadWidget};
 const MODULE_NAME = `editor`;
 const EDITOR_FORM_CONTAINER_ID = 'editor-attr-form';
 const EDITOR_CONTAINER_ID = 'editor-attr-dialog';
+const MAX_NODE_IN_FEATURE = 1000; // If number of nodes exceed this number, when the geometry editor is not enabled.
 
 const serviceWorkerCheck = () => {
     if (!('serviceWorker' in navigator) || !navigator.serviceWorker || !navigator.serviceWorker.controller) {
@@ -356,6 +360,7 @@ module.exports = {
      * @param isVectorLayer
      */
     add: function (k, qstore, doNotRemoveEditor, isVectorLayer = false) {
+        _self.stopEdit(editedFeature);
         editedFeature = false;
 
         let me = this, React = require('react'), ReactDOM = require('react-dom'),
@@ -621,6 +626,7 @@ module.exports = {
      * @param isVectorLayer
      */
     edit: function (e, k, qstore, isVectorLayer = false) {
+        _self.stopEdit(editedFeature);
         editedFeature = e;
         nonCommitedEditedFeature = {};
         const editFeature = () => {
@@ -645,7 +651,6 @@ module.exports = {
                 fieldconf = JSON.parse(metaDataKeys[schemaQualifiedName].fieldconf);
             }
 
-            me.stopEdit();
 
             e.on(`editable:editing`, () => {
                 featureWasEdited = true;
@@ -699,7 +704,25 @@ module.exports = {
                     break;
 
                 default:
-                    editor = e.enableEdit();
+                    let numberOfNodes = 0;
+                    editedFeature.feature.geometry.coordinates.forEach((c) => {
+                        if (typeof c === "object") {
+                            c.forEach((c2) => {
+                                numberOfNodes += c2.length;
+                            });
+                        }
+                        numberOfNodes += c.length;
+                    })
+                    if (numberOfNodes <= MAX_NODE_IN_FEATURE) {
+                        editor = e.enableEdit();
+                    } else {
+                        editor = false;
+                        jquery.snackbar({
+                            content: `<span>${__("Editing of geometry is not possible when number of nodes exceed")} ${MAX_NODE_IN_FEATURE}</span>`,
+                            htmlAllowed: true,
+                            timeout: 6000
+                        })
+                    }
                     break;
             }
 
@@ -776,8 +799,12 @@ module.exports = {
                 }
 
                 // Set GeoJSON properties from form values
+                let fieldConf = false;
+                if (metaDataKeys[schemaQualifiedName].fieldconf) {
+                    fieldConf = JSON.parse(metaDataKeys[schemaQualifiedName].fieldconf);
+                }
                 Object.keys(fields).map(function (key) {
-                    if (!key.startsWith("gc2_") && fields[key].type !== "geometry") {
+                    if ((!key.startsWith("gc2_") && fields[key].type !== "geometry" && !fieldConf[key]?.filter) || metaDataKeys[schemaQualifiedName].pkey === key) {
                         GeoJSON.properties[key] = formData.formData[key];
                         // Set undefined values back to NULL
                         if (GeoJSON.properties[key] === undefined) {
@@ -925,6 +952,7 @@ module.exports = {
      * @param isVectorLayer
      */
     delete: function (e, k, qstore, isVectorLayer = false) {
+        _self.stopEdit(editedFeature);
         editedFeature = false;
 
         let schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],

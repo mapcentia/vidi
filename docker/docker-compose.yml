@@ -6,6 +6,6 @@ services:
     image: mapcentia/vidi:base
   vidi:
     build: ./stable
-    image: mapcentia/vidi:2020.12.0
+    image: mapcentia/vidi
     depends_on:
       - base

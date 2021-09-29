@@ -251,6 +251,9 @@ var projWktWithBuffer;
  */
 var draw;
 
+let getPlaceStore;
+let fromVarsIsDone = false;
+
 /**
  *
  * @type set: module.exports.set, init: module.exports.init
@@ -334,7 +337,7 @@ module.exports = module.exports = {
         // DOM created
 
         // Init search with custom callback
-        search.init(function () {
+        getPlaceStore = search.init(function () {
             _clearDrawItems();
             _clearDataItems();
             this.layer._layers[Object.keys(this.layer._layers)[0]]._vidi_type = "query_draw"; // Tag it, so it serialized
@@ -508,6 +511,21 @@ module.exports = module.exports = {
         setTimeout(function () {
             po.popover("hide");
         }, 2500);
+
+        if (urlparser.urlVars?.var_landsejerlavskode && urlparser.urlVars?.var_matrikelnr) {
+            setTimeout(()=> {
+                if (!fromVarsIsDone) {
+                    let placeStore = getPlaceStore();
+                    placeStore.db = search.getMDB();
+                    placeStore.host = search.getMHOST();
+                    placeStore.sql = `SELECT esr_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE esr_ejendomsnummer = (SELECT esr_ejendomsnummer FROM matrikel.jordstykke WHERE landsejerlavskode=${urlparser.urlVars.var_landsejerlavskode} AND matrikelnummer='${urlparser.urlVars.var_matrikelnr.toLowerCase()}') group by esr_ejendomsnummer`;
+                    placeStore.load();
+                    fromVarsIsDone = true;
+                }
+            }, 200);
+        } else {
+            fromVarsIsDone = true;
+        }
 
     },
 
@@ -806,7 +824,7 @@ module.exports = module.exports = {
         $("#result-origin").html(response.text);
         $('#conflict-main-tabs a[href="#conflict-result-content"]').tab('show');
         $('#conflict-result-content a[href="#hits-content"]').tab('show');
-        $('#conflict-result .btn:first-child').attr("href", "/html?id=" + response.file)
+        $('#conflict-open-pdf').attr("href", "/html?id=" + response.file)
         $("#conflict-download-pdf").prop("download", `Søgning foretaget med ${response.text} d. ${response.dateTime}`);
 
         if ('bufferItems' in response) {
@@ -979,6 +997,9 @@ module.exports = module.exports = {
     },
     setValueForNoUiSlider: function (v) {
         bufferSlider.noUiSlider.set([v]);
+    },
+    getFromVarsIsDone: function () {
+        return fromVarsIsDone;
     }
 };
 
@@ -1005,7 +1026,7 @@ let dom = `
             <div role="tabpanel" class="tab-pane active" id="conflict-result-content">
                 <div id="conflict-result">
                     <div><span id="conflict-result-origin"></span></div>
-
+                    <div><a href="" target="_blank" class="btn btn-sm btn-raised" id="conflict-excel-btn">Excel</a></div>
                     <div class="btn-toolbar bs-component" style="margin: 0;">
                         <div class="btn-group">
                             <button disabled class="btn btn-sm btn-raised" id="conflict-print-btn" data-loading-text="<i class='fa fa-cog fa-spin fa-lg'></i> PDF rapport"><i class='fa fa-cog fa-lg'></i> Print rapport</button>

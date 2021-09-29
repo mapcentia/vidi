@@ -14,6 +14,7 @@ const API_URL = `/api/state-snapshots`;
 const exId = `state-snapshots`;
 let customSetOfTitles = false;
 let extensions;
+const base64url = require('base64url');
 
 /**
  *
@@ -63,9 +64,9 @@ module.exports = {
 
     /**
      * Fetches state snapshot by its identifier
-     * 
+     *
      * @param {String} id State snapshot identifier
-     * 
+     *
      * @return {Promise}
      */
     getSnapshotByID: (id) => {
@@ -73,9 +74,13 @@ module.exports = {
             throw new Error(`Snapshot identifier was not provided`);
         }
         return new Promise((resolve) => {
-            $.getJSON(`${API_URL}/${vidiConfig.appDatabase}/${id}`).done((data) => {
-                resolve(data);
-            }).fail(() => {
+            $.ajax({
+                url: `${API_URL}/${vidiConfig.appDatabase}/${id}`,
+                method: 'GET',
+                accept: 'text/plain; charset=utf-8',
+            }).then((data) => {
+                resolve(JSON.parse(base64url.decode(data)));
+            }).catch(error => {
                 resolve(false);
             });
         });
