@@ -30,6 +30,7 @@ let state;
 let sqlQuery;
 let applicationModules = false;
 let isStarted = false;
+let activeFromSnapshotHasLoaded = false;
 let urlVars = urlparser.urlVars;
 
 
@@ -181,10 +182,11 @@ module.exports = {
                     }, 200
                 );
             } else {
-                if (urlVars?.readyCallback) {
+                if (!activeFromSnapshotHasLoaded && urlVars?.readyCallback) {
                     try {
                         if (state.activeLayersInSnapshot()) {
                             window.parent.postMessage({type: "snapshotLayersCallback", method: urlVars.readyCallback}, "*");
+                            activeFromSnapshotHasLoaded = true;
                         }
                     } catch (e) {
                     }

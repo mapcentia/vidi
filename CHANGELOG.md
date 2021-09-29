@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [UNRELEASED]
+### Fixed
+- Serialization of line extremities was buggy when lines was recreated after applying state causing extremities not to be drawn.
+
+## [2021.9.0]
+### Changed
+- Links in pop-ups now gets the primary color of the theme instead of the fixed cyan color.
+
+### Fixed
+- Serveral smaller fixes for the Editor extension.
+- embed.js API: Only fire snapshotLayersCallback once.
+- Excel write erors in conflict module is now handled, so Vidi doesn't crash.
+
 ## [2021.8.3] - 2021-30-8
 ### Fixed
 - Regression bug regarding print. The metadata object was stripped from the payload in ealier release, but was necessary for recreation of layers. Now a slim down version of meta are send.

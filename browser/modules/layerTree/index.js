@@ -1439,7 +1439,7 @@ module.exports = {
                 let reloadInterval = meta.parseLayerMeta(layerKey)?.reload_interval;
                 let tableElement = meta.parseLayerMeta(layerKey)?.show_table_on_side;
                 // Create side table once
-                if (tableElement && !$('#vector-side-table').length) {
+                if (tableElement && !$('#vector-side-table').length && window.vidiConfig.template === "embed.tmpl") {
                     $("#pane").css("left", "0");
                     $("#pane").css("width", "70%");
                     $("#map").css("width", "115%");

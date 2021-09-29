@@ -589,7 +589,6 @@ module.exports = {
             delete   metaData.data[i].classwizard;
             delete   metaData.data[i].def;
             delete   metaData.data[i].fieldconf;
-            delete   metaData.data[i].meta;
             delete   metaData.data[i].fields;
         }
         try {
