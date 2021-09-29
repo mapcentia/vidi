@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [UNRELEASED]
+### Fixed
+- Serialization of line extremities was buggy when lines was recreated after applying state causing extremities not to be drawn.
+
 ## [2021.9.0]
 ### Changed
 - Links in pop-ups now gets the primary color of the theme instead of the fixed cyan color.
