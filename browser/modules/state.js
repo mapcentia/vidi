@@ -61,6 +61,8 @@ var layerTree;
 
 var stateSnapshots;
 
+let extensions;
+
 var listened = {};
 
 var p, hashArr = hash.replace("#", "").split("/");
@@ -149,6 +151,7 @@ module.exports = {
         meta = o.meta;
         layerTree = o.layerTree;
         backboneEvents = o.backboneEvents;
+        extensions = o.extensions;
         _self = this;
         return this;
     },
@@ -326,9 +329,9 @@ module.exports = {
 
                                 // Recreate print
                                 // ==============
-                                if (response.data.print !== null) {
+                                if (response.data.state.modules.print.print !== null) {
                                     GeoJsonAdded = false;
-                                    parr = response.data.print;
+                                    parr = response.data.state.modules.print.print;
                                     v = parr;
                                     $.each(v[0].geojson.features, function (n, m) {
                                         if (m.type === "Rectangle") {
@@ -373,7 +376,7 @@ module.exports = {
                                 // =================
 
                                 if (response.data.draw !== null) {
-                                    draw.recreateDrawnings(response.data.draw);
+                                    draw.recreateDrawnings(response.data.state.modules.draw.drawnItems);
                                 }
 
                                 // Recreate query draw
@@ -465,6 +468,13 @@ module.exports = {
                                         }
                                     });
                                 }
+
+                                // Recreate symbols
+                                // ================
+                                if ('symbols' in extensions && response.data.symbols !== null) {
+                                    extensions.symbols.index.recreateSymbolsFromState(response.data.state.modules.symbols);
+                                }
+
 
                                 // Recreate added layers
                                 // from layerSearch
