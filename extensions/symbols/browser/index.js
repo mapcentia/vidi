@@ -23,6 +23,7 @@ let mouseDown = false;
 let touch = false;
 let idBeingChanged = false;
 let creatingFromState = false;
+let filesAreLoaded = false;
 const config = require('../../../config/config.js');
 
 const htmlFragments = {
@@ -243,41 +244,56 @@ module.exports = {
 
         utils.createMainTab(exId, __("Symboles"), __("Info"), require('./../../../browser/modules/height')().max, "photo_camera", false, exId);
 
+        let symbols = {};
+        let files = config.extensionConfig.symbols.files;
+        let i = 0;
 
-        try {
-            const symbols = config.extensionConfig.symbols.symbols;
-            let inner = $(htmlFragments.inner);
-            let tabs = $(`<ul class="nav nav-tabs"></ul>`);
-            let tabPanes = $(`<div class="tab-content"></div>`);
-            let first = true;
+        backboneEvents.get().on(`on:${exId}`, () => {
+            if (!filesAreLoaded) {
+                (function iter() {
+                    $.getJSON("/api/symbols/" + files[i].file, (data) => {
+                        symbols[files[i].title] = data;
+                        i++;
+                        if (i === files.length) {
+                            try {
+                                let inner = $(htmlFragments.inner);
+                                let tabs = $(`<ul class="nav nav-tabs"></ul>`);
+                                let tabPanes = $(`<div class="tab-content"></div>`);
+                                let first = true;
 
-            for (const group in symbols) {
-                let outer = $(htmlFragments.outer).clone();
-                let id = createId();
-                for (const id in symbols[group]) {
-                    let svg = $(inner.clone()[0]).append(symbols[group][id].svg)
-                    outer.find('.row')[0].append(svg[0]);
-                }
-                let tab = $(`<li role="presentation"><a href="#${id}" role="tab" data-toggle="tab">${group}</a></li>`);
-                tabs.append(tab)
-                tabPanes.append(outer);
-                outer.attr('id', id);
-                if (first) {
-                    outer.addClass('active');
-                    tab.addClass('active');
-                    first = false;
-                }
+                                for (const group in symbols) {
+                                    let outer = $(htmlFragments.outer).clone();
+                                    let id = createId();
+                                    for (const id in symbols[group]) {
+                                        let svg = $(inner.clone()[0]).append(symbols[group][id].svg)
+                                        outer.find('.row')[0].append(svg[0]);
+                                    }
+                                    let tab = $(`<li role="presentation"><a href="#${id}" role="tab" data-toggle="tab">${group}</a></li>`);
+                                    tabs.append(tab)
+                                    tabPanes.append(outer);
+                                    outer.attr('id', id);
+                                    if (first) {
+                                        outer.addClass('active');
+                                        tab.addClass('active');
+                                        first = false;
+                                    }
+                                }
+
+                                let c = $(`#${exId}`);
+                                c.append(tabs);
+                                c.append(tabPanes);
+                                $(".drag-marker").on("dragend", handleDragEnd);
+                                filesAreLoaded = true;
+                            } catch (e) {
+                                console.error(e.message);
+                            }
+                        } else {
+                            iter()
+                        }
+                    })
+                }())
             }
-
-            let c = $(`#${exId}`);
-            c.append(tabs);
-            c.append(tabPanes);
-        } catch (e) {
-            console.error(e.message);
-        }
-
-
-        $(".drag-marker").on("dragend", handleDragEnd);
+        });
 
         $(document).on("touchend mouseup", function () {
             for (const id in symbolState) {
@@ -327,6 +343,7 @@ module.exports = {
     },
 
     applyState: (newState) => {
+        console.log(newState);
         return new Promise((resolve) => {
             _self.resetState();
             if (newState) {

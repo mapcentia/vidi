@@ -22,7 +22,7 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ## [2021.8.3] - 2021-30-8
 ### Fixed
-- Regression bug regarding print. The metadata object was stripped from the payload in ealier release, but was necessary for recreation of layers. Now a slim down version of meta are send.
+- Regression bug regarding print. The metadata object was stripped from the payload in ealier release, but was necessary for recreation of layers. Now a slim downed version of meta are send.
 
 ## [2021.8.2] - 2021-30-8
 ### Added
