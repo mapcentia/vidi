@@ -402,7 +402,7 @@ module.exports = {
     getState: () => {
         let drawnItems = false;
         if (_self.getDrawOn()) {
-            drawnItems = JSON.stringify(serializeLayers.serializeDrawnItems(true));
+            drawnItems = serializeLayers.serializeDrawnItems(true);
         }
 
         return {drawnItems};
@@ -417,7 +417,7 @@ module.exports = {
             _self.control(false);
             if (newState.drawnItems && newState.drawnItems !== `false`) {
                 setTimeout(() => {
-                    _self.recreateDrawnings(JSON.parse(newState.drawnItems), false);
+                    _self.recreateDrawnings(newState.drawnItems, false);
                     resolve();
                 }, 100);
             } else {
