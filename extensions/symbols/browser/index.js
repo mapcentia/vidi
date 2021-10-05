@@ -26,6 +26,8 @@ let touch = false;
 let idBeingChanged = false;
 let creatingFromState = false;
 let filesAreLoaded = false;
+let autoScale = false;
+let locked = false;
 const config = require('../../../config/config.js');
 
 /**
@@ -61,22 +63,12 @@ const htmlFragments = {
  * @param id
  */
 const store = () => {
-    // TODO Store symbol in database
-    console.log(symbolState);
-    let arr = [];
-    for (const id in symbolState) {
-        let p = symbolState[id];
-        let sql = `INSERT INTO settings.symbols (id,rotation,scale,zoom,svg,the_geom) VALUES ('${id}', ${p.rotation},${p.scale},${p.zoomLevel},'${p.svg}',ST_geomfromtext('POINT(${p.coord.lat} ${p.coord.lng})', 4326)) ON CONFLICT (id) DO UPDATE SET rotation=${p.rotation},scale=${p.scale},zoom=${p.zoomLevel},svg='${p.svg}',the_geom=ST_geomfromtext('POINT(${p.coord.lat} ${p.coord.lng})', 4326)`;
-        arr.push(sql);    
-    }
-    console.log(arr.join("\n"));
-
     $.ajax({
-        url: '/api/bulk/' + db,
-        data: arr.join("\n"),
-        contentType: "text/plain; charset=utf-8",
+        url: '/api/symbols/' + db,
+        data: JSON.stringify(symbolState),
+        contentType: "application/json; charset=utf-8",
         scriptCharset: "utf-8",
-        dataType: 'text',
+        dataType: 'json',
         type: "POST",
         success: function (response) {
         }
@@ -158,11 +150,16 @@ const scale = (e, img, id, classStr) => {
  */
 const handleDragEnd = (e) => {
     e.preventDefault();
+    if (locked) {
+        alert(__("Locked"));
+        return;
+    }
     let map = cloud.get().map;
     let innerHtml = $(e.target).clone().html();
     let id = createId();
     let coord = map.mouseEventToLatLng(e);
-    createSymbol(innerHtml, id, coord, 0, 1, map.getZoom());
+    let file =  $(e.target).attr("data-file");
+    createSymbol(innerHtml, id, coord, 0, 1, map.getZoom(), file);
 }
 
 /**
@@ -172,8 +169,10 @@ const handleDragEnd = (e) => {
  * @param coord
  * @param ro
  * @param sc
+ * @param zoomLevel
+ * @param file
  */
-const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel) => {
+const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file) => {
     let map = cloud.get().map;
     let classStr = "dm_" + id;
     let rotateHandleStr = "r_" + id;
@@ -199,6 +198,7 @@ const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel) => {
     symbolState[id].zoomLevel = zoomLevel;
     symbolState[id].svg = innerHtml;
     symbolState[id].coord = markers[id].getLatLng();
+    symbolState[id].file = file;
     markers[id].on("moveend", () => {
         symbolState[id].coord = markers[id].getLatLng();
         idBeingChanged = id;
@@ -248,6 +248,7 @@ const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel) => {
         });
     });
 }
+
 
 module.exports = {
 
@@ -302,12 +303,46 @@ module.exports = {
             // _self.off();
         });
 
-        utils.createMainTab(exId, __("Symbols"), __("Info"), require('./../../../browser/modules/height')().max, "photo_camera", false, exId);
+        utils.createMainTab(exId, __("Symbols"), __("Info"), require('./../../../browser/modules/height')().max, "local_florist", false, exId);
 
-        const gui = `<div><button class="btn" id="vidi_symbols_store">Store</button></div>
-                     <div id="vidi_symbols"></div>
+        const gui = `
+                    <div class="form-inline">
+                        <div class="form-group">
+                            <div class="togglebutton">
+                                <label>
+                                    <input id="vidi-symbols-lock" type="checkbox">${__("Lock")}
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="togglebutton">
+                                <label>
+                                    <input id="vidi-symbols-autoscale" type="checkbox">${__("Auto scale")}
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <button class="btn" id="vidi-symbols-store">${__("Save in db")}</button>
+                        </div>
+                    </div>
+                    <div id="vidi_symbols"></div>
                     `
         $(`#${exId}`).html(gui);
+
+        $("#vidi-symbols-autoscale").on("change", (e) => {
+            autoScale = e.target.checked;
+            setState();
+        })
+
+        $("#vidi-symbols-lock").on("change", (e) => {
+            locked = e.target.checked;
+            if (locked) {
+                _self.lock();
+            } else {
+                _self.unlock();
+            }
+            setState();
+        })
 
         let symbols = {};
         let files = config.extensionConfig.symbols.files;
@@ -330,7 +365,8 @@ module.exports = {
                                     let outer = $(htmlFragments.outer).clone();
                                     let id = createId();
                                     for (const id in symbols[group]) {
-                                        let svg = $(inner.clone()[0]).append(symbols[group][id].svg)
+                                        let svg = $(inner.clone()[0]).append(symbols[group][id].svg);
+                                        svg.attr('data-file', id);
                                         outer.find('.row')[0].append(svg[0]);
                                     }
                                     let tab = $(`<li role="presentation"><a href="#${id}" role="tab" data-toggle="tab">${group}</a></li>`);
@@ -360,11 +396,13 @@ module.exports = {
             }
         });
 
-        $('#vidi_symbols_store').on('click', store);
+        $('#vidi-symbols-store').on('click', store);
 
         $(document).on("touchend mouseup", function () {
             for (const id in symbolState) {
-                markers[id].dragging.enable();
+                if (!locked) {
+                    markers[id].dragging.enable();
+                }
             }
             map.dragging.enable();
             map.touchZoom.enable();
@@ -379,16 +417,18 @@ module.exports = {
         map.on("zoomend", () => {
             let currZoom = map.getZoom();
             // Auto scale
-            for (const id in symbolState) {
-                if (id && symbolState.hasOwnProperty(id)) {
-                    let scale = symbolState[id].scale;
-                    let diff = prevZoom - currZoom;
-                    for (let i = 0; i < Math.abs(diff); i++) {
-                        scale = diff < 0 ? symbolState[id].scale * 2 : symbolState[id].scale / 2;
-                        symbolState[id].scale = scale;
+            if (autoScale) {
+                for (const id in symbolState) {
+                    if (id && symbolState.hasOwnProperty(id)) {
+                        let scale = symbolState[id].scale;
+                        let diff = prevZoom - currZoom;
+                        for (let i = 0; i < Math.abs(diff); i++) {
+                            scale = diff < 0 ? symbolState[id].scale * 2 : symbolState[id].scale / 2;
+                            symbolState[id].scale = scale;
+                        }
+                        $($(`.dm_${id}`)[0]).css('transform', 'rotate(' + (symbolState[id].rotation).toString() + 'deg) scale(' + scale.toString() + ')');
+                        backboneEvents.get().trigger(`${MODULE_ID}:state_change`);
                     }
-                    $($(`.dm_${id}`)[0]).css('transform', 'rotate(' + (symbolState[id].rotation).toString() + 'deg) scale(' + scale.toString() + ')');
-                    backboneEvents.get().trigger(`${MODULE_ID}:state_change`);
                 }
             }
             prevZoom = currZoom;
@@ -414,7 +454,11 @@ module.exports = {
      * @returns {{}}
      */
     getState: () => {
-        return symbolState;
+        return {
+            symbolState: symbolState,
+            autoScale: autoScale,
+            locked: locked
+        };
     },
 
     /**
@@ -426,11 +470,17 @@ module.exports = {
         return new Promise((resolve) => {
             _self.resetState();
             if (newState) {
-                _self.recreateSymbolsFromState(newState);
+                _self.recreateSymbolsFromState(newState.symbolState);
+                autoScale = newState.autoScale;
+                $("#vidi-symbols-autoscale").prop("checked", newState.autoScale);
+                locked = newState.locked;
+                $("#vidi-symbols-lock").prop("checked", newState.locked);
+                if (locked) {
+                    _self.lock();
+                }
             }
             backboneEvents.get().trigger(`${MODULE_ID}:state_change`);
             resolve();
-
         });
     },
 
@@ -442,6 +492,9 @@ module.exports = {
         touch = false;
         idBeingChanged = false;
         creatingFromState = false;
+        autoScale = false;
+        locked = false;
+        $("#vidi-symbols-autoscale").prop("checked", false);
         _self.removeSymbols();
     },
 
@@ -455,5 +508,25 @@ module.exports = {
         }
         markers = {};
         symbolState = {};
+    },
+
+    /**
+     *
+     */
+    lock: () => {
+        for (const id in symbolState) {
+            markers[id].dragging.disable();
+        }
+        $(".symbols-handles").hide()
+    },
+
+    /**
+     *
+     */
+    unlock: () => {
+        for (const id in symbolState) {
+            markers[id].dragging.enable();
+        }
+        $(".symbols-handles").show()
     }
 };

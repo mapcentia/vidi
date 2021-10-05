@@ -375,7 +375,7 @@ module.exports = {
                                 // Recreate Drawings
                                 // =================
 
-                                if (response.data.draw !== null) {
+                                if (response.data.state.modules?.draw?.drawnItems) {
                                     draw.recreateDrawnings(response.data.state.modules.draw.drawnItems);
                                 }
 
@@ -471,10 +471,10 @@ module.exports = {
 
                                 // Recreate symbols
                                 // ================
-                                if ('symbols' in extensions && response.data.symbols !== null) {
-                                    extensions.symbols.index.recreateSymbolsFromState(response.data.state.modules.symbols);
+                                if ('symbols' in extensions && response?.data?.symbols?.symbolState !== null) {
+                                    extensions.symbols.index.recreateSymbolsFromState(response.data.state.modules.symbols.symbolState);
+                                    extensions.symbols.index.lock();
                                 }
-
 
                                 // Recreate added layers
                                 // from layerSearch
