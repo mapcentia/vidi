@@ -7,7 +7,8 @@ and this project adheres to [CalVer](https://calver.org/).
 ## [UNRELEASED]
 ### Changed
 - Legend in blank.tmpl (is used in static maps). Also the legend checkboxes are removed from legends in blank.tmpl and print.tmpl.
-- Extensions are initiated before state resolves, so extensions and work in state links. 
+- Extensions are initiated before state resolves, so extensions and work in state links.
+- Measurement tooltip will now show one decimal instead of none when showing meters.
 
 ### Fixed
 - Serialization of line extremities was buggy when lines was recreated after applying state causing extremities not to be drawn.

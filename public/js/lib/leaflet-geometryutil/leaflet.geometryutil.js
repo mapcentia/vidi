@@ -59,36 +59,6 @@ L.GeometryUtil = L.extend(L.GeometryUtil || {}, {
     },
 
     /**
-        Shortcut function for converting distance to readable distance.
-        @param {Number} distance distance to be converted
-        @param {String} unit 'metric' or 'imperial'
-        @returns {String} in yard or miles
-    */
-    readableDistance: function (distance, unit) {
-        var isMetric = (unit !== 'imperial'),
-            distanceStr;
-        if (isMetric) {
-            // show metres when distance is < 1km, then show km
-            if (distance > 1000) {
-                distanceStr = (distance  / 1000).toFixed(2) + ' km';
-            }
-            else {
-                distanceStr = Math.ceil(distance) + ' m';
-            }
-        }
-        else {
-            distance *= 1.09361;
-            if (distance > 1760) {
-                distanceStr = (distance / 1760).toFixed(2) + ' miles';
-            }
-            else {
-                distanceStr = Math.ceil(distance) + ' yd';
-            }
-        }
-        return distanceStr;
-    },
-
-    /**
         Returns true if the latlng belongs to segment A-B
         @param {L.LatLng} latlng - The position to search
         @param {L.LatLng} latlngA geographical point A of the segment
