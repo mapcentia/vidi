@@ -10,6 +10,8 @@ import {polyfill} from "mobile-drag-drop";
 import {scrollBehaviourDragImageTranslateOverride} from 'mobile-drag-drop/scroll-behaviour'
 
 
+const urlparser = require('./../../../browser/modules/urlparser');
+const db = urlparser.db;
 let utils;
 let exId = "symbols";
 let cloud;
@@ -26,6 +28,22 @@ let creatingFromState = false;
 let filesAreLoaded = false;
 const config = require('../../../config/config.js');
 
+/**
+ *
+ * @type {*|exports|HTMLElement}
+ */
+const symbolWrapper = $(`<div class="symbols-lib drag-marker" draggable="true"></div>`);
+
+/**
+ *
+ * @returns {string}
+ */
+const createId = () => (+new Date * (Math.random() + 1)).toString(36).substr(2, 5);
+
+/**
+ *
+ * @type {{outer: string, inner: string}}
+ */
 const htmlFragments = {
     "outer": `
         <div class="container tab-pane" role="tabpanel">
@@ -38,15 +56,54 @@ const htmlFragments = {
     `
 }
 
-const store = (id) => {
+/**
+ *
+ * @param id
+ */
+const store = () => {
     // TODO Store symbol in database
-    console.log(id);
+    console.log(symbolState);
+    let arr = [];
+    for (const id in symbolState) {
+        let p = symbolState[id];
+        let sql = `INSERT INTO settings.symbols (id,rotation,scale,zoom,svg,the_geom) VALUES ('${id}', ${p.rotation},${p.scale},${p.zoomLevel},'${p.svg}',ST_geomfromtext('POINT(${p.coord.lat} ${p.coord.lng})', 4326)) ON CONFLICT (id) DO UPDATE SET rotation=${p.rotation},scale=${p.scale},zoom=${p.zoomLevel},svg='${p.svg}',the_geom=ST_geomfromtext('POINT(${p.coord.lat} ${p.coord.lng})', 4326)`;
+        arr.push(sql);    
+    }
+    console.log(arr.join("\n"));
+
+    $.ajax({
+        url: '/api/bulk/' + db,
+        data: arr.join("\n"),
+        contentType: "text/plain; charset=utf-8",
+        scriptCharset: "utf-8",
+        dataType: 'text',
+        type: "POST",
+        success: function (response) {
+        }
+    });
+}
+
+const setState = () => {
     backboneEvents.get().trigger(`${MODULE_ID}:state_change`);
 }
 
+/**
+ *
+ * @param c
+ * @returns {DOMRect}
+ */
+const getRect = (c) => document.getElementsByClassName(c)[0].getBoundingClientRect();
+
+/**
+ *
+ * @param e
+ * @param img
+ * @param id
+ * @param classStr
+ */
 const rotate = (e, img, id, classStr) => {
     if (mouseDown === true) {
-        let cRect = document.getElementsByClassName(classStr)[0].getBoundingClientRect();
+        let cRect = getRect(classStr);
         let centerX = (cRect.left) + (cRect.width / 2);
         let centerY = (cRect.top) + (cRect.height / 2);
         let mouseX;
@@ -64,9 +121,17 @@ const rotate = (e, img, id, classStr) => {
         idBeingChanged = id;
     }
 }
+
+/**
+ *
+ * @param e
+ * @param img
+ * @param id
+ * @param classStr
+ */
 const scale = (e, img, id, classStr) => {
     if (mouseDown === true) {
-        let cRect = document.getElementsByClassName(classStr)[0].getBoundingClientRect();
+        let cRect = getRect(classStr);
         let centerX = (cRect.left) + (cRect.width / 2);
         let centerY = (cRect.top) + (cRect.height / 2);
         let mouseX;
@@ -86,10 +151,6 @@ const scale = (e, img, id, classStr) => {
         idBeingChanged = id;
     }
 }
-
-const symbolWrapper = $(`<div class="symbols-lib drag-marker" draggable="true"></div>`);
-
-const createId = () => (+new Date * (Math.random() + 1)).toString(36).substr(2, 5);
 
 /**
  *
@@ -146,7 +207,7 @@ const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel) => {
     symbolState[id].scale = sc;
 
     if (!creatingFromState) {
-        store(id);
+        setState();
     }
     let img = $(`.${classStr}`);
     let rotateHandle = $(`.${rotateHandleStr}`);
@@ -162,7 +223,7 @@ const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel) => {
         map.removeLayer(markers[id]);
         delete markers[e.target.id];
         delete symbolState[e.target.id];
-        store(id);
+        setState();
     });
     rotateHandle.on("touchstart mousedown", function (e) {
         e.preventDefault();
@@ -233,7 +294,6 @@ module.exports = {
         });
 
         backboneEvents.get().on(`reset:all`, () => {
-            // alert()
             _self.resetState();
         });
 
@@ -242,7 +302,12 @@ module.exports = {
             // _self.off();
         });
 
-        utils.createMainTab(exId, __("Symboles"), __("Info"), require('./../../../browser/modules/height')().max, "photo_camera", false, exId);
+        utils.createMainTab(exId, __("Symbols"), __("Info"), require('./../../../browser/modules/height')().max, "photo_camera", false, exId);
+
+        const gui = `<div><button class="btn" id="vidi_symbols_store">Store</button></div>
+                     <div id="vidi_symbols"></div>
+                    `
+        $(`#${exId}`).html(gui);
 
         let symbols = {};
         let files = config.extensionConfig.symbols.files;
@@ -279,7 +344,7 @@ module.exports = {
                                     }
                                 }
 
-                                let c = $(`#${exId}`);
+                                let c = $(`#vidi_symbols`);
                                 c.append(tabs);
                                 c.append(tabPanes);
                                 $(".drag-marker").on("dragend", handleDragEnd);
@@ -295,6 +360,8 @@ module.exports = {
             }
         });
 
+        $('#vidi_symbols_store').on('click', store);
+
         $(document).on("touchend mouseup", function () {
             for (const id in symbolState) {
                 markers[id].dragging.enable();
@@ -302,7 +369,7 @@ module.exports = {
             map.dragging.enable();
             map.touchZoom.enable();
             if (idBeingChanged) {
-                store(idBeingChanged);
+                setState();
             }
             $(document).off("mousemove touchmove");
             mouseDown = false;
@@ -320,7 +387,6 @@ module.exports = {
                         scale = diff < 0 ? symbolState[id].scale * 2 : symbolState[id].scale / 2;
                         symbolState[id].scale = scale;
                     }
-                    // console.log(diff, scale)
                     $($(`.dm_${id}`)[0]).css('transform', 'rotate(' + (symbolState[id].rotation).toString() + 'deg) scale(' + scale.toString() + ')');
                     backboneEvents.get().trigger(`${MODULE_ID}:state_change`);
                 }
@@ -328,6 +394,11 @@ module.exports = {
             prevZoom = currZoom;
         })
     },
+
+    /**
+     *
+     * @param state
+     */
     recreateSymbolsFromState: (state) => {
         creatingFromState = true;
         for (const id in state) {
@@ -338,12 +409,20 @@ module.exports = {
         creatingFromState = false;
     },
 
+    /**
+     *
+     * @returns {{}}
+     */
     getState: () => {
         return symbolState;
     },
 
+    /**
+     *
+     * @param newState
+     * @returns {Promise<unknown>}
+     */
     applyState: (newState) => {
-        console.log(newState);
         return new Promise((resolve) => {
             _self.resetState();
             if (newState) {
@@ -355,6 +434,9 @@ module.exports = {
         });
     },
 
+    /**
+     *
+     */
     resetState: () => {
         mouseDown = false;
         touch = false;
@@ -363,6 +445,9 @@ module.exports = {
         _self.removeSymbols();
     },
 
+    /**
+     *
+     */
     removeSymbols: () => {
         let map = cloud.get().map;
         for (const id in symbolState) {
@@ -372,6 +457,3 @@ module.exports = {
         symbolState = {};
     }
 };
-
-
-
