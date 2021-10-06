@@ -10,8 +10,6 @@ import {polyfill} from "mobile-drag-drop";
 import {scrollBehaviourDragImageTranslateOverride} from 'mobile-drag-drop/scroll-behaviour'
 
 
-const urlparser = require('./../../../browser/modules/urlparser');
-const db = urlparser.db;
 let utils;
 let exId = "symbols";
 let cloud;
@@ -20,7 +18,6 @@ let symbolState = {}
 let state;
 let backboneEvents;
 let _self;
-const MODULE_ID = exId;
 let mouseDown = false;
 let touch = false;
 let idBeingChanged = false;
@@ -28,6 +25,9 @@ let creatingFromState = false;
 let filesAreLoaded = false;
 let autoScale = false;
 let locked = false;
+const urlparser = require('./../../../browser/modules/urlparser');
+const db = urlparser.db;
+const MODULE_ID = exId;
 const config = require('../../../config/config.js');
 
 /**
@@ -60,7 +60,6 @@ const htmlFragments = {
 
 /**
  *
- * @param id
  */
 const store = () => {
     $.ajax({
@@ -365,9 +364,11 @@ module.exports = {
                                     let outer = $(htmlFragments.outer).clone();
                                     let id = createId();
                                     for (const id in symbols[group]) {
-                                        let svg = $(inner.clone()[0]).append(symbols[group][id].svg);
-                                        svg.attr('data-file', id);
-                                        outer.find('.row')[0].append(svg[0]);
+                                        if (id && symbols[group].hasOwnProperty(id)) {
+                                            let svg = $(inner.clone()[0]).append(symbols[group][id].svg);
+                                            svg.attr('data-file', id);
+                                            outer.find('.row')[0].append(svg[0]);
+                                        }
                                     }
                                     let tab = $(`<li role="presentation"><a href="#${id}" role="tab" data-toggle="tab">${group}</a></li>`);
                                     tabs.append(tab)
@@ -443,7 +444,8 @@ module.exports = {
         creatingFromState = true;
         for (const id in state) {
             if (id && state.hasOwnProperty(id)) {
-                createSymbol(state[id].svg, id, state[id].coord, state[id].rotation, state[id].scale, state[id].zoomLevel);
+                const s = state[id];
+                createSymbol(s.svg, id, s.coord, s.rotation, s.scale, s.zoomLevel, s.file);
             }
         }
         creatingFromState = false;
