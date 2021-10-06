@@ -4,9 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2021.8.3] - 2021-30-8
+### Fixed
+- Regression bug regarding print. The metadata object was stripped from the payload in ealier release, but was necessary for recreation of layers. Now a slim down version of meta are send.
+
 ## [2021.8.2] - 2021-30-8
 ### Added
-- The layer-group-checkboxes now have id's, so it's easier to apply css rules. Ids follows this pattern: `group-check-box-[group-id]`. Use the dev tool inspector to get the id.
+- The layer-group-checkboxes now have id's, so it's easier to apply css rules. Ids follow this pattern: `group-check-box-[group-id]`. Use the dev tool inspector to get the id.
 
 ## [2021.8.1] - 2021-25-8
 ### Changed

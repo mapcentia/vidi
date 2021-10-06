@@ -586,6 +586,16 @@ module.exports = {
         });
 
         let data;
+        // Slim down the meta data
+        let metaData = meta.getMetaData();
+        for (let i=0; i< metaData.data.length; i++) {
+            delete   metaData.data[i].class;
+            delete   metaData.data[i].classwizard;
+            delete   metaData.data[i].def;
+            delete   metaData.data[i].fieldconf;
+            delete   metaData.data[i].meta;
+            delete   metaData.data[i].fields;
+        }
         try {
             data = {
                 anchor: anchorRaw,
@@ -608,6 +618,7 @@ module.exports = {
                 header: encodeURIComponent($("#print-title").val()) || encodeURIComponent($("#print-comment").val()) ? "inline" : "none",
                 dateTime: dayjs().format('Do MMMM YYYY, H:mm'),
                 date: dayjs().format('Do MMMM YYYY'),
+                metaData: metaData,
                 px: config.print.templates[tmpl][pageSize][printingOrientation].mapsizePx[0],
                 py: config.print.templates[tmpl][pageSize][printingOrientation].mapsizePx[1],
                 queryString: urlparser.search.replace(/state=[a-z0-9_-]*/g, ""), // remove the state snapshot
