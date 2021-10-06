@@ -360,6 +360,7 @@ module.exports = {
      * @param isVectorLayer
      */
     add: function (k, qstore, doNotRemoveEditor, isVectorLayer = false) {
+        _self.stopEdit(editedFeature);
         editedFeature = false;
 
         let me = this, React = require('react'), ReactDOM = require('react-dom'),
@@ -625,6 +626,7 @@ module.exports = {
      * @param isVectorLayer
      */
     edit: function (e, k, qstore, isVectorLayer = false) {
+        _self.stopEdit(editedFeature);
         editedFeature = e;
         nonCommitedEditedFeature = {};
         const editFeature = () => {
@@ -649,7 +651,6 @@ module.exports = {
                 fieldconf = JSON.parse(metaDataKeys[schemaQualifiedName].fieldconf);
             }
 
-            me.stopEdit();
 
             e.on(`editable:editing`, () => {
                 featureWasEdited = true;
@@ -798,8 +799,12 @@ module.exports = {
                 }
 
                 // Set GeoJSON properties from form values
+                let fieldConf = false;
+                if (metaDataKeys[schemaQualifiedName].fieldconf) {
+                    fieldConf = JSON.parse(metaDataKeys[schemaQualifiedName].fieldconf);
+                }
                 Object.keys(fields).map(function (key) {
-                    if (!key.startsWith("gc2_") && fields[key].type !== "geometry") {
+                    if ((!key.startsWith("gc2_") && fields[key].type !== "geometry" && !fieldConf[key]?.filter) || metaDataKeys[schemaQualifiedName].pkey === key) {
                         GeoJSON.properties[key] = formData.formData[key];
                         // Set undefined values back to NULL
                         if (GeoJSON.properties[key] === undefined) {
@@ -947,6 +952,7 @@ module.exports = {
      * @param isVectorLayer
      */
     delete: function (e, k, qstore, isVectorLayer = false) {
+        _self.stopEdit(editedFeature);
         editedFeature = false;
 
         let schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],

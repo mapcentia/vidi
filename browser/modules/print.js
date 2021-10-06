@@ -527,7 +527,6 @@ module.exports = {
             recEdit.editing.disable();
         } catch (e) {
         }
-        let layerDraw = serializeLayers.serializeDrawnItems(true);
         let anchorRaw = anchor.getAnchor();
         anchorRaw = anchorRaw.substr(0, anchorRaw.lastIndexOf(`/`));
 
@@ -593,7 +592,6 @@ module.exports = {
             delete   metaData.data[i].classwizard;
             delete   metaData.data[i].def;
             delete   metaData.data[i].fieldconf;
-            delete   metaData.data[i].meta;
             delete   metaData.data[i].fields;
         }
         try {
@@ -602,7 +600,6 @@ module.exports = {
                 applicationHost: window.location.origin,
                 db: db,
                 schema: schema,
-                draw: (typeof layerDraw[0] !== "undefined" && layerDraw[0].geojson.features.length > 0) ? layerDraw : null,
                 queryDraw: (typeof layerQueryDraw[0] !== "undefined" && layerQueryDraw[0].geojson.features.length > 0) ? layerQueryDraw : null,
                 queryBuffer: (typeof layerQueryBuffer[0] !== "undefined" && layerQueryBuffer[0].geojson.features.length > 0) ? layerQueryBuffer : null,
                 queryResult: (typeof layerQueryResult[0] !== "undefined" && layerQueryResult[0].geojson.features.length > 0) ? layerQueryResult : null,

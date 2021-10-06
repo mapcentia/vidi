@@ -212,8 +212,7 @@ module.exports = {
                 draw: {
                     polygon: {
                         allowIntersection: true,
-                        shapeOptions: {},
-                        showArea: true
+                        shapeOptions: {}
                     },
                     polyline: {
                         metric: true,
@@ -234,7 +233,12 @@ module.exports = {
                     icon: cloud.iconSmall
                 },
                 polyline: {
-                    icon: cloud.iconSmall
+                    icon: cloud.iconSmall,
+                    metric: true,
+                    precision: {
+                        m: 1,
+                        km: 2
+                    },
                 }
             });
 

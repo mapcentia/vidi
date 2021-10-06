@@ -26,7 +26,7 @@ var urlVars = urlparser.urlVars;
  * The full meta dat object
  * @type {{data: Array}}
  */
-window.metaData = {data: []};
+let metaData = {data: []};
 
 /**
  * Object that holds the latest loaded meta data
@@ -107,7 +107,7 @@ module.exports = {
             to the array which already contains this meta
         */
         if (!doNotReset) {
-            window.metaData = {data: []};
+            metaData = {data: []};
         }
 
         return new Promise(function (resolve, reject) {

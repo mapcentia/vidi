@@ -56,13 +56,7 @@ let backArrowIsAdded = false;
 const jquery = require('jquery');
 require('snackbarjs');
 
-
-/**
- * A default template for GC2, with a loop
- * @type {string}
- */
-let defaultTemplate =
-    `<div class="vidi-popup-content">
+let editToolsHtml = `
         <div class="form-group gc2-edit-tools" style="display: none; width: 90%;">
             <div class="btn-group btn-group-justified">
                 <div class="btn-group">
@@ -77,6 +71,15 @@ let defaultTemplate =
                 </div>
             </div>
         </div>
+`;
+
+/**
+ * A default template for GC2, with a loop
+ * @type {string}
+ */
+let defaultTemplate =
+    `<div class="vidi-popup-content">
+        ${editToolsHtml}
         <h3 class="popup-title">{{_vidi_content.title}}</h3>
         {{#_vidi_content.fields}}
             {{#if value}}
@@ -296,7 +299,7 @@ module.exports = {
 
                     template = (typeof metaDataKeys[value].infowindow !== "undefined" && metaDataKeys[value].infowindow.template !== "") ? metaDataKeys[value].infowindow.template : metaDataKeys[value].type === "RASTER" ? defaultTemplateRaster : defaultTemplate;
 
-                    template = (parsedMeta.info_template && parsedMeta.info_template !== "") ? parsedMeta.info_template : template;
+                    template = (parsedMeta.info_template && parsedMeta.info_template !== "") ? editToolsHtml + parsedMeta.info_template : template;
 
                     if (!isEmpty && !not_querable) {
 
