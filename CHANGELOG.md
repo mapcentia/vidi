@@ -4,9 +4,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [UNRELEASED]
+## [2021.10.0]
 ### Changed
-- Legend added in blank.tmpl (is used in static maps). Also the legend checkboxes are removed from legends in blank.tmpl and print.tmpl.
+- Legend added in blank.tmpl (which is used in static maps). Also the legend checkboxes are removed from legends in blank.tmpl and print.tmpl.
 - Extensions are initiated before state resolves, so extensions work in state urls.
 - Measurement tooltip will now show one decimal instead of none when showing meters.
 
