@@ -81,6 +81,7 @@ module.exports = {
                         window.vidiConfig.featureInfoTableOnMap = data.featureInfoTableOnMap ? data.featureInfoTableOnMap : window.vidiConfig.featureInfoTableOnMap;
                         window.vidiConfig.showLayerGroupCheckbox = data.showLayerGroupCheckbox ? data.showLayerGroupCheckbox : window.vidiConfig.showLayerGroupCheckbox;
                         window.vidiConfig.activeLayers = data.activeLayers ? data.activeLayers : window.vidiConfig.activeLayers;
+                        window.vidiConfig.initFunction = data.initFunction ? data.initFunction : window.vidiConfig.initFunction;
                     }).fail(function () {
                         console.log("Could not load: " + configFile);
                         if (window.vidiConfig.defaultConfig && (window.vidiConfig.defaultConfig !== configFile)) {
