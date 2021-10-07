@@ -3008,7 +3008,7 @@ module.exports = {
                 }
 
                 if (isVirtual === false) {
-                    let componentContainerId = `layer-settings-filters-${layerKey}`;
+                    let componentContainerId = `layer-settings-filters-${layerKey.replace('.', '-')}`;
                     $(layerContainer).find('.js-layer-settings-filters').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
 
                     let localArbitraryfilters = {};
