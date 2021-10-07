@@ -178,6 +178,7 @@ module.exports = {
                         draw.getDrawItems().addLayer(l);
                     })
                     draw.getTable().loadDataInTable(false, true);
+                    backboneEvents.get().trigger(`draw:update`);
                 } else {
                     let resultLayer = new L.FeatureGroup();
                     cloud.get().map.addLayer(resultLayer);
