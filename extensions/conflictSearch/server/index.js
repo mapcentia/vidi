@@ -224,7 +224,7 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                             XLSX.utils.book_append_sheet(wb, [[]]);
                         }
                         try {
-                            XLSX.writeFile(wb, __dirname + "/../../../public/tmp/iexcel/" + fileName + ".xlsb");
+                            XLSX.writeFile(wb, __dirname + "/../../../public/tmp/excel/" + fileName + ".xlsb");
                         } catch (e) {
                             console.log(e.message, "Could not create excel file. Check if folder exists.")
                         }
