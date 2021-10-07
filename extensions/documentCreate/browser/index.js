@@ -734,6 +734,7 @@ var buildServiceSelect = function (id) {
         // clear select services
         $('#'+select_id).find('option').remove().end().append('<option value=""></option>').val('')
         
+        var metaData = meta.getMetaData();
         metaData.data.forEach(function(d) {
             if (d.tags) {
                 // Add layer to select box if tag is correctly defined
@@ -762,6 +763,7 @@ var buildFeatureMeta = function (layer, previousLayer = undefined) {
     //merge information from metadata
     var m = {}
 
+    var metaData = meta.getMetaData();
     metaData.data.forEach(function (d) {       
         if(d.fields) {
             //Get information from config.json
@@ -1022,7 +1024,7 @@ var SetGUI_ControlState = function (state_Enum) {
  * @private
  */
 var loadAndInitFilters = function (active_state) {
-    try {    
+    try {
         //check login status
         if (active_state === true) {   
             buildServiceSelect(select_id);
@@ -1313,7 +1315,8 @@ module.exports = {
 
                 // Activates module
                 backboneEvents.get().on(`on:${exId}`, () => {
-                    console.log('Starting documentCreate')
+                    console.log('Starting documentCreate');
+
                     /*
                     backboneEvents.get().trigger("refresh:meta");
                     */
