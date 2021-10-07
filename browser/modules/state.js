@@ -67,12 +67,6 @@ var listened = {};
 
 var p, hashArr = hash.replace("#", "").split("/");
 
-// TODO Dirty Hack,
-// Because extensions are not being set before State resolves.
-// So we hard code reportRender, which sets up a listener on event "on:customData"
-// and hard code the call to reportRender.render in state::initializeFromHashPart
-let reportRender = require('../../extensions/conflictSearch/browser/reportRenderAlt');
-
 let activeLayersInSnapshot = false;
 
 /**
@@ -180,6 +174,14 @@ module.exports = {
                     legend.init().then(function () {
                         console.log("Vidi is now loaded");// Vidi is now fully loaded
                         window.status = "all_loaded";
+                        if (window.vidiConfig?.initFunction) {
+                            let func = Function('"use strict";return (' + window.vidiConfig.initFunction + ')')();
+                            try {
+                                func();
+                            } catch (e) {
+                                console.error("Error in initFunction:", e.message)
+                            }
+                        }
                         if (urlVars?.readyCallback) {
                             try {
                                 window.parent.postMessage({
@@ -323,15 +325,13 @@ module.exports = {
 
                                 if (typeof response.data.customData !== "undefined" && response.data.customData !== null) {
                                     backboneEvents.get().trigger("on:customData", response.data.customData);
-                                    // TODO HACK:
-                                    reportRender.render(response.data.customData);
                                 }
 
                                 // Recreate print
                                 // ==============
-                                if (response.data.state.modules.print.print !== null) {
+                                if (response.data.print !== null) {
                                     GeoJsonAdded = false;
-                                    parr = response.data.state.modules.print.print;
+                                    parr = response.data.print;
                                     v = parr;
                                     $.each(v[0].geojson.features, function (n, m) {
                                         if (m.type === "Rectangle") {
