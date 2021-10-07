@@ -4,9 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [2021.10.1] - 2021-7-10
-### Changed
+## [2021.10.2] - 2021-7-10
+### Fixed
+- Intended code error removed from `conflict` module in excel function.
 
+## [2021.10.1] - 2021-7-10
 ### Added
 - A new config `initFunction`, which holds a JavaScript function as a string. When Vidi is fully loaded this function will be run:
   ```json
