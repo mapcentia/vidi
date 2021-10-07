@@ -4,7 +4,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [2021.10.0]
+## [UNRELEASED]
+### Changed
+
+### Added
+- A new config `initFunction`, which holds a JavaScript function as a string. When Vidi is fully loaded this function will be run:
+  ```json
+  {
+      "initFunction": "function(){alert(\"Hello\")}"
+  }
+  ```
+  
+### Fixed
+- The `reportRender` issue in `conflict` module regarding state resolving is fixed.
+- The alternative `reportRenderAlt` module for `conflictSearch` can now be set in config:
+  ```json
+    {  
+      "extensions": {
+        "browser": [
+            {"conflictSearch": ["index", "reportRenderAlt", "infoClick", "controller"]}
+        ]
+      }
+    }
+  ```
+
+## [2021.10.0] 2021-6-10
 ### Changed
 - Legend added in blank.tmpl (which is used in static maps). Also the legend checkboxes are removed from legends in blank.tmpl and print.tmpl.
 - Extensions are initiated before state resolves, so extensions work in state urls.
@@ -13,7 +37,7 @@ and this project adheres to [CalVer](https://calver.org/).
 ### Fixed
 - Serialization of line extremities was buggy when lines was recreated after applying state causing extremities not to be drawn.
 
-## [2021.9.0]
+## [2021.9.0] 2021-22-9
 ### Changed
 - Links in pop-ups now gets the primary color of the theme instead of the fixed cyan color.
 
@@ -183,7 +207,6 @@ and this project adheres to [CalVer](https://calver.org/).
     {{/_vidi_content.fields}}
 </div>
 ```  
-
 
 ### Added
 - `searchConfig.placeholderText` added to config, so the search placeholder can be customized.
