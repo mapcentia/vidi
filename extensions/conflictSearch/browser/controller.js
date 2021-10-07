@@ -31,7 +31,7 @@ module.exports = {
     set: function (o) {
         print = o.print;
         state = o.state;
-        reportRender = o.extensions.conflictSearch.reportRender;
+        reportRender = o.extensions.conflictSearch?.reportRender || o.extensions.conflictSearch.reportRenderAlt;
         infoClick = o.extensions.conflictSearch.infoClick;
         backboneEvents = o.backboneEvents;
         conflictSearch = o.extensions.conflictSearch.index;
@@ -45,7 +45,7 @@ module.exports = {
 
         let endPrintEventName = "end:conflictPrint";
 
-        $('input[name="conflict-report-type"]').on("change", () =>{
+        $('input[name="conflict-report-type"]').on("change", () => {
             reportType = $('input[name="conflict-report-type"]:checked').val();
             backboneEvents.get().trigger(`${MODULE_ID}:state_change`);
         })
@@ -65,7 +65,7 @@ module.exports = {
                 conflictSearch.setValueForNoUiSlider(stateFromDb.bufferValue);
                 conflictSearch.handleResult(stateFromDb);
                 reportType = stateFromDb.reportType;
-                $("input[name='conflict-report-type'][value='" + reportType +"']").prop("checked",true);
+                $("input[name='conflict-report-type'][value='" + reportType + "']").prop("checked", true);
                 return;
             }
             state.getModuleState(MODULE_ID).then(initialState => {
@@ -76,7 +76,7 @@ module.exports = {
                     }
                     reportType = initialState.reportType || "1";
                 }
-                $("input[name='conflict-report-type'][value='" + reportType +"']").prop("checked",true);
+                $("input[name='conflict-report-type'][value='" + reportType + "']").prop("checked", true);
             });
 
         });
@@ -93,11 +93,12 @@ module.exports = {
 
         // When conflict search is done, enable the print button
         backboneEvents.get().on("end:conflictSearch", function (e) {
+            let excelBtn = $("#conflict-excel-btn");
             $("#conflict-print-btn").prop("disabled", false);
-            $("#conflict-excel-btn").prop("disabled", false);
+            excelBtn.prop("disabled", false);
             $("#conflict-set-print-area-btn").prop("disabled", false);
             backboneEvents.get().trigger(`${MODULE_ID}:state_change`);
-            $("#conflict-excel-btn").prop("href", "/tmp/excel/" + e.file + ".xlsb");
+            excelBtn.prop("href", "/tmp/excel/" + e.file + ".xlsb");
         });
 
         // Handle conflict info click events
@@ -145,8 +146,10 @@ module.exports = {
                     let results = conflictSearch.getResult();
                     let positiveHits = JSON.parse(JSON.stringify(results));
                     for (const property in results.hits) {
-                        if (reportType === "2" && results.hits[property].hits === 0) {
-                            delete positiveHits.hits[property];
+                        if (property && results.hits.hasOwnProperty(property)) {
+                            if (reportType === "2" && results.hits[property].hits === 0) {
+                                delete positiveHits.hits[property];
+                            }
                         }
                     }
                     let hits = positiveHits.hits
