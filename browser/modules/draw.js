@@ -23,6 +23,7 @@ let editing = false;
 let _self = false;
 let conflictSearch;
 let selectedDrawing;
+let overRideOnCheck = false;
 
 module.exports = {
     set: function (o) {
@@ -400,11 +401,7 @@ module.exports = {
      * Returns current module state
      */
     getState: () => {
-        let drawnItems = false;
-        if (_self.getDrawOn()) {
-            drawnItems = JSON.stringify(serializeLayers.serializeDrawnItems(true));
-        }
-
+        let drawnItems = serializeLayers.serializeDrawnItems(true);
         return {drawnItems};
     },
 
@@ -415,9 +412,9 @@ module.exports = {
         return new Promise((resolve) => {
             store.reset();
             _self.control(false);
-            if (newState.drawnItems && newState.drawnItems !== `false`) {
+            if (newState.drawnItems && newState.drawnItems.length > 0) {
                 setTimeout(() => {
-                    _self.recreateDrawnings(JSON.parse(newState.drawnItems), false);
+                    _self.recreateDrawnings(newState.drawnItems, false);
                     resolve();
                 }, 100);
             } else {
@@ -425,7 +422,6 @@ module.exports = {
             }
         });
     },
-
 
     /**
      * Recreates drawnings on the map
@@ -612,12 +608,6 @@ module.exports = {
                 size: $("#draw-line-extremity-size").val(),
                 where: $("#draw-line-extremity-where").val()
             };
-
-            console.log({
-                pattern: $("#draw-line-extremity").val(),
-                size: $("#draw-line-extremity-size").val(),
-                where: $("#draw-line-extremity-where").val()
-            });
         }
 
         if (type === 'circlemarker') {

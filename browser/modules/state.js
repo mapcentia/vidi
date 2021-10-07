@@ -61,15 +61,11 @@ var layerTree;
 
 var stateSnapshots;
 
+let extensions;
+
 var listened = {};
 
 var p, hashArr = hash.replace("#", "").split("/");
-
-// TODO Dirty Hack,
-// Because extensions are not being set before State resolves.
-// So we hard code reportRender, which sets up a listener on event "on:customData"
-// and hard code the call to reportRender.render in state::initializeFromHashPart
-let reportRender = require('../../extensions/conflictSearch/browser/reportRenderAlt');
 
 let activeLayersInSnapshot = false;
 
@@ -149,6 +145,7 @@ module.exports = {
         meta = o.meta;
         layerTree = o.layerTree;
         backboneEvents = o.backboneEvents;
+        extensions = o.extensions;
         _self = this;
         return this;
     },
@@ -177,6 +174,14 @@ module.exports = {
                     legend.init().then(function () {
                         console.log("Vidi is now loaded");// Vidi is now fully loaded
                         window.status = "all_loaded";
+                        if (window.vidiConfig?.initFunction) {
+                            let func = Function('"use strict";return (' + window.vidiConfig.initFunction + ')')();
+                            try {
+                                func();
+                            } catch (e) {
+                                console.error("Error in initFunction:", e.message)
+                            }
+                        }
                         if (urlVars?.readyCallback) {
                             try {
                                 window.parent.postMessage({
@@ -320,8 +325,6 @@ module.exports = {
 
                                 if (typeof response.data.customData !== "undefined" && response.data.customData !== null) {
                                     backboneEvents.get().trigger("on:customData", response.data.customData);
-                                    // TODO HACK:
-                                    reportRender.render(response.data.customData);
                                 }
 
                                 // Recreate print
@@ -372,8 +375,8 @@ module.exports = {
                                 // Recreate Drawings
                                 // =================
 
-                                if (response.data.draw !== null) {
-                                    draw.recreateDrawnings(response.data.draw);
+                                if (response.data.state.modules?.draw?.drawnItems) {
+                                    draw.recreateDrawnings(response.data.state.modules.draw.drawnItems);
                                 }
 
                                 // Recreate query draw
@@ -464,6 +467,13 @@ module.exports = {
                                             cloud.get().map.addLayer(g);
                                         }
                                     });
+                                }
+
+                                // Recreate symbols
+                                // ================
+                                if ('symbols' in extensions && response?.data?.symbols?.symbolState !== null) {
+                                    extensions.symbols.index.recreateSymbolsFromState(response.data.state.modules.symbols.symbolState);
+                                    extensions.symbols.index.lock();
                                 }
 
                                 // Recreate added layers

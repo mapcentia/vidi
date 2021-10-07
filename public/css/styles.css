@@ -145,6 +145,9 @@ body {
 .tab-content .tab-pane {
   height: 100%;
 }
+.tab-content .container {
+  width: 100%;
+}
 #menu {
   z-index: 2 !important;
 }

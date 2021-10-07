@@ -4,11 +4,42 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [UNRELEASED]
+## [2021.10.2] - 2021-7-10
+### Fixed
+- Intended code error removed from `conflict` module in excel function.
+
+## [2021.10.1] - 2021-7-10
+### Added
+- A new config `initFunction`, which holds a JavaScript function as a string. When Vidi is fully loaded this function will be run:
+  ```json
+  {
+      "initFunction": "function(){alert(\"Hello\")}"
+  }
+  ```
+  
+### Fixed
+- The `reportRender` issue in `conflict` module regarding state resolving is fixed.
+- The alternative `reportRenderAlt` module for `conflictSearch` can now be set in config:
+  ```json
+    {  
+      "extensions": {
+        "browser": [
+            {"conflictSearch": ["index", "reportRenderAlt", "infoClick", "controller"]}
+        ]
+      }
+    }
+  ```
+
+## [2021.10.0] - 2021-6-10
+### Changed
+- Legend added in blank.tmpl (which is used in static maps). Also the legend checkboxes are removed from legends in blank.tmpl and print.tmpl.
+- Extensions are initiated before state resolves, so extensions work in state urls.
+- Measurement tooltip will now show one decimal instead of none when showing meters.
+
 ### Fixed
 - Serialization of line extremities was buggy when lines was recreated after applying state causing extremities not to be drawn.
 
-## [2021.9.0]
+## [2021.9.0] - 2021-22-9
 ### Changed
 - Links in pop-ups now gets the primary color of the theme instead of the fixed cyan color.
 
@@ -19,7 +50,7 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ## [2021.8.3] - 2021-30-8
 ### Fixed
-- Regression bug regarding print. The metadata object was stripped from the payload in ealier release, but was necessary for recreation of layers. Now a slim down version of meta are send.
+- Regression bug regarding print. The metadata object was stripped from the payload in ealier release, but was necessary for recreation of layers. Now a slim downed version of meta are send.
 
 ## [2021.8.2] - 2021-30-8
 ### Added
@@ -178,7 +209,6 @@ and this project adheres to [CalVer](https://calver.org/).
     {{/_vidi_content.fields}}
 </div>
 ```  
-
 
 ### Added
 - `searchConfig.placeholderText` added to config, so the search placeholder can be customized.

@@ -81,6 +81,7 @@ module.exports = {
                         window.vidiConfig.featureInfoTableOnMap = data.featureInfoTableOnMap ? data.featureInfoTableOnMap : window.vidiConfig.featureInfoTableOnMap;
                         window.vidiConfig.showLayerGroupCheckbox = data.showLayerGroupCheckbox ? data.showLayerGroupCheckbox : window.vidiConfig.showLayerGroupCheckbox;
                         window.vidiConfig.activeLayers = data.activeLayers ? data.activeLayers : window.vidiConfig.activeLayers;
+                        window.vidiConfig.initFunction = data.initFunction ? data.initFunction : window.vidiConfig.initFunction;
                     }).fail(function () {
                         console.log("Could not load: " + configFile);
                         if (window.vidiConfig.defaultConfig && (window.vidiConfig.defaultConfig !== configFile)) {
@@ -336,91 +337,89 @@ module.exports = {
             //alert("Vidi is loaded without schema. Can't set extent or add layers");
             backboneEvents.get().trigger("ready:meta");
         }).then(() => {
+            try {
+
+                // Require search module
+                // =====================
+
+                // Hack to compile Glob files. Don´t call this function!
+                function ಠ_ಠ() {
+                    require('./search/*.js', {mode: 'expand'});
+                }
+
+                if (typeof vidiConfig.searchModules !== "undefined") {
+                    $.each(vidiConfig.searchModules, function (i, v) {
+                        modules.search[v] = require('./search/' + v + '.js');
+                        modules.search[v].set(modules);
+                    });
+                    modules.search[window.vidiConfig.enabledSearch].init(null, null, null, null, 'init');
+                }
+
+                // Require extensions modules
+                // ==========================
+
+                //Hack to compile Glob files. Don´t call this function!
+                function ಠ_ಠ_() {
+                    require('./../../extensions/*/browser/*.js', {mode: 'expand'});
+                    require('./../../extensions/*/browser/*/*.js', {mode: 'expand'});
+
+                    // require('./../../extensions/!(watsonc)/browser/*.js', {mode: 'expand'});
+                    // require('./../../extensions/!(watsonc)/browser/*/*.js', {mode: 'expand'});
+                }
+
+                if (typeof vidiConfig.extensions !== "undefined" && typeof vidiConfig.extensions.browser !== "undefined") {
+                    $.each(vidiConfig.extensions.browser, function (i, v) {
+                        modules.extensions[Object.keys(v)[0]] = {};
+                        $.each(v[Object.keys(v)[0]], function (n, m) {
+                            modules.extensions[Object.keys(v)[0]][m] = require('./../../extensions/' + Object.keys(v)[0] + '/browser/' + m + ".js");
+                            modules.extensions[Object.keys(v)[0]][m].set(modules);
+                        })
+                    });
+
+                    if (typeof window.vidiConfig.enabledExtensions === "object") {
+                        let enabledExtensionsCopy = JSON.parse(JSON.stringify(window.vidiConfig.enabledExtensions));
+                        $.each(vidiConfig.extensions.browser, function (i, v) {
+                            $.each(v[Object.keys(v)[0]], function (n, m) {
+                                if (window.vidiConfig.enabledExtensions.indexOf(Object.keys(v)[0]) > -1) {
+                                    try {
+                                        modules.extensions[Object.keys(v)[0]][m].init();
+                                    } catch (e) {
+
+                                        console.warn(`Module ${Object.keys(v)[0]} could not be initiated`)
+                                        console.error(e);
+                                    }
+
+                                    let enabledExtensionIndex = enabledExtensionsCopy.indexOf(Object.keys(v)[0]);
+                                    if (enabledExtensionIndex > -1) {
+                                        enabledExtensionsCopy.splice(enabledExtensionIndex, 1);
+                                    }
+                                }
+                            })
+                        });
+
+                        if (enabledExtensionsCopy.length > 0) {
+                            console.warn('Following extensions need to be enabled, but they were not initially compiled: ' + JSON.stringify(enabledExtensionsCopy));
+                        }
+
+                        // Show log in button if session module is enabled
+                        if (window.vidiConfig.enabledExtensions.indexOf("session") > -1 && !enabledExtensionsCopy.indexOf("session") > -1) {
+                            $("#session").show();
+                        }
+                    }
+                }
+                $(window).resize(function () {
+                    setTimeout(function () {
+                        modules.cloud.get().map.invalidateSize();
+                    }, 100);
+                });
+                backboneEvents.get().trigger(`extensions:initialized`);
+            } catch (e) {
+                console.error("Could not perform application initialization", e.message, e);
+            }
             return modules.layerTree.create();
         }).finally(() => {
             modules.state.init().then(() => {
                 modules.state.listenAny(`extensions:initialized`, [`layerTree`]);
-                try {
-
-                    // Require search module
-                    // =====================
-
-                    // Hack to compile Glob files. Don´t call this function!
-                    function ಠ_ಠ() {
-                        require('./search/*.js', {mode: 'expand'});
-                    }
-
-                    if (typeof vidiConfig.searchModules !== "undefined") {
-                        $.each(vidiConfig.searchModules, function (i, v) {
-                            modules.search[v] = require('./search/' + v + '.js');
-                            modules.search[v].set(modules);
-                        });
-                        modules.search[window.vidiConfig.enabledSearch].init(null, null, null, null, 'init');
-                    }
-
-                    // Require extensions modules
-                    // ==========================
-
-                    //Hack to compile Glob files. Don´t call this function!
-                    function ಠ_ಠ_() {
-                        require('./../../extensions/*/browser/*.js', {mode: 'expand'});
-                        require('./../../extensions/*/browser/*/*.js', {mode: 'expand'});
-
-                        // require('./../../extensions/!(watsonc)/browser/*.js', {mode: 'expand'});
-                        // require('./../../extensions/!(watsonc)/browser/*/*.js', {mode: 'expand'});
-                    }
-
-                    if (typeof vidiConfig.extensions !== "undefined" && typeof vidiConfig.extensions.browser !== "undefined") {
-                        $.each(vidiConfig.extensions.browser, function (i, v) {
-                            modules.extensions[Object.keys(v)[0]] = {};
-                            $.each(v[Object.keys(v)[0]], function (n, m) {
-                                modules.extensions[Object.keys(v)[0]][m] = require('./../../extensions/' + Object.keys(v)[0] + '/browser/' + m + ".js");
-                                modules.extensions[Object.keys(v)[0]][m].set(modules);
-                            })
-                        });
-
-                        if (typeof window.vidiConfig.enabledExtensions === "object") {
-                            let enabledExtensionsCopy = JSON.parse(JSON.stringify(window.vidiConfig.enabledExtensions));
-                            $.each(vidiConfig.extensions.browser, function (i, v) {
-                                $.each(v[Object.keys(v)[0]], function (n, m) {
-                                    if (window.vidiConfig.enabledExtensions.indexOf(Object.keys(v)[0]) > -1) {
-                                        try {
-                                            modules.extensions[Object.keys(v)[0]][m].init();
-                                        } catch (e) {
-
-                                            console.warn(`Module ${Object.keys(v)[0]} could not be initiated`)
-                                            console.error(e);
-                                        }
-
-                                        let enabledExtensionIndex = enabledExtensionsCopy.indexOf(Object.keys(v)[0]);
-                                        if (enabledExtensionIndex > -1) {
-                                            enabledExtensionsCopy.splice(enabledExtensionIndex, 1);
-                                        }
-                                    }
-                                })
-                            });
-
-                            if (enabledExtensionsCopy.length > 0) {
-                                console.warn('Following extensions need to be enabled, but they were not initially compiled: ' + JSON.stringify(enabledExtensionsCopy));
-                            }
-
-                            // Show log in button if session module is enabled
-                            if (window.vidiConfig.enabledExtensions.indexOf("session") > -1 && !enabledExtensionsCopy.indexOf("session") > -1) {
-                                $("#session").show();
-                            }
-                        }
-                    }
-
-                    $(window).resize(function () {
-                        setTimeout(function () {
-                            modules.cloud.get().map.invalidateSize();
-                        }, 100);
-                    });
-
-                    backboneEvents.get().trigger(`extensions:initialized`);
-                } catch (e) {
-                    console.error("Could not perform application initialization", e.message, e);
-                }
                 $("#loadscreen").fadeOut(200);
             }).catch((error) => {
                 console.error(error)

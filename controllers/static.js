@@ -10,9 +10,9 @@
 
 require('dotenv').config();
 
-var express = require('express');
-var router = express.Router();
-var headless = require('./headlessBrowserPool').pool;
+const express = require('express');
+const router = express.Router();
+const headless = require('./headlessBrowserPool').pool;
 
 
 const returnPNGForStateSnapshot = (localRequest, localResponse) => {
