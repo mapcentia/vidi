@@ -749,6 +749,9 @@ var buildServiceSelect = function (id) {
             }
 
         });
+
+        // Clean up that first select option.
+        $('#'+select_id).find('option').get(0).remove()
     }
     
 };
