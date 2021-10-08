@@ -219,7 +219,7 @@ module.exports = {
         "Null": "Null",
         "Yes": "Ja",
         "No": "Nej",
-        "Add condition": "Tilføj betingelse",
+        "Add condition": "Tilføj",
         "Refresh cache for layer": "Genindlæs cache for lag",
         "Fetch layer data from server": "Hent data fra server",
         "Fetch layer data from cache": "Hent data fra cache",

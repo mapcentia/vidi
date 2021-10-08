@@ -219,7 +219,7 @@ module.exports = {
         "Null": "Null",
         "Yes": "Yes",
         "No": "No",
-        "Add condition": "Add condition",
+        "Add condition": "Add",
         "Refresh cache for layer": "Refresh cache for layer",
         "Fetch layer data from server": "Fetch data from server",
         "Fetch layer data from cache": "Fetch data from cache",

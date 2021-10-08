@@ -3161,9 +3161,13 @@ module.exports = {
                 $(layerContainer).find('.js-layer-settings-search').append(
                     `<div style="padding-left: 15px; padding-right: 10px; padding-bottom: 20px; padding-top: 20px;">
                         <div>
-                            <form class="form" onsubmit="return false">
-                                <div class="form-group">
-                                    <input type="test" class="js-search-input form-control" placeholder="${__("Search")}">
+                            <form onsubmit="return false">
+
+                                <div class="form-outline">
+                                    <input type="text" class="form-control" id="tyu"/>
+                                    <label class="form-label" for="tyu">
+                                        ${__("Search")}
+                                    </label>
                                 </div>
                                 <div class="form-inline">
                                     <div class="form-group">

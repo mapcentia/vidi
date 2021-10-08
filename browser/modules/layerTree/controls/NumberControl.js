@@ -22,7 +22,7 @@ class NumberControl extends React.Component {
         } else {
             return (<input
                 id={this.props.id}
-                className="form-control"
+                className="form-control form-select-sm"
                 type="number"
                 placeholder="123"
                 value={this.props.value}

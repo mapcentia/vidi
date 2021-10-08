@@ -35,9 +35,9 @@ class MarkupGenerator {
                     <div class="layer-count badge">
                         <span>0</span> / <span></span>
                     </div>
-                    <span style="display: ${addGroupCheckbox ? "inline" : "none"}" class="checkbox" id="group-check-box-${base64GroupName}">
-                        <label>
-                            <input type="checkbox" data-gc2-group-name="${name}">
+                    <span style="display: ${addGroupCheckbox ? "inline" : "none"}" class="form-check" id="group-check-box-${base64GroupName}">
+                        <label class="form-check-label">
+                            <input class="form-check-input" type="checkbox" data-gc2-group-name="${name}">
                         </label>
                     </span>
                     <button class="btn btn-primary accordion-toggle js-toggle-layer-panel" data-mdb-toggle="collapse" data-parent="#layers" data-mdb-target="#collapse${base64GroupName}" aria-expanded="false" aria-control="collapseExample">${name}</a>
@@ -80,8 +80,8 @@ class MarkupGenerator {
         data-gc2-subgroup-id="${name}"
         style="min-height: 36px; margin-top: 1px; background-color: white; border-bottom: 1px solid #CCC;">
             <span style="display: ${addGroupCheckbox ? "inline" : "none"}; margin-left: -2px" class="checkbox">
-                <label>
-                    <input type="checkbox" data-gc2-subgroup-name="${name}" data-gc2-subgroup-level="${level}">
+                <label class="form-check-label">
+                    <input class="form-check-input" type="checkbox" data-gc2-subgroup-name="${name}" data-gc2-subgroup-level="${level}">
                 </label>
             </span>
             <button style="margin-left: ${addGroupCheckbox ? "-18px" : "0"}" type="button" class="btn btn-default btn-xs js-subgroup-toggle-button">
@@ -104,8 +104,8 @@ class MarkupGenerator {
                     <div style="margin-top: 4px;">
                         <div style="display: inline-block;">
                             <div class="checkbox" style="width: 34px; top: 2px">
-                                <label>
-                                    <input type="checkbox"
+                                <label class="form-check-label">
+                                    <input class="form-check-input" type="checkbox"
                                         ${(layerIsActive ? `checked="checked"` : ``)}
                                         ${(disableCheckBox ? `disabled` : ``)}
                                         class="js-show-layer-control"

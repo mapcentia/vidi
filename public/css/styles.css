@@ -1642,3 +1642,6 @@ td.rdtYear:hover {
 .drag-marker {
   cursor: move;
 }
+.hidden {
+  display: none;
+}

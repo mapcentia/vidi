@@ -260,7 +260,7 @@ class VectorLayerFilter extends React.Component {
 
         return (<select
             id={`column_select_` + layerKey + `_` + index}
-            className="form-control"
+            className="form-control form-select-sm"
             onChange={(event) => {
                 this.changeFieldname(event.target.value, index)
             }}
@@ -294,7 +294,7 @@ class VectorLayerFilter extends React.Component {
 
             expressionControl = (<select
                 id={`expression_select_` + layerKey + `_` + index}
-                className="form-control"
+                className="form-control form-select-sm"
                 onChange={(event) => {
                     this.changeExpression(event.target.value, index)
                 }}
@@ -386,7 +386,7 @@ class VectorLayerFilter extends React.Component {
                 this.changeMatchType(event.target.value)
             }}
             value={this.state.arbitraryFilters.match}
-            className="form-control" style={{
+            className="form-control form-select-sm" style={{
             display: `inline`,
             width: SELECT_WIDTH
         }}>{matchSelectorOptions}</select>);
@@ -466,7 +466,7 @@ class VectorLayerFilter extends React.Component {
             controlDivStyle.maxWidth = `160px`;
             filterControls.push(<div key={`column_` + index} style={{display: `flex`}}>
                 <div className="form-group" style={divStyle}>
-                    <button className="btn btn-xs btn-warning" type="button"
+                    <button className="btn btn-sm btn-link" type="button"
                             onClick={this.onRuleDelete.bind(this, index)}
                             style={{display: this.props.isFilterImmutable ? "none" : "inline"}}>
                         <i className="fa fa-minus"></i>
@@ -520,17 +520,18 @@ class VectorLayerFilter extends React.Component {
                         <p>{__(`Match`)} {matchSelector} {__(`of the following`)}</p>
                     </div>
                     <div>{filterControls}</div>
-                    <div>
-                        <button className="btn btn-sm" type="button" onClick={this.onRuleAdd.bind(this)}
+                        <div className="btn-group shadow-0" role="group" aria-label="Basic example">
+
+                        <button className="btn btn-sm btn-link" data-mdb-ripple-color="dark" type="button" onClick={this.onRuleAdd.bind(this)}
                                 style={{display: this.props.isFilterImmutable ? "none" : "inline"}}>
-                            <i className="fa fa-plus"></i> {__(`Add condition`)}
+                            <i className="fa fa-plus"></i>
                         </button>
-                        <button className="btn btn-sm btn-success" type="button" disabled={!allRulesAreValid}
+                        <button className="btn btn-sm btn-link" type="button" disabled={!allRulesAreValid}
                                 onClick={this.onRulesApply.bind(this)}>
-                            <i className="fa fa-check"></i> {__(`Apply`)}
+                            <i className="fa fa-check"></i>
                         </button>
-                        <button className="btn btn-sm" type="button" onClick={this.onRulesClear.bind(this)}>
-                            <i className="fa fa-eraser"></i> {__(`Disable`)}
+                        <button className="btn btn-sm btn-link" type="button" onClick={this.onRulesClear.bind(this)}>
+                            <i className="fa fa-eraser"></i>
                         </button>
                     </div>
                 </div>
@@ -615,8 +616,8 @@ class VectorLayerFilter extends React.Component {
                         <button style={!this.state.editorFiltersActive ? {
                             pointerEvents: "none",
                             opacity: "0.2"
-                        } : {}} type="button" className="btn btn-xs btn-success" onClick={this.applyEditor.bind(this)}>
-                            <i className="fa fa-check"></i> {__(`Apply`)}
+                        } : {}} type="button" className="btn btn-sm btn-outline-success" onClick={this.applyEditor.bind(this)}>
+                            <i className="fa fa-check"></i>
                         </button>
                     </div>
                 </div>
@@ -624,12 +625,12 @@ class VectorLayerFilter extends React.Component {
         };
 
         const buildResetButton = () => {
-            return (<button className="btn btn-xs btn-danger" onClick={this.handleReset.bind(this)}>
+            return (<button className="btn btn-sm btn-link" onClick={this.handleReset.bind(this)}>
                 <i className="fa fa-reply"></i> {__(`Reset filter`)}</button>)
         };
 
         const buildFitBoundsButton = () => {
-            return (<button disabled={!this.state.fitBoundsActiveOnLayer} className="btn btn-xs btn-info"
+            return (<button disabled={!this.state.fitBoundsActiveOnLayer} className="btn btn-sm btn-link"
                             onClick={this.handleFitBounds.bind(this)}>
                 <i className="fa fa-arrows-alt"></i> {__(`Fit bounds to filter`)}</button>)
         };
@@ -640,14 +641,14 @@ class VectorLayerFilter extends React.Component {
                     <div className='form-group col-md-6' style={{paddingBottom: "0px"}}>
                         <button
                             disabled={!this.state.fitBoundsActiveOnLayer}
-                            className="btn btn-xs btn-info"
+                            className="btn btn-sm btn-link"
                             onClick={this.handleDownload.bind(this)}>
-                            <i className="fa fa-download"></i> {__(`Download`)}
+                            <i className="fa fa-download"></i>
                         </button>
                     </div>
                     <div className='form-group col-md-6'>
                         <select
-                            className="form-control"
+                            className="form-control form-select-sm"
                             onChange={(event) => {
                                 this.changeDownLoadFormat(event.target.value)
                             }}
