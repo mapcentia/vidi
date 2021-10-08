@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [UNRELEASED]
+### Changed
+- Session cookie will now be set as `secure=true` and `sameSite=none` if env var NODE_ENV is set to 'production'. This will fix issues with embeding Vidi and protected layers.
+
 ## [2021.10.2] - 2021-7-10
 ### Fixed
 - Intended code error removed from `conflict` module in excel function.
