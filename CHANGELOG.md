@@ -4,9 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [UNRELEASED]
+## [2021.10.3] - 2021-11-10
 ### Changed
-- Session cookie will now be set as `secure=true` and `sameSite=none` if env var NODE_ENV is set to 'production'. This will fix issues with embeding Vidi and protected layers.
+- Session cookie (connect.gc2) will now be set as `secure=true` and `sameSite=none` if enviromental variable NODE_ENV is set to 'production'. This will fix issues with embeding Vidi and protected layers. To set NODE_ENV in docker-compose file, use this:
+```yaml
+    environment:
+      - NODE_ENV=production
+```
 
 ## [2021.10.2] - 2021-7-10
 ### Fixed
