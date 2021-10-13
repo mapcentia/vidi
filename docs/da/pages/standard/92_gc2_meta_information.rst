@@ -76,11 +76,11 @@ En JavaScript funktion, som kaldes når der vælges en række i feature-listen. 
 
 **Accordion summery prefix**
 
-Anvendes ved bruge af :ref:`configjs_crossmultiselect`
+Anvendes ved brugen af :ref:`configjs_crossmultiselect`
 
 **Accordion summery**
 
-Anvendes ved bruge af :ref:`configjs_crossmultiselect`
+Anvendes ved brugen af :ref:`configjs_crossmultiselect`
 
 .. _gc2mata_layertype:
 
