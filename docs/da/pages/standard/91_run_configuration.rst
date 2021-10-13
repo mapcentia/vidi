@@ -1,7 +1,7 @@
 .. _configjson:
 
 #################################################################
-Kørselskonfiguration
+Kørselskonfiguration (configs)
 #################################################################
 
 .. topic:: Overview
@@ -17,7 +17,7 @@ Når vidi startes i browseren læses værdier ind fra :ref:`configjs`. I flere t
 
 Vidi startes med en URL som denne (uden fragments [#fragment]_):
 
-``https://kort.geofyn.dk/app/geofyn/?config=borgerkort01.json``
+``https://vidi.dk/app/mindb/?config=minconfig.json``
 
 Som kan læses sådan:
 
