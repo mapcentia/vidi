@@ -1142,11 +1142,11 @@ module.exports = {
         "layers": [
             "Basis_ortofoto"
         ],
-        "id": "Luftfoto_2019",
-        "name":"Luftfoto 2019",
+        "id": "Luftfoto_nyeste",
+        "name":"Luftfoto nyeste",
         "description": "Luftfotokort fra kortforsyningen",
         "attribution": "&copy; Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.",
-        "abstract":"<p>Oprettede luftfoto (ortofoto) marts/april 2019 (12,5 cm pixels).</p><p>Copyright: Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.</p><p>Luftfotoet må frit anvendes, men følgende skal angives 'Indeholder GeoDanmark-data fra Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.'.</p><br>",
+        "abstract":"<p>Baggrundskort med seneste udgave af GeoDanmark ortofoto forår</p><p>Copyright: Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.</p><p>Luftfotoet må frit anvendes, men følgende skal angives 'Indeholder GeoDanmark-data fra Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.'.</p><br>",
         "minZoom": 4,
         "maxZoom": 22,
         "maxNativeZoom": 20,
