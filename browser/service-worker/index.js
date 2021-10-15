@@ -115,9 +115,6 @@ let urlsIgnoredForCaching = [{
     requested: 'google'
 }, {
     regExp: true,
-    requested: '/api/sql'
-}, {
-    regExp: true,
     requested: '/api/feature'
 }, {
     regExp: true,
