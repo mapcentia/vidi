@@ -69,6 +69,13 @@ var exId = "graveAssistent";
 
 /**
  *
+ * @type {*|exports|module.exports}
+ */
+ var meta = require('./../../../browser/modules/meta');
+ console.log(meta)
+
+/**
+ *
  */
 var clicktimer;
 
@@ -1018,6 +1025,7 @@ module.exports = {
                      */
                     populateDClayers() {
                         try {
+                            var metaData = meta.getMetaData();
                             metaData.data.forEach(function (d) {
                                 if (d.f_table_name) {
                                     //console.log(d.f_table_name + ': ' + d.f_table_name.includes('graveassistent_') + '|' + !d.f_table_name.includes('_status'))
@@ -1115,7 +1123,6 @@ module.exports = {
                                 }
 
                                 // TODO: implement warning if MF/F exists!
-
                                 let f = d[0].properties;
                                 let bounds = [[f.ymin, f.xmin],[f.ymax, f.xmax]];
                                 cloud.get().map.fitBounds(bounds)
