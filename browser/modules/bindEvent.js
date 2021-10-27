@@ -548,13 +548,16 @@ module.exports = {
             }
         });
 
-        $('.slide-right > .modal-header > button[class="close"]').click(() => {
+        $('.slide-right > .modal-header > button[class="close"]').click((e) => {
             backboneEvents.get().trigger('off:all');
         });
 
         // Module icons
-        $('#side-panel ul li a').on('click', function () {
-            backboneEvents.get().trigger('off:all');
+        $('#side-panel ul li a').on('click', function (event) {
+
+            console.log($(event.target).parent().data('module-id'))
+
+            // backboneEvents.get().trigger('off:all');
             let moduleTitle = $(this).data('module-title');
             let e = $('#module-container');
             e.find('.js-module-title').text('');
@@ -591,8 +594,9 @@ module.exports = {
 
         // Listen for extensions
         $(document).arrive('#side-panel ul li a', function () {
-            $(this).on('click', function () {
-                backboneEvents.get().trigger('off:all');
+            $(this).on('click', function (event) {
+                console.log($(event.target).parent().data('module-id'))
+                // backboneEvents.get().trigger('off:all');
                 const moduleId = $(this).data('module-id');
                 const moduleTitle = $(this).data('module-title');
                 const e = $('#module-container');
