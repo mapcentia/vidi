@@ -549,7 +549,7 @@ module.exports = {
         });
 
         $('.slide-right > .modal-header > button[class="close"]').click((e) => {
-            backboneEvents.get().trigger('off:all');
+            // backboneEvents.get().trigger('off:all');
         });
 
         // Module icons
