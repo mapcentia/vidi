@@ -42,8 +42,8 @@ module.exports = {
             _self.reset();
         });
         backboneEvents.get().on(`off:all`, () => {
-            _self.off();
-            _self.reset();
+            // _self.off();
+            // _self.reset();
         });
         backboneEvents.get().on(`on:${MODULE_ID}`, () => {
             _self.active(true);
