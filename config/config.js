@@ -167,7 +167,16 @@ module.exports = {
                         mapsizePx: [2185, 3120],
                         mapsizeMm: [576, 820]
                     }
-                }
+                },
+                A0: {
+                    l: {
+                        mapsizePx: [4455, 3120],
+                        mapsizeMm: [1167, 820]
+                    },
+                    p: {
+                        mapsizePx: [3120, 4455],
+                        mapsizeMm: [820, 1167]
+                    }
             },
             "stoholmvarme": { // Your print templates. "print" is the default
                 A4: {
