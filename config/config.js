@@ -170,12 +170,12 @@ module.exports = {
                 },
                 A0: {
                     l: {
-                        mapsizePx: [4455, 3120],
-                        mapsizeMm: [1167, 820]
+                        mapsizePx: [4430, 3120],
+                        mapsizeMm: [1173, 825]
                     },
                     p: {
-                        mapsizePx: [3120, 4455],
-                        mapsizeMm: [820, 1167]
+                        mapsizePx: [3120, 4430],
+                        mapsizeMm: [825, 1173]
                     }
                 }
             },
