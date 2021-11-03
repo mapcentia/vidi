@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2021.11.0] - 2021-3-11
+### Changed
+- Draw tool bar will now be positioned beside the main tools, if screen height is below 700px.
+
+### Fixed
+- Vector table now show only in `embed.tmpl`.
+
 ## [2021.10.3] - 2021-11-10
 ### Changed
 - Session cookie (connect.gc2) will now be set as `secure=true` and `sameSite=none` if enviromental variable NODE_ENV is set to 'production'. This will fix issues with embeding Vidi and protected layers. To set NODE_ENV in docker-compose file, use this:
