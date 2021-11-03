@@ -128,6 +128,9 @@ let urlsIgnoredForCaching = [{
 }, {
     regExp: true,
     requested: '/mapcache/'
+}, {
+    regExp: true,
+    requested: '/api/df'
 }];
 
 if (typeof CONFIG.urlsIgnoredForCaching === "object") {
