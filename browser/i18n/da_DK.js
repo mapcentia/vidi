@@ -448,6 +448,8 @@ module.exports = {
         "Tsvector": "Tsvector",
         "No searchable fields on layer": "Ingen søgbare felter på laget",
         "Method": "Metode",
-        "Find me": "Find mig"
+        "Find me": "Find mig",
+
+        "Symbols": "Symboler"
     }
 };

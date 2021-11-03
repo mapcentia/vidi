@@ -85,15 +85,22 @@ if (typeof config?.redis?.host === "string") {
         path: "/tmp/sessions"
     });
 }
-
-app.use(session({
+let sess = {
     store: store,
     secret: 'keyboard cat',
     resave: false,
     saveUninitialized: false,
     name: "connect.gc2",
     cookie: {secure: false, httpOnly: false}
-}));
+};
+
+if (app.get('env') === 'production') {
+    app.set('trust proxy', 1) // trust first proxy
+    sess.cookie.secure = true
+    sess.cookie.sameSite = 'none'
+}
+
+app.use(session(sess));
 
 app.use('/app/:db/:schema?', express.static(path.join(__dirname, 'public'), {maxage: '60s'}));
 if (config.staticRoutes) {

@@ -1,7 +1,7 @@
 .. _configjson:
 
 #################################################################
-Kørselskonfiguration
+Kørselskonfiguration (configs)
 #################################################################
 
 .. topic:: Overview
@@ -17,7 +17,7 @@ Når vidi startes i browseren læses værdier ind fra :ref:`configjs`. I flere t
 
 Vidi startes med en URL som denne (uden fragments [#fragment]_):
 
-``https://kort.geofyn.dk/app/geofyn/?config=borgerkort01.json``
+``https://vidi.dk/app/mindb/?config=minconfig.json``
 
 Som kan læses sådan:
 
@@ -291,15 +291,16 @@ featureInfoTableOnMap
 Når denne er sat til ``true`` vises feature-info tabellerne i en popup på kortet i stedet for i sidepanelet. Det gør indstillingen veleget til embed template.
 Ved brug af "avanceret forespørgelse" vises tabellerne dog stadig i sidepanelet.
 
+.. code-block:: json
+
+    "featureInfoTableOnMap": true,
+
 .. figure:: ../../../_media/feature-info-table-on-map.png
     :width: 400px
     :align: center
     :name: feature-info-table-on-map
     :figclass: align-center
-
-.. code-block:: json
-
-    "featureInfoTableOnMap": true,
+|
 
 .. note::
     Kan ikke anvendes i sammenhæng med :ref:`configjs_crossmultiselect`
@@ -317,15 +318,16 @@ Overskrifterne har to dele:
 
 Ovenstående sættes i GC2 Meta.
 
+.. code-block:: json
+
+    "crossMultiSelect": true,
+
 .. figure:: ../../../_media/cross-multi-select.png
     :width: 400px
     :align: center
     :name: cross-multi-select
     :figclass: align-center
-
-.. code-block:: json
-
-    "crossMultiSelect": true,
+|
 
 .. note::
     Hvis et lag er editerbart, vises "blyant" og "skraldespand" ikonerne ikke i pop-up'en.
@@ -393,14 +395,14 @@ Andre muligheder kan ses `her <https://developer.mozilla.org/en-US/docs/Web/CSS/
 
 .. _configjs_showlayergroupcheckboxes:
 
-showLayerGroupCheckboxe
+showLayerGroupCheckbox
 *****************************************************************
 
 Viser en tjekboks i hver lag-gruppe og under-gruppe, som tænder/slukker alle lag i den pågældende gruppe.
 
 .. code-block:: json
 
-    "showLayerGroupCheckboxe: true
+    "showLayerGroupCheckbox": true
 
 .. _configjs_activelayers:
 
