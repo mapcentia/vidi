@@ -1097,7 +1097,7 @@ module.exports = {
    
     "df" : {
         "username" : "XMERXHKAVN",
-        "password" : "Geop1234!--"
+        "password" : "Geop1234!"
     },
     "baseLayers":[
         {
@@ -1294,7 +1294,7 @@ module.exports = {
       },
        {
         "type": "wms",
-        "url": "/api/dfd/DKtopokort/dtk_25/1.0.0/WMS",
+        "url": "/api/df/DKtopokort/dtk_25/1.0.0/WMS",
         "layers": [
             "dtk25"
         ],
