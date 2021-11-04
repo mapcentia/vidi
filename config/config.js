@@ -1094,8 +1094,13 @@ module.exports = {
     // dtkSkaermkortDaempet
     // hereNormalNightGrey
     // ===================================================
-   "baseLayers":[
-      {
+   
+    "df" : {
+        "username" : "XMERXHKAVN",
+        "password" : "Geop1234!--"
+    },
+    "baseLayers":[
+        {
          "id":"geodk.bright",
          "name":"Topografisk kort",
          "db":"baselayers", 
@@ -1289,7 +1294,7 @@ module.exports = {
       },
        {
         "type": "wms",
-        "url": "https://services.datafordeler.dk/DKtopokort/dtk_25/1.0.0/WMS?username=XMERXHKAVN&password=Geop1234!",
+        "url": "/api/dfd/DKtopokort/dtk_25/1.0.0/WMS",
         "layers": [
             "dtk25"
         ],
@@ -1300,6 +1305,21 @@ module.exports = {
         "minZoom": 4,
         "maxZoom": 24,
         "maxNativeZoom": 20
+      },
+      {
+        "type": "wms",
+        "url": "/api/df/GeoDanmarkOrto/orto_foraar/1.0.0/WMS",
+        "layers": [
+          "geodanmark_2020_12_5cm"
+        ],
+        "id": "geodanmark_2020_12_5cm_Test",
+        "name": "TEST geodanmark_2020_12_5cm",
+        "description": "geodanmark_2020_12_5cm",
+        "attribution": "Styrelsen for Dataforsyning og Effektivisering",
+        "minZoom": 8,
+        "maxZoom": 22,
+        "maxNativeZoom": 22,
+        "transparent": true
       }
    ]
 }
