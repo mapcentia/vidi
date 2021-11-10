@@ -1129,28 +1129,35 @@ module.exports = {
         "maxZoom": 21,
         "maxNativeZoom": 21
         },
-        {
-        "type": "wms",
-        "url": "https://services.kortforsyningen.dk/mat?TRANSPARENT=TRUE&STYLE=default&SERVICE=WMS&VERSION=1.1.1&STYLES=&FORMAT=image/png&token=2edaf0d4a10f052d184f2d4fcafcbfd6",
-        "layers": [
-            "Klitfredning",
-            "Strandbeskyttelse",
-            "Fredskov",
-            "Majoratskov",
-            "Stormfald",
-            "OptagetVej",
-            "MatrikelSkel"  ,
-            "Centroide"            
-        ],
-        "id": "Matrikel_kort",
-        "name": "Matrikelkort (GST)",
-        "description": "Matrikelkort fra kortforsyningen",
-        "attribution": "Kortforsyningen",
-        "abstract": "<p>Dagligt ajourført matrikelkort.</p><p>Copyright: Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.</p><p>Baggrundskortet må frit anvendes, men følgende skal angives 'Indeholder data fra Styrelsen for Dataforsyning og Effektivisering.'. </p><br>",
-        "minZoom": 4,
-        "maxZoom": 21, 
-        "maxNativeZoom": 21
-      },
+		{
+			"type": "wms",
+			"url": "/api/df/Matrikel/MatrikelGaeldendeOgForeloebigWMS/1.0.0/WMS",
+			"layers": [
+				"Centroide_Gaeldende",
+				"OptagetVej_Gaeldende",
+				"MatrikelSkel_Gaeldende",
+				"StrandbeskyttelseFlade_Gaeldende",
+				"KlitfredningFlade_Gaeldende",
+				"FredskovFlade_Gaeldende"
+			],
+			"styles": [
+				"Sorte_centroider",
+				"Sort_OptagetVej",
+				"Sorte_skel",
+				"default",
+				"default",
+				"default"
+			],
+			"id": "Matriklen-DAF",
+			"name": "Matrikelkort (DAF)",
+			"description": "Matriklen (Datafordeleren)",
+			"attribution": "&copy; Geodatastyrelsen, Datafordeleren",
+			"abstract": "<p>Dagligt ajourført matrikelkort.</p><p>Ophavsretten til Matrikelkortet tilhører Geodatastyrelsen</p><p>Data og kort fra Matrklen er stillet til rådighed efter vilkårene beskrevet på https://datafordeler.dk/vejledning/brugervilkaar/ejendomsoplysninger-ebr-og-mat/</p><br>",
+			"minZoom": 8,
+			"maxZoom": 22,
+			"maxNativeZoom": 22,
+			"transparent": false
+		},
       {
         "type": "wms",
         "url": "https://services.kortforsyningen.dk/service?SERVICENAME=forvaltning2&token=2edaf0d4a10f052d184f2d4fcafcbfd6",
