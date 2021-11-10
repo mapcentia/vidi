@@ -28,22 +28,20 @@ class MarkupGenerator {
     }
 
     getGroupPanel(base64GroupName, name, addGroupCheckbox = false) {
-        return (`<div class="panel panel-default panel-layertree" id="layer-panel-${base64GroupName}" xmlns="http://www.w3.org/1999/html">
-            <div class="panel-heading" role="tab" style="padding: 8px 0px 8px 15px;">
-                <h4 class="panel-title">
+        return (`<div class="accordion-item panel-layertree" id="layer-panel-${base64GroupName}" xmlns="http://www.w3.org/1999/html">
                     <i style="float: right;" class="material-icons layer-move-vert">more_vert</i>
                     <div class="layer-count badge">
                         <span>0</span> / <span></span>
                     </div>
                     <span style="display: ${addGroupCheckbox ? "inline" : "none"}" class="form-check" id="group-check-box-${base64GroupName}">
                         <label class="form-check-label">
-                            <input class="form-check-input" type="checkbox" data-gc2-group-name="${name}">
+                            <input class="form-check-input" type="checkbox" data-gc2-group-name="${name}" />
                         </label>
                     </span>
-                    <button class="btn btn-primary accordion-toggle js-toggle-layer-panel" data-mdb-toggle="collapse" data-parent="#layers" data-mdb-target="#collapse${base64GroupName}" aria-expanded="false" aria-control="collapseExample">${name}</a>
-                </h4>
-            </div>
-            <ul class="list-group" id="group-${base64GroupName}" role="tabpanel"></ul>
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed js-toggle-layer-panel" data-mdb-toggle="collapse" data-parent="#layers" data-mdb-target="#group-${base64GroupName}" aria-expanded="false" aria-control="collapseExample">${name}</button>
+                </h2>
+            <div class="list-group accordion-collapse collapse" id="group-${base64GroupName}" role="tabpanel"></div>
         </div>`);
     }
 

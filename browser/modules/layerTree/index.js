@@ -965,7 +965,7 @@ module.exports = {
                                     arr = layerSortingInstance.sortGroups(order, notSortedGroupsArray);
                                 }
 
-                                $("#layers").append(`<div id="layers_list"></div>`);
+                                $("#layers").append(`<div id="layers_list" class="accordion"></div>`);
 
                                 // Filling up groups and underlying layers (except ungrouped ones)
                                 latestFullTreeStructure = [];
@@ -2210,7 +2210,7 @@ module.exports = {
 
             // Append to inner group container
             // ===============================
-            $("#group-" + base64GroupName).append(`<div id="collapse${base64GroupName}" class="accordion-body collapse"></div>`);
+            $("#group-" + base64GroupName).append(`<div id="collapse${base64GroupName}" class="accordion-body"></div>`);
         }
 
         // Get layers that belong to current group
