@@ -1149,7 +1149,7 @@ module.exports = {
 				"default"
 			],
 			"id": "Matriklen-DAF",
-			"name": "Matrikelkort (DAF)",
+			"name": "Matrikelkort",
 			"description": "Matriklen (Datafordeleren)",
 			"attribution": "&copy; Geodatastyrelsen, Datafordeleren",
 			"abstract": "<p>Dagligt ajourført matrikelkort.</p><p>Ophavsretten til Matrikelkortet tilhører Geodatastyrelsen</p><p>Data og kort fra Matrklen er stillet til rådighed efter vilkårene beskrevet på https://datafordeler.dk/vejledning/brugervilkaar/ejendomsoplysninger-ebr-og-mat/</p><br>",
