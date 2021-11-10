@@ -2,9 +2,10 @@
  * Testing State snaphsots API
  */
 
-const { expect } = require(`chai`);
+const {expect} = require(`chai`);
 const request = require(`request`);
 const helpers = require(`./../helpers`);
+const base64url = require("base64url");
 
 let AUTH_COOKIE = false;
 const TRACKER_COOKIE = `vidi-state-tracker=6cafa811-2ae7-45f4-907db-2c14fb811e53`;
@@ -12,7 +13,7 @@ const TRACKER_COOKIE = `vidi-state-tracker=6cafa811-2ae7-45f4-907db-2c14fb811e53
 let anonymousStateSnapshotId = false;
 let nonAnonymousStateSnapshotId = false;
 
-const DATABASE_NAME = `test`;
+const DATABASE_NAME = `mydb`;
 
 const getAllSnapshots = (browser = false, user = false) => {
     let cookieRaw = ``;
@@ -29,9 +30,9 @@ const getAllSnapshots = (browser = false, user = false) => {
         request({
             url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}`,
             method: `GET`,
-            headers: { Cookie: cookie }
+            headers: {Cookie: cookie}
         }, (error, response) => {
-            parsedBody = JSON.parse(response.body);
+            parsedBody = JSON.parse(base64url.decode(response.body));
             resolve(parsedBody);
         });
     });
@@ -47,10 +48,10 @@ describe('State snapshot management API', () => {
             method: 'POST',
             json: true,
             body: {
-                "database": "test",
+                "database": "mydb",
                 "password": "Silke2009",
                 "schema": "public",
-                "user": "test"
+                "user": "mydb"
             }
         }, (error, response) => {
             AUTH_COOKIE = response.headers[`set-cookie`][0].split(`;`)[0];
@@ -61,7 +62,7 @@ describe('State snapshot management API', () => {
     it('should return publicly available state snapshots without tracker cookie or authorization', (done) => {
         request(`${helpers.API_URL}/state-snapshots/${DATABASE_NAME}`, (error, response, body) => {
             expect(response.statusCode).to.equal(200);
-            let parsedBody = JSON.parse(body);
+            let parsedBody = JSON.parse(base64url.decode(body));
             expect(parsedBody.length >= 0).to.be.true;
             done();
         });
@@ -69,29 +70,37 @@ describe('State snapshot management API', () => {
 
     it('should be able to create anonymous state snapshot for unauthorized user', (done) => {
         let cookie = request.cookie(`${TRACKER_COOKIE}`);
+        let data = base64url(JSON.stringify({
+            host: "https://exampdffdfle.com",
+            database: "database",
+            schema: "schema",
+            anonymous: true,
+            snapshot: {
+                modules: [],
+                map: {
+                    x: 1,
+                    y: 2,
+                    zoom: 3
+                }
+            }
+        }))
         let options = {
             url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}`,
             method: `POST`,
-            headers: { Cookie: cookie },
-            json: true,
-            body: {
-                host: `https://example.com`,
-                database: `database`,
-                schema: `schema`,
-                anonymous: true,
-                snapshot: {
-                    modules: [],
-                    map: {
-                        x: 1,
-                        y: 2,
-                        zoom: 3
-                    }
-                }
-            }
+            headers: {
+                Cookie: cookie,
+                'Content-Type': 'text/plain',
+                'Accept': 'text/plain, */*'
+            },
+            contentType: 'text/plain',
+            dataType: 'text',
+            json: false,
+            body: data
         };
 
-        request(options, (error, response, body) => {
+        request(options, (error, response) => {
             expect(response.statusCode).to.equal(200);
+            response.body= JSON.parse(response.body)
             expect(response.body.id.length > 0).to.equal(true);
             expect(response.body.token.length > 0).to.equal(true);
 
@@ -100,7 +109,7 @@ describe('State snapshot management API', () => {
             options = {
                 url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}`,
                 method: `GET`,
-                headers: { Cookie: cookie },
+                headers: {Cookie: cookie},
             };
 
             getAllSnapshots(true).then(stateSnapshots => {
@@ -123,7 +132,7 @@ describe('State snapshot management API', () => {
             url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}/${anonymousStateSnapshotId}`,
             method: `GET`,
             json: true,
-            headers: { Cookie: cookie },
+            headers: {Cookie: cookie},
         };
 
         request(options, (error, response, body) => {
@@ -141,7 +150,7 @@ describe('State snapshot management API', () => {
             url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}/INVALID`,
             method: `GET`,
             json: true,
-            headers: { Cookie: cookie },
+            headers: {Cookie: cookie},
         };
 
         request(options, (error, response, body) => {
@@ -168,7 +177,7 @@ describe('State snapshot management API', () => {
         let options = {
             url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}`,
             method: `POST`,
-            headers: { Cookie: cookie },
+            headers: {Cookie: cookie},
             json: true,
             body: {
                 host: `https://example.com`,
@@ -234,9 +243,9 @@ describe('State snapshot management API', () => {
         let options = {
             url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}`,
             method: `POST`,
-            headers: { Cookie: cookie },
+            headers: {Cookie: cookie},
             json: true,
-            body: { a: '1' }
+            body: {a: '1'}
         };
 
         request(options, (error, response, body) => {
@@ -251,7 +260,7 @@ describe('State snapshot management API', () => {
         let options = {
             url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}`,
             method: `POST`,
-            headers: { Cookie: cookie },
+            headers: {Cookie: cookie},
             json: true,
             body: {
                 host: `https://example.com`,
@@ -336,7 +345,7 @@ describe('State snapshot management API', () => {
         let options = {
             url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}`,
             method: `POST`,
-            headers: { Cookie: cookie },
+            headers: {Cookie: cookie},
             json: true,
             body: {
                 host: `https://example.com`,
@@ -374,7 +383,7 @@ describe('State snapshot management API', () => {
                     url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}/${foundItem.id}`,
                     method: `PUT`,
                     json: true,
-                    headers: { Cookie: cookie },
+                    headers: {Cookie: cookie},
                     body: foundItem
                 };
 
@@ -419,7 +428,7 @@ describe('State snapshot management API', () => {
         let options = {
             url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}`,
             method: `POST`,
-            headers: { Cookie: cookie },
+            headers: {Cookie: cookie},
             json: true,
             body
         };
@@ -442,7 +451,7 @@ describe('State snapshot management API', () => {
                 options = {
                     url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}/${foundItem.id}`,
                     method: `PUT`,
-                    headers: { Cookie: failingCookie },
+                    headers: {Cookie: failingCookie},
                     json: true,
                     body: foundItem
                 };
@@ -463,7 +472,7 @@ describe('State snapshot management API', () => {
         let options = {
             url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}`,
             method: `POST`,
-            headers: { Cookie: cookie },
+            headers: {Cookie: cookie},
             json: true,
             body: {
                 host: `https://example.com`,
@@ -625,7 +634,7 @@ describe('State snapshot management API', () => {
         let options = {
             url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}`,
             method: `POST`,
-            headers: { Cookie: cookie },
+            headers: {Cookie: cookie},
             json: true,
             body: data
         };
@@ -641,12 +650,12 @@ describe('State snapshot management API', () => {
             expect(decodedToken.config.length > 0).to.equal(true);
             expect(decodedToken.tmpl.length > 0).to.equal(true);
 
-            data.snapshot.meta = { config: `test.json` };
+            data.snapshot.meta = {config: `test.json`};
             request({
                 url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}/${stateSnapshotId}`,
                 method: `PUT`,
                 json: true,
-                headers: { Cookie: cookie },
+                headers: {Cookie: cookie},
                 body: data
             }, (error, response) => {
                 expect(response.statusCode).to.equal(200);
@@ -654,7 +663,7 @@ describe('State snapshot management API', () => {
                     url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}/${stateSnapshotId}`,
                     method: `GET`,
                     json: true,
-                    headers: { Cookie: cookie },
+                    headers: {Cookie: cookie},
                 }, (error, response) => {
                     let decodedToken = JSON.parse(Buffer.from(response.body.token, 'base64'));
                     expect(decodedToken.config.length > 0).to.equal(true);
