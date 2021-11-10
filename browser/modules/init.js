@@ -162,6 +162,7 @@ module.exports = {
                 par.pop();
             }
             tmpl = par.join();
+            window.vidiConfig.template = tmpl;
         }
 
         // If px and py is provided for print templates,

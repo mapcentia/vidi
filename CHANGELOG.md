@@ -4,6 +4,51 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [UNRELEASED]
+### Added
+- API endpoint for proxify base layer requests to Datafordeler.dk. The API rewrites the URL and adds `username` and `password`. The base layer url follows this pattern: `/api/df/[Datafordeler URI]`. Example Setup in `config/config.js`:
+
+```json
+{
+  "df" : {
+    "userName" : "QMO.....",
+    "password" : "3Ps....."
+  },
+  "baseLayers": [
+    {
+      "type": "wms",
+      "url": "/api/df/GeoDanmarkOrto/orto_foraar/1.0.0/WMS",
+      "layers": [
+        "geodanmark_2020_12_5cm"
+      ],
+      "id": "geodanmark_2020_12_5cm",
+      "name": "TEST geodanmark_2020_12_5cm",
+      "description": "geodanmark_2020_12_5cm",
+      "attribution": "Styrelsen for Dataforsyning og Effektivisering",
+      "minZoom": 8,
+      "maxZoom": 22,
+      "maxNativeZoom": 22,
+      "transparent": true
+    }
+  ]
+}
+```
+
+## [2021.11.0] - 2021-3-11
+### Changed
+- Draw tool bar will now be positioned beside the main tools, if screen height is below 700px.
+
+### Fixed
+- Vector table now show only in `embed.tmpl`.
+
+## [2021.10.3] - 2021-11-10
+### Changed
+- Session cookie (connect.gc2) will now be set as `secure=true` and `sameSite=none` if enviromental variable NODE_ENV is set to 'production'. This will fix issues with embeding Vidi and protected layers. To set NODE_ENV in docker-compose file, use this:
+  ```yaml
+    environment:
+      - NODE_ENV=production
+  ```
+
 ## [2021.10.2] - 2021-7-10
 ### Fixed
 - Intended code error removed from `conflict` module in excel function.
