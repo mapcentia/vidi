@@ -6,6 +6,7 @@
 
 'use strict';
 
+const React = require("react");
 /**
  *
  * @type {*|exports|module.exports}
@@ -75,7 +76,7 @@ module.exports = {
                 this.handleSubmit = this.handleSubmit.bind(this);
 
                 this.padding = {
-                    padding: "12px"
+                    padding: "0"
                 };
                 this.sessionLoginBtn = {
                     width: "100%"
@@ -156,8 +157,10 @@ module.exports = {
             }
 
             componentDidMount() {
-                var me = this;
-
+                document.querySelectorAll('.form-outline').forEach((formOutline) => {
+                    new mdb.Input(formOutline).init();
+                });
+                let me = this;
                 $.ajax({
                     dataType: 'json',
                     url: "/api/session/status",
@@ -201,24 +204,25 @@ module.exports = {
                     <div className="login">
                         <form onSubmit={this.handleSubmit}>
                             <div style={{display: this.state.auth ? 'none' : 'inline'}}>
-                                <div className="form-group">
-                                    <label htmlFor="session-email">User name</label>
+                                <div className="form-outline mb-4">
                                     <input
                                         id="sessionScreenName"
-                                        className="form-control"
+                                        className="form-control form-control-lg"
                                         defaultValue={this.state.sessionScreenName}
                                         onChange={this.handleChange}
+                                        type="text"
                                     />
+                                    <label htmlFor="sessionScreenName" className="form-label">User name</label>
                                 </div>
-                                <div className="form-group">
-                                    <label htmlFor="session-password">Password</label>
+                                <div className="form-outline mb-4">
                                     <input
                                         id="sessionPassword"
-                                        className="form-control"
+                                        className="form-control form-control-lg"
                                         defaultValue={this.state.sessionPassword}
                                         onChange={this.handleChange}
                                         type="password"
                                     />
+                                    <label htmlFor="sessionPassword" className="form-label">Password</label>
                                 </div>
                             </div>
                             <button
@@ -226,6 +230,7 @@ module.exports = {
                                 disabled={!this.validateForm()}
                                 className="btn btn-raised"
                                 style={this.sessionLoginBtn}
+                                className="btn btn-primary btn-block"
                             >
                                 {this.state.btnText}
                             </button>
