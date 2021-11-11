@@ -62,6 +62,18 @@ const htmlFragments = {
  *
  */
 const store = () => {
+    const validate = config?.extensionConfig?.symbols?.options?.validate;
+    if (validate) {
+        try {
+            let func = Function('"use strict";return (' + validate + ')')();
+            if (!func(symbolState)) {
+                alert("HEJ");
+                return;
+            }
+        } catch (e) {
+            console.error("Error in validate function:", e.message)
+        }
+    }
     $.ajax({
         url: '/api/symbols/' + db,
         data: JSON.stringify(symbolState),
@@ -178,11 +190,11 @@ const handleDragEnd = (e) => {
         }
     }
     if (callback) {
-        let func = Function('"use strict";return (' + callback + ')')();
         try {
+            let func = Function('"use strict";return (' + callback + ')')();
             func(file);
         } catch (e) {
-            console.error("Error in initFunction:", e.message)
+            console.error("Error in callback for " + file, e.message)
         }
     }
     createSymbol(innerHtml, id, coord, 0, 1, map.getZoom(), file);
