@@ -40,11 +40,11 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-body" id="login-modal-body">.</div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-mdb-dismiss="modal">
-                    {{Close}}
-                </button>
-            </div>
+<!--            <div class="modal-footer">-->
+<!--                <button type="button" class="btn btn-secondary" data-mdb-dismiss="modal">-->
+<!--                    {{Close}}-->
+<!--                </button>-->
+<!--            </div>-->
         </div>
     </div>
 </div>
@@ -643,23 +643,17 @@
                                         <div class="col-md-10" id="print-orientation"></div>
                                     </div>
 
-                                    <div class="form-group">
-                                        <label for="print-title"
-                                               class="col-md-2 control-label">{{Title}}</label>
-
-                                        <div class="col-md-10">
-                                            <input type="text" class="form-control" id="print-title" disabled>
-                                        </div>
+                                    <div class="form-outline">
+                                        <input type="text" class="form-control" id="print-title" disabled>
+                                        <label for="print-title" class="col-md-2 form-label">{{Title}}</label>
                                     </div>
 
-                                    <div class="form-group">
-                                        <label for="print-comment"
-                                               class="col-md-2 control-label">{{Comment}}</label>
-                                        <div class="col-md-10">
+                                    <div class="form-outline">
                                         <textarea class="form-control" rows="3" id="print-comment"
                                                   disabled></textarea>
                                             <span class="help-block">{{The comment will be placed on the PDF}}</span>
-                                        </div>
+                                        <label for="print-comment"
+                                               class="col-md-2 form-label">{{Comment}}</label>
                                     </div>
 
                                     <div class="form-group">

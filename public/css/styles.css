@@ -125,28 +125,12 @@ body {
   position: relative;
   width: 100%;
 }
-.tab-pane {
-  padding: 6px;
-}
-.tab-pane .tab-pane {
-  padding: 0 !important;
-}
-.leaflet-popup-content .tab-pane {
-  padding: 0 !important;
-}
 #pane {
   position: fixed;
   top: 0px;
   bottom: 0px;
   width: 100%;
   z-index: 0;
-}
-.tab-content.main-content,
-.tab-content .tab-pane {
-  height: 100%;
-}
-.tab-content .container {
-  width: 100%;
 }
 #menu {
   z-index: 2 !important;
@@ -244,35 +228,11 @@ input[type="checkbox"] {
   font-weight: 300;
   border-bottom: 0;
 }
-.nav-tabs > li > a,
 .dropdown-menu > li > a {
   font-weight: 500;
   font-family: 'Roboto', sans-serif, sans-serif !important;
   padding: 6px 10px;
   text-decoration: none !important;
-}
-.nav-tabs {
-  background-color: #ffffff !important;
-}
-.nav-tabs > li > a {
-  color: #999 !important;
-  border-radius: 0;
-  border: 1px solid rgba(255, 255, 255, 0) !important;
-  border-bottom: 0 !important;
-}
-.nav-tabs > li.active > a {
-  border: 1px solid #ddd !important;
-  border-bottom: 0 !important;
-  color: #111 !important;
-}
-.nav-tabs > li > a:hover {
-  background-color: #eee !important;
-  border: 1px solid rgba(255, 255, 255, 0) !important;
-  border-bottom: 0 !important;
-}
-.nav-tabs > li > a:hover,
-.nav-tabs > li > a:focus {
-  color: inherit !important;
 }
 .pane input,
 .pane textarea {
@@ -750,9 +710,6 @@ body {
   left: -100%;
   box-shadow: rgba(0, 0, 0, 0.2) 0 27px 24px 0, rgba(0, 0, 0, 0.22) 0 40px 77px 0;
 }
-.nav-tabs {
-  border-bottom: 0;
-}
 .layer-count {
   float: right;
 }
@@ -959,15 +916,6 @@ body {
 .places {
   width: 100%;
   position: relative;
-}
-input[type=text]::-ms-clear {
-  width: 0;
-  height: 0;
-  margin: 0 20px 5px 20px;
-  padding: 3px 0;
-  border-bottom: 1px solid #ccc;
-  font-size: 16px;
-  font-weight: bold;
 }
 .loadingIndicator {
   position: fixed;
@@ -1252,9 +1200,6 @@ h4 small {
 }
 .conflict-result-content {
   height: 100% !important;
-}
-#info-pane > .tab-pane {
-  height: 100%;
 }
 .togglebutton {
   margin-bottom: 6px;
@@ -1655,4 +1600,15 @@ td.rdtYear:hover {
 .accordion-item:first-of-type {
   border-top-left-radius: .5rem;
   border-top-right-radius: .5rem;
+}
+.list-group-item {
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+}
+.accordion-body {
+  padding: 0 !important;
+}
+.offcanvas-bottom {
+  height: 50vh;
 }
