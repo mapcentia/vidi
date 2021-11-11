@@ -48,7 +48,7 @@ const createId = () => (+new Date * (Math.random() + 1)).toString(36).substr(2, 
  */
 const htmlFragments = {
     "outer": `
-        <div class="container tab-pane" role="tabpanel">
+        <div class="tab-pane" role="tabpanel">
             <div class="row row-cols-2">
             </div>
         </div>
@@ -157,7 +157,34 @@ const handleDragEnd = (e) => {
     let innerHtml = $(e.target).clone().html();
     let id = createId();
     let coord = map.mouseEventToLatLng(e);
-    let file =  $(e.target).attr("data-file");
+    let file = $(e.target).attr("data-file");
+
+    let callback = config?.extensionConfig?.symbols?.symbolOptions?.[file]?.callback;
+    if (callback === undefined) {
+        callback = config?.extensionConfig?.symbols?.options?.callback;
+    }
+    let onlyOne = config?.extensionConfig?.symbols?.symbolOptions?.[file]?.onlyOne;
+    if (onlyOne === undefined) {
+        onlyOne = config?.extensionConfig?.symbols?.options?.onlyOne;
+    }
+    if (onlyOne === true) {
+        for (const id in symbolState) {
+            if (id && symbolState.hasOwnProperty(id)) {
+                if (symbolState[id].file === file) {
+                    alert("Symbolet kan kun indsættes en gang");
+                    return;
+                }
+            }
+        }
+    }
+    if (callback) {
+        let func = Function('"use strict";return (' + callback + ')')();
+        try {
+            func(file);
+        } catch (e) {
+            console.error("Error in initFunction:", e.message)
+        }
+    }
     createSymbol(innerHtml, id, coord, 0, 1, map.getZoom(), file);
 }
 
@@ -183,9 +210,23 @@ const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file) => 
     outerHtml.addClass("symbols-map");
     outerHtml.attr("draggable", "false")
     outerHtml.addClass(classStr);
-    outerHtml.append(`<div class="symbols-handles symbols-rotate ${rotateHandleStr}"></div>`);
-    outerHtml.append(`<div class="symbols-handles symbols-delete ${deleteHandleStr}" id="${id}"></div>`);
-    outerHtml.append(`<div class="symbols-handles symbols-scale ${scaleHandleStr}"></div>`);
+
+    let doRotate = config?.extensionConfig?.symbols?.symbolOptions?.[file]?.rotate
+    let doScale = config?.extensionConfig?.symbols?.symbolOptions?.[file]?.scale
+    let doDelete = config?.extensionConfig?.symbols?.symbolOptions?.[file]?.delete
+    if (doRotate === undefined) {
+        doRotate = config?.extensionConfig?.symbols?.options?.rotate;
+    }
+    if (doScale === undefined) {
+        doScale = config?.extensionConfig?.symbols?.options?.scale;
+    }
+    if (doDelete === undefined) {
+        doDelete = config?.extensionConfig?.symbols?.options?.delete;
+    }
+
+    if (doRotate) outerHtml.append(`<div class="symbols-handles symbols-rotate ${rotateHandleStr}"></div>`);
+    if (doScale) outerHtml.append(`<div class="symbols-handles symbols-scale ${scaleHandleStr}"></div>`);
+    if (doDelete) outerHtml.append(`<div class="symbols-handles symbols-delete ${deleteHandleStr}" id="${id}"></div>`);
     let icon = L.divIcon({
         className: "drag-symbole",
         iconSize: new L.Point(72, 72),
@@ -302,11 +343,11 @@ module.exports = {
             // _self.off();
         });
 
-        utils.createMainTab(exId, __("Symbols"), __("Info"), require('./../../../browser/modules/height')().max, "local_florist", false, exId);
+        // utils.createMainTab(exId, __("Symbols"), __("Info"), require('./../../../browser/modules/height')().max, "local_florist", false, exId);
 
         const gui = `
                     <div class="form-inline">
-                        <div class="form-group">
+                      <!--  <div class="form-group">
                             <div class="togglebutton">
                                 <label>
                                     <input id="vidi-symbols-lock" type="checkbox">${__("Lock")}
@@ -319,7 +360,7 @@ module.exports = {
                                     <input id="vidi-symbols-autoscale" type="checkbox">${__("Auto scale")}
                                 </label>
                             </div>
-                        </div>
+                        </div>-->
                         <div class="form-group">
                             <button class="btn" id="vidi-symbols-store">${__("Save in db")}</button>
                         </div>
@@ -347,55 +388,56 @@ module.exports = {
         let files = config.extensionConfig.symbols.files;
         let i = 0;
 
-        backboneEvents.get().on(`on:${exId}`, () => {
-            if (!filesAreLoaded) {
-                (function iter() {
-                    $.getJSON("/api/symbols/" + files[i].file, (data) => {
-                        symbols[files[i].title] = data;
-                        i++;
-                        if (i === files.length) {
-                            try {
-                                let inner = $(htmlFragments.inner);
-                                let tabs = $(`<ul class="nav nav-tabs"></ul>`);
-                                let tabPanes = $(`<div class="tab-content"></div>`);
-                                let first = true;
+        // backboneEvents.get().on(`on:${exId}`, () => {
+        if (!filesAreLoaded) {
+            (function iter() {
+                $.getJSON("/api/symbols/" + files[i].file, (data) => {
+                    symbols[files[i].title] = data;
+                    i++;
+                    if (i === files.length) {
+                        try {
+                            let inner = $(htmlFragments.inner);
+                            let tabs = $(`<ul class="nav nav-pills mb-3"></ul>`);
+                            let tabPanes = $(`<div class="tab-content"></div>`);
+                            let first = true;
 
-                                for (const group in symbols) {
-                                    let outer = $(htmlFragments.outer).clone();
-                                    let id = createId();
-                                    for (const id in symbols[group]) {
-                                        if (id && symbols[group].hasOwnProperty(id)) {
-                                            let svg = $(inner.clone()[0]).append(symbols[group][id].svg);
-                                            svg.attr('data-file', id);
-                                            outer.find('.row')[0].append(svg[0]);
-                                        }
-                                    }
-                                    let tab = $(`<li role="presentation"><a href="#${id}" role="tab" data-toggle="tab">${group}</a></li>`);
-                                    tabs.append(tab)
-                                    tabPanes.append(outer);
-                                    outer.attr('id', id);
-                                    if (first) {
-                                        outer.addClass('active');
-                                        tab.addClass('active');
-                                        first = false;
+                            for (const group in symbols) {
+                                let outer = $(htmlFragments.outer).clone();
+                                let id = createId();
+                                for (const id in symbols[group]) {
+                                    if (id && symbols[group].hasOwnProperty(id)) {
+                                        let svg = $(inner.clone()[0]).append(symbols[group][id].svg);
+                                        svg.attr('data-file', id);
+                                        outer.find('.row')[0].append(svg[0]);
                                     }
                                 }
-
-                                let c = $(`#vidi_symbols`);
-                                c.append(tabs);
-                                c.append(tabPanes);
-                                $(".drag-marker").on("dragend", handleDragEnd);
-                                filesAreLoaded = true;
-                            } catch (e) {
-                                console.error(e.message);
+                                let tab = $(`<li class="nav-item" role="presentation"><a data-mdb-toggle="pill" class="nav-link ` + (first ? ` active` : ``) + `" href="#_${id}" role="tab" data-toggle="tab">${group}</a></li>`);
+                                tabs.append(tab)
+                                tabPanes.append(outer);
+                                outer.attr('id', '_' + id);
+                                if (first) {
+                                    outer.addClass('active');
+                                    tab.addClass('active');
+                                    first = false;
+                                }
                             }
-                        } else {
-                            iter()
+
+                            let c = $(`#vidi_symbols`);
+                            c.append(tabs);
+                            c.append(tabPanes);
+                            $(".drag-marker").on("dragend", handleDragEnd);
+                            filesAreLoaded = true;
+                        } catch (e) {
+                            console.error(e.message);
                         }
-                    })
-                }())
-            }
-        });
+                    } else {
+                        iter()
+                    }
+                })
+            }())
+        }
+        // }
+        // );
 
         $('#vidi-symbols-store').on('click', store);
 
