@@ -937,6 +937,7 @@ module.exports = module.exports = {
                         errorCount++;
                     }
                     $('#conflict-result-content a[href="#hits-content"] span').html(" (" + hitsCount + ")");
+                    $('#conflict-result-content a[href="#hits-data-content"] span').html(" (" + hitsCount + ")");
                     $('#conflict-result-content a[href="#nohits-content"] span').html(" (" + noHitsCount + ")");
                     $('#conflict-result-content a[href="#error-content"] span').html(" (" + errorCount + ")");
                     $('#conflict-result-origin').html(`Søgning foretaget med: <b>${resultOrigin}</b>`);

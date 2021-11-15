@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
 ## [UNRELEASED]
+### Changed
+- Hit count add to the "Data fra konflikter" tab in `conflictSearch` module.
+
 ### Added
 - API endpoint for proxify base layer requests to Datafordeler.dk. The API rewrites the URL and adds `username` and `password`. The base layer url follows this pattern: `/api/df/[Datafordeler URI]`. Example Setup in `config/config.js`:
 
