@@ -823,7 +823,12 @@ module.exports = module.exports = {
         $("#spinner span").hide();
         $("#result-origin").html(response.text);
         $('#conflict-main-tabs a[href="#conflict-result-content"]').tab('show');
-        $('#conflict-result-content a[href="#hits-content"]').tab('show');
+        if (window.vidiConfig.template === "conflict.tmpl") {
+            $('#conflict-result-content a[href="#hits-data-content"]').tab('show');
+        }
+        else {
+            $('#conflict-result-content a[href="#hits-content"]').tab('show');
+        }
         $('#conflict-open-pdf').attr("href", "/html?id=" + response.file)
         $("#conflict-download-pdf").prop("download", `Søgning foretaget med ${response.text} d. ${response.dateTime}`);
 

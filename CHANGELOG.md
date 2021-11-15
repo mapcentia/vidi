@@ -7,6 +7,7 @@ and this project adheres to [CalVer](https://calver.org/).
 ## [UNRELEASED]
 ### Changed
 - Hit count add to the "Data fra konflikter" tab in `conflictSearch` module.
+- Some changes in `conflict.tmpl` HTML, so it's easier to customize it.
 
 ### Added
 - API endpoint for proxify base layer requests to Datafordeler.dk. The API rewrites the URL and adds `username` and `password`. The base layer url follows this pattern: `/api/df/[Datafordeler URI]`. Example Setup in `config/config.js`:
