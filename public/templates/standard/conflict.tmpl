@@ -37,18 +37,19 @@
         display: none !important;
     }
     #conflict-result .btn-toolbar.bs-component {
-        display: none !important;
+        /*display: none !important;*/
 
     }
     #hits-data-content {
-        display: block !important;
+        /*display: block !important;*/
 
     }
     .nav.nav-tabs {
-        display: none !important;
+        display: none;
+        margin-top: 10px;
     }
-    #hits-content {
-        display: none !important;
+    #conflict-excel-btn, .btn-toolbar.bs-component {
+        display: none;
     }
     #conflict-places {
         margin: 0;
@@ -65,7 +66,12 @@
     .conflict-result-content {
         overflow: unset;
     }
-
+    .nav.nav-tabs li:first-child {
+        display: none;
+    }
+    .nav.nav-tabs {
+        /*display: block;*/
+    }
 </style>
 <script>
     setInterval(function() {
