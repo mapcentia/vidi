@@ -667,7 +667,7 @@ inline .leaflet-control-print {
   margin-bottom: 0;
 }
 .custom-popup .leaflet-popup-content-wrapper a {
-  color: #222;
+  color: #009688;
   text-decoration: underline;
 }
 .custom-popup .leaflet-popup-tip-container {
@@ -1624,7 +1624,7 @@ td.rdtYear:hover {
   cursor: help;
 }
 .list-subgroup-item {
-  border-left: 2px solid #222 !important;
+  border-left: 2px solid #009688 !important;
 }
 .symbols-rotate {
   height: 16px;
@@ -1667,6 +1667,29 @@ td.rdtYear:hover {
   left: 0;
   padding: 14px;
 }
+/* Style for Geosag-extension */
+/* Geopartner, RGB 03/2020 */
+#geosag-results {
+  position: absolute;
+  width: 380px;
+  box-shadow: 0 1px 12px 0 rgba(0, 0, 0, 0.12);
+  z-index: 1;
+}
+.geosag-result {
+  display: block;
+  background-color: white;
+  padding: 0.25em;
+}
+.geosag-result:hover {
+  background-color: #009688;
+  color: white;
+  cursor: pointer;
+}
+#geosag-input {
+  height: 50px;
+  font-size: 1.5rem;
+  width: 320px;
+}
 .symbols-map {
   position: absolute;
 }
@@ -1676,6 +1699,9 @@ td.rdtYear:hover {
 }
 .drag-marker {
   cursor: move;
+}
+.list-subgroup-item {
+  border-left: 2px solid #009688 !important;
 }
 @media screen and (max-height: 700px) {
   .leaflet-draw.leaflet-control {
