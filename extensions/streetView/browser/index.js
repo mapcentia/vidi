@@ -247,7 +247,6 @@ module.exports = {
                     <div role="tabpanel">
                         <div className="form-group">
                             <h3>{__("Choose service")}</h3>
-                            {!config.extensionConfig.streetView.ignorelist.includes('google') &&
                             <div className="radio">
                                 <label>
                                     <input type="radio" id="streetview-service-google" name="streetview-service"
@@ -255,9 +254,8 @@ module.exports = {
                                            onChange={this.onChange}/>
                                     Google Street View
                                 </label>
-                            </div>}
-                            
-                            {!config.extensionConfig.streetView.ignorelist.includes('mapillary') &&
+                            </div>
+
                             <div className="radio">
                                 <label>
                                     <input type="radio" id="streetview-service-mapillary"
@@ -266,9 +264,8 @@ module.exports = {
                                            onChange={this.onChange}/>
                                     Mapillary
                                 </label>
-                            </div>}
+                            </div>
 
-                            {!config.extensionConfig.streetView.ignorelist.includes('skraafoto') &&
                             <div className="radio">
                                 <label>
                                     <input type="radio" id="streetview-service-skraafoto"
@@ -277,9 +274,8 @@ module.exports = {
                                            onChange={this.onChange}/>
                                     Skråfoto
                                 </label>
-                            </div>}
+                            </div>
 
-                            {!config.extensionConfig.streetView.ignorelist.includes('cowi') &&
                             <div className="radio">
                                 <label>
                                     <input type="radio" id="streetview-service-cowi"
@@ -288,7 +284,7 @@ module.exports = {
                                            onChange={this.onChange}/>
                                     COWI Gadefoto
                                 </label>
-                            </div>}
+                            </div>
 
                         </div>
                     </div>
