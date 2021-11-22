@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [UNRELEASED]
+### Changed
+- The location circle marker is now orange in follow-mode and blue when not following. Location now works the same in both embed and default templates.
+
+### Fixed
+- `slideOutLayerTree` is now inwoked after vidi is ready making it more stable.
+
 ## [2021.11.2] - 2021-17-11
 ### Fixed
 - `layerTree` state was not updated when Vidi was initiated with layers in URL anchor, resulting in no active layers in state until some changes was done by user afterward. 

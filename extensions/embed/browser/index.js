@@ -1,39 +1,29 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2021 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
+
 'use strict';
 
-import {state} from "../../../public/js/leaflet-easybutton/easy-button";
-
-/**
- *
- */
-var measurements;
-
-var backboneEvents;
-
-var cloud;
-
-var setting;
-
-var print;
-
-var meta;
-var anchor;
-
-var legend;
-
-var metaDataKeys;
+let measurements;
+let backboneEvents;
+let cloud;
+let setting;
+let print;
+let meta;
+let anchor;
+let legend;
+let metaDataKeys;
+let lc;
 
 /**
  *
  * @returns {*}
  */
 module.exports = {
-    set: function (o) {
+    set: (o) => {
         measurements = o.measurements;
         backboneEvents = o.backboneEvents;
         cloud = o.cloud;
@@ -44,50 +34,47 @@ module.exports = {
         anchor = o.anchor;
         return this;
     },
-    init: function () {
-        backboneEvents.get().trigger(`on:infoClick`);
-
+    init: () => {
+        let map = cloud.get().map;
         let id = "#legend-dialog";
+        backboneEvents.get().trigger(`on:infoClick`);
+        lc = cloud.getLc();
         $(id).animate({
             bottom: ("-233px")
-        }, 500, function () {
+        }, 500, () => {
             $(id + " .expand-less").hide();
             $(id + " .expand-more").show();
         });
 
-        let map = cloud.get().map;
-
         metaDataKeys = meta.getMetaDataKeys();
 
-        $("#burger-btn").on("click", function () {
+        $("#burger-btn").on("click", () => {
             $("#layer-slide.slide-left").animate({
                 left: "0"
             }, 500)
         });
 
-
-        $("#layer-slide.slide-left .close").on("click", function () {
+        $("#layer-slide.slide-left .close").on("click", () => {
             $("#layer-slide.slide-left").animate({
                 left: "-100%"
             }, 500)
         });
 
-        $("#info-modal-top.slide-left .close").on("click", function () {
+        $("#info-modal-top.slide-left .close").on("click", () => {
             $("#info-modal-top.slide-left").animate({
                 left: "-100%"
             }, 500)
         });
 
-
-        $("#zoom-in-btn").on("click", function () {
+        $("#zoom-in-btn").on("click", () => {
             map.zoomIn();
         });
 
-        $("#zoom-out-btn").on("click", function () {
+        $("#zoom-out-btn").on("click", () => {
             map.zoomOut();
         });
 
-        $("#zoom-default-btn").on("click", function () {
+        $("#zoom-default-btn").on("click", () => {
             let parameters = anchor.getInitMapParameters();
             if (parameters) {
                 cloud.get().setView(new L.LatLng(parseFloat(parameters.y), parseFloat(parameters.x)), parameters.zoom);
@@ -97,18 +84,47 @@ module.exports = {
 
         });
 
-        $("#measurements-module-btn").on("click", function () {
+        $("#measurements-module-btn").on("click", () => {
             measurements.toggleMeasurements(true);
         });
 
         $(`#find-me-btn`).click(() => {
-            let lc = cloud.getLc();
-            lc.stop();
-            lc.start();
-            setTimeout(() => {
+            lc._justClicked = true;
+            lc._userPanned = false;
+            lc._setClasses = (state) => {
+                if (state === 'active') {
+                    $("#find-me-btn i").css("color", "#136AEC")
+                } else if (state === 'following') {
+                    $("#find-me-btn i").css("color", "#FFB000")
+                }
+            }
+            if (lc._active && !lc._event) {
+                // click while requesting
                 lc.stop();
-            }, 5000);
+                $("#find-me-btn i").css("color", "rgba(0,0,0, 0.87)")
+            } else if (lc._active && lc._event !== undefined) {
+                let behavior = lc._map.getBounds().contains(lc._event.latlng) ?
+                    lc.options.clickBehavior.inView : lc.options.clickBehavior.outOfView;
+                switch (behavior) {
+                    case 'setView':
+                        lc.setView();
+                        break;
+                    case 'stop':
+                        lc.stop();
+                        $("#find-me-btn i").css("color", "rgba(0,0,0, 0.87)")
+                        if (lc.options.returnToPrevBounds) {
+                            let f = lc.options.flyTo ? lc._map.flyToBounds : lc._map.fitBounds;
+                            f.bind(lc._map)(lc._prevBounds);
+                        }
+                        break;
+                }
+            } else {
+                if (lc.options.returnToPrevBounds) {
+                    lc._prevBounds = lc._map.getBounds();
+                }
+                lc.start();
+            }
+            lc._updateContainerStyle();
         });
-
     }
 };
