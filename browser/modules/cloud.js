@@ -16,7 +16,7 @@ module.exports = {
      *
      * @returns {exports}
      */
-    set: (o) => {
+    set: function() {
         return this;
     },
 
