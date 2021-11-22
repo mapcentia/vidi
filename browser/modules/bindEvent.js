@@ -199,22 +199,6 @@ module.exports = {
             $('.loadingIndicator').fadeIn(200);
         });
 
-        const templateTriggers = () => {
-            setTimeout(
-                function () {
-                    if ($(document).width() > 1024 && typeof window.vidiConfig.activateMainTab === 'undefined') {
-                        $('#search-border').trigger('click');
-                    }
-                    if (window?.vidiConfig?.extensionConfig?.embed?.slideOutLayerTree === true) {
-                        $('#burger-btn').trigger('click');
-                    }
-                    if (window?.vidiConfig?.extensionConfig?.embed?.expandFirstInLayerTree === true) {
-                        $('.js-toggle-layer-panel:first').trigger('click');
-                    }
-                }, 0
-            );
-        }
-
         backboneEvents.get().on('doneLoading:layers', function (e) {
             console.log('Done loading: ' + e);
             if (layers.getCountLoading() === 0) {
@@ -229,7 +213,6 @@ module.exports = {
                         backboneEvents.get().trigger('allDoneLoading:layers');
                         doneB = doneL = false;
                         $('.loadingIndicator').fadeOut(200);
-                        templateTriggers();
                     }, window.vidiTimeout)
                 }
             }
@@ -247,7 +230,6 @@ module.exports = {
                     backboneEvents.get().trigger('allDoneLoading:layers');
                     doneB = doneL = false;
                     $('.loadingIndicator').fadeOut(200);
-                    templateTriggers();
                 }, window.vidiTimeout)
             }
         });
