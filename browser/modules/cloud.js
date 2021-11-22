@@ -16,14 +16,14 @@ module.exports = {
      *
      * @returns {exports}
      */
-    set: () => {
+    set: (o) => {
         return this;
     },
 
     /**
      *
      */
-    init: () => {
+    init: function () {
         const me = this;
         try {
             geocloud.setHost(window.gc2host);
