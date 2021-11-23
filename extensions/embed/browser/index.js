@@ -52,11 +52,25 @@ module.exports = {
             $("#layer-slide.slide-left").animate({
                 left: "0"
             }, 500)
+            let bp = 2170;
+            let sw =$( window ).width();
+            if (sw < bp && sw > 500) {
+                $("#legend-dialog").animate({
+                    left: "30.2%"
+                }, 500)
+            } else if (sw > bp) {
+                $("#legend-dialog").animate({
+                    left: "656px"
+                }, 500)
+            }
         });
 
         $("#layer-slide.slide-left .close").on("click", () => {
             $("#layer-slide.slide-left").animate({
                 left: "-100%"
+            }, 500)
+            $("#legend-dialog").animate({
+                left: "6px"
             }, 500)
         });
 
