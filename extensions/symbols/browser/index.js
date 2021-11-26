@@ -49,6 +49,7 @@ const createId = () => (+new Date * (Math.random() + 1)).toString(36).substr(2, 
 const htmlFragments = {
     "outer": `
         <div class="tab-pane" role="tabpanel">
+            <div class="symbols-desc"></div>
             <div class="row row-cols-2">
             </div>
         </div>
@@ -67,7 +68,6 @@ const store = () => {
         try {
             let func = Function('"use strict";return (' + validate + ')')();
             if (!func(symbolState)) {
-                alert("HEJ");
                 return;
             }
         } catch (e) {
@@ -81,7 +81,8 @@ const store = () => {
         scriptCharset: "utf-8",
         dataType: 'json',
         type: "POST",
-        success: function (response) {
+        success: function () {
+            window.parent.postMessage({type: "doneCallback"}, "*");
         }
     });
 }
@@ -189,15 +190,15 @@ const handleDragEnd = (e) => {
             }
         }
     }
+    createSymbol(innerHtml, id, coord, 0, 1, map.getZoom(), file);
     if (callback) {
         try {
             let func = Function('"use strict";return (' + callback + ')')();
-            func(file);
+            func(file, symbolState, "create");
         } catch (e) {
             console.error("Error in callback for " + file, e.message)
         }
     }
-    createSymbol(innerHtml, id, coord, 0, 1, map.getZoom(), file);
 }
 
 /**
@@ -212,6 +213,7 @@ const handleDragEnd = (e) => {
  */
 const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file) => {
     let map = cloud.get().map;
+    let func;
     let classStr = "dm_" + id;
     let rotateHandleStr = "r_" + id;
     let deleteHandleStr = "d_" + id;
@@ -222,6 +224,18 @@ const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file) => 
     outerHtml.addClass("symbols-map");
     outerHtml.attr("draggable", "false")
     outerHtml.addClass(classStr);
+
+    let callback = config?.extensionConfig?.symbols?.symbolOptions?.[file]?.callback;
+    if (callback === undefined) {
+        callback = config?.extensionConfig?.symbols?.options?.callback;
+    }
+    if (callback) {
+        try {
+            func = Function('"use strict";return (' + callback + ')')();
+        } catch (e) {
+            console.error("Error in callback for " + file, e.message)
+        }
+    }
 
     let doRotate = config?.extensionConfig?.symbols?.symbolOptions?.[file]?.rotate
     let doScale = config?.extensionConfig?.symbols?.symbolOptions?.[file]?.scale
@@ -276,6 +290,11 @@ const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file) => 
         delete markers[e.target.id];
         delete symbolState[e.target.id];
         setState();
+        try {
+            func(file, symbolState, "delete");
+        } catch (e) {
+            console.error("Error in callback for " + file, e.message)
+        }
     });
     rotateHandle.on("touchstart mousedown", function (e) {
         e.preventDefault();
@@ -358,8 +377,8 @@ module.exports = {
         // utils.createMainTab(exId, __("Symbols"), __("Info"), require('./../../../browser/modules/height')().max, "local_florist", false, exId);
 
         const gui = `
-                    <div class="form-inline">
-                      <!--  <div class="form-group">
+                    <!--<div class="form-inline">
+                      <div class="form-group">
                             <div class="togglebutton">
                                 <label>
                                     <input id="vidi-symbols-lock" type="checkbox">${__("Lock")}
@@ -372,11 +391,11 @@ module.exports = {
                                     <input id="vidi-symbols-autoscale" type="checkbox">${__("Auto scale")}
                                 </label>
                             </div>
-                        </div>-->
+                        </div>
                         <div class="form-group">
                             <button class="btn" id="vidi-symbols-store">${__("Save in db")}</button>
                         </div>
-                    </div>
+                    </div>-->
                     <div id="vidi_symbols"></div>
                     `
         $(`#${exId}`).html(gui);
@@ -397,6 +416,7 @@ module.exports = {
         })
 
         let symbols = {};
+        let descs = {};
         let files = config.extensionConfig.symbols.files;
         let i = 0;
 
@@ -405,6 +425,7 @@ module.exports = {
             (function iter() {
                 $.getJSON("/api/symbols/" + files[i].file, (data) => {
                     symbols[files[i].title] = data;
+                    descs[files[i].title] = files[i]?.desc;
                     i++;
                     if (i === files.length) {
                         try {
@@ -412,9 +433,10 @@ module.exports = {
                             let tabs = $(`<ul class="nav nav-pills mb-3"></ul>`);
                             let tabPanes = $(`<div class="tab-content"></div>`);
                             let first = true;
-
+                            let u = 0;
                             for (const group in symbols) {
                                 let outer = $(htmlFragments.outer).clone();
+                                if (descs[group]) outer.find('.symbols-desc')[0].append(`${descs[group]}`);
                                 let id = createId();
                                 for (const id in symbols[group]) {
                                     if (id && symbols[group].hasOwnProperty(id)) {
@@ -423,7 +445,7 @@ module.exports = {
                                         outer.find('.row')[0].append(svg[0]);
                                     }
                                 }
-                                let tab = $(`<li class="nav-item" role="presentation"><a data-mdb-toggle="pill" class="nav-link ` + (first ? ` active` : ``) + `" href="#_${id}" role="tab" data-toggle="tab">${group}</a></li>`);
+                                let tab = $(`<li class="nav-item" role="presentation"><a id="symbol-tab-${u}" data-mdb-toggle="pill" class="nav-link ` + (first ? ` active` : ``) + `" href="#_${id}" role="tab" data-toggle="tab">${group}</a></li>`);
                                 tabs.append(tab)
                                 tabPanes.append(outer);
                                 outer.attr('id', '_' + id);
@@ -432,6 +454,7 @@ module.exports = {
                                     tab.addClass('active');
                                     first = false;
                                 }
+                                u++;
                             }
 
                             let c = $(`#vidi_symbols`);
@@ -523,6 +546,7 @@ module.exports = {
      * @returns {Promise<unknown>}
      */
     applyState: (newState) => {
+        return ;
         return new Promise((resolve) => {
             _self.resetState();
             if (newState) {
@@ -584,5 +608,13 @@ module.exports = {
             markers[id].dragging.enable();
         }
         $(".symbols-handles").show()
+    },
+
+    createSymbol: (innerHtml, id, coord, ro, sc, zoom, file) => {
+        createSymbol(innerHtml, id, coord, 0, 1, zoom, file);
+    },
+
+    createId: () => {
+        return createId();
     }
 };
