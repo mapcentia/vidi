@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [UNRELEASED]
+## [2021.12.0]
 ### Changed
 - The location circle marker is now orange in follow-mode and blue when not following. Location now works the same in both embed and default templates.
 - The legend toast dialog in embed template will now be pushed to the right when sliding out the layer tree. This way the elements will not be stacked.
