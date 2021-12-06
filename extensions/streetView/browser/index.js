@@ -157,6 +157,8 @@ module.exports = {
                 };
 
                 this.onChange = this.onChange.bind(this);
+
+                var ignorelist = config.extensionConfig.streetView.ignorelist || [];
             }
 
             onChange(changeEvent) {
@@ -248,7 +250,7 @@ module.exports = {
                         <div className="form-group">
                             <h3>{__("Choose service")}</h3>
 
-                            {!config.extensionConfig.streetView.ignorelist.includes('google') &&
+                            {!ignorelist.includes('google') &&
                             <div className="radio">
                                 <label>
                                     <input type="radio" id="streetview-service-google" name="streetview-service"
@@ -258,7 +260,7 @@ module.exports = {
                                 </label>
                             </div>}
 
-                            {!config.extensionConfig.streetView.ignorelist.includes('mapillary') &&
+                            {!ignorelist.includes('mapillary') &&
                             <div className="radio">
                                 <label>
                                     <input type="radio" id="streetview-service-mapillary"
@@ -269,7 +271,7 @@ module.exports = {
                                 </label>
                             </div>}
 
-                            {!config.extensionConfig.streetView.ignorelist.includes('skraafoto') &&
+                            {!ignorelist.includes('skraafoto') &&
                             <div className="radio">
                                 <label>
                                     <input type="radio" id="streetview-service-skraafoto"
@@ -280,7 +282,7 @@ module.exports = {
                                 </label>
                             </div>}
 
-                            {!config.extensionConfig.streetView.ignorelist.includes('cowi') &&
+                            {!ignorelist.includes('cowi') &&
                             <div className="radio">
                                 <label>
                                     <input type="radio" id="streetview-service-cowi"
