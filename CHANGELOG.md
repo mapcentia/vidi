@@ -8,6 +8,7 @@ and this project adheres to [CalVer](https://calver.org/).
 ### Changed
 - The location circle marker is now orange in follow-mode and blue when not following. Location now works the same in both embed and default templates.
 - The legend toast dialog in embed template will now be pushed to the right when sliding out the layer tree. This way the elements will not be stacked.
+- The search-result element in `conflict.tmpl` now has a dynamic height, so it will fit the parent window.
 
 ### Fixed
 - `slideOutLayerTree` is now inwoked after vidi is ready making it more stable.
