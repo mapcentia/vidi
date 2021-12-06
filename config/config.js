@@ -1100,6 +1100,9 @@ module.exports = {
     "extensionConfig": {
         "layerSearch": {
             "host": "localhost:9200"
+        },
+        "streetview": {
+            "ignorelist": []
         }
     },
 
