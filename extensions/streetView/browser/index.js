@@ -50,7 +50,11 @@ let cowiUrl;
 
 let mapillaryUrl = "https://www.mapillary.com/app/?z=17";
 
+let ignorelist = []
+
 let config = require('../../../config/config.js');
+
+
 
 if (typeof config.extensionConfig !== "undefined" && typeof config.extensionConfig.streetView !== "undefined") {
     if (typeof config.extensionConfig.streetView.mapillary !== "undefined") {
@@ -58,6 +62,9 @@ if (typeof config.extensionConfig !== "undefined" && typeof config.extensionConf
     }
     if (typeof config.extensionConfig.streetView.cowi !== "undefined") {
         cowiUrl = config.extensionConfig.streetView.cowi;
+    }
+    if (typeof config.extensionConfig.streetView.ignorelist !== "undefined") {
+        ignorelist = config.extensionConfig.streetView.ignorelist;
     }
 }
 
@@ -157,8 +164,6 @@ module.exports = {
                 };
 
                 this.onChange = this.onChange.bind(this);
-
-                var ignorelist = config.extensionConfig.streetView.ignorelist || [];
             }
 
             onChange(changeEvent) {
