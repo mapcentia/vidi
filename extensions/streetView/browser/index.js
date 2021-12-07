@@ -50,6 +50,8 @@ let cowiUrl;
 
 let mapillaryUrl = "https://www.mapillary.com/app/?z=17";
 
+let ignorelist = []
+
 let config = require('../../../config/config.js');
 
 if (typeof config.extensionConfig !== "undefined" && typeof config.extensionConfig.streetView !== "undefined") {
@@ -58,6 +60,9 @@ if (typeof config.extensionConfig !== "undefined" && typeof config.extensionConf
     }
     if (typeof config.extensionConfig.streetView.cowi !== "undefined") {
         cowiUrl = config.extensionConfig.streetView.cowi;
+    }
+    if (typeof config.extensionConfig.streetView.ignorelist !== "undefined") {
+        ignorelist = config.extensionConfig.streetView.ignorelist;
     }
 }
 
@@ -247,6 +252,8 @@ module.exports = {
                     <div role="tabpanel">
                         <div className="form-group">
                             <h3>{__("Choose service")}</h3>
+
+                            {!ignorelist.includes('google') &&
                             <div className="radio">
                                 <label>
                                     <input type="radio" id="streetview-service-google" name="streetview-service"
@@ -254,8 +261,9 @@ module.exports = {
                                            onChange={this.onChange}/>
                                     Google Street View
                                 </label>
-                            </div>
+                            </div>}
 
+                            {!ignorelist.includes('mapillary') &&
                             <div className="radio">
                                 <label>
                                     <input type="radio" id="streetview-service-mapillary"
@@ -264,8 +272,9 @@ module.exports = {
                                            onChange={this.onChange}/>
                                     Mapillary
                                 </label>
-                            </div>
+                            </div>}
 
+                            {!ignorelist.includes('skraafoto') &&
                             <div className="radio">
                                 <label>
                                     <input type="radio" id="streetview-service-skraafoto"
@@ -274,8 +283,9 @@ module.exports = {
                                            onChange={this.onChange}/>
                                     Skråfoto
                                 </label>
-                            </div>
+                            </div>}
 
+                            {!ignorelist.includes('cowi') &&
                             <div className="radio">
                                 <label>
                                     <input type="radio" id="streetview-service-cowi"
@@ -284,7 +294,7 @@ module.exports = {
                                            onChange={this.onChange}/>
                                     COWI Gadefoto
                                 </label>
-                            </div>
+                            </div>}
 
                         </div>
                     </div>
