@@ -29,7 +29,8 @@ let state;
 let sqlQuery;
 let applicationModules = false;
 let isStarted = false;
-let activeFromSnapshotHasLoaded = false;
+let readyCallbackIsfired = false;
+let firstGroupIsOpened = false;
 let urlVars = urlparser.urlVars;
 
 
@@ -156,6 +157,12 @@ module.exports = {
         });
 
         backboneEvents.get().on("allDoneLoading:layers", function () {
+            const openFirtIfNotOpen = () => {
+                let e = $('.js-toggle-layer-panel:first');
+                if (window?.vidiConfig?.extensionConfig?.embed?.expandFirstInLayerTree === true && e.hasClass('collapsed')) {
+                    e.trigger('click');
+                }
+            }
             if (!isStarted) {
                 if (mobile()) {
                     $('ul[role="tablist"]:last-child').attr('style', 'padding-bottom: 100px');
@@ -167,26 +174,21 @@ module.exports = {
                 if (window?.vidiConfig?.extensionConfig?.embed?.slideOutLayerTree === true) {
                     $('#burger-btn').trigger('click');
                 }
-                let e = $('.js-toggle-layer-panel:first');
-                if (window?.vidiConfig?.extensionConfig?.embed?.expandFirstInLayerTree === true && e.hasClass('collapsed')) {
-                    e.trigger('click');
-                }
+                openFirtIfNotOpen();
 
             } else {
-                if (!activeFromSnapshotHasLoaded) {
-                    let e = $('.js-toggle-layer-panel:first');
-                    if (window?.vidiConfig?.extensionConfig?.embed?.expandFirstInLayerTree === true && e.hasClass('collapsed')) {
-                        e.trigger('click');
-                    }
+                if (!firstGroupIsOpened) {
+                    openFirtIfNotOpen();
+                    firstGroupIsOpened = true;
                 }
-                if (!activeFromSnapshotHasLoaded && urlVars?.readyCallback) {
+                if (!readyCallbackIsfired && urlVars?.readyCallback) {
                     try {
                         if (state.activeLayersInSnapshot()) {
                             window.parent.postMessage({
                                 type: "snapshotLayersCallback",
                                 method: urlVars.readyCallback
                             }, "*");
-                            activeFromSnapshotHasLoaded = true;
+                            readyCallbackIsfired = true;
                         }
                     } catch (e) {
                     }
