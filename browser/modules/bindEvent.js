@@ -161,11 +161,31 @@ module.exports = {
                     $('ul[role="tablist"]:last-child').attr('style', 'padding-bottom: 100px');
                 }
                 isStarted = true;
+                if ($(document).width() > 1024 && typeof window.vidiConfig.activateMainTab === 'undefined') {
+                    $('#search-border').trigger('click');
+                }
+                if (window?.vidiConfig?.extensionConfig?.embed?.slideOutLayerTree === true) {
+                    $('#burger-btn').trigger('click');
+                }
+                let e = $('.js-toggle-layer-panel:first');
+                if (window?.vidiConfig?.extensionConfig?.embed?.expandFirstInLayerTree === true && e.hasClass('collapsed')) {
+                    e.trigger('click');
+                }
+
             } else {
+                if (!activeFromSnapshotHasLoaded) {
+                    let e = $('.js-toggle-layer-panel:first');
+                    if (window?.vidiConfig?.extensionConfig?.embed?.expandFirstInLayerTree === true && e.hasClass('collapsed')) {
+                        e.trigger('click');
+                    }
+                }
                 if (!activeFromSnapshotHasLoaded && urlVars?.readyCallback) {
                     try {
                         if (state.activeLayersInSnapshot()) {
-                            window.parent.postMessage({type: "snapshotLayersCallback", method: urlVars.readyCallback}, "*");
+                            window.parent.postMessage({
+                                type: "snapshotLayersCallback",
+                                method: urlVars.readyCallback
+                            }, "*");
                             activeFromSnapshotHasLoaded = true;
                         }
                     } catch (e) {

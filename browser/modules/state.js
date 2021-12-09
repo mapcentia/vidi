@@ -191,16 +191,6 @@ module.exports = {
                             } catch (e) {
                             }
                         }
-
-                        if ($(document).width() > 1024 && typeof window.vidiConfig.activateMainTab === 'undefined') {
-                            $('#search-border').trigger('click');
-                        }
-                        if (window?.vidiConfig?.extensionConfig?.embed?.slideOutLayerTree === true) {
-                            $('#burger-btn').trigger('click');
-                        }
-                        if (window?.vidiConfig?.extensionConfig?.embed?.expandFirstInLayerTree === true) {
-                            $('.js-toggle-layer-panel:first').trigger('click');
-                        }
                     });
                 });
 
