@@ -30,9 +30,7 @@ let apiBridgeInstance = false;
 
 let multiply = require('geojson-multiply');
 
-let JSONSchemaForm = require("react-jsonschema-form");
-
-let Form = JSONSchemaForm.default;
+import Form from "@rjsf/core";
 
 let markers = [];
 
@@ -284,6 +282,7 @@ module.exports = {
                 }
 
                 if (fields[key]) {
+                    console.log(fields[key].type)
                     switch (fields[key].type) {
                         case `smallint`:
                         case `integer`:
@@ -296,6 +295,11 @@ module.exports = {
                         case `double precision`:
                             properties[key].type = `number`;
                             break;
+                        // case `time without time zone`:
+                        //     uiSchema[key] = {
+                        //         'ui:widget': 'time'
+                        //     };
+                        //     break;
                         case `date`:
                             uiSchema[key] = {
                                 'ui:widget': 'date'
