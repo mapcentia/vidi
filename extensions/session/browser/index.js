@@ -16,6 +16,17 @@ let exId = `login-modal-body`;
 var autoLogin = false; // Auto login is insecure and sets cookie with login creds.
 var autoLoginMaxAge = null;
 
+if (window.config?.autoLoginPossible === true) {
+    if (window.config?.extensionConfig?.session) {
+        if (window.config?.extensionConfig?.session?.autoLogin) {
+            autoLogin = window.config.extensionConfig.session.autoLogin;
+        }
+        if (window.config?.extensionConfig?.session?.autoLoginMaxAge) {
+            autoLoginMaxAge = window.config.extensionConfig.session.autoLoginMaxAge;
+        }
+    }
+}
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -143,6 +154,8 @@ module.exports = {
 
             componentDidMount() {
                 let me = this;
+                // console.log(window.config.extensionConfig)
+                // console.log(autoLogin, autoLoginMaxAge)
 
                 $.ajax({
                     dataType: 'json',

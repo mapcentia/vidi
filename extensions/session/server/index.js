@@ -127,6 +127,7 @@ router.get('/api/session/stop', function (req, response) {
 });
 
 router.get('/api/session/status', function (req, response) {
+    // console.log(req.url, req.cookies)
     let autoLoginCookie = req.cookies['autoconnect.gc2'];
     /*
     if (autoLogin == false && req.query.autoLogin)
