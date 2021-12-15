@@ -13,6 +13,8 @@ let sessionInstance = false;
 let userName = null;
 let isStatusChecked = false;
 let exId = `login-modal-body`;
+var autoLogin = false; // Auto login is insecure and sets cookie with login creds.
+var autoLoginMaxAge = null;
 
 /**
  *
