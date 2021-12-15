@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2021 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -11,12 +11,12 @@ let config = require('../../../config/config.js');
 let autoLogin = false; // Auto login is insecure and sets cookie with login creds. DO NOT USE
 let autoLoginMaxAge = null;
 
-if (typeof config.autoLoginPossible !== "undefined" && config.autoLoginPossible === true) {
-    if (typeof config.extensionConfig !== "undefined" && typeof config.extensionConfig.session !== "undefined") {
-        if (typeof config.extensionConfig.session.autoLogin !== "undefined") {
+if (config?.autoLoginPossible === true) {
+    if (config?.extensionConfig?.session) {
+        if (config?.extensionConfig?.session?.autoLogin) {
             autoLogin = config.extensionConfig.session.autoLogin;
         }
-        if (typeof config.extensionConfig.session.autoLoginMaxAge !== "undefined") {
+        if (config?.extensionConfig?.session?.autoLoginMaxAge) {
             autoLoginMaxAge = config.extensionConfig.session.autoLoginMaxAge;
         }
     }
@@ -47,7 +47,6 @@ let start = function (dataToAuthorizeWith, req, response, status) {
                 success: false,
                 message: "Could not log in"
             });
-
             return;
         }
 
@@ -59,7 +58,6 @@ let start = function (dataToAuthorizeWith, req, response, status) {
                 message: "Could not parse response from GC2",
                 data: body
             });
-
             return;
         }
 
@@ -68,7 +66,6 @@ let start = function (dataToAuthorizeWith, req, response, status) {
                 success: true,
                 message: "Already logged in"
             });
-
             return;
         }
 

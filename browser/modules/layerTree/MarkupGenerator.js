@@ -40,7 +40,7 @@ class MarkupGenerator {
                             <input type="checkbox" data-gc2-group-name="${name}">
                         </label>
                     </span>
-                    <a style="display: inline" class="accordion-toggle js-toggle-layer-panel" data-toggle="collapse" data-parent="#layers" href="#collapse${base64GroupName}">${name}</a>
+                    <a style="display: inline" class="accordion-toggle js-toggle-layer-panel collapsed" data-toggle="collapse" data-parent="#layers" href="#collapse${base64GroupName}">${name}</a>
                 </h4>
             </div>
             <ul class="list-group" id="group-${base64GroupName}" role="tabpanel"></ul>
