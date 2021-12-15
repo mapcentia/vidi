@@ -50,12 +50,12 @@ const htmlFragments = {
     "outer": `
         <div class="tab-pane" role="tabpanel">
             <div class="symbols-desc"></div>
-            <div class="row row-cols-2">
+            <div class="d-flex flex-wrap">
             </div>
         </div>
     `,
     "inner": `
-            <div class="col symbols-lib drag-marker" draggable="true"></div>
+            <div class="symbols-lib drag-marker" draggable="true"></div>
     `
 }
 
@@ -418,6 +418,7 @@ module.exports = {
         let symbols = {};
         let descs = {};
         let files = config.extensionConfig.symbols.files;
+        let symbolOptions = config?.extensionConfig?.symbols?.symbolOptions;
         let i = 0;
 
         // backboneEvents.get().on(`on:${exId}`, () => {
@@ -425,6 +426,7 @@ module.exports = {
             (function iter() {
                 $.getJSON("/api/symbols/" + files[i].file, (data) => {
                     symbols[files[i].title] = data;
+                    console.log(symbolOptions)
                     descs[files[i].title] = files[i]?.desc;
                     i++;
                     if (i === files.length) {
@@ -442,7 +444,10 @@ module.exports = {
                                     if (id && symbols[group].hasOwnProperty(id)) {
                                         let svg = $(inner.clone()[0]).append(symbols[group][id].svg);
                                         svg.attr('data-file', id);
-                                        outer.find('.row')[0].append(svg[0]);
+                                        let e = $('<div class="p-1 text-center">');
+                                        let decs = symbolOptions?.[id]?.desc || '';
+                                        e.append(svg[0], `<div>${decs}</div>`)
+                                        outer.find('.d-flex').append(e);
                                     }
                                 }
                                 let tab = $(`<li class="nav-item" role="presentation"><a id="symbol-tab-${u}" data-mdb-toggle="pill" class="nav-link ` + (first ? ` active` : ``) + `" href="#_${id}" role="tab" data-toggle="tab">${group}</a></li>`);
