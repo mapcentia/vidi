@@ -329,7 +329,7 @@ module.exports = {
 
         /**
          * Fetch meta > initialize settings > create layer tree >
-         * initialize state > load layers > initialize extensions > finish
+         * load layers > initialize extensions > initialize state > finish
          */
         modules.meta.init().then((schemataStr) => {
             return modules.setting.init(schemataStr);

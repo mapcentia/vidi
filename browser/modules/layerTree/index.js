@@ -1083,10 +1083,7 @@ module.exports = {
 
                             if (layersThatAreNotInMeta.length > 0) {
                                 let fetchMetaRequests = [];
-                                layersThatAreNotInMeta.map(item => {
-                                    fetchMetaRequests.push(meta.init(item, true, true).catch(error => { return false }))
-                                });
-
+                                fetchMetaRequests.push(meta.init(layersThatAreNotInMeta.join(','), true, true).catch(error => { return false }))
                                 Promise.all(fetchMetaRequests).then(() => {
                                     proceedWithBuilding();
                                 });

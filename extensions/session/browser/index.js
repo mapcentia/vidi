@@ -1,25 +1,18 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2021 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
 
-const React = require("react");
-/**
- *
- * @type {*|exports|module.exports}
- */
-var utils;
-
-var backboneEvents;
-var sessionInstance = false;
-var userName = null;
-var isStatusChecked = false;
-
-
-var exId = `login-modal-body`;
+let utils;
+let backboneEvents;
+let layerTree;
+let sessionInstance = false;
+let userName = null;
+let isStatusChecked = false;
+let exId = `login-modal-body`;
 
 /**
  *
@@ -29,27 +22,16 @@ module.exports = {
     set: function (o) {
         utils = o.utils;
         backboneEvents = o.backboneEvents;
+        layerTree = o.layerTree;
         return this;
     },
     init: function () {
-
-
-        var parent = this;
-
-        /**
-         *
-         */
-        var React = require('react');
-
-        /**
-         *
-         */
-        var ReactDOM = require('react-dom');
-
+        let parent = this;
+        let React = require('react');
+        let ReactDOM = require('react-dom');
 
         // Check if signed in
         //===================
-
         class Status extends React.Component {
             render() {
                 return <div className={"alert alert-dismissible " + this.props.alertClass} role="alert">
@@ -127,7 +109,7 @@ module.exports = {
                             parent.update();
                         },
 
-                        error: function (error) {
+                        error: function () {
                             me.setState({statusText: "Wrong user name or password"});
                             me.setState({alertClass: "alert-danger"});
                         }
@@ -137,7 +119,7 @@ module.exports = {
                         dataType: 'json',
                         url: "/api/session/stop",
                         type: "GET",
-                        success: function (data) {
+                        success: function () {
                             backboneEvents.get().trigger(`session:authChange`, false);
 
                             me.setState({statusText: "Not signed in"});
@@ -178,7 +160,14 @@ module.exports = {
                             userName = data.status.screen_name;
                             // True if auto login happens. When reload meta
                             if (data?.screen_name && data?.status?.authenticated) {
-                                backboneEvents.get().trigger("refresh:meta");
+                                // Wait for layer tree to be built before reloading
+                                (function poll() {
+                                    if (!layerTree.isBeingBuilt()) {
+                                        backboneEvents.get().trigger("refresh:meta");
+                                    } else {
+                                        setTimeout(() => poll(), 100)
+                                    }
+                                }())
                             }
                         } else {
                             backboneEvents.get().trigger(`session:authChange`, false);

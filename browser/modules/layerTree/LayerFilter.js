@@ -694,13 +694,15 @@ class VectorLayerFilter extends React.Component {
             <div>
                 {tabControl}
                 {activeFiltersTab}
-                {buildWhereClauseField()}
-                <div className="row">
-                    <div className="col-md-6">{buildResetButton()}</div>
-                    <div className="col-md-6">{buildFitBoundsButton()}</div>
-                </div>
-                <div className="row">
-                    <div className="col-md-6">{buildDownloadButton()}</div>
+                <div className="filter-functions">
+                    {buildWhereClauseField()}
+                    <div className="row">
+                        <div className="col-md-6">{buildResetButton()}</div>
+                        <div className="col-md-6">{buildFitBoundsButton()}</div>
+                    </div>
+                    <div className="row">
+                        <div className="col-md-6">{buildDownloadButton()}</div>
+                    </div>
                 </div>
             </div>
         );

@@ -1113,7 +1113,7 @@ h4 small {
   box-shadow: 0 27px 24px 0 rgba(0, 0, 0, 0.2), 0 15px 77px 0 rgba(0, 0, 0, 0.22);
   background-color: #fff;
   border-radius: 2px;
-  z-index: 99999;
+  z-index: 999999;
   max-height: 80%;
 }
 .dialog-bottom .modal-body {
@@ -1193,7 +1193,7 @@ h4 small {
 }
 #layer-slide-body-wrapper > div,
 #click-for-info-slide-wrapper > div {
-  height: calc(100vh - 48px);
+  height: calc(100vh - 58px);
 }
 #conflict-result-content {
   height: 100% !important;
