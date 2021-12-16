@@ -26,8 +26,8 @@ class LabelSettingToggle extends React.Component {
     render() {
         return (<div>
             <div className="form-check form-switch">
-                <label class="form-check-label" style={{ textIndent: `0px`, paddingLeft: `0px` }}>
-                    <input class="form-check-input" checked={this.state.checked} onChange={this.handleChange} type="checkbox"/> {__(`Show labels`)}
+                <label className="form-check-label" style={{ textIndent: `0px`, paddingLeft: `0px` }}>
+                    <input className="form-check-input" checked={this.state.checked} onChange={this.handleChange} type="checkbox"/> {__(`Show labels`)}
                 </label>
             </div>
         </div>)

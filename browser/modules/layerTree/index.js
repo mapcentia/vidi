@@ -2792,10 +2792,12 @@ module.exports = {
                 }
 
                 let switcher = $(e.target).closest('.layer-item').find('.js-show-layer-control');
+                console.log(switcher)
                 $(switcher).data('gc2-layer-type', type);
                 $(switcher).prop('checked', true);
 
                 let layerToReload = ((type === LAYER.RASTER_TILE ? `` : type + `:`) + $(switcher).data('gc2-id'));
+                console.log(layerToReload)
                 _self.setLayerState(type, layerKey);
                 _self.reloadLayer(layerToReload, false, (data ? data.doNotLegend : false));
 

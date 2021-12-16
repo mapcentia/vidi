@@ -13,7 +13,7 @@
 
 import {LAYER, ICONS} from './constants';
 
-const regularButtonStyle = `padding: 2px 10px 2px 10px; color: black; border-radius: 4px; height: 22px; margin: 0px;`;
+const regularButtonStyle = ``;
 
 class MarkupGenerator {
     constructor() {
@@ -22,7 +22,7 @@ class MarkupGenerator {
     getAddButton(layerKeyWithGeom) {
         let addButtonStyle = regularButtonStyle.replace(`padding: 2px 10px 2px 10px;`, `padding: 6px 10px 6px 10px;`);
         return (`<button type="button" data-gc2-key="${layerKeyWithGeom}" style="${regularButtonStyle} visibility: hidden;"
-            data-toggle="tooltip" data-placement="left" title="Add new feature to layer" data-layer-type="tile" class="btn gc2-add-feature gc2-edit-tools">
+            data-toggle="tooltip" data-placement="left" title="Add new feature to layer" data-layer-type="tile" class="btn btn-sm btn-outline-success btn-floating gc2-add-feature gc2-edit-tools">
             <i class="fa fa-plus"></i>
         </button>`);
     }
@@ -82,7 +82,7 @@ class MarkupGenerator {
                     <input class="form-check-input" type="checkbox" data-gc2-subgroup-name="${name}" data-gc2-subgroup-level="${level}">
                 </label>
             </span>
-            <button style="margin-left: ${addGroupCheckbox ? "-18px" : "0"}" type="button" class="btn btn-default btn-xs js-subgroup-toggle-button">
+            <button style="margin-left: ${addGroupCheckbox ? "-18px" : "0"}" type="button" class="btn btn-outline-primary btn-floating btn-sm js-subgroup-toggle-button">
                 <i class="fa fa-arrow-down"></i>
             </button>
             <div class="js-subgroup-id" style="display: inline; margin-left: 0"></div>
@@ -103,10 +103,9 @@ class MarkupGenerator {
                         <div style="display: inline-block;">
                             <div class="checkbox" style="width: 34px; top: 2px">
                                 <label class="form-check-label">
-                                    <input class="form-check-input" type="checkbox"
+                                    <input class="form-check-input js-show-layer-control" type="checkbox"
                                         ${(layerIsActive ? `checked="checked"` : ``)}
                                         ${(disableCheckBox ? `disabled` : ``)}
-                                        class="js-show-layer-control"
                                         id="${layer.f_table_name}"
                                         data-gc2-id="${layer.f_table_schema}.${layer.f_table_name}"
                                         data-gc2-layer-type="${layerType}">
@@ -259,8 +258,8 @@ class MarkupGenerator {
             selectors.push(`<li><a class="js-layer-type-selector-webgl" href="javascript:void(0)">${ICONS[LAYER.WEBGL]} ${__('WebGL')}</a></li>`);
         }
 
-        return (`<div class="dropdown">
-            <button style="padding: 2px; margin: 0px;" class="btn btn-default dropdown-toggle" type="button"
+        return (`<div class="btn-group shadow-0">
+            <button style="padding: 2px; margin: 0;" class="btn btn-default dropdown-toggle"  data-mdb-toggle="dropdown" type="button"
                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                 <span class="js-dropdown-label">${selectorLabel}</span>
                 <span class="caret"></span>
