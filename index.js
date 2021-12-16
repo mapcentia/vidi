@@ -30,6 +30,25 @@ app.use(session({
     cookie: {secure: false}
 }));
 
+// Hack for oplevsyddjurs
+app.use('^/$', function (req, res, next) {
+    let url = '/app/syddjursgis/?';
+    let go = false;
+
+    if (req?.query?.uuid) {
+        url += '&uuid=' + req?.query?.uuid;
+        go = true;
+    }
+    if (req?.query?.layers) {
+        url += '&layers=' + req?.query?.layers;
+        go = true;
+    }
+    if (go) {
+        res.redirect(302, url);
+    }
+    next();
+});
+
 app.use('/app/:db/:schema?', express.static(path.join(__dirname, 'public'), {maxage: '60s'}));
 
 if (config.staticRoutes) {
