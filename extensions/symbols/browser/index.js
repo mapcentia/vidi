@@ -426,7 +426,6 @@ module.exports = {
             (function iter() {
                 $.getJSON("/api/symbols/" + files[i].file, (data) => {
                     symbols[files[i].title] = data;
-                    console.log(symbolOptions)
                     descs[files[i].title] = files[i]?.desc;
                     i++;
                     if (i === files.length) {
@@ -442,11 +441,14 @@ module.exports = {
                                 let id = createId();
                                 for (const id in symbols[group]) {
                                     if (id && symbols[group].hasOwnProperty(id)) {
+                                        const parser = new DOMParser();
+                                        const doc = parser.parseFromString(symbols[group][id].svg, "image/svg+xml");
+                                        let text = doc.getElementsByTagName("desc")?.[0]?.textContent
+                                        let desc = text||'';
                                         let svg = $(inner.clone()[0]).append(symbols[group][id].svg);
                                         svg.attr('data-file', id);
                                         let e = $('<div class="p-1 text-center">');
-                                        let decs = symbolOptions?.[id]?.desc || '';
-                                        e.append(svg[0], `<div>${decs}</div>`)
+                                        e.append(svg[0], `<div style="max-width: 72px; font-size: 8pt">${desc}</div>`)
                                         outer.find('.d-flex').append(e);
                                     }
                                 }
