@@ -245,14 +245,11 @@ module.exports = {
             let layerTitel = (metaDataKeys[value].f_table_title !== null && metaDataKeys[value].f_table_title !== "") ? metaDataKeys[value].f_table_title : metaDataKeys[value].f_table_name;
             let not_querable = metaDataKeys[value].not_querable;
             let versioning = metaDataKeys[value].versioning;
-            let fields = typeof metaDataKeys[value].fields !== "undefined" ? metaDataKeys[value].fields : null;
+            let fields = metaDataKeys?.[value]?.fields || null;
             let onLoad;
-            let fieldConf = (typeof metaDataKeys[value].fieldconf !== "undefined"
-                && metaDataKeys[value].fieldconf !== "")
-                ? $.parseJSON(metaDataKeys[value].fieldconf) : null;
+            let fieldConf = metaDataKeys?.[value]?.fieldconf !== "" ? JSON.parse(metaDataKeys[value].fieldconf) : null;
             let parsedMeta = layerTree.parseLayerMeta(metaDataKeys[value]);
-
-            let featureInfoTableOnMap = (typeof window.vidiConfig.featureInfoTableOnMap !== "undefined" && window.vidiConfig.featureInfoTableOnMap === true && simple);
+            let featureInfoTableOnMap = window.vidiConfig?.featureInfoTableOnMap === true && simple;
             let f_geometry_column = metaDataKeys[value].f_geometry_column
             let styleForSelectedFeatures;
 
@@ -566,12 +563,13 @@ module.exports = {
             cloud.get().addGeoJsonStore(qstore[index]);
 
             let sql, fieldNames = [], fieldStr;
+            console.log(fieldConf)
 
             if (fields) {
                 $.each(fields, function (i, v) {
                     if (v.type === "bytea") {
                         fieldNames.push("encode(\"" + i + "\",'escape') as \"" + i + "\"");
-                    } else {
+                    } else if (fieldConf?.[i]?.ignore !== true) {
                         fieldNames.push("\"" + i + "\"");
                     }
                 });
