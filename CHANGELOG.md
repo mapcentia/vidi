@@ -4,6 +4,64 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [UNRELEASED]
+### Added
+- Field ignore setting from GC2 will now exclude the field from being queried in sqlQuery module (feature info).
+
+## [2021.12.0]
+### Changed
+- The location circle marker is now orange in follow-mode and blue when not following. Location now works the same in both embed and default templates.
+- The legend toast dialog in embed template will now be pushed to the right when sliding out the layer tree. This way the elements will not be stacked.
+- The search-result element in `conflict.tmpl` now has a dynamic height, so it will fit the parent window.
+
+### Fixed
+- `slideOutLayerTree` is now inwoked after vidi is ready making it more stable.
+
+## [2021.11.2] - 2021-17-11
+### Fixed
+- `layerTree` state was not updated when Vidi was initiated with layers in URL anchor, resulting in no active layers in state until some changes was done by user afterward. 
+
+## [2021.11.1] - 2021-16-11
+### Changed
+- Hit count added to the "Data fra konflikter" tab in `conflictSearch` module.
+- Some changes in `conflict.tmpl`, so it's easier to customize it.
+
+### Added
+- API endpoint for proxify base layer requests to Datafordeler.dk. The API rewrites the URL and adds `username` and `password`. The base layer url follows this pattern: `/api/df/[Datafordeler URI]`. Example Setup in `config/config.js`:
+
+```json
+{
+  "df" : {
+    "userName" : "QMO.....",
+    "password" : "3Ps....."
+  },
+  "baseLayers": [
+    {
+      "type": "wms",
+      "url": "/api/df/GeoDanmarkOrto/orto_foraar/1.0.0/WMS",
+      "layers": [
+        "geodanmark_2020_12_5cm"
+      ],
+      "id": "geodanmark_2020_12_5cm",
+      "name": "TEST geodanmark_2020_12_5cm",
+      "description": "geodanmark_2020_12_5cm",
+      "attribution": "Styrelsen for Dataforsyning og Effektivisering",
+      "minZoom": 8,
+      "maxZoom": 22,
+      "maxNativeZoom": 22,
+      "transparent": true
+    }
+  ]
+}
+```
+
+## [2021.11.0] - 2021-3-11
+### Changed
+- Draw tool bar will now be positioned beside the main tools, if screen height is below 700px.
+
+### Fixed
+- Vector table now only shows in `embed.tmpl`.
+
 ## [2021.10.3] - 2021-11-10
 ### Changed
 - Session cookie (connect.gc2) will now be set as `secure=true` and `sameSite=none` if enviromental variable NODE_ENV is set to 'production'. This will fix issues with embeding Vidi and protected layers. To set NODE_ENV in docker-compose file, use this:

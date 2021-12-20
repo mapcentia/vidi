@@ -29,7 +29,8 @@ let state;
 let sqlQuery;
 let applicationModules = false;
 let isStarted = false;
-let activeFromSnapshotHasLoaded = false;
+let readyCallbackIsfired = false;
+let firstGroupIsOpened = false;
 let urlVars = urlparser.urlVars;
 
 
@@ -156,36 +157,38 @@ module.exports = {
         });
 
         backboneEvents.get().on("allDoneLoading:layers", function () {
+            const openFirtIfNotOpen = () => {
+                let e = $('.js-toggle-layer-panel:first');
+                if (window?.vidiConfig?.extensionConfig?.embed?.expandFirstInLayerTree === true && e.hasClass('collapsed')) {
+                    e.trigger('click');
+                }
+            }
             if (!isStarted) {
                 if (mobile()) {
                     $('ul[role="tablist"]:last-child').attr('style', 'padding-bottom: 100px');
                 }
                 isStarted = true;
-                setTimeout(
-                    function () {
-                        if ($(document).width() > 1024 && typeof window.vidiConfig.activateMainTab === 'undefined') {
-                            $('#search-border').trigger('click');
-                        }
-                        if (typeof window.vidiConfig.extensionConfig !== 'undefined' &&
-                            typeof window.vidiConfig.extensionConfig.embed !== 'undefined' &&
-                            window.vidiConfig.extensionConfig.embed.slideOutLayerTree === true
-                        ) {
-                            $('#burger-btn').trigger('click');
-                        }
-                        if (typeof window.vidiConfig.extensionConfig !== 'undefined' &&
-                            typeof window.vidiConfig.extensionConfig.embed !== 'undefined' &&
-                            window.vidiConfig.extensionConfig.embed.expandFirstInLayerTree === true
-                        ) {
-                            $('.js-toggle-layer-panel:first').trigger('click');
-                        }
-                    }, 200
-                );
+                if ($(document).width() > 1024 && typeof window.vidiConfig.activateMainTab === 'undefined') {
+                    $('#search-border').trigger('click');
+                }
+                if (window?.vidiConfig?.extensionConfig?.embed?.slideOutLayerTree === true) {
+                    $('#burger-btn').trigger('click');
+                }
+                openFirtIfNotOpen();
+
             } else {
-                if (!activeFromSnapshotHasLoaded && urlVars?.readyCallback) {
+                if (!firstGroupIsOpened) {
+                    openFirtIfNotOpen();
+                    firstGroupIsOpened = true;
+                }
+                if (!readyCallbackIsfired && urlVars?.readyCallback) {
                     try {
                         if (state.activeLayersInSnapshot()) {
-                            window.parent.postMessage({type: "snapshotLayersCallback", method: urlVars.readyCallback}, "*");
-                            activeFromSnapshotHasLoaded = true;
+                            window.parent.postMessage({
+                                type: "snapshotLayersCallback",
+                                method: urlVars.readyCallback
+                            }, "*");
+                            readyCallbackIsfired = true;
                         }
                     } catch (e) {
                     }

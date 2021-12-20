@@ -239,7 +239,10 @@ module.exports = {
                      */
                     const createPromise = (data) => {
                         return new Promise(resolve => {
-                            switchLayer.init(data, true, true).then(resolve);
+                            switchLayer.init(data, true, true).then(() => {
+                                backboneEvents.get().trigger(`layerTree:activeLayersChange`);
+                                resolve()
+                            });
                         })
                     };
 

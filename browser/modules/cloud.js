@@ -1,25 +1,22 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2021 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
 
-/**
- *
- */
-var cloud;
-var lc;
+
+let cloud;
+let lc;
 
 module.exports = {
 
     /**
      *
-     * @param o
      * @returns {exports}
      */
-    set: function (o) {
+    set: function() {
         return this;
     },
 
@@ -27,7 +24,7 @@ module.exports = {
      *
      */
     init: function () {
-        var me = this;
+        const me = this;
         try {
             geocloud.setHost(window.gc2host);
         } catch (e) {
@@ -50,18 +47,15 @@ module.exports = {
             maxBoundsViscosity: 1.0
         });
 
-        /**
-         *
-         */
-        var map = cloud.map;
+        let map = cloud.map;
 
-        var zoomControl = L.control.zoom({
+        let zoomControl = L.control.zoom({
             position: 'topright'
         });
 
         cloud.map.addControl(zoomControl);
 
-        var scaleControl = L.control.scale({
+        let scaleControl = L.control.scale({
             position: "bottomright",
             imperial: false
         });
@@ -70,7 +64,7 @@ module.exports = {
         /**
          *
          */
-        lc =L.control.locate({
+        lc = L.control.locate({
             position: 'topright',
             strings: {
                 title: __("Find me")
@@ -79,16 +73,11 @@ module.exports = {
             drawCircle: false,
             locateOptions: {
                 enableHighAccuracy: true
-            }
+            },
+            followMarkerStyle: {
+                fillColor: '#FFB000'
+            },
         }).addTo(map);
-
-        var localization;
-        if (window._vidiLocale === "da_DK") {
-            localization = "da";
-        }
-        if (window._vidiLocale === "en_US") {
-            localization = "en";
-        }
 
         L.Edit.Poly = L.Edit.Poly.extend({
             options: {
@@ -113,11 +102,11 @@ module.exports = {
      * Return the cloud object
      * @returns {*}
      */
-    get: function () {
+    get: () => {
         return cloud;
     },
 
-    getLc: function() {
+    getLc: () => {
         return lc;
     },
 
