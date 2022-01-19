@@ -1293,7 +1293,7 @@ module.exports = {
 		},
       {
         "type": "wms",
-        "url": "https://services.kortforsyningen.dk/service?SERVICENAME=forvaltning2&token=2edaf0d4a10f052d184f2d4fcafcbfd6",
+        "url": "/api/df/GeoDanmarkOrto/orto_foraar/1.0.0/WMS",
         "layers": [
             "Basis_ortofoto"
         ],
@@ -1305,7 +1305,7 @@ module.exports = {
         "minZoom": 4,
         "maxZoom": 22,
         "maxNativeZoom": 20,
-            "_overlays": [
+            "overlays": [
                 {
                     "id": "public.mvw_adgangsadresser",
                     "db": "mapconnectbase",
