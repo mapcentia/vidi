@@ -1295,7 +1295,7 @@ module.exports = {
         "type": "wms",
         "url": "/api/df/GeoDanmarkOrto/orto_foraar/1.0.0/WMS",
         "layers": [
-            "Basis_ortofoto"
+            "orto_foraar"
         ],
         "id": "Luftfoto_nyeste",
         "name":"Luftfoto nyeste",
