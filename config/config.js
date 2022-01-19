@@ -1391,16 +1391,18 @@ module.exports = {
             ]
       },
       {
-         "id": "kortforsyningen.dtk_skaermkort_daempet",
-         "name":"Skærmkort - dæmpet",
-         "db":"baselayers",
-         "host":"https://dk.gc2.io",
+        "type": "wms",
+         "url": "/api/df/Dkskaermkort/topo_skaermkort/1.0.0/WMS",
+        "layers": [
+            "dtk_skaermkort_daempet"
+        ],
+        "id": "kortforsyningen.dtk_skaermkort_daempet",
+        "name": "Skærmkort - dæmpet",
+        "attribution": "&copy; Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.",
          "abstract":"<p>Skærmkort, som opdateres årligt.</p><p>Copyright: Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.</p><p>Baggrundskortet må frit anvendes, men følgende skal angives 'Indeholder data fra Styrelsen for Dataforsyning og Effektivisering.'. </p><br>",
-         "config":{
-            "maxZoom":21,
-            "maxNativeZoom":19,
-            "attribution":"&copy; Styrelsen for Dataforsyning og Effektivisering."
-         }
+        "minZoom": 4,
+        "maxZoom": 24,
+        "maxNativeZoom": 20
       },
       {
           "id": "osm",
