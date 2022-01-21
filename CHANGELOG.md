@@ -6,7 +6,7 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ## [2021.12.1] 2021-29-12
 ### Changed
-- The `df` extensiion is changed, so it can use both Dataforsyningen and Datafordeler. New setup (token has precedence):
+- The `df` extension is changed, so it can use both Dataforsyningen and Datafordeler. New setup (token has precedence):
 ```json
 {
   "df" : {
