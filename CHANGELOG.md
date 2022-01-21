@@ -4,7 +4,60 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [2021.12.0]
+## [2021.12.1] 2021-29-12
+### Changed
+- The `df` extension is changed, so it can use both Dataforsyningen and Datafordeler. New setup (token has precedence):
+```json
+{
+  "df" : {
+    "datafordeler" : {
+      "username": "...",
+      "password": "...",
+      "token": "..."
+    },
+    "dataforsyningen" : {
+      "username": "...",
+      "password": "...",
+      "token": "..."
+    }
+  },
+  "baseLayers": [
+    {
+      "type": "wms",
+      "url": "/api/datafordeler/GeoDanmarkOrto/orto_foraar/1.0.0/WMS",
+      "layers": [
+        "geodanmark_2020_12_5cm"
+      ],
+      "id": "geodanmark_2020_12_5cm",
+      "name": "TEST geodanmark_2020_12_5cm",
+      "description": "geodanmark_2020_12_5cm",
+      "attribution": "Styrelsen for Dataforsyning og Effektivisering",
+      "minZoom": 8,
+      "maxZoom": 22,
+      "maxNativeZoom": 22
+    },
+    {
+      "type": "wms",
+      "url": "/api/dataforsyningen/topo_skaermkort_DAF",
+      "layers": [
+        "dtk_skaermkort"
+      ],
+      "id": "dtk_skaermkort",
+      "name": "Skærmkort",
+      "description": "DTK/Skærmkort",
+      "attribution": "Styrelsen for Dataforsyning og Effektivisering",
+      "minZoom": 8,
+      "maxZoom": 22,
+      "maxNativeZoom": 22
+    }
+  ]
+}
+```
+
+### Added
+- Field ignore setting from GC2 will now exclude the field from being queried in sqlQuery module (feature info).
+
+## [2021.12.0] 2021-6-12
 ### Changed
 - The location circle marker is now orange in follow-mode and blue when not following. Location now works the same in both embed and default templates.
 - The legend toast dialog in embed template will now be pushed to the right when sliding out the layer tree. This way the elements will not be stacked.

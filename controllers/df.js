@@ -7,17 +7,34 @@
 const express = require('express');
 const request = require('request');
 const router = express.Router();
-const userName = require('../config/config.js')?.df?.username;
-const pwd = require('../config/config.js')?.df?.password;
-const host = 'https://services.datafordeler.dk';
 
-router.get('/api/df/*', (req, response) => {
-    let requestURL = host + decodeURIComponent(req.url.substr(7)) + '&username=' + userName + "&password=" + pwd;
+router.get('/api/datafordeler/*', (req, response) => {
+    const userName = require('../config/config.js')?.df?.datafordeler?.username;
+    const pwd = require('../config/config.js')?.df?.datafordeler?.password;
+    const token = require('../config/config.js')?.df?.datafordeler?.token;
+    const host = 'https://services.datafordeler.dk';
+    let creds = token ? `&token=${token}` : `&username=${userName}&password=${pwd}`;
+    let requestURL = host + decodeURIComponent(req.url.substr(17)) + creds;
+    requestURL = requestURL.replace('false', 'FALSE');
+    get(requestURL, response);
+});
+router.get('/api/dataforsyningen/*', (req, response) => {
+    const userName = require('../config/config.js')?.df?.dataforsyningen?.username;
+    const pwd = require('../config/config.js')?.df?.dataforsyningen?.password;
+    const token = require('../config/config.js')?.df?.dataforsyningen?.token;
+    const host = 'https://api.dataforsyningen.dk';
+    let creds = token ? `&token=${token}` : `&username=${userName}&password=${pwd}`;
+    let requestURL = host + decodeURIComponent(req.url.substr(20)) + creds;
     requestURL = requestURL.replace('false', 'FALSE')
+    get(requestURL, response);
+});
+
+const get = (url, res) => {
+    //console.log(url);
     let options = {
         method: 'GET',
-        uri: requestURL
+        uri: url
     };
-    request(options).pipe(response);
-});
+    request(options).on('error', (e) => console.error(e)).pipe(res);
+}
 module.exports = router;
