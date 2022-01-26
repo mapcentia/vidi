@@ -29,10 +29,10 @@ class MarkupGenerator {
 
     getGroupPanel(base64GroupName, name, addGroupCheckbox = false) {
         return (`<div class="accordion-item panel-layertree" id="layer-panel-${base64GroupName}" xmlns="http://www.w3.org/1999/html">
-                    <i style="float: right;" class="material-icons layer-move-vert">more_vert</i>
-                    <div class="layer-count badge">
-                        <span>0</span> / <span></span>
-                    </div>
+<!--                    <i style="float: right;" class="material-icons layer-move-vert">more_vert</i>-->
+<!--                    <div class="layer-count badge">-->
+<!--                        <span>0</span> / <span></span>-->
+<!--                    </div>-->
                     <span style="display: ${addGroupCheckbox ? "inline" : "none"}" class="form-check" id="group-check-box-${base64GroupName}">
                         <label class="form-check-label">
                             <input class="form-check-input" type="checkbox" data-gc2-group-name="${name}" />

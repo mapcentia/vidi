@@ -1,9 +1,3 @@
-<style>
-    .navbar .navbar-brand {
-        height: 48px;
-        line-height: 19px;
-    }
-</style>
 <!-- map -->
 <div id="pane">
     <div id="container">
@@ -40,11 +34,11 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-body" id="login-modal-body">.</div>
-<!--            <div class="modal-footer">-->
-<!--                <button type="button" class="btn btn-secondary" data-mdb-dismiss="modal">-->
-<!--                    {{Close}}-->
-<!--                </button>-->
-<!--            </div>-->
+            <!--            <div class="modal-footer">-->
+            <!--                <button type="button" class="btn btn-secondary" data-mdb-dismiss="modal">-->
+            <!--                    {{Close}}-->
+            <!--                </button>-->
+            <!--            </div>-->
         </div>
     </div>
 </div>
@@ -135,7 +129,7 @@
 
 <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
     <div class="offcanvas-header">
-        <h5 id="offcanvasRightLabel">Offcanvas right</h5>
+        <h5 id="offcanvasRightLabel">Dragøer Kommune</h5>
         <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body">
@@ -149,16 +143,15 @@
                         aria-orientation="vertical"
                 >
                     <a
-                            data-module-id="search"
-                            class="nav-link active"
-                            id="v-tabs-search-tab"
+                            data-module-id="layers"
+                            class="nav-link"
+                            id="v-tabs-layer-tab"
                             data-mdb-toggle="tab"
-                            href="#search-content"
+                            href="#layer-content"
                             role="tab"
-                            aria-controls="v-tabs-home"
-                            aria-selected="true"
-                    >{{Search}}</a
-                    >
+                            aria-controls="v-tabs-messages"
+                            aria-selected="false"
+                    >{{Layers}}</a>
                     <a
                             data-module-id="infoClick"
                             class="nav-link"
@@ -169,16 +162,6 @@
                             aria-controls="v-tabs-profile"
                             aria-selected="false"
                     >{{Info}}</a>
-                    <a
-                            data-module-id="layers"
-                            class="nav-link"
-                            id="v-tabs-layer-tab"
-                            data-mdb-toggle="tab"
-                            href="#layer-content"
-                            role="tab"
-                            aria-controls="v-tabs-messages"
-                            aria-selected="false"
-                    >{{Layers}}</a>
                     <a
                             data-module-id="baseLayer"
                             class="nav-link"
@@ -237,21 +220,15 @@
                 <!-- Tab content -->
                 <div class="tab-content" id="v-tabs-tabContent">
                     <div
-                            class="tab-pane fade show active"
-                            id="search-content"
+                            class="tab-pane fade"
+                            id="layer-content"
                             role="tabpanel"
-                            aria-labelledby="v-tabs-home-tab"
+                            aria-labelledby="v-tabs-messages-tab"
                     >
-                        <div class="help-btn" onclick="javascript:createAlert($(this), '{{Search places}}')">
+                        <div class="help-btn" onclick="javascript:createAlert($(this), '{{Help text overlays}}')">
                             <i class="material-icons help-btn">help_outline</i></div>
                         <div></div>
-                        <div id="place-search">
-                            <div class="places">
-                                <input id="custom-search" class="custom-search typeahead" type="text"
-                                       placeholder="{{Address}}">
-                                <span id="searchclear" class="glyphicon glyphicon-remove-circle"></span>
-                            </div>
-                        </div>
+                        <div class="form-group" id="layers" role="tablist"></div>
                     </div>
                     <div
                             class="tab-pane fade"
@@ -278,17 +255,6 @@
                         <div id="info-box"></div>
                         <table id="dtable" data-show-toggle="true"></table>
 
-                    </div>
-                    <div
-                            class="tab-pane fade"
-                            id="layer-content"
-                            role="tabpanel"
-                            aria-labelledby="v-tabs-messages-tab"
-                    >
-                        <div class="help-btn" onclick="javascript:createAlert($(this), '{{Help text overlays}}')">
-                            <i class="material-icons help-btn">help_outline</i></div>
-                        <div></div>
-                        <div class="form-group" id="layers" role="tablist"></div>
                     </div>
                     <div
                             class="tab-pane fade"
@@ -586,7 +552,8 @@
                                     <ul class="dropdown-menu">
                                         <li><a href="javascript:void(0)" id="download-pdf">{{Download}}</a></li>
                                         <li>
-                                            <a target="_blank" href="javascript:void(0)" id="open-html">{{Open HTML page}}</a>
+                                            <a target="_blank" href="javascript:void(0)" id="open-html">{{Open HTML
+                                                                                                               page}}</a>
                                         </li>
                                     </ul>
                                 </div>
@@ -651,7 +618,7 @@
                                     <div class="form-outline">
                                         <textarea class="form-control" rows="3" id="print-comment"
                                                   disabled></textarea>
-                                            <span class="help-block">{{The comment will be placed on the PDF}}</span>
+                                        <span class="help-block">{{The comment will be placed on the PDF}}</span>
                                         <label for="print-comment"
                                                class="col-md-2 form-label">{{Comment}}</label>
                                     </div>
@@ -683,13 +650,66 @@
                 aria-expanded="true" style="min-width: 14px;"><i class="fas fa-bars fa-lg"></i></button>
 
 
+        <span class="navbar-brand mb-0"><img src="https://www.dragoer.dk/img/6199dr/logo-desktop-2021.svg" style="width: 50px">Dragør Kommune</span>
         <!-- Right links -->
-        <ul id="dpl-navbar-new-right-buttons" class="navbar-nav ms-auto d-flex flex-row">
-            <li style="margin-top:2px;min-height:1px;min-width:1px;">
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav nav-flex-icons ml-auto ms-auto flex-row">
+                <li class="nav-item" style="margin-right: 10px">
+                    <input
+                            id="custom-search"
+                            type="search"
+                            class="form-control rounded custom-search typeahead"
+                            placeholder="{{Address}}"
+                            aria-label="Search"
+                            aria-describedby="search-addon"
+                    />
+                </li>
+                <li class="nav-item lh-1">
+                    <a class="nav-link" href="#">Hælp</a>
+                </li>
+                <li class="nav-item lh-1">
+                    <a class="nav-link" href="#">Om</a>
+                </li>
+                <!-- Icon -->
+                <li class="nav-item lh-1">
+                    <a class="nav-link" href="#">
+                        <i class="fas fa-refresh"></i>
+                    </a>
+                </li>
+                <li class="nav-item dropdown lh-1">
+                    <a
+                            class="nav-link dropdown-toggle hidden-arrow"
+                            href="#"
+                            id="navbarDropdownMenuLink"
+                            role="button"
+                            data-mdb-toggle="dropdown"
+                            aria-expanded="false"
+                    >
+                        <i class="fas fa-bell"></i>
+                        <span class="badge rounded-pill badge-notification bg-danger">1</span>
+                    </a>
+                    <ul
+                            class="dropdown-menu dropdown-menu-end"
+                            aria-labelledby="navbarDropdownMenuLink"
+                    >
+                        <li>
+                            <a class="dropdown-item" href="#">Some news</a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="#">Another news</a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="#">Something else here</a>
+                        </li>
+                    </ul>
+                </li>
+
+            <li class="nav-item">
                 <a class="auth-modal-toggle btn btn-primary ripple-surface ms-2 me-1" data-mdb-target="#login-modal"
                    data-mdb-toggle="modal" style="min-width: 82px;">Login</a>
             </li>
-        </ul>
+            </ul>
+        </div>
     </div>
 </nav>
 <!-- Navbar -->
