@@ -63,17 +63,6 @@ const htmlFragments = {
  *
  */
 const store = () => {
-    const validate = config?.extensionConfig?.symbols?.options?.validate;
-    if (validate) {
-        try {
-            let func = Function('"use strict";return (' + validate + ')')();
-            if (!func(symbolState)) {
-                return;
-            }
-        } catch (e) {
-            console.error("Error in validate function:", e.message)
-        }
-    }
     $.ajax({
         url: '/api/symbols/' + db,
         data: JSON.stringify(symbolState),
@@ -171,6 +160,19 @@ const handleDragEnd = (e) => {
     let id = createId();
     let coord = map.mouseEventToLatLng(e);
     let file = $(e.target).attr("data-file");
+    let group = $(e.target).attr("data-group");
+
+    const validate = config?.extensionConfig?.symbols?.options?.validate;
+    if (validate) {
+        try {
+            let func = Function('"use strict";return (' + validate + ')')();
+            if (!func(file, group, symbolState)) {
+                return;
+            }
+        } catch (e) {
+            console.error("Error in validate function:", e.message)
+        }
+    }
 
     let callback = config?.extensionConfig?.symbols?.symbolOptions?.[file]?.callback;
     if (callback === undefined) {
@@ -190,7 +192,7 @@ const handleDragEnd = (e) => {
             }
         }
     }
-    createSymbol(innerHtml, id, coord, 0, 1, map.getZoom(), file);
+    createSymbol(innerHtml, id, coord, 0, 1, map.getZoom(), file, group);
     if (callback) {
         try {
             let func = Function('"use strict";return (' + callback + ')')();
@@ -211,7 +213,7 @@ const handleDragEnd = (e) => {
  * @param zoomLevel
  * @param file
  */
-const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file) => {
+const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file, group) => {
     let map = cloud.get().map;
     let func;
     let classStr = "dm_" + id;
@@ -265,6 +267,7 @@ const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file) => 
     symbolState[id].svg = innerHtml;
     symbolState[id].coord = markers[id].getLatLng();
     symbolState[id].file = file;
+    symbolState[id].group = group;
     markers[id].on("moveend", () => {
         symbolState[id].coord = markers[id].getLatLng();
         idBeingChanged = id;
@@ -444,9 +447,10 @@ module.exports = {
                                         const parser = new DOMParser();
                                         const doc = parser.parseFromString(symbols[group][id].svg, "image/svg+xml");
                                         let text = doc.getElementsByTagName("desc")?.[0]?.textContent
-                                        let desc = text||'';
+                                        let desc = text || '';
                                         let svg = $(inner.clone()[0]).append(symbols[group][id].svg);
                                         svg.attr('data-file', id);
+                                        svg.attr('data-group', group);
                                         let e = $('<div class="p-1 text-center">');
                                         e.append(svg[0], `<div style="font-size: 8pt">${desc}</div>`)
                                         outer.find('.d-flex').append(e);
@@ -529,7 +533,7 @@ module.exports = {
         for (const id in state) {
             if (id && state.hasOwnProperty(id)) {
                 const s = state[id];
-                createSymbol(s.svg, id, s.coord, s.rotation, s.scale, s.zoomLevel, s.file);
+                createSymbol(s.svg, id, s.coord, s.rotation, s.scale, s.zoomLevel, s.file, s.group);
             }
         }
         creatingFromState = false;
@@ -553,7 +557,7 @@ module.exports = {
      * @returns {Promise<unknown>}
      */
     applyState: (newState) => {
-        return ;
+        return;
         return new Promise((resolve) => {
             _self.resetState();
             if (newState) {
@@ -617,8 +621,8 @@ module.exports = {
         $(".symbols-handles").show()
     },
 
-    createSymbol: (innerHtml, id, coord, ro, sc, zoom, file) => {
-        createSymbol(innerHtml, id, coord, 0, 1, zoom, file);
+    createSymbol: (innerHtml, id, coord, ro, sc, zoom, file, group) => {
+        createSymbol(innerHtml, id, coord, 0, 1, zoom, file, group);
     },
 
     createId: () => {
