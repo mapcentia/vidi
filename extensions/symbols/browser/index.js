@@ -255,8 +255,8 @@ const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file) => 
     if (doDelete) outerHtml.append(`<div class="symbols-handles symbols-delete ${deleteHandleStr}" id="${id}"></div>`);
     let icon = L.divIcon({
         className: "drag-symbole",
-        iconSize: new L.Point(72, 72),
-        // iconAnchor: [26, 26],
+        // iconSize: new L.Point(72, 72),
+        iconAnchor: [26, 26],
         html: `${outerHtml[0].outerHTML}`
     });
     markers[id] = L.marker(coord, {icon: icon, draggable: true}).addTo(map);
@@ -448,7 +448,7 @@ module.exports = {
                                         let svg = $(inner.clone()[0]).append(symbols[group][id].svg);
                                         svg.attr('data-file', id);
                                         let e = $('<div class="p-1 text-center">');
-                                        e.append(svg[0], `<div style="max-width: 72px; font-size: 8pt">${desc}</div>`)
+                                        e.append(svg[0], `<div style="font-size: 8pt">${desc}</div>`)
                                         outer.find('.d-flex').append(e);
                                     }
                                 }
