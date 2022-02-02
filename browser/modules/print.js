@@ -505,12 +505,6 @@ module.exports = {
     },
 
     getPrintParams: () => {
-        if (paramsFromDb) {
-            setTimeout(() => {
-                paramsFromDb = null;
-            }, 0);
-            return paramsFromDb;
-        }
 
         var layerQueryDraw = [], layerQueryResult = [], layerQueryBuffer = [], layerPrint = [], e, parr,
             configFile = null;
@@ -522,6 +516,13 @@ module.exports = {
         try {
             recEdit.editing.disable();
         } catch (e) {
+        }
+        recEdit[recEdit.length - 1]?.editing.enable();
+        if (paramsFromDb) {
+            setTimeout(() => {
+                paramsFromDb = null;
+            }, 0);
+            return paramsFromDb;
         }
         let anchorRaw = anchor.getAnchor();
         anchorRaw = anchorRaw.substr(0, anchorRaw.lastIndexOf(`/`));
@@ -629,7 +630,6 @@ module.exports = {
             }
             data.config = parr.join();
         }
-        recEdit[recEdit.length - 1]?.editing.enable();
         return data;
     },
 
