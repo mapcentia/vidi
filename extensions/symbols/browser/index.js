@@ -451,7 +451,7 @@ module.exports = {
                                         let svg = $(inner.clone()[0]).append(symbols[group][id].svg);
                                         svg.attr('data-file', id);
                                         svg.attr('data-group', group);
-                                        let e = $('<div class="p-1 text-center">');
+                                        let e = $('<div class="p-1 text-center symbol-text-wrapper">');
                                         e.append(svg[0], `<div style="font-size: 8pt">${desc}</div>`)
                                         outer.find('.d-flex').append(e);
                                     }
