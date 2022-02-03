@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2022.2.1] 2022-3-3
+### Fixed
+- Use UTM instead of web-mercator when projeting/unprojecting the print frame or the different will be to big.
+
 ## [2022.2.0] 2022-3-2
 ### Fixed
 - Fix for buggy print recreation from state. The print frame was re-calculated each time the state was applied making a small change in latitude coords. This made the frame drift south-east and rendered errors on big geographical frames. 
