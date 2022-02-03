@@ -2630,6 +2630,7 @@ geocloud = (function () {
     };
     transformPoint = function (lat, lon, s, d) {
         const proj4 = require("proj4");
+        proj4.defs("EPSG:32632", "+proj=utm +zone=32 +ellps=WGS84 +datum=WGS84 +units=m +no_defs");
         let p = proj4(s, d, [parseFloat(lat), parseFloat(lon)]);
         return {x: p[0], y: p[1]}
     };

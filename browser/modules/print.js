@@ -40,6 +40,7 @@ var callBack = () => {
 var alreadySetFromState = false;
 var setState = true;
 var paramsFromDb;
+let scaleFromForm = false;
 
 import dayjs from 'dayjs';
 import advancedFormat from "dayjs/plugin/advancedFormat";
@@ -70,7 +71,7 @@ var _cleanUp = function (hard) {
         center = [];
         recScale = [];
         printC = config.print.templates;
-        scales = config.print.scales;
+        // scales = config.print.scales;
         scale = null;
         pageSize = null;
         printingOrientation = null;
@@ -193,6 +194,8 @@ module.exports = {
             var s = e.target.value;
             scale = s;
             scales.push(parseInt(s));
+            scales.sort((a, b) => a - b);
+            scaleFromForm = true;
             change();
         });
         $.each(printC, function (i) {
@@ -333,7 +336,6 @@ module.exports = {
             setTimeout(() => {
                 if (o) {
                     $('#' + o).prop("checked", true);
-                    ;
                 }
             }, 5);
         }, 5);
@@ -349,7 +351,7 @@ module.exports = {
         if (st) {
             $("#print-sticky").prop("checked", st);
         }
-        var ps = printC[tmpl][pageSize][printingOrientation].mapsizeMm, curScale, newScale, newBounds;
+        var ps = printC[tmpl][pageSize][printingOrientation].mapsizeMm;
         var _getScale = function (scaleObject) {
             var bounds = scaleObject.getBounds(),
                 sw = bounds.getSouthWest(),
@@ -358,20 +360,10 @@ module.exports = {
                 midLeft = L.latLng(halfLat, sw.lng),
                 midRight = L.latLng(halfLat, ne.lng),
                 mwidth = midLeft.distanceTo(midRight),
-                closest = Number.POSITIVE_INFINITY,
-                i = scales.length,
-                diff,
                 mscale = mwidth * 1000 / ps[0];
-            curScale = scale;
-            while (i--) {
-                diff = Math.abs(mscale - scales[i]);
-                if (diff < closest) {
-                    closest = diff;
-                    scale = scales[i];
-                }
-            }
-            newScale = scale;
-            newBounds = [sw.lat, sw.lng, ne.lat, ne.lng];
+            scale = scales.reduce(function (prev, curr) {
+                return (Math.abs(curr - mscale) < Math.abs(prev - mscale) ? curr : prev);
+            });
             return scale;
         };
         var rectangle = function (initCenter, scaleObject, color, initScale, isFirst) {
@@ -386,13 +378,13 @@ module.exports = {
                 }
                 scale = scales[scaleIndex];
             }
-            var centerM = L.CRS.EPSG3857.project(L.latLng(initCenter.lat, initCenter.lng));
+            var centerM = geocloud.transformPoint(initCenter.lng, initCenter.lat, "EPSG:4326", "EPSG:32632");
             var printSizeM = [(ps[0] * scale / 1000), (ps[1] * scale / 1000)];
-            var printSwM = [centerM.x - (printSizeM[0]), centerM.y - (printSizeM[1])];
-            var printNeM = [centerM.x + (printSizeM[0]), centerM.y + (printSizeM[1])];
-            var printSwG = L.CRS.EPSG3857.unproject(L.point(printSwM[0], printSwM[1]));
-            var printNeG = L.CRS.EPSG3857.unproject(L.point(printNeM[0], printNeM[1]));
-            var rectangle = L.rectangle([[printSwG.lat, printSwG.lng], [printNeG.lat, printNeG.lng]], {
+            var printSwM = [centerM.x - (printSizeM[0] / 2), centerM.y - (printSizeM[1] / 2)];
+            var printNeM = [centerM.x + (printSizeM[0] / 2), centerM.y + (printSizeM[1] / 2)];
+            var printSwG = geocloud.transformPoint(printSwM[0], printSwM[1], "EPSG:32632", "EPSG:4326");
+            var printNeG = geocloud.transformPoint(printNeM[0], printNeM[1], "EPSG:32632", "EPSG:4326");
+            var rectangle = L.rectangle([[printSwG.y, printSwG.x], [printNeG.y, printNeG.x]], {
                 color: color,
                 fillOpacity: 0,
                 opacity: 1,
@@ -423,13 +415,13 @@ module.exports = {
         recScale[boxCount] = rectangle(c, recEdit[boxCount], "red");
         recScale[boxCount]._vidi_type = "print";
         printItems.addLayer(recScale[boxCount]);
-        icons[boxCount] = (L.marker(c, {
+        icons[boxCount] = L.marker(c, {
             icon: L.divIcon({
                 className: 'print-div-icon',
                 iconSize: null,
                 html: `<span>${(boxCount + 1)}</span>`
             })
-        }).addTo(cloud.get().map));
+        }).addTo(cloud.get().map);
 
         var sw = recEdit[boxCount].getBounds().getSouthWest(), ne = recEdit[boxCount].getBounds().getNorthEast();
         curBounds[boxCount] = [sw.lat, sw.lng, ne.lat, ne.lng];
@@ -437,6 +429,7 @@ module.exports = {
             icons.forEach((icon) => {
                 cloud.get().map.removeLayer(icon);
             })
+            scaleFromForm = false;
             for (let i = 0; i <= boxCount; i++) {
                 let c = recEdit[i].getBounds().getCenter();
                 icons[i] = (L.marker(c, {
@@ -448,15 +441,12 @@ module.exports = {
                 }).addTo(cloud.get().map));
                 center[i] = c; // re-calculate centers
                 rectangle(c, recEdit[i], "red");
-                //if (curScale !== newScale || (curBounds[i][0] !== newBounds[0] && curBounds[i][1] !== newBounds[1] && curBounds[i][2] !== newBounds[2] && curBounds[i][3] !== newBounds[3])) {
-                scales = config.print.scales;
                 cloud.get().map.removeLayer(recScale[i]);
                 // Set bounds from the one being edited to all
                 recScale[i] = rectangle(c, recEdit[e.target._count], "red");
                 recScale[i]._vidi_type = "print";
                 printItems.addLayer(recScale[i]);
                 $("#get-print-fieldset").prop("disabled", true);
-                //}
                 recEdit[i].editing.disable();
                 recEdit[i].setBounds(recScale[i].getBounds());
                 recEdit[i].editing.enable();
@@ -465,7 +455,6 @@ module.exports = {
                     ne = recEdit[i].getBounds().getNorthEast();
                 curBounds[boxCount] = [sw.lat, sw.lng, ne.lat, ne.lng];
             }
-
             backboneEvents.get().trigger(`${MODULE_ID}:state_change`);
         });
     },
