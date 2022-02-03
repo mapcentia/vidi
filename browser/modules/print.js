@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2020 MapCentia ApS
+ * @copyright  2013-2022 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -38,6 +38,7 @@ var _self = false;
 var callBack = () => {
 };
 var alreadySetFromState = false;
+var setState = true;
 var paramsFromDb;
 
 import dayjs from 'dayjs';
@@ -61,11 +62,9 @@ var _cleanUp = function (hard) {
     } catch (e) {
         //console.error(e.message);
     }
-
     icons.forEach((icon) => {
         cloud.get().map.removeLayer(icon);
     });
-
     printOn = false;
     if (hard) {
         center = [];
@@ -108,24 +107,14 @@ module.exports = {
         backboneEvents.get().on(`off:${MODULE_ID}`, () => {
             _self.off();
         });
-
-        /*cloud.get().map.on('zoomend', () => {
-
-            var newzoom = '' + (100 * cloud.get().map.getZoom() - 1000) + 'px';
-            console.log(newzoom);
-            $('.print-div-icon').css({'font-size': newzoom});
-
-        });*/
-
         state.listenTo(MODULE_ID, _self);
         state.listen(MODULE_ID, `state_change`);
-
         backboneEvents.get().on("end:print", function (response) {
             console.log("Response", response)
             $("#get-print-fieldset").prop("disabled", false);
             if (response.format === "pdf") {
                 $("#download-pdf, #open-pdf").attr("href", "/tmp/print/pdf/" + response.key + ".pdf");
-            } else if (response.format === "png"){
+            } else if (response.format === "png") {
                 $("#download-pdf, #open-pdf").attr("href", "/tmp/print/png/" + response.key + ".png");
             } else {
                 $("#download-pdf, #open-pdf").attr("href", "/tmp/print/png/" + response.key + ".zip");
@@ -137,7 +126,6 @@ module.exports = {
             // GeoEnviron
             console.log("GEMessage:LaunchURL:" + urlparser.urlObj.protocol + "://" + urlparser.urlObj.host + "/tmp/print/pdf/" + response.key + ".pdf");
         });
-
         $("#start-print-btn").on("click", function () {
             if (_self.print()) {
                 $(this).button('loading');
@@ -152,13 +140,11 @@ module.exports = {
                 $("#get-print-fieldset").prop("disabled", true);
             }
         });
-
         $("#add-print-box-btn").on("click", function () {
             boxCount++;
             _self.control(null, null, null, null, null, null, null, null, null, null, null, false);
             backboneEvents.get().trigger(`${MODULE_ID}:state_change`);
         });
-
         $("#remove-print-box-btn").on("click", function () {
             if (boxCount > 0) {
                 console.log(icons)
@@ -172,7 +158,6 @@ module.exports = {
                 backboneEvents.get().trigger(`${MODULE_ID}:state_change`);
             }
         });
-
         cloud.get().map.addLayer(printItems);
     },
 
@@ -185,9 +170,6 @@ module.exports = {
         callBack = fn;
     },
 
-    /**
-     *
-     */
     on: function () {
         let numOfPrintTmpl = 0;
         alreadySetFromState = false;
@@ -196,21 +178,16 @@ module.exports = {
         $("#print-size").empty();
         $("#print-orientation").empty();
         $("#select-scale").empty();
-        //center = [];
         scale = null;
-
         // Set up print dialog
         $("#ul-scale").empty();
         for (var i = 0; i < scales.length; i++) {
             $("#ul-scale").append("<li><a data-scale-ul='" + scales[i] + "' href='#'>" + scales[i] + "</a></li>");
         }
-
         $("#print-sticky").unbind("change");
         $("#print-sticky").change(function (e) {
-            //center = $("#print-sticky").is(":checked") ? center : [];
-            //recScale = $("#print-sticky").is(":checked") ? recScale : [];
+            alreadySetFromState = true;
         });
-
         $("#select-scale").unbind("change");
         $("#select-scale").change(function (e) {
             var s = e.target.value;
@@ -218,7 +195,6 @@ module.exports = {
             scales.push(parseInt(s));
             change();
         });
-
         $.each(printC, function (i) {
             if (window.vidiConfig.enabledPrints.indexOf(i) > -1) {
                 if (i.charAt(0) !== "_") {
@@ -227,11 +203,9 @@ module.exports = {
                 $("#print-tmpl").append('<div class="radio radio-primary"><label><input type="radio" class="print print-tmpl" name="print-tmpl" id="' + i + '" value="' + i + '">' + i + '</label></div>');
             }
         });
-
         if (numOfPrintTmpl > 1) {
             $("#print-tmpl").parent("div").show();
         }
-
         var me = this;
         var change = function () {
             var arr = $("#print-form").serializeArray();
@@ -241,39 +215,39 @@ module.exports = {
                 tmpl = arr[0].value;
                 pageSize = arr[1].value;
                 printingOrientation = arr[2].value;
-                setTimeout(() => {
-                    if (!alreadySetFromState && $("#print-sticky").is(":checked")) {
-                        alreadySetFromState = true;
-                        state.getState().then(applicationState => {
-                            if (typeof applicationState.modules.print !== "undefined") {
-                                let params = applicationState.modules.print;
-                                for (let i = 0; i < params.bounds.length; i++) {
-                                    boxCount = i;
-                                    me.control(false,
-                                        params.scales, params.tmpl, params.pageSize,
-                                        params.orientation, params.legend,
-                                        params.bounds[i], params.scale, params.title, params.comment, params.sticky, false);
-                                }
-                            } else {
-                                me.control(null, null, null, null, null, null, null, null, null, null, null, false);
+                if (!alreadySetFromState && $("#print-sticky").is(":checked")) {
+                    alreadySetFromState = true;
+                    setState = false;
+                    state.getState().then(applicationState => {
+                        if (typeof applicationState.modules.print !== "undefined") {
+                            let params = applicationState.modules.print;
+                            for (let i = 0; i < params.bounds.length; i++) {
+                                boxCount = i;
+                                me.control(false,
+                                    params.scales, params.tmpl, params.pageSize,
+                                    params.orientation, params.legend,
+                                    params.bounds[i], params.scale, params.title, params.comment, params.sticky, false);
                             }
-                        });
-                    } else {
-                        let boxCountTemp = boxCount;
-                        for (let i = 0; i <= boxCountTemp; i++) {
-                            boxCount = i;
+                        } else {
                             me.control(null, null, null, null, null, null, null, null, null, null, null, false);
                         }
+                    });
+                } else {
+                    let boxCountTemp = boxCount;
+                    for (let i = 0; i <= boxCountTemp; i++) {
+                        boxCount = i;
+                        me.control(null, null, null, null, null, null, null, null, null, null, null, false);
                     }
-                    setTimeout(() => {
-                        backboneEvents.get().trigger(`${MODULE_ID}:state_change`);
-                    }, 5)
-                }, 5);
+                    setState = true;
+                }
+                if (setState) {
+                    backboneEvents.get().trigger(`${MODULE_ID}:state_change`);
+                    setState = false;
+                }
             } else {
                 _cleanUp();
             }
         };
-
         $(".print-tmpl").unbind("change");
         $(".print-tmpl").change(function (e) {
             $("#print-size").empty();
@@ -282,12 +256,10 @@ module.exports = {
             $.each(printC[e.target.value], function (i, v) {
                 $("#print-size").append('<div class="radio radio-primary"><label><input type="radio" class="print print-size" name="print-size" id="' + i + '" value="' + i + '">' + i + '</label></div>');
             });
-
             // Click the first options in size
             setTimeout(function () {
                 $("input:radio[name=print-size]:first").trigger("click");
             }, 5);
-
             $(".print-size").unbind("change");
             $(".print-size").change(function (e) {
                 $("#print-orientation").empty();
@@ -306,14 +278,12 @@ module.exports = {
             });
             change();
         });
-
         $("#add-legend-btn, #print-title, #print-comment").unbind("change");
         $("#add-legend-btn, #print-title, #print-comment").change(() => {
             setTimeout(() => {
                 backboneEvents.get().trigger(`${MODULE_ID}:state_change`);
             }, 5)
         });
-
         // Click the first options in all
         $("input:radio[name=print-tmpl]:first").trigger("click");
         setTimeout(function () {
@@ -353,21 +323,20 @@ module.exports = {
             scale = sc;
             $("#select-scale").val(sc);
         }
-        let opacity = 0.5;
         if (t) {
-            $('#' + t).trigger("click");
+            $('#' + t).prop("checked", true);
         }
         setTimeout(() => {
             if (pa) {
-                $('#' + pa).trigger("click");
+                $('#' + pa).prop("checked", true);
             }
             setTimeout(() => {
                 if (o) {
-                    $('#' + o).trigger("click");
+                    $('#' + o).prop("checked", true);
+                    ;
                 }
             }, 5);
         }, 5);
-
         if (ti) {
             $('#print-title').val(decodeURIComponent(ti));
         }
@@ -380,7 +349,6 @@ module.exports = {
         if (st) {
             $("#print-sticky").prop("checked", st);
         }
-
         var ps = printC[tmpl][pageSize][printingOrientation].mapsizeMm, curScale, newScale, newBounds;
         var _getScale = function (scaleObject) {
             var bounds = scaleObject.getBounds(),
@@ -404,10 +372,9 @@ module.exports = {
             }
             newScale = scale;
             newBounds = [sw.lat, sw.lng, ne.lat, ne.lng];
-
             return scale;
         };
-        var rectangle = function (initCenter, scaleObject, color, initScale, isFirst, rec = false) {
+        var rectangle = function (initCenter, scaleObject, color, initScale, isFirst) {
             scale = initScale ? initScale : _getScale(scaleObject);
             $("#select-scale").val(scale);
             if (isFirst && !sc) { // Only when print tool is activated first time and no state from project
@@ -419,14 +386,13 @@ module.exports = {
                 }
                 scale = scales[scaleIndex];
             }
-
-            var centerM = geocloud.transformPoint(initCenter.lng, initCenter.lat, "EPSG:4326", "EPSG:32632");
+            var centerM = L.CRS.EPSG3857.project(L.latLng(initCenter.lat, initCenter.lng));
             var printSizeM = [(ps[0] * scale / 1000), (ps[1] * scale / 1000)];
-            var printSwM = [centerM.x - (printSizeM[0] / 2), centerM.y - (printSizeM[1] / 2)];
-            var printNeM = [centerM.x + (printSizeM[0] / 2), centerM.y + (printSizeM[1] / 2)];
-            var printSwG = geocloud.transformPoint(printSwM[0], printSwM[1], "EPSG:32632", "EPSG:4326");
-            var printNeG = geocloud.transformPoint(printNeM[0], printNeM[1], "EPSG:32632", "EPSG:4326");
-            var rectangle = L.rectangle([[printSwG.y, printSwG.x], [printNeG.y, printNeG.x]], {
+            var printSwM = [centerM.x - (printSizeM[0]), centerM.y - (printSizeM[1])];
+            var printNeM = [centerM.x + (printSizeM[0]), centerM.y + (printSizeM[1])];
+            var printSwG = L.CRS.EPSG3857.unproject(L.point(printSwM[0], printSwM[1]));
+            var printNeG = L.CRS.EPSG3857.unproject(L.point(printNeM[0], printNeM[1]));
+            var rectangle = L.rectangle([[printSwG.lat, printSwG.lng], [printNeG.lat, printNeG.lng]], {
                 color: color,
                 fillOpacity: 0,
                 opacity: 1,
@@ -584,12 +550,12 @@ module.exports = {
         let data;
         // Slim down the meta data
         let metaData = meta.getMetaData();
-        for (let i=0; i< metaData.data.length; i++) {
-            delete   metaData.data[i].class;
-            delete   metaData.data[i].classwizard;
-            delete   metaData.data[i].def;
-            delete   metaData.data[i].fieldconf;
-            delete   metaData.data[i].fields;
+        for (let i = 0; i < metaData.data.length; i++) {
+            delete metaData.data[i].class;
+            delete metaData.data[i].classwizard;
+            delete metaData.data[i].def;
+            delete metaData.data[i].fieldconf;
+            delete metaData.data[i].fields;
         }
         try {
             data = {
