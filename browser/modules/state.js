@@ -743,7 +743,7 @@ module.exports = {
 
     setExtent: function () {
         if (hashArr[1] && hashArr[2] && hashArr[3]) {
-            p = geocloud.transformPoint(hashArr[2], hashArr[3], "EPSG:4326", "EPSG:900913");
+            p = geocloud.transformPoint(hashArr[2], hashArr[3], "EPSG:4326", "EPSG:3857");
             cloud.get().zoomToPoint(p.x, p.y, hashArr[1]);
         } else {
             cloud.get().zoomToExtent();
