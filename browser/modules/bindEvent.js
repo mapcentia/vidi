@@ -551,39 +551,39 @@ module.exports = {
             }
         });
 
-        $('.slide-right > .modal-header > button[class="close"]').click(() => {
-            backboneEvents.get().trigger('off:all');
-        });
+        // $('.slide-right > .modal-header > button[class="close"]').click(() => {
+        //     backboneEvents.get().trigger('off:all');
+        // });
 
         // Module icons
-        $('#side-panel ul li a').on('click', function () {
-            backboneEvents.get().trigger('off:all');
-            let moduleTitle = $(this).data('module-title');
-            let e = $('#module-container');
-            e.find('.js-module-title').text('');
-            if (moduleTitle) {
-                e.find('.js-module-title').text(moduleTitle);
-            }
-            let moduleId = $(this).data('module-id');
-            let moduleIgnoreErrors = !!$(this).data('module-ignore-errors');
-            setTimeout(() => {
-                if (moduleId && moduleId !== '') {
-                    if (moduleId in applicationModules) {
-                        backboneEvents.get().trigger(`on:${moduleId}`);
-                    } else {
-                        if (moduleIgnoreErrors) {
-                            backboneEvents.get().trigger(`on:${moduleId}`);
-                        } else {
-                            console.error(`Module ${moduleId} was not found`);
-                        }
-                    }
-                }
-            }, 100);
-
-            let id = ($(this));
-            $('#side-panel ul li').removeClass('active');
-            id.addClass('active');
-        });
+        // $('#side-panel ul li a').on('click', function () {
+        //     backboneEvents.get().trigger('off:all');
+        //     let moduleTitle = $(this).data('module-title');
+        //     let e = $('#module-container');
+        //     e.find('.js-module-title').text('');
+        //     if (moduleTitle) {
+        //         e.find('.js-module-title').text(moduleTitle);
+        //     }
+        //     let moduleId = $(this).data('module-id');
+        //     let moduleIgnoreErrors = !!$(this).data('module-ignore-errors');
+        //     setTimeout(() => {
+        //         if (moduleId && moduleId !== '') {
+        //             if (moduleId in applicationModules) {
+        //                 backboneEvents.get().trigger(`on:${moduleId}`);
+        //             } else {
+        //                 if (moduleIgnoreErrors) {
+        //                     backboneEvents.get().trigger(`on:${moduleId}`);
+        //                 } else {
+        //                     console.error(`Module ${moduleId} was not found`);
+        //                 }
+        //             }
+        //         }
+        //     }, 100);
+        //
+        //     let id = ($(this));
+        //     $('#side-panel ul li').removeClass('active');
+        //     id.addClass('active');
+        // });
 
         $('#click-for-info-slide.slide-left .close').on('click', function () {
             $('#click-for-info-slide.slide-left').animate({
