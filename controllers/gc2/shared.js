@@ -1,3 +1,9 @@
+/*
+ * @author     Alexander Shumilov
+ * @copyright  2013-2021 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
+ */
+
 const TRACKER_COOKIE_NAME = `vidi-state-tracker`;
 
 const throwError = (response, error, data) => {
