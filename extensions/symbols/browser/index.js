@@ -174,10 +174,6 @@ const handleDragEnd = (e) => {
         }
     }
 
-    let callback = config?.extensionConfig?.symbols?.symbolOptions?.[file]?.callback;
-    if (callback === undefined) {
-        callback = config?.extensionConfig?.symbols?.options?.callback;
-    }
     let onlyOne = config?.extensionConfig?.symbols?.symbolOptions?.[file]?.onlyOne;
     if (onlyOne === undefined) {
         onlyOne = config?.extensionConfig?.symbols?.options?.onlyOne;
@@ -193,14 +189,6 @@ const handleDragEnd = (e) => {
         }
     }
     createSymbol(innerHtml, id, coord, 0, 1, map.getZoom(), file, group);
-    if (callback) {
-        try {
-            let func = Function('"use strict";return (' + callback + ')')();
-            func(file, symbolState, "create");
-        } catch (e) {
-            console.error("Error in callback for " + file, e.message)
-        }
-    }
 }
 
 /**
@@ -226,7 +214,6 @@ const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file, gro
     outerHtml.addClass("symbols-map");
     outerHtml.attr("draggable", "false")
     outerHtml.addClass(classStr);
-
     let callback = config?.extensionConfig?.symbols?.symbolOptions?.[file]?.callback;
     if (callback === undefined) {
         callback = config?.extensionConfig?.symbols?.options?.callback;
@@ -321,6 +308,15 @@ const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file, gro
             scale(e, img, id, classStr);
         });
     });
+
+    if (callback) {
+        try {
+            let func = Function('"use strict";return (' + callback + ')')();
+            func(file, symbolState, "create");
+        } catch (e) {
+            console.error("Error in callback for " + file, e.message)
+        }
+    }
 }
 
 
