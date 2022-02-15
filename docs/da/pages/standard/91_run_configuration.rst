@@ -244,6 +244,51 @@ Opsætning af tilgængelige base layers kan ske på fire forskellige metoder:
         }
     ],
 
+Til WMS baggrundskort fra Datafordeler og Dataforsyningen kan der anvendes en proxy, som til dels fixer et problem med Datafordeler og til dels kan forsyne kaldene med brugernavn/kodeord eller token, så disse ikke bliver eksponeret til Vidi brugerne.
+
+Se hvordan bruger-information opsættes i Systemkonfigurationen :ref:`configjs_df`
+
+Derefter kan WMS'er opsættes således. Fx hvis man ønsker at anvende:
+
+``https://services.datafordeler.dk/GeoDanmarkOrto/orto_foraar/1.0.0/WMS``
+
+skal "url" angives til:
+
+``/api/datafordeler/GeoDanmarkOrto/orto_foraar/1.0.0/WMS``
+
+Vidi sørger så for at tilføje bruger-infomationen og tilrette URL.
+
+.. code-block:: json
+
+    "baseLayers": [
+        {
+            "type": "wms",
+            "url": "/api/datafordeler/GeoDanmarkOrto/orto_foraar/1.0.0/WMS",
+            "layers": ["geodanmark_2020_12_5cm"],
+            "id": "geodanmark_2020_12_5cm",
+            "name": "TEST geodanmark_2020_12_5cm",
+            "description": "geodanmark_2020_12_5cm",
+            "attribution": "Styrelsen for Dataforsyning og Effektivisering",
+            "minZoom": 8,
+            "maxZoom": 22,
+            "maxNativeZoom": 22,
+            "transparent": true
+        },
+        {
+            "type": "wms",
+            "url": "/api/dataforsyningen/topo_skaermkort_DAF",
+            "layers": ["topo_skaermkort"],
+            "id": "topo_skaermkort",
+            "name": "TEST topo_skaermkort",
+            "description": "geodanmark_2020_12_5cm",
+            "attribution": "Styrelsen for Dataforsyning og Effektivisering",
+            "minZoom": 8,
+            "maxZoom": 22,
+            "maxNativeZoom": 22,
+            "transparent": true
+        }
+    ]
+
 .. note::
     HERE, Bing og Google Maps kræver API nøgle opsat i GC2. Google Maps fungerer på en anden måde end andre lag og langt fra optimalt. Fx kan man ikke printe Google Maps.
 
