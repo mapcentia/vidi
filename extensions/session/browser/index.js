@@ -11,6 +11,7 @@ let backboneEvents;
 let layerTree;
 let sessionInstance = false;
 let userName = null;
+let properties = null;
 let isStatusChecked = false;
 let exId = `login-modal-body`;
 
@@ -106,6 +107,7 @@ module.exports = {
                             $(".gc2-session-lock").show();
                             $(".gc2-session-unlock").hide();
                             userName = data.screen_name;
+                            properties = data.properties;
                             parent.update();
                         },
 
@@ -129,6 +131,7 @@ module.exports = {
                             $(".gc2-session-lock").hide();
                             $(".gc2-session-unlock").show();
                             userName = null;
+                            properties = null;
                             parent.update();
                         },
                         error: function (error) {
@@ -156,6 +159,7 @@ module.exports = {
                             $(".gc2-session-lock").show();
                             $(".gc2-session-unlock").hide();
                             userName = data.status.screen_name;
+                            properties = data.status.properties;
                             // True if auto login happens. When reload meta
                             if (data?.screen_name && data?.status?.authenticated) {
                                 // Wait for layer tree to be built before reloading
@@ -247,6 +251,10 @@ module.exports = {
 
     getUserName: function () {
         return userName;
+    },
+
+    getProperties: function () {
+        return properties;
     },
 
     isStatusChecked: () => {
