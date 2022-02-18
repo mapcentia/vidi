@@ -10,7 +10,7 @@ const config = require('../../config/config.js').gc2;
 const request = require('request');
 
 const proxifyRequest = (req, response) => {
-    let requestURL = config.host + decodeURIComponent(req.url.substr(4));
+    let requestURL = config.host + encodeURI(decodeURIComponent(req.url.substr(4)));
 
     // Rewrite URL in case of subUser
     if (req.session.subUser) {

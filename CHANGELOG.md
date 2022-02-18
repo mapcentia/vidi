@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [UNRELEASED]
+### Fixed
+- Better support for special characters and upper case in layer names. Fixes a UTF8 error in WMS requests and quotes schema/relation names in feature info requests.
+
 ## [2022.2.1] 2022-3-3
 ### Fixed
 - Use UTM instead of web-mercator when projeting/unprojecting the print frame or the different will be to big.
