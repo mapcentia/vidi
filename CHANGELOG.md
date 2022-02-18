@@ -4,20 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [UNRELEASED]
+## [2022.2.2] - 2022-18-2
 ### Fixed
 - Better support for special characters and upper case in layer names. Fixes a UTF8 error in WMS requests and quotes schema/relation names in feature info requests.
 - In the editor the counting of vertices in LineString features failed with NaN and it was impossible to edit. This is fixed with implementing a proper counting rutine.
 
-## [2022.2.1] 2022-3-3
+## [2022.2.1] - 2022-3-2
 ### Fixed
 - Use UTM instead of web-mercator when projeting/unprojecting the print frame or the different will be to big.
 
-## [2022.2.0] 2022-3-2
+## [2022.2.0] - 2022-3-2
 ### Fixed
 - Fix for buggy print recreation from state. The print frame was re-calculated each time the state was applied making a small change in latitude coords. This made the frame drift south-east and rendered errors on big geographical frames. 
 
-## [2021.12.1] 2021-29-12
+## [2021.12.1] - 2021-29-12
 ### Changed
 - The `df` extension is changed, so it can use both Dataforsyningen and Datafordeler. New setup (token has precedence):
 ```json
@@ -70,7 +70,7 @@ and this project adheres to [CalVer](https://calver.org/).
 ### Added
 - Field ignore setting from GC2 will now exclude the field from being queried in sqlQuery module (feature info).
 
-## [2021.12.0] 2021-6-12
+## [2021.12.0] - 2021-6-12
 ### Changed
 - The location circle marker is now orange in follow-mode and blue when not following. Location now works the same in both embed and default templates.
 - The legend toast dialog in embed template will now be pushed to the right when sliding out the layer tree. This way the elements will not be stacked.
