@@ -716,6 +716,9 @@ module.exports = {
                                 calculateCount(arr[i]);
                             } else {
                                 numberOfNodes++;
+                                if (numberOfNodes === MAX_NODE_IN_FEATURE) {
+                                    return;
+                                }
                             }
                         }
                     };

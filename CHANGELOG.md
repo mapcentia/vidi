@@ -7,7 +7,7 @@ and this project adheres to [CalVer](https://calver.org/).
 ## [UNRELEASED]
 ### Fixed
 - Better support for special characters and upper case in layer names. Fixes a UTF8 error in WMS requests and quotes schema/relation names in feature info requests.
-- In the editor the counting of vertices in LineString features failed with Nan and it was impossible to edit. This fixed with implementing a proper counting rutine.
+- In the editor the counting of vertices in LineString features failed with NaN and it was impossible to edit. This is fixed with implementing a proper counting rutine.
 
 ## [2022.2.1] 2022-3-3
 ### Fixed
