@@ -425,10 +425,10 @@ module.exports = {
                         geoJson.properties[key] = null;
                     }
                     if ((fields[key].type === "bytea" ||
-                        fields[key].type.startsWith("time") ||
-                        fields[key].type.startsWith("time") ||
-                        fields[key].type.startsWith("character") ||
-                        fields[key].type.startsWith("text")) &&
+                            fields[key].type.startsWith("time") ||
+                            fields[key].type.startsWith("time") ||
+                            fields[key].type.startsWith("character") ||
+                            fields[key].type.startsWith("text")) &&
                         geoJson.properties[key] !== null) {
                         geoJson.properties[key] = geoJson.properties[key].replace(/\\([\s\S])|(["])/ig, "\\$1$2");
                         geoJson.properties[key] = encodeURIComponent(geoJson.properties[key]);
@@ -709,14 +709,19 @@ module.exports = {
 
                 default:
                     let numberOfNodes = 0;
-                    editedFeature.feature.geometry.coordinates.forEach((c) => {
-                        if (typeof c === "object") {
-                            c.forEach((c2) => {
-                                numberOfNodes += c2.length;
-                            });
+                    const coors = editedFeature.feature.geometry.coordinates;
+                    const calculateCount = (arr) => {
+                        for (let i = 0; i < arr.length; i++) {
+                            if (Array.isArray(arr[i])) {
+                                calculateCount(arr[i]);
+                            } else {
+                                numberOfNodes++;
+                            }
                         }
-                        numberOfNodes += c.length;
-                    })
+                    };
+                    calculateCount(coors);
+                    numberOfNodes = numberOfNodes / 2;
+
                     if (numberOfNodes <= MAX_NODE_IN_FEATURE) {
                         editor = e.enableEdit();
                     } else {
@@ -815,10 +820,10 @@ module.exports = {
                             GeoJSON.properties[key] = null;
                         }
                         if ((fields[key].type === "bytea" ||
-                            fields[key].type.startsWith("time") ||
-                            fields[key].type.startsWith("time") ||
-                            fields[key].type.startsWith("character") ||
-                            fields[key].type.startsWith("text")) &&
+                                fields[key].type.startsWith("time") ||
+                                fields[key].type.startsWith("time") ||
+                                fields[key].type.startsWith("character") ||
+                                fields[key].type.startsWith("text")) &&
                             GeoJSON.properties[key] !== null) {
                             GeoJSON.properties[key] = GeoJSON.properties[key].replace(/\\([\s\S])|(["])/ig, "\\$1$2");
                             GeoJSON.properties[key] = encodeURIComponent(GeoJSON.properties[key]);
