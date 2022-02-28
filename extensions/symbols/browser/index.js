@@ -71,7 +71,7 @@ const store = () => {
         dataType: 'json',
         type: "POST",
         success: function () {
-            window.parent.postMessage({type: "doneCallback"}, "*");
+            window.parent.postMessage({type: "doneCallback", symbolState: symbolState}, "*");
         }
     });
 }
