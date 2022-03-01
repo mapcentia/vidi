@@ -6,6 +6,8 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ## [UNRELEASED]
 ### Changed
+- Added option to send link to print via mail-application. Values are currently hardcoded.
+
 ### Fixed
 
 

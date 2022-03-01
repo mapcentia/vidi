@@ -104,6 +104,7 @@ module.exports = {
         "Make PNG": "Lav PNG",
         "Download": "Download",
         "Open PDF": "Åben PDF",
+        "Send PDF": "Send PDF",
         "Open": "Åben",
         "Open HTML page": "Åben HTML side",
         "Scale": "Skala",
