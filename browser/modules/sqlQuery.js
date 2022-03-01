@@ -619,7 +619,7 @@ module.exports = {
                 qstore[index].custom_data = "";
             }
 
-            sql = sql + " LIMIT " + (num || 500);
+            sql = sql + " LIMIT " + (num || 10000);
 
             qstore[index].onLoad = onLoad || callBack.bind(this, qstore[index], isEmpty, not_querable, layerTitel, fieldConf, layers, count);
             qstore[index].sql = sql;
