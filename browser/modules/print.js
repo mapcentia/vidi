@@ -129,10 +129,10 @@ module.exports = {
                 pathstring = "/tmp/print/pdf/" + response.key + ".pdf"
             } else if (response.format === "png"){
                 $("#download-pdf, #open-pdf").attr("href", "/tmp/print/png/" + response.key + ".png");
-                pathstring = "/tmp/print/pdf/" + response.key + ".png"
+                pathstring = "/tmp/print/png/" + response.key + ".png"
             } else {
                 $("#download-pdf, #open-pdf").attr("href", "/tmp/print/png/" + response.key + ".zip");
-                pathstring = "/tmp/print/pdf/" + response.key + ".zip"
+                pathstring = "/tmp/print/png/" + response.key + ".zip"
             }
             $("#download-pdf").attr("download", response.key);
             $("#open-html").attr("href", response.url);
