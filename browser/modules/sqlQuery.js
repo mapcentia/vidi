@@ -92,11 +92,9 @@ let defaultTemplate =
 const defaultTemplateForCrossMultiSelect =
     `<div class="vidi-popup-content">
         {{#_vidi_content.fields}}
-            <h4>{{title}}</h4>
             {{#if value}}
+                <h4>{{title}}</h4>
                 <p {{#if type}}class="{{type}}"{{/if}}>{{{value}}}</p>
-            {{else}}
-                <p class="empty">null</p>
             {{/if}}
         {{/_vidi_content.fields}}
     </div>`;
@@ -180,7 +178,7 @@ module.exports = {
             metaDataKeys = meta.getMetaDataKeys(), firstLoop = true;
         elementPrefix = prefix;
 
-        if (`editor` in extensions) {
+        if (window.vidiConfig.enabledExtensions.includes('editor')) {
             editor = extensions.editor.index;
             editingIsEnabled = true;
         }
@@ -249,7 +247,7 @@ module.exports = {
             let onLoad;
             let fieldConf = metaDataKeys?.[value]?.fieldconf !== "" ? JSON.parse(metaDataKeys[value].fieldconf) : null;
             let parsedMeta = layerTree.parseLayerMeta(metaDataKeys[value]);
-            let featureInfoTableOnMap = window.vidiConfig?.featureInfoTableOnMap === true && simple;
+            let featureInfoTableOnMap = window.vidiConfig.featureInfoTableOnMap === true && simple;
             let f_geometry_column = metaDataKeys[value].f_geometry_column
             let styleForSelectedFeatures;
 
@@ -381,7 +379,7 @@ module.exports = {
                             store: layerObj,
                             cm: cm,
                             autoUpdate: false,
-                            autoPan: false,
+                            autoPan: window.vidiConfig.autoPanPopup,
                             openPopUp: true,
                             setViewOnSelect: count.hits > 1,
                             responsive: false,
@@ -805,10 +803,10 @@ module.exports = {
         download.download = fn
     },
 
-    getVectorTemplate: function (layerKey) {
+    getVectorTemplate: function (layerKey, multi = true) {
         let metaDataKeys = meta.getMetaDataKeys();
         let parsedMeta = layerTree.parseLayerMeta(metaDataKeys[layerKey]);
-        let template = (typeof metaDataKeys[layerKey].infowindow !== "undefined" && metaDataKeys[layerKey].infowindow.template !== "") ? metaDataKeys[layerKey].infowindow.template : defaultTemplateForCrossMultiSelect;
+        let template =  metaDataKeys[layerKey]?.infowindow?.template || multi ? defaultTemplateForCrossMultiSelect: defaultTemplate;
         template = (parsedMeta.info_template && parsedMeta.info_template !== "") ? parsedMeta.info_template : template;
         return template;
     },

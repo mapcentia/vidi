@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [UNRELEASED]
+### Added
+- Added config setting for auto panning map when pop-up's opens, so they don't stay outside map: `autoPanPopup: false|true`
+
+### Changed
+- Pop-ups on vector layers will use a simple pop-ups when `crossMultiSelect` is `false` instead of the accordion. This make pop-up behaviours similar on tile and vector layers.
+
+### Fixed
+- Some issues regarding pop-up behaviours when `crossMultiSelect` is `true` and editor is enabled: `crossMultiSelect` will be set to `false` when editor is enabled.
+- Config defaults are now handle one place in the source and all settings have defaults. No longer need for testing if a setting is undefined.
+
 ## [2022.2.2] - 2022-18-2
 ### Fixed
 - Better support for special characters and upper case in layer names. Fixes a UTF8 error in WMS requests and quotes schema/relation names in feature info requests.

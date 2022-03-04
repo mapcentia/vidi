@@ -228,7 +228,7 @@ module.exports = {
                             }
                         }
                     }
-                    layersToActivate = removeDuplicates(layersToActivate.concat(window?.vidiConfig?.activeLayers || []));
+                    layersToActivate = removeDuplicates(layersToActivate.concat(window.vidiConfig.activeLayers));
 
                     /**
                      * Creates promise
@@ -292,7 +292,7 @@ module.exports = {
                             } else {
                                 cloud.get().zoomToExtent();
                             }
-                            if (window?.vidiConfig?.activeLayers) {
+                            if (window.vidiConfig.activeLayers.length > 0) {
                                 setLayers(false);
                             }
                             initResolve();
