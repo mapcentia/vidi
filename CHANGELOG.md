@@ -4,12 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [UNRELEASED]
+## [2022.3.0] - 2022-4-3
 ### Added
-- Added config setting for auto panning map when pop-up's opens, so they don't stay outside map: `autoPanPopup: false|true`
+- Added config setting for auto panning the map when pop-up's opens, so they don't stay outside the map: `autoPanPopup: false|true`
 
 ### Changed
-- Pop-ups on vector layers will use a simple pop-ups when `crossMultiSelect` is `false` instead of the accordion. This make pop-up behaviours similar on tile and vector layers.
+- Pop-ups on vector layers will use simple pop-ups when `crossMultiSelect` is `false` instead of the accordion template. This make pop-up behaviours similar on tile and vector layers.
 
 ### Fixed
 - Some issues regarding pop-up behaviours when `crossMultiSelect` is `true` and editor is enabled: `crossMultiSelect` will be set to `false` when editor is enabled.
