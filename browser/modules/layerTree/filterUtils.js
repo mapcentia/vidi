@@ -41,7 +41,7 @@ const validateFilters = (filters) => {
 
     if (errors.length > 0) {
         console.error(`Invalid filters: ${errors.join(`,`)}`);
-        throw new Error(`Invalid filters`);
+        // throw new Error(`Invalid filters`);
     }
 };
 
