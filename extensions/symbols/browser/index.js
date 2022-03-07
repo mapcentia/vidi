@@ -436,7 +436,7 @@ module.exports = {
                             let u = 0;
                             for (const group in symbols) {
                                 let outer = $(htmlFragments.outer).clone();
-                                if (descs[group]) outer.find('.symbols-desc')[0].append(`${descs[group]}`);
+                                if (descs[group]) $(outer.find('.symbols-desc')[0]).append(`${descs[group]}`);
                                 let id = createId();
                                 for (const id in symbols[group]) {
                                     if (id && symbols[group].hasOwnProperty(id)) {
