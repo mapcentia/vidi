@@ -474,7 +474,7 @@ module.exports = {
 
                                 // Recreate symbols
                                 // ================
-                                if ('symbols' in extensions && response?.data?.symbols?.symbolState !== null) {
+                                if ('symbols' in extensions && response?.data?.state?.modules?.symbols?.symbolState) {
                                     extensions.symbols.index.recreateSymbolsFromState(response.data.state.modules.symbols.symbolState);
                                     extensions.symbols.index.lock();
                                 }
