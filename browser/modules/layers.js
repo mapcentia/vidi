@@ -277,7 +277,8 @@ module.exports = {
                 let layer = layerDescription.f_table_schema + "." + layerDescription.f_table_name;
                 let {
                     useCache,
-                    mapRequestProxy
+                    mapRequestProxy,
+                    tiled
                 } = _self.getCachingDataForLayer(layerDescription, additionalURLParameters);
                 if (layer === layerKey) {
                     let qgs;
@@ -301,24 +302,49 @@ module.exports = {
                         db: db,
                         isBaseLayer,
                         mapRequestProxy: mapRequestProxy,
-                        tileCached: useCache, // Use MapCache or "real" WMS. Defaults to MapCache
-                        singleTile: true, // Always use single tiled. With or without MapCache
+                        tileCached: useCache,
+                        singleTile: !tiled,
                         wrapDateLine: false,
                         displayInLayerSwitcher: true,
-                        //name: layerDescription.f_table_name,
                         name: layerDescription.f_table_name,
                         type: "wms", // Always use WMS protocol
                         format: "image/png",
                         uri: uri,
                         loadEvent: function (e) {
                             let canvasHasData = false;
-                            if (e.target.id && e.target && e.target._bufferCanvas) {
-                                try {
-                                    let canvas = e.target._bufferCanvas;
-                                    canvasHasData = new Uint32Array(canvas.getContext('2d')
-                                        .getImageData(0, 0, canvas.width, canvas.height).data.buffer).some(x => x !== 0);
-                                } catch (e) {
-                                    canvasHasData = true; // In case of Internet Explorer
+                            if (!tiled) {
+                                // Single tiles layers are canvas, so it can be used directly
+                                if (e.target.id && e.target._bufferCanvas) {
+                                    try {
+                                        let canvas = e.target._bufferCanvas;
+                                        canvasHasData = new Uint32Array(canvas.getContext('2d')
+                                            .getImageData(0, 0, canvas.width, canvas.height).data.buffer).some(x => x !== 0);
+                                    } catch (e) {
+                                        canvasHasData = true; // In case of Internet Explorer
+                                    }
+                                }
+                            } else {
+                                // For tiled layer we loop through images and turn them into canvas
+                                for (const obj in e.target._tiles) {
+                                    const imgEl = e.target._tiles[obj].el
+                                    const w = imgEl.clientWidth;
+                                    const h = imgEl.clientHeight;
+                                    let canvas = document.createElement("canvas");
+                                    canvas.width = w;
+                                    canvas.height = h;
+                                    let context = canvas.getContext('2d');
+                                    context.drawImage(imgEl, 0, 0, w, h, 0, 0, w, h);
+                                    try {
+                                        canvasHasData = new Uint32Array(canvas.getContext('2d')
+                                            .getImageData(0, 0, canvas.width, canvas.height).data.buffer).some(x => x !== 0);
+                                    } catch (e) {
+                                        canvasHasData = true; // In case of Internet Explorer
+                                    }
+                                    if (canvasHasData) {
+                                        canvas = null;
+                                        break;
+                                    }
+                                    canvas = null;
                                 }
                             }
                             backboneEvents.get().trigger("tileLayerVisibility:layers", {
@@ -431,12 +457,15 @@ module.exports = {
      */
     getCachingDataForLayer: (layerDescription, appendedFiltersString = []) => {
         // If filters are applied or single_tile is true, then request should not be cached
-        let useCache = (JSON.parse(layerDescription.meta) !== null && JSON.parse(layerDescription.meta).single_tile !== undefined && JSON.parse(layerDescription.meta).single_tile === true);
+        // Of legacy reasons are this setting called 'single_tile', but has nothing to do with
+        // a layer being tiled or not. This is controlled by option 'tiled'
+        let useCache = (JSON.parse(layerDescription.meta)?.single_tile === true);
         if (appendedFiltersString.length > 0 && appendedFiltersString[0] !== "") {
             useCache = false;
         }
+        let tiled = (JSON.parse(layerDescription.meta)?.tiled === true);
         // Detect if layer is protected and route it through backend if live WMS is used (Mapcache does not need authorization)
         let mapRequestProxy = urlparser.hostname + `/api`;
-        return {useCache, mapRequestProxy};
+        return {useCache, mapRequestProxy, tiled};
     }
 };
