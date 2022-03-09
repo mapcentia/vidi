@@ -92,11 +92,9 @@ let defaultTemplate =
 const defaultTemplateForCrossMultiSelect =
     `<div class="vidi-popup-content">
         {{#_vidi_content.fields}}
-            <h4>{{title}}</h4>
             {{#if value}}
+                <h4>{{title}}</h4>
                 <p {{#if type}}class="{{type}}"{{/if}}>{{{value}}}</p>
-            {{else}}
-                <p class="empty">null</p>
             {{/if}}
         {{/_vidi_content.fields}}
     </div>`;
@@ -180,7 +178,7 @@ module.exports = {
             metaDataKeys = meta.getMetaDataKeys(), firstLoop = true;
         elementPrefix = prefix;
 
-        if (`editor` in extensions) {
+        if (window.vidiConfig.enabledExtensions.includes('editor')) {
             editor = extensions.editor.index;
             editingIsEnabled = true;
         }
@@ -245,14 +243,11 @@ module.exports = {
             let layerTitel = (metaDataKeys[value].f_table_title !== null && metaDataKeys[value].f_table_title !== "") ? metaDataKeys[value].f_table_title : metaDataKeys[value].f_table_name;
             let not_querable = metaDataKeys[value].not_querable;
             let versioning = metaDataKeys[value].versioning;
-            let fields = typeof metaDataKeys[value].fields !== "undefined" ? metaDataKeys[value].fields : null;
+            let fields = metaDataKeys?.[value]?.fields || null;
             let onLoad;
-            let fieldConf = (typeof metaDataKeys[value].fieldconf !== "undefined"
-                && metaDataKeys[value].fieldconf !== "")
-                ? $.parseJSON(metaDataKeys[value].fieldconf) : null;
+            let fieldConf = metaDataKeys?.[value]?.fieldconf !== "" ? JSON.parse(metaDataKeys[value].fieldconf) : null;
             let parsedMeta = layerTree.parseLayerMeta(metaDataKeys[value]);
-
-            let featureInfoTableOnMap = (typeof window.vidiConfig.featureInfoTableOnMap !== "undefined" && window.vidiConfig.featureInfoTableOnMap === true && simple);
+            let featureInfoTableOnMap = window.vidiConfig.featureInfoTableOnMap === true && simple;
             let f_geometry_column = metaDataKeys[value].f_geometry_column
             let styleForSelectedFeatures;
 
@@ -384,7 +379,7 @@ module.exports = {
                             store: layerObj,
                             cm: cm,
                             autoUpdate: false,
-                            autoPan: false,
+                            autoPan: window.vidiConfig.autoPanPopup,
                             openPopUp: true,
                             setViewOnSelect: count.hits > 1,
                             responsive: false,
@@ -571,7 +566,7 @@ module.exports = {
                 $.each(fields, function (i, v) {
                     if (v.type === "bytea") {
                         fieldNames.push("encode(\"" + i + "\",'escape') as \"" + i + "\"");
-                    } else {
+                    } else if (fieldConf?.[i]?.ignore !== true) {
                         fieldNames.push("\"" + i + "\"");
                     }
                 });
@@ -581,6 +576,7 @@ module.exports = {
             }
             // Get applied filters from layerTree as a WHERE clause
             let filters = layerTree.getFilterStr(keyWithoutGeom) ? layerTree.getFilterStr(keyWithoutGeom) : "1=1";
+            const schemaQualifiedName = "\"" + value.split(".")[0] + "\".\"" + value.split(".")[1] + "\"";
             if (!whereClause) {
                 if (geoType === "RASTER" && (!advancedInfo.getSearchOn())) {
                     sql = "SELECT 1 as rid,foo.the_geom,ST_Value(rast, foo.the_geom) As band1, ST_Value(rast, 2, foo.the_geom) As band2, ST_Value(rast, 3, foo.the_geom) As band3 " +
@@ -612,7 +608,7 @@ module.exports = {
                         }
                         sql = sql + " ORDER BY round(ST_Distance(ST_Transform(\"" + f_geometry_column + "\"," + proj + "), ST_GeomFromText('" + wkt + "'," + proj + ")))";
                     } else {
-                        sql = "SELECT * FROM (SELECT " + fieldStr + " FROM " + value + " WHERE " + filters + ") AS foo WHERE ST_Intersects(ST_Transform(ST_geomfromtext('" + wkt + "'," + proj + ")," + srid + ")," + f_geometry_column + ")";
+                        sql = "SELECT * FROM (SELECT " + fieldStr + " FROM " + schemaQualifiedName + " WHERE " + filters + ") AS foo WHERE ST_Intersects(ST_Transform(ST_geomfromtext('" + wkt + "'," + proj + ")," + srid + ")," + f_geometry_column + ")";
                         if (versioning) {
                             sql = sql + " AND gc2_version_end_date IS NULL ";
                         }
@@ -620,14 +616,14 @@ module.exports = {
                     }
                 }
             } else {
-                sql = "SELECT " + fieldStr + " FROM " + value + " WHERE " + whereClause;
+                sql = "SELECT " + fieldStr + " FROM " + schemaQualifiedName + " WHERE " + whereClause;
                 if (versioning) {
                     sql = sql + " AND gc2_version_end_date IS NULL ";
                 }
                 qstore[index].custom_data = "";
             }
 
-            sql = sql + " LIMIT " + (num || 500);
+            sql = sql + " LIMIT " + (num || 10000);
 
             qstore[index].onLoad = onLoad || callBack.bind(this, qstore[index], isEmpty, not_querable, layerTitel, fieldConf, layers, count);
             qstore[index].sql = sql;
@@ -813,10 +809,10 @@ module.exports = {
         download.download = fn
     },
 
-    getVectorTemplate: function (layerKey) {
+    getVectorTemplate: function (layerKey, multi = true) {
         let metaDataKeys = meta.getMetaDataKeys();
         let parsedMeta = layerTree.parseLayerMeta(metaDataKeys[layerKey]);
-        let template = (typeof metaDataKeys[layerKey].infowindow !== "undefined" && metaDataKeys[layerKey].infowindow.template !== "") ? metaDataKeys[layerKey].infowindow.template : defaultTemplateForCrossMultiSelect;
+        let template =  metaDataKeys[layerKey]?.infowindow?.template || multi ? defaultTemplateForCrossMultiSelect: defaultTemplate;
         template = (parsedMeta.info_template && parsedMeta.info_template !== "") ? parsedMeta.info_template : template;
         return template;
     },
