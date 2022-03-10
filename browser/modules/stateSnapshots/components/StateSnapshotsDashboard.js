@@ -15,6 +15,8 @@ const base64url = require('base64url');
 const buttonStyle = {padding: `4px`, margin: `0px`};
 
 const DEFAULT_API_URL = `/api/state-snapshots`;
+const urlparser = require('./../../urlparser');
+const noTracking = urlparser.urlVars["notracking"] === "true";
 
 let jquery = require('jquery');
 require('snackbarjs');
@@ -47,11 +49,13 @@ class StateSnapshotsDashboard extends React.Component {
         this.copyToClipboard = this.copyToClipboard.bind(this);
 
         // Setting unique cookie if it have not been set yet
-        let trackingCookie = uuidv4();
-        if (cookie.get('vidi-state-tracker')) {
-            trackingCookie = cookie.get('vidi-state-tracker');
-        } else {
-            cookie.set('vidi-state-tracker', trackingCookie, {expires: 365});
+        if (!noTracking) {
+            let trackingCookie = uuidv4();
+            if (cookie.get('vidi-state-tracker')) {
+                trackingCookie = cookie.get('vidi-state-tracker');
+            } else {
+                cookie.set('vidi-state-tracker', trackingCookie, {expires: 365});
+            }
         }
     }
 

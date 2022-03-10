@@ -7,6 +7,7 @@ and this project adheres to [CalVer](https://calver.org/).
 ## [UNREALESED] - 2022-9-3
 ### Added
 - Added GC2 Meta option for tiled raster layer: `tiled`. If set to `true` the layer will be fetched in tiles instead of one big single tile, which is default. The layer visibility detection still works, but will be more inaccurate because of the natur of tile loading. But it will always be false visible. 
+- A new option in embed.js: `data-vidi-no-tracking`, which will disable the Vidi tracking cookie used for advanced functions like state-snapshots and printing.
 
 ## [2022.3.0] - 2022-4-3
 ### Added
