@@ -50,11 +50,16 @@ class StateSnapshotsDashboard extends React.Component {
 
         // Setting unique cookie if it have not been set yet
         if (!noTracking) {
+            let options = {
+                expires: 365
+            }
+            if (process.env.NODE_ENV === "production") {
+                options.secure = true;
+                options.sameSite = 'none';
+            }
             let trackingCookie = uuidv4();
-            if (cookie.get('vidi-state-tracker')) {
-                trackingCookie = cookie.get('vidi-state-tracker');
-            } else {
-                cookie.set('vidi-state-tracker', trackingCookie, {expires: 365});
+            if (!cookie.get('vidi-state-tracker')) {
+                cookie.set('vidi-state-tracker', trackingCookie, options);
             }
         }
     }

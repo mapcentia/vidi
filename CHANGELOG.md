@@ -9,6 +9,9 @@ and this project adheres to [CalVer](https://calver.org/).
 - Added GC2 Meta option for tiled raster layer: `tiled`. If set to `true` the layer will be fetched in tiles instead of one big single tile, which is default. The layer visibility detection still works, but will be more inaccurate because of the natur of tile loading. But it will always be false visible. 
 - A new option in embed.js: `data-vidi-no-tracking`, which will disable the Vidi tracking cookie used for advanced functions like state-snapshots and printing.
 
+### CHANGED
+- Tracking cookie will now be set as `secure=true` and `sameSite=none` if env var NODE_ENV is set to 'production'. This will fix issues with embeding Vidi and setting the cookie.
+
 ## [2022.3.0] - 2022-4-3
 ### Added
 - Added config setting for auto panning the map when pop-up's opens, so they don't stay outside the map: `autoPanPopup: false|true`
