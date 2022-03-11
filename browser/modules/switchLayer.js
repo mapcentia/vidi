@@ -529,6 +529,8 @@ module.exports = module.exports = {
                     if (vectorTableEl.length && window.vidiConfig.template === "embed.tmpl") {
                         vectorTableEl.remove();
                         $("#pane").css("width", "100%");
+                        $("#pane").css("height", "100%");
+                        cloud.get().map.invalidateSize();
                     }
                 }
                 _self.uncheckLayerControl(name, doNotLegend, setupControls);
