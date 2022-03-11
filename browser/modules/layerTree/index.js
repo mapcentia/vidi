@@ -11,15 +11,31 @@
 'use strict';
 
 import {
-    LOG,
-    SUB_GROUP_DIVIDER,
-    MODULE_NAME,
-    VIRTUAL_LAYERS_SCHEMA,
-    SYSTEM_FIELD_PREFIX,
-    LAYER,
     ICONS,
-    MAP_RESOLUTIONS
+    LAYER,
+    LOG,
+    MAP_RESOLUTIONS,
+    MODULE_NAME,
+    SUB_GROUP_DIVIDER,
+    SYSTEM_FIELD_PREFIX,
+    VIRTUAL_LAYERS_SCHEMA,
+    VECTOR_SIDE_TABLE_EL
 } from './constants';
+import dayjs from 'dayjs';
+import noUiSlider from 'nouislider';
+import mustache from 'mustache';
+import LayerFilter from './LayerFilter';
+import LoadStrategyToggle from './LoadStrategyToggle';
+import LabelSettingToggle from './LabelSettingToggle';
+import {
+    EXPRESSIONS_FOR_BOOLEANS,
+    EXPRESSIONS_FOR_DATES,
+    EXPRESSIONS_FOR_NUMBERS,
+    EXPRESSIONS_FOR_STRINGS,
+    validateFilters
+} from './filterUtils';
+import OfflineModeControlsManager from './OfflineModeControlsManager';
+import {GROUP_CHILD_TYPE_GROUP, GROUP_CHILD_TYPE_LAYER, LayerSorting} from './LayerSorting';
 
 let _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEvents,
     onEachFeature = [], pointToLayer = [], onSelectedStyle = [], onLoad = [], onSelect = [],
@@ -29,22 +45,6 @@ const uuidv4 = require('uuid/v4');
 const React = require('react');
 const ReactDOM = require('react-dom');
 const base64url = require('base64url');
-
-import dayjs from 'dayjs';
-import noUiSlider from 'nouislider';
-import mustache from 'mustache';
-import LayerFilter from './LayerFilter';
-import LoadStrategyToggle from './LoadStrategyToggle';
-import LabelSettingToggle from './LabelSettingToggle';
-import {
-    validateFilters,
-    EXPRESSIONS_FOR_STRINGS,
-    EXPRESSIONS_FOR_NUMBERS,
-    EXPRESSIONS_FOR_DATES,
-    EXPRESSIONS_FOR_BOOLEANS
-} from './filterUtils';
-import OfflineModeControlsManager from './OfflineModeControlsManager';
-import {GROUP_CHILD_TYPE_LAYER, GROUP_CHILD_TYPE_GROUP, LayerSorting} from './LayerSorting';
 
 const urlparser = require('./../urlparser');
 const download = require('./../download');
@@ -166,8 +166,7 @@ module.exports = {
      */
     getFilterStr(layerName) {
         let filterArr = this.getActiveLayerFilters(layerName);
-        let filterStr = filterArr.length > 0 ? filterArr[0] : null;
-        return filterStr;
+        return filterArr.length > 0 ? filterArr[0] : null;
     },
 
     /**
@@ -789,7 +788,7 @@ module.exports = {
                         // of the previously requested bbox (extended one in gc2cloud.js) kept in corresponding store
                         let needToReload;
                         if (layerPrefix === LAYER.VECTOR && ((parsedMeta && `load_strategy` in parsedMeta && parsedMeta.load_strategy === `d`)
-                            || (layerKeyNoPrefix in moduleState.dynamicLoad && moduleState.dynamicLoad[layerKeyNoPrefix] === true))) {
+                            || (layerKeyNoPrefix in moduleState.dynamicLoad && moduleState.dynamicLoad[layerKeyNoPrefix] === true)) && localTypeStores?.[layerKey]) {
                             needToReload = true;
                             let currentMapBBox = cloud.get().map.getBounds();
                             if (`buffered_bbox` in localTypeStores[layerKey]) {
@@ -1436,12 +1435,11 @@ module.exports = {
                 let reloadInterval = meta.parseLayerMeta(layerKey)?.reload_interval;
                 let tableElement = meta.parseLayerMeta(layerKey)?.show_table_on_side;
                 // Create side table once
-                if (tableElement && !$('#vector-side-table').length && window.vidiConfig.template === "embed.tmpl") {
+                if (tableElement && !$('#' + VECTOR_SIDE_TABLE_EL).length && window.vidiConfig.template === "embed.tmpl") {
                     $("#pane").css("left", "0");
                     $("#pane").css("width", "70%");
-                    $("#map").css("width", "115%");
-                    $("#pane").before(`<div id="vector-side-table" style="width: 30%; float: right; background-color: white"></div>`)
-                    _self.createTable(layerKey, true, "#vector-side-table", {
+                    $("#pane").before(`<div id="${VECTOR_SIDE_TABLE_EL}" style="width: 30%; float: right; background-color: white" data-vidi-vector-table-id="${trackingLayerKey}"></div>`)
+                    _self.createTable(layerKey, true, "#" + VECTOR_SIDE_TABLE_EL, {
                         showToggle: false,
                         showExport: false,
                         showColumns: false,
@@ -1467,7 +1465,7 @@ module.exports = {
                 if (typeof onLoad[LAYER.VECTOR + ':' + layerKey] === "function") {
                     onLoad[LAYER.VECTOR + ':' + layerKey](l);
                 }
-                if (l === undefined || l.geoJSON === null) {
+                if (l.geoJSON === null) {
                     return
                 }
                 sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + layerKey, l.geoJSON.features);
@@ -1494,8 +1492,6 @@ module.exports = {
                         if (`editor` in extensions) {
                             editor = extensions.editor.index;
                         }
-
-
                         layer.on("click", function (e) {
                             let layerIsEditable = false;
                             let metaDataKeys = meta.getMetaDataKeys();
