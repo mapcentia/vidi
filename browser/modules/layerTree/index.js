@@ -1082,7 +1082,9 @@ module.exports = {
 
                             if (layersThatAreNotInMeta.length > 0) {
                                 let fetchMetaRequests = [];
-                                fetchMetaRequests.push(meta.init(layersThatAreNotInMeta.join(','), true, true).catch(error => { return false }))
+                                fetchMetaRequests.push(meta.init(layersThatAreNotInMeta.join(','), true, true).catch(error => {
+                                    return false
+                                }))
                                 Promise.all(fetchMetaRequests).then(() => {
                                     proceedWithBuilding();
                                 });
@@ -1436,16 +1438,31 @@ module.exports = {
                 let tableElement = meta.parseLayerMeta(layerKey)?.show_table_on_side;
                 // Create side table once
                 if (tableElement && !$('#' + VECTOR_SIDE_TABLE_EL).length && window.vidiConfig.template === "embed.tmpl") {
-                    $("#pane").css("left", "0");
-                    $("#pane").css("width", "70%");
-                    $("#pane").before(`<div id="${VECTOR_SIDE_TABLE_EL}" style="width: 30%; float: right; background-color: white" data-vidi-vector-table-id="${trackingLayerKey}"></div>`)
+                    let styles;
+                    let height = null;
+                    let tableBodyHeight;
+                    const m = 400;
+                    const p = 30;
+                    if (1 === 1) {
+                        styles = `width: ${p}%; float: right;`;
+                        $("#pane").css("width", `calc(100vw - ${p}%)`);
+                        $("#pane").css("left", "0");
+                        tableBodyHeight = "calc(100vh - 34px)";
+                        height= $(window).height();
+                    } else {
+                        styles = `width: 100%; height: ${m}; bottom: 0; position: fixed;`;
+                        $("#pane").css("height", `calc(100vh - ${m}px)`);
+                        tableBodyHeight = (m - 34) + "px"
+                        height = m;
+                    }
+                    $("#pane").before(`<div id="${VECTOR_SIDE_TABLE_EL}" style="${styles}; background-color: white; " data-vidi-vector-table-id="${trackingLayerKey}"></div>`)
                     _self.createTable(layerKey, true, "#" + VECTOR_SIDE_TABLE_EL, {
                         showToggle: false,
                         showExport: false,
                         showColumns: false,
                         cardView: false,
-                        height: null,
-                        tableBodyHeight: "100vh"
+                        height: height,
+                        tableBodyHeight: tableBodyHeight
                     });
                 }
                 if (reloadInterval && reloadInterval !== "") {
@@ -1542,11 +1559,11 @@ module.exports = {
                         // Cross Multi select disabled
                         if (!window.vidiConfig.crossMultiSelect) {
                             _self.displayAttributesPopup([{
-                                feature: feature,
-                                layer: layer,
-                                layerKey: layerKey
-                            }],
-                                e,'', false);
+                                    feature: feature,
+                                    layer: layer,
+                                    layerKey: layerKey
+                                }],
+                                e, '', false);
                             return
                         }
 
@@ -1882,7 +1899,8 @@ module.exports = {
             }
 
             // Set select call when opening a panel
-            let selectCallBack = () => {};
+            let selectCallBack = () => {
+            };
             if (typeof parsedMeta.select_function !== "undefined" && parsedMeta.select_function !== "") {
                 try {
                     selectCallBack = Function('"use strict";return (' + parsedMeta.select_function + ')')();
@@ -1907,7 +1925,8 @@ module.exports = {
                     $(parsedMeta.info_element_selector).html(renderedText)
                 } else {
                     // Set select call when opening a panel
-                    let selectCallBack = () => {};
+                    let selectCallBack = () => {
+                    };
                     if (typeof parsedMeta.select_function !== "undefined" && parsedMeta.select_function !== "") {
                         try {
                             selectCallBack = Function('"use strict";return (' + parsedMeta.select_function + ')')();
@@ -1941,7 +1960,7 @@ module.exports = {
             }
         })
         if (count === 1) {
-            setTimeout(()=> {
+            setTimeout(() => {
                 $(".js-toggle-feature-panel:first").trigger('click');
             }, 200);
         }
