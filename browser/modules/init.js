@@ -69,6 +69,11 @@ module.exports = {
             activeLayers: [],
             initFunction: null,
             snapshot: null,
+            vectorTable: {
+                position: 'bottom',
+                width: '30%',
+                height: '250px'
+            }
         };
         // Set default for unset props
         for (let prop in defaults) {

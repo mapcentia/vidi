@@ -1441,29 +1441,33 @@ module.exports = {
                     let styles;
                     let height = null;
                     let tableBodyHeight;
-                    const m = 400;
-                    const p = 30;
-                    if (1 === 1) {
-                        styles = `width: ${p}%; float: right;`;
-                        $("#pane").css("width", `calc(100vw - ${p}%)`);
-                        $("#pane").css("left", "0");
+                    const h = window.vidiConfig.vectorTable.height;
+                    const w = window.vidiConfig.vectorTable.width;
+                    const position = window.vidiConfig.vectorTable.position;
+                    const e = $('#pane');
+                    if (position === 'left') {
+                        styles = `width: ${w}; float: right;`;
+                        e.css("width", `calc(100vw - ${w})`);
+                        e.css("left", "0");
                         tableBodyHeight = "calc(100vh - 34px)";
-                        height= $(window).height();
-                    } else {
-                        styles = `width: 100%; height: ${m}; bottom: 0; position: fixed;`;
-                        $("#pane").css("height", `calc(100vh - ${m}px)`);
-                        tableBodyHeight = (m - 34) + "px"
-                        height = m;
+                        height = $(window).height();
+                    } else if (position === 'bottom') {
+                        styles = `width: 100%; height: ${h}; bottom: 0; position: fixed;`;
+                        e.css("height", `calc(100vh - ${h})`);
+                        height = parseInt(h);
+                        tableBodyHeight = (height - 34) + "px"
                     }
-                    $("#pane").before(`<div id="${VECTOR_SIDE_TABLE_EL}" style="${styles}; background-color: white; " data-vidi-vector-table-id="${trackingLayerKey}"></div>`)
-                    _self.createTable(layerKey, true, "#" + VECTOR_SIDE_TABLE_EL, {
-                        showToggle: false,
-                        showExport: false,
-                        showColumns: false,
-                        cardView: false,
-                        height: height,
-                        tableBodyHeight: tableBodyHeight
-                    });
+                    if (position === 'left' || position === 'bottom') {
+                        e.before(`<div id="${VECTOR_SIDE_TABLE_EL}" style="${styles}; background-color: white; " data-vidi-vector-table-id="${trackingLayerKey}"></div>`)
+                        _self.createTable(layerKey, true, "#" + VECTOR_SIDE_TABLE_EL, {
+                            showToggle: false,
+                            showExport: false,
+                            showColumns: false,
+                            cardView: false,
+                            height: height,
+                            tableBodyHeight: tableBodyHeight
+                        });
+                    }
                 }
                 if (reloadInterval && reloadInterval !== "") {
                     let reloadCallback = meta.parseLayerMeta(layerKey)?.reload_callback;
