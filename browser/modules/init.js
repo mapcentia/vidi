@@ -70,7 +70,7 @@ module.exports = {
             initFunction: null,
             snapshot: null,
             vectorTable: {
-                position: 'bottom',
+                position: 'right',
                 width: '30%',
                 height: '250px'
             }

@@ -1445,7 +1445,7 @@ module.exports = {
                     const w = window.vidiConfig.vectorTable.width;
                     const position = window.vidiConfig.vectorTable.position;
                     const e = $('#pane');
-                    if (position === 'left') {
+                    if (position === 'right') {
                         styles = `width: ${w}; float: right;`;
                         e.css("width", `calc(100vw - ${w})`);
                         e.css("left", "0");
@@ -1457,7 +1457,7 @@ module.exports = {
                         height = parseInt(h);
                         tableBodyHeight = (height - 34) + "px"
                     }
-                    if (position === 'left' || position === 'bottom') {
+                    if (position === 'right' || position === 'bottom') {
                         e.before(`<div id="${VECTOR_SIDE_TABLE_EL}" style="${styles}; background-color: white; " data-vidi-vector-table-id="${trackingLayerKey}"></div>`)
                         _self.createTable(layerKey, true, "#" + VECTOR_SIDE_TABLE_EL, {
                             showToggle: false,
