@@ -190,7 +190,7 @@ module.exports = {
 
         // Filter layers without pixels from
         layers = layers.filter((key) => {
-            if (typeof moduleState.tileContentCache[key] === "boolean" && moduleState.tileContentCache[key] === true) {
+            if (window.moduleState?.tileContentCache?.[key] === true) {
                 return true;
             }
         })
@@ -537,24 +537,6 @@ module.exports = {
                     } else {
                         l._vidi_type = layerTag;
                     }
-
-                    /*
-                                        l.on("click", function (e) {
-                                            setTimeout(function () {
-                                                $(".popup-edit-btn").unbind("click.popup-edit-btn").bind("click.popup-edit-btn", function () {
-                                                    alert("1")
-                                                    editor.edit(l, _key_, qstore);
-                                                });
-
-                                                $(".popup-delete-btn").unbind("click.popup-delete-btn").bind("click.popup-delete-btn", function () {
-                                                    if (window.confirm("Er du sikker? Dine ændringer vil ikke blive gemt!")) {
-                                                        editor.delete(l, _key_, qstore);
-                                                    }
-                                                });
-                                            }, 500)
-                                        });
-                    */
-
                 }
             });
 
