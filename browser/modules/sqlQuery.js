@@ -668,7 +668,7 @@ module.exports = {
             features.forEach(feature => {
                 let fields = [];
                 if (fieldConf === null) {
-                    feature.forEach(name => {
+                    $.each(feature.properties, function (name, property) {
                         if (name.indexOf(SYSTEM_FIELD_PREFIX) !== 0 && name !== `_id` && name !== `_vidi_content`) {
                             fields.push({
                                 title: name,
