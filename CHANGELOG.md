@@ -4,8 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [2022.3.1] - 2022-15-3
+## [2022.3.2] - 2022-18-3
+### Fixed
+- Bug in sqlQuery.js, which rendered feature-info inoperable.
+- Added `geolocation` to the `allow` attribut on the created iframe in embed.js. 
 
+## [2022.3.1] - 2022-15-3
 ### Added
 - Added GC2 Meta option for tiled raster layer: `tiled`. If set to `true` the layer will be fetched in tiles instead of
   one big single tile, which is default. The layer visibility detection still works, but will be more inaccurate because
@@ -20,7 +24,6 @@ and this project adheres to [CalVer](https://calver.org/).
   switched off. Only one table can be displayed at a time. New config for setting position and width/height. `width`
   only has effect then postion is `right` and `height` only when position is `bottom`. `width` can be both relative `%`
   and absolute `px. `height` can only be absolute:
-
 ```json
 {
   "vectorTable": {

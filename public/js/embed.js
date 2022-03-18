@@ -39,7 +39,7 @@
                 var src = host + "/app/" + database + "/" + schema + "?config=" + config + "&state=" + id + "&tmpl=" + tmpl + "&s=" + search + "&his=" + history + (frameName ? "&readyCallback=" + frameName : "") + "&notracking=" + noTracking;
                 var iframe = document.createElement("iframe");
                 iframe.setAttribute("style", "width:" + width + ";height:" + height + ";border: 1px solid rgba(0,0,0,0.1)");
-                iframe.setAttribute("allowfullscreen", "");
+                iframe.setAttribute("allow", "fullscreen;geolocation");
                 iframe.setAttribute("src", src);
                 if (frameName) {
                     iframe.setAttribute("name", frameName);
