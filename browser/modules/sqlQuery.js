@@ -512,7 +512,7 @@ module.exports = {
                 method: "POST",
                 host: "",
                 db: db,
-                uri: "/api/sql",
+                uri: "/api/sql/nocache",
                 clickable: true,
                 id: index,
                 key: value,
