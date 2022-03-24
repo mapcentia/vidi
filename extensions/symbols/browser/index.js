@@ -50,7 +50,8 @@ const htmlFragments = {
     "outer": `
         <div class="tab-pane" role="tabpanel">
             <div class="symbols-desc"></div>
-            <div class="d-flex flex-wrap">
+            <div>
+                <div class="d-flex flex-wrap"></div>
             </div>
         </div>
     `,
