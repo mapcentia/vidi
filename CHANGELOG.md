@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [UNRELEASED] - 2022-24-3
+### Fixed
+- Regression bug, which kept the right side-panel closed after load of app.
+- The Leaflet method `toGeoJSON` rounds of coordinates with 6 decimals by default. But this may result in up to 10 cm on the map (tested at about 57 degrees north). This makes the editor and snapping very unprecise. So all `toGeoJSON` calls are now done with a precision argument of 14 through the app. 
+
 ## [2022.3.2] - 2022-18-3
 ### Fixed
 - Bug in sqlQuery.js, which rendered feature-info inoperable.

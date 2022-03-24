@@ -36,7 +36,7 @@ import {
 } from './filterUtils';
 import OfflineModeControlsManager from './OfflineModeControlsManager';
 import {GROUP_CHILD_TYPE_GROUP, GROUP_CHILD_TYPE_LAYER, LayerSorting} from './LayerSorting';
-
+import {GEOJSON_PRECISION} from './../constants';
 let _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEvents,
     onEachFeature = [], pointToLayer = [], onSelectedStyle = [], onLoad = [], onSelect = [],
     onMouseOver = [], cm = [], styles = [], tables = {}, childLayersThatShouldBeEnabled = [];
@@ -1773,7 +1773,7 @@ module.exports = {
                 && metaDataKeys[layerKey].infowindow.template !== "")
                 ? metaDataKeys[layerKey].infowindow.template : sqlQuery.getVectorTemplate(layerKey);
             let tableHeaders = sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + layerKey,
-                JSON.parse(JSON.stringify(layerWithData[0].toGeoJSON().features)));
+                JSON.parse(JSON.stringify(layerWithData[0].toGeoJSON(GEOJSON_PRECISION).features)));
 
             let styleSelected = (onSelectedStyle[LAYER.VECTOR + ':' + layerKey] ? onSelectedStyle[LAYER.VECTOR + ':' + layerKey] : {
                 weight: 5,

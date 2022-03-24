@@ -8,6 +8,7 @@
 
 const layerTreeUtils = require('./layerTree/utils');
 import {LAYER, SYSTEM_FIELD_PREFIX, MAP_RESOLUTIONS} from './layerTree/constants';
+import {GEOJSON_PRECISION} from './constants';
 
 /**
  * @type {*|exports|module.exports}
@@ -437,7 +438,7 @@ module.exports = {
                         if (typeof parsedMeta.info_function !== "undefined" && parsedMeta.info_function !== "") {
                             try {
                                 let func = Function('"use strict";return (' + parsedMeta.info_function + ')')();
-                                func(this.layer.toGeoJSON().features[0], this.layer, keyWithoutGeom, _self, this, cloud.get().map);
+                                func(this.layer.toGeoJSON(GEOJSON_PRECISION).features[0], this.layer, keyWithoutGeom, _self, this, cloud.get().map);
                             } catch (e) {
                                 console.info("Error in click function for: " + _key_);
                                 console.error(e.message);

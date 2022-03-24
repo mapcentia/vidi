@@ -7,6 +7,7 @@
 'use strict';
 
 import {LAYER, SYSTEM_FIELD_PREFIX} from '../../../browser/modules/layerTree/constants';
+import {GEOJSON_PRECISION} from '../../../browser/modules/constants';
 import dayjs from 'dayjs';
 
 const jquery = require('jquery');
@@ -412,7 +413,7 @@ module.exports = {
              * @param formData
              */
             const onSubmit = function (formData) {
-                let featureCollection, geoJson = editor.toGeoJSON();
+                let featureCollection, geoJson = editor.toGeoJSON(GEOJSON_PRECISION);
 
                 // Promote MULTI geom
                 if (type.substring(0, 5) === "MULTI") {
@@ -665,7 +666,7 @@ module.exports = {
                 e.id = "v:" + e.id;
             }
 
-            e.initialFeatureJSON = e.toGeoJSON();
+            e.initialFeatureJSON = e.toGeoJSON(GEOJSON_PRECISION);
 
             featureWasEdited = false;
             // Hack to edit (Multi)Point layers
@@ -788,7 +789,7 @@ module.exports = {
              * @param formData
              */
             const onSubmit = (formData) => {
-                let GeoJSON = e.toGeoJSON(), featureCollection;
+                let GeoJSON = e.toGeoJSON(GEOJSON_PRECISION), featureCollection;
                 delete GeoJSON.properties._vidi_content;
                 delete GeoJSON.properties._id;
 
@@ -969,7 +970,7 @@ module.exports = {
 
         let schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
             metaDataKeys = meta.getMetaDataKeys(),
-            GeoJSON = e.toGeoJSON();
+            GeoJSON = e.toGeoJSON(GEOJSON_PRECISION);
 
         const deleteFeature = () => {
             serviceWorkerCheck();

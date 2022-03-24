@@ -624,7 +624,7 @@ module.exports = module.exports = {
                     // We use a buffer to recreate a circle from the GeoJSON point
                     if (typeof l._mRadius !== "undefined") {
                         let buffer = l._mRadius;
-                        let primitive = l.toGeoJSON();
+                        let primitive = l.toGeoJSON(GEOJSON_PRECISION);
                         primitive.type = "Feature"; // Must be there
                         // Get utm zone
                         let reader = new jsts.io.GeoJSONReader();
@@ -633,7 +633,7 @@ module.exports = module.exports = {
                         let buffer4326 = reproject.reproject(writer.write(geom.geometry.buffer(buffer)), "proj", "unproj", crss);
                         collection.geometries.push(buffer4326)
                     } else {
-                        collection.geometries.push(l.toGeoJSON().geometry)
+                        collection.geometries.push(l.toGeoJSON(GEOJSON_PRECISION).geometry)
                     }
                 })
                 let newLayer = L.geoJSON(collection);
@@ -655,7 +655,7 @@ module.exports = module.exports = {
                 buffer = buffer + layer._mRadius;
             }
         }
-        primitive = layer.toGeoJSON();
+        primitive = layer.toGeoJSON(GEOJSON_PRECISION);
         if (typeof primitive.features !== "undefined") {
             primitive = primitive.features[0];
         }
