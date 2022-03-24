@@ -7,6 +7,7 @@
 const MAX_RESOLUTION = 156543.03390625;
 const MAX_EXTENT = [-20037508.34, -20037508.34, 20037508.34, 20037508.34];
 const SRS ="EPSG:3857";
+import {GEOJSON_PRECISION} from './constants';
 
 /**
  * @type {*|exports|module.exports}
@@ -384,7 +385,7 @@ var _encoders = {
                     featureGeoJson.type = "Marker";
                     featureGeoJson.feature = feature.feature;
                 } else {
-                    featureGeoJson = feature.toGeoJSON();
+                    featureGeoJson = feature.toGeoJSON(GEOJSON_PRECISION);
                     featureGeoJson.geometry.coordinates = _projectCoords(SRS, featureGeoJson.geometry.coordinates);
                     featureGeoJson.type = "Feature";
                 }
@@ -529,7 +530,7 @@ var _circleGeoJSON = function (circle) {
         var shift = L.point(Math.cos(radian), Math.sin(radian));
         points.push(projection.unproject(cnt.add(shift.multiplyBy(circle.getRadius() * scale / earthRadius))));
     }
-    return L.polygon(points).toGeoJSON();
+    return L.polygon(points).toGeoJSON(GEOJSON_PRECISION);
 };
 
 /**

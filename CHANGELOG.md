@@ -4,15 +4,69 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [2022.2.1] 2022-3-3
+## [UNRELEASED] - 2022-24-3
+### Fixed
+- Regression bug, which kept the right side-panel closed after load of app.
+- The Leaflet method `toGeoJSON` rounds of coordinates with 6 decimals by default. But this may result in up to 10 cm on the map (tested at about 57 degrees north). This makes the editor and snapping very unprecise. So all `toGeoJSON` calls are now done with a precision argument of 14 through the app. 
+
+## [2022.3.2] - 2022-18-3
+### Fixed
+- Bug in sqlQuery.js, which rendered feature-info inoperable.
+- Added `geolocation` to the `allow` attribut on the created iframe in embed.js. 
+
+## [2022.3.1] - 2022-15-3
+### Added
+- Added GC2 Meta option for tiled raster layer: `tiled`. If set to `true` the layer will be fetched in tiles instead of
+  one big single tile, which is default. The layer visibility detection still works, but will be more inaccurate because
+  of the natur of tile loading. But it will always be false visible.
+- A new option in embed.js: `data-vidi-no-tracking`, which will disable the Vidi tracking cookie used for advanced
+  functions like state-snapshots and printing.
+
+### Changed
+- Tracking cookie will now be set as `secure=true` and `sameSite=none` if env var NODE_ENV is set to 'production'. This
+  will fix issues with embeding Vidi and setting the cookie.
+- Vector feature table can now be placed to the right or at the bottom of the screen. The table is removed when layer is
+  switched off. Only one table can be displayed at a time. New config for setting position and width/height. `width`
+  only has effect then postion is `right` and `height` only when position is `bottom`. `width` can be both relative `%`
+  and absolute `px. `height` can only be absolute:
+```json
+{
+  "vectorTable": {
+    "position": "right",
+    "width": "30%",
+    "height": "250px"
+  }
+}
+```
+
+### Fixed
+- Some bugs regarding vector feature table and dynamic load.
+
+## [2022.3.0] - 2022-4-3
+### Added
+- Added config setting for auto panning the map when pop-up's opens, so they don't stay outside the map: `autoPanPopup: false|true`
+
+### Changed
+- Pop-ups on vector layers will use simple pop-ups when `crossMultiSelect` is `false` instead of the accordion template. This make pop-up behaviours similar on tile and vector layers.
+
+### Fixed
+- Some issues regarding pop-up behaviours when `crossMultiSelect` is `true` and editor is enabled: `crossMultiSelect` will be set to `false` when editor is enabled.
+- Config defaults are now handle one place in the source and all settings have defaults. No longer need for testing if a setting is undefined.
+
+## [2022.2.2] - 2022-18-2
+### Fixed
+- Better support for special characters and upper case in layer names. Fixes a UTF8 error in WMS requests and quotes schema/relation names in feature info requests.
+- In the editor the counting of vertices in LineString features failed with NaN and it was impossible to edit. This is fixed with implementing a proper counting rutine.
+
+## [2022.2.1] - 2022-3-2
 ### Fixed
 - Use UTM instead of web-mercator when projeting/unprojecting the print frame or the different will be to big.
 
-## [2022.2.0] 2022-3-2
+## [2022.2.0] - 2022-3-2
 ### Fixed
 - Fix for buggy print recreation from state. The print frame was re-calculated each time the state was applied making a small change in latitude coords. This made the frame drift south-east and rendered errors on big geographical frames. 
 
-## [2021.12.1] 2021-29-12
+## [2021.12.1] - 2021-29-12
 ### Changed
 - The `df` extension is changed, so it can use both Dataforsyningen and Datafordeler. New setup (token has precedence):
 ```json
@@ -65,7 +119,7 @@ and this project adheres to [CalVer](https://calver.org/).
 ### Added
 - Field ignore setting from GC2 will now exclude the field from being queried in sqlQuery module (feature info).
 
-## [2021.12.0] 2021-6-12
+## [2021.12.0] - 2021-6-12
 ### Changed
 - The location circle marker is now orange in follow-mode and blue when not following. Location now works the same in both embed and default templates.
 - The legend toast dialog in embed template will now be pushed to the right when sliding out the layer tree. This way the elements will not be stacked.
@@ -206,8 +260,8 @@ and this project adheres to [CalVer](https://calver.org/).
 - `select_function` is now called when opening a panel in a accordion pop-up.
 
 ### Fixed
+- Print and Conflict modules will not longer keep unnecessary Meta data in state. This reduce the data volume. 
 - Layer tree will now build with all valid layers. Before it would start building as soon an invalid layer was proccess leaving out the rest.
-- Print and Conflict modules will not longer keep unnecessary Meta data in state. This reduces the data volume.
 
 ## [2021.7.1] - 2021-8-7
 ### Fixed
