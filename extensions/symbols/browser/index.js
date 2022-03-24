@@ -63,16 +63,24 @@ const htmlFragments = {
  *
  */
 const store = () => {
-    $.ajax({
-        url: '/api/symbols/' + db,
-        data: JSON.stringify(symbolState),
-        contentType: "application/json; charset=utf-8",
-        scriptCharset: "utf-8",
-        dataType: 'json',
-        type: "POST",
-        success: function () {
-            window.parent.postMessage({type: "doneCallback", symbolState: symbolState}, "*");
+    fetch('/api/symbols/' + db,{
+        method: 'POST',
+        mode: 'cors',
+        cache: 'no-cache',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            userId: window.aauUserId,
+            symbolState
+        }),
+    }).then(res => {
+        if (!res.ok) {
+            alert("Noget gik galt. Prøv igen");
         }
+        res.json().then(json => {
+            window.parent.postMessage({type: "doneCallback", symbolState: symbolState}, "*");
+        })
     });
 }
 
