@@ -79,6 +79,7 @@ const store = () => {
     }).then(res => {
         if (!res.ok) {
             alert("Noget gik galt. Prøv igen");
+            return;
         }
         res.json().then(json => {
             window.parent.postMessage({type: "doneCallback", symbolState: symbolState}, "*");
