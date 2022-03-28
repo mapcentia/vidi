@@ -228,7 +228,7 @@ module.exports = {
                             }
                         }
                     }
-                    layersToActivate = removeDuplicates(layersToActivate.concat(window?.vidiConfig?.activeLayers || []));
+                    layersToActivate = removeDuplicates(layersToActivate.concat(window.vidiConfig.activeLayers));
 
                     /**
                      * Creates promise
@@ -292,7 +292,7 @@ module.exports = {
                             } else {
                                 cloud.get().zoomToExtent();
                             }
-                            if (window?.vidiConfig?.activeLayers) {
+                            if (window.vidiConfig.activeLayers.length > 0) {
                                 setLayers(false);
                             }
                             initResolve();
@@ -474,7 +474,7 @@ module.exports = {
 
                                 // Recreate symbols
                                 // ================
-                                if ('symbols' in extensions && response?.data?.symbols?.symbolState !== null) {
+                                if ('symbols' in extensions && response?.data?.state?.modules?.symbols?.symbolState) {
                                     extensions.symbols.index.recreateSymbolsFromState(response.data.state.modules.symbols.symbolState);
                                     extensions.symbols.index.lock();
                                 }
@@ -743,7 +743,7 @@ module.exports = {
 
     setExtent: function () {
         if (hashArr[1] && hashArr[2] && hashArr[3]) {
-            p = geocloud.transformPoint(hashArr[2], hashArr[3], "EPSG:4326", "EPSG:900913");
+            p = geocloud.transformPoint(hashArr[2], hashArr[3], "EPSG:4326", "EPSG:3857");
             cloud.get().zoomToPoint(p.x, p.y, hashArr[1]);
         } else {
             cloud.get().zoomToExtent();

@@ -53,6 +53,72 @@ module.exports = {
             // The "print" template is build-in
             // ================================
 
+            "vandvaerk_sjoerupvand2": { // Your print templates. "print" is the default
+                A4: {
+                    l: {
+                        mapsizePx: [1060, 730],
+                        mapsizeMm: [280, 192]
+                    },
+                    p: {
+                        mapsizePx: [730, 1060],
+                        mapsizeMm: [192, 280]
+                    }
+                },
+                A3: {
+                    l: {
+                        mapsizePx: [1525, 1065],
+                        mapsizeMm: [401, 282]
+                    },
+                    p: {
+                        mapsizePx: [1065, 1525],
+                        mapsizeMm: [282, 401]
+                    }
+                }
+            },
+            "vandvaerk_fjelsoevand2": { // Your print templates. "print" is the default
+                A4: {
+                    l: {
+                        mapsizePx: [1060, 730],
+                        mapsizeMm: [280, 192]
+                    },
+                    p: {
+                        mapsizePx: [730, 1060],
+                        mapsizeMm: [192, 280]
+                    }
+                },
+                A3: {
+                    l: {
+                        mapsizePx: [1525, 1065],
+                        mapsizeMm: [401, 282]
+                    },
+                    p: {
+                        mapsizePx: [1065, 1525],
+                        mapsizeMm: [282, 401]
+                    }
+                }
+            },
+            "vandvaerk_farstrupvand2": { // Your print templates. "print" is the default
+                A4: {
+                    l: {
+                        mapsizePx: [1060, 730],
+                        mapsizeMm: [280, 192]
+                    },
+                    p: {
+                        mapsizePx: [730, 1060],
+                        mapsizeMm: [192, 280]
+                    }
+                },
+                A3: {
+                    l: {
+                        mapsizePx: [1525, 1065],
+                        mapsizeMm: [401, 282]
+                    },
+                    p: {
+                        mapsizePx: [1065, 1525],
+                        mapsizeMm: [282, 401]
+                    }
+                }
+            },
             "print": {
                 A4: {
                     l: {
@@ -102,6 +168,28 @@ module.exports = {
                     p: {
                         mapsizePx: [3120, 4430],
                         mapsizeMm: [825, 1173]
+                    }
+                }
+            },
+            "andelsnet": { // Your print templates. "print" is the default
+                A4: {
+                    l: {
+                        mapsizePx: [1060, 730],
+                        mapsizeMm: [280, 192]
+                    },
+                    p: {
+                        mapsizePx: [730, 1060],
+                        mapsizeMm: [192, 280]
+                    }
+                },
+                A3: {
+                    l: {
+                        mapsizePx: [1525, 1065],
+                        mapsizeMm: [401, 282]
+                    },
+                    p: {
+                        mapsizePx: [1065, 1525],
+                        mapsizeMm: [282, 401]
                     }
                 }
             },
@@ -176,6 +264,50 @@ module.exports = {
                     p: {
                         mapsizePx: [3120, 4430],
                         mapsizeMm: [825, 1173]
+                    }
+                }
+            },
+            "grundfosprint": { // Your print templates. "print" is the default
+                A4: {
+                    l: {
+                        mapsizePx: [1060, 730],
+                        mapsizeMm: [280, 192]
+                    },
+                    p: {
+                        mapsizePx: [730, 1060],
+                        mapsizeMm: [192, 280]
+                    }
+                },
+                A3: {
+                    l: {
+                        mapsizePx: [1525, 1065],
+                        mapsizeMm: [401, 282]
+                    },
+                    p: {
+                        mapsizePx: [1065, 1525],
+                        mapsizeMm: [282, 401]
+                    }
+                }
+            },
+            "edcvidebaekgprint": { // Your print templates. "print" is the default
+                A4: {
+                    l: {
+                        mapsizePx: [1060, 730],
+                        mapsizeMm: [280, 192]
+                    },
+                    p: {
+                        mapsizePx: [730, 1060],
+                        mapsizeMm: [192, 280]
+                    }
+                },
+                A3: {
+                    l: {
+                        mapsizePx: [1525, 1065],
+                        mapsizeMm: [401, 282]
+                    },
+                    p: {
+                        mapsizePx: [1065, 1525],
+                        mapsizeMm: [282, 401]
                     }
                 }
             },
@@ -312,6 +444,28 @@ module.exports = {
                 }
             },
             "vandvaerk_poulstrupvand2": { // Your print templates. "print" is the default
+                A4: {
+                    l: {
+                        mapsizePx: [1060, 730],
+                        mapsizeMm: [280, 192]
+                    },
+                    p: {
+                        mapsizePx: [730, 1060],
+                        mapsizeMm: [192, 280]
+                    }
+                },
+                A3: {
+                    l: {
+                        mapsizePx: [1525, 1065],
+                        mapsizeMm: [401, 282]
+                    },
+                    p: {
+                        mapsizePx: [1065, 1525],
+                        mapsizeMm: [282, 401]
+                    }
+                }
+            },
+            "vandvaerk_haderupvand2": { // Your print templates. "print" is the default
                 A4: {
                     l: {
                         mapsizePx: [1060, 730],
@@ -1293,9 +1447,9 @@ module.exports = {
 		},
       {
         "type": "wms",
-        "url": "https://services.kortforsyningen.dk/service?SERVICENAME=forvaltning2&token=2edaf0d4a10f052d184f2d4fcafcbfd6",
+        "url": "/api/df/GeoDanmarkOrto/orto_foraar/1.0.0/WMS",
         "layers": [
-            "Basis_ortofoto"
+            "orto_foraar"
         ],
         "id": "Luftfoto_nyeste",
         "name":"Luftfoto nyeste",
@@ -1305,7 +1459,7 @@ module.exports = {
         "minZoom": 4,
         "maxZoom": 22,
         "maxNativeZoom": 20,
-            "_overlays": [
+            "overlays": [
                 {
                     "id": "public.mvw_adgangsadresser",
                     "db": "mapconnectbase",
@@ -1391,16 +1545,18 @@ module.exports = {
             ]
       },
       {
-         "id": "kortforsyningen.dtk_skaermkort_daempet",
-         "name":"Skærmkort - dæmpet",
-         "db":"baselayers",
-         "host":"https://dk.gc2.io",
+        "type": "wms",
+         "url": "/api/df/Dkskaermkort/topo_skaermkort/1.0.0/WMS",
+        "layers": [
+            "dtk_skaermkort_daempet"
+        ],
+        "id": "kortforsyningen.dtk_skaermkort_daempet",
+        "name": "Skærmkort - dæmpet",
+        "attribution": "&copy; Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.",
          "abstract":"<p>Skærmkort, som opdateres årligt.</p><p>Copyright: Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.</p><p>Baggrundskortet må frit anvendes, men følgende skal angives 'Indeholder data fra Styrelsen for Dataforsyning og Effektivisering.'. </p><br>",
-         "config":{
-            "maxZoom":21,
-            "maxNativeZoom":19,
-            "attribution":"&copy; Styrelsen for Dataforsyning og Effektivisering."
-         }
+        "minZoom": 4,
+        "maxZoom": 24,
+        "maxNativeZoom": 20
       },
       {
           "id": "osm",
@@ -1445,21 +1601,6 @@ module.exports = {
         "minZoom": 4,
         "maxZoom": 24,
         "maxNativeZoom": 20
-      },
-      {
-        "type": "wms",
-        "url": "/api/df/GeoDanmarkOrto/orto_foraar/1.0.0/WMS",
-        "layers": [
-          "geodanmark_2020_12_5cm"
-        ],
-        "id": "geodanmark_2020_12_5cm_Test",
-        "name": "TEST geodanmark_2020_12_5cm",
-        "description": "geodanmark_2020_12_5cm",
-        "attribution": "Styrelsen for Dataforsyning og Effektivisering",
-        "minZoom": 8,
-        "maxZoom": 22,
-        "maxNativeZoom": 22,
-        "transparent": true
       }
    ]
 }

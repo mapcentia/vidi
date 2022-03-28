@@ -1083,10 +1083,7 @@ module.exports = {
 
                             if (layersThatAreNotInMeta.length > 0) {
                                 let fetchMetaRequests = [];
-                                layersThatAreNotInMeta.map(item => {
-                                    fetchMetaRequests.push(meta.init(item, true, true).catch(error => { return false }))
-                                });
-
+                                fetchMetaRequests.push(meta.init(layersThatAreNotInMeta.join(','), true, true).catch(error => { return false }))
                                 Promise.all(fetchMetaRequests).then(() => {
                                     proceedWithBuilding();
                                 });
@@ -1520,7 +1517,7 @@ module.exports = {
                                 feature: feature,
                                 layer: layer,
                                 layerKey: layerKey
-                            }], e, editingButtonsMarkup);
+                            }], e, editingButtonsMarkup, false);
 
                             if (moduleState.editingIsEnabled && layerIsEditable) {
                                 $(`.js-vector-layer-popup`).find(".ge-start-edit").unbind("click.ge-start-edit").bind("click.ge-start-edit", function () {
@@ -1547,12 +1544,13 @@ module.exports = {
                     layer.on("click", function (e) {
 
                         // Cross Multi select disabled
-                        if (typeof window.vidiConfig.crossMultiSelect === "undefined" || window.vidiConfig.crossMultiSelect === false) {
+                        if (!window.vidiConfig.crossMultiSelect) {
                             _self.displayAttributesPopup([{
                                 feature: feature,
                                 layer: layer,
                                 layerKey: layerKey
-                            }], e);
+                            }],
+                                e,'', false);
                             return
                         }
 
@@ -1776,7 +1774,7 @@ module.exports = {
                 store: moduleState.vectorStores[LAYER.VECTOR + ':' + layerKey],
                 cm: tableHeaders,
                 autoUpdate: false,
-                autoPan: false,
+                autoPan: window.vidiConfig.autoPanPopup,
                 openPopUp: false,
                 setViewOnSelect: true,
                 responsive: false,
@@ -1799,7 +1797,7 @@ module.exports = {
         }
     },
 
-    displayAttributesPopup(features, event, additionalControls = ``) {
+    displayAttributesPopup(features, event, additionalControls = ``, multi = true) {
         event.originalEvent.clickedOnFeature = true;
         let renderedText = null;
         let accordion = "";
@@ -1809,7 +1807,6 @@ module.exports = {
         if (typeof vectorPopUp !== "undefined") {
             vectorPopUp.closePopup();
         }
-
         features.forEach((f) => {
             let layerKey = f.layerKey;
             let feature = f.feature;
@@ -1851,7 +1848,7 @@ module.exports = {
                 return v.toString(16);
             });
             try {
-                let tmpl = sqlQuery.getVectorTemplate(layerKey);
+                let tmpl = sqlQuery.getVectorTemplate(layerKey, multi);
                 if (tmpl) {
                     // Convert Markdown in text fields
                     let metaDataKeys = meta.getMetaDataKeys();
@@ -1868,7 +1865,8 @@ module.exports = {
                     renderedText = Handlebars.compile(tmpl)(properties);
                     if (typeof parsedMeta.disable_vector_feature_info === "undefined" || parsedMeta.disable_vector_feature_info === false) {
                         count++;
-                        accordion += `<div class="panel panel-default vector-feature-info-panel" id="vector-feature-info-panel-${randText}" style="box-shadow: none;border-radius: 0; margin-bottom: 0">
+                        if (multi) {
+                            accordion += `<div class="panel panel-default vector-feature-info-panel" id="vector-feature-info-panel-${randText}" style="box-shadow: none;border-radius: 0; margin-bottom: 0">
                                         <div class="panel-heading" role="tab" style="padding: 8px 0px 8px 15px;border-bottom: 1px white solid">
                                             <h4 class="panel-title">
                                                 <a style="display: block; color: black" class="feature-info-accordion-toggle accordion-toggle js-toggle-feature-panel" data-toggle="collapse" data-parent="#layers" href="#collapse${randText}" id="a-collapse${randText}">${title}</a>
@@ -1876,6 +1874,9 @@ module.exports = {
                                         </div>
                                         <ul class="list-group" id="group-${randText}" role="tabpanel"><div id="collapse${randText}" class="feature-info-accordion-body accordion-body collapse" style="padding: 3px 8px 3px 8px">${renderedText}</div></ul>
                                     </div>`;
+                        } else {
+                            accordion = renderedText;
+                        }
                     } else {
                         console.log(`Feature info disabled for ${layerKey}`)
                     }
@@ -1929,9 +1930,8 @@ module.exports = {
                             $('.feature-info-accordion-body').collapse("hide")
                         });
                     });
-
                     vectorPopUp = L.popup({
-                        autoPan: true,
+                        autoPan: window.vidiConfig.autoPanPopup,
                         minWidth: 300,
                         className: `js-vector-layer-popup custom-popup`
                     }).setLatLng(event.latlng).setContent(`<div>

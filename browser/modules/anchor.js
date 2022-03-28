@@ -56,7 +56,7 @@ module.exports = {
      * @returns {Object|Boolean}
      */
     getCurrentMapParameters: () => {
-        let p = geocloud.transformPoint(cloud.get().getCenter().x, cloud.get().getCenter().y, "EPSG:900913", "EPSG:4326");
+        let p = geocloud.transformPoint(cloud.get().getCenter().x, cloud.get().getCenter().y, "EPSG:3857", "EPSG:4326");
         let result = false;
         if (cloud.get().getBaseLayerName()) {
             result = {

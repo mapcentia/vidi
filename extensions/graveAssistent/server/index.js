@@ -764,7 +764,7 @@ function DONOTHING(contentType, ext, base64) {
 // Use GEOLAMBDA
 function GEOLAMBDA(layername, format, data64) {
     // hit geolambda function
-    var url = 'https://lskze93j56.execute-api.eu-central-1.amazonaws.com/default/geolambda'
+    var url = 'https://lskze93j56.execute-api.eu-central-1.amazonaws.com/v1/geolambda'
     var key = '9OMEn0zKMn6oznXcuO8lE5ALP6sRgtbv3dTg6ZUz'
 
     var postData = {
