@@ -855,8 +855,7 @@ module.exports = module.exports = {
                     let metaData = v.meta;
                     if (metaData.layergroup === groups[i]) {
                         count++;
-                        let title = (typeof metaData.f_table_title !== "undefined" && metaData.f_table_title !== "" && metaData.f_table_title !== null) ? metaData.f_table_title : u;
-                        row = "<tr><td>" + title + "</td><td>" + v.hits + "</td><td><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + u + "' " + ($.inArray(u, visibleLayers) > -1 ? "checked" : "") + "></label></div></td></tr>";
+                        row = "<tr><td>" + v.title + "</td><td>" + v.hits + "</td><td><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + v.table + "' " + ($.inArray(v.table, visibleLayers) > -1 ? "checked" : "") + "></label></div></td></tr>";
                         hitsTable.append(row);
                     }
                 }
