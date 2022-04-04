@@ -49,7 +49,7 @@ body {
 }
 #loadscreentext {
   font-weight: 300;
-  font-family: 'roboto', sans-serif;
+  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
 }
 .modal-title {
   line-height: 1;
@@ -237,14 +237,14 @@ input[type="checkbox"] {
   line-height: 1.428571429;
   vertical-align: top;
   border-top: 1px solid #f5f5f5;
-  font-family: 'roboto', sans-serif;
+  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
   font-weight: 300;
   border-bottom: 0;
 }
 .nav-tabs > li > a,
 .dropdown-menu > li > a {
   font-weight: 500;
-  font-family: 'roboto', sans-serif !important;
+  font-family: 'Roboto', sans-serif, sans-serif !important;
   padding: 6px 10px;
   text-decoration: none !important;
 }
@@ -274,7 +274,7 @@ input[type="checkbox"] {
 .pane input,
 .pane textarea {
   font-weight: 300;
-  font-family: 'roboto', sans-serif;
+  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
 }
 .navbar {
   border-radius: 0;
@@ -292,7 +292,7 @@ input[type="checkbox"] {
 .popover-content span {
   vertical-align: top !important;
   font-weight: 300;
-  font-family: 'roboto', sans-serif;
+  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
 }
 .leaflet-top {
   top: 50px;
