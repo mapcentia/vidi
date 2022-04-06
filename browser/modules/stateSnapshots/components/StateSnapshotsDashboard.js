@@ -171,6 +171,7 @@ class StateSnapshotsDashboard extends React.Component {
         this.setState({stateApplyingIsBlocked: true});
         this.props.state.applyState(item.snapshot).then(() => {
             this.setState({stateApplyingIsBlocked: false});
+            this.props.backboneEvents.get().trigger('statesnapshot:apply', item);
         });
     }
 
