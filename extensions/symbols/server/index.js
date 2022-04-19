@@ -37,14 +37,14 @@ router.get('/api/symbols/:file', function (req, response) {
 });
 
 router.post('/api/symbols/:db', function (req, response) {
-    let db = req.params.db, symbolState = req.body.symbolState, browserId = req.body.userId;
+    let db = req.params.db, symbolState = req.body.symbolState, browserId = req.body.userId, userGr = req.body.userGr;
     let anonymous = true;
     let arr = [];
 
     try {
         for (const id in symbolState) {
             let p = symbolState[id];
-            let sql = `INSERT INTO settings.symbols (id,rotation,scale,zoom,svg,browserid,anonymous,file,the_geom) VALUES ('${id}',${p.rotation},${p.scale},${p.zoomLevel},'${p.svg}','${browserId}',${anonymous},'${p.file}',ST_geomfromtext('POINT(${p.coord.lng} ${p.coord.lat})', 4326)) ON CONFLICT (id) DO UPDATE SET rotation=${p.rotation},scale=${p.scale},zoom=${p.zoomLevel},svg='${p.svg}',browserid='${browserId}',anonymous=${anonymous},file='${p.file}',the_geom=ST_geomfromtext('POINT(${p.coord.lng} ${p.coord.lat})', 4326)`;
+            let sql = `INSERT INTO settings.symbols (id,rotation,scale,zoom,svg,browserid,userid,anonymous,file,the_geom) VALUES ('${id}',${p.rotation},${p.scale},${p.zoomLevel},'${p.svg}','${browserId}','${userGr}',${anonymous},'${p.file}',ST_geomfromtext('POINT(${p.coord.lng} ${p.coord.lat})', 4326)) ON CONFLICT (id) DO UPDATE SET rotation=${p.rotation},scale=${p.scale},zoom=${p.zoomLevel},svg='${p.svg}',browserid='${browserId}',userid='${userGr}',anonymous=${anonymous},file='${p.file}',the_geom=ST_geomfromtext('POINT(${p.coord.lng} ${p.coord.lat})', 4326)`;
             arr.push(sql);
         }
     } catch (e) {

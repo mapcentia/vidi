@@ -74,6 +74,7 @@ const store = () => {
         },
         body: JSON.stringify({
             userId: window.aauUserId,
+            userGr: window.aauUserGr,
             symbolState
         }),
     }).then(res => {
