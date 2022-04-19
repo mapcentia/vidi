@@ -161,6 +161,13 @@ const scale = (e, img, id, classStr) => {
  * @param e
  */
 const handleDragEnd = (e) => {
+    const targetElements = document.elementsFromPoint(e.clientX, e.clientY);
+    // Don't do anything if symbols is dropped on container
+    for (let i = 0; i < targetElements.length; i++) {
+        if (targetElements[i].id === "symbols") {
+            return;
+        }
+    }
     e.preventDefault();
     if (locked) {
         alert(__("Locked"));
