@@ -12,7 +12,7 @@ const dayjs = require('dayjs');
 const XLSX = require('xlsx');
 const config = require('../../../config/config.js');
 const {PromisePool} = require('@supercharge/promise-pool');
-const POOL_SIZE = 20;
+const POOL_SIZE = 30;
 const utf8 = require('utf8');
 // Set locale for date/time string
 dayjs.locale("da_DK");
