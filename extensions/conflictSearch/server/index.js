@@ -256,7 +256,7 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                 });
             });
         }
-        createPool();
+        createPool().then(r => {});
     });
 });
 module.exports = router;
