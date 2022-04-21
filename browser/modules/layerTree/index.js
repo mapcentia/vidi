@@ -11,16 +11,32 @@
 'use strict';
 
 import {
-    LOG,
-    SUB_GROUP_DIVIDER,
-    MODULE_NAME,
-    VIRTUAL_LAYERS_SCHEMA,
-    SYSTEM_FIELD_PREFIX,
-    LAYER,
     ICONS,
-    MAP_RESOLUTIONS
+    LAYER,
+    LOG,
+    MAP_RESOLUTIONS,
+    MODULE_NAME,
+    SUB_GROUP_DIVIDER,
+    SYSTEM_FIELD_PREFIX,
+    VIRTUAL_LAYERS_SCHEMA,
+    VECTOR_SIDE_TABLE_EL
 } from './constants';
-
+import dayjs from 'dayjs';
+import noUiSlider from 'nouislider';
+import mustache from 'mustache';
+import LayerFilter from './LayerFilter';
+import LoadStrategyToggle from './LoadStrategyToggle';
+import LabelSettingToggle from './LabelSettingToggle';
+import {
+    EXPRESSIONS_FOR_BOOLEANS,
+    EXPRESSIONS_FOR_DATES,
+    EXPRESSIONS_FOR_NUMBERS,
+    EXPRESSIONS_FOR_STRINGS,
+    validateFilters
+} from './filterUtils';
+import OfflineModeControlsManager from './OfflineModeControlsManager';
+import {GROUP_CHILD_TYPE_GROUP, GROUP_CHILD_TYPE_LAYER, LayerSorting} from './LayerSorting';
+import {GEOJSON_PRECISION} from './../constants';
 let _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEvents,
     onEachFeature = [], pointToLayer = [], onSelectedStyle = [], onLoad = [], onSelect = [],
     onMouseOver = [], cm = [], styles = [], tables = {}, childLayersThatShouldBeEnabled = [];
@@ -29,22 +45,6 @@ const uuidv4 = require('uuid/v4');
 const React = require('react');
 const ReactDOM = require('react-dom');
 const base64url = require('base64url');
-
-import dayjs from 'dayjs';
-import noUiSlider from 'nouislider';
-import mustache from 'mustache';
-import LayerFilter from './LayerFilter';
-import LoadStrategyToggle from './LoadStrategyToggle';
-import LabelSettingToggle from './LabelSettingToggle';
-import {
-    validateFilters,
-    EXPRESSIONS_FOR_STRINGS,
-    EXPRESSIONS_FOR_NUMBERS,
-    EXPRESSIONS_FOR_DATES,
-    EXPRESSIONS_FOR_BOOLEANS
-} from './filterUtils';
-import OfflineModeControlsManager from './OfflineModeControlsManager';
-import {GROUP_CHILD_TYPE_LAYER, GROUP_CHILD_TYPE_GROUP, LayerSorting} from './LayerSorting';
 
 const urlparser = require('./../urlparser');
 const download = require('./../download');
@@ -166,8 +166,7 @@ module.exports = {
      */
     getFilterStr(layerName) {
         let filterArr = this.getActiveLayerFilters(layerName);
-        let filterStr = filterArr.length > 0 ? filterArr[0] : null;
-        return filterStr;
+        return filterArr.length > 0 ? filterArr[0] : null;
     },
 
     /**
@@ -789,7 +788,7 @@ module.exports = {
                         // of the previously requested bbox (extended one in gc2cloud.js) kept in corresponding store
                         let needToReload;
                         if (layerPrefix === LAYER.VECTOR && ((parsedMeta && `load_strategy` in parsedMeta && parsedMeta.load_strategy === `d`)
-                            || (layerKeyNoPrefix in moduleState.dynamicLoad && moduleState.dynamicLoad[layerKeyNoPrefix] === true))) {
+                            || (layerKeyNoPrefix in moduleState.dynamicLoad && moduleState.dynamicLoad[layerKeyNoPrefix] === true)) && localTypeStores?.[layerKey]) {
                             needToReload = true;
                             let currentMapBBox = cloud.get().map.getBounds();
                             if (`buffered_bbox` in localTypeStores[layerKey]) {
@@ -1083,10 +1082,9 @@ module.exports = {
 
                             if (layersThatAreNotInMeta.length > 0) {
                                 let fetchMetaRequests = [];
-                                layersThatAreNotInMeta.map(item => {
-                                    fetchMetaRequests.push(meta.init(item, true, true).catch(error => { return false }))
-                                });
-
+                                fetchMetaRequests.push(meta.init(layersThatAreNotInMeta.join(','), true, true).catch(error => {
+                                    return false
+                                }))
                                 Promise.all(fetchMetaRequests).then(() => {
                                     proceedWithBuilding();
                                 });
@@ -1439,19 +1437,37 @@ module.exports = {
                 let reloadInterval = meta.parseLayerMeta(layerKey)?.reload_interval;
                 let tableElement = meta.parseLayerMeta(layerKey)?.show_table_on_side;
                 // Create side table once
-                if (tableElement && !$('#vector-side-table').length && window.vidiConfig.template === "embed.tmpl") {
-                    $("#pane").css("left", "0");
-                    $("#pane").css("width", "70%");
-                    $("#map").css("width", "115%");
-                    $("#pane").before(`<div id="vector-side-table" style="width: 30%; float: right; background-color: white"></div>`)
-                    _self.createTable(layerKey, true, "#vector-side-table", {
-                        showToggle: false,
-                        showExport: false,
-                        showColumns: false,
-                        cardView: false,
-                        height: null,
-                        tableBodyHeight: "100vh"
-                    });
+                if (tableElement && !$('#' + VECTOR_SIDE_TABLE_EL).length && window.vidiConfig.template === "embed.tmpl") {
+                    let styles;
+                    let height = null;
+                    let tableBodyHeight;
+                    const h = window.vidiConfig.vectorTable.height;
+                    const w = window.vidiConfig.vectorTable.width;
+                    const position = window.vidiConfig.vectorTable.position;
+                    const e = $('#pane');
+                    if (position === 'right') {
+                        styles = `width: ${w}; float: right;`;
+                        e.css("width", `calc(100vw - ${w})`);
+                        e.css("left", "0");
+                        tableBodyHeight = "calc(100vh - 34px)";
+                        height = $(window).height();
+                    } else if (position === 'bottom') {
+                        styles = `width: 100%; height: ${h}; bottom: 0; position: fixed;`;
+                        e.css("height", `calc(100vh - ${h})`);
+                        height = parseInt(h);
+                        tableBodyHeight = (height - 34) + "px"
+                    }
+                    if (position === 'right' || position === 'bottom') {
+                        e.before(`<div id="${VECTOR_SIDE_TABLE_EL}" style="${styles}; background-color: white; " data-vidi-vector-table-id="${trackingLayerKey}"></div>`)
+                        _self.createTable(layerKey, true, "#" + VECTOR_SIDE_TABLE_EL, {
+                            showToggle: false,
+                            showExport: false,
+                            showColumns: false,
+                            cardView: false,
+                            height: height,
+                            tableBodyHeight: tableBodyHeight
+                        });
+                    }
                 }
                 if (reloadInterval && reloadInterval !== "") {
                     let reloadCallback = meta.parseLayerMeta(layerKey)?.reload_callback;
@@ -1470,7 +1486,7 @@ module.exports = {
                 if (typeof onLoad[LAYER.VECTOR + ':' + layerKey] === "function") {
                     onLoad[LAYER.VECTOR + ':' + layerKey](l);
                 }
-                if (l === undefined || l.geoJSON === null) {
+                if (l.geoJSON === null) {
                     return
                 }
                 sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + layerKey, l.geoJSON.features);
@@ -1497,8 +1513,6 @@ module.exports = {
                         if (`editor` in extensions) {
                             editor = extensions.editor.index;
                         }
-
-
                         layer.on("click", function (e) {
                             let layerIsEditable = false;
                             let metaDataKeys = meta.getMetaDataKeys();
@@ -1520,7 +1534,7 @@ module.exports = {
                                 feature: feature,
                                 layer: layer,
                                 layerKey: layerKey
-                            }], e, editingButtonsMarkup);
+                            }], e, editingButtonsMarkup, false);
 
                             if (moduleState.editingIsEnabled && layerIsEditable) {
                                 $(`.js-vector-layer-popup`).find(".ge-start-edit").unbind("click.ge-start-edit").bind("click.ge-start-edit", function () {
@@ -1547,12 +1561,13 @@ module.exports = {
                     layer.on("click", function (e) {
 
                         // Cross Multi select disabled
-                        if (typeof window.vidiConfig.crossMultiSelect === "undefined" || window.vidiConfig.crossMultiSelect === false) {
+                        if (!window.vidiConfig.crossMultiSelect) {
                             _self.displayAttributesPopup([{
-                                feature: feature,
-                                layer: layer,
-                                layerKey: layerKey
-                            }], e);
+                                    feature: feature,
+                                    layer: layer,
+                                    layerKey: layerKey
+                                }],
+                                e, '', false);
                             return
                         }
 
@@ -1758,7 +1773,7 @@ module.exports = {
                 && metaDataKeys[layerKey].infowindow.template !== "")
                 ? metaDataKeys[layerKey].infowindow.template : sqlQuery.getVectorTemplate(layerKey);
             let tableHeaders = sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + layerKey,
-                JSON.parse(JSON.stringify(layerWithData[0].toGeoJSON().features)));
+                JSON.parse(JSON.stringify(layerWithData[0].toGeoJSON(GEOJSON_PRECISION).features)));
 
             let styleSelected = (onSelectedStyle[LAYER.VECTOR + ':' + layerKey] ? onSelectedStyle[LAYER.VECTOR + ':' + layerKey] : {
                 weight: 5,
@@ -1776,7 +1791,7 @@ module.exports = {
                 store: moduleState.vectorStores[LAYER.VECTOR + ':' + layerKey],
                 cm: tableHeaders,
                 autoUpdate: false,
-                autoPan: false,
+                autoPan: window.vidiConfig.autoPanPopup,
                 openPopUp: false,
                 setViewOnSelect: true,
                 responsive: false,
@@ -1799,7 +1814,7 @@ module.exports = {
         }
     },
 
-    displayAttributesPopup(features, event, additionalControls = ``) {
+    displayAttributesPopup(features, event, additionalControls = ``, multi = true) {
         event.originalEvent.clickedOnFeature = true;
         let renderedText = null;
         let accordion = "";
@@ -1809,7 +1824,6 @@ module.exports = {
         if (typeof vectorPopUp !== "undefined") {
             vectorPopUp.closePopup();
         }
-
         features.forEach((f) => {
             let layerKey = f.layerKey;
             let feature = f.feature;
@@ -1851,7 +1865,7 @@ module.exports = {
                 return v.toString(16);
             });
             try {
-                let tmpl = sqlQuery.getVectorTemplate(layerKey);
+                let tmpl = sqlQuery.getVectorTemplate(layerKey, multi);
                 if (tmpl) {
                     // Convert Markdown in text fields
                     let metaDataKeys = meta.getMetaDataKeys();
@@ -1868,7 +1882,8 @@ module.exports = {
                     renderedText = Handlebars.compile(tmpl)(properties);
                     if (typeof parsedMeta.disable_vector_feature_info === "undefined" || parsedMeta.disable_vector_feature_info === false) {
                         count++;
-                        accordion += `<div class="panel panel-default vector-feature-info-panel" id="vector-feature-info-panel-${randText}" style="box-shadow: none;border-radius: 0; margin-bottom: 0">
+                        if (multi) {
+                            accordion += `<div class="panel panel-default vector-feature-info-panel" id="vector-feature-info-panel-${randText}" style="box-shadow: none;border-radius: 0; margin-bottom: 0">
                                         <div class="panel-heading" role="tab" style="padding: 8px 0px 8px 15px;border-bottom: 1px white solid">
                                             <h4 class="panel-title">
                                                 <a style="display: block; color: black" class="feature-info-accordion-toggle accordion-toggle js-toggle-feature-panel" data-toggle="collapse" data-parent="#layers" href="#collapse${randText}" id="a-collapse${randText}">${title}</a>
@@ -1876,6 +1891,9 @@ module.exports = {
                                         </div>
                                         <ul class="list-group" id="group-${randText}" role="tabpanel"><div id="collapse${randText}" class="feature-info-accordion-body accordion-body collapse" style="padding: 3px 8px 3px 8px">${renderedText}</div></ul>
                                     </div>`;
+                        } else {
+                            accordion = renderedText;
+                        }
                     } else {
                         console.log(`Feature info disabled for ${layerKey}`)
                     }
@@ -1885,7 +1903,8 @@ module.exports = {
             }
 
             // Set select call when opening a panel
-            let selectCallBack = () => {};
+            let selectCallBack = () => {
+            };
             if (typeof parsedMeta.select_function !== "undefined" && parsedMeta.select_function !== "") {
                 try {
                     selectCallBack = Function('"use strict";return (' + parsedMeta.select_function + ')')();
@@ -1910,7 +1929,8 @@ module.exports = {
                     $(parsedMeta.info_element_selector).html(renderedText)
                 } else {
                     // Set select call when opening a panel
-                    let selectCallBack = () => {};
+                    let selectCallBack = () => {
+                    };
                     if (typeof parsedMeta.select_function !== "undefined" && parsedMeta.select_function !== "") {
                         try {
                             selectCallBack = Function('"use strict";return (' + parsedMeta.select_function + ')')();
@@ -1929,9 +1949,8 @@ module.exports = {
                             $('.feature-info-accordion-body').collapse("hide")
                         });
                     });
-
                     vectorPopUp = L.popup({
-                        autoPan: true,
+                        autoPan: window.vidiConfig.autoPanPopup,
                         minWidth: 300,
                         className: `js-vector-layer-popup custom-popup`
                     }).setLatLng(event.latlng).setContent(`<div>
@@ -1945,7 +1964,7 @@ module.exports = {
             }
         })
         if (count === 1) {
-            setTimeout(()=> {
+            setTimeout(() => {
                 $(".js-toggle-feature-panel:first").trigger('click');
             }, 200);
         }
@@ -3008,7 +3027,7 @@ module.exports = {
                 }
 
                 if (isVirtual === false) {
-                    let componentContainerId = `layer-settings-filters-${layerKey}`;
+                    let componentContainerId = `layer-settings-filters-${layerKey.replace('.', '-')}`;
                     $(layerContainer).find('.js-layer-settings-filters').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
 
                     let localArbitraryfilters = {};

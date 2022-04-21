@@ -4,11 +4,236 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [UNRELEASED]
+## [UNRELEASED] - 2022-20-4
+### Changed
+- In conflictSearch requests to the GC2 SQL API now happens concurrently. This is done by implementing a promise pool. The default size of the pool is 30, but this can be set in the runtime config. Note that this setting can't be changed in a run-time config. 
+```json
+{
+  "extensionConfig": {
+    "conflictSearch": {
+      "poolSize": 40
+    }
+  }
+}
+```
+
+## [2022.4.0] - 2022-8-4
+### Fixed
+- Now uses sfe_ejendomsnummer instead of esr_ejendomsnummer in search of 'adresser' and 'matrikel'.
+
+## [2022.3.3] - 2022-24-3
+### Fixed
+- Regression bug, which kept the right side-panel closed after load of app.
+- The Leaflet method `toGeoJSON` rounds of coordinates with 6 decimals by default. But this may result in up to 10 cm on the map (tested at about 57 degrees north). This makes the editor and snapping very unprecise. So all `toGeoJSON` calls are now done with a precision argument of 14 through the app. 
+
+## [2022.3.2] - 2022-18-3
+### Fixed
+- Bug in sqlQuery.js, which rendered feature-info inoperable.
+- Added `geolocation` to the `allow` attribut on the created iframe in embed.js. 
+
+## [2022.3.1] - 2022-15-3
+### Added
+- Added GC2 Meta option for tiled raster layer: `tiled`. If set to `true` the layer will be fetched in tiles instead of
+  one big single tile, which is default. The layer visibility detection still works, but will be more inaccurate because
+  of the natur of tile loading. But it will always be false visible.
+- A new option in embed.js: `data-vidi-no-tracking`, which will disable the Vidi tracking cookie used for advanced
+  functions like state-snapshots and printing.
+
+### Changed
+- Tracking cookie will now be set as `secure=true` and `sameSite=none` if env var NODE_ENV is set to 'production'. This
+  will fix issues with embeding Vidi and setting the cookie.
+- Vector feature table can now be placed to the right or at the bottom of the screen. The table is removed when layer is
+  switched off. Only one table can be displayed at a time. New config for setting position and width/height. `width`
+  only has effect then postion is `right` and `height` only when position is `bottom`. `width` can be both relative `%`
+  and absolute `px. `height` can only be absolute:
+```json
+{
+  "vectorTable": {
+    "position": "right",
+    "width": "30%",
+    "height": "250px"
+  }
+}
+```
+
+### Fixed
+- Some bugs regarding vector feature table and dynamic load.
+
+## [2022.3.0] - 2022-4-3
+### Added
+- Added config setting for auto panning the map when pop-up's opens, so they don't stay outside the map: `autoPanPopup: false|true`
+
+### Changed
+- Pop-ups on vector layers will use simple pop-ups when `crossMultiSelect` is `false` instead of the accordion template. This make pop-up behaviours similar on tile and vector layers.
+
+### Fixed
+- Some issues regarding pop-up behaviours when `crossMultiSelect` is `true` and editor is enabled: `crossMultiSelect` will be set to `false` when editor is enabled.
+- Config defaults are now handle one place in the source and all settings have defaults. No longer need for testing if a setting is undefined.
+
+## [2022.2.2] - 2022-18-2
+### Fixed
+- Better support for special characters and upper case in layer names. Fixes a UTF8 error in WMS requests and quotes schema/relation names in feature info requests.
+- In the editor the counting of vertices in LineString features failed with NaN and it was impossible to edit. This is fixed with implementing a proper counting rutine.
+
+## [2022.2.1] - 2022-3-2
+### Fixed
+- Use UTM instead of web-mercator when projeting/unprojecting the print frame or the different will be to big.
+
+## [2022.2.0] - 2022-3-2
+### Fixed
+- Fix for buggy print recreation from state. The print frame was re-calculated each time the state was applied making a small change in latitude coords. This made the frame drift south-east and rendered errors on big geographical frames. 
+
+## [2021.12.1] - 2021-29-12
+### Changed
+- The `df` extension is changed, so it can use both Dataforsyningen and Datafordeler. New setup (token has precedence):
+```json
+{
+  "df" : {
+    "datafordeler" : {
+      "username": "...",
+      "password": "...",
+      "token": "..."
+    },
+    "dataforsyningen" : {
+      "username": "...",
+      "password": "...",
+      "token": "..."
+    }
+  },
+  "baseLayers": [
+    {
+      "type": "wms",
+      "url": "/api/datafordeler/GeoDanmarkOrto/orto_foraar/1.0.0/WMS",
+      "layers": [
+        "geodanmark_2020_12_5cm"
+      ],
+      "id": "geodanmark_2020_12_5cm",
+      "name": "TEST geodanmark_2020_12_5cm",
+      "description": "geodanmark_2020_12_5cm",
+      "attribution": "Styrelsen for Dataforsyning og Effektivisering",
+      "minZoom": 8,
+      "maxZoom": 22,
+      "maxNativeZoom": 22
+    },
+    {
+      "type": "wms",
+      "url": "/api/dataforsyningen/topo_skaermkort_DAF",
+      "layers": [
+        "dtk_skaermkort"
+      ],
+      "id": "dtk_skaermkort",
+      "name": "Skærmkort",
+      "description": "DTK/Skærmkort",
+      "attribution": "Styrelsen for Dataforsyning og Effektivisering",
+      "minZoom": 8,
+      "maxZoom": 22,
+      "maxNativeZoom": 22
+    }
+  ]
+}
+```
+
+### Added
+- Field ignore setting from GC2 will now exclude the field from being queried in sqlQuery module (feature info).
+
+## [2021.12.0] - 2021-6-12
+### Changed
+- The location circle marker is now orange in follow-mode and blue when not following. Location now works the same in both embed and default templates.
+- The legend toast dialog in embed template will now be pushed to the right when sliding out the layer tree. This way the elements will not be stacked.
+- The search-result element in `conflict.tmpl` now has a dynamic height, so it will fit the parent window.
+
+### Fixed
+- `slideOutLayerTree` is now inwoked after vidi is ready making it more stable.
+
+## [2021.11.2] - 2021-17-11
+### Fixed
+- `layerTree` state was not updated when Vidi was initiated with layers in URL anchor, resulting in no active layers in state until some changes was done by user afterward. 
+
+## [2021.11.1] - 2021-16-11
+### Changed
+- Hit count added to the "Data fra konflikter" tab in `conflictSearch` module.
+- Some changes in `conflict.tmpl`, so it's easier to customize it.
+
+### Added
+- API endpoint for proxify base layer requests to Datafordeler.dk. The API rewrites the URL and adds `username` and `password`. The base layer url follows this pattern: `/api/df/[Datafordeler URI]`. Example Setup in `config/config.js`:
+
+```json
+{
+  "df" : {
+    "userName" : "QMO.....",
+    "password" : "3Ps....."
+  },
+  "baseLayers": [
+    {
+      "type": "wms",
+      "url": "/api/df/GeoDanmarkOrto/orto_foraar/1.0.0/WMS",
+      "layers": [
+        "geodanmark_2020_12_5cm"
+      ],
+      "id": "geodanmark_2020_12_5cm",
+      "name": "TEST geodanmark_2020_12_5cm",
+      "description": "geodanmark_2020_12_5cm",
+      "attribution": "Styrelsen for Dataforsyning og Effektivisering",
+      "minZoom": 8,
+      "maxZoom": 22,
+      "maxNativeZoom": 22,
+      "transparent": true
+    }
+  ]
+}
+```
+
+## [2021.11.0] - 2021-3-11
+### Changed
+- Draw tool bar will now be positioned beside the main tools, if screen height is below 700px.
+
+### Fixed
+- Vector table now only shows in `embed.tmpl`.
+
+## [2021.10.3] - 2021-11-10
+### Changed
+- Session cookie (connect.gc2) will now be set as `secure=true` and `sameSite=none` if enviromental variable NODE_ENV is set to 'production'. This will fix issues with embeding Vidi and protected layers. To set NODE_ENV in docker-compose file, use this:
+  ```yaml
+    environment:
+      - NODE_ENV=production
+  ```
+
+## [2021.10.2] - 2021-7-10
+### Fixed
+- Intended code error removed from `conflict` module in excel function.
+
+## [2021.10.1] - 2021-7-10
+### Added
+- A new config `initFunction`, which holds a JavaScript function as a string. When Vidi is fully loaded this function will be run:
+  ```json
+  {
+      "initFunction": "function(){alert(\"Hello\")}"
+  }
+  ```
+  
+### Fixed
+- The `reportRender` issue in `conflict` module regarding state resolving is fixed.
+- The alternative `reportRenderAlt` module for `conflictSearch` can now be set in config:
+  ```json
+    {  
+      "extensions": {
+        "browser": [
+            {"conflictSearch": ["index", "reportRenderAlt", "infoClick", "controller"]}
+        ]
+      }
+    }
+  ```
+
+## [2021.10.0] - 2021-6-10
+### Changed
+- Legend added in blank.tmpl (which is used in static maps). Also the legend checkboxes are removed from legends in blank.tmpl and print.tmpl.
+- Extensions are initiated before state resolves, so extensions work in state urls.
+- Measurement tooltip will now show one decimal instead of none when showing meters.
+
 ### Fixed
 - Serialization of line extremities was buggy when lines was recreated after applying state causing extremities not to be drawn.
 
-## [2021.9.0]
+## [2021.9.0] - 2021-22-9
 ### Changed
 - Links in pop-ups now gets the primary color of the theme instead of the fixed cyan color.
 
@@ -19,7 +244,7 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ## [2021.8.3] - 2021-30-8
 ### Fixed
-- Regression bug regarding print. The metadata object was stripped from the payload in ealier release, but was necessary for recreation of layers. Now a slim down version of meta are send.
+- Regression bug regarding print. The metadata object was stripped from the payload in ealier release, but was necessary for recreation of layers. Now a slim downed version of meta are send.
 
 ## [2021.8.2] - 2021-30-8
 ### Added
@@ -178,7 +403,6 @@ and this project adheres to [CalVer](https://calver.org/).
     {{/_vidi_content.fields}}
 </div>
 ```  
-
 
 ### Added
 - `searchConfig.placeholderText` added to config, so the search placeholder can be customized.

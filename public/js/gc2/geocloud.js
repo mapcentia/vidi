@@ -119,7 +119,7 @@ geocloud = (function () {
         maxFeaturesLimit: false,
         onMaxFeaturesLimitReached: false,
         rendererOptions: {zIndexing: true},
-        projection: (MAPLIB === "leaflet") ? "4326" : "900913",
+        projection: (MAPLIB === "leaflet") ? "4326" : "3857",
         //Only leaflet
         pointToLayer: function (feature, latlng) {
             return L.circleMarker(latlng);
@@ -1064,7 +1064,7 @@ geocloud = (function () {
         var prop, lControl, queryLayers = [],
             defaults = {
                 numZoomLevels: 20,
-                projection: "EPSG:900913",
+                projection: "EPSG:3857",
                 fadeAnimation: true,
                 zoomAnimation: true,
                 showLayerSwitcher: false,
@@ -1104,8 +1104,8 @@ geocloud = (function () {
                     if (!extent) {
                         this.map.fitWorld();
                     } else {
-                        p1 = transformPoint(extent[0], extent[1], "EPSG:900913", "EPSG:4326");
-                        p2 = transformPoint(extent[2], extent[3], "EPSG:900913", "EPSG:4326");
+                        p1 = transformPoint(extent[0], extent[1], "EPSG:3857", "EPSG:4326");
+                        p2 = transformPoint(extent[2], extent[3], "EPSG:3857", "EPSG:4326");
                         this.map.fitBounds([
                             [p1.y, p1.x],
                             [p2.y, p2.x]
@@ -1119,8 +1119,8 @@ geocloud = (function () {
             var p1, p2;
             switch (MAPLIB) {
                 case "leaflet":
-                    p1 = transformPoint(extent[0], extent[1], "EPSG:900913", "EPSG:4326");
-                    p2 = transformPoint(extent[2], extent[3], "EPSG:900913", "EPSG:4326");
+                    p1 = transformPoint(extent[0], extent[1], "EPSG:3857", "EPSG:4326");
+                    p2 = transformPoint(extent[2], extent[3], "EPSG:3857", "EPSG:4326");
                     this.map.setMaxBounds([
                         [p1.y, p1.x],
                         [p2.y, p2.x]
@@ -1339,7 +1339,7 @@ geocloud = (function () {
             return p;
         };
         //ol2, ol3 and leaflet
-        // Input map coordinates (900913)
+        // Input map coordinates (3857)
         this.zoomToPoint = function (x, y, r) {
             switch (MAPLIB) {
                 case "ol2":
@@ -1352,7 +1352,7 @@ geocloud = (function () {
                     this.map.getView().setResolution(resolution);
                     break;
                 case "leaflet":
-                    var p = transformPoint(x, y, "EPSG:900913", "EPSG:4326");
+                    var p = transformPoint(x, y, "EPSG:3857", "EPSG:4326");
                     this.map.setView([p.y, p.x], r);
                     break;
             }
@@ -2477,7 +2477,7 @@ geocloud = (function () {
             }
         };
         //ol2, ol3 and leaflet
-        // Output map coordinates (900913)
+        // Output map coordinates (3857)
         this.getCenter = function () {
             var point;
             switch (MAPLIB) {
@@ -2497,7 +2497,7 @@ geocloud = (function () {
                     break;
                 case "leaflet":
                     point = this.map.getCenter();
-                    var p = transformPoint(point.lng, point.lat, "EPSG:4326", "EPSG:900913");
+                    var p = transformPoint(point.lng, point.lat, "EPSG:4326", "EPSG:3857");
                     return {
                         x: p.x,
                         y: p.y,
@@ -2521,8 +2521,8 @@ geocloud = (function () {
                 case "leaflet":
                     mapBounds = this.map.getBounds().toBBoxString().split(",");
 
-                    var lower = transformPoint(mapBounds[0], mapBounds[1], "EPSG:4326", "EPSG:900913")
-                    var upper = transformPoint(mapBounds[2], mapBounds[3], "EPSG:4326", "EPSG:900913")
+                    var lower = transformPoint(mapBounds[0], mapBounds[1], "EPSG:4326", "EPSG:3857")
+                    var upper = transformPoint(mapBounds[2], mapBounds[3], "EPSG:4326", "EPSG:3857")
 
                     bounds = {
                         left: mapBounds[0],
@@ -2570,7 +2570,7 @@ geocloud = (function () {
                         });
                         geometry = features.geometry.transform(
                             new OpenLayers.Projection('EPSG:4326'),
-                            new OpenLayers.Projection('EPSG:900913')
+                            new OpenLayers.Projection('EPSG:3857')
                         );
                         transformedFeature = new OpenLayers.Feature.Vector(geometry, {});
                         queryLayers[i].addFeatures([transformedFeature]);
@@ -2662,7 +2662,7 @@ geocloud = (function () {
         };
     };
 // ol2, ol3 and leaflet
-// Input map coordinates (900913)
+// Input map coordinates (3857)
     clickEvent = function (e, map) {
         this.getCoordinate = function () {
             var point;
@@ -2683,7 +2683,7 @@ geocloud = (function () {
                     break;
                 case "leaflet":
                     point = e.latlng;
-                    var p = transformPoint(point.lng, point.lat, "EPSG:4326", "EPSG:900913");
+                    var p = transformPoint(point.lng, point.lat, "EPSG:4326", "EPSG:3857");
                     return {
                         x: p.x,
                         y: p.y,

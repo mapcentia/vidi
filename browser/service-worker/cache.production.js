@@ -39,9 +39,7 @@ let urlsToCache = [
     '/js/templates.js',
     '/js/leaflet-easybutton/easy-button.css',
     '/locale',
-    '/api/config/vidi.json',
-    `/js/build/all.min.js`,
-    `/css/build/all.min.css`
+    '/api/config/vidi.json'
 ];
 
 module.exports = urlsToCache;

@@ -41,6 +41,44 @@ module.exports = {
      */
     init: function () {
         let me = this, configFile, stop = false;
+        const defaults = {
+            schemata: [],
+            baseLayers: [],
+            autoPanPopup: false,
+            crossMultiSelect: false,
+            brandName: '',
+            startUpModal: '',
+            enabledExtensions: [],
+            searchConfig: [],
+            aboutBox: '',
+            enabledSearch: 'google',
+            removeDisabledLayersFromLegend: false,
+            template: 'default.tmpl',
+            enabledPrints: [],
+            activateMainTab: null,
+            extensionConfig: {},
+            singleTiled: true,
+            doNotCloseLoadScreen: false,
+            startupModalSupressionTemplates: [],
+            cssFiles: [],
+            dontUseAdvancedBaseLayerSwitcher: false,
+            wmsUriReplace: null,
+            infoClickCursorStyle: 'crosshair',
+            featureInfoTableOnMap: false,
+            showLayerGroupCheckbox: false,
+            activeLayers: [],
+            initFunction: null,
+            snapshot: null,
+            vectorTable: {
+                position: 'right',
+                width: '30%',
+                height: '250px'
+            }
+        };
+        // Set default for unset props
+        for (let prop in defaults) {
+            window.vidiConfig[prop] = typeof window.vidiConfig[prop] !== 'undefined' ? window.vidiConfig[prop] : defaults[prop];
+        }
         (function poll() {
             if (typeof L.control.locate !== "undefined") {
                 if (typeof urlVars.session === "string") {
@@ -56,31 +94,9 @@ module.exports = {
                         configParam = "/api/config/" + urlparser.db + "/" + configFile;
                     }
                     $.getJSON(configParam, function (data) {
-                        window.vidiConfig.brandName = data.brandName ? data.brandName : window.vidiConfig.brandName;
-                        window.vidiConfig.startUpModal = data.startUpModal ? data.startUpModal : window.vidiConfig.startUpModal;
-                        window.vidiConfig.baseLayers = data.baseLayers ? data.baseLayers : window.vidiConfig.baseLayers;
-                        window.vidiConfig.enabledExtensions = data.enabledExtensions ? data.enabledExtensions : window.vidiConfig.enabledExtensions;
-                        window.vidiConfig.searchConfig = data.searchConfig ? data.searchConfig : window.vidiConfig.searchConfig;
-                        window.vidiConfig.aboutBox = data.aboutBox ? data.aboutBox : window.vidiConfig.aboutBox;
-                        window.vidiConfig.enabledSearch = data.enabledSearch ? data.enabledSearch : window.vidiConfig.enabledSearch;
-                        window.vidiConfig.removeDisabledLayersFromLegend = data.removeDisabledLayersFromLegend ? data.removeDisabledLayersFromLegend : window.vidiConfig.removeDisabledLayersFromLegend;
-                        window.vidiConfig.snapshot = data.snapshot ? data.snapshot : window.vidiConfig.snapshot;
-                        window.vidiConfig.schemata = data.schemata ? data.schemata : window.vidiConfig.schemata;
-                        window.vidiConfig.template = data.template ? data.template : window.vidiConfig.template;
-                        window.vidiConfig.enabledPrints = data.enabledPrints ? data.enabledPrints : window.vidiConfig.enabledPrints;
-                        window.vidiConfig.activateMainTab = data.activateMainTab ? data.activateMainTab : window.vidiConfig.activateMainTab;
-                        window.vidiConfig.extensionConfig = data.extensionConfig ? data.extensionConfig : window.vidiConfig.extensionConfig;
-                        window.vidiConfig.singleTiled = data.singleTiled ? data.singleTiled : window.vidiConfig.singleTiled;
-                        window.vidiConfig.doNotCloseLoadScreen = data.doNotCloseLoadScreen ? data.doNotCloseLoadScreen : window.vidiConfig.doNotCloseLoadScreen;
-                        window.vidiConfig.startupModalSupressionTemplates = data.startupModalSupressionTemplates ? data.startupModalSupressionTemplates : window.vidiConfig.startupModalSupressionTemplates;
-                        window.vidiConfig.cssFiles = data.cssFiles ? data.cssFiles : window.vidiConfig.cssFiles;
-                        window.vidiConfig.dontUseAdvancedBaseLayerSwitcher = data.dontUseAdvancedBaseLayerSwitcher ? data.dontUseAdvancedBaseLayerSwitcher : window.vidiConfig.dontUseAdvancedBaseLayerSwitcher;
-                        window.vidiConfig.wmsUriReplace = data.wmsUriReplace ? data.wmsUriReplace : window.vidiConfig.wmsUriReplace;
-                        window.vidiConfig.infoClickCursorStyle = data.infoClickCursorStyle ? data.infoClickCursorStyle : window.vidiConfig.infoClickCursorStyle;
-                        window.vidiConfig.crossMultiSelect = data.crossMultiSelect ? data.crossMultiSelect : window.vidiConfig.crossMultiSelect;
-                        window.vidiConfig.featureInfoTableOnMap = data.featureInfoTableOnMap ? data.featureInfoTableOnMap : window.vidiConfig.featureInfoTableOnMap;
-                        window.vidiConfig.showLayerGroupCheckbox = data.showLayerGroupCheckbox ? data.showLayerGroupCheckbox : window.vidiConfig.showLayerGroupCheckbox;
-                        window.vidiConfig.activeLayers = data.activeLayers ? data.activeLayers : window.vidiConfig.activeLayers;
+                        for (let prop in defaults) {
+                            window.vidiConfig[prop] = typeof data[prop] !== 'undefined' ? data[prop] : window.vidiConfig[prop];
+                        }
                     }).fail(function () {
                         console.log("Could not load: " + configFile);
                         if (window.vidiConfig.defaultConfig && (window.vidiConfig.defaultConfig !== configFile)) {
@@ -146,11 +162,7 @@ module.exports = {
         // Render template and set some styling
         // ====================================
 
-        if (typeof window.vidiConfig.template === "undefined") {
-            tmpl = "default.tmpl";
-        } else {
-            tmpl = window.vidiConfig.template;
-        }
+        tmpl = window.vidiConfig.template;
 
         // Check if template is set in URL vars
         // ====================================
@@ -161,6 +173,7 @@ module.exports = {
                 par.pop();
             }
             tmpl = par.join();
+            window.vidiConfig.template = tmpl;
         }
 
         // If px and py is provided for print templates,
@@ -220,10 +233,7 @@ module.exports = {
         let humanUsedTemplate = !(urlVars.px && urlVars.py);
         if (`tmpl` in urlVars) {
             let supressedModalTemplates = DEFAULT_STARTUP_MODAL_SUPRESSION_TEMPLATES;
-            if (`startupModalSupressionTemplates` in window.vidiConfig && Array.isArray(window.vidiConfig.startupModalSupressionTemplates)) {
-                supressedModalTemplates = window.vidiConfig.startupModalSupressionTemplates;
-            }
-
+            supressedModalTemplates = window.vidiConfig.startupModalSupressionTemplates;
             supressedModalTemplates.map(item => {
                 if (typeof item === 'string' || item instanceof String) {
                     // Exact string template name
@@ -278,16 +288,14 @@ module.exports = {
         // Load css files
         // ==============
 
-        if (typeof window.vidiConfig.cssFiles === "object") {
-            window.vidiConfig.cssFiles.forEach((file) => {
-                let url = `/api/css/${urlparser.db}/${file}`;
-                $("<link/>", {
-                    rel: "stylesheet",
-                    type: "text/css",
-                    href: url
-                }).appendTo("head");
-            });
-        }
+        window.vidiConfig.cssFiles.forEach((file) => {
+            let url = `/api/css/${urlparser.db}/${file}`;
+            $("<link/>", {
+                rel: "stylesheet",
+                type: "text/css",
+                href: url
+            }).appendTo("head");
+        });
 
         // Add the tooltip div
         // ===================
@@ -327,7 +335,7 @@ module.exports = {
 
         /**
          * Fetch meta > initialize settings > create layer tree >
-         * initialize state > load layers > initialize extensions > finish
+         * load layers > initialize extensions > initialize state > finish
          */
         modules.meta.init().then((schemataStr) => {
             return modules.setting.init(schemataStr);
@@ -336,91 +344,89 @@ module.exports = {
             //alert("Vidi is loaded without schema. Can't set extent or add layers");
             backboneEvents.get().trigger("ready:meta");
         }).then(() => {
+            try {
+
+                // Require search module
+                // =====================
+
+                // Hack to compile Glob files. Don´t call this function!
+                function ಠ_ಠ() {
+                    require('./search/*.js', {mode: 'expand'});
+                }
+
+                if (typeof vidiConfig.searchModules !== "undefined") {
+                    $.each(vidiConfig.searchModules, function (i, v) {
+                        modules.search[v] = require('./search/' + v + '.js');
+                        modules.search[v].set(modules);
+                    });
+                    modules.search[window.vidiConfig.enabledSearch].init(null, null, null, null, 'init');
+                }
+
+                // Require extensions modules
+                // ==========================
+
+                //Hack to compile Glob files. Don´t call this function!
+                function ಠ_ಠ_() {
+                    require('./../../extensions/*/browser/*.js', {mode: 'expand'});
+                    require('./../../extensions/*/browser/*/*.js', {mode: 'expand'});
+
+                    // require('./../../extensions/!(watsonc)/browser/*.js', {mode: 'expand'});
+                    // require('./../../extensions/!(watsonc)/browser/*/*.js', {mode: 'expand'});
+                }
+
+                if (typeof vidiConfig.extensions !== "undefined" && typeof vidiConfig.extensions.browser !== "undefined") {
+                    $.each(vidiConfig.extensions.browser, function (i, v) {
+                        modules.extensions[Object.keys(v)[0]] = {};
+                        $.each(v[Object.keys(v)[0]], function (n, m) {
+                            modules.extensions[Object.keys(v)[0]][m] = require('./../../extensions/' + Object.keys(v)[0] + '/browser/' + m + ".js");
+                            modules.extensions[Object.keys(v)[0]][m].set(modules);
+                        })
+                    });
+
+                    if (typeof window.vidiConfig.enabledExtensions === "object") {
+                        let enabledExtensionsCopy = JSON.parse(JSON.stringify(window.vidiConfig.enabledExtensions));
+                        $.each(vidiConfig.extensions.browser, function (i, v) {
+                            $.each(v[Object.keys(v)[0]], function (n, m) {
+                                if (window.vidiConfig.enabledExtensions.indexOf(Object.keys(v)[0]) > -1) {
+                                    try {
+                                        modules.extensions[Object.keys(v)[0]][m].init();
+                                    } catch (e) {
+
+                                        console.warn(`Module ${Object.keys(v)[0]} could not be initiated`)
+                                        console.error(e);
+                                    }
+
+                                    let enabledExtensionIndex = enabledExtensionsCopy.indexOf(Object.keys(v)[0]);
+                                    if (enabledExtensionIndex > -1) {
+                                        enabledExtensionsCopy.splice(enabledExtensionIndex, 1);
+                                    }
+                                }
+                            })
+                        });
+
+                        if (enabledExtensionsCopy.length > 0) {
+                            console.warn('Following extensions need to be enabled, but they were not initially compiled: ' + JSON.stringify(enabledExtensionsCopy));
+                        }
+
+                        // Show log in button if session module is enabled
+                        if (window.vidiConfig.enabledExtensions.indexOf("session") > -1 && !enabledExtensionsCopy.indexOf("session") > -1) {
+                            $("#session").show();
+                        }
+                    }
+                }
+                $(window).resize(function () {
+                    setTimeout(function () {
+                        modules.cloud.get().map.invalidateSize();
+                    }, 100);
+                });
+                backboneEvents.get().trigger(`extensions:initialized`);
+            } catch (e) {
+                console.error("Could not perform application initialization", e.message, e);
+            }
             return modules.layerTree.create();
         }).finally(() => {
             modules.state.init().then(() => {
                 modules.state.listenAny(`extensions:initialized`, [`layerTree`]);
-                try {
-
-                    // Require search module
-                    // =====================
-
-                    // Hack to compile Glob files. Don´t call this function!
-                    function ಠ_ಠ() {
-                        require('./search/*.js', {mode: 'expand'});
-                    }
-
-                    if (typeof vidiConfig.searchModules !== "undefined") {
-                        $.each(vidiConfig.searchModules, function (i, v) {
-                            modules.search[v] = require('./search/' + v + '.js');
-                            modules.search[v].set(modules);
-                        });
-                        modules.search[window.vidiConfig.enabledSearch].init(null, null, null, null, 'init');
-                    }
-
-                    // Require extensions modules
-                    // ==========================
-
-                    //Hack to compile Glob files. Don´t call this function!
-                    function ಠ_ಠ_() {
-                        require('./../../extensions/*/browser/*.js', {mode: 'expand'});
-                        require('./../../extensions/*/browser/*/*.js', {mode: 'expand'});
-
-                        // require('./../../extensions/!(watsonc)/browser/*.js', {mode: 'expand'});
-                        // require('./../../extensions/!(watsonc)/browser/*/*.js', {mode: 'expand'});
-                    }
-
-                    if (typeof vidiConfig.extensions !== "undefined" && typeof vidiConfig.extensions.browser !== "undefined") {
-                        $.each(vidiConfig.extensions.browser, function (i, v) {
-                            modules.extensions[Object.keys(v)[0]] = {};
-                            $.each(v[Object.keys(v)[0]], function (n, m) {
-                                modules.extensions[Object.keys(v)[0]][m] = require('./../../extensions/' + Object.keys(v)[0] + '/browser/' + m + ".js");
-                                modules.extensions[Object.keys(v)[0]][m].set(modules);
-                            })
-                        });
-
-                        if (typeof window.vidiConfig.enabledExtensions === "object") {
-                            let enabledExtensionsCopy = JSON.parse(JSON.stringify(window.vidiConfig.enabledExtensions));
-                            $.each(vidiConfig.extensions.browser, function (i, v) {
-                                $.each(v[Object.keys(v)[0]], function (n, m) {
-                                    if (window.vidiConfig.enabledExtensions.indexOf(Object.keys(v)[0]) > -1) {
-                                        try {
-                                            modules.extensions[Object.keys(v)[0]][m].init();
-                                        } catch (e) {
-
-                                            console.warn(`Module ${Object.keys(v)[0]} could not be initiated`)
-                                            console.error(e);
-                                        }
-
-                                        let enabledExtensionIndex = enabledExtensionsCopy.indexOf(Object.keys(v)[0]);
-                                        if (enabledExtensionIndex > -1) {
-                                            enabledExtensionsCopy.splice(enabledExtensionIndex, 1);
-                                        }
-                                    }
-                                })
-                            });
-
-                            if (enabledExtensionsCopy.length > 0) {
-                                console.warn('Following extensions need to be enabled, but they were not initially compiled: ' + JSON.stringify(enabledExtensionsCopy));
-                            }
-
-                            // Show log in button if session module is enabled
-                            if (window.vidiConfig.enabledExtensions.indexOf("session") > -1 && !enabledExtensionsCopy.indexOf("session") > -1) {
-                                $("#session").show();
-                            }
-                        }
-                    }
-
-                    $(window).resize(function () {
-                        setTimeout(function () {
-                            modules.cloud.get().map.invalidateSize();
-                        }, 100);
-                    });
-
-                    backboneEvents.get().trigger(`extensions:initialized`);
-                } catch (e) {
-                    console.error("Could not perform application initialization", e.message, e);
-                }
                 $("#loadscreen").fadeOut(200);
             }).catch((error) => {
                 console.error(error)

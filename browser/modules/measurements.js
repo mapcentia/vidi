@@ -212,8 +212,7 @@ module.exports = {
                 draw: {
                     polygon: {
                         allowIntersection: true,
-                        shapeOptions: {},
-                        showArea: true
+                        shapeOptions: {}
                     },
                     polyline: {
                         metric: true,
@@ -234,7 +233,12 @@ module.exports = {
                     icon: cloud.iconSmall
                 },
                 polyline: {
-                    icon: cloud.iconSmall
+                    icon: cloud.iconSmall,
+                    metric: true,
+                    precision: {
+                        m: 1,
+                        km: 2
+                    },
                 }
             });
 
@@ -374,22 +378,26 @@ module.exports = {
      */
     recreateDrawnings: (parr) => {
         let v = parr;
-        $.each(v[0].geojson.features, (n, m) => {
-            let json = L.geoJson(m, {
-                style: function (f) {
-                    return f.style;
+        try {
+            $.each(v[0].geojson.features, (n, m) => {
+                let json = L.geoJson(m, {
+                    style: function (f) {
+                        return f.style;
+                    }
+                });
+
+                let g = json._layers[Object.keys(json._layers)[0]];
+                g._vidi_type = m._vidi_type;
+                drawnItems.addLayer(g);
+                g.showMeasurements(m._vidi_measurementOptions);
+                if (m._vidi_extremities) {
+                    g.showExtremities(m._vidi_extremities.pattern, m._vidi_extremities.size, m._vidi_extremities.where);
                 }
             });
-
-            let g = json._layers[Object.keys(json._layers)[0]];
-            g._vidi_type = m._vidi_type;
-            drawnItems.addLayer(g);
-            g.showMeasurements(m._vidi_measurementOptions);
-            if (m._vidi_extremities) {
-                g.showExtremities(m._vidi_extremities.pattern, m._vidi_extremities.size, m._vidi_extremities.where);
-            }
-        });
-    },
+        } catch(e) {
+            console.error(e.message)
+        }
+     },
 
 
     /**

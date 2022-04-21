@@ -17,31 +17,118 @@ Lagopsætning fra GC2
 GC2 Meta information
 *****************************************************************
 
-GC2 har et konfigurerbart Meta Data system med egenskaber, som Vidi læser ved opstart. Egenskaberne omfatter fx hvilke lag, som kan editeres, om et lag skal vises som tile- eller vektorlag osv. GC2 skal være sat op med de rigtige Meta Data egenskaber, før det kan bruges sammen med Vidi.
+GC2 har et konfigurerbart Meta Data system med egenskaber tilknyttet de enkelte lag, som Vidi læser ved opstart. Egenskaberne omfatter fx om lag kan editeres, om et lag skal vises som tile- eller vektorlag osv.
 
+.. figure:: ../../../_media/gc2-meta.png
+    :width: 700px
+    :align: center
+    :name: cross-multi-select
+    :figclass: align-center
+|
 Herunder følger de forskellige egenskaber, der har betydning for Vidi.
+
+.. _gc2mata_infopopup:
+
+Info pop-up
+=================================================================
+
+**Pop-up template**
+
+Indeholdet i feature-info pop-up'en styres vha. en template, som anvender sproget `handlebars <https://handlebarsjs.com>`_
+
+Hvis der ikke angives en template, så anvendes en standard, som looper felterne igennem og lister dem. Den ser således ud:
+
+.. code-block:: handlebars
+
+    <div class="vidi-popup-content">
+        <h3 class="popup-title">{{_vidi_content.title}}</h3>
+        {{#_vidi_content.fields}}
+            {{#if value}}
+                <h4>{{title}}</h4>
+                <p {{#if type}}class="{{type}}"{{/if}}>{{{value}}}</p>
+            {{/if}}
+        {{/_vidi_content.fields}}
+    </div>
+
+**Element selector**
+
+Hvilket DOM element skal pop-up templaten renderes i? Kan bruges til brugerdefinerede templates.
+
+**Function**
+
+En JavaScript funktion som kaldes når feature-info foretages. En række argumenter bliver sendt til funktionen, herunder det objekt man har klikket i GeoJSON formatet.
+
+.. code-block:: javascript
+
+    function(feature, layer){
+        alert(feature.properties.regionnavn)
+    }
+
+**Select function**
+
+En JavaScript funktion, som kaldes når der vælges en række i feature-listen. Id på Leaflet layer samt selve Leaflet layer bliver sendt som argumenter.
+
+.. code-block:: javascript
+
+    function(id, layer){
+        alert(layer.feature.properties.regionnavn)
+    }
+
+**Accordion summery prefix**
+
+Anvendes ved brugen af :ref:`configjs_crossmultiselect`
+
+**Accordion summery**
+
+Anvendes ved brugen af :ref:`configjs_crossmultiselect`
 
 .. _gc2mata_layertype:
 
-1) Layer type
+Layer type
 =================================================================
 
 **Type**
 
-Hvilket type skal laget have i Vidi? Enten Vector, Tile eller Both. Tile er standard. Hvis Vector vælges vil Vidi hente rå-dataene og vise som et vektorlag. Vektorlag gemmes i browseren og kan bruges uden netværk (Se PWA afsnittet). Hvis Both vælges, bliver det muligt at skifte mellem typerne i Vidi.
+Hvilken type skal laget have i Vidi? Enten Vector eller Tile. Tile er WMS fra MapServer/QGIS Server og er standard. Hvis Vector vælges vil Vidi hente rå-dataene og vise som et vektorlag. Vektorlag gemmes i browseren og kan bruges uden netværk. Hvis begge tjekkes af, vil man kunne vælge mellem dem i lag-træet.
+
+.. note::
+    Typerne WebGL og MVT (vector tiles) er eksperimentielle og virker givetvis ikke i Vidi.
+
+**Default**
+
+Hvilken type skal være valgt fra starten.
+
+.. _gc2mata_tables:
+
+Tables
+=================================================================
+
+**Zoom on select**
+
+Skal der zoomes ved valg af objekt i feature-info-tabellen?
+
+**Max zoom level**
+
+Hvis der zoomes, så kan maks zoom-level sættes. Jo højere tal jo længere ind zoomes der. Er speciel anvendelig ved punktlag, hvor der altid zoomes maks ind. Standard sat til 17.
 
 .. _gc2mata_editor:
 
-2) Editor
+Editor
 =================================================================
 
 **Editable**
 
 Skal laget være editerbart? Både Tile og Vector kan editeres. Det anbefales dog at benytte Vector til lag, som skal editeres i marken, da der er fuld funktionalitet uden netværk eller med langsom forbindelse.
 
+.. figure:: ../../../_media/gc2-meta-editor.png
+    :width: 400px
+    :align: center
+    :name: cross-multi-select
+    :figclass: align-center
+|
 .. _gc2mata_tilesettings:
 
-3) Tile settings
+Tile settings
 =================================================================
 
 (Har kun betydning for lag af typen Tile)
@@ -54,9 +141,26 @@ Hvis tjekket af, vil Vidi omgå MapCache og trække laget direkte fra WMS. Dette
 
 Denne egenskab bevirker, at laget tiles bliver trukket fra et brugerdefineret API. Fx en extension til GC2.
 
+**Selected style**
+
+Her kan angives et style-objekt, som styrer hvordan det valgte objekt bliver markeret ved feature-info. Hvis det angives anvendes e. standard styling.
+
+Eksempel på et style-objekt:
+
+.. code-block:: json
+
+    {
+        "color": "green",
+        "weight": 2,
+        "fillColor": "red",
+        "opacity": 0,
+        "fillOpacity": 0.5,
+        "dashSpeed": 5
+    }
+
 .. _gc2mata_vectorsettings:
 
-4) Vector settings
+Vector settings
 =================================================================
 
 (Har kun betydning for lag af typen Vector)
@@ -69,9 +173,76 @@ Kan enten være Static eller dynamic. Static betyder, at alle lagets data bliver
 
 Hvor mange features skal skal der max leveres? Når laget tændes og max bliver nået, vises ingen features i laget og brugeren bliver informeret om, at max blev nået.
 
+**Use clustering**
+
+Aktiverer Leaflet Cluster Map på laget.
+
+**Point to layer**
+
+Vektor-punkter punkter kan vises som enten circle markers eller grafiske markers. Førstnævnte kan sammenlignes med vektor-linjer og flader og vil anvende nedenfornævnte Style function.
+
+Men punkter kan også vises som grafisk markers. Vidi har indbygget Leaflet Plugin'en `Extra Markers <https://github.com/coryasilva/Leaflet.ExtraMarkers>`_ med `Font Awesome <https://fontawesome.com>`_ , som anvendes uden videre.
+
+.. code-block:: javascript
+
+    function(feature, latlng) {
+        return L.marker(latlng, {
+            icon: L.ExtraMarkers.icon({
+                icon: 'fa-home',
+                markerColor: 'blue',
+                shape: 'circle',
+                prefix: 'fa',
+                iconColor: '#fff'
+            })
+        });
+    }
+
+**Style function**
+
+Funktion til styling af vektor-lag. Funktionen modtager hver enkelt feature i laget og leverer en style tilbage. Man kan derved lave meget anvanceret tematiseringer./
+
+.. code-block:: javascript
+
+    function(feature) {
+        return {
+            color: 'green',
+            weight: 2,
+            fillColor: 'red',
+            opacity: 0.5,
+            fillOpacity: 0.5,
+            radius: 25
+        }
+    }
+
+**Show table**
+
+Hvis tjekket af og laget bliver tændt som vektor vil en tabel med lagets attributter vises.
+Kolonnerne styres af ``Vis i klik-info`` og ``Alias`` i GC2 Admin. Der kan kun vises en tabel ad gangen.
+Hvis der allerede er en tabel åben, sker der ingenting ved åbning af en anden - det første lag skal slukkes før en anden tabel kan åbnes.
+Virker kun i embed template.
+Positionen og bredde/højde på tabellen kan styres gennem :ref:`Kørselskonfiguration (configs)<configjs_vectorTable>`
+
+.. figure:: ../../../_media/vector-table.png
+    :width: 400px
+    :align: center
+    :name: vector-table
+    :figclass: align-center
+
+**Reload Interval**
+
+Hvis dette sættes vil laget refreshe i det angivne interval. Angives i millisekunder.
+
+**Reload callback**
+
+Hvis ovenfor er sat, vil denne funktion blive kørt ved hvert refresh.
+
+**Disable feature info**
+
+Deaktiverer feature-info på vektor-laget.
+
 .. _gc2mata_filters:
 
-5) Filters
+Filters
 =================================================================
 
 **Filter config**
@@ -88,6 +259,14 @@ Filteropsætningen er en liste af objekter med hver to egenskaber: field og oper
       {"field": "datotid_til","operator": "<"}
     ]
 
+Som giver dette resultat:
+
+.. figure:: ../../../_media/gc2-meta-filters.png
+    :width: 400px
+    :align: center
+    :name: cross-multi-select
+    :figclass: align-center
+|
 **Predefined filters**
 
 Præ-definerede filtre gør det muligt, at aktivere fastsatte filtrer med en tjekboks. Som udgangspunkt er et filter aktiveret og som match bruges altid "Any". Dette er velegnet til at give brugeren mulighed for at slukke/tænde klasser i kortet. Et eksempel på Præ-definerede filtre kan ses nedenunder. Først skrives titlen på filteret og på højresiden skrives selve filtret, som er en SQL where clause.
@@ -103,6 +282,13 @@ Præ-definerede filtre gør det muligt, at aktivere fastsatte filtrer med en tje
 
 Eksemplet ser sådan ud i lag-træet:
 
+.. figure:: ../../../_media/gc2-meta-filters2.png
+    :width: 400px
+    :align: center
+    :name: cross-multi-select
+    :figclass: align-center
+|
+
 **Default match**
 
 Hvad skal match være som standard: All eller Any
@@ -111,9 +297,36 @@ Hvad skal match være som standard: All eller Any
 
 Hvis denne egenskab er slået til kan filteropsætningen ikke ændres i Vidi.
 
+.. _gc2mata_mouseover:
+
+Mouse over
+=================================================================
+
+**Activate mouse over**
+
+Aktiverer mouse over på laget. Virker på tile- og vektor-lag.
+
+**Template**
+
+Indeholdet i mouse over labelen styres vha. en template, som anvender sproget `handlebars <https://handlebarsjs.com>`_
+
+Hvis der ikke angives en template, så anvendes en standard, som looper valgte felterne (tjekket af i :ref:`gc2structure_mouseover`) igennem og lister dem. Den ser således ud:
+
+.. code-block:: handlebars
+
+    <div>
+        {{#each data}}
+            {{this.title}}: {{this.value}} <br>
+        {{/each}}
+    </div>
+
+**Cache UTF grid**
+
+Ved mouse over på tile-lag anvendes et såkaldt UTF grid, som er en slags interaktivt lag, som loades bag tile-laget. Det kræver database og CPU resourcer at danne disse grids, så det er muligt at cache dem, således allerede brugte grids ikke skal gendannes.
+
 .. _gc2mata_references:
 
-6) References
+References
 =================================================================
 
 **Referenced by**
@@ -138,9 +351,16 @@ Her er der kun ét børne-lag, men der skrives flere objekter ind i listen.
 
 I Vidi i laget-træet kan børne-lagene ses på forældre-laget:
 
+.. figure:: ../../../_media/gc2-meta-references.png
+    :width: 400px
+    :align: center
+    :name: cross-multi-select
+    :figclass: align-center
+|
+
 .. _gc2mata_layerstree:
 
-7) Layer tree
+Layer tree
 =================================================================
 
 **Sub group**
@@ -149,8 +369,11 @@ Denne egenskab kan gruppere lag i en under-lag-grupper. Alle lag med samme Sub g
 
 Man kan have uendelig mange undergrupper og stien af undergrupper, hvor laget skal befinde sig skal angives således:
 
-sub group 1|sub group 2|sub group 3|sub group 4x
-Open tools
+.. code-block:: json
+
+    sub group 1|sub group 2|sub group 3|sub group 4
+
+**Open tools**
 
 Her kan angives om et lags værktøjer skal være åbne fra starten. Hvilke værktøjer, der skal være åbne, angives således:
 
@@ -166,21 +389,109 @@ Her ses alle mulighederne:
 
     ["filters","opacity","load-strategy","search"]
 
+**Disable check box**
+
+Laget kan låses. Det låses op, hvis laget er registreret som "barn" til et andet lag gennem :ref:`gc2mata_references`, hvorpå der aktiveres et filter.
+
+
 *****************************************************************
 GC2 Struktur-fanen
 *****************************************************************
 
 I GC2's struktur-fane kan der laves en række indstillinger på feltniveau.
 
-Egenskaber
-=================================================================
-I feltet ``Egenskaber`` kan der defineres hvilke værdier, der kan være i feltet. Hvis dette defineres, vil der i Vidi's filter og editerings funktioner blive dannet en drop-down-liste, hvor værdierne kan vælges. Det vil altså ikke være muligt at indtaste vilkårlige værdier.
-
-.. figure:: ../../../_media/structur-tab-properties.png
+.. figure:: ../../../_media/structure-overview.png
     :width: 700px
     :align: center
     :name: cross-multi-select
     :figclass: align-center
+|
+
+Alias
+=================================================================
+
+Giv feltet et alias, som vises i stedet for det tekniske feltnavn i Vidi. Kan indeholde specialtegn
+
+Vis i klik-info
+=================================================================
+
+Medtag feltet i feature-info. Gælder kun ved brugen af standard pop-up templaten. (se :ref:`gc2mata_infopopup`)
+
+.. _gc2structure_mouseover:
+
+Vis i mouse-over
+=================================================================
+
+Medtag feltet i mouse-over. Gælder kun ved brugen af standard mouse-over-templaten. Men skal klikkes af, hvis feltet overhovedet skal med i UTF Grid'et. (se :ref:`gc2mata_mouseover`)
+
+
+Søgbar
+=================================================================
+
+Gør feltet søgbart i lagets fritekstsøgning.
+
+.. figure:: ../../../_media/layer-search.png
+    :width: 500px
+    :align: center
+    :name: cross-multi-select
+    :figclass: align-center
+|
+
+Deaktiver filtrering
+=================================================================
+
+Ekskluder feltet fra lag-filtrering.
+
+
+Autocomplete
+=================================================================
+
+Aktiver autocomplete på feltet i filtrering.
+
+.. figure:: ../../../_media/filter-autocomplete.png
+    :width: 450px
+    :align: center
+    :name: cross-multi-select
+    :figclass: align-center
+|
+
+.. _gc2structure_link:
+
+Gør til link
+=================================================================
+
+Hvis feltet indholder en web-adresse gøres det til et aktivt link i pop-up'en. Hvis der anvendes en brugerdefineret pop-up, så anvend tre { } udenom feltnavnet, så HTML linket bliver fortolket (se :ref:`gc2mata_infopopup`)
+
+.. code-block:: handlebars
+
+    {{{felt_med_link}}}
+
+
+Content
+=================================================================
+
+Hvis feltet indeholder et link til et billede eller mp4-video kan der her vælges typen. Ved brug af standard templaten bliver billedet eller videoen sat ind (se :ref:`gc2mata_infopopup`)
+
+
+.. _gc2structure_link_prefix:
+
+Link prefix
+=================================================================
+
+Hvis :ref:`gc2structure_link` er tjekket af, kan der sættes en tekst-streng foran linket. Fx hvis ``https://`` mangler i linket (fx ``minside.dk/mitdok.pdf``) således det blivet et gyldigt link.
+
+
+Link suffix
+=================================================================
+
+Som ved :ref:`gc2structure_link_prefix` men bare bagved. Fx hvis feltet kun indeholder en titel på et dokument: ``mitdok``, så kan ``https://minside.dk`` sættes som prefix og ``.pdf`` som suffix. og resultatet bliver ``https://minside.dk/mitdok.pdf``.
+
+
+Egenskaber
+=================================================================
+
+Her kan der defineres hvilke værdier, der kan være i feltet. Hvis dette defineres, vil der i Vidi's filter og editerings funktioner blive dannet en drop-down-liste, hvor værdierne kan vælges. Det vil altså ikke være muligt at indtaste vilkårlige værdier.
+
 
 Listen af værdier kan defineres på en række forskellige måder.
 

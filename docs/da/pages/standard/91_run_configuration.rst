@@ -1,7 +1,7 @@
 .. _configjson:
 
 #################################################################
-Kørselskonfiguration
+Kørselskonfiguration (configs)
 #################################################################
 
 .. topic:: Overview
@@ -17,7 +17,7 @@ Når vidi startes i browseren læses værdier ind fra :ref:`configjs`. I flere t
 
 Vidi startes med en URL som denne (uden fragments [#fragment]_):
 
-``https://kort.geofyn.dk/app/geofyn/?config=borgerkort01.json``
+``https://vidi.dk/app/mindb/?config=minconfig.json``
 
 Som kan læses sådan:
 
@@ -244,6 +244,51 @@ Opsætning af tilgængelige base layers kan ske på fire forskellige metoder:
         }
     ],
 
+Til WMS baggrundskort fra Datafordeler og Dataforsyningen kan der anvendes en proxy, som til dels fixer et problem med Datafordeler og til dels kan forsyne kaldene med brugernavn/kodeord eller token, så disse ikke bliver eksponeret til Vidi brugerne.
+
+Se hvordan bruger-information opsættes i Systemkonfigurationen :ref:`configjs_df`
+
+Derefter kan WMS'er opsættes således. Fx hvis man ønsker at anvende:
+
+``https://services.datafordeler.dk/GeoDanmarkOrto/orto_foraar/1.0.0/WMS``
+
+skal "url" angives til:
+
+``/api/datafordeler/GeoDanmarkOrto/orto_foraar/1.0.0/WMS``
+
+Vidi sørger så for at tilføje bruger-infomationen og tilrette URL.
+
+.. code-block:: json
+
+    "baseLayers": [
+        {
+            "type": "wms",
+            "url": "/api/datafordeler/GeoDanmarkOrto/orto_foraar/1.0.0/WMS",
+            "layers": ["geodanmark_2020_12_5cm"],
+            "id": "geodanmark_2020_12_5cm",
+            "name": "TEST geodanmark_2020_12_5cm",
+            "description": "geodanmark_2020_12_5cm",
+            "attribution": "Styrelsen for Dataforsyning og Effektivisering",
+            "minZoom": 8,
+            "maxZoom": 22,
+            "maxNativeZoom": 22,
+            "transparent": true
+        },
+        {
+            "type": "wms",
+            "url": "/api/dataforsyningen/topo_skaermkort_DAF",
+            "layers": ["topo_skaermkort"],
+            "id": "topo_skaermkort",
+            "name": "TEST topo_skaermkort",
+            "description": "geodanmark_2020_12_5cm",
+            "attribution": "Styrelsen for Dataforsyning og Effektivisering",
+            "minZoom": 8,
+            "maxZoom": 22,
+            "maxNativeZoom": 22,
+            "transparent": true
+        }
+    ]
+
 .. note::
     HERE, Bing og Google Maps kræver API nøgle opsat i GC2. Google Maps fungerer på en anden måde end andre lag og langt fra optimalt. Fx kan man ikke printe Google Maps.
 
@@ -291,15 +336,16 @@ featureInfoTableOnMap
 Når denne er sat til ``true`` vises feature-info tabellerne i en popup på kortet i stedet for i sidepanelet. Det gør indstillingen veleget til embed template.
 Ved brug af "avanceret forespørgelse" vises tabellerne dog stadig i sidepanelet.
 
+.. code-block:: json
+
+    "featureInfoTableOnMap": true,
+
 .. figure:: ../../../_media/feature-info-table-on-map.png
     :width: 400px
     :align: center
     :name: feature-info-table-on-map
     :figclass: align-center
-
-.. code-block:: json
-
-    "featureInfoTableOnMap": true,
+|
 
 .. note::
     Kan ikke anvendes i sammenhæng med :ref:`configjs_crossmultiselect`
@@ -317,18 +363,19 @@ Overskrifterne har to dele:
 
 Ovenstående sættes i GC2 Meta.
 
+.. code-block:: json
+
+    "crossMultiSelect": true,
+
 .. figure:: ../../../_media/cross-multi-select.png
     :width: 400px
     :align: center
     :name: cross-multi-select
     :figclass: align-center
-
-.. code-block:: json
-
-    "crossMultiSelect": true,
+|
 
 .. note::
-    Hvis et lag er editerbart, vises "blyant" og "skraldespand" ikonerne ikke i pop-up'en.
+    Hvis extension ``editor`` er aktiv vil ``crossMultiSelect`` bliver sat til ``false``.
 
 .. _configjs_activatemaintab:
 
@@ -393,14 +440,14 @@ Andre muligheder kan ses `her <https://developer.mozilla.org/en-US/docs/Web/CSS/
 
 .. _configjs_showlayergroupcheckboxes:
 
-showLayerGroupCheckboxe
+showLayerGroupCheckbox
 *****************************************************************
 
 Viser en tjekboks i hver lag-gruppe og under-gruppe, som tænder/slukker alle lag i den pågældende gruppe.
 
 .. code-block:: json
 
-    "showLayerGroupCheckboxe: true
+    "showLayerGroupCheckbox": true
 
 .. _configjs_activelayers:
 
@@ -415,6 +462,46 @@ Liste over lag, som skal tændes fra starten. Lag angives schema qualified og me
         "schema.lag1",
         "v:schema.lag2"
     ]
+
+
+.. _configjs_removedisabledlayersfromLegend:
+
+removeDisabledLayersFromLegend
+*****************************************************************
+
+Hvis sættes til true, så fjernes lag fra signaturforklaringen, når laget slukkes. Ellers forbliver det på signaturen, men tjekboksen bliver tom. Default er "false".
+
+.. code-block:: json
+
+    "removeDisabledLayersFromLegend": true
+
+.. _configjs_autoPanPopup:
+
+autoPanPopup
+*****************************************************************
+
+Denne indstilling bevirker, at når en pop-up åbnes, så panoreres kort således, at pop-up'en kommer indenfor kortets udsnit. Bemærk, at indstillingen helst skal sættes til "false", hvis der anvendes vektor-lag med dynamisk loading af data, fordi panoreringen evt. kan bevirke reload af data og derefter lukkes pop-up'en Default er "false".
+
+.. code-block:: json
+
+    "autoPanPopup": true
+
+.. _configjs_vectorTable:
+
+vectorTable
+*****************************************************************
+
+Denne indstilling styrer om :ref:`vektorlag tabellen<gc2mata_vectorsettings>` skal vises til højre for eller i bunden af kortet. Endvidere kan højde/bredde styres. Hvis positionen er sat til ``right``
+vil kun ``width`` have effekt og tabellen vil altid fylde højden ud. Hvis position er sat til ``bottom`` vil kun ``height`` have effekt og bredden bliver den samme som kortet.
+``width`` kan både være relativ ``%`` og absolute ``px`` mens ``height`` kun kan angives som absolute ``px``. Hvis ikke denne indstilling sættes bruges default værdier som vist nedenunder.
+
+.. code-block:: json
+
+    "vectorTable": {
+        "position": "bottom",
+        "width": "30%",
+        "height": "250px"
+    }
 
 .. rubric:: Fodnoter
 

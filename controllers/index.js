@@ -1,11 +1,11 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2020 MapCentia ApS
+ * @copyright  2013-2021 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
 
 router.use(require('./gc2/meta'));
 router.use(require('./gc2/stateSnapshots'));
@@ -18,6 +18,7 @@ router.use(require('./gc2/legend'));
 router.use(require('./gc2/sql'));
 router.use(require('./gc2/elasticsearch'));
 router.use(require('./gc2/feature'));
+router.use(require('./gc2/bulk'));
 router.use(require('./print'));
 router.use(require('./locale'));
 router.use(require('./config'));
@@ -26,5 +27,6 @@ router.use(require('./static'));
 router.use(require('./template'));
 router.use(require('./css'));
 router.use(require('./mergePrint'));
+router.use(require('./df'));
 
 module.exports = router;

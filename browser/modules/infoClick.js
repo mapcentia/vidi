@@ -74,7 +74,7 @@ module.exports = {
                     wkt = "POINT(" + coords.x + " " + coords.y + ")";
 
                     // Cross Multi select disabled
-                    if (typeof window.vidiConfig.crossMultiSelect === "undefined" || window.vidiConfig.crossMultiSelect === false) {
+                    if (!window.vidiConfig.crossMultiSelect || window.vidiConfig.enabledExtensions.includes('editor')) {
                         sqlQuery.init(qstore, wkt, "3857", null, null, [coords.lat, coords.lng], false, false, false, (layerId) => {
                             setTimeout(() => {
                                 let parentLayer = cloud.get().map._layers[layerId];
@@ -102,7 +102,7 @@ module.exports = {
                                 _layers.decrementCountLoading("_vidi_sql_" + store.id);
                                 backboneEvents.get().trigger("doneLoading:layers", "_vidi_sql_" + store.id);
                                 if (_layers.getCountLoading() === 0) {
-                                    layerTree.displayAttributesPopup(intersectingFeatures, e);
+                                    layerTree.displayAttributesPopup(intersectingFeatures, e, '');
                                 }
                             }, 200)
                         }, null, [coords.lat, coords.lng]);

@@ -142,6 +142,9 @@ body {
 .tab-content .tab-pane {
   height: 100%;
 }
+.tab-content .container {
+  width: 100%;
+}
 #menu {
   z-index: 2 !important;
 }
@@ -1169,7 +1172,7 @@ h4 small {
   box-shadow: 0 27px 24px 0 rgba(0, 0, 0, 0.2), 0 15px 77px 0 rgba(0, 0, 0, 0.22);
   background-color: #fff;
   border-radius: 2px;
-  z-index: 99999;
+  z-index: 999999;
   max-height: 80%;
 }
 .dialog-bottom .modal-body {
@@ -1249,7 +1252,7 @@ h4 small {
 }
 #layer-slide-body-wrapper > div,
 #click-for-info-slide-wrapper > div {
-  height: calc(100vh - 48px);
+  height: calc(100vh - 58px);
 }
 #conflict-result-content {
   height: 100% !important;
@@ -1664,4 +1667,11 @@ td.rdtYear:hover {
 }
 .drag-marker {
   cursor: move;
+}
+@media screen and (max-height: 700px) {
+  .leaflet-draw.leaflet-control {
+    margin-right: 54px!important;
+    top: -330px;
+    position: relative;
+  }
 }

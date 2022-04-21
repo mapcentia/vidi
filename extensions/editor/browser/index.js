@@ -7,6 +7,7 @@
 'use strict';
 
 import {LAYER, SYSTEM_FIELD_PREFIX} from '../../../browser/modules/layerTree/constants';
+import {GEOJSON_PRECISION} from '../../../browser/modules/constants';
 import dayjs from 'dayjs';
 
 const jquery = require('jquery');
@@ -30,9 +31,7 @@ let apiBridgeInstance = false;
 
 let multiply = require('geojson-multiply');
 
-let JSONSchemaForm = require("react-jsonschema-form");
-
-let Form = JSONSchemaForm.default;
+import Form from "@rjsf/core";
 
 let markers = [];
 
@@ -284,6 +283,7 @@ module.exports = {
                 }
 
                 if (fields[key]) {
+                    console.log(fields[key].type)
                     switch (fields[key].type) {
                         case `smallint`:
                         case `integer`:
@@ -296,6 +296,11 @@ module.exports = {
                         case `double precision`:
                             properties[key].type = `number`;
                             break;
+                        // case `time without time zone`:
+                        //     uiSchema[key] = {
+                        //         'ui:widget': 'time'
+                        //     };
+                        //     break;
                         case `date`:
                             uiSchema[key] = {
                                 'ui:widget': 'date'
@@ -408,7 +413,7 @@ module.exports = {
              * @param formData
              */
             const onSubmit = function (formData) {
-                let featureCollection, geoJson = editor.toGeoJSON();
+                let featureCollection, geoJson = editor.toGeoJSON(GEOJSON_PRECISION);
 
                 // Promote MULTI geom
                 if (type.substring(0, 5) === "MULTI") {
@@ -421,10 +426,10 @@ module.exports = {
                         geoJson.properties[key] = null;
                     }
                     if ((fields[key].type === "bytea" ||
-                        fields[key].type.startsWith("time") ||
-                        fields[key].type.startsWith("time") ||
-                        fields[key].type.startsWith("character") ||
-                        fields[key].type.startsWith("text")) &&
+                            fields[key].type.startsWith("time") ||
+                            fields[key].type.startsWith("time") ||
+                            fields[key].type.startsWith("character") ||
+                            fields[key].type.startsWith("text")) &&
                         geoJson.properties[key] !== null) {
                         geoJson.properties[key] = geoJson.properties[key].replace(/\\([\s\S])|(["])/ig, "\\$1$2");
                         geoJson.properties[key] = encodeURIComponent(geoJson.properties[key]);
@@ -661,7 +666,7 @@ module.exports = {
                 e.id = "v:" + e.id;
             }
 
-            e.initialFeatureJSON = e.toGeoJSON();
+            e.initialFeatureJSON = e.toGeoJSON(GEOJSON_PRECISION);
 
             featureWasEdited = false;
             // Hack to edit (Multi)Point layers
@@ -705,14 +710,22 @@ module.exports = {
 
                 default:
                     let numberOfNodes = 0;
-                    editedFeature.feature.geometry.coordinates.forEach((c) => {
-                        if (typeof c === "object") {
-                            c.forEach((c2) => {
-                                numberOfNodes += c2.length;
-                            });
+                    const coors = editedFeature.feature.geometry.coordinates;
+                    const calculateCount = (arr) => {
+                        for (let i = 0; i < arr.length; i++) {
+                            if (Array.isArray(arr[i])) {
+                                calculateCount(arr[i]);
+                            } else {
+                                numberOfNodes++;
+                                if (numberOfNodes === MAX_NODE_IN_FEATURE) {
+                                    return;
+                                }
+                            }
                         }
-                        numberOfNodes += c.length;
-                    })
+                    };
+                    calculateCount(coors);
+                    numberOfNodes = numberOfNodes / 2;
+
                     if (numberOfNodes <= MAX_NODE_IN_FEATURE) {
                         editor = e.enableEdit();
                     } else {
@@ -776,7 +789,7 @@ module.exports = {
              * @param formData
              */
             const onSubmit = (formData) => {
-                let GeoJSON = e.toGeoJSON(), featureCollection;
+                let GeoJSON = e.toGeoJSON(GEOJSON_PRECISION), featureCollection;
                 delete GeoJSON.properties._vidi_content;
                 delete GeoJSON.properties._id;
 
@@ -811,10 +824,10 @@ module.exports = {
                             GeoJSON.properties[key] = null;
                         }
                         if ((fields[key].type === "bytea" ||
-                            fields[key].type.startsWith("time") ||
-                            fields[key].type.startsWith("time") ||
-                            fields[key].type.startsWith("character") ||
-                            fields[key].type.startsWith("text")) &&
+                                fields[key].type.startsWith("time") ||
+                                fields[key].type.startsWith("time") ||
+                                fields[key].type.startsWith("character") ||
+                                fields[key].type.startsWith("text")) &&
                             GeoJSON.properties[key] !== null) {
                             GeoJSON.properties[key] = GeoJSON.properties[key].replace(/\\([\s\S])|(["])/ig, "\\$1$2");
                             GeoJSON.properties[key] = encodeURIComponent(GeoJSON.properties[key]);
@@ -957,7 +970,7 @@ module.exports = {
 
         let schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
             metaDataKeys = meta.getMetaDataKeys(),
-            GeoJSON = e.toGeoJSON();
+            GeoJSON = e.toGeoJSON(GEOJSON_PRECISION);
 
         const deleteFeature = () => {
             serviceWorkerCheck();

@@ -97,6 +97,32 @@ Tallene angiver brededer i hhv. phone, tablet og desktop.
 
 .. _configjs_complete_example:
 
+.. _configjs_df:
+
+df
+*****************************************************************
+
+Til WMS baggrundskort fra Datafordeler og Dataforsyningen kan der anvendes en proxy, som til dels fixer et problem med Datafordeler og til dels kan forsyne kaldene med brugernavn/kodeord eller token, så disse ikke bliver eksponeret til Vidi brugerne.
+
+Det er kun nødvendig at angive enten username/password eller token. Token har forrang hvis begge er angivet:
+
+.. code-block:: json
+
+    "df": {
+        "datafordeler" : {
+            "username": "....",
+            "password": "....",
+            "token": "...."
+        },
+        "dataforsyningen" : {
+            "username": "....",
+            "password": "....",
+            "token": "...."
+        }
+    }
+
+Se i Kørselskonfigurationen :ref:`configjs_baselayers` hvordan WMS'er fra Datafordeler og Dataforsyningen kan anvendes
+
 Komplet eksempel
 *****************************************************************
 
