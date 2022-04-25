@@ -178,43 +178,44 @@ class MarkupGenerator {
 
                         <div class="js-toggles-container" style="display: none; padding-right: 10px; padding-left: 10px;">
                             <span id="layer-tools-search">
-                                <a href="javascript:void(0);" class="js-toggle-search" >
-                                    <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Search`)}" class="material-icons">search</i>
-                                </a>
+                                <button class="js-toggle-search btn btn-sm btn-outline-success btn-floating" data-toggle="tooltip" data-placement="left" title="${__(`Search`)}" >
+                                    <i class="fa fa-search"></i>
+                                </button>
                             </span>
                             <span id="layer-tools-opacity">
-                                <a href="javascript:void(0);" class="js-toggle-opacity">
-                                    <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Opacity`)}" class="material-icons">opacity</i>
-                                </a>
+                                <button class="js-toggle-opacity btn btn-sm btn-outline-success btn-floating" data-toggle="tooltip" data-placement="left" title="${__(`Opacity`)}">
+                                    <i class="fa fa-tint"></i>
+                                </button>
                             </span>
                             <span id="layer-tools-labels">
-                                <a href="javascript:void(0);" class="js-toggle-labels">
-                                    <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Labels`)}" class="material-icons">label</i>
-                                </a>
+                                <button class="js-toggle-labels btn btn-sm btn-outline-success btn-floating" data-toggle="tooltip" data-placement="left" title="${__(`Labels`)}">
+                                    <i class="fa fa-tag"></i>
+                                </button>
                             </span>
                             <span id="layer-tools-table">
-                                <a href="javascript:void(0);" class="js-toggle-table">
-                                    <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Table view`)}" class="material-icons">list</i>
-                                </a>
+                                <button class="js-toggle-table btn btn-sm btn-outline-success btn-floating" data-toggle="tooltip" data-placement="left" title="${__(`Table view`)}">
+                                    <i class="fa fa-table"></i>
+                                </button>
                             </span>
                             <span id="layer-tools-load">
-                                <a href="javascript:void(0);" class="js-toggle-load-strategy">
-                                    <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Load strategy`)}" class="material-icons">branding_watermark</i>
-                                </a>
+                                <button class="js-toggle-load-strategy btn btn-sm btn-outline-success btn-floating" data-toggle="tooltip" data-placement="left" title="${__(`Load strategy`)}">
+                                    <i class="fa fa-th"></i>
+                                </button>
                             </span>
                             <span id="layer-tools-filters">
-                                <a href="javascript:void(0);" class="js-toggle-filters">
-                                    <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Filters`)}" class="material-icons">filter_list</i>
-                                </a>
-                            <span class="js-toggle-filters-number-of-filters">0</span>
+                                <button class="js-toggle-filters btn btn-sm btn-outline-success btn-floating" data-toggle="tooltip"  data-placement="left" title="${__(`Filters`)}" >
+                                    <i class="fa fa-filter"></i>
+                                </button>
+<!--                            <span class="js-toggle-filters-number-of-filters">0</span>-->
+                            <span>
+                                ${addButton}
+                                <a href="javascript:void(0);" data-toggle="tooltip" data-placement="left" title="${tooltip}" style="visibility: ${displayInfo};" class="info-label" data-gc2-id="${layerKey}">${__(`Info`)}</a>
+                            </span>
                             </span>
                         </div>
 
                         <i style="float: right; padding-top: 9px; font-size: 26px;" class="material-icons layer-move-vert">more_vert</i>
 
-                        <div style="float: right; padding-top: 8px; padding-right: 10px;">${addButton}
-                            <a href="javascript:void(0);" data-toggle="tooltip" data-placement="left" title="${tooltip}" style="visibility: ${displayInfo};" class="info-label" data-gc2-id="${layerKey}">${__(`Info`)}</a>
-                        </div>
                     </div>
                 </div>
             </div>
