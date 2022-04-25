@@ -216,8 +216,17 @@ Funktion til styling af vektor-lag. Funktionen modtager hver enkelt feature i la
 
 **Show table**
 
-.. note::
-    Eksperimentiel funktion, som gør det mulig at vise en liste over objekter i laget.
+Hvis tjekket af og laget bliver tændt som vektor vil en tabel med lagets attributter vises.
+Kolonnerne styres af ``Vis i klik-info`` og ``Alias`` i GC2 Admin. Der kan kun vises en tabel ad gangen.
+Hvis der allerede er en tabel åben, sker der ingenting ved åbning af en anden - det første lag skal slukkes før en anden tabel kan åbnes.
+Virker kun i embed template.
+Positionen og bredde/højde på tabellen kan styres gennem :ref:`Kørselskonfiguration (configs)<configjs_vectorTable>`
+
+.. figure:: ../../../_media/vector-table.png
+    :width: 400px
+    :align: center
+    :name: vector-table
+    :figclass: align-center
 
 **Reload Interval**
 

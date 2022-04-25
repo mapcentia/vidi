@@ -93,11 +93,9 @@ let defaultTemplate =
 const defaultTemplateForCrossMultiSelect =
     `<div class="vidi-popup-content">
         {{#_vidi_content.fields}}
-            <h4>{{title}}</h4>
             {{#if value}}
+                <h4>{{title}}</h4>
                 <p {{#if type}}class="{{type}}"{{/if}}>{{{value}}}</p>
-            {{else}}
-                <p class="empty">null</p>
             {{/if}}
         {{/_vidi_content.fields}}
     </div>`;
@@ -181,7 +179,7 @@ module.exports = {
             metaDataKeys = meta.getMetaDataKeys(), firstLoop = true;
         elementPrefix = prefix;
 
-        if (`editor` in extensions) {
+        if (window.vidiConfig.enabledExtensions.includes('editor')) {
             editor = extensions.editor.index;
             editingIsEnabled = true;
         }
@@ -193,7 +191,7 @@ module.exports = {
 
         // Filter layers without pixels from
         layers = layers.filter((key) => {
-            if (typeof moduleState.tileContentCache[key] === "boolean" && moduleState.tileContentCache[key] === true) {
+            if (window.moduleState?.tileContentCache?.[key] === true) {
                 return true;
             }
         })
@@ -250,7 +248,7 @@ module.exports = {
             let onLoad;
             let fieldConf = metaDataKeys?.[value]?.fieldconf !== "" ? JSON.parse(metaDataKeys[value].fieldconf) : null;
             let parsedMeta = layerTree.parseLayerMeta(metaDataKeys[value]);
-            let featureInfoTableOnMap = window.vidiConfig?.featureInfoTableOnMap === true && simple;
+            let featureInfoTableOnMap = window.vidiConfig.featureInfoTableOnMap === true && simple;
             let f_geometry_column = metaDataKeys[value].f_geometry_column
             let styleForSelectedFeatures;
 
@@ -382,7 +380,7 @@ module.exports = {
                             store: layerObj,
                             cm: cm,
                             autoUpdate: false,
-                            autoPan: false,
+                            autoPan: window.vidiConfig.autoPanPopup,
                             openPopUp: true,
                             setViewOnSelect: count.hits > 1,
                             responsive: false,
@@ -515,7 +513,7 @@ module.exports = {
                 method: "POST",
                 host: "",
                 db: db,
-                uri: "/api/sql",
+                uri: "/api/sql/nocache",
                 clickable: true,
                 id: index,
                 key: value,
@@ -540,31 +538,12 @@ module.exports = {
                     } else {
                         l._vidi_type = layerTag;
                     }
-
-                    /*
-                                        l.on("click", function (e) {
-                                            setTimeout(function () {
-                                                $(".popup-edit-btn").unbind("click.popup-edit-btn").bind("click.popup-edit-btn", function () {
-                                                    alert("1")
-                                                    editor.edit(l, _key_, qstore);
-                                                });
-
-                                                $(".popup-delete-btn").unbind("click.popup-delete-btn").bind("click.popup-delete-btn", function () {
-                                                    if (window.confirm("Er du sikker? Dine ændringer vil ikke blive gemt!")) {
-                                                        editor.delete(l, _key_, qstore);
-                                                    }
-                                                });
-                                            }, 500)
-                                        });
-                    */
-
                 }
             });
 
             cloud.get().addGeoJsonStore(qstore[index]);
 
             let sql, fieldNames = [], fieldStr;
-            console.log(fieldConf)
 
             if (fields) {
                 $.each(fields, function (i, v) {
@@ -580,6 +559,7 @@ module.exports = {
             }
             // Get applied filters from layerTree as a WHERE clause
             let filters = layerTree.getFilterStr(keyWithoutGeom) ? layerTree.getFilterStr(keyWithoutGeom) : "1=1";
+            const schemaQualifiedName = "\"" + value.split(".")[0] + "\".\"" + value.split(".")[1] + "\"";
             if (!whereClause) {
                 if (geoType === "RASTER" && (!advancedInfo.getSearchOn())) {
                     sql = "SELECT 1 as rid,foo.the_geom,ST_Value(rast, foo.the_geom) As band1, ST_Value(rast, 2, foo.the_geom) As band2, ST_Value(rast, 3, foo.the_geom) As band3 " +
@@ -599,13 +579,13 @@ module.exports = {
                     ];
                 } else {
                     if (geoType !== "POLYGON" && geoType !== "MULTIPOLYGON" && (!advancedInfo.getSearchOn())) {
-                        sql = "SELECT * FROM (SELECT " + fieldStr + " FROM " + value + " WHERE " + filters + ") AS foo WHERE round(ST_Distance(ST_Transform(\"" + f_geometry_column + "\"," + proj + "), ST_GeomFromText('" + wkt + "'," + proj + "))) < " + distance;
+                        sql = "SELECT * FROM (SELECT " + fieldStr + " FROM " + schemaQualifiedName + " WHERE " + filters + ") AS foo WHERE round(ST_Distance(ST_Transform(\"" + f_geometry_column + "\"," + proj + "), ST_GeomFromText('" + wkt + "'," + proj + "))) < " + distance;
                         if (versioning) {
                             sql = sql + " AND gc2_version_end_date IS NULL ";
                         }
                         sql = sql + " ORDER BY round(ST_Distance(ST_Transform(\"" + f_geometry_column + "\"," + proj + "), ST_GeomFromText('" + wkt + "'," + proj + ")))";
                     } else {
-                        sql = "SELECT * FROM (SELECT " + fieldStr + " FROM " + value + " WHERE " + filters + ") AS foo WHERE ST_Intersects(ST_Transform(ST_geomfromtext('" + wkt + "'," + proj + ")," + srid + ")," + f_geometry_column + ")";
+                        sql = "SELECT * FROM (SELECT " + fieldStr + " FROM " + schemaQualifiedName + " WHERE " + filters + ") AS foo WHERE ST_Intersects(ST_Transform(ST_geomfromtext('" + wkt + "'," + proj + ")," + srid + ")," + f_geometry_column + ")";
                         if (versioning) {
                             sql = sql + " AND gc2_version_end_date IS NULL ";
                         }
@@ -613,14 +593,14 @@ module.exports = {
                     }
                 }
             } else {
-                sql = "SELECT " + fieldStr + " FROM " + value + " WHERE " + whereClause;
+                sql = "SELECT " + fieldStr + " FROM " + schemaQualifiedName + " WHERE " + whereClause;
                 if (versioning) {
                     sql = sql + " AND gc2_version_end_date IS NULL ";
                 }
                 qstore[index].custom_data = "";
             }
 
-            sql = sql + " LIMIT " + (num || 500);
+            sql = sql + " LIMIT " + (num || 10000);
 
             qstore[index].onLoad = onLoad || callBack.bind(this, qstore[index], isEmpty, not_querable, layerTitel, fieldConf, layers, count);
             qstore[index].sql = sql;
@@ -667,34 +647,34 @@ module.exports = {
 
         let cm = [];
         let out = [];
-        $.each(features, function (i, feature) {
-            let fields = [];
-            if (fieldConf === null) {
-                $.each(feature.properties, function (name, property) {
-                    if (name.indexOf(SYSTEM_FIELD_PREFIX) !== 0 && name !== `_id` && name !== `_vidi_content`) {
-                        fields.push({
-                            title: name,
-                            value: feature.properties[name]
-                        });
-
-                        out.push([name, 0, name, false]);
-                    }
-                });
-            } else {
-                $.each(sortObject(fieldConf), (name, property) => {
-                    if (property.value.querable) {
-                        let value = feature.properties[property.key];
-                        if (property.value.link) {
-                            value = "<a target='_blank' rel='noopener' href='" + (property.value.linkprefix ? property.value.linkprefix : "") + feature.properties[property.key] + (property.value.linksuffix ? property.value.linksuffix : "") + "'>Link</a>";
-                        } else if (property.value.content && property.value.content === "image") {
-                            if (!feature.properties[property.key]) {
-                                value = `<i class="fa fa-ban"></i>`;
-                            } else {
-                                let layerKeyWithoutPrefix = layerKey.replace(LAYER.VECTOR + ':', '');
-                                if (metaDataKeys[layerKeyWithoutPrefix]["fields"][property.key].type.startsWith("json")) {
-                                    // We use a Handlebars template to create a image carousel
-                                    let carouselId = Base64.encode(layerKey).replace(/=/g, "");
-                                    let tmpl = `<div id="${carouselId}" class="carousel slide" data-ride="carousel">
+        if (features.length > 0) {
+            features.forEach(feature => {
+                let fields = [];
+                if (fieldConf === null) {
+                    $.each(feature.properties, function (name, property) {
+                        if (name.indexOf(SYSTEM_FIELD_PREFIX) !== 0 && name !== `_id` && name !== `_vidi_content`) {
+                            fields.push({
+                                title: name,
+                                value: feature.properties[name]
+                            });
+                            out.push([name, 0, name, false]);
+                        }
+                    });
+                } else {
+                    $.each(sortObject(fieldConf), (name, property) => {
+                        if (property.value.querable) {
+                            let value = feature.properties[property.key];
+                            if (property.value.link) {
+                                value = "<a target='_blank' rel='noopener' href='" + (property.value.linkprefix ? property.value.linkprefix : "") + feature.properties[property.key] + (property.value.linksuffix ? property.value.linksuffix : "") + "'>Link</a>";
+                            } else if (property.value.content && property.value.content === "image") {
+                                if (!feature.properties[property.key]) {
+                                    value = `<i class="fa fa-ban"></i>`;
+                                } else {
+                                    let layerKeyWithoutPrefix = layerKey.replace(LAYER.VECTOR + ':', '');
+                                    if (metaDataKeys[layerKeyWithoutPrefix]["fields"][property.key].type.startsWith("json")) {
+                                        // We use a Handlebars template to create a image carousel
+                                        let carouselId = Base64.encode(layerKey).replace(/=/g, "");
+                                        let tmpl = `<div id="${carouselId}" class="carousel slide" data-ride="carousel">
                                                     <ol class="carousel-indicators">
                                                         {{#@root}}
                                                         <li data-target="#${carouselId}" data-slide-to="{{@index}}"  class="{{#if @first}}active{{/if}}"></li>
@@ -719,65 +699,80 @@ module.exports = {
                                                         <span class="sr-only">Next</span>
                                                     </a>
                                                 </div>`;
-                                    Handlebars.registerHelper('breaklines', function (text) {
-                                        text = Handlebars.Utils.escapeExpression(text);
-                                        text = text.replace(/(\r\n|\n|\r)/gm, '<br>');
-                                        return new Handlebars.SafeString(text);
-                                    });
-                                    value = Handlebars.compile(tmpl)(feature.properties[property.key]);
+                                        Handlebars.registerHelper('breaklines', function (text) {
+                                            text = Handlebars.Utils.escapeExpression(text);
+                                            text = text.replace(/(\r\n|\n|\r)/gm, '<br>');
+                                            return new Handlebars.SafeString(text);
+                                        });
+                                        value = Handlebars.compile(tmpl)(feature.properties[property.key]);
+                                    } else {
+                                        let subValue = feature.properties[property.key];
+                                        value =
+                                            `<div style="cursor: pointer" onclick="window.open().document.body.innerHTML = '<img src=\\'${subValue}\\' />';">
+                                        <img style='width:250px' src='${subValue}'/>
+                                     </div>`;
+                                    }
+                                }
+                            } else if (property.value.content && property.value.content === "video") {
+                                if (!feature.properties[property.key]) {
+                                    value = `<i class="fa fa-ban"></i>`;
                                 } else {
                                     let subValue = feature.properties[property.key];
                                     value =
-                                        `<div style="cursor: pointer" onclick="window.open().document.body.innerHTML = '<img src=\\'${subValue}\\' />';">
-                                        <img style='width:250px' src='${subValue}'/>
-                                     </div>`;
-                                }
-                            }
-                        } else if (property.value.content && property.value.content === "video") {
-                            if (!feature.properties[property.key]) {
-                                value = `<i class="fa fa-ban"></i>`;
-                            } else {
-                                let subValue = feature.properties[property.key];
-                                value =
-                                    `<video width="250" controls>
+                                        `<video width="250" controls>
                                         <source src="${subValue}" type="video/mp4">
                                         <source src="${subValue}" type="video/ogg">
                                         <source src="${subValue}" type="video/webm">
                                     </video>`;
+                                }
+                            }
+                            fields.push({title: property.value.alias || property.key, value});
+                            fieldLabel = (property.value.alias !== null && property.value.alias !== "") ? property.value.alias : property.key;
+                            if (feature.properties[property.key] !== undefined) {
+                                out.push([property.key, property.value.sort_id, fieldLabel, property.value.link]);
                             }
                         }
-                        fields.push({title: property.value.alias || property.key, value});
-                        fieldLabel = (property.value.alias !== null && property.value.alias !== "") ? property.value.alias : property.key;
-                        if (feature.properties[property.key] !== undefined) {
-                            out.push([property.key, property.value.sort_id, fieldLabel, property.value.link]);
-                        }
-                    }
-                });
+                    });
+                    out.sort(function (a, b) {
+                        return a[1] - b[1];
+                    });
+                }
 
 
-                out.sort(function (a, b) {
-                    return a[1] - b[1];
-                });
-            }
+                feature.properties._vidi_content = {};
+                feature.properties._vidi_content.title = layerTitle;
+                feature.properties._vidi_content.fields = fields; // Used in a "loop" template
+                if (first) {
+                    out.forEach(property => {
+                        cm.push({
+                            header: property[2],
+                            dataIndex: property[0],
+                            sortable: true,
+                            link: property[3]
+                        })
+                    });
+                    first = false;
+                }
 
-            feature.properties._vidi_content = {};
-            feature.properties._vidi_content.title = layerTitle;
-            feature.properties._vidi_content.fields = fields; // Used in a "loop" template
-            if (first) {
-                $.each(out, function (name, property) {
-                    cm.push({
-                        header: property[2],
-                        dataIndex: property[0],
-                        sortable: true,
-                        link: property[3]
-                    })
-                });
-                first = false;
-            }
-
-            out = [];
-        });
-
+                out = [];
+            });
+        } else { // If no features are present e.g. when use dynamic load
+            sortObject(fieldConf).forEach((property) => {
+                fieldLabel = (property.value.alias !== null && property.value.alias !== "") ? property.value.alias : property.key;
+                out.push([property.key, property.value.sort_id, fieldLabel, property.value.link]);
+            });
+            out.sort(function (a, b) {
+                return a[1] - b[1];
+            });
+            out.forEach(property => {
+                cm.push({
+                    header: property[2],
+                    dataIndex: property[0],
+                    sortable: true,
+                    link: property[3]
+                })
+            });
+        }
         return cm;
     },
 
@@ -806,10 +801,10 @@ module.exports = {
         download.download = fn
     },
 
-    getVectorTemplate: function (layerKey) {
+    getVectorTemplate: function (layerKey, multi = true) {
         let metaDataKeys = meta.getMetaDataKeys();
         let parsedMeta = layerTree.parseLayerMeta(metaDataKeys[layerKey]);
-        let template = (typeof metaDataKeys[layerKey].infowindow !== "undefined" && metaDataKeys[layerKey].infowindow.template !== "") ? metaDataKeys[layerKey].infowindow.template : defaultTemplateForCrossMultiSelect;
+        let template = metaDataKeys[layerKey]?.infowindow?.template || multi ? defaultTemplateForCrossMultiSelect : defaultTemplate;
         template = (parsedMeta.info_template && parsedMeta.info_template !== "") ? parsedMeta.info_template : template;
         return template;
     },

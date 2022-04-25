@@ -120,12 +120,6 @@ var config = require('../../../config/config.js');
 
 /**
  *
- * @type {string}
- */
-var BACKEND = config.backend;
-
-/**
- *
  */
 var dataStore;
 
@@ -385,23 +379,27 @@ module.exports = module.exports = {
      * Handle for GUI toggle button
      */
     control: function () {
-        var me = this;
-
+        let me = this;
         hitsTable = $("#hits-content tbody");
         hitsData = $("#hits-data");
         noHitsTable = $("#nohits-content tbody");
         errorTable = $("#error-content tbody");
+        let c = 0;
+        backboneEvents.get().on("end:conflictSearch", ()=>{
+            c = 0;
+        })
         // Start listen to the web socket
         io.connect().on(socketId.get(), function (data) {
             if (typeof data.num !== "undefined") {
-                $("#conflict-progress").html(data.num + " " + (data.title || data.table));
+                $("#conflict-progress").html(c++);
                 if (data.error === null) {
-                    $("#conflict-console").append(data.num + " table: " + data.table + ", hits: " + data.hits + " , time: " + data.time + "\n");
+                    $("#conflict-console").append("table: " + data.table + ", hits: " + data.hits + " , time: " + data.time + "\n");
                 } else {
                     $("#conflict-console").append(data.table + " : " + data.error + "\n");
                 }
             }
         });
+
 
         backboneEvents.get().trigger("on:conflictInfoClick");
 
@@ -815,7 +813,7 @@ module.exports = module.exports = {
     },
     handleResult: function (response) {
         visibleLayers = cloud.getAllTypesOfVisibleLayers().split(";"); // Must be set here also, if result is coming from state
-        var hitsCount = 0, noHitsCount = 0, errorCount = 0, resultOrigin, groups = [];
+        let hitsCount = 0, noHitsCount = 0, errorCount = 0, resultOrigin, groups = [];
         _result = response;
         setTimeout(function () {
             $("#snackbar-conflict").snackbar("hide");
@@ -855,8 +853,7 @@ module.exports = module.exports = {
                     let metaData = v.meta;
                     if (metaData.layergroup === groups[i]) {
                         count++;
-                        let title = (typeof metaData.f_table_title !== "undefined" && metaData.f_table_title !== "" && metaData.f_table_title !== null) ? metaData.f_table_title : u;
-                        row = "<tr><td>" + title + "</td><td>" + v.hits + "</td><td><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + u + "' " + ($.inArray(u, visibleLayers) > -1 ? "checked" : "") + "></label></div></td></tr>";
+                        row = "<tr><td>" + v.title + "</td><td>" + v.hits + "</td><td><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + v.table + "' " + ($.inArray(v.table, visibleLayers) > -1 ? "checked" : "") + "></label></div></td></tr>";
                         hitsTable.append(row);
                     }
                 }
@@ -872,19 +869,19 @@ module.exports = module.exports = {
             hitsData.append(row);
             let count = 0;
             $.each(response.hits, function (i, v) {
-                var table = i, table1, table2, tr, td, title, metaData = v.meta;
+                let table = v.table, table1, table2, tr, td, title, metaData = v.meta;
                 if (metaData.layergroup === groups[u]) {
                     title = (typeof metaData.f_table_title !== "undefined" && metaData.f_table_title !== "" && metaData.f_table_title !== null) ? metaData.f_table_title : table;
                     if (v.error === null) {
                         if (metaData.meta_url) {
                             title = "<a target='_blank' href='" + metaData.meta_url + "'>" + title + "</a>";
                         }
-                        row = "<tr><td>" + title + "</td><td>" + v.hits + "</td><td><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + i + "' " + ($.inArray(i, visibleLayers) > -1 ? "checked" : "") + "></label></div></td></tr>";
+                        row = "<tr><td>" + title + "</td><td>" + v.hits + "</td><td><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + table + "' " + ($.inArray(i, visibleLayers) > -1 ? "checked" : "") + "></label></div></td></tr>";
                         if (v.hits > 0) {
                             count++;
                             hitsCount++;
                             table1 = $("<table class='table table-data'/>");
-                            hitsData.append("<h5>" + title + " (" + v.hits + ")<div class='checkbox' style='float: right; margin-top: 25px'><label><input type='checkbox' data-gc2-id='" + i + "' " + ($.inArray(i, visibleLayers) > -1 ? "checked" : "") + "></label></div></h5>");
+                            hitsData.append("<h5>" + title + " (" + v.hits + ")<div class='checkbox' style='float: right; margin-top: 25px'><label><input type='checkbox' data-gc2-id='" + table + "' " + ($.inArray(i, visibleLayers) > -1 ? "checked" : "") + "></label></div></h5>");
                             let conflictForLayer = metaData.meta !== null ? JSON.parse(metaData.meta) : null;
                             if (conflictForLayer !== null && 'short_conflict_meta_desc' in conflictForLayer) {
                                 hitsData.append("<p style='margin: 0'>" + conflictForLayer.short_conflict_meta_desc + "</p>");
@@ -904,8 +901,8 @@ module.exports = module.exports = {
                             }
                             if (v.data.length > 0) {
                                 $.each(v.data, function (u, row) {
-                                    var key = null, fid = null;
-                                    tr = $("<tr style='border-top: 0px solid #eee'/>");
+                                    let key = null, fid = null;
+                                    tr = $("<tr style='border-top: 0 solid #eee'/>");
                                     td = $("<td/>");
                                     table2 = $("<table style='margin-bottom: 5px; margin-top: 5px;' class='table'/>");
                                     row.sort((a, b) => (a.sort_id > b.sort_id) ? 1 : ((b.sort_id > a.sort_id) ? -1 : 0));
@@ -926,7 +923,7 @@ module.exports = module.exports = {
                                         }
                                     });
                                     td.append(table2);
-                                    tr.append("<td style='width: 60px'><button type='button' class='btn btn-default btn-xs zoom-to-feature' data-gc2-sf-table='" + i + "' data-gc2-sf-key='" + key + "' data-gc2-sf-fid='" + fid + "'>#" + (u + 1) + " <i class='fa fa-search'></i></button></td>");
+                                    tr.append("<td style='width: 60px'><button type='button' class='btn btn-default btn-xs zoom-to-feature' data-gc2-sf-table='" + v.table + "' data-gc2-sf-key='" + key + "' data-gc2-sf-fid='" + fid + "'>#" + (u + 1) + " <i class='fa fa-search'></i></button></td>");
                                     tr.append(td);
                                     table1.append(tr);
                                 });

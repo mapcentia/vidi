@@ -47,11 +47,18 @@ class StateSnapshotsDashboard extends React.Component {
         this.copyToClipboard = this.copyToClipboard.bind(this);
 
         // Setting unique cookie if it have not been set yet
-        let trackingCookie = uuidv4();
-        if (cookie.get('vidi-state-tracker')) {
-            trackingCookie = cookie.get('vidi-state-tracker');
-        } else {
-            cookie.set('vidi-state-tracker', trackingCookie, {expires: 365, secure: true, sameSite: 'none'});
+        if (!noTracking) {
+            let options = {
+                expires: 365
+            }
+            if (process.env.NODE_ENV === "production") {
+                options.secure = true;
+                options.sameSite = 'none';
+            }
+            let trackingCookie = uuidv4();
+            if (!cookie.get('vidi-state-tracker')) {
+                cookie.set('vidi-state-tracker', trackingCookie, options);
+            }
         }
     }
 
@@ -367,10 +374,9 @@ class StateSnapshotsDashboard extends React.Component {
                 options.push(<option key={`${item.id}_size_key_${size}`} value={size}>{size}</option>);
             });
 
-            return (<select style={{height: `25px`, padding: `0`}} className="form-control" value={value}
-                            onChange={(event) => {
-                                this.setImageLinkSize(event.target.value, item.id);
-                            }}>{options}</select>)
+            return (<select style={{height: `25px`, padding: `0`}} className="form-control" value={value} onChange={(event) => {
+                this.setImageLinkSize(event.target.value, item.id);
+            }}>{options}</select>)
         };
 
         const createSnapshotRecord = (item, index, local = false) => {
@@ -452,8 +458,7 @@ class StateSnapshotsDashboard extends React.Component {
                     <div style={{display: `flex`, width: `100%`}}>
                         <a className="input-group-addon" style={{cursor: `pointer`}} onClick={() => {
                             this.copyToClipboard(token)
-                        }}><i className="material-icons" style={{fontSize: `18px`}}>content_copy</i>{__(`Copy token`)}
-                        </a>
+                        }}><i className="material-icons" style={{fontSize: `18px`}}>content_copy</i>{__(`Copy token`)}</a>
                     </div>
                 </div>);
             }
@@ -496,24 +501,21 @@ class StateSnapshotsDashboard extends React.Component {
                         {importButton}
                     </div>)}
                     {this.props.playOnly ? false : (
-                        <div style={{display: `flex`}}>
+                        <div style={{display:`flex`}}>
                             <div className="input-group form-group" style={{paddingTop: `8px`}}>
                                 <div style={{display: `flex`, width: `100%`}}>
                                     <a className="input-group-addon" style={{cursor: `pointer`}} onClick={() => {
                                         this.copyToClipboard(permaLink)
-                                    }}><i className="material-icons"
-                                          style={{fontSize: `18px`}}>content_copy</i>{__(`Copy Vidi link`)}</a>
+                                    }}><i className="material-icons" style={{fontSize: `18px`}}>content_copy</i>{__(`Copy Vidi link`)}</a>
                                 </div>
                             </div>
                             {tokenField}
-                            <div className="input-group form-group snapshot-copy-png-link"
-                                 style={{width: `100%`, paddingTop: `8px`}}>
+                            <div className="input-group form-group snapshot-copy-png-link" style={{width: `100%`, paddingTop: `8px`}}>
                                 <div style={{display: `flex`, width: `100%`}}>
                                     <div>
                                         <a className="input-group-addon" style={{cursor: `pointer`}} onClick={() => {
                                             this.copyToClipboard(imageLink)
-                                        }}><i className="material-icons"
-                                              style={{fontSize: `18px`}}>content_copy</i>{__(`Copy PNG link`)}</a>
+                                        }}><i className="material-icons" style={{fontSize: `18px`}}>content_copy</i>{__(`Copy PNG link`)}</a>
                                     </div>
                                     <div style={{paddingLeft: `10px`, paddingRight: `10px`}}>{selectSize}</div>
                                 </div>

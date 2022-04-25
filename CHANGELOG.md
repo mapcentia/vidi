@@ -4,7 +4,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [UNRELEASED] - 2022-24-3
+## [UNRELEASED] - 2022-20-4
+### Changed
+- In conflictSearch requests to the GC2 SQL API now happens concurrently. This is done by implementing a promise pool. The default size of the pool is 30, but this can be set in the runtime config. Note that this setting can't be changed in a run-time config. 
+```json
+{
+  "extensionConfig": {
+    "conflictSearch": {
+      "poolSize": 40
+    }
+  }
+}
+```
+
+## [2022.4.0] - 2022-8-4
+### Fixed
+- Now uses sfe_ejendomsnummer instead of esr_ejendomsnummer in search of 'adresser' and 'matrikel'.
+
+## [2022.3.3] - 2022-24-3
 ### Fixed
 - Regression bug, which kept the right side-panel closed after load of app.
 - The Leaflet method `toGeoJSON` rounds of coordinates with 6 decimals by default. But this may result in up to 10 cm on the map (tested at about 57 degrees north). This makes the editor and snapping very unprecise. So all `toGeoJSON` calls are now done with a precision argument of 14 through the app. 

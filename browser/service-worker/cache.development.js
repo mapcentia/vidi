@@ -134,7 +134,6 @@ let urlsToCache = [
     '/js/bundle.js',
     '/js/lib/jquery-ui/jquery-ui.min.css',
     '/css/styles.css',
-    '/css/styles.css',
     '/css/font-awesome.v520.regular.css',
     '/css/font-awesome.v520.css',
 ];
