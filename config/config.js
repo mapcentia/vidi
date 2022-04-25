@@ -1473,23 +1473,24 @@ module.exports = {
             "attribution":"&copy; Styrelsen for Dataforsyning og Effektivisering og Danske kommuner."
          }
       },
-      {
-        "type": "wms",
-        "url": "https://services.kortforsyningen.dk/service?SERVICENAME=forvaltning2&token=2edaf0d4a10f052d184f2d4fcafcbfd6",
-        "layers": [
-            "Basis_kort",
-            "Navne_basis_kort",
-            "Husnummer"
-        ],
-        "id": "Basis_kort",
-        "name": "Basiskort (GST)",
-        "description": "Forvaltningskort fra kortforsyningen",
-        "attribution": "Kortforsyningen",
-        "abstract": "<p>Forvaltningskort.</p><p>Copyright: Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.</p><p>Baggrundskortet må frit anvendes, men følgende skal angives 'Indeholder data fra Styrelsen for Dataforsyning og Effektivisering.'. </p><br>",
-        "minZoom": 4,
-        "maxZoom": 21,
-        "maxNativeZoom": 21
-        },
+		{
+			"type": "wms",
+			"url": "https://api.dataforsyningen.dk/forvaltning2?token=4aacd5977eb46ca012c260ecb608c65c",
+			"layers": [
+				"Basis_kort",
+				"Stednavne_basiskort",
+				"Vejnavne_basiskort",
+				"Husnummer"
+			],
+			"id": "ForvaltningskortDF",
+			"name": "Forvaltningskort",
+			"description": "Forvaltningskort fra Dataforsyningen",
+			"attribution": "&copy; Styrelsen for Dataforsyning og Effektivisering, GeoDanmark og Danske kommuner.",
+			"abstract": "<p>Forvaltningskort.</p><p>&copy; Styrelsen for Dataforsyning og Effektivisering, GeoDanmark og Danske kommuner.</p><p>Forvaltningskortet viser følgende temaer:<br><ul><li>Basis_kort</li><li>Stednavne_basiskort</li><li>Vejnavne_basiskort</li><li>Husnummer</li></ul></p><br>",
+			"minZoom": 4,
+			"maxZoom": 22,
+			"maxNativeZoom": 20
+		},
 		{
 			"type": "wms",
 			"url": "/api/df/Matrikel/MatrikelGaeldendeOgForeloebigWMS/1.0.0/WMS",
