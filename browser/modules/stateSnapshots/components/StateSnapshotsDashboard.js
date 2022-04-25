@@ -15,6 +15,8 @@ const base64url = require('base64url');
 const buttonStyle = {padding: `4px`, margin: `0px`};
 
 const DEFAULT_API_URL = `/api/state-snapshots`;
+const urlparser = require('./../../urlparser');
+const noTracking = urlparser.urlVars["notracking"] === "true";
 
 let jquery = require('jquery');
 require('snackbarjs');
