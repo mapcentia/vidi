@@ -29,17 +29,19 @@ class MarkupGenerator {
 
     getGroupPanel(base64GroupName, name, addGroupCheckbox = false) {
         return (`<div class="accordion-item panel-layertree" id="layer-panel-${base64GroupName}" xmlns="http://www.w3.org/1999/html">
-<!--                    <i style="float: right;" class="material-icons layer-move-vert">more_vert</i>-->
-<!--                    <div class="layer-count badge">-->
-<!--                        <span>0</span> / <span></span>-->
-<!--                    </div>-->
-                    <span style="display: ${addGroupCheckbox ? "inline" : "none"}" class="form-check" id="group-check-box-${base64GroupName}">
+                <h2 class="accordion-header" style="display: flex; align-items: center">
+                    <button class="accordion-button collapsed js-toggle-layer-panel" data-mdb-toggle="collapse" data-parent="#layers" data-mdb-target="#group-${base64GroupName}" aria-expanded="false" aria-control="collapseExample">${name}
+                    
+                    </button>
+                    <div class="layer-count badge bg-primary" style="font-size: 12px">
+                        <span>0</span> / <span></span>
+                    </div>
+                    <div style="align-items: center; padding-left: 0.2em; margin-bottom: 0; display: ${addGroupCheckbox ? "flex" : "flex"}" class="form-check" id="group-check-box-${base64GroupName}">
                         <label class="form-check-label">
                             <input class="form-check-input" type="checkbox" data-gc2-group-name="${name}" />
                         </label>
-                    </span>
-                <h2 class="accordion-header">
-                    <button class="accordion-button collapsed js-toggle-layer-panel" data-mdb-toggle="collapse" data-parent="#layers" data-mdb-target="#group-${base64GroupName}" aria-expanded="false" aria-control="collapseExample">${name}</button>
+                    </div>
+                    <i class="material-icons layer-move-vert">more_vert</i>
                 </h2>
             <div class="list-group accordion-collapse collapse" id="group-${base64GroupName}" role="tabpanel"></div>
         </div>`);
@@ -96,13 +98,13 @@ class MarkupGenerator {
         let tooltip = layer.f_table_abstract || ``;
 
         return (`
-        <li class="layer-item list-group-item" data-gc2-layer-key="${layerKeyWithGeom}" style="min-height: 36px; margin-top: 1px; border-bottom: 1px solid #CCC; background-color: white;">
-            <div style="border-left: 0px solid #ccc">
-                <div style="display: flex; min-height: 40px; justify-content: space-between; flex-wrap: wrap;">
-                    <div style="margin-top: 4px;">
-                        <div style="display: inline-block;">
-                            <div class="checkbox" style="width: 34px; top: 2px">
-                                <label class="form-check-label">
+        <li class="layer-item list-group-item" data-gc2-layer-key="${layerKeyWithGeom}">
+                <div style="display: flex; justify-content: space-between;flex-wrap: nowrap; padding: 7px 0">
+                    <div style="display: flex; width: 100%; justify-content: space-between; align-items: center">
+                
+                    <div style="display: flex; align-items: center">
+                            <div class="checkbox">
+                                <label class="form-check-label" style="align-items: center; display: flex">
                                     <input class="form-check-input js-show-layer-control" type="checkbox"
                                         ${(layerIsActive ? `checked="checked"` : ``)}
                                         ${(disableCheckBox ? `disabled` : ``)}
@@ -111,26 +113,31 @@ class MarkupGenerator {
                                         data-gc2-layer-type="${layerType}">
                                 </label>
                             </div>
-                        </div>
 
-                        <div style="display: inline-block;">${layerTypeSelector}</div>
+                        <div style="">${layerTypeSelector}</div>
 
-                        <div style="display: inline-block;" id="layer-information">
-                            <span>
+                       
+                        <div style="display: flex; flex-wrap: nowrap" id="layer-information">
+                            <div>
                                 ${text}${lockedLayer}
-                                <span class="js-tiles-contain-data" style="visibility: ${moduleState.tileContentCache[layerKey] ? "inline" : "hidden"};" data-toggle="tooltip" data-placement="right"
-                                    title="${__("Layer is visible")}"><i class="fa fa-eye info-icon" style="color: green;"></i></span>
-                                <span class="js-layer-is-disabled" style="visibility: ${disableCheckBox ? "inline" : "hidden"};" data-toggle="tooltip" data-placement="right"
-                                    title="${__("Locked")}"><span class="material-icons" style="font-size: 13px; color: red">lock</span></span>
-                                <span class="js-layer-has-parents info-icon" style="visibility: ${parentLayerKeys.length > 0 ? "inline" : "hidden"};" data-toggle="tooltip" data-placement="right"
-                                    title="${__("Parents")}: ${parentLayerKeys.length > 0 ? parentLayerKeys.join(", ") : ""}"><span class="material-icons" style="font-size: 13px">arrow_upward</span></span>
-                                <span class="js-layer-has-children info-icon" style="visibility: ${childLayerKeys.length > 0 ? "inline" : "hidden"};" data-toggle="tooltip" data-placement="right"
-                                    title="${__("Children")}: ${childLayerKeys.length > 0 ? childLayerKeys.join(", ") : ""}"><span class="material-icons" style="font-size: 13px">arrow_downward</span></span>
-                                <span style="display: none" class="_gc2_layer_sort_id">(${layer.sort_id})</span>
-                            </span>
+                            </div>
+                            <div class="js-tiles-contain-data" style="visibility: ${moduleState.tileContentCache[layerKey] ? "inline" : "hidden"};" data-toggle="tooltip" data-placement="right"
+                                    title="${__("Layer is visible")}"><i class="fa fa-eye info-icon" style="color: green;"></i></div>
                         </div>
+                        
+                        <div style="display: flex; flex-wrap: nowrap">
+                                <div class="js-layer-is-disabled" style="display: ${disableCheckBox ? "inline" : "none"};" data-toggle="tooltip" data-placement="right"
+                                    title="${__("Locked")}"><span class="material-icons" style="font-size: 13px; color: red">lock</span></div>
+                                <div class="js-layer-has-parents info-icon" style="display: ${parentLayerKeys.length > 0 ? "inline" : "none"};" data-toggle="tooltip" data-placement="right"
+                                    title="${__("Parents")}: ${parentLayerKeys.length > 0 ? parentLayerKeys.join(", ") : ""}"><span class="material-icons" style="font-size: 13px">arrow_upward</span></div>
+                                <div class="js-layer-has-children info-icon" style="display: ${childLayerKeys.length > 0 ? "inline" : "none"};" data-toggle="tooltip" data-placement="right"
+                                    title="${__("Children")}: ${childLayerKeys.length > 0 ? childLayerKeys.join(", ") : ""}"><span class="material-icons" style="font-size: 13px">arrow_downward</span></div>
+                                <div style="display: none" class="_gc2_layer_sort_id">(${layer.sort_id})</div>
+                        </div>
+                        
+                       </div>
 
-                        <div style="display: inline-block;">
+                       <div style="display: inline-block">
                             <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-failed-add" style="${queueFailedButtonStyle}" disabled>
                                 <i class="fa fa-plus"></i> <span class="js-value"></span>
                             </button>
@@ -152,73 +159,70 @@ class MarkupGenerator {
                             <button type="button" data-gc2-id="${layerKey}" class="hidden btn btn-sm btn-secondary js-clear" style="${regularButtonStyle}">
                                 <i class="fa fa-undo"></i>
                             </button>
-                        </div>
                     </div>
-                    <div style="text-align: right; flex-grow: 1;">
-                        <div style="display: inline-block;">
-                            <div class="btn-group" role="group" style="height: 23px; width: 1px; margin: 10px;"></div>
-                        </div>
+
 
                         <div class="js-toggle-layer-offline-mode-container" style="display: none;">
-                            <div class="btn-group" role="group" id="layer-tools-offline">
-                                <button type="button" data-layer-key="${layerKey}" class="btn btn-success btn-xs js-set-online" title="${__(`Fetch layer data from server`)}" style="padding: 4px" disabled>
+                            <div class="btn-group btn-group-sm" role="group" id="layer-tools-offline">
+                                <button type="button" data-layer-key="${layerKey}" class="btn btn-light js-set-online" title="${__(`Fetch layer data from server`)}" style="padding: 4px" disabled>
                                     <i class="fa fa-signal"></i>
                                 </button>
-                                <button type="button" data-layer-key="${layerKey}" class="btn btn-danger btn-xs js-set-offline" title="${__(`Fetch layer data from cache`)}" style="padding: 4px" disabled>
+                                <button type="button" data-layer-key="${layerKey}" class="btn btn-light js-set-offline" title="${__(`Fetch layer data from cache`)}" style="padding: 4px" disabled>
                                     <i class="fas fa-database"></i>
                                 </button>
-                                <button type="button" data-layer-key="${layerKey}" class="btn btn-secondary btn-xs js-refresh" title="${__(`Refresh existing cache for layer`)}" style="padding: 4px" disabled>
+                                <button type="button" data-layer-key="${layerKey}" class="btn btn-light-secondary js-refresh" title="${__(`Refresh existing cache for layer`)}" style="padding: 4px" disabled>
                                     <i class="fa fa-refresh"></i>
                                 </button>
-                                <button type="button" data-layer-key="${layerKey}" class="btn btn-secondary btn-xs js-bbox" title="${__(`Dynamic layer is cached only within the last requested bounding box`)}" style="padding: 4px; display: none;">
+                                <button type="button" data-layer-key="${layerKey}" class="btn btn-light js-bbox" title="${__(`Dynamic layer is cached only within the last requested bounding box`)}" style="padding: 4px; display: none;">
                                     <i class="fa fa-exclamation"></i>
                                 </button>
                             </div>
                         </div>
 
-                        <div class="js-toggles-container" style="display: none; padding-right: 10px; padding-left: 10px;">
-                            <span id="layer-tools-search">
-                                <button class="js-toggle-search btn btn-sm btn-outline-success btn-floating" data-toggle="tooltip" data-placement="left" title="${__(`Search`)}" >
+                        <div class="js-toggles-container" style="display: none; flex-wrap: wrap;">
+                            <div id="layer-tools-search">
+                                <button class="js-toggle-search btn btn-sm btn-floating shadow-0" data-toggle="tooltip" data-mdb-trigger="hover" data-placement="left" title="${__(`Search`)}" >
                                     <i class="fa fa-search"></i>
                                 </button>
-                            </span>
-                            <span id="layer-tools-opacity">
-                                <button class="js-toggle-opacity btn btn-sm btn-outline-success btn-floating" data-toggle="tooltip" data-placement="left" title="${__(`Opacity`)}">
+                            </div>
+                            <div id="layer-tools-opacity">
+                                <button class="js-toggle-opacity btn btn-sm btn-floating" data-toggle="tooltip" data-placement="left" title="${__(`Opacity`)}">
                                     <i class="fa fa-tint"></i>
                                 </button>
-                            </span>
-                            <span id="layer-tools-labels">
-                                <button class="js-toggle-labels btn btn-sm btn-outline-success btn-floating" data-toggle="tooltip" data-placement="left" title="${__(`Labels`)}">
+                            </div>
+                            <div id="layer-tools-labels">
+                                <button class="js-toggle-labels btn btn-sm btn-floating" data-toggle="tooltip" data-placement="left" title="${__(`Labels`)}">
                                     <i class="fa fa-tag"></i>
                                 </button>
-                            </span>
-                            <span id="layer-tools-table">
-                                <button class="js-toggle-table btn btn-sm btn-outline-success btn-floating" data-toggle="tooltip" data-placement="left" title="${__(`Table view`)}">
+                            </div>
+                            <div id="layer-tools-table">
+                                <button class="js-toggle-table btn btn-sm btn-floating" data-toggle="tooltip" data-placement="left" title="${__(`Table view`)}">
                                     <i class="fa fa-table"></i>
                                 </button>
-                            </span>
-                            <span id="layer-tools-load">
-                                <button class="js-toggle-load-strategy btn btn-sm btn-outline-success btn-floating" data-toggle="tooltip" data-placement="left" title="${__(`Load strategy`)}">
+                            </div>
+                            <div id="layer-tools-load">
+                                <button class="js-toggle-load-strategy btn btn-sm btn-floating" data-toggle="tooltip" data-placement="left" title="${__(`Load strategy`)}">
                                     <i class="fa fa-th"></i>
                                 </button>
-                            </span>
-                            <span id="layer-tools-filters">
-                                <button class="js-toggle-filters btn btn-sm btn-outline-success btn-floating" data-toggle="tooltip"  data-placement="left" title="${__(`Filters`)}" >
+                            </div>
+                            <div id="layer-tools-filters">
+                                <button class="js-toggle-filters btn btn-sm btn-floating" data-toggle="tooltip"  data-placement="left" title="${__(`Filters`)}" >
                                     <i class="fa fa-filter"></i>
                                 </button>
 <!--                            <span class="js-toggle-filters-number-of-filters">0</span>-->
-                            <span>
+                            </div>
+                            <div>
+                            
                                 ${addButton}
-                                <a href="javascript:void(0);" data-toggle="tooltip" data-placement="left" title="${tooltip}" style="visibility: ${displayInfo};" class="info-label" data-gc2-id="${layerKey}">${__(`Info`)}</a>
-                            </span>
-                            </span>
+                            </div>
                         </div>
-
-                        <i style="float: right; padding-top: 9px; font-size: 26px;" class="material-icons layer-move-vert">more_vert</i>
-
+                            <div>
+                                <a href="javascript:void(0);" data-toggle="tooltip" data-placement="left" title="${tooltip}" style="visibility: ${displayInfo};" class="info-label" data-gc2-id="${layerKey}">${__(`Info`)}</a>
+                            </div>
                     </div>
+                    <div style="justify-items: flex-end; display: flex; align-items: center"><i style="font-size: 24px;" class="material-icons layer-move-vert">more_vert</i></div>
+</div>
                 </div>
-            </div>
             <div class="js-rejectedByServerItems hidden" style="width: 100%; padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>
             <div class="js-layer-settings-filters" style="display: none;"></div>
             <div class="js-layer-settings-load-strategy" style="display: none;"></div>
@@ -259,11 +263,10 @@ class MarkupGenerator {
             selectors.push(`<li><a class="js-layer-type-selector-webgl" href="javascript:void(0)">${ICONS[LAYER.WEBGL]} ${__('WebGL')}</a></li>`);
         }
 
-        return (`<div class="btn-group shadow-0">
-            <button style="padding: 2px; margin: 0;" class="btn btn-default dropdown-toggle"  data-mdb-toggle="dropdown" type="button"
+        return (`<div class="btn-group">
+            <button style="" class="btn btn-default dropdown-toggle btn-sm"  data-mdb-toggle="dropdown" type="button"
                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                <span class="js-dropdown-label">${selectorLabel}</span>
-                <span class="caret"></span>
+                <span class="js-dropdown-label" style="">${selectorLabel}</span>
             </button>
             <ul class="dropdown-menu">${selectors.join(``)}</ul>
         </div>`);

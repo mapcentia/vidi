@@ -278,9 +278,9 @@ class OfflineModeControlsManager {
         $(layerRecord).find(`.js-set-offline`).prop(`disabled`, false);
         $(layerRecord).find(`.js-refresh`).prop(`disabled`, true);
 
-        $(layerRecord).find(`.js-set-online`).css(`background-color`, `#009688`);
-        $(layerRecord).find(`.js-set-online`).css(`color`, `white`);
-        $(layerRecord).find(`.js-set-offline`).attr(`style`, ``);
+        $(layerRecord).find(`.js-set-online`).addClass('active');
+        // $(layerRecord).find(`.js-set-online`).css(`color`, `white`);
+        $(layerRecord).find(`.js-set-offline`).removeClass(`active`);
 
         if (isVectorLayer) {
             $(layerRecord).find(`.js-refresh`).show();
@@ -313,9 +313,9 @@ class OfflineModeControlsManager {
         $(layerRecord).find(`.js-set-offline`).prop(`disabled`, true);
         $(layerRecord).find(`.js-refresh`).prop(`disabled`, false);
 
-        $(layerRecord).find(`.js-set-online`).attr(`style`, ``);
-        $(layerRecord).find(`.js-set-offline`).css(`background-color`, `#009688`);
-        $(layerRecord).find(`.js-set-offline`).css(`color`, `white`);
+        $(layerRecord).find(`.js-set-online`).removeClass(`active`);
+        $(layerRecord).find(`.js-set-offline`).addClass(`active`);
+        // $(layerRecord).find(`.js-set-offline`).css(`color`, `white`);
 
         if (isVectorLayer) {
             $(layerRecord).find(`.js-refresh`).show();

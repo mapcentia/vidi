@@ -42,8 +42,8 @@ const LAYER_TYPE_DEFAULT = LAYER.RASTER_TILE;
  * Layer type icons
  */
 let icons = {};
-icons[LAYER.VECTOR] = `<i class="material-icons">gesture</i>`;
-icons[LAYER.RASTER_TILE] = `<i class="material-icons">border_all</i>`;
+icons[LAYER.VECTOR] = `<i class="fab fa-facebook-f"></i>`;
+icons[LAYER.RASTER_TILE] = `<i class="fab fa-twitter"></i>`;
 icons[LAYER.VECTOR_TILE] = `<i class="material-icons">domain</i>`;
 icons[LAYER.WEBGL] = `<i class="material-icons">grain</i>`;
 const ICONS = icons;

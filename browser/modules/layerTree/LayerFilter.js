@@ -278,7 +278,7 @@ class VectorLayerFilter extends React.Component {
     renderExpressionControl(column, index, layerKey) {
         let expressionControl;
         if (column.fieldname === DUMMY_RULE.fieldname || column.expression === DUMMY_RULE.expression) {
-            expressionControl = (<p className="text-secondary" style={{paddingTop: `12px`}}>{__(`Select field`)}</p>);
+            expressionControl = (<p className="text-secondary" style={{marginBottom: `0`}}>{__(`Select field`)}</p>);
         } else {
             let expressionOptions = [];
             for (let key in this.state.layer.fields) {
@@ -464,7 +464,7 @@ class VectorLayerFilter extends React.Component {
             let divStyle = {paddingRight: `10px`};
             let controlDivStyle = divStyle;
             controlDivStyle.maxWidth = `160px`;
-            filterControls.push(<div key={`column_` + index} style={{display: `flex`}}>
+            filterControls.push(<div key={`column_` + index} style={{display: `flex`, alignItems: `center`}}>
                 <div className="form-group" style={divStyle}>
                     <button className="btn btn-sm btn-link" type="button"
                             onClick={this.onRuleDelete.bind(this, index)}
@@ -475,7 +475,7 @@ class VectorLayerFilter extends React.Component {
                 <div className="form-group" style={divStyle}>{fieldControl}</div>
                 <div className="form-group" style={divStyle}>{expressionControl}</div>
                 <div className="form-group" style={controlDivStyle}>{control}</div>
-                <div style={{paddingRight: `10px`, paddingTop: `16px`}}>{ruleValidityIndicator}</div>
+                <div>{ruleValidityIndicator}</div>
             </div>);
         });
 

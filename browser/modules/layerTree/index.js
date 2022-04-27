@@ -472,7 +472,7 @@ module.exports = {
                         // Refresh all tables when closing one panel, because DOM changes can make the tables un-aligned
                         $(`.js-layer-settings-table table`).bootstrapTable('resetView');
                         // Remove active class from all buttons
-                        $(container).find('a').removeClass('active');
+                        $(container).find('button').removeClass('active');
                     }
 
                     $(container).attr(`data-last-layer-type`, desiredSetupType);
@@ -2914,7 +2914,7 @@ module.exports = {
         if ($(layerContainer).length === 1) {
             if ($(layerContainer).attr(`data-widgets-were-initialized`) !== `true`) {
                 $(layerContainer).find(`.js-toggle-layer-offline-mode-container`).css(`display`, `inline-block`);
-                $(layerContainer).find(`.js-toggles-container`).css(`display`, `inline-block`);
+                $(layerContainer).find(`.js-toggles-container`).css(`display`, `flex`);
 
                 $(layerContainer).find(`.js-set-online, .js-set-offline`).click(e => {
                     e.preventDefault();
