@@ -49,11 +49,11 @@ const createId = () => (+new Date * (Math.random() + 1)).toString(36).substr(2, 
 const htmlFragments = {
     "outer": `
         <div class="tab-pane" role="tabpanel">
-            <div class="symbols-desc"></div>
             <div class="symbols-cover-text" style="position: absolute; top: 50%; left: 50px; display: none; opacity: 0; font-weight: 600; color: #333333">Zoom tættere på</div>
             <div class="symbols-cover" style="position: relative;">
                 <div class="d-flex flex-wrap"></div>
             </div>
+            <div class="symbols-desc"></div>
         </div>
     `,
     "inner": `
