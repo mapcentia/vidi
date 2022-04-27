@@ -89,13 +89,11 @@ module.exports = function (grunt) {
                         'public/js/lib/Leaflet.markercluster/MarkerCluster.css',
                         'public/js/lib/Leaflet.markercluster/MarkerCluster.Default.css',
                         // Bootstrap
-                        'public/js/lib/bootstrap/dist/css/bootstrap.css',
                         'public/js/lib/snackbarjs/snackbar.min.css',
-                        'public/js/lib/bootstrap-material-design/dist/css/ripples.css',
                         'public/js/lib/bootstrap-material-datetimepicker/bootstrap-material-datetimepicker.css',
                         'public/js/lib/bootstrap-select/bootstrap-select.css',
                         'public/js/lib/bootstrap-table/bootstrap-table.css',
-                        'public/js/lib/bootstrap-material-design/dist/css/bootstrap-material-design.css',
+                        'public/js/lib/mdb-ui-kit/css/mdb.min.css',
                         'public/js/lib/bootstrap-colorpicker/css/bootstrap-colorpicker.css',
                         //custom
                         'public/css/styles.min.css'
