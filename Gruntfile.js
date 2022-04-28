@@ -286,7 +286,6 @@ module.exports = function (grunt) {
                         'node_modules/bootstrap-table/dist/bootstrap-table.js',
                         'node_modules/bootstrap-table/dist/bootstrap-table-locale-all.js',
                         'node_modules/bootstrap-table/dist/extensions/export/bootstrap-table-export.js',
-                        // 'node_modules/bootstrap-table/dist/extensions/filter-control/bootstrap-table-filter-control.js',
 
                         'public/js/lib/bootstrap-colorpicker/js/bootstrap-colorpicker.js',
                         'public/js/lib/tableExport.jquery.plugin/tableExport.js',
