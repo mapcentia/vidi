@@ -80,7 +80,7 @@ module.exports = {
             window.vidiConfig[prop] = typeof window.vidiConfig[prop] !== 'undefined' ? window.vidiConfig[prop] : defaults[prop];
         }
         (function poll() {
-            if (typeof L.control.locate !== "undefined") {
+            if (typeof $().bootstrapTable !== "undefined") {
                 if (typeof urlVars.session === "string") {
                     // Try to remove existing cookie
                     document.cookie = 'connect.gc2=; Max-Age=0; path=/; domain=' + location.host;
