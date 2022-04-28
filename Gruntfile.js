@@ -18,10 +18,10 @@ module.exports = function (grunt) {
     });
 
     // Default build parameters
-    let copyBootstrapVariablesCommand = 'cp ./config/_variables.less ./public/js/lib/bootstrap-material-design/less';
     let lessConfig = {"public/css/styles.css": "public/less/styles.default.less"};
+    // let copyBootstrapVariablesCommand = 'cp ./config/_variables.less ./public/js/lib/bootstrap-material-design/less';
     if (theme && theme === 'watsonc') {
-        copyBootstrapVariablesCommand = 'cp ./extensions/' + theme + '/config/_variables.less ./public/js/lib/bootstrap-material-design/less';
+        // copyBootstrapVariablesCommand = 'cp ./extensions/' + theme + '/config/_variables.less ./public/js/lib/bootstrap-material-design/less';
         lessConfig = {"public/css/styles.css": "public/less/styles." + theme + ".less"};
     }
 
@@ -89,10 +89,13 @@ module.exports = function (grunt) {
                         'public/js/lib/Leaflet.markercluster/MarkerCluster.css',
                         'public/js/lib/Leaflet.markercluster/MarkerCluster.Default.css',
                         // Bootstrap
+                        // 'public/js/lib/bootstrap/dist/css/bootstrap.css',
                         'public/js/lib/snackbarjs/snackbar.min.css',
+                        // 'public/js/lib/bootstrap-material-design/dist/css/ripples.css',
                         'public/js/lib/bootstrap-material-datetimepicker/bootstrap-material-datetimepicker.css',
                         'public/js/lib/bootstrap-select/bootstrap-select.css',
                         'public/js/lib/bootstrap-table/bootstrap-table.css',
+                        // 'public/js/lib/bootstrap-material-design/dist/css/bootstrap-material-design.css',
                         'public/js/lib/mdb-ui-kit/css/mdb.min.css',
                         'public/js/lib/bootstrap-colorpicker/css/bootstrap-colorpicker.css',
                         //custom
@@ -171,7 +174,7 @@ module.exports = function (grunt) {
                     transform: [['babelify', {
                         presets: ["@babel/preset-env", "@babel/preset-react"],
                         plugins: ["@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread"]
-                    }], 'require-globify', 'windowify', 'envify', ['browserify-css', {global: true}]]
+                    }], 'require-globify', 'windowify', 'envify', ['browserify-css', { global: true }]]
                 }
             },
             debug: {
@@ -186,7 +189,7 @@ module.exports = function (grunt) {
                     transform: [['babelify', {
                         presets: ["@babel/preset-env", "@babel/preset-react"],
                         plugins: ["@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread"]
-                    }], 'require-globify', 'windowify', 'envify', ['browserify-css', {global: true}]]
+                    }], 'require-globify', 'windowify', 'envify', ['browserify-css', { global: true }]]
                 }
             },
             publish_sw: {
@@ -229,7 +232,7 @@ module.exports = function (grunt) {
                     transform: [['babelify', {
                         presets: ["@babel/preset-env", "@babel/preset-react"],
                         plugins: ["@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread"]
-                    }], 'require-globify', 'windowify', 'envify', ['browserify-css', {global: true}]],
+                    }], 'require-globify', 'windowify', 'envify', ['browserify-css', { global: true }]],
                     watch: true,
                     keepAlive: true
                 }
@@ -282,8 +285,16 @@ module.exports = function (grunt) {
                         'public/js/lib/leaflet-dash-flow/L.Path.DashFlow.js',
                         'public/js/lib/handlebars/handlebars.js',
                         'public/js/lib/typeahead.js/typeahead.jquery.js',
+                        'public/js/lib/bootstrap/dist/js/bootstrap.js',
+                        // 'public/js/lib/bootstrap-material-design/dist/js/ripples.js',
+                        // 'public/js/lib/bootstrap-material-design/dist/js/material.js',
                         'public/js/lib/mdb-ui-kit/mdb.min.js',
                         'public/js/lib/bootstrap-colorpicker/js/bootstrap-colorpicker.js',
+                        //'public/js/lib/bootstrap-table/bootstrap-table.js',
+                        //'public/js/lib/bootstrap-table/bootstrap-table-locale-all.js',
+                        //'public/js/lib/bootstrap-table/extensions/export/bootstrap-table-export.js',
+                        //'public/js/lib/bootstrap-table/extensions/filter-control/bootstrap-table-filter-control.js',
+                        //'node_modules/popper.js/dist/popper.js', // Makes the JS invalid
                         'node_modules/bootstrap-table/dist/bootstrap-table.js',
                         'node_modules/bootstrap-table/dist/bootstrap-table-locale-all.js',
                         'node_modules/bootstrap-table/dist/extensions/export/bootstrap-table-export.js',
@@ -313,17 +324,15 @@ module.exports = function (grunt) {
                 }
             }
         },
-        shell: {
+        /* shell: {
             default: {
                 command: [
-                    copyBootstrapVariablesCommand,
-                    'grunt --gruntfile ./public/js/lib/bootstrap-material-design/Gruntfile.js dist-less'
+                    // copyBootstrapVariablesCommand,
+                    // 'grunt --gruntfile ./public/js/lib/bootstrap-material-design/Gruntfile.js dist-less'
+
                 ].join('&&')
-            },
-            buildDocs: {
-                command: 'sphinx-build ./docs/da ./docs/html'
             }
-        },
+        }, */
         cacheBust: {
             options: {
                 assets: ['js/build/all.min.js', 'js/build/all.async.min.js', 'css/build/all.min.css', 'js/templates.js'],
@@ -386,7 +395,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-templates-hogan');
     grunt.loadNpmTasks('grunt-browserify');
     grunt.loadNpmTasks('grunt-git');
-    grunt.loadNpmTasks('grunt-shell');
+    // grunt.loadNpmTasks('grunt-shell');
     grunt.loadNpmTasks('grunt-contrib-less');
     grunt.loadNpmTasks('grunt-contrib-uglify-es');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
@@ -399,8 +408,8 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-watchify');
     grunt.loadNpmTasks('grunt-version');
 
-    grunt.registerTask('default', ['prepareAssets', 'browserify:publish', 'browserify:publish_sw_dev', 'extension-css', 'shell:default', 'hogan', 'version']);
-    grunt.registerTask('production', ['env:prod', 'hogan', 'prepareAssets', 'browserify:publish', 'browserify:publish_sw', 'extension-css', 'shell:default', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust', 'version', 'appendBuildHashToVersion']);
-    grunt.registerTask('production-test', ['env:prod', 'browserify:publish']);
+    grunt.registerTask('default', ['prepareAssets', 'browserify:publish', 'browserify:publish_sw_dev', 'extension-css', 'hogan', 'version']);
+    grunt.registerTask('production', ['env:prod', 'hogan', 'prepareAssets', 'browserify:publish', 'browserify:publish_sw', 'extension-css', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust', 'version', 'appendBuildHashToVersion']);
+    grunt.registerTask('production-test', ['env:prod', 'hogan', 'browserify:publish', 'browserify:publish_sw', 'extension-css', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust', 'version', 'appendBuildHashToVersion']);
     grunt.registerTask('extension-css', ['less', 'cssmin:extensions']);
 };
