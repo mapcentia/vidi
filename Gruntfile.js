@@ -282,7 +282,7 @@ module.exports = function (grunt) {
                         'public/js/lib/handlebars/handlebars.js',
                         'public/js/lib/typeahead.js/typeahead.jquery.js',
 
-                        'node_modules/bootstrap/dist/js/bootstrap.js',
+                        'node_modules/bootstrap/dist/js/bootstrap.bundle.js',
                         'node_modules/bootstrap-table/dist/bootstrap-table.js',
                         'node_modules/bootstrap-table/dist/bootstrap-table-locale-all.js',
                         'node_modules/bootstrap-table/dist/extensions/export/bootstrap-table-export.js',
