@@ -563,7 +563,6 @@ module.exports = {
             cloud.get().addGeoJsonStore(qstore[index]);
 
             let sql, fieldNames = [], fieldStr;
-            console.log(fieldConf)
 
             if (fields) {
                 $.each(fields, function (i, v) {
