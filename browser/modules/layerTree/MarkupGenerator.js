@@ -181,32 +181,32 @@ class MarkupGenerator {
 
                         <div class="js-toggles-container" style="display: none; flex-wrap: wrap;">
                             <div id="layer-tools-search">
-                                <button class="js-toggle-search btn btn-sm btn-floating shadow-0" data-toggle="tooltip" data-mdb-trigger="hover" data-placement="left" title="${__(`Search`)}" >
+                                <button class="js-toggle-search btn btn-sm btn-floating" data-toggle="tooltip" data-mdb-trigger="hover" data-placement="left" title="${__(`Search`)}" >
                                     <i class="fa fa-search"></i>
                                 </button>
                             </div>
                             <div id="layer-tools-opacity">
-                                <button class="js-toggle-opacity btn btn-sm btn-floating" data-toggle="tooltip" data-placement="left" title="${__(`Opacity`)}">
+                                <button class="js-toggle-opacity btn btn-sm btn-floating" data-toggle="tooltip" data-mdb-trigger="hover" data-placement="left" title="${__(`Opacity`)}">
                                     <i class="fa fa-tint"></i>
                                 </button>
                             </div>
                             <div id="layer-tools-labels">
-                                <button class="js-toggle-labels btn btn-sm btn-floating" data-toggle="tooltip" data-placement="left" title="${__(`Labels`)}">
+                                <button class="js-toggle-labels btn btn-sm btn-floating" data-toggle="tooltip" data-mdb-trigger="hover" data-placement="left" title="${__(`Labels`)}">
                                     <i class="fa fa-tag"></i>
                                 </button>
                             </div>
                             <div id="layer-tools-table">
-                                <button class="js-toggle-table btn btn-sm btn-floating" data-toggle="tooltip" data-placement="left" title="${__(`Table view`)}">
+                                <button class="js-toggle-table btn btn-sm btn-floating" data-toggle="tooltip" data-mdb-trigger="hover" data-placement="left" title="${__(`Table view`)}">
                                     <i class="fa fa-table"></i>
                                 </button>
                             </div>
                             <div id="layer-tools-load">
-                                <button class="js-toggle-load-strategy btn btn-sm btn-floating" data-toggle="tooltip" data-placement="left" title="${__(`Load strategy`)}">
+                                <button class="js-toggle-load-strategy btn btn-sm btn-floating" data-toggle="tooltip" data-mdb-trigger="hover" data-placement="left" title="${__(`Load strategy`)}">
                                     <i class="fa fa-th"></i>
                                 </button>
                             </div>
                             <div id="layer-tools-filters">
-                                <button class="js-toggle-filters btn btn-sm btn-floating" data-toggle="tooltip"  data-placement="left" title="${__(`Filters`)}" >
+                                <button class="js-toggle-filters btn btn-sm btn-floating" data-toggle="tooltip" data-mdb-trigger="hover" data-placement="left" title="${__(`Filters`)}" >
                                     <i class="fa fa-filter"></i>
                                 </button>
 <!--                            <span class="js-toggle-filters-number-of-filters">0</span>-->
