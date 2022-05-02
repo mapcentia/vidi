@@ -316,6 +316,7 @@ class StateSnapshotsDashboard extends React.Component {
     }
 
     copyToClipboard(str) {
+        console.log(str)
         const el = document.createElement('textarea');
         el.value = str;
         document.body.appendChild(el);

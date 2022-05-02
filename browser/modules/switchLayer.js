@@ -221,6 +221,10 @@ module.exports = module.exports = {
                 // TODO check "mouseover" properties in fieldConf. No need to switch on if mouse over is not wanted
                 _self.enableUTFGrid(gc2Id);
                 _self.enableCheckBoxesOnChildren(gc2Id);
+                let opacity = layerTreeState?.opacitySettings?.[gc2Id];
+                if (opacity) {
+                    layerTreeUtils.applyOpacityToLayer(opacity, gc2Id, cloud, backboneEvents);
+                }
                 resolve();
             }).catch(err => {
                 if (err) {

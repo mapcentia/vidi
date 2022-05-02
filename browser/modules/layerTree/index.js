@@ -2970,7 +2970,6 @@ module.exports = {
                 });
 
                 let initialSliderValue = 1;
-                debugger
                 if (isRasterTileLayer || isVectorTileLayer) {
                     if (layerKey in moduleState.opacitySettings && isNaN(moduleState.opacitySettings[layerKey]) === false) {
                         if (moduleState.opacitySettings[layerKey] >= 0 && moduleState.opacitySettings[layerKey] <= 1) {
