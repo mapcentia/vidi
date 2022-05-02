@@ -21,7 +21,7 @@
   ~ @author     Martin Høgh <mh@mapcentia.com>
   ~ @copyright  2013-2020 MapCentia ApS
   ~ @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
-  ~ @version    2020.12.0
+  ~ @version    UNRELEASED
 
   -->
 <html lang="en">
@@ -31,7 +31,7 @@
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="google" value="notranslate">
     <meta name="Description" content="A platform for building spatial data infrastructure and deploying browser based GIS.">
-    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
     <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
