@@ -37,6 +37,7 @@ import {
 import OfflineModeControlsManager from './OfflineModeControlsManager';
 import {GROUP_CHILD_TYPE_GROUP, GROUP_CHILD_TYPE_LAYER, LayerSorting} from './LayerSorting';
 import {GEOJSON_PRECISION} from './../constants';
+
 let _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEvents,
     onEachFeature = [], pointToLayer = [], onSelectedStyle = [], onLoad = [], onSelect = [],
     onMouseOver = [], cm = [], styles = [], tables = {}, childLayersThatShouldBeEnabled = [];
@@ -273,8 +274,10 @@ module.exports = {
                 result.push(activeLayers[key].fullLayerKey);
             }
         }
+        const layersFromFromUrl = state.layersInUrl();
 
-        return result;
+
+        return result.concat(layersFromFromUrl);
     },
 
     /**
@@ -542,7 +545,7 @@ module.exports = {
         let activeLayers = _self.getActiveLayers();
         let layersOfflineMode = offlineModeControlsManager.getOfflineModeSettings();
 
-        let opacitySettings = {};
+        let opacitySettings = moduleState.opacitySettings;
         for (let key in cloud.get().map._layers) {
             let layer = cloud.get().map._layers[key];
             if (`id` in layer && layer.id) {
@@ -2965,32 +2968,23 @@ module.exports = {
                 });
 
                 let initialSliderValue = 1;
+                debugger
                 if (isRasterTileLayer || isVectorTileLayer) {
-                    // Opacity slider
-                    $(layerContainer).find('.js-layer-settings-opacity').append(`<div style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px; padding-top: 10px;">
-                        <div class="js-opacity-slider slider shor slider-material-orange"></div>
-                    </div>`);
-
                     if (layerKey in moduleState.opacitySettings && isNaN(moduleState.opacitySettings[layerKey]) === false) {
                         if (moduleState.opacitySettings[layerKey] >= 0 && moduleState.opacitySettings[layerKey] <= 1) {
                             initialSliderValue = moduleState.opacitySettings[layerKey];
                         }
                     }
+                    // Opacity slider
+                    $(layerContainer).find('.js-layer-settings-opacity').append(`<div class="range" style="padding: 10px;">
+                        <input type="range"  min="1" max="100" value="${initialSliderValue * 100}" class="js-opacity-slider form-range">
+                    </div>`);
 
-                    let slider = $(layerContainer).find('.js-layer-settings-opacity').find(`.js-opacity-slider`).get(0);
+
+                    let slider = $(layerContainer).find('.js-layer-settings-opacity').find(`.js-opacity-slider`);
                     if (slider) {
-                        noUiSlider.create(slider, {
-                            start: (initialSliderValue * 100),
-                            connect: `lower`,
-                            step: 10,
-                            range: {
-                                'min': 0,
-                                'max': 100
-                            }
-                        });
-
-                        slider.noUiSlider.on(`update`, (values, handle, unencoded, tap, positions) => {
-                            let sliderValue = (parseFloat(values[handle]) / 100);
+                        slider.on('input change', (e) => {
+                            let sliderValue = (parseFloat(e.target.value) / 100);
                             layerTreeUtils.applyOpacityToLayer(sliderValue, layerKey, cloud, backboneEvents);
                             moduleState.setLayerOpacityRequests.push({layerKey, opacity: sliderValue});
                         });

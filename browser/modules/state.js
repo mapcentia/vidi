@@ -825,5 +825,13 @@ module.exports = {
 
     activeLayersInSnapshot: () => {
         return activeLayersInSnapshot;
+    },
+
+    layersInUrl: () => {
+        let l = [];
+        if (hashArr[4]) {
+            l = hashArr[4].split(",");
+        }
+        return l;
     }
 };
