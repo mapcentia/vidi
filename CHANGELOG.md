@@ -6,18 +6,21 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ## [UNRELEASED] - 2022-20-4
 ### Changed
-- In conflictSearch requests to the GC2 SQL API now happens concurrently. This is done by implementing a promise pool. The default size of the pool is 30, but this can be set in the runtime config. Note that this setting can't be changed in a run-time config. 
+- In conflictSearch requests to the GC2 SQL API now happens concurrently. This is done by implementing a promise pool. The default size of the pool is 30, but this can be set in the build config. Note that this setting can't be changed in a run-time config. 
+- conflictSearch now has a `stateless` option, which can be set in both build and run-time config. In stateless mode the state of the module will not be kept. Default `false`.
 ```json
 {
   "extensionConfig": {
     "conflictSearch": {
-      "poolSize": 40
+      "poolSize": 40,
+      "stateless": true
     }
   }
 }
 ```
+
 ### Fixed
-- Tile layer opacity state now is kept betweens freshes. 
+- Tile layer opacity state now is kept betweens browser refreshes. 
 
 ## [2022.4.0] - 2022-8-4
 ### Fixed
