@@ -391,7 +391,7 @@ module.exports = module.exports = {
         // Start listen to the web socket
         io.connect().on(socketId.get(), function (data) {
             if (typeof data.num !== "undefined") {
-                $("#conflict-progress").html(c++);
+                $("#conflict-progress").html(data.num);
                 if (data.error === null) {
                     $("#conflict-console").append("table: " + data.table + ", hits: " + data.hits + " , time: " + data.time + "\n");
                 } else {

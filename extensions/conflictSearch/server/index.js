@@ -237,7 +237,7 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                         group: metaDataKeys[table].layergroup,
                         hits: (typeof result.features !== "undefined" && result.features !== null) ? result.features.length : 0,
                         data: data,
-                        num: count + "/" + metaDataFinal.data.length,
+                        num: ++count + "/" + metaDataFinal.data.length,
                         time: time,
                         id: socketId,
                         error: res.statusCode !== 200 ? JSON.parse(body).message : null,
