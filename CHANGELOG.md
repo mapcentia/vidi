@@ -7,6 +7,7 @@ and this project adheres to [CalVer](https://calver.org/).
 ## [UNRELEASED] - 2022-5-5
 ### Fixed
 - When editing a raster tile layer the altered properties for the feature-info template is also send to the editor. So e.g. HTML tags for links and images are rendered in the editor form. Now an unaltered clone is send instead.
+- A block/unblock event is added in `infoClick` module, så other modules can block feature-info clicks from happening. This is implemented in `editor, so feature-info-click is blocked while creating new features.
 
 ## [2022.5.0] - 2022-5-5
 ### Changed

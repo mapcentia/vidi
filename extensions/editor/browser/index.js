@@ -390,6 +390,7 @@ module.exports = {
 
             me.stopEdit();
 
+            backboneEvents.get().trigger('block:infoClick');
             // Create schema for attribute form
             let formBuildInformation = this.createFormObj(fields, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column, fieldconf);
             const schema = formBuildInformation.schema;
@@ -1026,6 +1027,7 @@ module.exports = {
      * @param editedFeature
      */
     stopEdit: function (editedFeature) {
+        backboneEvents.get().trigger('unblock:infoClick');
         cloud.get().map.editTools.stopDrawing();
 
         if (editor) {
