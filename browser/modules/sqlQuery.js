@@ -399,7 +399,7 @@ module.exports = {
                             dashSelected: true
                         });
                         if (!parsedMeta.info_element_selector) {
-                            _table.object.on("openpopup" + "_" + _table.uid, function (e) {
+                            _table.object.on("openpopup" + "_" + _table.uid, function (e, layersClone) {
                                 let popup = e.getPopup();
                                 if (popup?._closeButton) {
                                     popup._closeButton.onclick = function () {
@@ -421,7 +421,9 @@ module.exports = {
                                 }, 100);
 
                                 $(".popup-edit-btn").unbind("click.popup-edit-btn").bind("click.popup-edit-btn", function () {
-                                    editor.edit(e, _key_, qstore);
+                                    // We reset the query layer and use a unaltered layer for editor
+                                    layerObj.reset();
+                                    editor.edit(layersClone, _key_, qstore);
                                     editingStarted = true;
                                 });
 

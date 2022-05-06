@@ -96,6 +96,8 @@ var gc2table = (function () {
 
         var customOnLoad = false, destroy, assignEventListeners, clickedFlag = false;
 
+        let clonedLayers = {};
+
         $(el).parent("div").addClass("gc2map");
 
         var originalLayers, filters, filterControls, uncheckedIds = [];
@@ -135,7 +137,7 @@ var gc2table = (function () {
             try {
                 m.map._layers[id].setStyle({
                     opacity: 1,
-                    dashArray: dashSelected ? "5 8": false,
+                    dashArray: dashSelected ? "5 8" : false,
                     dashSpeed: 10,
                     lineCap: "butt"
                 });
@@ -180,7 +182,7 @@ var gc2table = (function () {
                     if (onPopupClose) onPopupClose(id);
                 });
 
-                object.trigger("openpopup" + "_" + uid, m.map._layers[id]);
+                object.trigger("openpopup" + "_" + uid, m.map._layers[id], clonedLayers[id]);
             }
         });
 
@@ -386,6 +388,10 @@ var gc2table = (function () {
             loadDataInTable();
         };
 
+        $.each(store.layer._layers, function (i, v) {
+            const l = L.geoJson(JSON.parse(JSON.stringify(v.toGeoJSON())))._layers;
+            clonedLayers[i] = l[Object.keys(l)[0]];
+        })
         loadDataInTable = function (doNotCallCustomOnload = false, forceDataLoad = false) {
             data = [];
             $.each(store.layer._layers, function (i, v) {
@@ -491,7 +497,7 @@ var gc2table = (function () {
             store: store,
             moveEndOff: moveEndOff,
             moveEndOn: moveEndOn,
-            bootStrapTable : $(el).bootstrapTable
+            bootStrapTable: $(el).bootstrapTable
         };
     };
     return {

@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [UNRELEASED] - 2022-5-5
+### Fixed
+- When editing a raster tile layer the altered properties for the feature-info template is also send to the editor. So e.g. HTML tags for links and images are rendered in the editor form. Now an unaltered clone is send instead.
+
 ## [2022.5.0] - 2022-5-5
 ### Changed
 - In conflictSearch requests to the GC2 SQL API now happens concurrently. This is done by implementing a promise pool. The default size of the pool is 30, but this can be set in the build config. Note that this setting can't be changed in a run-time config. 

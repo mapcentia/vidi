@@ -709,6 +709,7 @@ module.exports = {
                     break;
 
                 default:
+                    cloud.get().map.addLayer(e);
                     let numberOfNodes = 0;
                     const coors = editedFeature.feature.geometry.coordinates;
                     const calculateCount = (arr) => {
@@ -857,7 +858,7 @@ module.exports = {
                     switchLayer.registerLayerDataAlternation(schemaQualifiedName);
 
                     sqlQuery.reset(qstore);
-                    me.stopEdit();
+                    me.stopEdit(editedFeature);
 
                     // Reloading only vector layers, as uncommited changes can be displayed only for vector layers
                     if (isVectorLayer) {
@@ -910,7 +911,6 @@ module.exports = {
 
             _self.openAttributesDialog();
         };
-
         let confirmMessage = __(`Application is offline, tiles will not be updated. Proceed?`);
         if (isVectorLayer) {
             editFeature();
@@ -1030,6 +1030,9 @@ module.exports = {
 
         if (editor) {
             cloud.get().map.removeLayer(editor);
+        }
+        if (editedFeature) {
+            cloud.get().map.removeLayer(editedFeature);
         }
 
         // If feature was edited, then reload the layer
