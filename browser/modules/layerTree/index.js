@@ -2187,6 +2187,7 @@ module.exports = {
     createSimulatedLayerDescriptionForVirtualLayer: (item) => {
         let creationTime = parseInt(item.key.split(`.`)[1].replace(`query`, ``));
         let date = new Date(+creationTime);
+        // TODO this is a flaky way og getting the relation name
         let layerNamesFromSQL = item.store.sql.substring(item.store.sql.indexOf(`" FROM`) + 6, item.store.sql.indexOf(`WHERE`)).trim();
 
         // Find the corresponding layer
