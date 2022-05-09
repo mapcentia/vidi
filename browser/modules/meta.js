@@ -311,8 +311,14 @@ module.exports = {
      * Get a clone of the full meta data object
      * @returns {Object}
      */
-    getMetaData: function () {
-        return $.extend(true, {}, metaData);
+    getMetaData: function (filter = null) {
+        const clone = $.extend(true, {}, metaData)
+        if (filter) {
+            clone.data = clone.data.filter((e) => {
+                if (e.f_table_name.includes(filter)) return true;
+            })
+        }
+        return clone;
     },
 
     /**

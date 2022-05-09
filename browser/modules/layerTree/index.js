@@ -676,7 +676,7 @@ module.exports = {
      *
      * @returns {Promise}
      */
-    create: (forcedState = false, ignoredInitialStateKeys = [], dontRegisterEvents = false) => {
+    create: (forcedState = false, ignoredInitialStateKeys = [], dontRegisterEvents = false, filter = null) => {
         if (LOG) console.log(`${MODULE_NAME}: create`, moduleState.isBeingBuilt, forcedState);
 
         queueStatistsics.setLastStatistics(false);
@@ -711,7 +711,7 @@ module.exports = {
          * counters of active / added layers needs to be updated
          */
         backboneEvents.get().once(`allDoneLoading:layers`, () => {
-            let metaData = meta.getMetaData();
+            let metaData = meta.getMetaData(filter);
             let groupsToActiveLayers = {};
             let groupsToAddedLayers = {};
             let activeLayers = switchLayer.getLayersEnabledStatus();
@@ -884,7 +884,7 @@ module.exports = {
                                     activeLayers = forcedState.activeLayers;
                                 }
 
-                                let existingMeta = meta.getMetaData();
+                                let existingMeta = meta.getMetaData(filter);
                                 if (`data` in existingMeta) {
                                     activeLayers.map(layerName => {
                                         let correspondingMeta = meta.getMetaByKey(layerTreeUtils.stripPrefix(layerName), false);
@@ -949,7 +949,7 @@ module.exports = {
                                 let groups = [];
 
                                 // Getting set of all loaded vectors
-                                let metaData = meta.getMetaData();
+                                let metaData = meta.getMetaData(filter);
                                 for (let i = 0; i < metaData.data.length; ++i) {
                                     groups[i] = metaData.data[i].layergroup;
                                 }
@@ -973,7 +973,7 @@ module.exports = {
                                 latestFullTreeStructure = [];
                                 for (let i = 0; i < arr.length; ++i) {
                                     if (arr[i] && arr[i] !== "<font color='red'>[Ungrouped]</font>") {
-                                        let sortedLayers = _self.createGroupRecord(arr[i], order, forcedState, precheckedLayers);
+                                        let sortedLayers = _self.createGroupRecord(arr[i], order, forcedState, precheckedLayers, filter);
                                         latestFullTreeStructure.push({
                                             id: arr[i],
                                             type: GROUP_CHILD_TYPE_GROUP,
@@ -2211,7 +2211,7 @@ module.exports = {
      *
      * @returns {void}
      */
-    createGroupRecord: (groupName, order, forcedState, precheckedLayers) => {
+    createGroupRecord: (groupName, order, forcedState, precheckedLayers, filter) => {
         let isVirtualGroup = false;
         if (groupName === __(`Virtual layers`)) {
             if (moduleState.virtualLayers.length > 0) {
@@ -2221,7 +2221,7 @@ module.exports = {
             }
         }
 
-        let metaData = meta.getMetaData();
+        let metaData = meta.getMetaData(filter);
         let base64GroupName = Base64.encode(groupName).replace(/=/g, "");
 
         // Add group container
