@@ -63,8 +63,6 @@ class MarkupGenerator {
                 <span class="js-set-all-layer-offline-mode-container">
                     ${__('Set all layers to be')}: <a href="javascript:void(0);" class="js-set-all-layer-to-be-online">${__('Online')}</a> | <a href="javascript:void(0);" class="js-set-all-layer-to-be-offline">${__('Offline')}</a>
                 </span>
-                <button id="test-layer-filter">city</button>
-                <button id="test-layer-filter-reset">Reset</button>
             </div>
         </div>`);
     }

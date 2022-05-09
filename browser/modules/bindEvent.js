@@ -109,17 +109,6 @@ module.exports = {
             });
         });
 
-        $(document).arrive('#test-layer-filter', function (e, data) {
-            $(this).on('click', function (e) {
-                layerTree.create(false, [], true, "city");
-            })
-        });
-        $(document).arrive('#test-layer-filter-reset', function (e, data) {
-            $(this).on('click', function (e) {
-                layerTree.create(false, [], true, null);
-            })
-        });
-
         $(document).arrive('[data-gc2-group-name]', function () {
             $(this).on('change', function (e) {
                 let prefix;

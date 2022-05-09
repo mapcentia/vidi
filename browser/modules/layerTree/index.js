@@ -116,6 +116,28 @@ module.exports = {
         _self = this;
         if (window.vidiConfig.enabledExtensions.indexOf(`editor`) !== -1) moduleState.editingIsEnabled = true;
 
+        $(document).arrive('#layers-filter', function (e, data) {
+            const filterEl = $('#layers-filter-busy');
+            let timeOut;
+            $(this).on('input', function (e) {
+                clearTimeout(timeOut)
+                const c = () => {
+                    if (moduleState.isBeingBuilt) {
+                        filterEl.show();
+                        timeOut = setTimeout(() => {
+                            c()
+                        }, 100)
+                    } else {
+                        filterEl.hide();
+                        _self.create(false, [], true, e.target.value);
+
+                    }
+                }
+                c();
+            })
+        });
+        $("#layers").before(`<div><input type="text" id="layers-filter" autocomplete="off"></div><div id="layers-filter-busy" style="display: none">b</div>`);
+
         if (urlparser && urlparser.urlVars && urlparser.urlVars.initialFilter) {
             backboneEvents.get().on(`${MODULE_NAME}:ready`, () => {
                 let decodedFilters = JSON.parse(atob(urlparser.urlVars.initialFilter));

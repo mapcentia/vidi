@@ -315,7 +315,11 @@ module.exports = {
         const clone = $.extend(true, {}, metaData)
         if (filter) {
             clone.data = clone.data.filter((e) => {
-                if (e.f_table_name.includes(filter)) return true;
+                if (e.f_table_title && e.f_table_title !== "") {
+                    if (e.f_table_title.toLowerCase().includes(filter.toLowerCase())) return true;
+                } else {
+                    if (e.f_table_name.toLowerCase().includes(filter.toLowerCase())) return true;
+                }
             })
         }
         return clone;
