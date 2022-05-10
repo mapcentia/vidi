@@ -123,12 +123,12 @@ module.exports = {
                 clearTimeout(timeOut)
                 const c = () => {
                     if (moduleState.isBeingBuilt) {
-                        filterEl.show();
+                        filterEl.css("visibility", "visible");
                         timeOut = setTimeout(() => {
                             c()
                         }, 100)
                     } else {
-                        filterEl.hide();
+                        filterEl.css("visibility", "hidden");
                         _self.create(false, [], true, e.target.value);
 
                     }
@@ -136,7 +136,7 @@ module.exports = {
                 c();
             })
         });
-        $("#layers").before(`<div><input type="text" id="layers-filter" autocomplete="off"></div><div id="layers-filter-busy" style="display: none">b</div>`);
+        $("#layers").before(`<div style="display: flex; align-items: center"><div class="form-group" style="flex-grow: 1;"><input class="form-control" type="text" id="layers-filter" autocomplete="off"></div><div id="layers-filter-busy" style="visibility: hidden"><i class="fa fa-cog fa-spin fa-lg"></i></div></div>`);
 
         if (urlparser && urlparser.urlVars && urlparser.urlVars.initialFilter) {
             backboneEvents.get().on(`${MODULE_NAME}:ready`, () => {
