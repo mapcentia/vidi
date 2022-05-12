@@ -4,10 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [UNRELEASED] - 2022-5-5
+## [2022.5.1] - 2022-12-5
+### Added
+- The layer tree now has a "Layer filter" function. This makes it possible to filter layers according to inputted text in a form field above the layer tree. The layer tree will re-render as the user types ahead leaving only layers which matches the text. The matching is done as a case-insentive substring search.
+
 ### Fixed
 - When editing a raster tile layer the altered properties for the feature-info template is also send to the editor. So e.g. HTML tags for links and images are rendered in the editor form. Now an unaltered clone is send instead.
-- A block/unblock event is added in `infoClick` module, så other modules can block feature-info clicks from happening. This is implemented in `editor, so feature-info clicks are blocked while creating new features.
+- A block/unblock event is added in `infoClick` module, så other modules can block feature-info clicks from happening. This is implemented in `editor`, so feature-info clicks are blocked while creating new features.
 
 ## [2022.5.0] - 2022-5-5
 ### Changed
