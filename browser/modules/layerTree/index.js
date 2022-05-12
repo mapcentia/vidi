@@ -115,20 +115,28 @@ module.exports = {
     init: function () {
         _self = this;
         if (window.vidiConfig.enabledExtensions.indexOf(`editor`) !== -1) moduleState.editingIsEnabled = true;
-
+        $(document).arrive('#layers-filter-reset', function (e, data) {
+            $(this).on('click', function (e) {
+                _self.create(false, [], true, "");
+                $('#layers-filter').val('');
+            })
+        });
         $(document).arrive('#layers-filter', function (e, data) {
-            const filterEl = $('#layers-filter-busy');
+            const filterBusy = $('#layers-filter-busy');
+            const filterReset = $('#layers-filter-reset');
             let timeOut;
             $(this).on('input', function (e) {
                 clearTimeout(timeOut)
                 const c = () => {
                     if (moduleState.isBeingBuilt) {
-                        filterEl.css("visibility", "visible");
+                        filterBusy.show();
+                        filterReset.hide();
                         timeOut = setTimeout(() => {
                             c()
                         }, 100)
                     } else {
-                        filterEl.css("visibility", "hidden");
+                        filterBusy.hide();
+                        filterReset.show();
                         _self.create(false, [], true, e.target.value);
 
                     }
@@ -136,7 +144,7 @@ module.exports = {
                 c();
             })
         });
-        $("#layers").before(`<div style="display: flex; align-items: center"><div class="form-group" style="flex-grow: 1;"><input class="form-control" type="text" id="layers-filter" autocomplete="off"></div><div id="layers-filter-busy" style="visibility: hidden"><i class="fa fa-cog fa-spin fa-lg"></i></div></div>`);
+        $("#layers").before(`<div style="display: flex; align-items: center"><div class="form-group" style="flex-grow: 1;"><input placeholder="${__('Filter layers')}" class="form-control" type="text" id="layers-filter" autocomplete="off"></div><div style="width: 18px; display: flex; justify-content:center"><div id="layers-filter-reset" style="display: inline; cursor: pointer"><i class="fas fa-times"></i></div><div id="layers-filter-busy" style="display: none"><i class="fas fa-circle-notch fa-spin"></i></div></div></div>`);
 
         if (urlparser && urlparser.urlVars && urlparser.urlVars.initialFilter) {
             backboneEvents.get().on(`${MODULE_NAME}:ready`, () => {
