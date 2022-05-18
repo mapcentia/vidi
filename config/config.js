@@ -1549,18 +1549,7 @@ module.exports = {
         "password" : "Geop1234!"
     },
     "baseLayers":[
-        {
-         "id":"geodk.bright",
-         "name":"Topografisk kort",
-         "db":"baselayers", 
-         "host":"https://dk.gc2.io",
-         "abstract":"<p>Topografisk kort baseret på GeoDanmark data, som opdateres årligt.</p><p>Copyright: Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.</p><p>Baggrundskortet må frit anvendes, men følgende skal angives 'Indeholder GeoDanmark-data fra Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.'. </p><br>",
-         "config":{
-            "maxZoom":21,
-            "maxNativeZoom":19,
-            "attribution":"&copy; Styrelsen for Dataforsyning og Effektivisering og Danske kommuner."
-         }
-      },
+        
 		{
 			"type": "wms",
 			"url": "https://api.dataforsyningen.dk/forvaltning2?token=4aacd5977eb46ca012c260ecb608c65c",
@@ -1579,6 +1568,18 @@ module.exports = {
 			"maxZoom": 22,
 			"maxNativeZoom": 20
 		},
+	    {
+         "id":"geodk.bright",
+         "name":"Topografisk kort",
+         "db":"baselayers", 
+         "host":"https://dk.gc2.io",
+         "abstract":"<p>Topografisk kort baseret på GeoDanmark data, som opdateres årligt.</p><p>Copyright: Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.</p><p>Baggrundskortet må frit anvendes, men følgende skal angives 'Indeholder GeoDanmark-data fra Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.'. </p><br>",
+         "config":{
+            "maxZoom":21,
+            "maxNativeZoom":19,
+            "attribution":"&copy; Styrelsen for Dataforsyning og Effektivisering og Danske kommuner."
+         }
+      },
 		{
 			"type": "wms",
 			"url": "/api/df/Matrikel/MatrikelGaeldendeOgForeloebigWMS/1.0.0/WMS",
