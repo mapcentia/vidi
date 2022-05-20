@@ -1984,6 +1984,7 @@ module.exports = {
                     });
                     vectorPopUp = L.popup({
                         autoPan: window.vidiConfig.autoPanPopup,
+                        // autoPanPaddingTopLeft: L.point(125, 150),
                         minWidth: 300,
                         className: `js-vector-layer-popup custom-popup`
                     }).setLatLng(event.latlng).setContent(`<div>
