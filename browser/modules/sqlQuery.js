@@ -46,10 +46,8 @@ let elementPrefix;
 let qStoreShadow;
 
 let defaultSelectedStyle = {
-    weight: 5,
     color: '#ff0000',
-    fillOpacity: 0.2,
-    opacity: 0.2
+
 };
 
 let backArrowIsAdded = false;
@@ -396,7 +394,6 @@ module.exports = {
                             caller: _self,
                             styleSelected: styleForSelectedFeatures,
                             setZoom: parsedMeta?.zoom_on_table_click ? parsedMeta.zoom_on_table_click : false,
-                            dashSelected: true
                         });
                         if (!parsedMeta.info_element_selector) {
                             _table.object.on("openpopup" + "_" + _table.uid, function (e, layersClone) {

@@ -19,7 +19,8 @@ import {
     SUB_GROUP_DIVIDER,
     SYSTEM_FIELD_PREFIX,
     VIRTUAL_LAYERS_SCHEMA,
-    VECTOR_SIDE_TABLE_EL
+    VECTOR_SIDE_TABLE_EL,
+    SELECTED_STYLE
 } from './constants';
 import dayjs from 'dayjs';
 import noUiSlider from 'nouislider';
@@ -80,7 +81,7 @@ let moduleState = {
     dynamicLoad: {},
     setLayerOpacityRequests: [],
     setLayerStateRequests: {},
-    vectorStores: [],
+    vectorStores: {},
     webGLStores: [],
     virtualLayers: [],
     tileContentCache: {},
@@ -1528,6 +1529,7 @@ module.exports = {
                 return apiBridgeInstance.transformResponseHandler(response, id);
             },
             onEachFeature: (feature, layer) => {
+                let me = this;
                 if (parsedMeta?.hover_active) {
                     _self.mouseOver(layer, fieldConf, template);
                 }
@@ -1547,6 +1549,10 @@ module.exports = {
                             editor = extensions.editor.index;
                         }
                         layer.on("click", function (e) {
+                            _self.resetAllVectorLayerStyles();
+                            try {
+                                e.target.setStyle(SELECTED_STYLE);
+                            } catch (e) {}
                             let layerIsEditable = false;
                             let metaDataKeys = meta.getMetaDataKeys();
                             if (metaDataKeys[layerKey] && `meta` in metaDataKeys[layerKey]) {
@@ -1592,7 +1598,10 @@ module.exports = {
                 } else {
                     // If there is no handler for specific layer, then display attributes only
                     layer.on("click", function (e) {
-
+                        _self.resetAllVectorLayerStyles();
+                        try {
+                            e.target.setStyle(SELECTED_STYLE);
+                        } catch (e) {}
                         // Cross Multi select disabled
                         if (!window.vidiConfig.crossMultiSelect) {
                             _self.displayAttributesPopup([{
@@ -1993,6 +2002,7 @@ module.exports = {
                                                             </div>`).openOn(cloud.get().map)
                         .on('remove', () => {
                             sqlQuery.resetAll();
+                            _self.resetAllVectorLayerStyles();
                         });
                 }
             }
@@ -3597,5 +3607,19 @@ module.exports = {
             }, 200)
 
         });
+    },
+
+    resetAllVectorLayerStyles: () => {
+        $.each(moduleState.vectorStores, function(u, store){
+            $.each(store.layer._layers, function (i, v) {
+                try {
+                    if (store.layer && store.layer.resetStyle) {
+                        store.layer.resetStyle(v);
+                    }
+                } catch (e) {
+                    console.log(e);
+                }
+            });
+        })
     }
 };
