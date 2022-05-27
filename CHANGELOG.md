@@ -7,6 +7,7 @@ and this project adheres to [CalVer](https://calver.org/).
 ## [2022.5.2] - 2022-27-5
 ### Changed
 - Popup in vector layers is now opened when clicking the feature table. This way the close-pop-up event can be fired when clicking somewhere else. This gives a more consistent experience.
+- `crossMultiSelect` on vector features now used `@turf/boolean-intersects` instead of comparing the bounds of features with Leafletjs. This gives the expected result when clicking on stacked vector features. 
 
 ### Fixed
 - When signed in as a sub-user, cached tile layers wouldn't work but give a 404 error. Vidi changed the 'db' URI part to 'user@db' but the URI for cached layers can't be dynamic. 

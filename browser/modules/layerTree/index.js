@@ -38,6 +38,13 @@ import {
 import OfflineModeControlsManager from './OfflineModeControlsManager';
 import {GROUP_CHILD_TYPE_GROUP, GROUP_CHILD_TYPE_LAYER, LayerSorting} from './LayerSorting';
 import {GEOJSON_PRECISION} from './../constants';
+import {
+    buffer as turfBuffer,
+    point as turfPoint,
+    feature as turfFeature,
+    booleanIntersects as turfIntersects
+} from '@turf/turf'
+
 
 let _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEvents,
     onEachFeature = [], pointToLayer = [], onSelectedStyle = [], onLoad = [], onSelect = [],
@@ -1551,7 +1558,8 @@ module.exports = {
                             _self.resetAllVectorLayerStyles();
                             try {
                                 e.target.setStyle(SELECTED_STYLE);
-                            } catch (e) {}
+                            } catch (e) {
+                            }
                             let layerIsEditable = false;
                             let metaDataKeys = meta.getMetaDataKeys();
                             if (metaDataKeys[layerKey] && `meta` in metaDataKeys[layerKey]) {
@@ -1600,7 +1608,8 @@ module.exports = {
                         _self.resetAllVectorLayerStyles();
                         try {
                             e.target.setStyle(SELECTED_STYLE);
-                        } catch (e) {}
+                        } catch (e) {
+                        }
                         // Cross Multi select disabled
                         if (!window.vidiConfig.crossMultiSelect) {
                             _self.displayAttributesPopup([{
@@ -1646,26 +1655,17 @@ module.exports = {
                                 }, 200)
                             }, null, [coord3857[0], coord3857[1]]);
                         }
-                        let clickBounds = L.latLngBounds(e.latlng, e.latlng);
-                        let distance = 10 * MAP_RESOLUTIONS[cloud.get().getZoom()];
+                        const distance = 10 * MAP_RESOLUTIONS[cloud.get().getZoom()];
+                        const clickFeature = turfBuffer(turfPoint([e.latlng.lng, e.latlng.lat]), distance, {units: 'meters'});
                         let mapObj = cloud.get().map;
                         for (let l in mapObj._layers) {
                             let overlay = mapObj._layers[l];
                             if (overlay._layers) {
                                 for (let f in overlay._layers) {
                                     let featureForChecking = overlay._layers[f];
-                                    let bounds;
-                                    if (featureForChecking.getBounds) {
-                                        bounds = featureForChecking.getBounds();
-                                    } else if (featureForChecking._latlng) {
-                                        let circle = new L.circle(featureForChecking._latlng, {radius: distance});
-                                        // DIRTY HACK
-                                        circle.addTo(mapObj);
-                                        bounds = circle.getBounds();
-                                        circle.removeFrom(mapObj);
-                                    }
+                                    let feature = turfFeature(featureForChecking.feature.geometry);
                                     try {
-                                        if (bounds && clickBounds.intersects(bounds) && overlay.id) {
+                                        if (turfIntersects(clickFeature, feature) && overlay.id) {
                                             intersectingFeatures.push({
                                                 "feature": featureForChecking.feature,
                                                 "layer": overlay,
@@ -1990,7 +1990,7 @@ module.exports = {
                     });
                     vectorPopUp = L.popup({
                         autoPan: window.vidiConfig.autoPanPopup,
-                        autoPanPaddingTopLeft: L.point(multi ? 20 : 0 , multi ? 190: 0),
+                        autoPanPaddingTopLeft: L.point(multi ? 20 : 0, multi ? 300 : 0),
                         minWidth: 300,
                         className: `js-vector-layer-popup custom-popup`
                     }).setLatLng(event.latlng).setContent(`<div>
@@ -3607,7 +3607,7 @@ module.exports = {
     },
 
     resetAllVectorLayerStyles: () => {
-        $.each(moduleState.vectorStores, function(u, store){
+        $.each(moduleState.vectorStores, function (u, store) {
             $.each(store.layer._layers, function (i, v) {
                 try {
                     if (store.layer && store.layer.resetStyle) {
