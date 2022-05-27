@@ -4,9 +4,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [UNRELEASED]
+## [2022.5.2] - 2022-27-5
+### Changed
+- Popup in vector layers is now opened when clicking the feature table. This way the close-pop-up event can be fired when clicking somewhere else. This gives a more consistent experience.
+
 ### Fixed
-- When signed in as a sub-user, cached layer wouldn't work but give a 404 error. Vidi would change the 'db' URI part with 'user@db' but the URI for cached layers can't be dynamic. 
+- When signed in as a sub-user, cached tile layers wouldn't work but give a 404 error. Vidi changed the 'db' URI part to 'user@db' but the URI for cached layers can't be dynamic. 
+- Added some auto-pan-padding to accordion popups, so they don't open up outside the map.
+- When selecting a vector feature it will now get the bolow shown style. Colors will not be changed. Get Feature info on raster tile layer will use the same style, but get a red outline.
+```json
+{
+    "opacity": 1,
+    "weight": 5,
+    "dashArray": "8 5",
+    "lineCap": "butt"
+}
+```
 
 ## [2022.5.1] - 2022-12-5
 ### Added

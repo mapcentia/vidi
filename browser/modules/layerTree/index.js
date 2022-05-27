@@ -1529,7 +1529,6 @@ module.exports = {
                 return apiBridgeInstance.transformResponseHandler(response, id);
             },
             onEachFeature: (feature, layer) => {
-                let me = this;
                 if (parsedMeta?.hover_active) {
                     _self.mouseOver(layer, fieldConf, template);
                 }
@@ -1811,9 +1810,7 @@ module.exports = {
             $(tableContainerId).append(`<table class="table" data-show-toggle="${defaults.showToggle}" data-show-export="${defaults.showExport}" data-show-columns="${defaults.showColumns}" data-card-view="${defaults.cardView}"></table>`);
 
             let metaDataKeys = meta.getMetaDataKeys();
-            let template = (typeof metaDataKeys[layerKey].infowindow !== "undefined"
-                && metaDataKeys[layerKey].infowindow.template !== "")
-                ? metaDataKeys[layerKey].infowindow.template : sqlQuery.getVectorTemplate(layerKey);
+            let template = sqlQuery.getVectorTemplate(layerKey);
             let tableHeaders = sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + layerKey,
                 JSON.parse(JSON.stringify(layerWithData[0].toGeoJSON(GEOJSON_PRECISION).features)));
 
@@ -1834,7 +1831,7 @@ module.exports = {
                 cm: tableHeaders,
                 autoUpdate: false,
                 autoPan: window.vidiConfig.autoPanPopup,
-                openPopUp: false,
+                openPopUp: true,
                 setViewOnSelect: true,
                 responsive: false,
                 callCustomOnload: true,
@@ -1876,7 +1873,7 @@ module.exports = {
             for (var key in properties) {
                 if (properties.hasOwnProperty(key)) {
                     if (key.indexOf(SYSTEM_FIELD_PREFIX) === 0) {
-                        delete properties[key];
+                        // delete properties[key];
                     }
                 }
             }
@@ -1884,7 +1881,7 @@ module.exports = {
             let i = properties._vidi_content.fields.length;
             while (i--) {
                 if (properties._vidi_content.fields[i].title.indexOf(SYSTEM_FIELD_PREFIX) === 0 || properties._vidi_content.fields[i].title === `_id`) {
-                    properties._vidi_content.fields.splice(i, 1);
+                    // properties._vidi_content.fields.splice(i, 1);
                 }
             }
 
@@ -2002,7 +1999,7 @@ module.exports = {
                                                             </div>`).openOn(cloud.get().map)
                         .on('remove', () => {
                             sqlQuery.resetAll();
-                            _self.resetAllVectorLayerStyles();
+                            // _self.resetAllVectorLayerStyles();
                         });
                 }
             }
