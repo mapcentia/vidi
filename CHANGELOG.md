@@ -12,7 +12,7 @@ and this project adheres to [CalVer](https://calver.org/).
 ### Fixed
 - When signed in as a sub-user, cached tile layers wouldn't work but give a 404 error. Vidi changed the 'db' URI part to 'user@db' but the URI for cached layers can't be dynamic. 
 - Added some auto-pan-padding to accordion popups, so they don't open up outside the map.
-- When selecting a vector feature it will now get the bolow shown style. Colors will not be changed. Get Feature info on raster tile layer will use the same style, but get a red outline.
+- When selecting a vector feature it will now get the below shown style. Colors will not be changed. Get Feature info on raster tile layer will use the same style, but get a red outline.
 ```json
 {
     "opacity": 1,
