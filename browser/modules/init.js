@@ -473,9 +473,13 @@ module.exports = {
                         modules.state.getState().then(st => {
                             // Don't recreate SQL store from snapshot
                             modules.layerTree.setRecreateStores(false);
-                            modules.layerTree.applyState(st.modules.layerTree, true).then(() => {
-                                modules.layerTree.setRecreateStores(true);
-                            });
+                            if (st.modules?.layerTree) {
+                                modules.layerTree.applyState(st.modules.layerTree, true).then(() => {
+                                    modules.layerTree.setRecreateStores(true);
+                                });
+                            } else {
+                                modules.layerTree.create();
+                            }
                         })
                     }).catch((error) => {
                         console.log(error); // Stacktrace
