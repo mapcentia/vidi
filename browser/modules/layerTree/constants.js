@@ -48,6 +48,15 @@ icons[LAYER.VECTOR_TILE] = `<i class="material-icons">domain</i>`;
 icons[LAYER.WEBGL] = `<i class="material-icons">grain</i>`;
 const ICONS = icons;
 
+const VECTOR_SIDE_TABLE_EL = 'vector-side-table';
+
+const SELECTED_STYLE = {
+    opacity: 1,
+    weight: 5,
+    dashArray: "8 5",
+    lineCap: "butt",
+}
+
 export {
     LOG,
     MODULE_NAME,
@@ -58,5 +67,7 @@ export {
     ICONS,
     LAYER_TYPE_DEFAULT,
     SUB_GROUP_DIVIDER,
-    MAP_RESOLUTIONS
+    MAP_RESOLUTIONS,
+    VECTOR_SIDE_TABLE_EL,
+    SELECTED_STYLE
 };

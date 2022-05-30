@@ -263,9 +263,12 @@ module.exports = {
     },
 
     getState: () => {
-        let res = conflictSearch.getResult();
-        res.reportType = reportType;
-        return res;
+        if (config?.extensionConfig?.conflictSearch?.stateless) {
+            return {};
+        }
+        let state = conflictSearch.getResult();
+        state.reportType = reportType;
+        return state;
     },
 
     applyState: (newState) => {

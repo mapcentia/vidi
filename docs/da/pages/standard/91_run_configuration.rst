@@ -375,7 +375,7 @@ Ovenstående sættes i GC2 Meta.
 |
 
 .. note::
-    Hvis et lag er editerbart, vises "blyant" og "skraldespand" ikonerne ikke i pop-up'en.
+    Hvis extension ``editor`` er aktiv vil ``crossMultiSelect`` bliver sat til ``false``.
 
 .. _configjs_activatemaintab:
 
@@ -462,6 +462,46 @@ Liste over lag, som skal tændes fra starten. Lag angives schema qualified og me
         "schema.lag1",
         "v:schema.lag2"
     ]
+
+
+.. _configjs_removedisabledlayersfromLegend:
+
+removeDisabledLayersFromLegend
+*****************************************************************
+
+Hvis sættes til true, så fjernes lag fra signaturforklaringen, når laget slukkes. Ellers forbliver det på signaturen, men tjekboksen bliver tom. Default er "false".
+
+.. code-block:: json
+
+    "removeDisabledLayersFromLegend": true
+
+.. _configjs_autoPanPopup:
+
+autoPanPopup
+*****************************************************************
+
+Denne indstilling bevirker, at når en pop-up åbnes, så panoreres kort således, at pop-up'en kommer indenfor kortets udsnit. Bemærk, at indstillingen helst skal sættes til "false", hvis der anvendes vektor-lag med dynamisk loading af data, fordi panoreringen evt. kan bevirke reload af data og derefter lukkes pop-up'en Default er "false".
+
+.. code-block:: json
+
+    "autoPanPopup": true
+
+.. _configjs_vectorTable:
+
+vectorTable
+*****************************************************************
+
+Denne indstilling styrer om :ref:`vektorlag tabellen<gc2mata_vectorsettings>` skal vises til højre for eller i bunden af kortet. Endvidere kan højde/bredde styres. Hvis positionen er sat til ``right``
+vil kun ``width`` have effekt og tabellen vil altid fylde højden ud. Hvis position er sat til ``bottom`` vil kun ``height`` have effekt og bredden bliver den samme som kortet.
+``width`` kan både være relativ ``%`` og absolute ``px`` mens ``height`` kun kan angives som absolute ``px``. Hvis ikke denne indstilling sættes bruges default værdier som vist nedenunder.
+
+.. code-block:: json
+
+    "vectorTable": {
+        "position": "bottom",
+        "width": "30%",
+        "height": "250px"
+    }
 
 .. rubric:: Fodnoter
 

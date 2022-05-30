@@ -168,7 +168,7 @@ module.exports = {
                     $('ul[role="tablist"]:last-child').attr('style', 'padding-bottom: 100px');
                 }
                 isStarted = true;
-                if ($(document).width() > 1024 && typeof window.vidiConfig.activateMainTab === 'undefined') {
+                if ($(document).width() > 1024 && !window.vidiConfig.activateMainTab) {
                     $('#search-border').trigger('click');
                 }
                 if (window?.vidiConfig?.extensionConfig?.embed?.slideOutLayerTree === true) {
