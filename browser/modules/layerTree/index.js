@@ -1676,11 +1676,11 @@ module.exports = {
                                         console.log(e);
                                     }
                                 }
-                                // No active raster tile layers - open the pop-up
-                                if (activeTilelayers.length === 0) {
-                                    _self.displayAttributesPopup(intersectingFeatures, e);
-                                }
                             }
+                        }
+                        // No active raster tile layers - open the pop-up
+                        if (activeTilelayers.length === 0) {
+                            _self.displayAttributesPopup(intersectingFeatures, e);
                         }
                     });
                 }
@@ -1831,7 +1831,7 @@ module.exports = {
                 cm: tableHeaders,
                 autoUpdate: false,
                 autoPan: window.vidiConfig.autoPanPopup,
-                openPopUp: true,
+                openPopUp: !window.vidiConfig.crossMultiSelect,
                 setViewOnSelect: true,
                 responsive: false,
                 callCustomOnload: true,
@@ -1990,7 +1990,7 @@ module.exports = {
                     });
 
                     // Open pop-up if table is NOT enabled - gc2table with control pop-up if enabled
-                    if ($(`#table_view-${layerKey.replace('.', '_')}`).children('.bootstrap-table').length === 0) {
+                    if ($(`#table_view-${layerKey.replace('.', '_')}`).children('.bootstrap-table').length === 0 || multi) {
                         vectorPopUp = L.popup({
                             autoPan: window.vidiConfig.autoPanPopup,
                             autoPanPaddingTopLeft: L.point(multi ? 20 : 0, multi ? 300 : 0),
