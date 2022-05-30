@@ -19,7 +19,8 @@ import {
     SUB_GROUP_DIVIDER,
     SYSTEM_FIELD_PREFIX,
     VIRTUAL_LAYERS_SCHEMA,
-    VECTOR_SIDE_TABLE_EL
+    VECTOR_SIDE_TABLE_EL,
+    SELECTED_STYLE
 } from './constants';
 import dayjs from 'dayjs';
 import noUiSlider from 'nouislider';
@@ -37,6 +38,13 @@ import {
 import OfflineModeControlsManager from './OfflineModeControlsManager';
 import {GROUP_CHILD_TYPE_GROUP, GROUP_CHILD_TYPE_LAYER, LayerSorting} from './LayerSorting';
 import {GEOJSON_PRECISION} from './../constants';
+import {
+    buffer as turfBuffer,
+    point as turfPoint,
+    feature as turfFeature,
+    booleanIntersects as turfIntersects
+} from '@turf/turf'
+
 
 let _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEvents,
     onEachFeature = [], pointToLayer = [], onSelectedStyle = [], onLoad = [], onSelect = [],
@@ -274,10 +282,8 @@ module.exports = {
                 result.push(activeLayers[key].fullLayerKey);
             }
         }
-        const layersFromFromUrl = state.layersInUrl();
 
-
-        return result.concat(layersFromFromUrl);
+        return result;
     },
 
     /**
@@ -475,7 +481,7 @@ module.exports = {
                         // Refresh all tables when closing one panel, because DOM changes can make the tables un-aligned
                         $(`.js-layer-settings-table table`).bootstrapTable('resetView');
                         // Remove active class from all buttons
-                        $(container).find('button').removeClass('active');
+                        $(container).find('a').removeClass('active');
                     }
 
                     $(container).attr(`data-last-layer-type`, desiredSetupType);
@@ -545,7 +551,7 @@ module.exports = {
         let activeLayers = _self.getActiveLayers();
         let layersOfflineMode = offlineModeControlsManager.getOfflineModeSettings();
 
-        let opacitySettings = moduleState.opacitySettings;
+        let opacitySettings = {};
         for (let key in cloud.get().map._layers) {
             let layer = cloud.get().map._layers[key];
             if (`id` in layer && layer.id) {
@@ -967,7 +973,7 @@ module.exports = {
                                     arr = layerSortingInstance.sortGroups(order, notSortedGroupsArray);
                                 }
 
-                                $("#layers").append(`<div id="layers_list" class="accordion"></div>`);
+                                $("#layers").append(`<div id="layers_list"></div>`);
 
                                 // Filling up groups and underlying layers (except ungrouped ones)
                                 latestFullTreeStructure = [];
@@ -2232,7 +2238,7 @@ module.exports = {
 
             // Append to inner group container
             // ===============================
-            $("#group-" + base64GroupName).append(`<div id="collapse${base64GroupName}" class="accordion-body"></div>`);
+            $("#group-" + base64GroupName).append(`<div id="collapse${base64GroupName}" class="accordion-body collapse"></div>`);
         }
 
         // Get layers that belong to current group
@@ -2817,12 +2823,10 @@ module.exports = {
                 }
 
                 let switcher = $(e.target).closest('.layer-item').find('.js-show-layer-control');
-                console.log(switcher)
                 $(switcher).data('gc2-layer-type', type);
                 $(switcher).prop('checked', true);
 
                 let layerToReload = ((type === LAYER.RASTER_TILE ? `` : type + `:`) + $(switcher).data('gc2-id'));
-                console.log(layerToReload)
                 _self.setLayerState(type, layerKey);
                 _self.reloadLayer(layerToReload, false, (data ? data.doNotLegend : false));
 
@@ -2917,7 +2921,7 @@ module.exports = {
         if ($(layerContainer).length === 1) {
             if ($(layerContainer).attr(`data-widgets-were-initialized`) !== `true`) {
                 $(layerContainer).find(`.js-toggle-layer-offline-mode-container`).css(`display`, `inline-block`);
-                $(layerContainer).find(`.js-toggles-container`).css(`display`, `flex`);
+                $(layerContainer).find(`.js-toggles-container`).css(`display`, `inline-block`);
 
                 $(layerContainer).find(`.js-set-online, .js-set-offline`).click(e => {
                     e.preventDefault();
@@ -2971,21 +2975,31 @@ module.exports = {
 
                 let initialSliderValue = 1;
                 if (isRasterTileLayer || isVectorTileLayer) {
+                    // Opacity slider
+                    $(layerContainer).find('.js-layer-settings-opacity').append(`<div style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px; padding-top: 10px;">
+                        <div class="js-opacity-slider slider shor slider-material-orange"></div>
+                    </div>`);
+
                     if (layerKey in moduleState.opacitySettings && isNaN(moduleState.opacitySettings[layerKey]) === false) {
                         if (moduleState.opacitySettings[layerKey] >= 0 && moduleState.opacitySettings[layerKey] <= 1) {
                             initialSliderValue = moduleState.opacitySettings[layerKey];
                         }
                     }
-                    // Opacity slider
-                    $(layerContainer).find('.js-layer-settings-opacity').append(`<div class="range" style="padding: 10px;">
-                        <input type="range"  min="1" max="100" value="${initialSliderValue * 100}" class="js-opacity-slider form-range">
-                    </div>`);
 
-
-                    let slider = $(layerContainer).find('.js-layer-settings-opacity').find(`.js-opacity-slider`);
+                    let slider = $(layerContainer).find('.js-layer-settings-opacity').find(`.js-opacity-slider`).get(0);
                     if (slider) {
-                        slider.on('input change', (e) => {
-                            let sliderValue = (parseFloat(e.target.value) / 100);
+                        noUiSlider.create(slider, {
+                            start: (initialSliderValue * 100),
+                            connect: `lower`,
+                            step: 10,
+                            range: {
+                                'min': 0,
+                                'max': 100
+                            }
+                        });
+
+                        slider.noUiSlider.on(`update`, (values, handle, unencoded, tap, positions) => {
+                            let sliderValue = (parseFloat(values[handle]) / 100);
                             layerTreeUtils.applyOpacityToLayer(sliderValue, layerKey, cloud, backboneEvents);
                             moduleState.setLayerOpacityRequests.push({layerKey, opacity: sliderValue});
                         });
@@ -3175,13 +3189,9 @@ module.exports = {
                 $(layerContainer).find('.js-layer-settings-search').append(
                     `<div style="padding-left: 15px; padding-right: 10px; padding-bottom: 20px; padding-top: 20px;">
                         <div>
-                            <form onsubmit="return false">
-
-                                <div class="form-outline">
-                                    <input type="text" class="form-control" id="tyu"/>
-                                    <label class="form-label" for="tyu">
-                                        ${__("Search")}
-                                    </label>
+                            <form class="form" onsubmit="return false">
+                                <div class="form-group">
+                                    <input type="test" class="js-search-input form-control" placeholder="${__("Search")}">
                                 </div>
                                 <div class="form-inline">
                                     <div class="form-group">

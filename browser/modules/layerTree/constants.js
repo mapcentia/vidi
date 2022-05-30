@@ -50,6 +50,13 @@ const ICONS = icons;
 
 const VECTOR_SIDE_TABLE_EL = 'vector-side-table';
 
+const SELECTED_STYLE = {
+    opacity: 1,
+    weight: 5,
+    dashArray: "8 5",
+    lineCap: "butt",
+}
+
 export {
     LOG,
     MODULE_NAME,
@@ -61,5 +68,6 @@ export {
     LAYER_TYPE_DEFAULT,
     SUB_GROUP_DIVIDER,
     MAP_RESOLUTIONS,
-    VECTOR_SIDE_TABLE_EL
+    VECTOR_SIDE_TABLE_EL,
+    SELECTED_STYLE
 };

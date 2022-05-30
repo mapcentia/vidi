@@ -20,6 +20,7 @@ var _layers;
 var qstore = [];
 var active = false;
 var _self = false;
+let blocked = false;
 
 /**
  *
@@ -51,13 +52,19 @@ module.exports = {
         backboneEvents.get().on(`off:${MODULE_ID}`, () => {
             _self.active(false);
         });
+        backboneEvents.get().on(`block:${MODULE_ID}`, () => {
+            blocked = true;
+        });
+        backboneEvents.get().on(`unblock:${MODULE_ID}`, () => {
+            blocked = false;
+        });
 
         cloud.get().on("dblclick", function () {
             clicktimer = undefined;
         });
 
         cloud.get().on("click", function (e) {
-            if (active === false || e.originalEvent.clickedOnFeature) {
+            if (active === false || e.originalEvent.clickedOnFeature || blocked) {
                 return;
             }
 

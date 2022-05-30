@@ -391,7 +391,7 @@ module.exports = module.exports = {
         // Start listen to the web socket
         io.connect().on(socketId.get(), function (data) {
             if (typeof data.num !== "undefined") {
-                $("#conflict-progress").html(c++);
+                $("#conflict-progress").html(data.num);
                 if (data.error === null) {
                     $("#conflict-console").append("table: " + data.table + ", hits: " + data.hits + " , time: " + data.time + "\n");
                 } else {
@@ -516,7 +516,7 @@ module.exports = module.exports = {
                     let placeStore = getPlaceStore();
                     placeStore.db = search.getMDB();
                     placeStore.host = search.getMHOST();
-                    placeStore.sql = `SELECT esr_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE esr_ejendomsnummer = (SELECT esr_ejendomsnummer FROM matrikel.jordstykke WHERE landsejerlavskode=${urlparser.urlVars.var_landsejerlavskode} AND matrikelnummer='${urlparser.urlVars.var_matrikelnr.toLowerCase()}') group by esr_ejendomsnummer`;
+                    placeStore.sql = `SELECT sfe_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE sfe_ejendomsnummer = (SELECT sfe_ejendomsnummer FROM matrikel.jordstykke WHERE landsejerlavskode=${urlparser.urlVars.var_landsejerlavskode} AND matrikelnummer='${urlparser.urlVars.var_matrikelnr.toLowerCase()}') group by sfe_ejendomsnummer`;
                     placeStore.load();
                     fromVarsIsDone = true;
                 }
