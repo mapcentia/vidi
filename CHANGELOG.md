@@ -21,6 +21,7 @@ and this project adheres to [CalVer](https://calver.org/).
     "lineCap": "butt"
 }
 ```
+- If all cookies are blocked in the browser, Vidi will now still startup, but with a blank state.
 
 ## [2022.5.1] - 2022-12-5
 ### Added
