@@ -4,18 +4,50 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [UNRELEASED] - 2022-20-4
+## [2022.5.2] - 2022-27-5
 ### Changed
-- In conflictSearch requests to the GC2 SQL API now happens concurrently. This is done by implementing a promise pool. The default size of the pool is 30, but this can be set in the runtime config. Note that this setting can't be changed in a run-time config. 
+- Popup in vector layers is now opened when clicking the feature table. This way the close-pop-up event can be fired when clicking somewhere else. This gives a more consistent experience.
+- `crossMultiSelect` on vector features now used `@turf/boolean-intersects` instead of comparing the bounds of features with Leafletjs. This gives the expected result when clicking on stacked vector features. 
+
+### Fixed
+- When signed in as a sub-user, cached tile layers wouldn't work but give a 404 error. Vidi changed the 'db' URI part to 'user@db' but the URI for cached layers can't be dynamic. 
+- Added some auto-pan-padding to accordion popups, so they don't open up outside the map.
+- When selecting a vector feature it will now get the below shown style. Colors will not be changed. Get Feature info on raster tile layer will use the same style, but get a red outline.
+```json
+{
+    "opacity": 1,
+    "weight": 5,
+    "dashArray": "8 5",
+    "lineCap": "butt"
+}
+```
+- If all cookies are blocked in the browser, Vidi will now still startup, but with a blank state.
+
+## [2022.5.1] - 2022-12-5
+### Added
+- The layer tree now has a "Layer filter" function. This makes it possible to filter layers according to inputted text in a form field above the layer tree. The layer tree will re-render as the user types ahead leaving only layers which matches the text. The matching is done as a case-insentive substring search.
+
+### Fixed
+- When editing a raster tile layer the altered properties for the feature-info template is also send to the editor. So e.g. HTML tags for links and images are rendered in the editor form. Now an unaltered clone is send instead.
+- A block/unblock event is added in `infoClick` module, så other modules can block feature-info clicks from happening. This is implemented in `editor`, so feature-info clicks are blocked while creating new features.
+
+## [2022.5.0] - 2022-5-5
+### Changed
+- In conflictSearch requests to the GC2 SQL API now happens concurrently. This is done by implementing a promise pool. The default size of the pool is 30, but this can be set in the build config. Note that this setting can't be changed in a run-time config. 
+- conflictSearch now has a `stateless` option, which can be set in both build and run-time config. In stateless mode the state of the module will not be kept. Default `false`.
 ```json
 {
   "extensionConfig": {
     "conflictSearch": {
-      "poolSize": 40
+      "poolSize": 40,
+      "stateless": true
     }
   }
 }
 ```
+
+### Fixed
+- Tile layer opacity state now is kept betweens browser refreshes. 
 
 ## [2022.4.0] - 2022-8-4
 ### Fixed
@@ -24,7 +56,7 @@ and this project adheres to [CalVer](https://calver.org/).
 ## [2022.3.3] - 2022-24-3
 ### Fixed
 - Regression bug, which kept the right side-panel closed after load of app.
-- The Leaflet method `toGeoJSON` rounds of coordinates with 6 decimals by default. But this may result in up to 10 cm on the map (tested at about 57 degrees north). This makes the editor and snapping very unprecise. So all `toGeoJSON` calls are now done with a precision argument of 14 through the app. 
+- The Leaflet method `toGeoJSON` rounds of coordinates with 6 decimals by default. But this may result in up to 10 cm on the map (tested at about 57 degrees north). This makes the editor and snapping very unprecise. So all `toGeoJSON` calls are now done with a precision argument of 14 through out the app. 
 
 ## [2022.3.2] - 2022-18-3
 ### Fixed
@@ -35,7 +67,7 @@ and this project adheres to [CalVer](https://calver.org/).
 ### Added
 - Added GC2 Meta option for tiled raster layer: `tiled`. If set to `true` the layer will be fetched in tiles instead of
   one big single tile, which is default. The layer visibility detection still works, but will be more inaccurate because
-  of the natur of tile loading. But it will always be false visible.
+  of the nature of tile loading. But it will always be false visible.
 - A new option in embed.js: `data-vidi-no-tracking`, which will disable the Vidi tracking cookie used for advanced
   functions like state-snapshots and printing.
 

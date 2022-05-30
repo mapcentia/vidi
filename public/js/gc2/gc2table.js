@@ -10,6 +10,9 @@
 /*global window:false */
 /*global console:false */
 /*global _:false */
+import {
+    SELECTED_STYLE
+} from './../../../browser/modules/layerTree/constants';
 var gc2table = (function () {
     "use strict";
     var isLoaded, object, init;
@@ -45,13 +48,13 @@ var gc2table = (function () {
                 },
                 styleSelected: {
                     fillOpacity: 0.5,
-                    opacity: 0.5
+                    opacity: 0.5,
+                    fillColor: 'red'
                 },
                 renderInfoIn: null,
                 key: null,
                 caller: null,
-                maxZoom: 17,
-                dashSelected: false
+                maxZoom: 17
             }, prop,
             uid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
                 var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
@@ -91,10 +94,11 @@ var gc2table = (function () {
             renderInfoIn = defaults.renderInfoIn,
             key = defaults.key,
             caller = defaults.caller,
-            maxZoom = parseInt(defaults.maxZoom) || 17,
-            dashSelected = defaults.dashSelected;
+            maxZoom = parseInt(defaults.maxZoom) || 17;
 
         var customOnLoad = false, destroy, assignEventListeners, clickedFlag = false;
+
+        let clonedLayers = {};
 
         $(el).parent("div").addClass("gc2map");
 
@@ -133,12 +137,7 @@ var gc2table = (function () {
             let row = $('*[data-uniqueid="' + id + '"]');
             row.addClass("selected");
             try {
-                m.map._layers[id].setStyle({
-                    opacity: 1,
-                    dashArray: dashSelected ? "5 8": false,
-                    dashSpeed: 10,
-                    lineCap: "butt"
-                });
+                m.map._layers[id].setStyle(selectedStyle);
             } catch (e) {
                 console.warn("Can't set style on marker")
             }
@@ -180,7 +179,7 @@ var gc2table = (function () {
                     if (onPopupClose) onPopupClose(id);
                 });
 
-                object.trigger("openpopup" + "_" + uid, m.map._layers[id]);
+                object.trigger("openpopup" + "_" + uid, m.map._layers[id], clonedLayers[id]);
             }
         });
 
@@ -287,6 +286,7 @@ var gc2table = (function () {
                 });
             }, 100);
         };
+        var selectedStyle = SELECTED_STYLE;
 
         var uncheckedStyle = {
             fillOpacity: 0.0,
@@ -371,7 +371,6 @@ var gc2table = (function () {
             $(el).bootstrapTable('removeAll')
             $(el).bootstrapTable('destroy')
             originalLayers = null;
-            store = null;
         };
 
         assignEventListeners = function () {
@@ -386,6 +385,10 @@ var gc2table = (function () {
             loadDataInTable();
         };
 
+        $.each(store.layer._layers, function (i, v) {
+            const l = L.geoJson(JSON.parse(JSON.stringify(v.toGeoJSON())))._layers;
+            clonedLayers[i] = l[Object.keys(l)[0]];
+        })
         loadDataInTable = function (doNotCallCustomOnload = false, forceDataLoad = false) {
             data = [];
             $.each(store.layer._layers, function (i, v) {
@@ -491,7 +494,7 @@ var gc2table = (function () {
             store: store,
             moveEndOff: moveEndOff,
             moveEndOn: moveEndOn,
-            bootStrapTable : $(el).bootstrapTable
+            bootStrapTable: $(el).bootstrapTable
         };
     };
     return {

@@ -28,6 +28,10 @@ Rejsetid extensionen opsættes i en kørselskonfiguration (config) under :ref:`c
 
 ``default`` angiver start-værdier for de forskellige indstillinger i Vidi. Alle behøves ikke udfyldes. Hvis der undlades indstillinger, bliver der anvendt værdier, som svarer til de nedenunser viste.
 
+``parameters`` angiver ekstra URL parametre, som skal sendes med til OTP serveren. Default bliver ingen parametre sat.
+
+``helpText`` angiver den tekst, som skal vises i modulets hjælpefunktion. Default er en tom tekst.
+
 .. code-block:: json
 
     {
@@ -44,7 +48,12 @@ Rejsetid extensionen opsættes i en kørselskonfiguration (config) under :ref:`c
                     "arriveBy": false,
                     "route": "default",
                     "maxWalkDistance": 500
-                }
+                },
+                "parameters": {
+                    "offRoadDistanceMeters": "75",
+                    "precisionMeters": "100"
+                },
+                "helpText": "Hjælp til OTP"
             }
         }
     }

@@ -46,10 +46,8 @@ let elementPrefix;
 let qStoreShadow;
 
 let defaultSelectedStyle = {
-    weight: 5,
     color: '#ff0000',
-    fillOpacity: 0.2,
-    opacity: 0.2
+
 };
 
 let backArrowIsAdded = false;
@@ -396,10 +394,9 @@ module.exports = {
                             caller: _self,
                             styleSelected: styleForSelectedFeatures,
                             setZoom: parsedMeta?.zoom_on_table_click ? parsedMeta.zoom_on_table_click : false,
-                            dashSelected: true
                         });
                         if (!parsedMeta.info_element_selector) {
-                            _table.object.on("openpopup" + "_" + _table.uid, function (e) {
+                            _table.object.on("openpopup" + "_" + _table.uid, function (e, layersClone) {
                                 let popup = e.getPopup();
                                 if (popup?._closeButton) {
                                     popup._closeButton.onclick = function () {
@@ -421,7 +418,9 @@ module.exports = {
                                 }, 100);
 
                                 $(".popup-edit-btn").unbind("click.popup-edit-btn").bind("click.popup-edit-btn", function () {
-                                    editor.edit(e, _key_, qstore);
+                                    // We reset the query layer and use a unaltered layer for editor
+                                    layerObj.reset();
+                                    editor.edit(layersClone, _key_, qstore);
                                     editingStarted = true;
                                 });
 
@@ -579,13 +578,13 @@ module.exports = {
                     ];
                 } else {
                     if (geoType !== "POLYGON" && geoType !== "MULTIPOLYGON" && (!advancedInfo.getSearchOn())) {
-                        sql = "SELECT * FROM (SELECT " + fieldStr + " FROM " + schemaQualifiedName + " WHERE " + filters + ") AS foo WHERE round(ST_Distance(ST_Transform(\"" + f_geometry_column + "\"," + proj + "), ST_GeomFromText('" + wkt + "'," + proj + "))) < " + distance;
+                        sql = "SELECT " + fieldStr + " FROM (SELECT * FROM " + schemaQualifiedName + " WHERE " + filters + ") AS foo WHERE round(ST_Distance(ST_Transform(\"" + f_geometry_column + "\"," + proj + "), ST_GeomFromText('" + wkt + "'," + proj + "))) < " + distance;
                         if (versioning) {
                             sql = sql + " AND gc2_version_end_date IS NULL ";
                         }
                         sql = sql + " ORDER BY round(ST_Distance(ST_Transform(\"" + f_geometry_column + "\"," + proj + "), ST_GeomFromText('" + wkt + "'," + proj + ")))";
                     } else {
-                        sql = "SELECT * FROM (SELECT " + fieldStr + " FROM " + schemaQualifiedName + " WHERE " + filters + ") AS foo WHERE ST_Intersects(ST_Transform(ST_geomfromtext('" + wkt + "'," + proj + ")," + srid + ")," + f_geometry_column + ")";
+                        sql = "SELECT " + fieldStr + " FROM (SELECT * FROM " + schemaQualifiedName + " WHERE " + filters + ") AS foo WHERE ST_Intersects(ST_Transform(ST_geomfromtext('" + wkt + "'," + proj + ")," + srid + ")," + f_geometry_column + ")";
                         if (versioning) {
                             sql = sql + " AND gc2_version_end_date IS NULL ";
                         }
@@ -804,8 +803,7 @@ module.exports = {
     getVectorTemplate: function (layerKey, multi = true) {
         let metaDataKeys = meta.getMetaDataKeys();
         let parsedMeta = layerTree.parseLayerMeta(metaDataKeys[layerKey]);
-        let template = metaDataKeys[layerKey]?.infowindow?.template || multi ? defaultTemplateForCrossMultiSelect : defaultTemplate;
-        template = (parsedMeta.info_template && parsedMeta.info_template !== "") ? parsedMeta.info_template : template;
+        template = (parsedMeta.info_template && parsedMeta.info_template !== "") ? parsedMeta.info_template : defaultTemplate;
         return template;
     },
 

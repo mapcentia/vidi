@@ -652,7 +652,7 @@ module.exports = {
                         }
 
                         $.ajax({
-                            url: MHOST + '/api/v2/elasticsearch/search/' + MDB + '/matrikel',
+                            url: MHOST + '/api/v2/elasticsearch/search/' + MDB + '/matrikel/jordstykke_view',
                             data: JSON.stringify(dslM),
                             contentType: "application/json; charset=utf-8",
                             scriptCharset: "utf-8",
@@ -730,7 +730,7 @@ module.exports = {
                             }
 
                             $.ajax({
-                                url: MHOST + '/api/v2/elasticsearch/search/' + MDB + '/matrikel',
+                                url: MHOST + '/api/v2/elasticsearch/search/' + MDB + '/matrikel/jordstykke_view',
                                 data: JSON.stringify(dslM),
                                 contentType: "application/json; charset=utf-8",
                                 scriptCharset: "utf-8",
@@ -796,7 +796,7 @@ module.exports = {
                             }
 
                             $.ajax({
-                                url: MHOST + '/api/v2/elasticsearch/search/' + MDB + '/matrikel',
+                                url: MHOST + '/api/v2/elasticsearch/search/' + MDB + '/matrikel/jordstykke_view',
                                 data: JSON.stringify(dslM),
                                 contentType: "application/json; charset=utf-8",
                                 scriptCharset: "utf-8",
