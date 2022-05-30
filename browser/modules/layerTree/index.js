@@ -1988,19 +1988,23 @@ module.exports = {
                             $('.feature-info-accordion-body').collapse("hide")
                         });
                     });
-                    vectorPopUp = L.popup({
-                        autoPan: window.vidiConfig.autoPanPopup,
-                        autoPanPaddingTopLeft: L.point(multi ? 20 : 0, multi ? 300 : 0),
-                        minWidth: 300,
-                        className: `js-vector-layer-popup custom-popup`
-                    }).setLatLng(event.latlng).setContent(`<div>
+
+                    // Open pop-up if table is NOT enabled - gc2table with control pop-up if enabled
+                    if ($(`#table_view-${layerKey.replace('.', '_')}`).children('.bootstrap-table').length === 0) {
+                        vectorPopUp = L.popup({
+                            autoPan: window.vidiConfig.autoPanPopup,
+                            autoPanPaddingTopLeft: L.point(multi ? 20 : 0, multi ? 300 : 0),
+                            minWidth: 300,
+                            className: `js-vector-layer-popup custom-popup`
+                        }).setLatLng(event.latlng).setContent(`<div>
                                                                 ${additionalControls}
                                                                 <div style="margin-right: 5px; margin-left: 2px">${accordion}</div>
                                                             </div>`).openOn(cloud.get().map)
-                        .on('remove', () => {
-                            sqlQuery.resetAll();
-                            // _self.resetAllVectorLayerStyles();
-                        });
+                            .on('remove', () => {
+                                sqlQuery.resetAll();
+                                _self.resetAllVectorLayerStyles();
+                            });
+                    }
                 }
             }
         })

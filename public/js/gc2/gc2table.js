@@ -137,7 +137,6 @@ var gc2table = (function () {
             let row = $('*[data-uniqueid="' + id + '"]');
             row.addClass("selected");
             try {
-                console.log(m.map._layers[id])
                 m.map._layers[id].setStyle(selectedStyle);
             } catch (e) {
                 console.warn("Can't set style on marker")
@@ -372,7 +371,6 @@ var gc2table = (function () {
             $(el).bootstrapTable('removeAll')
             $(el).bootstrapTable('destroy')
             originalLayers = null;
-            store = null;
         };
 
         assignEventListeners = function () {
