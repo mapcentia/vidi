@@ -192,8 +192,8 @@ function print(key, q, req, response, outputPng = false, frame = 0, count, retur
                     } else {
                         let width, height;
                         browser.newPage().then(page => {
-                            const pxWidth = 790;
-                            const pxHeight = 1116;
+                            const pxWidth = 795;
+                            const pxHeight = 1125;
                             switch (q.pageSize) {
                                 case "A4":
                                     switch (q.orientation) {

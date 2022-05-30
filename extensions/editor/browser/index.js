@@ -7,6 +7,7 @@
 'use strict';
 
 import {LAYER, SYSTEM_FIELD_PREFIX} from '../../../browser/modules/layerTree/constants';
+import {GEOJSON_PRECISION} from '../../../browser/modules/constants';
 import dayjs from 'dayjs';
 
 const jquery = require('jquery');
@@ -389,6 +390,7 @@ module.exports = {
 
             me.stopEdit();
 
+            backboneEvents.get().trigger('block:infoClick');
             // Create schema for attribute form
             let formBuildInformation = this.createFormObj(fields, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column, fieldconf);
             const schema = formBuildInformation.schema;
@@ -412,7 +414,7 @@ module.exports = {
              * @param formData
              */
             const onSubmit = function (formData) {
-                let featureCollection, geoJson = editor.toGeoJSON();
+                let featureCollection, geoJson = editor.toGeoJSON(GEOJSON_PRECISION);
 
                 // Promote MULTI geom
                 if (type.substring(0, 5) === "MULTI") {
@@ -425,10 +427,10 @@ module.exports = {
                         geoJson.properties[key] = null;
                     }
                     if ((fields[key].type === "bytea" ||
-                        fields[key].type.startsWith("time") ||
-                        fields[key].type.startsWith("time") ||
-                        fields[key].type.startsWith("character") ||
-                        fields[key].type.startsWith("text")) &&
+                            fields[key].type.startsWith("time") ||
+                            fields[key].type.startsWith("time") ||
+                            fields[key].type.startsWith("character") ||
+                            fields[key].type.startsWith("text")) &&
                         geoJson.properties[key] !== null) {
                         geoJson.properties[key] = geoJson.properties[key].replace(/\\([\s\S])|(["])/ig, "\\$1$2");
                         geoJson.properties[key] = encodeURIComponent(geoJson.properties[key]);
@@ -665,7 +667,7 @@ module.exports = {
                 e.id = "v:" + e.id;
             }
 
-            e.initialFeatureJSON = e.toGeoJSON();
+            e.initialFeatureJSON = e.toGeoJSON(GEOJSON_PRECISION);
 
             featureWasEdited = false;
             // Hack to edit (Multi)Point layers
@@ -708,15 +710,24 @@ module.exports = {
                     break;
 
                 default:
+                    cloud.get().map.addLayer(e);
                     let numberOfNodes = 0;
-                    editedFeature.feature.geometry.coordinates.forEach((c) => {
-                        if (typeof c === "object") {
-                            c.forEach((c2) => {
-                                numberOfNodes += c2.length;
-                            });
+                    const coors = editedFeature.feature.geometry.coordinates;
+                    const calculateCount = (arr) => {
+                        for (let i = 0; i < arr.length; i++) {
+                            if (Array.isArray(arr[i])) {
+                                calculateCount(arr[i]);
+                            } else {
+                                numberOfNodes++;
+                                if (numberOfNodes === MAX_NODE_IN_FEATURE) {
+                                    return;
+                                }
+                            }
                         }
-                        numberOfNodes += c.length;
-                    })
+                    };
+                    calculateCount(coors);
+                    numberOfNodes = numberOfNodes / 2;
+
                     if (numberOfNodes <= MAX_NODE_IN_FEATURE) {
                         editor = e.enableEdit();
                     } else {
@@ -780,7 +791,7 @@ module.exports = {
              * @param formData
              */
             const onSubmit = (formData) => {
-                let GeoJSON = e.toGeoJSON(), featureCollection;
+                let GeoJSON = e.toGeoJSON(GEOJSON_PRECISION), featureCollection;
                 delete GeoJSON.properties._vidi_content;
                 delete GeoJSON.properties._id;
 
@@ -815,10 +826,10 @@ module.exports = {
                             GeoJSON.properties[key] = null;
                         }
                         if ((fields[key].type === "bytea" ||
-                            fields[key].type.startsWith("time") ||
-                            fields[key].type.startsWith("time") ||
-                            fields[key].type.startsWith("character") ||
-                            fields[key].type.startsWith("text")) &&
+                                fields[key].type.startsWith("time") ||
+                                fields[key].type.startsWith("time") ||
+                                fields[key].type.startsWith("character") ||
+                                fields[key].type.startsWith("text")) &&
                             GeoJSON.properties[key] !== null) {
                             GeoJSON.properties[key] = GeoJSON.properties[key].replace(/\\([\s\S])|(["])/ig, "\\$1$2");
                             GeoJSON.properties[key] = encodeURIComponent(GeoJSON.properties[key]);
@@ -848,7 +859,7 @@ module.exports = {
                     switchLayer.registerLayerDataAlternation(schemaQualifiedName);
 
                     sqlQuery.reset(qstore);
-                    me.stopEdit();
+                    me.stopEdit(editedFeature);
 
                     // Reloading only vector layers, as uncommited changes can be displayed only for vector layers
                     if (isVectorLayer) {
@@ -901,7 +912,6 @@ module.exports = {
 
             _self.openAttributesDialog();
         };
-
         let confirmMessage = __(`Application is offline, tiles will not be updated. Proceed?`);
         if (isVectorLayer) {
             editFeature();
@@ -961,7 +971,7 @@ module.exports = {
 
         let schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
             metaDataKeys = meta.getMetaDataKeys(),
-            GeoJSON = e.toGeoJSON();
+            GeoJSON = e.toGeoJSON(GEOJSON_PRECISION);
 
         const deleteFeature = () => {
             serviceWorkerCheck();
@@ -1017,10 +1027,14 @@ module.exports = {
      * @param editedFeature
      */
     stopEdit: function (editedFeature) {
+        backboneEvents.get().trigger('unblock:infoClick');
         cloud.get().map.editTools.stopDrawing();
 
         if (editor) {
             cloud.get().map.removeLayer(editor);
+        }
+        if (editedFeature) {
+            cloud.get().map.removeLayer(editedFeature);
         }
 
         // If feature was edited, then reload the layer

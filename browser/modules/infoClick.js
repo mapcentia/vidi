@@ -20,6 +20,7 @@ var _layers;
 var qstore = [];
 var active = false;
 var _self = false;
+let blocked = false;
 
 /**
  *
@@ -51,13 +52,19 @@ module.exports = {
         backboneEvents.get().on(`off:${MODULE_ID}`, () => {
             _self.active(false);
         });
+        backboneEvents.get().on(`block:${MODULE_ID}`, () => {
+            blocked = true;
+        });
+        backboneEvents.get().on(`unblock:${MODULE_ID}`, () => {
+            blocked = false;
+        });
 
         cloud.get().on("dblclick", function () {
             clicktimer = undefined;
         });
 
         cloud.get().on("click", function (e) {
-            if (active === false || e.originalEvent.clickedOnFeature) {
+            if (active === false || e.originalEvent.clickedOnFeature || blocked) {
                 return;
             }
 
@@ -74,7 +81,7 @@ module.exports = {
                     wkt = "POINT(" + coords.x + " " + coords.y + ")";
 
                     // Cross Multi select disabled
-                    if (typeof window.vidiConfig.crossMultiSelect === "undefined" || window.vidiConfig.crossMultiSelect === false) {
+                    if (!window.vidiConfig.crossMultiSelect || window.vidiConfig.enabledExtensions.includes('editor')) {
                         sqlQuery.init(qstore, wkt, "3857", null, null, [coords.lat, coords.lng], false, false, false, (layerId) => {
                             setTimeout(() => {
                                 let parentLayer = cloud.get().map._layers[layerId];
@@ -102,7 +109,7 @@ module.exports = {
                                 _layers.decrementCountLoading("_vidi_sql_" + store.id);
                                 backboneEvents.get().trigger("doneLoading:layers", "_vidi_sql_" + store.id);
                                 if (_layers.getCountLoading() === 0) {
-                                    layerTree.displayAttributesPopup(intersectingFeatures, e);
+                                    layerTree.displayAttributesPopup(intersectingFeatures, e, '');
                                 }
                             }, 200)
                         }, null, [coords.lat, coords.lng]);

@@ -159,6 +159,9 @@ geocloud = (function () {
         this.show = function () {
             this.layer.setVisibility(true);
         };
+        this.resetStyle = function () {
+            this.layer.resetStyle(this.layer);
+        }
         this.map = null;
 
         // Initiate base class settings

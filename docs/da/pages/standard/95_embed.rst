@@ -63,6 +63,8 @@ Der en række data attributer, som skal/kan sættes:
  * Kan sættes til en host (fx "https://example.com") som bruges i stedet for host angivet i token.
 * **data-vidi-frame-name (valgfri)**
  * Navn på det indsatte kort. Dette er nødvendig hvis :ref:`embed_api` skal anvendes.
+* **data-vidi-no-tracking (valgfri)**
+ * Kan sættes til "true" for at undgå at Vidi's tracking cookie bliver sat. Cookien anvendes bl.a til anonyme projekter og print, hvilket der typisk ikke er behov for på indlejrede kort.
 
 
 .. _embed_api:
