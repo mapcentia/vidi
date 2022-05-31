@@ -738,7 +738,7 @@ module.exports = {
                                 type: "POST",
                                 success: function (response) {
                                     $.each(response.hits.hits, function (i, hit) {
-                                        var str = hit._source.properties.esr_ejendomsnummer;
+                                        var str = hit._source.properties.sfe_ejendomsnummer;
                                         // find only the 20 first real properties
                                         if (names.length < 20 && names.findIndex(x => x.value == str) < 0) {
                                             names.push({value: str});
@@ -890,84 +890,99 @@ module.exports = {
                 )
             });
         }
-        $("#" + el).typeahead({
-            highlight: false
-        }, ...standardSearches);
-        $('#' + el).bind('typeahead:selected', function (obj, datum, name) {
-            if ((type1 === "adresse" && name === "adresse") || (type2 === "jordstykke" && name === "matrikel")
-                || (type3 === "esr_nr" && name === "esr_ejdnr") || (type4 === "sfe_nr" && name === "sfe_ejdnr")
-                || extraSearchesNames.indexOf(name) !== -1
-            ) {
-                let key;
-                if (advanced) {
-                    key = datum.value;
-                } else {
-                    key = "simple";
-                    try {
-                        placeStores[key].reset();
-                    } catch (e) {
+        // We support both existing search element and arriving one
+        let element = $("#" + el);
+        if (element.length === 0) {
+            $(document).arrive('#' + el, function (e) {
+                element = $(e);
+            });
+        }
+        (function poll() {
+            if (element.length > 0) {
+                element.typeahead({
+                    highlight: false
+                }, ...standardSearches);
+                $(element).bind('typeahead:selected', function (obj, datum, name) {
+                    if ((type1 === "adresse" && name === "adresse") || (type2 === "jordstykke" && name === "matrikel")
+                        || (type3 === "esr_nr" && name === "esr_ejdnr") || (type4 === "sfe_nr" && name === "sfe_ejdnr")
+                        || extraSearchesNames.indexOf(name) !== -1
+                    ) {
+                        let key;
+                        if (advanced) {
+                            key = datum.value;
+                        } else {
+                            key = "simple";
+                            try {
+                                placeStores[key].reset();
+                            } catch (e) {
+                            }
+                        }
+                        searchString = datum.value;
+                        switch (name) {
+                            case "esr_ejdnr" :
+                                placeStores[key] = getPlaceStore();
+                                placeStores[key].db = MDB;
+                                placeStores[key].host = MHOST;
+                                if (advanced) {
+                                    placeStores[key].sql = "SELECT esr_ejendomsnummer,matrikelnummer,ejerlavsnavn,the_geom FROM matrikel.jordstykke WHERE esr_ejendomsnummer = (SELECT esr_ejendomsnummer FROM matrikel.jordstykke WHERE gid=" + gids[type3][datum.value] + ")";
+                                } else {
+                                    placeStores[key].sql = "SELECT esr_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE esr_ejendomsnummer = (SELECT esr_ejendomsnummer FROM matrikel.jordstykke WHERE gid=" + gids[type3][datum.value] + ") group by esr_ejendomsnummer";
+                                }
+                                placeStores[key].load();
+                                break;
+                            case "sfe_ejdnr" :
+                                placeStores[key] = getPlaceStore();
+                                placeStores[key].db = MDB;
+                                placeStores[key].host = MHOST;
+                                if (advanced) {
+                                    placeStores[key].sql = "SELECT sfe_ejendomsnummer,matrikelnummer,ejerlavsnavn,the_geom FROM matrikel.jordstykke WHERE sfe_ejendomsnummer = (SELECT sfe_ejendomsnummer FROM matrikel.jordstykke WHERE gid=" + gids[type4][datum.value] + ")";
+                                } else {
+                                    placeStores[key].sql = "SELECT sfe_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE sfe_ejendomsnummer = (SELECT sfe_ejendomsnummer FROM matrikel.jordstykke WHERE gid=" + gids[type4][datum.value] + ") group by sfe_ejendomsnummer";
+                                }
+                                placeStores[key].load();
+                                break;
+                            case "matrikel" :
+                                placeStores[key] = getPlaceStore();
+                                placeStores[key].db = MDB;
+                                placeStores[key].host = MHOST;
+                                if (getProperty) {
+                                    placeStores[key].sql = "SELECT sfe_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE sfe_ejendomsnummer = (SELECT sfe_ejendomsnummer FROM matrikel.jordstykke WHERE gid=" + gids[type2][datum.value] + ") group by sfe_ejendomsnummer";
+                                } else {
+                                    placeStores[key].sql = "SELECT gid,the_geom,matrikelnummer,ejerlavsnavn, ST_asgeojson(ST_transform(the_geom,4326)) as geojson FROM matrikel.jordstykke WHERE gid='" + gids[type2][datum.value] + "'";
+                                }
+                                placeStores[key].load();
+                                break;
+                            case "adresse" :
+                                placeStores[key] = getPlaceStore();
+                                placeStores[key].db = ADB;
+                                placeStores[key].host = AHOST;
+                                if (getProperty) {
+                                    placeStores[key].sql = "SELECT sfe_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE sfe_ejendomsnummer = (SELECT sfe_ejendomsnummer FROM matrikel.jordstykke WHERE (the_geom && (SELECT ST_transform(the_geom, 25832) FROM dar.adgangsadresser WHERE id='" + gids[type1][datum.value] + "')) AND ST_Intersects(the_geom, (SELECT ST_transform(the_geom, 25832) FROM dar.adgangsadresser WHERE id='" + gids[type1][datum.value] + "'))) group by sfe_ejendomsnummer";
+                                } else {
+                                    placeStores[key].sql = "SELECT id,husnr,postnr,kommunekode,the_geom,ST_asgeojson(ST_transform(the_geom,4326)) as geojson FROM dar.adgangsadresser WHERE id='" + gids[type1][datum.value] + "'";
+                                }
+                                placeStores[key].load();
+                                break;
+                            default: // Extra searches
+                                placeStores[key] = getPlaceStore();
+                                placeStores[key].db = extraSearchesObj[name].db;
+                                placeStores[key].host = extraSearchesObj[name].host;
+                                placeStores[key].sql = "SELECT *,ST_asgeojson(ST_transform(" + extraSearchesObj[name].relation.geom + ",4326)) as geojson FROM " + extraSearchesObj[name].relation.name + " WHERE " + extraSearchesObj[name].relation.key + "='" + gids[name][datum.value] + "'";
+                                placeStores[key].load();
+                                break;
+                        }
+                    } else {
+                        setTimeout(function () {
+                            $("#" + el).val(datum.value + " ").trigger("paste").trigger("input");
+                        }, 100)
                     }
-                }
-                searchString = datum.value;
-                switch (name) {
-                    case "esr_ejdnr" :
-                        placeStores[key] = getPlaceStore();
-                        placeStores[key].db = MDB;
-                        placeStores[key].host = MHOST;
-                        if (advanced) {
-                            placeStores[key].sql = "SELECT esr_ejendomsnummer,matrikelnummer,ejerlavsnavn,the_geom FROM matrikel.jordstykke WHERE esr_ejendomsnummer = (SELECT esr_ejendomsnummer FROM matrikel.jordstykke WHERE gid=" + gids[type3][datum.value] + ")";
-                        } else {
-                            placeStores[key].sql = "SELECT esr_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE esr_ejendomsnummer = (SELECT esr_ejendomsnummer FROM matrikel.jordstykke WHERE gid=" + gids[type3][datum.value] + ") group by esr_ejendomsnummer";
-                        }
-                        placeStores[key].load();
-                        break;
-                    case "sfe_ejdnr" :
-                        placeStores[key] = getPlaceStore();
-                        placeStores[key].db = MDB;
-                        placeStores[key].host = MHOST;
-                        if (advanced) {
-                            placeStores[key].sql = "SELECT sfe_ejendomsnummer,matrikelnummer,ejerlavsnavn,the_geom FROM matrikel.jordstykke WHERE sfe_ejendomsnummer = (SELECT sfe_ejendomsnummer FROM matrikel.jordstykke WHERE gid=" + gids[type4][datum.value] + ")";
-                        } else {
-                            placeStores[key].sql = "SELECT sfe_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE sfe_ejendomsnummer = (SELECT sfe_ejendomsnummer FROM matrikel.jordstykke WHERE gid=" + gids[type4][datum.value] + ") group by sfe_ejendomsnummer";
-                        }
-                        placeStores[key].load();
-                        break;
-                    case "matrikel" :
-                        placeStores[key] = getPlaceStore();
-                        placeStores[key].db = MDB;
-                        placeStores[key].host = MHOST;
-                        if (getProperty) {
-                            placeStores[key].sql = "SELECT sfe_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE sfe_ejendomsnummer = (SELECT sfe_ejendomsnummer FROM matrikel.jordstykke WHERE gid=" + gids[type2][datum.value] + ") group by sfe_ejendomsnummer";
-                        } else {
-                            placeStores[key].sql = "SELECT gid,the_geom,matrikelnummer,ejerlavsnavn, ST_asgeojson(ST_transform(the_geom,4326)) as geojson FROM matrikel.jordstykke WHERE gid='" + gids[type2][datum.value] + "'";
-                        }
-                        placeStores[key].load();
-                        break;
-                    case "adresse" :
-                        placeStores[key] = getPlaceStore();
-                        placeStores[key].db = ADB;
-                        placeStores[key].host = AHOST;
-                        if (getProperty) {
-                            placeStores[key].sql = "SELECT sfe_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE sfe_ejendomsnummer = (SELECT sfe_ejendomsnummer FROM matrikel.jordstykke WHERE (the_geom && (SELECT ST_transform(the_geom, 25832) FROM dar.adgangsadresser WHERE id='" + gids[type1][datum.value] + "')) AND ST_Intersects(the_geom, (SELECT ST_transform(the_geom, 25832) FROM dar.adgangsadresser WHERE id='" + gids[type1][datum.value] + "'))) group by sfe_ejendomsnummer";
-                        } else {
-                            placeStores[key].sql = "SELECT id,husnr,postnr,kommunekode,the_geom,ST_asgeojson(ST_transform(the_geom,4326)) as geojson FROM dar.adgangsadresser WHERE id='" + gids[type1][datum.value] + "'";
-                        }
-                        placeStores[key].load();
-                        break;
-                    default: // Extra searches
-                        placeStores[key] = getPlaceStore();
-                        placeStores[key].db = extraSearchesObj[name].db;
-                        placeStores[key].host = extraSearchesObj[name].host;
-                        placeStores[key].sql = "SELECT *,ST_asgeojson(ST_transform(" + extraSearchesObj[name].relation.geom + ",4326)) as geojson FROM " + extraSearchesObj[name].relation.name + " WHERE " + extraSearchesObj[name].relation.key + "='" + gids[name][datum.value] + "'";
-                        placeStores[key].load();
-                        break;
-                }
+                });
             } else {
-                setTimeout(function () {
-                    $("#" + el).val(datum.value + " ").trigger("paste").trigger("input");
+                setTimeout(()=>{
+                    poll();
                 }, 100)
             }
-        });
+        }())
         return getPlaceStore;
     },
 
