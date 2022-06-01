@@ -354,7 +354,7 @@ module.exports = {
                 }
 
                 var handleGeometry = function (obj) {
-                    //console.table(object)
+                    //console.table(obj)
                     let geomObj = {}
                     let flat = flattenObject(obj)
 
@@ -363,20 +363,17 @@ module.exports = {
                     }
 
                     // Handle type
-                    // Points
                     if ('Point' in obj) {
                         geomObj.type = 'MultiPoint'
-                        //console.log(geomObj)
                     } else if ('LineString' in obj) {
                         geomObj.type = 'MultiLineString'
                     } else if ('Surface' in obj) {
                         geomObj.type = "MultiPolygon"
-                        //console.log(obj)
-                        //console.log(flat)
                     } else if ('Polygon' in obj) {
                         geomObj.type = "MultiPolygon"
                     } else {
                         // Matched nothing, kill 
+                        console.log('killed:', obj)
                         return null
                     }
 
@@ -384,7 +381,6 @@ module.exports = {
 
                     // Handle geometry
                     flat.type = geomObj.type
-                    //console.table(flat)
 
                     let dim = 2
                     if (flat.hasOwnProperty('srsDimension')) {
@@ -392,14 +388,15 @@ module.exports = {
                     }
                     if (flat.hasOwnProperty('posList')) {
                         if (flat.type == 'MultiPolygon') {
+                            console.log(flat)
                             geomObj.coordinates = flat.posList.split(' ').map(Number).chunk(dim)
                             let rings = [geomObj.coordinates]
                             let multis = [rings]
                             geomObj.coordinates = multis
-
                         } else {
                             geomObj.coordinates = [flat.posList.split(' ').map(Number).chunk(dim)]
                         }
+                        
                     } else if (flat.hasOwnProperty('pos')) {
                         geomObj.coordinates = [flat.pos.split(' ').map(Number)]
                     } else if (flat.hasOwnProperty('coordinates')) {
@@ -416,6 +413,12 @@ module.exports = {
                     } else if (flat.hasOwnProperty('value')) {
                         if (flat.type == 'MultiPoint') {
                             geomObj.coordinates = flat.value.split(' ').map(Number).chunk(dim)
+                        } else if (flat.type == 'MultiPolygon') {
+                            console.log(flat)
+                            geomObj.coordinates = flat.value.split(' ').map(Number).chunk(dim)
+                            let rings = [geomObj.coordinates]
+                            let multis = [rings]
+                            geomObj.coordinates = multis
                         } else {
                             geomObj.coordinates = [flat.value.split(' ').map(Number).chunk(dim)]
                         }
@@ -605,6 +608,7 @@ module.exports = {
                         method: 'POST',
                         body: JSON.stringify(obj)
                     }
+                    
                     return new Promise(function (resolve, reject) {
                         // Do async job and resolve
                         fetch('/api/extension/upsertForespoergsel', opts)

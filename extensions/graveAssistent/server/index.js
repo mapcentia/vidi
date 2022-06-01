@@ -131,7 +131,7 @@ var buildSQLArray = function (features, table, geom_col, crs, timestamp, statusK
     // Build final string
     let str = 'INSERT INTO ' + table + ' (' + into.join(',') + ') VALUES ' + values.join(',')
 
-    console.log(str)
+    // console.log(str)
     return str
 }
 
@@ -694,7 +694,7 @@ function FeatureAPI(req, featurecollection, table, crs) {
             .then(data => {
                 // if message is present, is error
                 if (data.hasOwnProperty('message')) {
-                    //console.log(data.message)
+                    console.log(data)
                     reject(data)
                 } else {
                     //console.log('Success: ' + data.success + ' - Q: ' + postData.substring(0, 60))
@@ -702,6 +702,7 @@ function FeatureAPI(req, featurecollection, table, crs) {
                 }
             })
             .catch(error => {
+                console.log(error)
                 reject(error)
             })
     });
@@ -735,7 +736,7 @@ function SQLAPI(q, req) {
             .then(data => {
                 // if message is present, is error
                 if (data.hasOwnProperty('message')) {
-                    //console.log(data.message)
+                    console.log(data)
                     reject(data)
                 } else {
                     //console.log('Success: '+ data.success+' - Q: '+q.substring(0,60))
