@@ -486,7 +486,22 @@ Denne indstilling bevirker, at når en pop-up åbnes, så panoreres kort sålede
 
     "autoPanPopup": true
 
-.. _configjs_autoPanPopup:
+.. _configjs_vectorTable:
+
+vectorTable
+*****************************************************************
+
+Denne indstilling styrer om :ref:`vektorlag tabellen<gc2mata_vectorsettings>` skal vises til højre for eller i bunden af kortet. Endvidere kan højde/bredde styres. Hvis positionen er sat til ``right``
+vil kun ``width`` have effekt og tabellen vil altid fylde højden ud. Hvis position er sat til ``bottom`` vil kun ``height`` have effekt og bredden bliver den samme som kortet.
+``width`` kan både være relativ ``%`` og absolute ``px`` mens ``height`` kun kan angives som absolute ``px``. Hvis ikke denne indstilling sættes bruges default værdier som vist nedenunder.
+
+.. code-block:: json
+
+    "vectorTable": {
+        "position": "bottom",
+        "width": "30%",
+        "height": "250px"
+    }
 
 .. rubric:: Fodnoter
 

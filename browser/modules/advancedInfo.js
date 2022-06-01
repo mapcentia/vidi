@@ -8,6 +8,8 @@
 
 const MODULE_ID = `advancedInfo`;
 
+import {GEOJSON_PRECISION} from './constants';
+
 /**
  * @type {*|exports|module.exports}
  */
@@ -104,7 +106,7 @@ var _makeSearch = function () {
             buffer = buffer + layer._mRadius;
         }
     }
-    primitive = layer.toGeoJSON();
+    primitive = layer.toGeoJSON(GEOJSON_PRECISION);
     if (primitive) {
         if (typeof layer.getBounds !== "undefined") {
             coord = layer.getBounds().getSouthWest();

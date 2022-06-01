@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2020 MapCentia ApS
+ * @copyright  2013-2022 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -21,6 +21,7 @@
                 var history = targetDiv.getAttribute("data-vidi-history") || "";
                 var useSchema = targetDiv.getAttribute("data-vidi-use-schema") === "true";
                 var useConfig = targetDiv.getAttribute("data-vidi-use-config") === "true";
+                var noTracking = targetDiv.getAttribute("data-vidi-no-tracking") || "false";
                 var configHost = targetDiv.getAttribute("data-vidi-host") || null;
                 var frameName = targetDiv.getAttribute("data-vidi-frame-name") || null;
                 try {
@@ -35,10 +36,10 @@
                 var database = obj.database;
                 var schema = obj.schema !== undefined && useSchema ? obj.schema + "/" : "";
                 var config = obj.config !== undefined && useConfig ? obj.config : "";
-                var src = host + "/app/" + database + "/" + schema + "?config=" + config + "&state=" + id + "&tmpl=" + tmpl + "&s=" + search + "&his=" + history + (frameName ? "&readyCallback=" + frameName : "");
+                var src = host + "/app/" + database + "/" + schema + "?config=" + config + "&state=" + id + "&tmpl=" + tmpl + "&s=" + search + "&his=" + history + (frameName ? "&readyCallback=" + frameName : "") + "&notracking=" + noTracking;
                 var iframe = document.createElement("iframe");
                 iframe.setAttribute("style", "width:" + width + ";height:" + height + ";border: 1px solid rgba(0,0,0,0.1)");
-                iframe.setAttribute("allowfullscreen", "");
+                iframe.setAttribute("allow", "fullscreen;geolocation");
                 iframe.setAttribute("src", src);
                 if (frameName) {
                     iframe.setAttribute("name", frameName);

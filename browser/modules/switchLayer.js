@@ -221,6 +221,10 @@ module.exports = module.exports = {
                 // TODO check "mouseover" properties in fieldConf. No need to switch on if mouse over is not wanted
                 _self.enableUTFGrid(gc2Id);
                 _self.enableCheckBoxesOnChildren(gc2Id);
+                let opacity = layerTreeState?.opacitySettings?.[gc2Id];
+                if (opacity) {
+                    layerTreeUtils.applyOpacityToLayer(opacity, gc2Id, cloud, backboneEvents);
+                }
                 resolve();
             }).catch(err => {
                 if (err) {
@@ -524,6 +528,14 @@ module.exports = module.exports = {
                         }
                     }
                     stores[name].geoJSON = null;
+                    // If vector table is enabled for layer the remove and set pane with back to 100%
+                    const vectorTableEl = $(`*[data-vidi-vector-table-id="${name}"]`);
+                    if (vectorTableEl.length && window.vidiConfig.template === "embed.tmpl") {
+                        vectorTableEl.remove();
+                        $("#pane").css("width", "100%");
+                        $("#pane").css("height", "100%");
+                        cloud.get().map.invalidateSize();
+                    }
                 }
                 _self.uncheckLayerControl(name, doNotLegend, setupControls);
                 //Remove UTF grid layer

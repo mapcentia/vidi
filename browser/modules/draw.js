@@ -7,6 +7,7 @@
 'use strict';
 
 const MODULE_NAME = `draw`;
+import {GEOJSON_PRECISION} from './constants';
 const drawTools = require(`./drawTools`);
 const fileSaver = require(`file-saver`);
 let cloud, utils, state, serializeLayers;
@@ -683,7 +684,7 @@ module.exports = {
             "features": []
         };
         store.layer.eachLayer(function (layer) {
-            let feature = layer.toGeoJSON();
+            let feature = layer.toGeoJSON(GEOJSON_PRECISION);
             feature.type = "Feature"; // Is for some reason not set in Leaflet. QGIS needs this.
             geojson.features.push(feature);
         });

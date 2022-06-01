@@ -234,6 +234,7 @@ module.exports = {
         "Fit bounds to filter": "Fit bounds to filter",
         "Labels": "Labels",
         "Show labels": "Show labels",
+        "Layer filter": "Layer filter",
 
         // Base layers
         "Side-by-side mode": "Side-by-side mode",

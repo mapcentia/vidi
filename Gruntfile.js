@@ -419,6 +419,6 @@ module.exports = function (grunt) {
 
     grunt.registerTask('default', ['prepareAssets', 'browserify:publish', 'browserify:publish_sw_dev', 'extension-css', 'shell:default', 'hogan', 'version']);
     grunt.registerTask('production', ['env:prod', 'hogan', 'prepareAssets', 'browserify:publish', 'browserify:publish_sw', 'extension-css', 'shell:default', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust', 'version', 'appendBuildHashToVersion']);
-    grunt.registerTask('production-test', ['env:prod', 'hogan', 'browserify:publish', 'browserify:publish_sw', 'extension-css', 'shell:default', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust', 'version', 'appendBuildHashToVersion']);
+    grunt.registerTask('production-test', ['env:prod', 'browserify:publish']);
     grunt.registerTask('extension-css', ['less', 'cssmin:extensions']);
 };
