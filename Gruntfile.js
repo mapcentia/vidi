@@ -291,7 +291,6 @@ module.exports = function (grunt) {
                         'public/js/lib/bootstrap-table/bootstrap-table.js',
                         'public/js/lib/bootstrap-table/bootstrap-table-locale-all.js',
                         'public/js/lib/bootstrap-table/extensions/export/bootstrap-table-export.js',
-                        'public/js/lib/bootstrap-table/extensions/filter-control/bootstrap-table-filter-control.js',
                         'public/js/lib/tableExport.jquery.plugin/tableExport.js',
 
                     ]
