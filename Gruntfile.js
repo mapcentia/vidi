@@ -288,9 +288,11 @@ module.exports = function (grunt) {
                         'public/js/lib/bootstrap-material-design/dist/js/ripples.js',
                         'public/js/lib/bootstrap-material-design/dist/js/material.js',
                         'public/js/lib/bootstrap-colorpicker/js/bootstrap-colorpicker.js',
-                        'public/js/lib/bootstrap-table/bootstrap-table.js',
-                        'public/js/lib/bootstrap-table/bootstrap-table-locale-all.js',
-                        'public/js/lib/bootstrap-table/extensions/export/bootstrap-table-export.js',
+
+                        'node_modules/bootstrap-table/dist/bootstrap-table.js',
+                        'node_modules/bootstrap-table/dist/bootstrap-table-locale-all.js',
+                        'node_modules/bootstrap-table/dist/extensions/export/bootstrap-table-export.js',
+
                         'public/js/lib/tableExport.jquery.plugin/tableExport.js',
 
                     ]
