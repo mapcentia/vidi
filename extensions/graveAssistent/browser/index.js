@@ -72,7 +72,7 @@ var exId = "graveAssistent";
  * @type {*|exports|module.exports}
  */
  var meta = require('./../../../browser/modules/meta');
- console.log(meta)
+ // console.log(meta)
 
 /**
  *

@@ -75,6 +75,28 @@ module.exports = {
                     }
                 }
             },
+            "varmevaerk_lendumvarme": { // Your print templates. "print" is the default
+                A4: {
+                    l: {
+                        mapsizePx: [1060, 730],
+                        mapsizeMm: [280, 192]
+                    },
+                    p: {
+                        mapsizePx: [730, 1060],
+                        mapsizeMm: [192, 280]
+                    }
+                },
+                A3: {
+                    l: {
+                        mapsizePx: [1525, 1065],
+                        mapsizeMm: [401, 282]
+                    },
+                    p: {
+                        mapsizePx: [1065, 1525],
+                        mapsizeMm: [282, 401]
+                    }
+                }
+            },
             "vandvaerk_fjelsoevand2": { // Your print templates. "print" is the default
                 A4: {
                     l: {
@@ -1572,6 +1594,17 @@ module.exports = {
     "baseLayers":[
         
 		{
+            "id":"geodk.bright",
+            "name":"Topografisk kort",
+            "db":"baselayers", 
+            "host":"https://dk.gc2.io",
+            "abstract":"<p>Topografisk kort baseret på GeoDanmark data, som opdateres årligt.</p><p>Copyright: Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.</p><p>Baggrundskortet må frit anvendes, men følgende skal angives 'Indeholder GeoDanmark-data fra Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.'. </p><br>",
+            "config":{
+               "maxZoom":21,
+               "maxNativeZoom":19,
+               "attribution":"&copy; Styrelsen for Dataforsyning og Effektivisering og Danske kommuner."
+            }
+         },{
 			"type": "wms",
 			"url": "https://api.dataforsyningen.dk/forvaltning2?token=4aacd5977eb46ca012c260ecb608c65c",
 			"layers": [
@@ -1589,18 +1622,6 @@ module.exports = {
 			"maxZoom": 22,
 			"maxNativeZoom": 20
 		},
-	    {
-         "id":"geodk.bright",
-         "name":"Topografisk kort",
-         "db":"baselayers", 
-         "host":"https://dk.gc2.io",
-         "abstract":"<p>Topografisk kort baseret på GeoDanmark data, som opdateres årligt.</p><p>Copyright: Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.</p><p>Baggrundskortet må frit anvendes, men følgende skal angives 'Indeholder GeoDanmark-data fra Styrelsen for Dataforsyning og Effektivisering og Danske kommuner.'. </p><br>",
-         "config":{
-            "maxZoom":21,
-            "maxNativeZoom":19,
-            "attribution":"&copy; Styrelsen for Dataforsyning og Effektivisering og Danske kommuner."
-         }
-      },
 		{
 			"type": "wms",
 			"url": "/api/df/Matrikel/MatrikelGaeldendeOgForeloebigWMS/1.0.0/WMS",
