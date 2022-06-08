@@ -261,7 +261,7 @@ module.exports = function (grunt) {
                         'public/js/lib/leaflet-boxzoom/leaflet-boxzoom.js',
                         'public/js/lib/leaflet-draw/leaflet.draw.js',
                         'public/js/lib/leaflet.locatecontrol/L.Control.Locate.js',
-                        'public/js/lib/Leaflet.utfgrid/L.UTFGrid.js',
+                        // 'public/js/lib/Leaflet.utfgrid/L.UTFGrid.js',
                         'public/js/lib/leaflet-plugins/Bing.js',
                         'public/js/lib/Leaflet.GridLayer.GoogleMutant/Leaflet.GoogleMutant.js',
                         'public/js/lib/Leaflet.NonTiledLayer/NonTiledLayer.js',

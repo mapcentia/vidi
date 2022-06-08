@@ -132,7 +132,8 @@
 <script src="/api/baselayer"></script>
 <!-- Build -->
 <!-- build:js /js/build/all.min.js -->
-<script src="/js/lib/leaflet/leaflet-src.js"></script>
+<script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"></script>
+<script src="/js/lib/Leaflet.utfgrid/L.UTFGrid_test.js"></script>
 <script src="/js/bundle.js"></script>
 <!-- /build -->
 <!-- Async load Javascript -->

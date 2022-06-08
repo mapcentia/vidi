@@ -1496,7 +1496,7 @@ module.exports = {
                         styles = `width: 100%; height: ${h}; bottom: 0; position: fixed;`;
                         e.css("height", `calc(100vh - ${h})`);
                         height = parseInt(h);
-                        tableBodyHeight = (height - 34) + "px"
+                        tableBodyHeight = (height - 100) + "px"
                     }
                     if (position === 'right' || position === 'bottom') {
                         e.before(`<div id="${VECTOR_SIDE_TABLE_EL}" style="${styles}; background-color: white; " data-vidi-vector-table-id="${trackingLayerKey}"></div>`)
@@ -1807,7 +1807,7 @@ module.exports = {
         if (layerWithData.length === 1) {
             let tableContainerId = element ? element : `#table_view-${layerKey.replace(".", "_")}`;
             if ($(tableContainerId + ` table`).length > 0) $(tableContainerId).empty();
-            $(tableContainerId).append(`<table class="table" data-show-toggle="${defaults.showToggle}" data-search-highlight="true"  data-filter-control="true" data-search="true" data-show-fullscreen="true"  data-show-export="${defaults.showExport}" data-show-columns="${defaults.showColumns}" data-card-view="${defaults.cardView}"></table>`);
+            $(tableContainerId).append(`<table class="table" data-show-toggle="${defaults.showToggle}" data-search-highlight="true"  data-search="true" data-show-export="${defaults.showExport}" data-show-columns="${defaults.showColumns}" data-card-view="${defaults.cardView}"></table>`);
 
             let metaDataKeys = meta.getMetaDataKeys();
             let template = sqlQuery.getVectorTemplate(layerKey);

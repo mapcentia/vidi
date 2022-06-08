@@ -846,9 +846,12 @@ geocloud = (function () {
         if (defaults.cache) {
             uri = "/api/mapcache/" + defaults.db + "/gmaps/" + layer + ".json@g20/{z}/{x}/{y}.json";
         } else {
-            uri = "/api/wms/" + defaults.db + "/" + layer.split(".")[0] + "?mode=tile&tilemode=gmap&tile={x}+{y}+{z}&layers=" + layer + "&format=json&map.imagetype=application/json&";
+            uri = "/api/wms/" + defaults.db + "/" + layer.split(".")[0] + "";
         }
-        var utfGrid = new L.utfGrid(uri, {
+        var utfGrid = new L.NonTiledUTFGrid.WMS(uri, {
+            layers: layer,
+            format: 'json',
+            transparent: true,
             resolution: 4,
             pointerCursor: true,
             mouseInterval: 66,  // Delay for mousemove events,
