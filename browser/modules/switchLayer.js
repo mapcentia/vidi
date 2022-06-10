@@ -472,7 +472,7 @@ module.exports = module.exports = {
         let gc2Id = layerTreeUtils.stripPrefix(name);
         let applicationWideControls = $(`*[data-gc2-id="${gc2Id}"]`);
         applicationWideControls.prop('checked', enable);
-        let result = new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             let vectorDataStores = layerTree.getStores();
 
             let vectorLayerId = LAYER.VECTOR + `:` + gc2Id;
@@ -543,8 +543,6 @@ module.exports = module.exports = {
                 resolve();
             }
         });
-
-        return result;
     },
 
     /**

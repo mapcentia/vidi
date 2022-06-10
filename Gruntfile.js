@@ -261,7 +261,7 @@ module.exports = function (grunt) {
                         'public/js/lib/leaflet-boxzoom/leaflet-boxzoom.js',
                         'public/js/lib/leaflet-draw/leaflet.draw.js',
                         'public/js/lib/leaflet.locatecontrol/L.Control.Locate.js',
-                        // 'public/js/lib/Leaflet.utfgrid/L.UTFGrid.js',
+                        'public/js/lib/Leaflet.utfgrid/L.NonTiledUTFGrid.js',
                         'public/js/lib/leaflet-plugins/Bing.js',
                         'public/js/lib/Leaflet.GridLayer.GoogleMutant/Leaflet.GoogleMutant.js',
                         'public/js/lib/Leaflet.NonTiledLayer/NonTiledLayer.js',
@@ -344,18 +344,6 @@ module.exports = function (grunt) {
                     src: ['index.html']
                 }]
             }
-        },
-        bower: {
-            install: {
-                //just run 'grunt bower:install' and you'll see files from your Bower packages in lib directory
-                options: {
-                    targetDir: "./public/js/lib",
-                    copy: true,
-                    install: true,
-                    cleanTargetDir: false,
-                    verbose: true,
-                }
-            }
         }
     });
 
@@ -400,7 +388,6 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-env');
     grunt.loadNpmTasks('grunt-contrib-handlebars');
     grunt.loadNpmTasks('grunt-contrib-watch');
-    grunt.loadNpmTasks('grunt-bower-task');
     grunt.loadNpmTasks('grunt-watchify');
     grunt.loadNpmTasks('grunt-version');
 
