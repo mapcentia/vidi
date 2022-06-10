@@ -228,7 +228,6 @@
             }
         },
         _onImageError: function onImageError(e) {
-            alert("eer");
             // this.fire('error', e);
             // leaflet.DomUtil.addClass(e.target, 'invalid');
             // prevent error loop if error image is not valid
@@ -237,7 +236,6 @@
             }
         },
         _onImageLoad: function onImageLoad(e) {
-            // alert("Bille");
             if (e.target.src !== this.options.errorImageUrl) {
                 leaflet.DomUtil.removeClass(e.target, 'invalid');
                 if (!e.target.key || e.target.key !== this.key) { // obsolete / outdated image
@@ -310,9 +308,6 @@
                     _tileCharCode: null
                 };
             }
-            // console.log("gridX", gridX)
-            // console.log("gridY", gridY)
-            // console.log("data", data)
 
             var charCode = data.grid[gridY].charCodeAt(gridX);
             var idx = this._utfDecode(charCode),
