@@ -25,9 +25,6 @@
         _cache: null, // {<tileKey>: <utfgrid>}
         _map: null,
 
-        _updateCursor: function (cursor) {
-            //this._container.style.cursor = cursor;
-        }, //no-op, overridden below
         _throttleMove: null, // holds throttled mousemove handler
         // override this method in the inherited class
         // getImageUrl: function (bounds, width, height) {},
@@ -40,6 +37,9 @@
             this._cache = {};
             this._map = map;
 
+            this._updateCursor = function (cursor) {
+               //console.log(this)
+            }; //no-op, overridden below
             if (!this._div) {
                 this._div = leaflet.DomUtil.create('div', 'leaflet-utfgrid-layer');
                 if (this.options.pointerEvents) {
@@ -309,7 +309,7 @@
                 };
             }
 
-            var charCode = data.grid[gridY].charCodeAt(gridX);
+            var charCode = data.grid?.[gridY]?.charCodeAt(gridX);
             var idx = this._utfDecode(charCode),
                 key = data.keys[idx],
                 result = data.data[key];
