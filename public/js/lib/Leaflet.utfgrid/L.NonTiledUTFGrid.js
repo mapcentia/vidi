@@ -38,7 +38,7 @@
             this._map = map;
 
             this._updateCursor = function (cursor) {
-               //console.log(this)
+                //console.log(this)
             }; //no-op, overridden below
             if (!this._div) {
                 this._div = leaflet.DomUtil.create('div', 'leaflet-utfgrid-layer');
@@ -64,7 +64,7 @@
             this._map.on('mousemove', this._throttleMove, this);
         },
         _disconnectMapEventHandlers: function () {
-           // this._map.off('click', this._onClick, this);
+            // this._map.off('click', this._onClick, this);
             this._map.off('mousemove', this._throttleMove, this);
         },
         onRemove: function onRemove() {
@@ -148,8 +148,7 @@
             if (this._useCanvas) {
                 image.width = size.x;
                 image.height = size.y;
-            }
-            else {
+            } else {
                 image.style.width = `${size.x}px`;
                 image.style.height = `${size.y}px`;
             }
@@ -296,7 +295,7 @@
             var map = this._map,
                 point = map.latLngToContainerPoint(e.latlng),
                 resolution = 4,
-                gridX = Math.floor(point.x /  resolution),
+                gridX = Math.floor(point.x / resolution),
                 gridY = Math.floor(point.y / resolution);
 
             var data = this._cache["test"];
@@ -309,7 +308,11 @@
                 };
             }
 
-            var charCode = data.grid?.[gridY]?.charCodeAt(gridX);
+            var charCode;
+            try {
+                charCode = data.grid[gridY].charCodeAt(gridX);
+            } catch (e) {
+            }
             var idx = this._utfDecode(charCode),
                 key = data.keys[idx],
                 result = data.data[key];
