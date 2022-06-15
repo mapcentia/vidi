@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [UNRELEASED]
+## [2022.6.0] - 2022-15-6
 ### Added
 - The URL parameters `var_matrikelnr` and `var_landsejerlavskode` will trigger search on the specified cadastral number using `danish` module. These parameters are already used in module `conflictSearch`. 
 
@@ -13,7 +13,6 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ## [2022.5.2] - 2022-27-5
 ### Changed
-- Popup in vector layers is now opened when clicking the feature table. This way the close-pop-up event can be fired when clicking somewhere else. This gives a more consistent experience.
 - `crossMultiSelect` on vector features now used `@turf/boolean-intersects` instead of comparing the bounds of features with Leafletjs. This gives the expected result when clicking on stacked vector features. 
 
 ### Fixed
