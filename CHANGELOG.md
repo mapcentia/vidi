@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [UNRELEASED]
+### Changed
+- UTFgrids are now single tiled for better performance due to fewer network reqeusts. But MapCache can't "untile" raw data, so the GC2 Meta setting `cache_utf_grid` will be ignorred.
+
 ## [2022.5.2] - 2022-27-5
 ### Changed
 - Popup in vector layers is now opened when clicking the feature table. This way the close-pop-up event can be fired when clicking somewhere else. This gives a more consistent experience.

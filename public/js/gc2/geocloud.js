@@ -843,11 +843,11 @@ geocloud = (function () {
      */
     createUTFGridLayer = function (layer, defaults) {
         var uri;
-        if (defaults.cache) {
-            uri = "/api/mapcache/" + defaults.db + "/gmaps/" + layer + ".json@g20/{z}/{x}/{y}.json";
-        } else {
-            uri = "/api/wms/" + defaults.db + "/" + layer.split(".")[0] + "";
-        }
+        // if (defaults.cache) {
+        //     uri = "/api/mapcache/" + defaults.db + "/gmaps/" + layer + ".json@g20/{z}/{x}/{y}.json";
+        // } else {
+        uri = "/api/wms/" + defaults.db + "/" + layer.split(".")[0] + "";
+        // }
         var utfGrid = new L.NonTiledUTFGrid.WMS(uri, {
             layers: layer,
             format: 'json',
