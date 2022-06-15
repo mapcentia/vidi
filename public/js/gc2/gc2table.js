@@ -13,6 +13,7 @@
 import {
     SELECTED_STYLE
 } from './../../../browser/modules/layerTree/constants';
+var debounce = require('lodash/debounce');
 var gc2table = (function () {
     "use strict";
     var isLoaded, object, init;
@@ -206,6 +207,33 @@ var gc2table = (function () {
         $.each(cm, function (i, v) {
             $(el + ' thead tr').append("<th data-filter-control=" + (v.filterControl || "false") + " data-field='" + v.dataIndex + "' data-sortable='" + (v.sortable || "false") + "' data-editable='false' data-formatter='" + (v.formatter || "") + "'>" + v.header + "</th>");
         });
+        var filterMap =
+            debounce(function () {
+                let visibleRows = [];
+                $.each(store.layer._layers, function (i, v) {
+                    m.map.removeLayer(v);
+                });
+                $.each(originalLayers, function (i, v) {
+                    m.map.addLayer(v);
+                });
+                filters = {};
+                filterControls = {};
+                $.each(cm, function (i, v) {
+                    if (v.filterControl) {
+                        filters[v.dataIndex] = $(".bootstrap-table-filter-control-" + v.dataIndex).val();
+                        filterControls[v.dataIndex] = v.filterControl;
+                    }
+                });
+                $.each($(el + " tbody").children(), function (x, y) {
+                    visibleRows.push($(y).attr("data-uniqueid"));
+                });
+                $.each(store.layer._layers, function (i, v) {
+                    if (visibleRows.indexOf(v._leaflet_id + "") === -1) {
+                        m.map.removeLayer(v);
+                    }
+                });
+                bindEvent();
+            }, 500);
 
         var getDatabaseIdForLayerId = function (layerId) {
             if (!store.geoJSON) return false;
@@ -299,7 +327,8 @@ var gc2table = (function () {
             locale: locale,
             onToggle: bindEvent,
             onSort: bindEvent,
-            onColumnSwitch: bindEvent
+            onColumnSwitch: bindEvent,
+            onSearch: filterMap
         });
 
         $(el).on('check-all.bs.table', function (e, m) {
