@@ -894,9 +894,9 @@ module.exports = {
             });
         }
 
-        if (urlparser.urlVars?.var_landsejerlavskode && urlparser.urlVars?.var_matrikelnr) {
-            backboneEvents.get().on('allDoneLoading:layers', ()=>{
-                setTimeout(()=> {
+        if (urlparser.urlVars?.var_landsejerlavskode && urlparser.urlVars?.var_matrikelnr && !urlparser.urlVars?.px) {
+            backboneEvents.get().on('allDoneLoading:layers', () => {
+                setTimeout(() => {
                     if (!fromVarsIsDone) {
                         const key = "simple";
                         placeStores[key] = getPlaceStore();
