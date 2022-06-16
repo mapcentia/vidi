@@ -895,7 +895,7 @@ module.exports = {
         }
 
         if (urlparser.urlVars?.var_landsejerlavskode && urlparser.urlVars?.var_matrikelnr && !urlparser.urlVars?.px) {
-            backboneEvents.get().on('allDoneLoading:layers', () => {
+            backboneEvents.get().on('end:state', () => {
                 setTimeout(() => {
                     if (!fromVarsIsDone) {
                         const key = "simple";
