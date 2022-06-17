@@ -900,8 +900,8 @@ module.exports = {
                     if (!fromVarsIsDone) {
                         const key = "simple";
                         placeStores[key] = getPlaceStore();
-                        placeStores[key].db = search.getMDB();
-                        placeStores[key].host = search.getMHOST();
+                        placeStores[key].db = MDB;
+                        placeStores[key].host = MHOST;
                         placeStores[key].sql = `SELECT sfe_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE sfe_ejendomsnummer = (SELECT sfe_ejendomsnummer FROM matrikel.jordstykke WHERE landsejerlavskode=${urlparser.urlVars.var_landsejerlavskode} AND matrikelnummer='${urlparser.urlVars.var_matrikelnr.toLowerCase()}') group by sfe_ejendomsnummer`;
                         placeStores[key].load();
                         fromVarsIsDone = true;
