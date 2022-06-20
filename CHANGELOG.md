@@ -4,12 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [UNRELEASED]
+### Fixed
+- Full translation of `coordinates` module.
+
 ## [2022.6.0] - 2022-15-6
 ### Added
 - The URL parameters `var_matrikelnr` and `var_landsejerlavskode` will trigger search on the specified cadastral number using `danish` module. These parameters are already used in module `conflictSearch`. 
 
 ### Changed
 - UTFgrids are now single tiled for better performance due to fewer network reqeusts. But MapCache can't "untile" raw data, so the GC2 Meta setting `cache_utf_grid` will be ignorred.
+- Upgraded to Leafletjs 1.8 and Bootstrap Table 1.2.0.
 
 ## [2022.5.2] - 2022-27-5
 ### Changed
