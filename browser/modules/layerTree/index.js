@@ -2002,7 +2002,9 @@ module.exports = {
                                                             </div>`).openOn(cloud.get().map)
                             .on('remove', () => {
                                 sqlQuery.resetAll();
-                                _self.resetAllVectorLayerStyles();
+                                if (window.vidiConfig.crossMultiSelect) {
+                                    _self.resetAllVectorLayerStyles();
+                                }
                             });
                     }
                 }

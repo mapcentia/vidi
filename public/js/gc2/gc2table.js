@@ -256,6 +256,7 @@ var gc2table = (function () {
         var bindEvent = function (e) {
             setTimeout(function () {
                 $(el + ' > tbody > tr').on("click", function (e) {
+                    m.map.closePopup();
                     var id = $(this).data('uniqueid');
                     var databaseIdentifier = getDatabaseIdForLayerId(id);
                     if (uncheckedIds.indexOf(databaseIdentifier) === -1 || checkBox === false) {
@@ -422,14 +423,18 @@ var gc2table = (function () {
             data = [];
             $.each(store.layer._layers, function (i, v) {
                 v.feature.properties._id = i;
-                $.each(v.feature.properties, function (n, m) {
+
+                // Clone
+                let layerClone = jQuery.extend(true, {}, v.feature.properties);
+                $.each(layerClone, function (n, m) {
                     $.each(cm, function (j, k) {
                         if (k.dataIndex === n && ((typeof k.link === "boolean" && k.link === true) || (typeof k.link === "string"))) {
-                            v.feature.properties[n] = "<a style='text-decoration: underline' target='_blank' rel='noopener' href='" + v.feature.properties[n] + "'>" + (typeof k.link === "string" ? k.link : "Link") + "</a>";
+                            layerClone[n] = "<a style='text-decoration: underline' target='_blank' rel='noopener' href='" + layerClone[n] + "'>" + (typeof k.link === "string" ? k.link : "Link") + "</a>";
                         }
                     });
                 });
-                data.push(JSON.parse(JSON.stringify(v.feature.properties)));
+                data.push(JSON.parse(JSON.stringify(layerClone)));
+                layerClone = null;
 
                 if (assignFeatureEventListenersOnDataLoad) {
                     assignEventListeners();
