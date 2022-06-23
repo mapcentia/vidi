@@ -1831,7 +1831,7 @@ module.exports = {
                 cm: tableHeaders,
                 autoUpdate: false,
                 autoPan: window.vidiConfig.autoPanPopup,
-                openPopUp: !window.vidiConfig.crossMultiSelect,
+                openPopUp: false,
                 setViewOnSelect: true,
                 responsive: false,
                 callCustomOnload: true,
@@ -1989,24 +1989,21 @@ module.exports = {
                         });
                     });
 
-                    // Open pop-up if table is NOT enabled - gc2table with control pop-up if enabled
-                    if ($(`#table_view-${layerKey.replace('.', '_')}`).children('.bootstrap-table').length === 0 || multi) {
-                        vectorPopUp = L.popup({
-                            autoPan: window.vidiConfig.autoPanPopup,
-                            autoPanPaddingTopLeft: L.point(multi ? 20 : 0, multi ? 300 : 0),
-                            minWidth: 300,
-                            className: `js-vector-layer-popup custom-popup`
-                        }).setLatLng(event.latlng).setContent(`<div>
+                    vectorPopUp = L.popup({
+                        autoPan: window.vidiConfig.autoPanPopup,
+                        autoPanPaddingTopLeft: L.point(multi ? 20 : 0, multi ? 300 : 0),
+                        minWidth: 300,
+                        className: `js-vector-layer-popup custom-popup`
+                    }).setLatLng(event.latlng).setContent(`<div>
                                                                 ${additionalControls}
                                                                 <div style="margin-right: 5px; margin-left: 2px">${accordion}</div>
                                                             </div>`).openOn(cloud.get().map)
-                            .on('remove', () => {
-                                sqlQuery.resetAll();
-                                if (window.vidiConfig.crossMultiSelect) {
-                                    _self.resetAllVectorLayerStyles();
-                                }
-                            });
-                    }
+                        .on('remove', () => {
+                            sqlQuery.resetAll();
+                            if (window.vidiConfig.crossMultiSelect) {
+                                _self.resetAllVectorLayerStyles();
+                            }
+                        });
                 }
             }
         })

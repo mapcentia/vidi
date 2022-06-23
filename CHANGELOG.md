@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
 ## [UNRELEASED]
+### Changed
+- Pop-ups are not longer opened when selecting a row in table, because this will let gc2table control the pop-up and here editing tools are not supported.
+
 ### Fixed
 - Full translation of `coordinates` module.
   Some fixes regarding pop-ups and tables.
