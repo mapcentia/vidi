@@ -663,7 +663,7 @@ module.exports = {
                     $.each(sortObject(fieldConf), (name, property) => {
                         if (property.value.querable) {
                             let value = feature.properties[property.key];
-                            if (property.value.link) {
+                            if (property.value.link && feature.properties[property.key] && feature.properties[property.key] !== '') {
                                 value = "<a target='_blank' rel='noopener' href='" + (property.value.linkprefix ? property.value.linkprefix : "") + feature.properties[property.key] + (property.value.linksuffix ? property.value.linksuffix : "") + "'>Link</a>";
                             } else if (property.value.content && property.value.content === "image") {
                                 if (!feature.properties[property.key]) {

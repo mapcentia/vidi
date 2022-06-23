@@ -10,8 +10,8 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ### Fixed
 - Full translation of `coordinates` module.
-  Some fixes regarding pop-ups and tables.
-- Bug regarding doubled marked-up in pop-ups links fixed.
+- Bug regarding nested double mark-up in pop-ups links fixed.
+- Links in pop-ups and tables will now not be generated if value is null or empty string.
 
 ## [2022.6.0] - 2022-15-6
 ### Added

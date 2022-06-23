@@ -428,7 +428,7 @@ var gc2table = (function () {
                 let layerClone = jQuery.extend(true, {}, v.feature.properties);
                 $.each(layerClone, function (n, m) {
                     $.each(cm, function (j, k) {
-                        if (k.dataIndex === n && ((typeof k.link === "boolean" && k.link === true) || (typeof k.link === "string"))) {
+                        if (k.dataIndex === n && (((typeof k.link === "boolean" && k.link === true) || typeof k.link === "string")) && (layerClone[n] && layerClone[n] !=='')) {
                             layerClone[n] = "<a style='text-decoration: underline' target='_blank' rel='noopener' href='" + layerClone[n] + "'>" + (typeof k.link === "string" ? k.link : "Link") + "</a>";
                         }
                     });
