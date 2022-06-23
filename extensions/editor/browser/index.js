@@ -38,6 +38,7 @@ let markers = [];
 let editor;
 
 let editedFeature = false;
+let isVectorLayer = false;
 
 let featureWasEdited = false;
 
@@ -128,7 +129,6 @@ module.exports = {
             existing: true
         }, function () {
             $(this).on("click", function (e) {
-                let isVectorLayer = false;
                 if ($(this).closest('.layer-item').find('.js-show-layer-control').data('gc2-layer-type') === LAYER.VECTOR) {
                     isVectorLayer = true;
                 }
@@ -141,7 +141,7 @@ module.exports = {
 
         // Listen to close of attr box
         $(".editor-attr-dialog__close-hide").on("click", function () {
-            _self.stopEdit(editedFeature);
+            _self.stopEdit();
             backboneEvents.get().trigger("sqlQuery:clear");
         });
 
@@ -364,8 +364,9 @@ module.exports = {
      * @param doNotRemoveEditor
      * @param isVectorLayer
      */
-    add: function (k, qstore, doNotRemoveEditor, isVectorLayer = false) {
-        _self.stopEdit(editedFeature);
+    add: function (k, qstore, doNotRemoveEditor, isVector = false) {
+        isVectorLayer = isVector;
+        _self.stopEdit();
         editedFeature = false;
 
         let me = this, React = require('react'), ReactDOM = require('react-dom'),
@@ -631,8 +632,9 @@ module.exports = {
      * @param qstore
      * @param isVectorLayer
      */
-    edit: function (e, k, qstore, isVectorLayer = false) {
-        _self.stopEdit(editedFeature);
+    edit: function (e, k, qstore, isVector = false) {
+        isVectorLayer = isVector;
+        _self.stopEdit();
         editedFeature = e;
         nonCommitedEditedFeature = {};
         const editFeature = () => {
@@ -859,7 +861,7 @@ module.exports = {
                     switchLayer.registerLayerDataAlternation(schemaQualifiedName);
 
                     sqlQuery.reset(qstore);
-                    me.stopEdit(editedFeature);
+                    me.stopEdit();
 
                     // Reloading only vector layers, as uncommited changes can be displayed only for vector layers
                     if (isVectorLayer) {
@@ -965,8 +967,9 @@ module.exports = {
      * @param qstore
      * @param isVectorLayer
      */
-    delete: function (e, k, qstore, isVectorLayer = false) {
-        _self.stopEdit(editedFeature);
+    delete: function (e, k, qstore, isVector = false) {
+        isVectorLayer = isVector;
+        _self.stopEdit();
         editedFeature = false;
 
         let schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
@@ -1026,14 +1029,14 @@ module.exports = {
      * Stop editing and clean up
      * @param editedFeature
      */
-    stopEdit: function (editedFeature) {
+    stopEdit: function () {
         backboneEvents.get().trigger('unblock:infoClick');
         cloud.get().map.editTools.stopDrawing();
 
         if (editor) {
             cloud.get().map.removeLayer(editor);
         }
-        if (editedFeature) {
+        if (editedFeature && !isVectorLayer) {
             cloud.get().map.removeLayer(editedFeature);
         }
 

@@ -7,6 +7,8 @@ and this project adheres to [CalVer](https://calver.org/).
 ## [UNRELEASED]
 ### Fixed
 - Full translation of `coordinates` module.
+  Some fixes regarding pop-ups and tables.
+- Bug regarding doubled marked-up in pop-ups links fixed.
 
 ## [2022.6.0] - 2022-15-6
 ### Added
