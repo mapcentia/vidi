@@ -13,7 +13,10 @@
 import {
     SELECTED_STYLE
 } from './../../../browser/modules/layerTree/constants';
+
 var debounce = require('lodash/debounce');
+const marked = require('marked');
+const mustache = require('mustache');
 var gc2table = (function () {
     "use strict";
     var isLoaded, object, init;
@@ -423,14 +426,18 @@ var gc2table = (function () {
             data = [];
             $.each(store.layer._layers, function (i, v) {
                 v.feature.properties._id = i;
-
                 // Clone
                 let layerClone = jQuery.extend(true, {}, v.feature.properties);
+                console.log(layerClone)
                 $.each(layerClone, function (n, m) {
                     $.each(cm, function (j, k) {
-                        if (k.dataIndex === n && (((typeof k.link === "boolean" && k.link === true) || typeof k.link === "string")) && (layerClone[n] && layerClone[n] !=='')) {
-                            layerClone[n] = "<a style='text-decoration: underline' target='_blank' rel='noopener' href='" + layerClone[n] + "'>" + (typeof k.link === "string" ? k.link : "Link") + "</a>";
-                        }
+                       if (k.dataIndex === n && (k?.template && k?.template !== '') && (layerClone[n] && layerClone[n] !== '')) {
+                            const fieldTmpl = k.template;
+                            const fieldHtml = mustache.render(fieldTmpl, layerClone);
+                            layerClone[n] = fieldHtml;
+                        } else if (k.dataIndex === n && (k?.link === true || typeof k?.link === "string") && (layerClone[n] && layerClone[n] !== '')) {
+                           layerClone[n] = "<a style='text-decoration: underline' target='_blank' rel='noopener' href='" + layerClone[n] + "'>" + (typeof k.link === "string" ? k.link : "Link") + "</a>";
+                       }
                     });
                 });
                 data.push(JSON.parse(JSON.stringify(layerClone)));

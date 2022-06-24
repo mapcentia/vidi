@@ -5,13 +5,16 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
 ## [UNRELEASED]
+### Added
+- In vector tables values are now replaced with rendered mustache template if provided through GC2.
+
 ### Changed
 - Pop-ups are not longer opened when selecting a row in table, because this will let gc2table control the pop-up and here editing tools are not supported.
 
 ### Fixed
-- Full translation of `coordinates` module.
+- Full Danish translation of `coordinates` module.
 - Bug regarding nested double mark-up in pop-ups links fixed.
-- Links in pop-ups and tables will now not be generated if value is null or empty string.
+- Links in pop-ups and tables will not be generated if value is null or empty string.
 
 ## [2022.6.0] - 2022-15-6
 ### Added
