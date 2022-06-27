@@ -6,9 +6,11 @@
 
 'use strict';
 
-const layerTreeUtils = require('./layerTree/utils');
-import {LAYER, SYSTEM_FIELD_PREFIX, MAP_RESOLUTIONS} from './layerTree/constants';
+import mustache from "mustache";
+import {LAYER, MAP_RESOLUTIONS, SYSTEM_FIELD_PREFIX} from './layerTree/constants';
 import {GEOJSON_PRECISION} from './constants';
+
+const layerTreeUtils = require('./layerTree/utils');
 
 /**
  * @type {*|exports|module.exports}
@@ -663,11 +665,14 @@ module.exports = {
                     $.each(sortObject(fieldConf), (name, property) => {
                         if (property.value.querable) {
                             let value = feature.properties[property.key];
-                            if (property.value.link && feature.properties[property.key] && feature.properties[property.key] !== '') {
+                            if (property.value.template && feature.properties[property.key] && feature.properties[property.key] !== '') {
+                                const fieldTmpl = property.value.template;
+                                value = mustache.render(fieldTmpl, feature.properties);
+                            } else if (property.value.link && feature.properties[property.key] && feature.properties[property.key] !== '') {
                                 value = "<a target='_blank' rel='noopener' href='" + (property.value.linkprefix ? property.value.linkprefix : "") + feature.properties[property.key] + (property.value.linksuffix ? property.value.linksuffix : "") + "'>Link</a>";
                             } else if (property.value.content && property.value.content === "image") {
                                 if (!feature.properties[property.key]) {
-                                    value = `<i class="fa fa-ban"></i>`;
+                                    value = null;
                                 } else {
                                     let layerKeyWithoutPrefix = layerKey.replace(LAYER.VECTOR + ':', '');
                                     if (metaDataKeys[layerKeyWithoutPrefix]["fields"][property.key].type.startsWith("json")) {
@@ -714,7 +719,7 @@ module.exports = {
                                 }
                             } else if (property.value.content && property.value.content === "video") {
                                 if (!feature.properties[property.key]) {
-                                    value = `<i class="fa fa-ban"></i>`;
+                                    value = null;
                                 } else {
                                     let subValue = feature.properties[property.key];
                                     value =
