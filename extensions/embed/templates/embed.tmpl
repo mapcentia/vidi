@@ -359,11 +359,40 @@
         height: auto !important;
     }
     #place-search {
-        position: absolute;
+        position: relative;
+        float: right;
+        /*display: flex;*/
         z-index: 2000;
         width: 350px;
         right: 63px;
         max-width: calc(100vw - 70px);
+    }
+    #embed-legend-panel{
+        position: relative;
+        float: right;
+        z-index: 2000;
+        right: 63px;
+        max-width: calc(100vw - 70px);
+        top: 6px;
+        margin-left: 6px;
+    }
+    #embed-legend-panel .panel-heading {
+        height: 38px;
+        cursor: pointer;
+    }
+    .legend .list-group .list-group-item {
+        padding: 0;
+    }
+    .legend .list-group {
+        margin: 0;
+    }
+
+    .legend > ul > li > ul {
+        padding-inline-start: 25px;
+    }
+
+    #embed-legend-panel .panel-body {
+        padding: 5px;
     }
     #burger-btn-container {
         position: absolute;
@@ -397,13 +426,6 @@
         font-weight: bold;
     }
 
-    #legend-dialog .modal-body {
-        height: 210px;
-    }
-    #legend-dialog.dialog-bottom {
-        left: 6px;
-        right: auto;
-    }
     #measurements-module-btn, #measurements-module-cancel-btn, #mapcontrols-clear-map {
         display: none;
     }
@@ -469,7 +491,7 @@
         #floating-container-secondary {
             top: 225px;
         }
-        .dialog-bottom, #legend-dialog.dialog-bottom {
+        .dialog-bottom {
             min-width: 100%;
             border-radius: 0;
             right: 0;
@@ -480,9 +502,6 @@
     @media (max-width: 767px) {
         .dialog-bottom .modal-body {
             max-height: 60vh;
-        }
-        #legend-dialog .modal-body {
-            height: 210px;
         }
         .dialog-bottom-wide {
             min-width: 288px;
@@ -546,25 +565,20 @@
                 <i class="material-icons gc2-session-unlock">lock_open</i>
             </a>
         </div>
-
+        <div id="embed-legend-panel">
+            <div class="panel panel-default">
+                <div class="panel-heading" data-toggle="collapse" data-target="#demo">{{Legend}}</div>
+                <div class="panel-body collapse" id="demo">
+                    <div id="legend" class="legend"></div>
+                </div>
+            </div>
+        </div>
         <div id="place-search" style="display: {{_displaySearch}}">
             <div class="places">
                 <input id="custom-search" class="custom-search typeahead" type="text"
                        placeholder="{{Address}}">
                 <span id="searchclear" class="glyphicon glyphicon-remove-circle"></span>
             </div>
-        </div>
-    </div>
-    <div id="legend-dialog" class="dialog-bottom fade-then-dragging">
-        <div class="modal-header">
-            <button type="button" class="close expand-more" aria-hidden="true"><i class="material-icons">expand_less</i>
-            </button>
-            <button type="button" class="close expand-less" aria-hidden="true"><i class="material-icons">expand_more</i>
-            </button>
-            <h3 class="modal-title">Signatur</h3>
-        </div>
-        <div class="modal-body">
-            <div id="legend" class="legend"></div>
         </div>
     </div>
     <div id="base-layers-dialog" class="dialog-bottom fade-then-dragging">

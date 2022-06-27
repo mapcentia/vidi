@@ -1678,3 +1678,6 @@ td.rdtYear:hover {
 iframe.leaflet-utfgrid-layer {
   display: none !important;
 }
+.leaflet-container {
+  font-size: 12px !important;
+}

@@ -9,6 +9,9 @@ and this project adheres to [CalVer](https://calver.org/).
 - In pop-ups and vector tables values are now replaced with rendered mustache template if provided through GC2.
 
 ### Changed
+- Legend moved to upper right corner in embed.tmpl, so it doesn't coflict with the bottom aligned vector table.
+
+### Changed
 - Pop-ups are not longer opened when selecting a row in table, because this will let gc2table control the pop-up and here editing tools are not supported.
 
 ### Fixed
