@@ -733,7 +733,7 @@ module.exports = {
                             fields.push({title: property.value.alias || property.key, value});
                             fieldLabel = (property.value.alias !== null && property.value.alias !== "") ? property.value.alias : property.key;
                             if (feature.properties[property.key] !== undefined) {
-                                out.push([property.key, property.value.sort_id, fieldLabel, property.value.link, property.value.template]);
+                                out.push([property.key, property.value.sort_id, fieldLabel, property.value.link, property.value.template, property.value.content]);
                             }
                         }
                     });
@@ -754,6 +754,7 @@ module.exports = {
                             sortable: true,
                             link: property[3],
                             template: property[4],
+                            content: property[5],
                         })
                     });
                     first = false;

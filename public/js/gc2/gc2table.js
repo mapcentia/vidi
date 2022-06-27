@@ -431,13 +431,17 @@ var gc2table = (function () {
                 console.log(layerClone)
                 $.each(layerClone, function (n, m) {
                     $.each(cm, function (j, k) {
-                       if (k.dataIndex === n && (k?.template && k?.template !== '') && (layerClone[n] && layerClone[n] !== '')) {
+                        if (k.dataIndex === n && (k?.template && k?.template !== '') && (layerClone[n] && layerClone[n] !== '')) {
                             const fieldTmpl = k.template;
                             const fieldHtml = mustache.render(fieldTmpl, layerClone);
                             layerClone[n] = fieldHtml;
                         } else if (k.dataIndex === n && (k?.link === true || typeof k?.link === "string") && (layerClone[n] && layerClone[n] !== '')) {
-                           layerClone[n] = "<a style='text-decoration: underline' target='_blank' rel='noopener' href='" + layerClone[n] + "'>" + (typeof k.link === "string" ? k.link : "Link") + "</a>";
-                       }
+                            layerClone[n] = "<a style='text-decoration: underline' target='_blank' rel='noopener' href='" + layerClone[n] + "'>" + (typeof k.link === "string" ? k.link : "Link") + "</a>";
+                        } else if (k.dataIndex === n && (k?.content === 'image' && (layerClone[n] && layerClone[n] !== ''))) {
+                            layerClone[n] = `<div style="cursor: pointer" onclick="window.open().document.body.innerHTML = '<img src=\\'${layerClone[n]}\\' />';">
+                                        <img style='width:25px' src='${layerClone[n]}'/>
+                                     </div>`
+                        }
                     });
                 });
                 data.push(JSON.parse(JSON.stringify(layerClone)));
