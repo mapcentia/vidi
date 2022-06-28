@@ -428,7 +428,6 @@ var gc2table = (function () {
                 v.feature.properties._id = i;
                 // Clone
                 let layerClone = jQuery.extend(true, {}, v.feature.properties);
-                console.log(layerClone)
                 $.each(layerClone, function (n, m) {
                     $.each(cm, function (j, k) {
                         if (k.dataIndex === n && (k?.template && k?.template !== '') && (layerClone[n] && layerClone[n] !== '')) {

@@ -1504,6 +1504,7 @@ module.exports = {
                             showToggle: false,
                             showExport: false,
                             showColumns: false,
+                            showSearch: false,
                             cardView: false,
                             height: height,
                             tableBodyHeight: tableBodyHeight
@@ -1794,6 +1795,7 @@ module.exports = {
             showToggle: true,
             showExport: false,
             showColumns: true,
+            showSearch: false,
             cardView: false,
             height: 250,
             tableBodyHeight: null
@@ -1807,7 +1809,7 @@ module.exports = {
         if (layerWithData.length === 1) {
             let tableContainerId = element ? element : `#table_view-${layerKey.replace(".", "_")}`;
             if ($(tableContainerId + ` table`).length > 0) $(tableContainerId).empty();
-            $(tableContainerId).append(`<table class="table" data-show-toggle="${defaults.showToggle}" data-search-highlight="true"  data-search="true" data-show-export="${defaults.showExport}" data-show-columns="${defaults.showColumns}" data-card-view="${defaults.cardView}"></table>`);
+            $(tableContainerId).append(`<table class="table" data-show-toggle="${defaults.showToggle}" data-search-highlight="true"  data-search="${defaults.showSearch}" data-show-export="${defaults.showExport}" data-show-columns="${defaults.showColumns}" data-card-view="${defaults.cardView}"></table>`);
 
             let metaDataKeys = meta.getMetaDataKeys();
             let template = sqlQuery.getVectorTemplate(layerKey);
