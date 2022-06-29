@@ -44,7 +44,7 @@ Indlejring af Vidi sker ved at placere et ``div`` element på hjemmeside, hvor V
 Der en række data attributer, som skal/kan sættes:
 
 * **data-vidi-token (obligatorisk)**
- * Projektets "token" som indeholder state-id, host, database mv. Skal angives.
+ * Projektets "token" som indeholder state-id, host, database mv. Skal angives. Læse mere om :ref:`project`
 * **data-vidi-width (valgfri)**
  * Bredde på kort. Standard 100%
 * **data-vidi-height (valgfri)**
