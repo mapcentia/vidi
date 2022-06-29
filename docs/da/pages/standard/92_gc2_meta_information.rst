@@ -494,11 +494,11 @@ Som ved :ref:`gc2structure_link_prefix` men bare bagved. Fx hvis feltet kun inde
 Template
 =================================================================
 
-Hvis værdien af et felt skal udtrykkes i pop-up og tabel ved andet end selve den rå værdi kan der indsættes en template for feltet. En template har adgang til alle objektets attributter. Fx kan der defineres en template, som skaber et link med link- og alt tekst fra et andet felt. Fx:
+Hvis værdien af et felt skal udtrykkes i pop-up og tabel ved andet end selve den rå værdi kan der indsættes en template for feltet. En template har adgang til alle objektets attributter. Fx kan der defineres en template, som skaber et link med link-tekst og ``title`` attribute fra et andet felt. Fx:
 
 .. code-block:: html
 
-   <a href="{{doklink}}" target="_blank" alt="Link til lokalplan {{plannavn}} {{plannr}} som pdf">{{plannr}} {{plannavn}}</a>
+   <a href="{{doklink}}" target="_blank" title="Link til lokalplan {{plannavn}} {{plannr}} som pdf">{{plannr}} {{plannavn}}</a>
 
 .. note::
     Hvis der anvendes en brugerdefineret pop-up template, har denne indstilling ingen effekt (se :ref:`gc2mata_infopopup`)
