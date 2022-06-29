@@ -1496,7 +1496,7 @@ module.exports = {
                         styles = `width: 100%; height: ${h}; bottom: 0; position: fixed;`;
                         e.css("height", `calc(100vh - ${h})`);
                         height = parseInt(h);
-                        tableBodyHeight = (height - 100) + "px"
+                        tableBodyHeight = (height - 34) + "px"
                     }
                     if (position === 'right' || position === 'bottom') {
                         e.before(`<div id="${VECTOR_SIDE_TABLE_EL}" style="${styles}; background-color: white; " data-vidi-vector-table-id="${trackingLayerKey}"></div>`)
@@ -1664,6 +1664,9 @@ module.exports = {
                             if (overlay._layers) {
                                 for (let f in overlay._layers) {
                                     let featureForChecking = overlay._layers[f];
+                                    if (!featureForChecking?.feature?.geometry) {
+                                        continue;
+                                    }
                                     let feature = turfFeature(featureForChecking.feature.geometry);
                                     try {
                                         if (turfIntersects(clickFeature, feature) && overlay.id) {
