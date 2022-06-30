@@ -1456,7 +1456,8 @@ module.exports = {
 
         moduleState.vectorStores[trackingLayerKey] = new geocloud.sqlStore({
             map: cloud.get().map,
-            minZoom: 11,
+            minZoom: parseInt(meta.parseLayerMeta(layerKey)?.vector_min_zoom),
+            maxZoom: parseInt(meta.parseLayerMeta(layerKey)?.vector_max_zoom),
             parentFiltersHash,
             jsonp: false,
             method: "POST",

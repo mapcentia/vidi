@@ -148,6 +148,7 @@ geocloud = (function () {
         custom_data: null,
         clustering: false,
         minZoom: null,
+        maxZoom: null,
     };
 
     // Base class for stores
@@ -191,6 +192,7 @@ geocloud = (function () {
 
             this.layer.id = this.defaults.name;
             this.layer.minZoom = this.defaults.minZoom;
+            this.layer.maxZoom = this.defaults.maxZoom;
             this.key = this.defaults.key;
         };
         this.geoJSON = null;

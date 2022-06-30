@@ -626,27 +626,35 @@ module.exports = {
             }
         });
 
+        // Check if active vector layers have max/min zoom values
         let orginallayers = {};
         const map = cloud.get().map;
-        map.on('zoomend', () => {
+        const moveEndEvent = () => {
             const layers = map._layers;
             for (let key in layers) {
                 if (layers.hasOwnProperty(key)) {
-                    if (layers[key]?.id?.startsWith("v:")) {
-                        console.log(layers[key]);
-                        orginallayers[layers[key].id] = jQuery.extend(true, {}, layers[key]._layers)
-                        if (map.getZoom() < 10) {
-                            $.each(layers[key]._layers, function (i, v) {
-                                map.removeLayer(v);
-                            });
-                        } else {
-                            $.each(orginallayers[layers[key].id], function (i, v) {
-                                map.addLayer(v);
-                            });
+                    const layer = layers[key];
+                    if (layer?.id?.startsWith("v:")) {
+                        orginallayers[layer.id] = jQuery.extend(true, {}, layer._layers);
+                        if (typeof layer?.minZoom === 'number' || typeof layer?.maxZoom === 'number') {
+                            if (map.getZoom() < layer.minZoom || map.getZoom() >= layer.maxZoom) {
+                                $.each(layer._layers, function (i, v) {
+                                    try {
+                                        map.removeLayer(v);
+                                    } catch (e) {
+                                        // console.error(e)
+                                    }
+                                })
+                            } else {
+                                $.each(orginallayers[layer.id], function (i, v) {
+                                    map.addLayer(v);
+                                })
+                            }
                         }
                     }
                 }
             }
-        })
+        }
+        map.on('moveend layeradd', moveEndEvent)
     }
 };
