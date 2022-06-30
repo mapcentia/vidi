@@ -10,6 +10,13 @@
 /*global window:false */
 /*global console:false */
 /*global _:false */
+import {
+    SELECTED_STYLE
+} from './../../../browser/modules/layerTree/constants';
+
+var debounce = require('lodash/debounce');
+const marked = require('marked');
+const mustache = require('mustache');
 var gc2table = (function () {
     "use strict";
     var isLoaded, object, init;
@@ -45,13 +52,13 @@ var gc2table = (function () {
                 },
                 styleSelected: {
                     fillOpacity: 0.5,
-                    opacity: 0.5
+                    opacity: 0.5,
+                    fillColor: 'red'
                 },
                 renderInfoIn: null,
                 key: null,
                 caller: null,
-                maxZoom: 17,
-                dashSelected: false
+                maxZoom: 17
             }, prop,
             uid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
                 var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
@@ -91,10 +98,11 @@ var gc2table = (function () {
             renderInfoIn = defaults.renderInfoIn,
             key = defaults.key,
             caller = defaults.caller,
-            maxZoom = parseInt(defaults.maxZoom) || 17,
-            dashSelected = defaults.dashSelected;
+            maxZoom = parseInt(defaults.maxZoom) || 17;
 
         var customOnLoad = false, destroy, assignEventListeners, clickedFlag = false;
+
+        let clonedLayers = {};
 
         $(el).parent("div").addClass("gc2map");
 
@@ -133,12 +141,7 @@ var gc2table = (function () {
             let row = $('*[data-uniqueid="' + id + '"]');
             row.addClass("selected");
             try {
-                m.map._layers[id].setStyle({
-                    opacity: 1,
-                    dashArray: dashSelected ? "5 8": false,
-                    dashSpeed: 10,
-                    lineCap: "butt"
-                });
+                m.map._layers[id].setStyle(selectedStyle);
             } catch (e) {
                 console.warn("Can't set style on marker")
             }
@@ -180,7 +183,7 @@ var gc2table = (function () {
                     if (onPopupClose) onPopupClose(id);
                 });
 
-                object.trigger("openpopup" + "_" + uid, m.map._layers[id]);
+                object.trigger("openpopup" + "_" + uid, m.map._layers[id], clonedLayers[id]);
             }
         });
 
@@ -207,6 +210,33 @@ var gc2table = (function () {
         $.each(cm, function (i, v) {
             $(el + ' thead tr').append("<th data-filter-control=" + (v.filterControl || "false") + " data-field='" + v.dataIndex + "' data-sortable='" + (v.sortable || "false") + "' data-editable='false' data-formatter='" + (v.formatter || "") + "'>" + v.header + "</th>");
         });
+        var filterMap =
+            debounce(function () {
+                let visibleRows = [];
+                $.each(store.layer._layers, function (i, v) {
+                    m.map.removeLayer(v);
+                });
+                $.each(originalLayers, function (i, v) {
+                    m.map.addLayer(v);
+                });
+                filters = {};
+                filterControls = {};
+                $.each(cm, function (i, v) {
+                    if (v.filterControl) {
+                        filters[v.dataIndex] = $(".bootstrap-table-filter-control-" + v.dataIndex).val();
+                        filterControls[v.dataIndex] = v.filterControl;
+                    }
+                });
+                $.each($(el + " tbody").children(), function (x, y) {
+                    visibleRows.push($(y).attr("data-uniqueid"));
+                });
+                $.each(store.layer._layers, function (i, v) {
+                    if (visibleRows.indexOf(v._leaflet_id + "") === -1) {
+                        m.map.removeLayer(v);
+                    }
+                });
+                bindEvent();
+            }, 500);
 
         var getDatabaseIdForLayerId = function (layerId) {
             if (!store.geoJSON) return false;
@@ -229,6 +259,7 @@ var gc2table = (function () {
         var bindEvent = function (e) {
             setTimeout(function () {
                 $(el + ' > tbody > tr').on("click", function (e) {
+                    m.map.closePopup();
                     var id = $(this).data('uniqueid');
                     var databaseIdentifier = getDatabaseIdForLayerId(id);
                     if (uncheckedIds.indexOf(databaseIdentifier) === -1 || checkBox === false) {
@@ -287,6 +318,7 @@ var gc2table = (function () {
                 });
             }, 100);
         };
+        var selectedStyle = SELECTED_STYLE;
 
         var uncheckedStyle = {
             fillOpacity: 0.0,
@@ -299,7 +331,8 @@ var gc2table = (function () {
             locale: locale,
             onToggle: bindEvent,
             onSort: bindEvent,
-            onColumnSwitch: bindEvent
+            onColumnSwitch: bindEvent,
+            onSearch: filterMap
         });
 
         $(el).on('check-all.bs.table', function (e, m) {
@@ -371,7 +404,6 @@ var gc2table = (function () {
             $(el).bootstrapTable('removeAll')
             $(el).bootstrapTable('destroy')
             originalLayers = null;
-            store = null;
         };
 
         assignEventListeners = function () {
@@ -386,18 +418,33 @@ var gc2table = (function () {
             loadDataInTable();
         };
 
+        $.each(store.layer._layers, function (i, v) {
+            const l = L.geoJson(JSON.parse(JSON.stringify(v.toGeoJSON())))._layers;
+            clonedLayers[i] = l[Object.keys(l)[0]];
+        })
         loadDataInTable = function (doNotCallCustomOnload = false, forceDataLoad = false) {
             data = [];
             $.each(store.layer._layers, function (i, v) {
                 v.feature.properties._id = i;
-                $.each(v.feature.properties, function (n, m) {
+                // Clone
+                let layerClone = jQuery.extend(true, {}, v.feature.properties);
+                $.each(layerClone, function (n, m) {
                     $.each(cm, function (j, k) {
-                        if (k.dataIndex === n && ((typeof k.link === "boolean" && k.link === true) || (typeof k.link === "string"))) {
-                            v.feature.properties[n] = "<a style='text-decoration: underline' target='_blank' rel='noopener' href='" + v.feature.properties[n] + "'>" + (typeof k.link === "string" ? k.link : "Link") + "</a>";
+                        if (k.dataIndex === n && (k?.template && k?.template !== '') && (layerClone[n] && layerClone[n] !== '')) {
+                            const fieldTmpl = k.template;
+                            const fieldHtml = mustache.render(fieldTmpl, layerClone);
+                            layerClone[n] = fieldHtml;
+                        } else if (k.dataIndex === n && (k?.link === true || typeof k?.link === "string") && (layerClone[n] && layerClone[n] !== '')) {
+                            layerClone[n] = "<a style='text-decoration: underline' target='_blank' rel='noopener' href='" + layerClone[n] + "'>" + (typeof k.link === "string" ? k.link : "Link") + "</a>";
+                        } else if (k.dataIndex === n && (k?.content === 'image' && (layerClone[n] && layerClone[n] !== ''))) {
+                            layerClone[n] = `<div style="cursor: pointer" onclick="window.open().document.body.innerHTML = '<img src=\\'${layerClone[n]}\\' />';">
+                                        <img style='width:25px' src='${layerClone[n]}'/>
+                                     </div>`
                         }
                     });
                 });
-                data.push(JSON.parse(JSON.stringify(v.feature.properties)));
+                data.push(JSON.parse(JSON.stringify(layerClone)));
+                layerClone = null;
 
                 if (assignFeatureEventListenersOnDataLoad) {
                     assignEventListeners();
@@ -491,7 +538,7 @@ var gc2table = (function () {
             store: store,
             moveEndOff: moveEndOff,
             moveEndOn: moveEndOn,
-            bootStrapTable : $(el).bootstrapTable
+            bootStrapTable: $(el).bootstrapTable
         };
     };
     return {

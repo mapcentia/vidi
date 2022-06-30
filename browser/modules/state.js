@@ -80,7 +80,7 @@ const _getInternalState = () => {
             if (LOG) console.log('State: after getting state');
 
             if (error) {
-                throw new Error('State: error occured while accessing the store', error);
+                resolve({});
             }
 
             let localState = {modules: {}};
@@ -106,11 +106,11 @@ const _setInternalState = (value) => {
     let result = new Promise((resolve, reject) => {
         localforage.setItem(STATE_STORE_NAME, JSON.stringify(value), (error) => {
             if (error) {
-                throw new Error('State: error occured while storing the state');
+                console.error(error);
             } else {
                 if (LOG) console.log('State: saved', value);
-                resolve();
             }
+            resolve();
         });
     });
 
@@ -160,7 +160,7 @@ module.exports = {
             try {
 
                 if (!('localforage' in window)) {
-                    throw new Error('localforage is not defined');
+                    console.error('localforage is not defined');
                 }
 
                 var arr, i, maxBounds = setting.getMaxBounds();
@@ -825,5 +825,13 @@ module.exports = {
 
     activeLayersInSnapshot: () => {
         return activeLayersInSnapshot;
+    },
+
+    layersInUrl: () => {
+        let l = [];
+        if (hashArr[4]) {
+            l = hashArr[4].split(",");
+        }
+        return l;
     }
 };

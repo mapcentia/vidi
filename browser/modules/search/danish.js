@@ -43,7 +43,10 @@ const MHOST = "https://dk.gc2.io";
  */
 const MDB = "dk";
 
+let fromVarsIsDone = false;
+
 const drawTools = require(`./../drawTools`);
+const urlparser = require("../urlparser");
 
 /**
  * Global var with config object
@@ -652,7 +655,7 @@ module.exports = {
                         }
 
                         $.ajax({
-                            url: MHOST + '/api/v2/elasticsearch/search/' + MDB + '/matrikel',
+                            url: MHOST + '/api/v2/elasticsearch/search/' + MDB + '/matrikel/jordstykke_view',
                             data: JSON.stringify(dslM),
                             contentType: "application/json; charset=utf-8",
                             scriptCharset: "utf-8",
@@ -730,7 +733,7 @@ module.exports = {
                             }
 
                             $.ajax({
-                                url: MHOST + '/api/v2/elasticsearch/search/' + MDB + '/matrikel',
+                                url: MHOST + '/api/v2/elasticsearch/search/' + MDB + '/matrikel/jordstykke_view',
                                 data: JSON.stringify(dslM),
                                 contentType: "application/json; charset=utf-8",
                                 scriptCharset: "utf-8",
@@ -796,7 +799,7 @@ module.exports = {
                             }
 
                             $.ajax({
-                                url: MHOST + '/api/v2/elasticsearch/search/' + MDB + '/matrikel',
+                                url: MHOST + '/api/v2/elasticsearch/search/' + MDB + '/matrikel/jordstykke_view',
                                 data: JSON.stringify(dslM),
                                 contentType: "application/json; charset=utf-8",
                                 scriptCharset: "utf-8",
@@ -889,6 +892,24 @@ module.exports = {
                     }
                 )
             });
+        }
+
+        if (urlparser.urlVars?.var_landsejerlavskode && urlparser.urlVars?.var_matrikelnr && !urlparser.urlVars?.px) {
+            backboneEvents.get().on('end:state', () => {
+                setTimeout(() => {
+                    if (!fromVarsIsDone) {
+                        const key = "simple";
+                        placeStores[key] = getPlaceStore();
+                        placeStores[key].db = MDB;
+                        placeStores[key].host = MHOST;
+                        placeStores[key].sql = `SELECT sfe_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE sfe_ejendomsnummer = (SELECT sfe_ejendomsnummer FROM matrikel.jordstykke WHERE landsejerlavskode=${urlparser.urlVars.var_landsejerlavskode} AND matrikelnummer='${urlparser.urlVars.var_matrikelnr.toLowerCase()}') group by sfe_ejendomsnummer`;
+                        placeStores[key].load();
+                        fromVarsIsDone = true;
+                    }
+                }, 200);
+            });
+        } else {
+            fromVarsIsDone = true;
         }
         $("#" + el).typeahead({
             highlight: false

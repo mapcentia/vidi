@@ -19,7 +19,8 @@ import {
     SUB_GROUP_DIVIDER,
     SYSTEM_FIELD_PREFIX,
     VIRTUAL_LAYERS_SCHEMA,
-    VECTOR_SIDE_TABLE_EL
+    VECTOR_SIDE_TABLE_EL,
+    SELECTED_STYLE
 } from './constants';
 import dayjs from 'dayjs';
 import noUiSlider from 'nouislider';
@@ -37,6 +38,14 @@ import {
 import OfflineModeControlsManager from './OfflineModeControlsManager';
 import {GROUP_CHILD_TYPE_GROUP, GROUP_CHILD_TYPE_LAYER, LayerSorting} from './LayerSorting';
 import {GEOJSON_PRECISION} from './../constants';
+import {
+    buffer as turfBuffer,
+    point as turfPoint,
+    feature as turfFeature,
+    booleanIntersects as turfIntersects
+} from '@turf/turf'
+
+
 let _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEvents,
     onEachFeature = [], pointToLayer = [], onSelectedStyle = [], onLoad = [], onSelect = [],
     onMouseOver = [], cm = [], styles = [], tables = {}, childLayersThatShouldBeEnabled = [];
@@ -79,7 +88,7 @@ let moduleState = {
     dynamicLoad: {},
     setLayerOpacityRequests: [],
     setLayerStateRequests: {},
-    vectorStores: [],
+    vectorStores: {},
     webGLStores: [],
     virtualLayers: [],
     tileContentCache: {},
@@ -114,6 +123,36 @@ module.exports = {
     init: function () {
         _self = this;
         if (window.vidiConfig.enabledExtensions.indexOf(`editor`) !== -1) moduleState.editingIsEnabled = true;
+        $(document).arrive('#layers-filter-reset', function (e, data) {
+            $(this).on('click', function (e) {
+                _self.create(false, [], true, "");
+                $('#layers-filter').val('');
+            })
+        });
+        $(document).arrive('#layers-filter', function (e, data) {
+            const filterBusy = $('#layers-filter-busy');
+            const filterReset = $('#layers-filter-reset');
+            let timeOut;
+            $(this).on('input', function (e) {
+                clearTimeout(timeOut)
+                const c = () => {
+                    if (moduleState.isBeingBuilt) {
+                        filterBusy.show();
+                        filterReset.hide();
+                        timeOut = setTimeout(() => {
+                            c()
+                        }, 100)
+                    } else {
+                        filterBusy.hide();
+                        filterReset.show();
+                        _self.create(false, [], true, e.target.value);
+
+                    }
+                }
+                c();
+            })
+        });
+        $("#layers").before(`<div style="display: flex; align-items: center"><div class="form-group" style="flex-grow: 1;"><input placeholder="${__('Layer filter')}" class="form-control" type="text" id="layers-filter" autocomplete="off"></div><div style="width: 18px; display: flex; justify-content:center"><div id="layers-filter-reset" style="display: inline; cursor: pointer"><i class="fas fa-times"></i></div><div id="layers-filter-busy" style="display: none"><i class="fas fa-circle-notch fa-spin"></i></div></div></div>`);
 
         if (urlparser && urlparser.urlVars && urlparser.urlVars.initialFilter) {
             backboneEvents.get().on(`${MODULE_NAME}:ready`, () => {
@@ -273,8 +312,10 @@ module.exports = {
                 result.push(activeLayers[key].fullLayerKey);
             }
         }
+        const layersFromFromUrl = state.layersInUrl();
 
-        return result;
+
+        return result.concat(layersFromFromUrl);
     },
 
     /**
@@ -542,7 +583,7 @@ module.exports = {
         let activeLayers = _self.getActiveLayers();
         let layersOfflineMode = offlineModeControlsManager.getOfflineModeSettings();
 
-        let opacitySettings = {};
+        let opacitySettings = moduleState.opacitySettings;
         for (let key in cloud.get().map._layers) {
             let layer = cloud.get().map._layers[key];
             if (`id` in layer && layer.id) {
@@ -673,7 +714,7 @@ module.exports = {
      *
      * @returns {Promise}
      */
-    create: (forcedState = false, ignoredInitialStateKeys = [], dontRegisterEvents = false) => {
+    create: (forcedState = false, ignoredInitialStateKeys = [], dontRegisterEvents = false, filter = null) => {
         if (LOG) console.log(`${MODULE_NAME}: create`, moduleState.isBeingBuilt, forcedState);
 
         queueStatistsics.setLastStatistics(false);
@@ -708,7 +749,7 @@ module.exports = {
          * counters of active / added layers needs to be updated
          */
         backboneEvents.get().once(`allDoneLoading:layers`, () => {
-            let metaData = meta.getMetaData();
+            let metaData = meta.getMetaData(filter);
             let groupsToActiveLayers = {};
             let groupsToAddedLayers = {};
             let activeLayers = switchLayer.getLayersEnabledStatus();
@@ -881,7 +922,7 @@ module.exports = {
                                     activeLayers = forcedState.activeLayers;
                                 }
 
-                                let existingMeta = meta.getMetaData();
+                                let existingMeta = meta.getMetaData(filter);
                                 if (`data` in existingMeta) {
                                     activeLayers.map(layerName => {
                                         let correspondingMeta = meta.getMetaByKey(layerTreeUtils.stripPrefix(layerName), false);
@@ -946,7 +987,7 @@ module.exports = {
                                 let groups = [];
 
                                 // Getting set of all loaded vectors
-                                let metaData = meta.getMetaData();
+                                let metaData = meta.getMetaData(filter);
                                 for (let i = 0; i < metaData.data.length; ++i) {
                                     groups[i] = metaData.data[i].layergroup;
                                 }
@@ -970,7 +1011,7 @@ module.exports = {
                                 latestFullTreeStructure = [];
                                 for (let i = 0; i < arr.length; ++i) {
                                     if (arr[i] && arr[i] !== "<font color='red'>[Ungrouped]</font>") {
-                                        let sortedLayers = _self.createGroupRecord(arr[i], order, forcedState, precheckedLayers);
+                                        let sortedLayers = _self.createGroupRecord(arr[i], order, forcedState, precheckedLayers, filter);
                                         latestFullTreeStructure.push({
                                             id: arr[i],
                                             type: GROUP_CHILD_TYPE_GROUP,
@@ -1463,6 +1504,7 @@ module.exports = {
                             showToggle: false,
                             showExport: false,
                             showColumns: false,
+                            showSearch: false,
                             cardView: false,
                             height: height,
                             tableBodyHeight: tableBodyHeight
@@ -1514,6 +1556,11 @@ module.exports = {
                             editor = extensions.editor.index;
                         }
                         layer.on("click", function (e) {
+                            _self.resetAllVectorLayerStyles();
+                            try {
+                                e.target.setStyle(SELECTED_STYLE);
+                            } catch (e) {
+                            }
                             let layerIsEditable = false;
                             let metaDataKeys = meta.getMetaDataKeys();
                             if (metaDataKeys[layerKey] && `meta` in metaDataKeys[layerKey]) {
@@ -1559,7 +1606,11 @@ module.exports = {
                 } else {
                     // If there is no handler for specific layer, then display attributes only
                     layer.on("click", function (e) {
-
+                        _self.resetAllVectorLayerStyles();
+                        try {
+                            e.target.setStyle(SELECTED_STYLE);
+                        } catch (e) {
+                        }
                         // Cross Multi select disabled
                         if (!window.vidiConfig.crossMultiSelect) {
                             _self.displayAttributesPopup([{
@@ -1605,26 +1656,20 @@ module.exports = {
                                 }, 200)
                             }, null, [coord3857[0], coord3857[1]]);
                         }
-                        let clickBounds = L.latLngBounds(e.latlng, e.latlng);
-                        let distance = 10 * MAP_RESOLUTIONS[cloud.get().getZoom()];
+                        const distance = 10 * MAP_RESOLUTIONS[cloud.get().getZoom()];
+                        const clickFeature = turfBuffer(turfPoint([e.latlng.lng, e.latlng.lat]), distance, {units: 'meters'});
                         let mapObj = cloud.get().map;
                         for (let l in mapObj._layers) {
                             let overlay = mapObj._layers[l];
                             if (overlay._layers) {
                                 for (let f in overlay._layers) {
                                     let featureForChecking = overlay._layers[f];
-                                    let bounds;
-                                    if (featureForChecking.getBounds) {
-                                        bounds = featureForChecking.getBounds();
-                                    } else if (featureForChecking._latlng) {
-                                        let circle = new L.circle(featureForChecking._latlng, {radius: distance});
-                                        // DIRTY HACK
-                                        circle.addTo(mapObj);
-                                        bounds = circle.getBounds();
-                                        circle.removeFrom(mapObj);
+                                    if (!featureForChecking?.feature?.geometry) {
+                                        continue;
                                     }
+                                    let feature = turfFeature(featureForChecking.feature.geometry);
                                     try {
-                                        if (bounds && clickBounds.intersects(bounds) && overlay.id) {
+                                        if (turfIntersects(clickFeature, feature) && overlay.id) {
                                             intersectingFeatures.push({
                                                 "feature": featureForChecking.feature,
                                                 "layer": overlay,
@@ -1635,11 +1680,11 @@ module.exports = {
                                         console.log(e);
                                     }
                                 }
-                                // No active raster tile layers - open the pop-up
-                                if (activeTilelayers.length === 0) {
-                                    _self.displayAttributesPopup(intersectingFeatures, e);
-                                }
                             }
+                        }
+                        // No active raster tile layers - open the pop-up
+                        if (activeTilelayers.length === 0) {
+                            _self.displayAttributesPopup(intersectingFeatures, e);
                         }
                     });
                 }
@@ -1753,6 +1798,7 @@ module.exports = {
             showToggle: true,
             showExport: false,
             showColumns: true,
+            showSearch: false,
             cardView: false,
             height: 250,
             tableBodyHeight: null
@@ -1766,12 +1812,10 @@ module.exports = {
         if (layerWithData.length === 1) {
             let tableContainerId = element ? element : `#table_view-${layerKey.replace(".", "_")}`;
             if ($(tableContainerId + ` table`).length > 0) $(tableContainerId).empty();
-            $(tableContainerId).append(`<table class="table" data-show-toggle="${defaults.showToggle}" data-show-export="${defaults.showExport}" data-show-columns="${defaults.showColumns}" data-card-view="${defaults.cardView}"></table>`);
+            $(tableContainerId).append(`<table class="table" data-show-toggle="${defaults.showToggle}" data-search-highlight="true"  data-search="${defaults.showSearch}" data-show-export="${defaults.showExport}" data-show-columns="${defaults.showColumns}" data-card-view="${defaults.cardView}"></table>`);
 
             let metaDataKeys = meta.getMetaDataKeys();
-            let template = (typeof metaDataKeys[layerKey].infowindow !== "undefined"
-                && metaDataKeys[layerKey].infowindow.template !== "")
-                ? metaDataKeys[layerKey].infowindow.template : sqlQuery.getVectorTemplate(layerKey);
+            let template = sqlQuery.getVectorTemplate(layerKey);
             let tableHeaders = sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + layerKey,
                 JSON.parse(JSON.stringify(layerWithData[0].toGeoJSON(GEOJSON_PRECISION).features)));
 
@@ -1834,7 +1878,7 @@ module.exports = {
             for (var key in properties) {
                 if (properties.hasOwnProperty(key)) {
                     if (key.indexOf(SYSTEM_FIELD_PREFIX) === 0) {
-                        delete properties[key];
+                        // delete properties[key];
                     }
                 }
             }
@@ -1842,7 +1886,7 @@ module.exports = {
             let i = properties._vidi_content.fields.length;
             while (i--) {
                 if (properties._vidi_content.fields[i].title.indexOf(SYSTEM_FIELD_PREFIX) === 0 || properties._vidi_content.fields[i].title === `_id`) {
-                    properties._vidi_content.fields.splice(i, 1);
+                    // properties._vidi_content.fields.splice(i, 1);
                 }
             }
 
@@ -1949,8 +1993,10 @@ module.exports = {
                             $('.feature-info-accordion-body').collapse("hide")
                         });
                     });
+
                     vectorPopUp = L.popup({
                         autoPan: window.vidiConfig.autoPanPopup,
+                        autoPanPaddingTopLeft: L.point(multi ? 20 : 0, multi ? 300 : 0),
                         minWidth: 300,
                         className: `js-vector-layer-popup custom-popup`
                     }).setLatLng(event.latlng).setContent(`<div>
@@ -1959,6 +2005,9 @@ module.exports = {
                                                             </div>`).openOn(cloud.get().map)
                         .on('remove', () => {
                             sqlQuery.resetAll();
+                            if (window.vidiConfig.crossMultiSelect) {
+                                _self.resetAllVectorLayerStyles();
+                            }
                         });
                 }
             }
@@ -2184,6 +2233,7 @@ module.exports = {
     createSimulatedLayerDescriptionForVirtualLayer: (item) => {
         let creationTime = parseInt(item.key.split(`.`)[1].replace(`query`, ``));
         let date = new Date(+creationTime);
+        // TODO this is a flaky way og getting the relation name
         let layerNamesFromSQL = item.store.sql.substring(item.store.sql.indexOf(`" FROM`) + 6, item.store.sql.indexOf(`WHERE`)).trim();
 
         // Find the corresponding layer
@@ -2208,7 +2258,7 @@ module.exports = {
      *
      * @returns {void}
      */
-    createGroupRecord: (groupName, order, forcedState, precheckedLayers) => {
+    createGroupRecord: (groupName, order, forcedState, precheckedLayers, filter) => {
         let isVirtualGroup = false;
         if (groupName === __(`Virtual layers`)) {
             if (moduleState.virtualLayers.length > 0) {
@@ -2218,7 +2268,7 @@ module.exports = {
             }
         }
 
-        let metaData = meta.getMetaData();
+        let metaData = meta.getMetaData(filter);
         let base64GroupName = Base64.encode(groupName).replace(/=/g, "");
 
         // Add group container
@@ -2966,31 +3016,21 @@ module.exports = {
 
                 let initialSliderValue = 1;
                 if (isRasterTileLayer || isVectorTileLayer) {
-                    // Opacity slider
-                    $(layerContainer).find('.js-layer-settings-opacity').append(`<div style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px; padding-top: 10px;">
-                        <div class="js-opacity-slider slider shor slider-material-orange"></div>
-                    </div>`);
-
                     if (layerKey in moduleState.opacitySettings && isNaN(moduleState.opacitySettings[layerKey]) === false) {
                         if (moduleState.opacitySettings[layerKey] >= 0 && moduleState.opacitySettings[layerKey] <= 1) {
                             initialSliderValue = moduleState.opacitySettings[layerKey];
                         }
                     }
+                    // Opacity slider
+                    $(layerContainer).find('.js-layer-settings-opacity').append(`<div class="range" style="padding: 10px;">
+                        <input type="range"  min="1" max="100" value="${initialSliderValue * 100}" class="js-opacity-slider form-range">
+                    </div>`);
 
-                    let slider = $(layerContainer).find('.js-layer-settings-opacity').find(`.js-opacity-slider`).get(0);
+
+                    let slider = $(layerContainer).find('.js-layer-settings-opacity').find(`.js-opacity-slider`);
                     if (slider) {
-                        noUiSlider.create(slider, {
-                            start: (initialSliderValue * 100),
-                            connect: `lower`,
-                            step: 10,
-                            range: {
-                                'min': 0,
-                                'max': 100
-                            }
-                        });
-
-                        slider.noUiSlider.on(`update`, (values, handle, unencoded, tap, positions) => {
-                            let sliderValue = (parseFloat(values[handle]) / 100);
+                        slider.on('input change', (e) => {
+                            let sliderValue = (parseFloat(e.target.value) / 100);
                             layerTreeUtils.applyOpacityToLayer(sliderValue, layerKey, cloud, backboneEvents);
                             moduleState.setLayerOpacityRequests.push({layerKey, opacity: sliderValue});
                         });
@@ -3572,5 +3612,19 @@ module.exports = {
             }, 200)
 
         });
+    },
+
+    resetAllVectorLayerStyles: () => {
+        $.each(moduleState.vectorStores, function (u, store) {
+            $.each(store.layer._layers, function (i, v) {
+                try {
+                    if (store.layer && store.layer.resetStyle) {
+                        store.layer.resetStyle(v);
+                    }
+                } catch (e) {
+                    console.log(e);
+                }
+            });
+        })
     }
 };

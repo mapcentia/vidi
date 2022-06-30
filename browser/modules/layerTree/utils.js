@@ -10,6 +10,7 @@ require('snackbarjs');
 
 import {MODULE_NAME, LAYER, SQL_QUERY_LIMIT} from './constants';
 import {GROUP_CHILD_TYPE_LAYER, GROUP_CHILD_TYPE_GROUP} from './LayerSorting';
+
 const base64url = require('base64url');
 
 /**
@@ -46,7 +47,11 @@ const applyOpacityToLayer = (opacity, layerKey, cloud, backboneEvents) => {
     for (let key in cloud.get().map._layers) {
         if (`id` in cloud.get().map._layers[key] && cloud.get().map._layers[key].id) {
             if (cloud.get().map._layers[key].id === layerKey) {
-                cloud.get().map._layers[key].setOpacity(opacity);
+                try {
+                    cloud.get().map._layers[key].setOpacity(opacity);
+                } catch (e) {
+                    console.error(e)
+                }
                 backboneEvents.get().trigger(`${MODULE_NAME}:opacityChange`);
             }
         }

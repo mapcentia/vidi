@@ -6,9 +6,11 @@
 
 'use strict';
 
-const layerTreeUtils = require('./layerTree/utils');
-import {LAYER, SYSTEM_FIELD_PREFIX, MAP_RESOLUTIONS} from './layerTree/constants';
+import mustache from "mustache";
+import {LAYER, MAP_RESOLUTIONS, SYSTEM_FIELD_PREFIX} from './layerTree/constants';
 import {GEOJSON_PRECISION} from './constants';
+
+const layerTreeUtils = require('./layerTree/utils');
 
 /**
  * @type {*|exports|module.exports}
@@ -46,10 +48,8 @@ let elementPrefix;
 let qStoreShadow;
 
 let defaultSelectedStyle = {
-    weight: 5,
     color: '#ff0000',
-    fillOpacity: 0.2,
-    opacity: 0.2
+
 };
 
 let backArrowIsAdded = false;
@@ -396,10 +396,9 @@ module.exports = {
                             caller: _self,
                             styleSelected: styleForSelectedFeatures,
                             setZoom: parsedMeta?.zoom_on_table_click ? parsedMeta.zoom_on_table_click : false,
-                            dashSelected: true
                         });
                         if (!parsedMeta.info_element_selector) {
-                            _table.object.on("openpopup" + "_" + _table.uid, function (e) {
+                            _table.object.on("openpopup" + "_" + _table.uid, function (e, layersClone) {
                                 let popup = e.getPopup();
                                 if (popup?._closeButton) {
                                     popup._closeButton.onclick = function () {
@@ -421,7 +420,9 @@ module.exports = {
                                 }, 100);
 
                                 $(".popup-edit-btn").unbind("click.popup-edit-btn").bind("click.popup-edit-btn", function () {
-                                    editor.edit(e, _key_, qstore);
+                                    // We reset the query layer and use a unaltered layer for editor
+                                    layerObj.reset();
+                                    editor.edit(layersClone, _key_, qstore);
                                     editingStarted = true;
                                 });
 
@@ -579,13 +580,13 @@ module.exports = {
                     ];
                 } else {
                     if (geoType !== "POLYGON" && geoType !== "MULTIPOLYGON" && (!advancedInfo.getSearchOn())) {
-                        sql = "SELECT * FROM (SELECT " + fieldStr + " FROM " + schemaQualifiedName + " WHERE " + filters + ") AS foo WHERE round(ST_Distance(ST_Transform(\"" + f_geometry_column + "\"," + proj + "), ST_GeomFromText('" + wkt + "'," + proj + "))) < " + distance;
+                        sql = "SELECT " + fieldStr + " FROM (SELECT * FROM " + schemaQualifiedName + " WHERE " + filters + ") AS foo WHERE round(ST_Distance(ST_Transform(\"" + f_geometry_column + "\"," + proj + "), ST_GeomFromText('" + wkt + "'," + proj + "))) < " + distance;
                         if (versioning) {
                             sql = sql + " AND gc2_version_end_date IS NULL ";
                         }
                         sql = sql + " ORDER BY round(ST_Distance(ST_Transform(\"" + f_geometry_column + "\"," + proj + "), ST_GeomFromText('" + wkt + "'," + proj + ")))";
                     } else {
-                        sql = "SELECT * FROM (SELECT " + fieldStr + " FROM " + schemaQualifiedName + " WHERE " + filters + ") AS foo WHERE ST_Intersects(ST_Transform(ST_geomfromtext('" + wkt + "'," + proj + ")," + srid + ")," + f_geometry_column + ")";
+                        sql = "SELECT " + fieldStr + " FROM (SELECT * FROM " + schemaQualifiedName + " WHERE " + filters + ") AS foo WHERE ST_Intersects(ST_Transform(ST_geomfromtext('" + wkt + "'," + proj + ")," + srid + ")," + f_geometry_column + ")";
                         if (versioning) {
                             sql = sql + " AND gc2_version_end_date IS NULL ";
                         }
@@ -664,11 +665,14 @@ module.exports = {
                     $.each(sortObject(fieldConf), (name, property) => {
                         if (property.value.querable) {
                             let value = feature.properties[property.key];
-                            if (property.value.link) {
+                            if (property.value.template && feature.properties[property.key] && feature.properties[property.key] !== '') {
+                                const fieldTmpl = property.value.template;
+                                value = mustache.render(fieldTmpl, feature.properties);
+                            } else if (property.value.link && feature.properties[property.key] && feature.properties[property.key] !== '') {
                                 value = "<a target='_blank' rel='noopener' href='" + (property.value.linkprefix ? property.value.linkprefix : "") + feature.properties[property.key] + (property.value.linksuffix ? property.value.linksuffix : "") + "'>Link</a>";
                             } else if (property.value.content && property.value.content === "image") {
                                 if (!feature.properties[property.key]) {
-                                    value = `<i class="fa fa-ban"></i>`;
+                                    value = null;
                                 } else {
                                     let layerKeyWithoutPrefix = layerKey.replace(LAYER.VECTOR + ':', '');
                                     if (metaDataKeys[layerKeyWithoutPrefix]["fields"][property.key].type.startsWith("json")) {
@@ -715,7 +719,7 @@ module.exports = {
                                 }
                             } else if (property.value.content && property.value.content === "video") {
                                 if (!feature.properties[property.key]) {
-                                    value = `<i class="fa fa-ban"></i>`;
+                                    value = null;
                                 } else {
                                     let subValue = feature.properties[property.key];
                                     value =
@@ -729,7 +733,7 @@ module.exports = {
                             fields.push({title: property.value.alias || property.key, value});
                             fieldLabel = (property.value.alias !== null && property.value.alias !== "") ? property.value.alias : property.key;
                             if (feature.properties[property.key] !== undefined) {
-                                out.push([property.key, property.value.sort_id, fieldLabel, property.value.link]);
+                                out.push([property.key, property.value.sort_id, fieldLabel, property.value.link, property.value.template, property.value.content]);
                             }
                         }
                     });
@@ -748,7 +752,9 @@ module.exports = {
                             header: property[2],
                             dataIndex: property[0],
                             sortable: true,
-                            link: property[3]
+                            link: property[3],
+                            template: property[4],
+                            content: property[5],
                         })
                     });
                     first = false;
@@ -804,8 +810,7 @@ module.exports = {
     getVectorTemplate: function (layerKey, multi = true) {
         let metaDataKeys = meta.getMetaDataKeys();
         let parsedMeta = layerTree.parseLayerMeta(metaDataKeys[layerKey]);
-        let template = metaDataKeys[layerKey]?.infowindow?.template || multi ? defaultTemplateForCrossMultiSelect : defaultTemplate;
-        template = (parsedMeta.info_template && parsedMeta.info_template !== "") ? parsedMeta.info_template : template;
+        template = (parsedMeta.info_template && parsedMeta.info_template !== "") ? parsedMeta.info_template : defaultTemplate;
         return template;
     },
 

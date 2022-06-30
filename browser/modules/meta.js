@@ -311,8 +311,18 @@ module.exports = {
      * Get a clone of the full meta data object
      * @returns {Object}
      */
-    getMetaData: function () {
-        return $.extend(true, {}, metaData);
+    getMetaData: function (filter = null) {
+        const clone = $.extend(true, {}, metaData)
+        if (filter) {
+            clone.data = clone.data.filter((e) => {
+                if (e.f_table_title && e.f_table_title !== "") {
+                    if (e.f_table_title.toLowerCase().includes(filter.toLowerCase())) return true;
+                } else {
+                    if (e.f_table_name.toLowerCase().includes(filter.toLowerCase())) return true;
+                }
+            })
+        }
+        return clone;
     },
 
     /**

@@ -460,18 +460,18 @@ Aktiver autocomplete på feltet i filtrering.
 Gør til link
 =================================================================
 
-Hvis feltet indholder en web-adresse gøres det til et aktivt link i pop-up'en. Hvis der anvendes en brugerdefineret pop-up, så anvend tre { } udenom feltnavnet, så HTML linket bliver fortolket (se :ref:`gc2mata_infopopup`)
+Hvis feltet indholder en web-adresse gøres det til et aktivt link i pop-up'en.
 
-.. code-block:: handlebars
-
-    {{{felt_med_link}}}
-
+.. note::
+    Hvis der anvendes en brugerdefineret pop-up template, har denne indstilling ingen effekt (se :ref:`gc2mata_infopopup`)
 
 Content
 =================================================================
 
 Hvis feltet indeholder et link til et billede eller mp4-video kan der her vælges typen. Ved brug af standard templaten bliver billedet eller videoen sat ind (se :ref:`gc2mata_infopopup`)
 
+.. note::
+    Hvis der anvendes en brugerdefineret pop-up template, har denne indstilling ingen effekt (se :ref:`gc2mata_infopopup`)
 
 .. _gc2structure_link_prefix:
 
@@ -480,12 +480,28 @@ Link prefix
 
 Hvis :ref:`gc2structure_link` er tjekket af, kan der sættes en tekst-streng foran linket. Fx hvis ``https://`` mangler i linket (fx ``minside.dk/mitdok.pdf``) således det blivet et gyldigt link.
 
+.. note::
+    Hvis der anvendes en brugerdefineret pop-up template, har denne indstilling ingen effekt (se :ref:`gc2mata_infopopup`)
 
 Link suffix
 =================================================================
 
 Som ved :ref:`gc2structure_link_prefix` men bare bagved. Fx hvis feltet kun indeholder en titel på et dokument: ``mitdok``, så kan ``https://minside.dk`` sættes som prefix og ``.pdf`` som suffix. og resultatet bliver ``https://minside.dk/mitdok.pdf``.
 
+.. note::
+    Hvis der anvendes en brugerdefineret pop-up template, har denne indstilling ingen effekt (se :ref:`gc2mata_infopopup`)
+
+Template
+=================================================================
+
+Hvis værdien af et felt skal udtrykkes i pop-up og tabel ved andet end selve den rå værdi kan der indsættes en template for feltet. En template har adgang til alle objektets attributter. Fx kan der defineres en template, som skaber et link med link-tekst og ``title`` og ``aria-label`` attributter fra et andet felt. Fx:
+
+.. code-block:: html
+
+   <a href="{{doklink}}" target="_blank" title="Link til lokalplan {{plannavn}} {{plannr}} som pdf" aria-label="Link til lokalplan {{plannavn}} {{plannr}} som pdf">{{plannr}} {{plannavn}}</a>
+
+.. note::
+    Hvis der anvendes en brugerdefineret pop-up template, har denne indstilling ingen effekt (se :ref:`gc2mata_infopopup`)
 
 Egenskaber
 =================================================================
@@ -501,7 +517,7 @@ Værdier kan komme fra en anden tabel i databasen. Dette angives ved tre paramet
 
 .. code-block:: json
 
-    {'_rel':'schema.tabel', '_value':'feltnavn', '_text':'feltnavn'}
+    {"_rel":"schema.tabel", "_value":"feltnavn", "_text":"feltnavn"}
 
 * ``_rel`` angiver reference-tabellen (eller view) som schema-kvalificeret (schema-navnet skal angives foran tabelnavnet).
 * ``_value`` angiver feltet, som indeholder værdierne.
@@ -513,7 +529,7 @@ Værdier kan angive som en liste af værdi-tekst par i et JSON objekt. Dvs. at d
 
 .. code-block:: json
 
-    {'tekst_1':'1','tekst_2':'2','tekst_3':'3'}
+    {"tekst_1":"1","tekst_2":"2","tekst_3":"3"}
 
 **Værdi liste**
 
@@ -529,7 +545,5 @@ Listen kan både bestå af tal og tekster.
 
 Der kan dannes en drop-down-liste af samtlige unikke værdier som allerede findes i feltet. Det gøres ved at indsætte ``*`` i feltet.
 
-.. note::
-   JSON strengene skal anvende single-qoutes ``'`` og ikke double-qoutes ``"``. Der erbejdes på at double også kan anvendes.
 
 

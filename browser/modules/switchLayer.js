@@ -221,10 +221,14 @@ module.exports = module.exports = {
                 // TODO check "mouseover" properties in fieldConf. No need to switch on if mouse over is not wanted
                 _self.enableUTFGrid(gc2Id);
                 _self.enableCheckBoxesOnChildren(gc2Id);
+                let opacity = layerTreeState?.opacitySettings?.[gc2Id];
+                if (opacity) {
+                    layerTreeUtils.applyOpacityToLayer(opacity, gc2Id, cloud, backboneEvents);
+                }
                 resolve();
             }).catch(err => {
                 if (err) {
-                    console.warn(`Unable to add layer ${gc2Id}, trying to get meta for it`);
+                    console.warn(`Unable to add layer ${gc2Id}, trying to get meta for it`, err);
                 }
 
                 _self.loadMissingMeta(gc2Id).then(() => {
@@ -468,7 +472,7 @@ module.exports = module.exports = {
         let gc2Id = layerTreeUtils.stripPrefix(name);
         let applicationWideControls = $(`*[data-gc2-id="${gc2Id}"]`);
         applicationWideControls.prop('checked', enable);
-        let result = new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             let vectorDataStores = layerTree.getStores();
 
             let vectorLayerId = LAYER.VECTOR + `:` + gc2Id;
@@ -539,8 +543,6 @@ module.exports = module.exports = {
                 resolve();
             }
         });
-
-        return result;
     },
 
     /**

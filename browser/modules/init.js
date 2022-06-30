@@ -449,12 +449,11 @@ module.exports = {
                     }
                 }, 1000);
             }).catch(error => {
-                console.error(`Unable to register the service worker, please load the application over HTTPS in order to use its full functionality`);
+                console.error(error);
             });
         } else {
             console.warn(`Service workers are not supported in this browser, some features may be unavailable`);
         }
-
         if (window.localforage) {
             localforage.getItem('appVersion').then(versionValue => {
                 localforage.getItem('appExtensionsBuild').then(extensionsBuildValue => {
@@ -464,7 +463,7 @@ module.exports = {
                                 console.log(`Versioning: setting new application version (${window.vidiConfig.appVersion}, ${window.vidiConfig.appExtensionsBuild})`);
                             });
                         }).catch(error => {
-                            throw new Error(`Unable to store current application version`);
+                            console.error(`Unable to store current application version`, error);
                         });
                     } else {
                         // If two versions are correctly detected
@@ -511,15 +510,17 @@ module.exports = {
                             }).catch(error => {
                                 localforage.setItem('appExtensionsBuild', '0').then(() => {
                                 }).catch(error => {
-                                    throw new Error(`Unable to store current application version`);
+                                    console.error(`Unable to store current application version`, error);
                                 });
                             });
                         }
                     }
                 });
+            }).catch(error =>{
+                console.error(`Can't get item from localforage`, error);
             });
         } else {
-            throw new Error(`localforage is not available`);
+            console.error(`localforage is not available`);
         }
     }
 };

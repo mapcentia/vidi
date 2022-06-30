@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2022 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -13,11 +13,9 @@ const proxifyRequest = (req, response) => {
     let requestURL = config.host + encodeURI(decodeURIComponent(req.url.substr(4)));
 
     // Rewrite URL in case of subUser
-    if (req.session.subUser) {
+    if (req.session.subUser && !req.url.includes('/mapcache/')) {
         requestURL = requestURL.replace(`/${req.session.parentDb}/`, `/${req.session.screenName}@${req.session.parentDb}/`);
     }
-
-    console.log(requestURL);
 
     let options = {
         method: 'GET',
@@ -29,7 +27,6 @@ const proxifyRequest = (req, response) => {
     }
 
     request(options).pipe(response);
-
 };
 
 router.all('/api/wms/:db/:schema', proxifyRequest);

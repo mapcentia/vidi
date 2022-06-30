@@ -38,6 +38,7 @@ let markers = [];
 let editor;
 
 let editedFeature = false;
+let isVectorLayer = false;
 
 let featureWasEdited = false;
 
@@ -128,7 +129,6 @@ module.exports = {
             existing: true
         }, function () {
             $(this).on("click", function (e) {
-                let isVectorLayer = false;
                 if ($(this).closest('.layer-item').find('.js-show-layer-control').data('gc2-layer-type') === LAYER.VECTOR) {
                     isVectorLayer = true;
                 }
@@ -141,7 +141,7 @@ module.exports = {
 
         // Listen to close of attr box
         $(".editor-attr-dialog__close-hide").on("click", function () {
-            _self.stopEdit(editedFeature);
+            _self.stopEdit();
             backboneEvents.get().trigger("sqlQuery:clear");
         });
 
@@ -364,8 +364,9 @@ module.exports = {
      * @param doNotRemoveEditor
      * @param isVectorLayer
      */
-    add: function (k, qstore, doNotRemoveEditor, isVectorLayer = false) {
-        _self.stopEdit(editedFeature);
+    add: function (k, qstore, doNotRemoveEditor, isVector = false) {
+        isVectorLayer = isVector;
+        _self.stopEdit();
         editedFeature = false;
 
         let me = this, React = require('react'), ReactDOM = require('react-dom'),
@@ -390,6 +391,7 @@ module.exports = {
 
             me.stopEdit();
 
+            backboneEvents.get().trigger('block:infoClick');
             // Create schema for attribute form
             let formBuildInformation = this.createFormObj(fields, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column, fieldconf);
             const schema = formBuildInformation.schema;
@@ -630,8 +632,9 @@ module.exports = {
      * @param qstore
      * @param isVectorLayer
      */
-    edit: function (e, k, qstore, isVectorLayer = false) {
-        _self.stopEdit(editedFeature);
+    edit: function (e, k, qstore, isVector = false) {
+        isVectorLayer = isVector;
+        _self.stopEdit();
         editedFeature = e;
         nonCommitedEditedFeature = {};
         const editFeature = () => {
@@ -709,6 +712,7 @@ module.exports = {
                     break;
 
                 default:
+                    cloud.get().map.addLayer(e);
                     let numberOfNodes = 0;
                     const coors = editedFeature.feature.geometry.coordinates;
                     const calculateCount = (arr) => {
@@ -910,7 +914,6 @@ module.exports = {
 
             _self.openAttributesDialog();
         };
-
         let confirmMessage = __(`Application is offline, tiles will not be updated. Proceed?`);
         if (isVectorLayer) {
             editFeature();
@@ -964,8 +967,9 @@ module.exports = {
      * @param qstore
      * @param isVectorLayer
      */
-    delete: function (e, k, qstore, isVectorLayer = false) {
-        _self.stopEdit(editedFeature);
+    delete: function (e, k, qstore, isVector = false) {
+        isVectorLayer = isVector;
+        _self.stopEdit();
         editedFeature = false;
 
         let schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
@@ -1025,11 +1029,15 @@ module.exports = {
      * Stop editing and clean up
      * @param editedFeature
      */
-    stopEdit: function (editedFeature) {
+    stopEdit: function () {
+        backboneEvents.get().trigger('unblock:infoClick');
         cloud.get().map.editTools.stopDrawing();
 
         if (editor) {
             cloud.get().map.removeLayer(editor);
+        }
+        if (editedFeature && !isVectorLayer) {
+            cloud.get().map.removeLayer(editedFeature);
         }
 
         // If feature was edited, then reload the layer
