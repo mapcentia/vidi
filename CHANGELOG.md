@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [UNRELEASED]
+###
+
 ## [2022.6.1] - 2022-28-6
 ### Added
 - In pop-ups and vector tables values are now replaced with rendered mustache template if provided through GC2.
