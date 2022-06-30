@@ -625,5 +625,28 @@ module.exports = {
                 $('#full-screen-btn i').html('fullscreen')
             }
         });
+
+        let orginallayers = {};
+        const map = cloud.get().map;
+        map.on('zoomend', () => {
+            const layers = map._layers;
+            for (let key in layers) {
+                if (layers.hasOwnProperty(key)) {
+                    if (layers[key]?.id?.startsWith("v:")) {
+                        console.log(layers[key]);
+                        orginallayers[layers[key].id] = jQuery.extend(true, {}, layers[key]._layers)
+                        if (map.getZoom() < 10) {
+                            $.each(layers[key]._layers, function (i, v) {
+                                map.removeLayer(v);
+                            });
+                        } else {
+                            $.each(orginallayers[layers[key].id], function (i, v) {
+                                map.addLayer(v);
+                            });
+                        }
+                    }
+                }
+            }
+        })
     }
 };

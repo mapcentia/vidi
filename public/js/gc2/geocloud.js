@@ -146,7 +146,8 @@ geocloud = (function () {
         key: null,
         base64: true,
         custom_data: null,
-        clustering: false
+        clustering: false,
+        minZoom: null,
     };
 
     // Base class for stores
@@ -189,6 +190,7 @@ geocloud = (function () {
             }
 
             this.layer.id = this.defaults.name;
+            this.layer.minZoom = this.defaults.minZoom;
             this.key = this.defaults.key;
         };
         this.geoJSON = null;
@@ -256,6 +258,8 @@ geocloud = (function () {
         this.buffered_bbox = false;
         this.currentGeoJsonHash = null;
         this.dataHasChanged = false;
+
+        this.minZoom = this.defaults.minZoom;
 
         this.load = function (doNotShowAlertOnError) {
             try {
@@ -511,7 +515,7 @@ geocloud = (function () {
 
                             me.layer = layer.glLayer;
                             me.layer.id = me.defaults.name;
-
+                            me.layer.minZoom = me.defaults.minZoom;
                             if (me.onLoad) me.onLoad();
                         } else {
                             me.geoJSON = null;

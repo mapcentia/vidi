@@ -1456,6 +1456,7 @@ module.exports = {
 
         moduleState.vectorStores[trackingLayerKey] = new geocloud.sqlStore({
             map: cloud.get().map,
+            minZoom: 11,
             parentFiltersHash,
             jsonp: false,
             method: "POST",
