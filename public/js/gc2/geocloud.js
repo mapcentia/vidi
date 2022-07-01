@@ -149,6 +149,7 @@ geocloud = (function () {
         clustering: false,
         minZoom: null,
         maxZoom: null,
+        pane: 'overlayPane'
     };
 
     // Base class for stores
@@ -173,7 +174,8 @@ geocloud = (function () {
                 pointToLayer: this.defaults.pointToLayer,
                 onEachFeature: this.defaults.onEachFeature,
                 interactive: this.defaults.clickable,
-                bubblingMouseEvents: false
+                bubblingMouseEvents: false,
+                pane: this.defaults.pane
             });
             this.onLoad = this.defaults.onLoad;
             this.loading = this.defaults.loading;
@@ -261,7 +263,6 @@ geocloud = (function () {
         this.currentGeoJsonHash = null;
         this.dataHasChanged = false;
 
-        this.minZoom = this.defaults.minZoom;
 
         this.load = function (doNotShowAlertOnError) {
             try {
@@ -517,7 +518,6 @@ geocloud = (function () {
 
                             me.layer = layer.glLayer;
                             me.layer.id = me.defaults.name;
-                            me.layer.minZoom = me.defaults.minZoom;
                             if (me.onLoad) me.onLoad();
                         } else {
                             me.geoJSON = null;
@@ -811,18 +811,20 @@ geocloud = (function () {
                 l.id = layer;
                 break;
             case "leaflet":
+                console.log("TEST")
                 var options = {
                     layers: layer,
                     format: 'image/png',
                     transparent: true,
                     minZoom: defaults.minZoom,
                     maxZoom: defaults.maxZoom,
-                    tileSize: defaults.tileSize
+                    tileSize: defaults.tileSize,
+                    pane: defaults.pane
                 };
 
                 if (defaults.singleTile) {
                     // Insert in tile pane, so non-tiled and tiled layers can be sorted
-                    options.pane = "tilePane";
+                    // options.pane = ;
                     l = new L.nonTiledLayer.wms(url, options);
                 } else {
                     l = new L.TileLayer.WMS(url, options);
@@ -1434,7 +1436,8 @@ geocloud = (function () {
                     this.osm = new L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
                         attribution: "&copy; <a target='_blank' rel='noopener' href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors",
                         maxZoom: 21,
-                        maxNativeZoom: 18
+                        maxNativeZoom: 18,
+                        pane: "base"
                     });
                     lControl.addBaseLayer(this.osm, "OSM");
                     break;
@@ -2255,7 +2258,8 @@ geocloud = (function () {
                 maxZoom: 28,
                 maxNativeZoom: 28,
                 tileSize: MAPLIB === "ol2" ? OpenLayers.Size(256, 256) : 256,
-                uri: null
+                uri: null,
+                pane: "tilePane"
             };
             if (config) {
                 for (prop in config) {
