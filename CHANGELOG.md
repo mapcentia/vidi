@@ -5,7 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
 ## [UNRELEASED]
-###
+### CHANGED
+- New GC2 meta settings for controlling zoom level visibility for vector layers: `vector_min_zoom` and `vector_max_zoom`.
 
 ## [2022.6.1] - 2022-28-6
 ### Added
