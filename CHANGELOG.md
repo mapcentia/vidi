@@ -5,7 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
 ## [UNRELEASED]
-###
+### Changed
+- For each activated layer there is now created a map pane named `[schema]-[layer]` and the layer is added to this. The sort layer function will work on the panes instead on layers. This way both tile and vector layers can be sorted between each other.
 
 ## [2022.6.1] - 2022-28-6
 ### Added

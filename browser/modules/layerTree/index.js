@@ -1453,12 +1453,12 @@ module.exports = {
         } catch (e) {
             fieldConf = {};
         }
-
+        const pane = layer.f_table_schema + '-' + layer.f_table_name;
         moduleState.vectorStores[trackingLayerKey] = new geocloud.sqlStore({
             map: cloud.get().map,
             minZoom: parseInt(meta.parseLayerMeta(layerKey)?.vector_min_zoom),
             maxZoom: parseInt(meta.parseLayerMeta(layerKey)?.vector_max_zoom),
-            pane: meta.parseLayerMeta(layerKey)?.vector_pane,
+            pane,
             parentFiltersHash,
             jsonp: false,
             method: "POST",
@@ -1693,7 +1693,7 @@ module.exports = {
                 }
             },
             pointToLayer: (pointToLayer.hasOwnProperty(LAYER.VECTOR + ':' + layerKey) ? pointToLayer[LAYER.VECTOR + ':' + layerKey] : (feature, latlng) => {
-                return L.circleMarker(latlng, {pane: meta.parseLayerMeta(layerKey)?.vector_pane});
+                return L.circleMarker(latlng, {pane});
             }),
             error: layerTreeUtils.storeErrorHandler
         });

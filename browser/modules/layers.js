@@ -190,7 +190,7 @@ module.exports = {
 
                             if (layer.id && (layerTreeUtils.stripPrefix(layer.id) === layerTreeUtils.stripPrefix(itemId))) {
                                 let zIndex = (10000 - indexCounter);
-                                layer.setZIndex(zIndex);
+                                cloud.get().map.getPane(layerTreeUtils.stripPrefix(layer.id).replace('.', '-')).style.zIndex = zIndex;
                                 indexCounter++;
                             }
                         });
@@ -213,7 +213,7 @@ module.exports = {
      * @returns {boolean}
      */
     addUTFGridLayer: function (layerKey) {
-        let metaData = meta.getMetaDataKeys(), fieldConf,  result = false;
+        let metaData = meta.getMetaDataKeys(), fieldConf, result = false;
         let parsedMeta = layerTree.parseLayerMeta(metaData[layerKey]), template;
         try {
             fieldConf = JSON.parse(metaData[layerKey].fieldconf);
@@ -294,14 +294,14 @@ module.exports = {
                             additionalURLParameters.push(`qgs=${qgs}`);
                         }
                     }
-                    var isBaseLayer = !!layerDescription.baselayer;
+                    const isBaseLayer = !!layerDescription.baselayer;
                     layers[[layer]] = cloud.get().addTileLayers({
                         additionalURLParameters,
-                        host: host,
+                        host,
                         layers: [layer],
-                        db: db,
+                        db,
                         isBaseLayer,
-                        mapRequestProxy: mapRequestProxy,
+                        mapRequestProxy,
                         tileCached: useCache,
                         singleTile: !tiled,
                         wrapDateLine: false,
@@ -309,7 +309,8 @@ module.exports = {
                         name: layerDescription.f_table_name,
                         type: "wms", // Always use WMS protocol
                         format: "image/png",
-                        uri: uri,
+                        uri,
+                        pane: layerDescription.f_table_schema + "-" + layerDescription.f_table_name,
                         loadEvent: function (e) {
                             let canvasHasData = false;
                             if (!tiled) {
@@ -362,7 +363,6 @@ module.exports = {
                         subdomains: window.gc2Options.subDomainsForTiles
                     });
 
-                    layers[[layer]][0].setZIndex(layerDescription.sort_id + 10000);
                     me.reorderLayers();
 
                     layerWasAdded = true;
@@ -429,7 +429,6 @@ module.exports = {
                         subdomains: window.gc2Options.subDomainsForTiles
                     });
 
-                    layers[[layer]][0].setZIndex(layerDescription.sort_id + 10000);
                     me.reorderLayers();
 
                     layerWasAdded = true;

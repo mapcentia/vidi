@@ -622,7 +622,6 @@ module.exports = module.exports = {
                         host: bl.host,
                         type: "mvt",
                         isBaseLayer: true,
-                        pane: 'base'
                     }, bl.config));
 
                     result = addedLayers[0];
@@ -637,7 +636,6 @@ module.exports = module.exports = {
                         maxZoom: typeof bl.maxZoom !== "undefined" ? bl.maxZoom : 20,
                         maxNativeZoom: typeof bl.maxNativeZoom !== "undefined" ? bl.maxNativeZoom : 18,
                         baseLayer: true,
-                        pane: 'base'
                     });
                 } else if (typeof bl.type !== "undefined" && bl.type === "wms") {
                     result = cloud.get().addWmsBaseLayer(bl.url, {
@@ -649,7 +647,6 @@ module.exports = module.exports = {
                         minZoom: typeof bl.minZoom !== "undefined" ? bl.minZoom : 0,
                         maxZoom: typeof bl.maxZoom !== "undefined" ? bl.maxZoom : 20,
                         maxNativeZoom: typeof bl.maxNativeZoom !== "undefined" ? bl.maxNativeZoom : 18,
-                        pane: 'base'
                     });
                 } else {
                     result = cloud.get().addBaseLayer(bl.id, bl.db, bl.config, bl.host || null);

@@ -1436,8 +1436,7 @@ geocloud = (function () {
                     this.osm = new L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
                         attribution: "&copy; <a target='_blank' rel='noopener' href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors",
                         maxZoom: 21,
-                        maxNativeZoom: 18,
-                        pane: "base"
+                        maxNativeZoom: 18
                     });
                     lControl.addBaseLayer(this.osm, "OSM");
                     break;

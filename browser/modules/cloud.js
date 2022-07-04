@@ -52,11 +52,12 @@ module.exports = {
         map.createPane('base');
         map.getPane('base').style.zIndex = 1;
 
-        map.createPane('custom100');
-        map.getPane('custom100').style.zIndex = 100;
+        map.getPane('overlayPane').style.zIndex = 1000000;
+        map.getPane('shadowPane').style.zIndex = 1001000;
+        map.getPane('markerPane').style.zIndex = 1002000;
+        map.getPane('tooltipPane').style.zIndex = 1003000;
+        map.getPane('popupPane').style.zIndex = 1003000;
 
-        map.createPane('custom300');
-        map.getPane('custom300').style.zIndex = 300;
 
         let zoomControl = L.control.zoom({
             position: 'topright'
