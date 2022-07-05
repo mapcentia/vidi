@@ -7,6 +7,10 @@ and this project adheres to [CalVer](https://calver.org/).
 ## [UNRELEASED]
 ### Added
 - New GC2 meta settings for controlling zoom level visibility for vector layers: `vector_min_zoom` and `vector_max_zoom`.
+- New GC2 meta setting for bind a tooltip to vector layers: `tooltip_template`. This is a mustace/handlebars template where feature properties can be uses:
+```handlebars
+This is a label for feature {{gid}}
+```
 
 ### Changed
 - For each activated layer there is now created a map pane named `[schema]-[layer]` and the layer is added to this. The sort layer function will work on the panes instead on layers. This way both tile and vector layers can be sorted between each other.

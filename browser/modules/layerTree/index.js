@@ -1435,7 +1435,7 @@ module.exports = {
             Setting up mouse over
          */
         let metaData = meta.getMetaDataKeys();
-        let parsedMeta = _self.parseLayerMeta(metaData[layerKey]), template;
+        let parsedMeta = _self.parseLayerMeta(metaData[layerKey]), template, tooltipTemplate;
         const defaultTemplate =
             `<div>
                         {{#each data}}
@@ -1446,6 +1446,9 @@ module.exports = {
             template = parsedMeta.info_template_hover;
         } else {
             template = defaultTemplate;
+        }
+        if (parsedMeta?.tooltip_template && parsedMeta.tooltip_template !== "") {
+            tooltipTemplate = parsedMeta.tooltip_template;
         }
         let fieldConf;
         try {
@@ -1542,6 +1545,9 @@ module.exports = {
             onEachFeature: (feature, layer) => {
                 if (parsedMeta?.hover_active) {
                     _self.mouseOver(layer, fieldConf, template);
+                }
+                if (tooltipTemplate) {
+                    _self.toolTip(layer, feature, tooltipTemplate);
                 }
                 if ((LAYER.VECTOR + ':' + layerKey) in onEachFeature) {
                     /*
@@ -3576,6 +3582,10 @@ module.exports = {
 
     setChildLayersThatShouldBeEnabled: function (arr) {
         childLayersThatShouldBeEnabled = arr;
+    },
+    toolTip: function (layer, feature, template) {
+        const tooltipHtml = Handlebars.compile(template)(feature.properties);
+        layer.bindTooltip(tooltipHtml, {permanent: true}).openTooltip();
     },
     mouseOver: function (layer, fieldConf, template) {
         let flag = false, tooltipHtml, tail = $("#tail");
