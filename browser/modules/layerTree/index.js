@@ -1547,7 +1547,7 @@ module.exports = {
                     _self.mouseOver(layer, fieldConf, template);
                 }
                 if (tooltipTemplate) {
-                    _self.toolTip(layer, feature, tooltipTemplate);
+                    _self.toolTip(layer, feature, tooltipTemplate, pane);
                 }
                 if ((LAYER.VECTOR + ':' + layerKey) in onEachFeature) {
                     /*
@@ -3583,9 +3583,9 @@ module.exports = {
     setChildLayersThatShouldBeEnabled: function (arr) {
         childLayersThatShouldBeEnabled = arr;
     },
-    toolTip: function (layer, feature, template) {
+    toolTip: function (layer, feature, template, pane) {
         const tooltipHtml = Handlebars.compile(template)(feature.properties);
-        layer.bindTooltip(tooltipHtml, {permanent: true}).openTooltip();
+        layer.bindTooltip(tooltipHtml, {permanent: true, pane}).openTooltip();
     },
     mouseOver: function (layer, fieldConf, template) {
         let flag = false, tooltipHtml, tail = $("#tail");
