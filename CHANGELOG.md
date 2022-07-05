@@ -9,7 +9,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - New GC2 meta settings for controlling zoom level visibility for vector layers: `vector_min_zoom` and `vector_max_zoom`.
 - New GC2 meta setting for bind a tooltip to vector layers: `tooltip_template`. This is a mustace/handlebars template where feature properties can be uses:
 ```handlebars
-This is a label for feature {{gid}}
+This is a label for feature <b>{{gid}}</b>
 ```
 
 ### Changed
