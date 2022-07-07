@@ -1,4 +1,10 @@
-var React = require('react');
+/*
+ * @author     Alexander Shumilov
+ * @copyright  2013-2022 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
+ */
+
+const React = require('react');
 
 /**
  * Loading overlay
@@ -11,10 +17,10 @@ class LoadingOverlay extends React.Component {
     /**
      * Renders the component
      * 
-     * @returns {XML}
+     * @returns {JSX.Element}
      */
     render() {
-        return (<div style={{
+        return (<div className="loading-overlay" style={{
             position: 'absolute',
             width: '100%',
             height: '100%',

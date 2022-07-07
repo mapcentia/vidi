@@ -1435,7 +1435,7 @@ module.exports = {
             Setting up mouse over
          */
         let metaData = meta.getMetaDataKeys();
-        let parsedMeta = _self.parseLayerMeta(metaData[layerKey]), template;
+        let parsedMeta = _self.parseLayerMeta(metaData[layerKey]), template, tooltipTemplate;
         const defaultTemplate =
             `<div>
                         {{#each data}}
@@ -1447,15 +1447,21 @@ module.exports = {
         } else {
             template = defaultTemplate;
         }
+        if (parsedMeta?.tooltip_template && parsedMeta.tooltip_template !== "") {
+            tooltipTemplate = parsedMeta.tooltip_template;
+        }
         let fieldConf;
         try {
             fieldConf = JSON.parse(metaData[layerKey].fieldconf);
         } catch (e) {
             fieldConf = {};
         }
-
+        const pane = layer.f_table_schema + '-' + layer.f_table_name;
         moduleState.vectorStores[trackingLayerKey] = new geocloud.sqlStore({
             map: cloud.get().map,
+            minZoom: parseInt(meta.parseLayerMeta(layerKey)?.vector_min_zoom),
+            maxZoom: parseInt(meta.parseLayerMeta(layerKey)?.vector_max_zoom),
+            pane,
             parentFiltersHash,
             jsonp: false,
             method: "POST",
@@ -1504,6 +1510,7 @@ module.exports = {
                             showToggle: false,
                             showExport: false,
                             showColumns: false,
+                            showSearch: false,
                             cardView: false,
                             height: height,
                             tableBodyHeight: tableBodyHeight
@@ -1538,6 +1545,9 @@ module.exports = {
             onEachFeature: (feature, layer) => {
                 if (parsedMeta?.hover_active) {
                     _self.mouseOver(layer, fieldConf, template);
+                }
+                if (tooltipTemplate) {
+                    _self.toolTip(layer, feature, tooltipTemplate, pane);
                 }
                 if ((LAYER.VECTOR + ':' + layerKey) in onEachFeature) {
                     /*
@@ -1663,6 +1673,9 @@ module.exports = {
                             if (overlay._layers) {
                                 for (let f in overlay._layers) {
                                     let featureForChecking = overlay._layers[f];
+                                    if (!featureForChecking?.feature?.geometry) {
+                                        continue;
+                                    }
                                     let feature = turfFeature(featureForChecking.feature.geometry);
                                     try {
                                         if (turfIntersects(clickFeature, feature) && overlay.id) {
@@ -1686,7 +1699,7 @@ module.exports = {
                 }
             },
             pointToLayer: (pointToLayer.hasOwnProperty(LAYER.VECTOR + ':' + layerKey) ? pointToLayer[LAYER.VECTOR + ':' + layerKey] : (feature, latlng) => {
-                return L.circleMarker(latlng);
+                return L.circleMarker(latlng, {pane});
             }),
             error: layerTreeUtils.storeErrorHandler
         });
@@ -1794,6 +1807,7 @@ module.exports = {
             showToggle: true,
             showExport: false,
             showColumns: true,
+            showSearch: false,
             cardView: false,
             height: 250,
             tableBodyHeight: null
@@ -1807,7 +1821,7 @@ module.exports = {
         if (layerWithData.length === 1) {
             let tableContainerId = element ? element : `#table_view-${layerKey.replace(".", "_")}`;
             if ($(tableContainerId + ` table`).length > 0) $(tableContainerId).empty();
-            $(tableContainerId).append(`<table class="table" data-show-toggle="${defaults.showToggle}" data-show-export="${defaults.showExport}" data-show-columns="${defaults.showColumns}" data-card-view="${defaults.cardView}"></table>`);
+            $(tableContainerId).append(`<table class="table" data-show-toggle="${defaults.showToggle}" data-search-highlight="true"  data-search="${defaults.showSearch}" data-show-export="${defaults.showExport}" data-show-columns="${defaults.showColumns}" data-card-view="${defaults.cardView}"></table>`);
 
             let metaDataKeys = meta.getMetaDataKeys();
             let template = sqlQuery.getVectorTemplate(layerKey);
@@ -1831,7 +1845,7 @@ module.exports = {
                 cm: tableHeaders,
                 autoUpdate: false,
                 autoPan: window.vidiConfig.autoPanPopup,
-                openPopUp: !window.vidiConfig.crossMultiSelect,
+                openPopUp: false,
                 setViewOnSelect: true,
                 responsive: false,
                 callCustomOnload: true,
@@ -1989,22 +2003,21 @@ module.exports = {
                         });
                     });
 
-                    // Open pop-up if table is NOT enabled - gc2table with control pop-up if enabled
-                    if ($(`#table_view-${layerKey.replace('.', '_')}`).children('.bootstrap-table').length === 0 || multi) {
-                        vectorPopUp = L.popup({
-                            autoPan: window.vidiConfig.autoPanPopup,
-                            autoPanPaddingTopLeft: L.point(multi ? 20 : 0, multi ? 300 : 0),
-                            minWidth: 300,
-                            className: `js-vector-layer-popup custom-popup`
-                        }).setLatLng(event.latlng).setContent(`<div>
+                    vectorPopUp = L.popup({
+                        autoPan: window.vidiConfig.autoPanPopup,
+                        autoPanPaddingTopLeft: L.point(multi ? 20 : 0, multi ? 300 : 0),
+                        minWidth: 300,
+                        className: `js-vector-layer-popup custom-popup`
+                    }).setLatLng(event.latlng).setContent(`<div>
                                                                 ${additionalControls}
                                                                 <div style="margin-right: 5px; margin-left: 2px">${accordion}</div>
                                                             </div>`).openOn(cloud.get().map)
-                            .on('remove', () => {
-                                sqlQuery.resetAll();
+                        .on('remove', () => {
+                            sqlQuery.resetAll();
+                            if (window.vidiConfig.crossMultiSelect) {
                                 _self.resetAllVectorLayerStyles();
-                            });
-                    }
+                            }
+                        });
                 }
             }
         })
@@ -3569,6 +3582,10 @@ module.exports = {
 
     setChildLayersThatShouldBeEnabled: function (arr) {
         childLayersThatShouldBeEnabled = arr;
+    },
+    toolTip: function (layer, feature, template, pane) {
+        const tooltipHtml = Handlebars.compile(template)(feature.properties);
+        layer.bindTooltip(tooltipHtml, {permanent: true, pane}).openTooltip();
     },
     mouseOver: function (layer, fieldConf, template) {
         let flag = false, tooltipHtml, tail = $("#tail");

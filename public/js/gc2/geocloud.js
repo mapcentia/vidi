@@ -146,7 +146,10 @@ geocloud = (function () {
         key: null,
         base64: true,
         custom_data: null,
-        clustering: false
+        clustering: false,
+        minZoom: null,
+        maxZoom: null,
+        pane: 'overlayPane'
     };
 
     // Base class for stores
@@ -171,7 +174,8 @@ geocloud = (function () {
                 pointToLayer: this.defaults.pointToLayer,
                 onEachFeature: this.defaults.onEachFeature,
                 interactive: this.defaults.clickable,
-                bubblingMouseEvents: false
+                bubblingMouseEvents: false,
+                pane: this.defaults.pane
             });
             this.onLoad = this.defaults.onLoad;
             this.loading = this.defaults.loading;
@@ -189,6 +193,8 @@ geocloud = (function () {
             }
 
             this.layer.id = this.defaults.name;
+            this.layer.minZoom = this.defaults.minZoom;
+            this.layer.maxZoom = this.defaults.maxZoom;
             this.key = this.defaults.key;
         };
         this.geoJSON = null;
@@ -256,6 +262,7 @@ geocloud = (function () {
         this.buffered_bbox = false;
         this.currentGeoJsonHash = null;
         this.dataHasChanged = false;
+
 
         this.load = function (doNotShowAlertOnError) {
             try {
@@ -511,7 +518,6 @@ geocloud = (function () {
 
                             me.layer = layer.glLayer;
                             me.layer.id = me.defaults.name;
-
                             if (me.onLoad) me.onLoad();
                         } else {
                             me.geoJSON = null;
@@ -805,18 +811,20 @@ geocloud = (function () {
                 l.id = layer;
                 break;
             case "leaflet":
+                console.log("TEST")
                 var options = {
                     layers: layer,
                     format: 'image/png',
                     transparent: true,
                     minZoom: defaults.minZoom,
                     maxZoom: defaults.maxZoom,
-                    tileSize: defaults.tileSize
+                    tileSize: defaults.tileSize,
+                    pane: defaults.pane
                 };
 
                 if (defaults.singleTile) {
                     // Insert in tile pane, so non-tiled and tiled layers can be sorted
-                    options.pane = "tilePane";
+                    // options.pane = ;
                     l = new L.nonTiledLayer.wms(url, options);
                 } else {
                     l = new L.TileLayer.WMS(url, options);
@@ -843,12 +851,15 @@ geocloud = (function () {
      */
     createUTFGridLayer = function (layer, defaults) {
         var uri;
-        if (defaults.cache) {
-            uri = "/api/mapcache/" + defaults.db + "/gmaps/" + layer + ".json@g20/{z}/{x}/{y}.json";
-        } else {
-            uri = "/api/wms/" + defaults.db + "/" + layer.split(".")[0] + "?mode=tile&tilemode=gmap&tile={x}+{y}+{z}&layers=" + layer + "&format=json&map.imagetype=application/json&";
-        }
-        var utfGrid = new L.utfGrid(uri, {
+        // if (defaults.cache) {
+        //     uri = "/api/mapcache/" + defaults.db + "/gmaps/" + layer + ".json@g20/{z}/{x}/{y}.json";
+        // } else {
+        uri = "/api/wms/" + defaults.db + "/" + layer.split(".")[0] + "";
+        // }
+        var utfGrid = new L.NonTiledUTFGrid.WMS(uri, {
+            layers: layer,
+            format: 'json',
+            transparent: true,
             resolution: 4,
             pointerCursor: true,
             mouseInterval: 66,  // Delay for mousemove events,
@@ -2246,7 +2257,8 @@ geocloud = (function () {
                 maxZoom: 28,
                 maxNativeZoom: 28,
                 tileSize: MAPLIB === "ol2" ? OpenLayers.Size(256, 256) : 256,
-                uri: null
+                uri: null,
+                pane: "tilePane"
             };
             if (config) {
                 for (prop in config) {

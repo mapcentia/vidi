@@ -13,6 +13,10 @@
 import {
     SELECTED_STYLE
 } from './../../../browser/modules/layerTree/constants';
+
+var debounce = require('lodash/debounce');
+const marked = require('marked');
+const mustache = require('mustache');
 var gc2table = (function () {
     "use strict";
     var isLoaded, object, init;
@@ -206,6 +210,33 @@ var gc2table = (function () {
         $.each(cm, function (i, v) {
             $(el + ' thead tr').append("<th data-filter-control=" + (v.filterControl || "false") + " data-field='" + v.dataIndex + "' data-sortable='" + (v.sortable || "false") + "' data-editable='false' data-formatter='" + (v.formatter || "") + "'>" + v.header + "</th>");
         });
+        var filterMap =
+            debounce(function () {
+                let visibleRows = [];
+                $.each(store.layer._layers, function (i, v) {
+                    m.map.removeLayer(v);
+                });
+                $.each(originalLayers, function (i, v) {
+                    m.map.addLayer(v);
+                });
+                filters = {};
+                filterControls = {};
+                $.each(cm, function (i, v) {
+                    if (v.filterControl) {
+                        filters[v.dataIndex] = $(".bootstrap-table-filter-control-" + v.dataIndex).val();
+                        filterControls[v.dataIndex] = v.filterControl;
+                    }
+                });
+                $.each($(el + " tbody").children(), function (x, y) {
+                    visibleRows.push($(y).attr("data-uniqueid"));
+                });
+                $.each(store.layer._layers, function (i, v) {
+                    if (visibleRows.indexOf(v._leaflet_id + "") === -1) {
+                        m.map.removeLayer(v);
+                    }
+                });
+                bindEvent();
+            }, 500);
 
         var getDatabaseIdForLayerId = function (layerId) {
             if (!store.geoJSON) return false;
@@ -228,6 +259,7 @@ var gc2table = (function () {
         var bindEvent = function (e) {
             setTimeout(function () {
                 $(el + ' > tbody > tr').on("click", function (e) {
+                    m.map.closePopup();
                     var id = $(this).data('uniqueid');
                     var databaseIdentifier = getDatabaseIdForLayerId(id);
                     if (uncheckedIds.indexOf(databaseIdentifier) === -1 || checkBox === false) {
@@ -299,7 +331,8 @@ var gc2table = (function () {
             locale: locale,
             onToggle: bindEvent,
             onSort: bindEvent,
-            onColumnSwitch: bindEvent
+            onColumnSwitch: bindEvent,
+            onSearch: filterMap
         });
 
         $(el).on('check-all.bs.table', function (e, m) {
@@ -393,14 +426,25 @@ var gc2table = (function () {
             data = [];
             $.each(store.layer._layers, function (i, v) {
                 v.feature.properties._id = i;
-                $.each(v.feature.properties, function (n, m) {
+                // Clone
+                let layerClone = jQuery.extend(true, {}, v.feature.properties);
+                $.each(layerClone, function (n, m) {
                     $.each(cm, function (j, k) {
-                        if (k.dataIndex === n && ((typeof k.link === "boolean" && k.link === true) || (typeof k.link === "string"))) {
-                            v.feature.properties[n] = "<a style='text-decoration: underline' target='_blank' rel='noopener' href='" + v.feature.properties[n] + "'>" + (typeof k.link === "string" ? k.link : "Link") + "</a>";
+                        if (k.dataIndex === n && (k?.template && k?.template !== '') && (layerClone[n] && layerClone[n] !== '')) {
+                            const fieldTmpl = k.template;
+                            const fieldHtml = mustache.render(fieldTmpl, layerClone);
+                            layerClone[n] = fieldHtml;
+                        } else if (k.dataIndex === n && (k?.link === true || typeof k?.link === "string") && (layerClone[n] && layerClone[n] !== '')) {
+                            layerClone[n] = "<a style='text-decoration: underline' target='_blank' rel='noopener' href='" + layerClone[n] + "'>" + (typeof k.link === "string" ? k.link : "Link") + "</a>";
+                        } else if (k.dataIndex === n && (k?.content === 'image' && (layerClone[n] && layerClone[n] !== ''))) {
+                            layerClone[n] = `<div style="cursor: pointer" onclick="window.open().document.body.innerHTML = '<img src=\\'${layerClone[n]}\\' />';">
+                                        <img style='width:25px' src='${layerClone[n]}'/>
+                                     </div>`
                         }
                     });
                 });
-                data.push(JSON.parse(JSON.stringify(v.feature.properties)));
+                data.push(JSON.parse(JSON.stringify(layerClone)));
+                layerClone = null;
 
                 if (assignFeatureEventListenersOnDataLoad) {
                     assignEventListeners();
