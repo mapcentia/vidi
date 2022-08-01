@@ -90,6 +90,7 @@ module.exports = module.exports = {
                                     db: v.overlays[u].db,
                                     host: v.overlays[u].host || "",
                                     type: "tms",
+                                    pane: "base",
                                     loadEvent: function () {
                                         layers.decrementCountLoading(layerName);
                                         backboneEvents.get().trigger("doneLoading:layers", layerName);

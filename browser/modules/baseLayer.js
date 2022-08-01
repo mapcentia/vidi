@@ -635,7 +635,7 @@ module.exports = module.exports = {
                         minZoom: typeof bl.minZoom !== "undefined" ? bl.minZoom : 0,
                         maxZoom: typeof bl.maxZoom !== "undefined" ? bl.maxZoom : 20,
                         maxNativeZoom: typeof bl.maxNativeZoom !== "undefined" ? bl.maxNativeZoom : 18,
-                        baseLayer: true
+                        baseLayer: true,
                     });
                 } else if (typeof bl.type !== "undefined" && bl.type === "wms") {
                     result = cloud.get().addWmsBaseLayer(bl.url, {

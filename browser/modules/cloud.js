@@ -49,6 +49,16 @@ module.exports = {
 
         let map = cloud.map;
 
+        map.createPane('base');
+        map.getPane('base').style.zIndex = 1;
+
+        map.getPane('overlayPane').style.zIndex = 1000000;
+        map.getPane('shadowPane').style.zIndex = 1001000;
+        map.getPane('markerPane').style.zIndex = 1002000;
+        map.getPane('tooltipPane').style.zIndex = 1003000;
+        map.getPane('popupPane').style.zIndex = 1003000;
+
+
         let zoomControl = L.control.zoom({
             position: 'topright'
         });

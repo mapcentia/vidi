@@ -147,7 +147,10 @@ geocloud = (function () {
         key: null,
         base64: true,
         custom_data: null,
-        clustering: false
+        clustering: false,
+        minZoom: null,
+        maxZoom: null,
+        pane: 'overlayPane'
     };
 
     // Base class for stores
@@ -172,7 +175,8 @@ geocloud = (function () {
                 pointToLayer: this.defaults.pointToLayer,
                 onEachFeature: this.defaults.onEachFeature,
                 interactive: this.defaults.clickable,
-                bubblingMouseEvents: false
+                bubblingMouseEvents: false,
+                pane: this.defaults.pane
             });
             this.onLoad = this.defaults.onLoad;
             this.loading = this.defaults.loading;
@@ -190,6 +194,8 @@ geocloud = (function () {
             }
 
             this.layer.id = this.defaults.name;
+            this.layer.minZoom = this.defaults.minZoom;
+            this.layer.maxZoom = this.defaults.maxZoom;
             this.key = this.defaults.key;
         };
         this.geoJSON = null;
@@ -257,6 +263,7 @@ geocloud = (function () {
         this.buffered_bbox = false;
         this.currentGeoJsonHash = null;
         this.dataHasChanged = false;
+
 
         this.load = function (doNotShowAlertOnError) {
             try {
@@ -574,14 +581,13 @@ geocloud = (function () {
                                             throw new Error('Layer features type (' + this.defaults.type + ') is not supported by WebGL');
                                         }
 
-                                        me.layer = layer.glLayer;
-                                        me.layer.id = me.defaults.name;
-
-                                        if (me.onLoad) me.onLoad();
-                                    } else {
-                                        me.geoJSON = null;
-                                    }
-                                }
+                            me.layer = layer.glLayer;
+                            me.layer.id = me.defaults.name;
+                            if (me.onLoad) me.onLoad();
+                        } else {
+                            me.geoJSON = null;
+                        }
+                    }
 
                                 if (onLoadCallback) onLoadCallback();
                             },
@@ -877,12 +883,13 @@ geocloud = (function () {
                     transparent: true,
                     minZoom: defaults.minZoom,
                     maxZoom: defaults.maxZoom,
-                    tileSize: defaults.tileSize
+                    tileSize: defaults.tileSize,
+                    pane: defaults.pane
                 };
 
                 if (defaults.singleTile) {
                     // Insert in tile pane, so non-tiled and tiled layers can be sorted
-                    options.pane = "tilePane";
+                    // options.pane = ;
                     l = new L.nonTiledLayer.wms(url, options);
                 } else {
                     l = new L.TileLayer.WMS(url, options);
@@ -2315,7 +2322,8 @@ geocloud = (function () {
                 maxZoom: 28,
                 maxNativeZoom: 28,
                 tileSize: MAPLIB === "ol2" ? OpenLayers.Size(256, 256) : 256,
-                uri: null
+                uri: null,
+                pane: "tilePane"
             };
             if (config) {
                 for (prop in config) {

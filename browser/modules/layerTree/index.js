@@ -1435,7 +1435,7 @@ module.exports = {
             Setting up mouse over
          */
         let metaData = meta.getMetaDataKeys();
-        let parsedMeta = _self.parseLayerMeta(metaData[layerKey]), template;
+        let parsedMeta = _self.parseLayerMeta(metaData[layerKey]), template, tooltipTemplate;
         const defaultTemplate =
             `<div>
                         {{#each data}}
@@ -1447,15 +1447,21 @@ module.exports = {
         } else {
             template = defaultTemplate;
         }
+        if (parsedMeta?.tooltip_template && parsedMeta.tooltip_template !== "") {
+            tooltipTemplate = parsedMeta.tooltip_template;
+        }
         let fieldConf;
         try {
             fieldConf = JSON.parse(metaData[layerKey].fieldconf);
         } catch (e) {
             fieldConf = {};
         }
-
+        const pane = layer.f_table_schema + '-' + layer.f_table_name;
         moduleState.vectorStores[trackingLayerKey] = new geocloud.sqlStore({
             map: cloud.get().map,
+            minZoom: parseInt(meta.parseLayerMeta(layerKey)?.vector_min_zoom),
+            maxZoom: parseInt(meta.parseLayerMeta(layerKey)?.vector_max_zoom),
+            pane,
             parentFiltersHash,
             jsonp: false,
             method: "POST",
@@ -1539,6 +1545,9 @@ module.exports = {
             onEachFeature: (feature, layer) => {
                 if (parsedMeta?.hover_active) {
                     _self.mouseOver(layer, fieldConf, template);
+                }
+                if (tooltipTemplate) {
+                    _self.toolTip(layer, feature, tooltipTemplate, pane);
                 }
                 if ((LAYER.VECTOR + ':' + layerKey) in onEachFeature) {
                     /*
@@ -1690,7 +1699,7 @@ module.exports = {
                 }
             },
             pointToLayer: (pointToLayer.hasOwnProperty(LAYER.VECTOR + ':' + layerKey) ? pointToLayer[LAYER.VECTOR + ':' + layerKey] : (feature, latlng) => {
-                return L.circleMarker(latlng);
+                return L.circleMarker(latlng, {pane});
             }),
             error: layerTreeUtils.storeErrorHandler
         });
@@ -3573,6 +3582,10 @@ module.exports = {
 
     setChildLayersThatShouldBeEnabled: function (arr) {
         childLayersThatShouldBeEnabled = arr;
+    },
+    toolTip: function (layer, feature, template, pane) {
+        const tooltipHtml = Handlebars.compile(template)(feature.properties);
+        layer.bindTooltip(tooltipHtml, {permanent: true, pane}).openTooltip();
     },
     mouseOver: function (layer, fieldConf, template) {
         let flag = false, tooltipHtml, tail = $("#tail");

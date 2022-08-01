@@ -446,12 +446,14 @@ module.exports = module.exports = {
         };
 
         let metaData = meta.getMetaData();
+        let sortId;
         for (let j = 0; j < metaData.data.length; j++) {
             let layerKey = (metaData.data[j].f_table_schema + '.' + metaData.data[j].f_table_name);
             if (layerKey === layerTreeUtils.stripPrefix(name)) {
                 let layer = metaData.data[j];
                 let {isVectorLayer, isRasterTileLayer, isVectorTileLayer} = layerTreeUtils.getPossibleLayerTypes(layer);
                 let defaultLayerType = layerTreeUtils.getDefaultLayerType(layer);
+                sortId =  metaData.data[j].sort_id;
 
                 if (LOG) console.log(`switchLayer: ${name}, according to meta, is vector (${isVectorLayer}), raster tile (${isRasterTileLayer}), vector tile (${isVectorTileLayer})`);
                 if (!isVectorLayer && name.startsWith(LAYER.VECTOR + `:`)
@@ -501,6 +503,11 @@ module.exports = module.exports = {
             });
 
             if (enable) {
+
+                const pane = layerTreeUtils.stripPrefix(name).replace('.', '-');
+                if (!cloud.get().map.getPane(pane)) {
+                    cloud.get().map.createPane(pane);
+                }
                 if (LOG) console.log(`switchLayer: enabling ${name}`);
                 if (name.startsWith(LAYER.VECTOR + ':')) {
                     _self.enableVector(gc2Id, doNotLegend, setupControls, failedBefore).then(resolve);
@@ -511,7 +518,7 @@ module.exports = module.exports = {
                 } else {
                     _self.enableRasterTile(gc2Id, forceReload, doNotLegend, setupControls).then(resolve);
                 }
-
+                cloud.get().map.getPane(pane).style.zIndex = sortId + 10000;
                 layers.reorderLayers();
             } else {
                 if (name.startsWith(LAYER.VECTOR + ':')) {

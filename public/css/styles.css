@@ -1681,3 +1681,6 @@ iframe.leaflet-utfgrid-layer {
 .leaflet-container {
   font-size: 12px !important;
 }
+.leaflet-tooltip {
+  z-index: 1000;
+}
