@@ -133,7 +133,6 @@
 <!-- Build -->
 <!-- build:js /js/build/all.min.js -->
 <script src="/js/lib/leaflet/leaflet-src.js"></script>
-<script src="/js/lib/leaflet-glify/glify-browser.js"></script>
 <script src="/js/bundle.js"></script>
 <!-- /build -->
 <!-- Async load Javascript -->
