@@ -259,7 +259,6 @@ var gc2table = (function () {
         var bindEvent = function (e) {
             setTimeout(function () {
                 $(el + ' > tbody > tr').on("click", function (e) {
-                    m.map.closePopup();
                     var id = $(this).data('uniqueid');
                     var databaseIdentifier = getDatabaseIdForLayerId(id);
                     if (uncheckedIds.indexOf(databaseIdentifier) === -1 || checkBox === false) {
