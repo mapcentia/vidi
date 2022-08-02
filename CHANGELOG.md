@@ -4,16 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [UNRELEASED]
+## [2022.8.0] - 2022-2-8
 ### Added
-- New GC2 meta settings for controlling zoom level visibility for vector layers: `vector_min_zoom` and `vector_max_zoom`.
-- New GC2 meta setting for bind a tooltip to vector layers: `tooltip_template`. This is a mustace/handlebars template where feature properties can be uses:
+- New GC2 meta settings for controlling zoom level visibility for vector layers: `vector_min_zoom` and `vector_max_zoom`. The values must be tile set zoom levels.
+- New GC2 meta setting for bind a tooltip to vector layers: `tooltip_template`. This is a mustache/handlebars template where feature properties can be uses:
 ```handlebars
 This is a label for feature <b>{{gid}}</b>
 ```
 
 ### Changed
 - For each activated layer there is now created a map pane named `[schema]-[layer]` and the layer is added to this. The sort layer function will work on the panes instead on layers. This way both tile and vector layers can be sorted between each other.
+
+### Fixed
+- Issue regarding side-by-side base layers: https://github.com/digidem/leaflet-side-by-side/issues/43
+- Issue regarding `featureInfoTableOnMap` and pop-up error when single feature is selected.
 
 ## [2022.6.1] - 2022-28-6
 ### Added
