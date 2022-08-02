@@ -454,7 +454,7 @@ Viser en tjekboks i hver lag-gruppe og under-gruppe, som tænder/slukker alle la
 activeLayers
 *****************************************************************
 
-Liste over lag, som skal tændes fra starten. Lag angives schema qualified og med evt. type præfiks (:v, :mvt, :w). De angivne lag behøver ikke at være includeret i :ref:`schemata<configjs_schemata>`. Hvis Vidi startes med et projekt link, vil denne konfiguration blive ignoreret.
+Liste over lag, som skal tændes fra starten. Lag angives schema qualified og med evt. type præfiks (v:, mvt:, w:). De angivne lag behøver ikke at være includeret i :ref:`schemata<configjs_schemata>`. Hvis Vidi startes med et projekt link, vil denne konfiguration blive ignoreret.
 
 .. code-block:: json
 
@@ -502,6 +502,18 @@ vil kun ``width`` have effekt og tabellen vil altid fylde højden ud. Hvis posit
         "width": "30%",
         "height": "250px"
     }
+
+.. _configjs_initFunction:
+
+initFunction
+*****************************************************************
+
+Her kan angives en JavaScript funktion, som bliver kørt når Vidi er klar. Funktionen skal skrives som en linje tekst startende med `function()` og den efterfølgende blok er den, som bliver eksekveret:
+
+.. code-block:: json
+
+    "initFunction": "function(){alert('Hello world')}"
+
 
 .. rubric:: Fodnoter
 

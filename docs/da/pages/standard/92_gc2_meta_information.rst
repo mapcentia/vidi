@@ -240,6 +240,22 @@ Hvis ovenfor er sat, vil denne funktion blive kørt ved hvert refresh.
 
 Deaktiverer feature-info på vektor-laget.
 
+**Max zoom**
+
+Højeste zoom-level hvor laget skal være synligt. Værdien skal være en tile-set zoom level (0-20). Virker for både vektor og marker lag.
+
+**Min zoom**
+
+Laveste zoom-level hvor laget skal være synligt. Værdien skal være en tile-set zoom level (0-20). Virker for både vektor og marker lag.
+
+**Tooltip template**
+
+Hvis der angives en tooltip template får hver vektorfeature et tooltip/label med værdien. Templaten har adgang til alle attributter for feature:
+
+.. code-block:: html
+
+   <i>{{plannavn}} {{plannr}}</i>
+
 .. _gc2mata_filters:
 
 Filters
