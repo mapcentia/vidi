@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [UNRELEASED]
+### Changed
+- The snapshot list fetch now only include meta data - not the snapshot data it self. When activating a snapshot the data is fetched. This way a long snapshot list will not hog the system down.  
+
 ## [2022.8.0] - 2022-2-8
 ### Added
 - New GC2 meta settings for controlling zoom level visibility for vector layers: `vector_min_zoom` and `vector_max_zoom`. The values must be tile set zoom levels.
