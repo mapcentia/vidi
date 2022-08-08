@@ -1824,14 +1824,19 @@ module.exports = {
     // ===================================================
 
     "df": {
-        "username": "XMERXHKAVN",
-        "password": "Geop1234!"
+        "datafordeler": {
+            "username": "XMERXHKAVN",
+            "password": "Geop1234!",
+        },
+        "dataforsyningen": {
+            "token": "4aacd5977eb46ca012c260ecb608c65c"
+        }
     },
     "baseLayers": [
 
         {
             "type": "wms",
-            "url": "https://api.dataforsyningen.dk/forvaltning2?token=4aacd5977eb46ca012c260ecb608c65c",
+            "url": "/api/dataforsyningen/forvaltning2",
             "layers": [
                 "Basis_kort",
                 "Stednavne_basiskort",
@@ -1843,13 +1848,13 @@ module.exports = {
             "description": "Forvaltningskort fra Dataforsyningen",
             "attribution": "&copy; Styrelsen for Dataforsyning og Effektivisering, GeoDanmark og Danske kommuner.",
             "abstract": "<p>Forvaltningskort.</p><p>&copy; Styrelsen for Dataforsyning og Effektivisering, GeoDanmark og Danske kommuner.</p><p>Forvaltningskortet viser følgende temaer:<br><ul><li>Basis_kort</li><li>Stednavne_basiskort</li><li>Vejnavne_basiskort</li><li>Husnummer</li></ul></p><br>",
-            "minZoom": 4,
+            "minZoom": 7,
             "maxZoom": 22,
             "maxNativeZoom": 20
         },
         {
             "type": "wms",
-            "url": "/api/df/Matrikel/MatrikelGaeldendeOgForeloebigWMS/1.0.0/WMS",
+            "url": "/api/datafordeler/Matrikel/MatrikelGaeldendeOgForeloebigWMS/1.0.0/WMS",
             "layers": [
                 "Centroide_Gaeldende",
                 "OptagetVej_Gaeldende",
@@ -1878,7 +1883,22 @@ module.exports = {
         },
         {
             "type": "wms",
-            "url": "/api/df/GeoDanmarkOrto/orto_foraar/1.0.0/WMS",
+            "url": "/api/dataforsyningen/orto_foraar_temp",
+            "layers": [
+                "quickorto",
+            ],
+            "id": "quickorto",
+            "name": "Forårsbilleder - Luftfoto (MIDLERTIDIG)",
+            "description": "SDFI Quick Orto. Ortofotos anvendes til ajourføring af de topografiske grunddata. Optagelsestidspunkt for ortofotos er om foråret før løvspring.",
+            "attribution": "&copy; SDFI",
+            "abstract": "<p>Quickorto: Umiddelbart efter ekstern blokvis levering af råbilleder producerer og udstiller SDFE quickorto i en kvalitet med ringere nøjagtighed end i den endelige version. Nøjagtigheden er 10 pixels RMSE. Desuden er kontrast- og farveforhold ikke justeret, og sømningen mellem billederne er ikke endelig. Data lægges blokvis i tjenesten i takt med produktionen. Typisk er en blok tilgængelig på tjenesten 5 kalenderdage efter den er leveret fra producenten (~ 20 dage efter den er fotograferet).</p><br>",
+            "minZoom": 7,
+            "maxZoom": 22,
+            "maxNativeZoom": 20
+        },
+        {
+            "type": "wms",
+            "url": "/api/datafordeler/GeoDanmarkOrto/orto_foraar/1.0.0/WMS",
             "layers": [
                 "orto_foraar"
             ],
@@ -2105,7 +2125,7 @@ module.exports = {
         },
         {
             "type": "wms",
-            "url": "/api/df/Dkskaermkort/topo_skaermkort/1.0.0/WMS",
+            "url": "/api/datafordeler/Dkskaermkort/topo_skaermkort/1.0.0/WMS",
             "layers": [
                 "dtk_skaermkort_daempet"
             ],
@@ -2149,7 +2169,7 @@ module.exports = {
         },
         {
             "type": "wms",
-            "url": "/api/df/DKtopokort/dtk_25/1.0.0/WMS",
+            "url": "/api/datafordeler/DKtopokort/dtk_25/1.0.0/WMS",
             "layers": [
                 "dtk25"
             ],
