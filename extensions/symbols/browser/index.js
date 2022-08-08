@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2021 MapCentia ApS
+ * @copyright  2013-2022 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -48,30 +48,46 @@ const createId = () => (+new Date * (Math.random() + 1)).toString(36).substr(2, 
  */
 const htmlFragments = {
     "outer": `
-        <div class="container tab-pane" role="tabpanel">
-            <div class="row row-cols-2">
+        <div class="tab-pane" role="tabpanel">
+            <div class="symbols-cover-text" style="position: absolute; top: 50%; left: 50px; display: none; opacity: 0; font-weight: 600; color: #333333">Zoom tættere på</div>
+            <div class="symbols-cover" style="position: relative;">
+                <div class="d-flex flex-wrap" style="display: flex; flex-wrap: wrap"></div>
             </div>
+            <div class="symbols-desc"></div>
         </div>
     `,
     "inner": `
-            <div class="col symbols-lib drag-marker" draggable="true"></div>
+            <div class="symbols-lib drag-marker" draggable="true"></div>
     `
 }
 
 /**
  *
  */
-const store = () => {
-    $.ajax({
-        url: '/api/symbols/' + db,
-        data: JSON.stringify(symbolState),
-        contentType: "application/json; charset=utf-8",
-        scriptCharset: "utf-8",
-        dataType: 'json',
-        type: "POST",
-        success: function (response) {
-        }
-    });
+const store = (tag) => {
+    return new Promise((resolve, reject) => {
+        fetch('/api/symbols/' + db, {
+            method: 'POST',
+            mode: 'cors',
+            cache: 'no-cache',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                userId: window.aauUserId,
+                userGr: window.aauUserGr,
+                tag,
+                symbolState
+            }),
+        }).then(res => {
+            if (!res.ok) {
+                reject(res);
+            }
+            res.json().then(json => {
+                resolve(json);
+            })
+        });
+    })
 }
 
 const setState = () => {
@@ -148,6 +164,13 @@ const scale = (e, img, id, classStr) => {
  * @param e
  */
 const handleDragEnd = (e) => {
+    const targetElements = document.elementsFromPoint(e.clientX, e.clientY);
+    // Don't do anything if symbols is dropped on container
+    for (let i = 0; i < targetElements.length; i++) {
+        if (targetElements[i].id === "symbols") {
+            return;
+        }
+    }
     e.preventDefault();
     if (locked) {
         alert(__("Locked"));
@@ -157,8 +180,36 @@ const handleDragEnd = (e) => {
     let innerHtml = $(e.target).clone().html();
     let id = createId();
     let coord = map.mouseEventToLatLng(e);
-    let file =  $(e.target).attr("data-file");
-    createSymbol(innerHtml, id, coord, 0, 1, map.getZoom(), file);
+    let file = $(e.target).attr("data-file");
+    let group = $(e.target).attr("data-group");
+
+    const validate = config?.extensionConfig?.symbols?.options?.validate;
+    if (validate) {
+        try {
+            let func = Function('"use strict";return (' + validate + ')')();
+            if (!func(file, group, symbolState)) {
+                return;
+            }
+        } catch (e) {
+            console.error("Error in validate function:", e.message)
+        }
+    }
+
+    let onlyOne = config?.extensionConfig?.symbols?.symbolOptions?.[file]?.onlyOne;
+    if (onlyOne === undefined) {
+        onlyOne = config?.extensionConfig?.symbols?.options?.onlyOne;
+    }
+    if (onlyOne === true) {
+        for (const id in symbolState) {
+            if (id && symbolState.hasOwnProperty(id)) {
+                if (symbolState[id].file === file) {
+                    alert("Symbolet kan kun indsættes en gang");
+                    return;
+                }
+            }
+        }
+    }
+    createSymbol(innerHtml, id, coord, 0, 1, map.getZoom(), file, group);
 }
 
 /**
@@ -171,8 +222,9 @@ const handleDragEnd = (e) => {
  * @param zoomLevel
  * @param file
  */
-const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file) => {
+const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file, group) => {
     let map = cloud.get().map;
+    let func = ()=>{};
     let classStr = "dm_" + id;
     let rotateHandleStr = "r_" + id;
     let deleteHandleStr = "d_" + id;
@@ -183,13 +235,38 @@ const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file) => 
     outerHtml.addClass("symbols-map");
     outerHtml.attr("draggable", "false")
     outerHtml.addClass(classStr);
-    outerHtml.append(`<div class="symbols-handles symbols-rotate ${rotateHandleStr}"></div>`);
-    outerHtml.append(`<div class="symbols-handles symbols-delete ${deleteHandleStr}" id="${id}"></div>`);
-    outerHtml.append(`<div class="symbols-handles symbols-scale ${scaleHandleStr}"></div>`);
+    let callback = config?.extensionConfig?.symbols?.symbolOptions?.[file]?.callback;
+    if (callback === undefined) {
+        callback = config?.extensionConfig?.symbols?.options?.callback || null;
+    }
+    if (callback) {
+        try {
+            func = Function('"use strict";return (' + callback + ')')();
+        } catch (e) {
+            console.error("Error in callback for " + file, e.message)
+        }
+    }
+
+    let doRotate = config?.extensionConfig?.symbols?.symbolOptions?.[file]?.rotate
+    let doScale = config?.extensionConfig?.symbols?.symbolOptions?.[file]?.scale
+    let doDelete = config?.extensionConfig?.symbols?.symbolOptions?.[file]?.delete
+    if (doRotate === undefined) {
+        doRotate = config?.extensionConfig?.symbols?.options?.rotate || true;
+    }
+    if (doScale === undefined) {
+        doScale = config?.extensionConfig?.symbols?.options?.scale || true;
+    }
+    if (doDelete === undefined) {
+        doDelete = config?.extensionConfig?.symbols?.options?.delete || true;
+    }
+
+    if (doRotate) outerHtml.append(`<div class="symbols-handles symbols-rotate ${rotateHandleStr}"></div>`);
+    if (doScale) outerHtml.append(`<div class="symbols-handles symbols-scale ${scaleHandleStr}"></div>`);
+    if (doDelete) outerHtml.append(`<div class="symbols-handles symbols-delete ${deleteHandleStr}" id="${id}"></div>`);
     let icon = L.divIcon({
         className: "drag-symbole",
-        iconSize: new L.Point(72, 72),
-        // iconAnchor: [26, 26],
+        // iconSize: new L.Point(72, 72),
+        iconAnchor: [26, 26],
         html: `${outerHtml[0].outerHTML}`
     });
     markers[id] = L.marker(coord, {icon: icon, draggable: true}).addTo(map);
@@ -198,8 +275,9 @@ const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file) => 
     symbolState[id].svg = innerHtml;
     symbolState[id].coord = markers[id].getLatLng();
     symbolState[id].file = file;
-    markers[id].on("moveend", () => {
-        symbolState[id].coord = markers[id].getLatLng();
+    symbolState[id].group = group;
+    markers[id].on("moveend", (e) => {
+        symbolState[id].coord = e.target.getLatLng();
         idBeingChanged = id;
     })
     symbolState[id].rotation = ro;
@@ -223,6 +301,11 @@ const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file) => 
         delete markers[e.target.id];
         delete symbolState[e.target.id];
         setState();
+        try {
+            func(file, symbolState, "delete");
+        } catch (e) {
+            console.error("Error in callback for " + file, e.message)
+        }
     });
     rotateHandle.on("touchstart mousedown", function (e) {
         e.preventDefault();
@@ -246,6 +329,15 @@ const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file) => 
             scale(e, img, id, classStr);
         });
     });
+
+    if (callback) {
+        try {
+            let func = Function('"use strict";return (' + callback + ')')();
+            func(file, symbolState, "create");
+        } catch (e) {
+            console.error("Error in callback for " + file, e.message)
+        }
+    }
 }
 
 
@@ -306,7 +398,7 @@ module.exports = {
 
         const gui = `
                     <div class="form-inline">
-                        <div class="form-group">
+                      <div class="form-group">
                             <div class="togglebutton">
                                 <label>
                                     <input id="vidi-symbols-lock" type="checkbox">${__("Lock")}
@@ -344,7 +436,9 @@ module.exports = {
         })
 
         let symbols = {};
+        let descs = {};
         let files = config.extensionConfig.symbols.files;
+        let symbolOptions = config?.extensionConfig?.symbols?.symbolOptions;
         let i = 0;
 
         backboneEvents.get().on(`on:${exId}`, () => {
@@ -352,33 +446,43 @@ module.exports = {
                 (function iter() {
                     $.getJSON("/api/symbols/" + files[i].file, (data) => {
                         symbols[files[i].title] = data;
+                        descs[files[i].title] = files[i]?.desc;
                         i++;
                         if (i === files.length) {
                             try {
                                 let inner = $(htmlFragments.inner);
-                                let tabs = $(`<ul class="nav nav-tabs"></ul>`);
+                                let tabs = $(`<ul class="nav nav-tabs mb-3"></ul>`);
                                 let tabPanes = $(`<div class="tab-content"></div>`);
                                 let first = true;
-
+                                let u = 0;
                                 for (const group in symbols) {
                                     let outer = $(htmlFragments.outer).clone();
+                                    if (descs[group]) $(outer.find('.symbols-desc')[0]).append(`${descs[group]}`);
                                     let id = createId();
                                     for (const id in symbols[group]) {
                                         if (id && symbols[group].hasOwnProperty(id)) {
+                                            const parser = new DOMParser();
+                                            const doc = parser.parseFromString(symbols[group][id].svg, "image/svg+xml");
+                                            let text = doc.getElementsByTagName("desc")?.[0]?.textContent
+                                            let desc = text || '';
                                             let svg = $(inner.clone()[0]).append(symbols[group][id].svg);
                                             svg.attr('data-file', id);
-                                            outer.find('.row')[0].append(svg[0]);
+                                            svg.attr('data-group', group);
+                                            let e = $('<div class="p-1 text-center symbol-text-wrapper">');
+                                            e.append(svg[0], `<div style="font-size: 8pt">${desc}</div>`)
+                                            outer.find('.d-flex').append(e);
                                         }
                                     }
-                                    let tab = $(`<li role="presentation"><a href="#${id}" role="tab" data-toggle="tab">${group}</a></li>`);
+                                    let tab = $(`<li class="nav-item" role="presentation"><a id="symbol-tab-${u}" data-mdb-toggle="pill" class="nav-link ` + (first ? ` active` : ``) + `" href="#_${id}" role="tab" data-toggle="tab">${group}</a></li>`);
                                     tabs.append(tab)
                                     tabPanes.append(outer);
-                                    outer.attr('id', id);
+                                    outer.attr('id', '_' + id);
                                     if (first) {
                                         outer.addClass('active');
                                         tab.addClass('active');
                                         first = false;
                                     }
+                                    u++;
                                 }
 
                                 let c = $(`#vidi_symbols`);
@@ -397,7 +501,11 @@ module.exports = {
             }
         });
 
-        $('#vidi-symbols-store').on('click', store);
+        $('#vidi-symbols-store').on('click', () => {
+            store().then((e) => {
+                console.log(e)
+            })
+        });
 
         $(document).on("touchend mouseup", function () {
             for (const id in symbolState) {
@@ -407,12 +515,14 @@ module.exports = {
             }
             map.dragging.enable();
             map.touchZoom.enable();
-            if (idBeingChanged) {
-                setState();
-            }
+            setTimeout(() => {
+                if (idBeingChanged) {
+                    setState();
+                    mouseDown = false;
+                    idBeingChanged = false;
+                }
+            }, 0);
             $(document).off("mousemove touchmove");
-            mouseDown = false;
-            idBeingChanged = false;
         });
 
         map.on("zoomend", () => {
@@ -445,7 +555,7 @@ module.exports = {
         for (const id in state) {
             if (id && state.hasOwnProperty(id)) {
                 const s = state[id];
-                createSymbol(s.svg, id, s.coord, s.rotation, s.scale, s.zoomLevel, s.file);
+                createSymbol(s.svg, id, s.coord, s.rotation, s.scale, s.zoomLevel, s.file, s.group);
             }
         }
         creatingFromState = false;
@@ -516,6 +626,7 @@ module.exports = {
      *
      */
     lock: () => {
+        locked = true;
         for (const id in symbolState) {
             markers[id].dragging.disable();
         }
@@ -526,9 +637,19 @@ module.exports = {
      *
      */
     unlock: () => {
+        locked = false;
         for (const id in symbolState) {
             markers[id].dragging.enable();
         }
         $(".symbols-handles").show()
+    },
+
+    createSymbol: (innerHtml, id, coord, ro, sc, zoom, file, group) => {
+        createSymbol(innerHtml, id, coord, 0, 1, zoom, file, group);
+    },
+
+    createId: () => {
+        return createId();
     }
+
 };
