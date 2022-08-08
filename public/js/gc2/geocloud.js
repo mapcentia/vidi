@@ -811,7 +811,7 @@ geocloud = (function () {
                 l.id = layer;
                 break;
             case "leaflet":
-                console.log("TEST")
+                // console.log("TEST")
                 var options = {
                     layers: layer,
                     format: 'image/png',
