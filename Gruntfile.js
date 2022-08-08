@@ -299,6 +299,7 @@ module.exports = function (grunt) {
                         'public/js/lib/bootstrap-material-design/dist/js/ripples.js',
                         'public/js/lib/bootstrap-material-design/dist/js/material.js',
                         'public/js/lib/bootstrap-colorpicker/js/bootstrap-colorpicker.js',
+
                         'node_modules/leaflet.glify/dist/glify-browser.js',
 
                         'node_modules/bootstrap-table/dist/bootstrap-table.js',

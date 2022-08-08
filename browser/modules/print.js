@@ -117,7 +117,7 @@ module.exports = {
             if (response.format === "pdf") {
                 $("#download-pdf, #open-pdf").attr("href", "/tmp/print/pdf/" + response.key + ".pdf");
                 pathstring = "/tmp/print/pdf/" + response.key + ".pdf"
-            } else if (response.format === "png"){
+            } else if (response.format === "png") {
                 $("#download-pdf, #open-pdf").attr("href", "/tmp/print/png/" + response.key + ".png");
                 pathstring = "/tmp/print/png/" + response.key + ".png"
             } else {
@@ -474,7 +474,7 @@ module.exports = {
 
         var layerQueryDraw = [], layerQueryResult = [], layerQueryBuffer = [], layerPrint = [], e, parr,
             configFile = null;
-
+        
         // We really want to print in 100. so thats OK!
         // TODO: check in config for applicable scales - RGB
         // if (scale && (isNaN(scale) || scale < 200)) {

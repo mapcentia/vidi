@@ -181,7 +181,7 @@ Aktiverer Leaflet Cluster Map på laget.
 
 Vektor-punkter punkter kan vises som enten circle markers eller grafiske markers. Førstnævnte kan sammenlignes med vektor-linjer og flader og vil anvende nedenfornævnte Style function.
 
-Men punkter kan også vises som grafisk markers. Vidi har indbygget Leaflet Plugin'en `Extra Markers <https://github.com/coryasilva/Leaflet.ExtraMarkers>`_ med `Font Awesome <https://fontawesome.com>`_ , som anvendes uden videre.
+Men punkter kan også vises som grafisk ikoner. Vidi har indbygget Leaflet Plugin'en `Extra Markers <https://github.com/coryasilva/Leaflet.ExtraMarkers>`_ med `Font Awesome <https://fontawesome.com>`_ , som anvendes uden videre:
 
 .. code-block:: javascript
 
@@ -197,9 +197,44 @@ Men punkter kan også vises som grafisk markers. Vidi har indbygget Leaflet Plug
         });
     }
 
+Her er et eksempel på hvordan et brugerdefineret SVG symbol kan anvendes:
+
+.. code-block:: javascript
+
+    function(feature, latlng) {
+        return L.marker(latlng, {
+            icon: L.icon({
+                iconUrl: "https://geofyn.github.io/mapcentia_vidi_symbols/flaticon/heart.svg",
+                iconSize: [25, 25],
+                iconAnchor: [12, 12],
+                tooltip:'virksomhed'
+            })
+        })
+    }
+
+Markers placeres som standard i "marker-pane", som ligger øverste i kortet. Dvs. at marker-lag ikke kan sorteres mellem andre lag ej heller andre marker-lag. For at kun sortere marker-lag som andre typer af lag, er det nødvendigt at angive i marker-definitionen, at de skal placeres i eget pane.
+
+Hvert lag har sit eget pane, som hedder "schemanavn-lagnavn". Dette kan angives i hhv. ``pane`` og ``shadowPane``. Sidstnævnte anvendes kun ved bruge af ExtraMarkers eller tilsvarende, som har en skygge:
+
+.. code-block:: javascript
+
+    function(feature, latlng) {
+        return L.marker(latlng, {
+            pane: "schemanavn-lagnavn",
+            shadowPane: "schemanavn-lagnavn",
+            icon: L.ExtraMarkers.icon({
+                icon: 'fa-home',
+                markerColor: 'blue',
+                shape: 'circle',
+                prefix: 'fa',
+                iconColor: '#fff'
+            })
+        });
+    }
+
 **Style function**
 
-Funktion til styling af vektor-lag. Funktionen modtager hver enkelt feature i laget og leverer en style tilbage. Man kan derved lave meget anvanceret tematiseringer./
+Funktion til styling af vektor-lag. Funktionen modtager hver enkelt feature i laget og leverer en style tilbage. Man kan derved lave meget anvanceret tematiseringer:
 
 .. code-block:: javascript
 
@@ -239,6 +274,22 @@ Hvis ovenfor er sat, vil denne funktion blive kørt ved hvert refresh.
 **Disable feature info**
 
 Deaktiverer feature-info på vektor-laget.
+
+**Max zoom**
+
+Højeste zoom-level hvor laget skal være synligt. Værdien skal være en tile-set zoom level (0-20). Virker for både vektor og marker lag.
+
+**Min zoom**
+
+Laveste zoom-level hvor laget skal være synligt. Værdien skal være en tile-set zoom level (0-20). Virker for både vektor og marker lag.
+
+**Tooltip template**
+
+Hvis der angives en tooltip template får hver vektorfeature et tooltip/label med værdien. Templaten har adgang til alle attributter for feature:
+
+.. code-block:: html
+
+   <i>{{plannavn}} {{plannr}}</i>
 
 .. _gc2mata_filters:
 
