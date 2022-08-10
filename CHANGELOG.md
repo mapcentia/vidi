@@ -4,9 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [UNRELEASED]
+## [2022.8.1] - 2022-10-8
 ### Changed
-- The snapshot list fetch now only include metadata - not the snapshot data itself. When activating a snapshot the data is fetched. This way a long snapshot list will not hog the system down.  
+- Lazy load of snapshot data. The loaded snapshot list now only includes metadata - not the snapshot data itself. When activating a snapshot the data is fetched. This way a long snapshot list will load faster and not fill the memory.
+- Added config options to the symbol module.
 
 ## [2022.8.0] - 2022-2-8
 ### Added

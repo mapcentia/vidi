@@ -1,5 +1,9 @@
 .. _non_standard_extensions:
 
+.. |gc2| raw:: html
+
+  <abbr title="MapCentia Geocloud2">GC2</abbr>
+
 #################################################################
 Ikke-standard extensions
 #################################################################
