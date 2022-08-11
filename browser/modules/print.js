@@ -474,7 +474,7 @@ module.exports = {
 
         var layerQueryDraw = [], layerQueryResult = [], layerQueryBuffer = [], layerPrint = [], e, parr,
             configFile = null;
-        
+
         // We really want to print in 100. so thats OK!
         // TODO: check in config for applicable scales - RGB
         // if (scale && (isNaN(scale) || scale < 200)) {

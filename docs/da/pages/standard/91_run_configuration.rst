@@ -96,6 +96,26 @@ Her følger hvordan de enkelte extensions kan opsættes (Pt. omfatter denne del 
         "embed": {
             "slideOutLayerTree": true,
             "expandFirstInLayerTree": true
+        },
+        "symbols": {
+            "files": [
+                {"file": "symbolset1.json", "title": "Symbolsæt 1"},
+                {"file": "symbolset2.json", "title": "Symbolsæt 2"}
+            ],
+            "options": {
+                "scale": true,
+                "rotate": true,
+                "delete": true,
+                "callback": "function(file, state, operation){alert('Et symbol placeret')}",
+                "validate": "function(file, group, state){return true}"
+            },
+            "symbolOptions": {
+                "symbol34.svg": {
+                    "onlyOne": true,
+                    "rotate": false,
+                    "callback": "function(file, state, operation){alert('Symbol 34 placeret')}"
+                }
+            }
         }
     }
 

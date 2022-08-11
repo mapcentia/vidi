@@ -32,7 +32,7 @@ Ud over standardværktøjerne, er der udviddet funktionalitet som du kan læse m
     :maxdepth: 1
     :glob:
 
-    pages/extension/*
+    pages/extensions/*
 
 
 .. Include generic links to repo
