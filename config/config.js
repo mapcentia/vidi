@@ -1857,7 +1857,6 @@ module.exports = {
             "description": "Forvaltningskort fra Dataforsyningen",
             "attribution": "&copy; Styrelsen for Dataforsyning og Effektivisering, GeoDanmark og Danske kommuner.",
             "abstract": "<p>Forvaltningskort.</p><p>&copy; Styrelsen for Dataforsyning og Effektivisering, GeoDanmark og Danske kommuner.</p><p>Forvaltningskortet viser følgende temaer:<br><ul><li>Basis_kort</li><li>Stednavne_basiskort</li><li>Vejnavne_basiskort</li><li>Husnummer</li></ul></p><br>",
-            "minZoom": 7,
             "maxZoom": 22,
             "maxNativeZoom": 20
         },
