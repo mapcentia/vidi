@@ -2030,3 +2030,9 @@ iframe.leaflet-utfgrid-layer {
 .leaflet-tooltip {
   z-index: 1000;
 }
+
+/* Bad fix for unselectable popups */
+/* Geopartner, RGB 08/2022 */
+.leaflet-popup-content {
+  pointer-events: all;
+}
