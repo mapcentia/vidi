@@ -134,7 +134,12 @@ module.exports = {
                 print.control(printC, scales, "_conflictPrint", "A4", "p", "inline");
 
                 if (reportType === "1") {
-                    print.print(endPrintEventName, conflictSearch.getResult()).then(res => {
+                    let results = conflictSearch.getResult();
+
+                    print.print(endPrintEventName, results).then(res => {
+
+                        console.log(res);
+
                         print.cleanUp(true);
                         $("#conflict-get-print-fieldset").prop("disabled", false);
                         $("#conflict-download-pdf, #conflict-open-pdf").prop("href", "/tmp/print/pdf/" + res.key + ".pdf");
@@ -167,8 +172,13 @@ module.exports = {
                         let hit = Object.keys(hits)[n]
                         clone.hits = {};
                         clone.layer = hit;
+                        clone.hits = []
                         clone.hits[hit] = positiveHits.hits[hit];
-                        print.print(endPrintEventName, clone).then(res => {
+                        
+                        console.log(clone, track);
+
+                        print.print(endPrintEventName, results).then(res => {
+                            console.log(res);
                             track.push(res.key);
                             count++;
                             $("#conflict-print-progress").html(`${count}/${numOfHits}`);
@@ -191,6 +201,10 @@ module.exports = {
                                             $("#snackbar-conflict-print").snackbar("hide");
                                         }, 200);
                                     },
+                                    error: (err) => {
+                                        console.error(err);
+                                        reject(err)
+                                    }
                                     //error: reject
                                 });
                             } else {
