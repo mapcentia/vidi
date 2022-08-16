@@ -178,9 +178,9 @@ module.exports = {
                         let clone = JSON.parse(JSON.stringify(positiveHits));
                         let hit = Object.keys(hits)[n]
                         clone.hits = {};
-                        clone.layer = hit;
+                        clone.layer = positiveHits.hits[hit].table;
                         clone.hits = []
-                        clone.hits[hit] = positiveHits.hits[hit];
+                        clone.hits[0] = positiveHits.hits[hit];
                         
                         console.log(clone, track);
 
