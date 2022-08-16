@@ -127,14 +127,19 @@ module.exports = {
 
         // Click event for print button
         $("#conflict-print-btn").on("click", function () {
+
                 // Trigger print dialog off
                 $("#conflict-set-print-area-btn").prop("disabled", true);
                 $("#conflict-get-print-fieldset").prop("disabled", true);
                 $(this).button('loading');
                 print.control(printC, scales, "_conflictPrint", "A4", "p", "inline");
 
+                
                 if (reportType === "1") {
+                    // Report is Kompakt
                     let results = conflictSearch.getResult();
+
+                    console.log(results);
 
                     print.print(endPrintEventName, results).then(res => {
 
@@ -148,6 +153,8 @@ module.exports = {
                         $("#conflict-set-print-area-btn").prop("disabled", false);
                     });
                 } else {
+
+                    // Report is lang/komplet
                     let results = conflictSearch.getResult();
                     let positiveHits = JSON.parse(JSON.stringify(results));
                     for (const property in results.hits) {
@@ -177,7 +184,7 @@ module.exports = {
                         
                         console.log(clone, track);
 
-                        print.print(endPrintEventName, results).then(res => {
+                        print.print(endPrintEventName, clone).then(res => {
                             console.log(res);
                             track.push(res.key);
                             count++;
