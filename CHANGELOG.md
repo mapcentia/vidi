@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [UNRELEASED]
+### Added
+- New runtime config `initZoomCenter`, which will lock Vidi to a specific zoom/center. This will override zoom/center in URL and snapshot link.  
+
 ## [2022.8.1] - 2022-10-8
 ### Changed
 - Lazy load of snapshot data. The loaded snapshot list now only includes metadata - not the snapshot data itself. When activating a snapshot the data is fetched. This way a long snapshot list will load faster and not fill the memory.

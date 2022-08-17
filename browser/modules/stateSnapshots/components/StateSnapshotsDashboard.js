@@ -172,11 +172,11 @@ class StateSnapshotsDashboard extends React.Component {
      *
      * @param {Object} item Applies snapshot
      */
-    applySnapshot(item) {
+    applySnapshot(item, ignoreInitZoomCenter) {
         if (this.props.onStateSnapshotApply) this.props.onStateSnapshotApply();
 
         this.setState({stateApplyingIsBlocked: true});
-        this.props.state.applyState(item.snapshot).then(() => {
+        this.props.state.applyState(item.snapshot, ignoreInitZoomCenter).then(() => {
             this.setState({stateApplyingIsBlocked: false});
         });
     }
@@ -473,7 +473,7 @@ class StateSnapshotsDashboard extends React.Component {
                         `/api/state-snapshots/${vidiConfig.appDatabase}/${item.id}`
                     ).then((response) => response.text())
                         .then((data) => {
-                            this.applySnapshot(JSON.parse(base64url.decode(data)));
+                            this.applySnapshot(JSON.parse(base64url.decode(data)), true);
                         });
 
                 }}

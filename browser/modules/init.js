@@ -73,7 +73,8 @@ module.exports = {
                 position: 'right',
                 width: '30%',
                 height: '250px'
-            }
+            },
+            initZoomCenter: null
         };
         // Set default for unset props
         for (let prop in defaults) {
