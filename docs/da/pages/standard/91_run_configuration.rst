@@ -545,7 +545,7 @@ Angives således `/z/x/y`. Dette svarer til det, der vises i Vidi URL'en.
 
 .. code-block:: json
 
-    "initFunction": "/16/9.875/56.142"
+    "initZoomCenter": "/16/9.875/56.142"
 
 .. rubric:: Fodnoter
 
