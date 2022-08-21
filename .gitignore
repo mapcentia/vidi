@@ -24,6 +24,7 @@ public/css/build
 
 ## Directory-based project format:
 .idea/
+.fleet/
 # if you remove the above rule, at least ignore the following:
 
 # User-specific stuff:
