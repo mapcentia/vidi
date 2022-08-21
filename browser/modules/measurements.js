@@ -406,7 +406,7 @@ module.exports = {
     getState: () => {
         let state = false;
         if (drawOn) {
-            state = JSON.stringify(serializeLayers.serializeMeasurementItems(true));
+            state = serializeLayers.serializeMeasurementItems(true);
         }
 
         return { measurements: state };
@@ -422,7 +422,7 @@ module.exports = {
             }
 
             if (newState && `measurements` in newState && newState.measurements) {
-                _self.recreateDrawnings(JSON.parse(newState.measurements));
+                _self.recreateDrawnings(newState.measurements);
             }
             
             resolve();

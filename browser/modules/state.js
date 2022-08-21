@@ -389,6 +389,13 @@ module.exports = {
                                     draw.recreateDrawnings(response.data.state.modules.draw.drawnItems);
                                 }
 
+                                // Recreate Measurements
+                                // =====================
+
+                                if (response.data.state.modules?.measurements?.measurements) {
+                                    draw.recreateDrawnings(response.data.state.modules.measurements.measurements);
+                                }
+
                                 // Recreate query draw
                                 // ===================
 
