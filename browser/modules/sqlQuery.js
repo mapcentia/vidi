@@ -130,6 +130,23 @@ const sortObject = function (obj) {
     return arr; // returns array
 };
 
+// Make popups moveable
+// RGB 2022
+function makeDraggable(popup){
+    var map = cloud.get().map
+
+    var pos = map.latLngToLayerPoint(popup.getLatLng());
+    console.log(popup);
+    L.DomUtil.setPosition(popup._wrapper.parentNode, pos);
+    var draggable = new L.Draggable(popup._container, popup._wrapper);
+    draggable.enable();
+    
+    draggable.on('dragend', function() {
+      var pos = map.layerPointToLatLng(this._newPos);
+      popup.setLatLng(pos);
+    });
+  }
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init, reset: module.exports.reset}}
@@ -407,6 +424,9 @@ module.exports = {
                                         }
                                     }
                                 }
+                                // Enable draggable
+                                makeDraggable(popup);
+
                                 setTimeout(() => {
                                     if (editingIsEnabled && layerIsEditable) {
                                         $(".gc2-edit-tools").css(`display`, `inline`);
