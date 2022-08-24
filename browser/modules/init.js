@@ -65,6 +65,7 @@ module.exports = {
             wmsUriReplace: null,
             infoClickCursorStyle: 'crosshair',
             featureInfoTableOnMap: false,
+            popupDraggable: false,
             showLayerGroupCheckbox: false,
             activeLayers: [],
             initFunction: null,

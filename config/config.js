@@ -1716,7 +1716,7 @@ module.exports = {
     // Make pop-ups draggable - defaults to 'false'
     // ========================================
 
-    "popupDraggable": true,
+    "popupDraggable": false,
 
 
     // ========================================
