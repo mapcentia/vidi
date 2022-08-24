@@ -41,6 +41,8 @@ let _self = false;
 
 let editingIsEnabled = false;
 
+let draggableEnabled = false;
+
 let template;
 
 let elementPrefix;
@@ -130,23 +132,6 @@ const sortObject = function (obj) {
     return arr; // returns array
 };
 
-// Make popups moveable
-// RGB 2022
-function makeDraggable(popup){
-    var map = cloud.get().map
-
-    var pos = map.latLngToLayerPoint(popup.getLatLng());
-    console.log(popup);
-    L.DomUtil.setPosition(popup._wrapper.parentNode, pos);
-    var draggable = new L.Draggable(popup._container, popup._wrapper);
-    draggable.enable();
-    
-    draggable.on('dragend', function() {
-      var pos = map.layerPointToLatLng(this._newPos);
-      popup.setLatLng(pos);
-    });
-  }
-
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init, reset: module.exports.reset}}
@@ -201,6 +186,9 @@ module.exports = {
             editingIsEnabled = true;
         }
 
+        if (window.vidiConfig.popupDraggable) {
+            draggableEnabled = true;
+        }
         qStoreShadow = qstore;
 
         this.reset(qstore);
@@ -326,7 +314,7 @@ module.exports = {
 
                             // Add alternative-info-container to pop-up if featureInfoTableOnMap or else in left slide panel
                             if (featureInfoTableOnMap) {
-                                L.popup({
+                                var popup = L.popup({
                                     minWidth: 350
                                 })
                                     .setLatLng(infoClickPoint)
@@ -339,6 +327,9 @@ module.exports = {
                                             editingStarted = false;
                                         }
                                     });
+                                    
+                                if (draggableEnabled) _self.makeDraggable(popup);
+                                
                                 $("#info-box-pop-up").html(popUpInner);
 
                             } else {
@@ -425,7 +416,7 @@ module.exports = {
                                     }
                                 }
                                 // Enable draggable
-                                makeDraggable(popup);
+                                if (draggableEnabled) _self.makeDraggable(e.getPopup());
 
                                 setTimeout(() => {
                                     if (editingIsEnabled && layerIsEditable) {
@@ -844,5 +835,37 @@ module.exports = {
             $("#click-for-info-slide .modal-title").html(title);
 
         }
+    },
+
+    /**
+     * makes popup draggable
+     * @param popup {object}
+     */
+    makeDraggable(popup){
+        var map = cloud.get().map
+
+        //console.log('makeDrag: ', map, popup);
+
+        //var pos = map.latLngToLayerPoint(popup.getLatLng());
+        // L.DomUtil.setPosition(popup._wrapper.parentNode, pos);
+        var draggable = new L.Draggable(popup._container, popup._wrapper);
+
+        // change cursor class
+        $(".leaflet-popup-content-wrapper").css('cursor','move');
+
+        draggable.on('dragstart', function(e) {
+            //on first drag, remove the pop-up tip
+            $(".leaflet-popup-tip-container").hide();
+        });
+
+        draggable.on('dragend', function(e) {
+            // set the new position
+            var pos = map.layerPointToLatLng(e.target._newPos);
+            popup.setLatLng(pos);
+        });
+
+        draggable.enable();
     }
+
+    
 };
