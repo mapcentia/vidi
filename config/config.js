@@ -1713,6 +1713,13 @@ module.exports = {
     "startUpModal": "<h1>Velkommen</h1><p>Det er her muligt at se forskellige baggrundskort, som topografiske kort og luftfoto-serier, tilføje en række korttemaer, læse informationer om disse, samt tegne, tage mål, udskrive kort, mv.</p><p>Geopartner A/S er ikke ansvarlig for misbrug af oplysninger eller for fejl i de oplysninger, der stilles til rådighed.</p><p>For yderligere oplysninger og kontaktinformationer besøg <a href='http://www.geopartner.dk' target='_blank'>www.geopartner.dk</a>.</p>",
 
     // ========================================
+    // Make pop-ups draggable - defaults to 'false'
+    // ========================================
+
+    "popupDraggable": true,
+
+
+    // ========================================
     // Set a width for video elements in popups
     // Should be a string with units - defaults to '250px'
     // ========================================
