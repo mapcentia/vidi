@@ -7,14 +7,14 @@
 'use strict';
 
 const STATE_STORE_NAME = `vidi-state-store`;
-const LOG = true;
+const LOG = false;
 
 const MODULE_NAME = `state`;
 
 /**
  * @type {*|exports|module.exports}
  */
-var cloud, setting, baseLayer, setBaseLayer, switchLayer, legend, print, draw, measurements, advancedInfo, meta;
+var cloud, setting, baseLayer, setBaseLayer, switchLayer, legend, print, draw, advancedInfo, meta;
 
 /**
  * @type {*|exports|module.exports}
@@ -142,7 +142,6 @@ module.exports = {
         legend = o.legend;
         print = o.print;
         draw = o.draw;
-        measurements = o.measurements;
         layers = o.layers;
         advancedInfo = o.advancedInfo;
         meta = o.meta;
@@ -390,11 +389,11 @@ module.exports = {
                                     draw.recreateDrawnings(response.data.state.modules.draw.drawnItems);
                                 }
 
-                                // Recreate measurements
+                                // Recreate Measurements
                                 // =====================
 
                                 if (response.data.state.modules?.measurements?.measurements) {
-                                    measurements.recreateDrawnings(response.data.state.modules.measurements.measurements);
+                                    draw.recreateDrawnings(response.data.state.modules.measurements.measurements);
                                 }
 
                                 // Recreate query draw
@@ -661,6 +660,7 @@ module.exports = {
      * @returns {Promise}
      */
     applyState: (state, ignoreInitZoomCenter = false) => {
+        console.log("ignoreInitZoomCenter", ignoreInitZoomCenter)
         if (LOG) console.log(`${MODULE_NAME}: applying state`, state);
 
         history.pushState(``, document.title, window.location.pathname + window.location.search);
