@@ -288,7 +288,7 @@ module.exports = {
                     distance = drawTools.getDistance(drawLayer);
                 }
 
-                drawLayer._vidi_type = `measurement`;
+                drawLayer._vidi_type = `measurements`;
                 drawLayer.feature = {
                     properties: {
                         type: type,
