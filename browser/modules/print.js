@@ -218,10 +218,11 @@ module.exports = {
                 tmpl = arr[0].value;
                 pageSize = arr[1].value;
                 printingOrientation = arr[2].value;
-                if (!alreadySetFromState && $("#print-sticky").is(":checked")) {
+                if (true) {
                     alreadySetFromState = true;
                     setState = false;
                     state.getState().then(applicationState => {
+                        console.log(applicationState)
                         if (typeof applicationState.modules.print !== "undefined") {
                             let params = applicationState.modules.print;
                             for (let i = 0; i < params.bounds.length; i++) {
@@ -489,6 +490,7 @@ module.exports = {
             "query_buffer": true,
             "query_result": true,
             "draw": true,
+            "measurement": true,
             "print": true
         }, true);
         $.each(e, function (i, v) {
@@ -502,6 +504,7 @@ module.exports = {
             "query_buffer": false, // Get query buffer draw
             "query_result": true,
             "draw": true,
+            "measurement": true,
             "print": true
         }, true);
         $.each(e, function (i, v) {
@@ -515,6 +518,7 @@ module.exports = {
             "query_buffer": true,
             "query_result": false, // Get result
             "draw": true,
+            "measurement": true,
             "print": true
         }, true);
         $.each(e, function (i, v) {
@@ -528,6 +532,7 @@ module.exports = {
             "query_buffer": true,
             "query_result": true,
             "draw": true,
+            "measurement": true,
             "print": false // Get print
         }, true);
         $.each(e, function (i, v) {
@@ -618,9 +623,10 @@ module.exports = {
     },
 
     applyState: (print) => {
+        console.log(print)
         return new Promise((resolve) => {
             paramsFromDb = print;
-            backboneEvents.get().trigger(`${MODULE_ID}:state_change`);
+            // backboneEvents.get().trigger(`${MODULE_ID}:state_change`);
             resolve();
         });
     }
