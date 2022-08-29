@@ -660,7 +660,6 @@ module.exports = {
      * @returns {Promise}
      */
     applyState: (state, ignoreInitZoomCenter = false) => {
-        console.log("ignoreInitZoomCenter", ignoreInitZoomCenter)
         if (LOG) console.log(`${MODULE_NAME}: applying state`, state);
 
         history.pushState(``, document.title, window.location.pathname + window.location.search);

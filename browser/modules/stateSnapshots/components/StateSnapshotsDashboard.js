@@ -171,12 +171,14 @@ class StateSnapshotsDashboard extends React.Component {
      * Applies snapshot
      *
      * @param {Object} item Applies snapshot
+     * @param ignoreInitZoomCenter
      */
     applySnapshot(item, ignoreInitZoomCenter) {
         if (this.props.onStateSnapshotApply) this.props.onStateSnapshotApply();
 
         this.setState({stateApplyingIsBlocked: true});
         this.props.state.applyState(item.snapshot, ignoreInitZoomCenter).then(() => {
+            console.log(item.snapshot.modules.print)
             this.setState({stateApplyingIsBlocked: false});
         });
     }
