@@ -669,6 +669,7 @@ module.exports = {
                 reject(`Provided state is empty`);
                 return;
             }
+            _setInternalState(state);
             const applyStateToModules = () => {
                 let promises = [];
                 let modulesWithAppliedState = [];

@@ -4,7 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [2022.8.2]
+## [2022.8.3] 2022-29-8
+### Fixed
+- State loaded from snapshot now is set in localforage. This was a regression bug.
+
+## [2022.8.2] - 2022-17-8
 ### Added
 - New runtime config `initZoomCenter`, which will lock Vidi to a specific zoom/center. This will override zoom/center in URL and snapshot link.  
 

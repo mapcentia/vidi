@@ -61,9 +61,9 @@ module.exports = {
 
         state.listenTo(MODULE_NAME, _self);
         state.listen(MODULE_NAME, `update`);
-        // state.getModuleState(MODULE_NAME).then(initialState => {
-        //     _self.applyState(initialState)
-        // });
+        state.getModuleState(MODULE_NAME).then(initialState => {
+            _self.applyState(initialState)
+        });
 
         // Detect if the embed template is used
         if ($(`#floating-container-secondary`).length === 1) {
