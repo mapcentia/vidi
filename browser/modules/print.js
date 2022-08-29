@@ -218,8 +218,7 @@ module.exports = {
                 tmpl = arr[0].value;
                 pageSize = arr[1].value;
                 printingOrientation = arr[2].value;
-                //if (!alreadySetFromState && $("#print-sticky").is(":checked")) {
-                if (true) {
+                if (!alreadySetFromState && $("#print-sticky").is(":checked")) {
                     alreadySetFromState = true;
                     setState = false;
                     state.getState().then(applicationState => {
