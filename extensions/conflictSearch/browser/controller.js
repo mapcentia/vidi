@@ -164,9 +164,10 @@ module.exports = {
                     });
                     let iter = n => {
                         let clone = JSON.parse(JSON.stringify(positiveHits));
-                        let hit = Object.keys(hits)[n]
+                        let hit = Object.keys(hits)[n];
+                        let table = hits[Object.keys(hits)[n]].table;
                         clone.hits = {};
-                        clone.layer = hit;
+                        clone.layer = table;
                         clone.hits[hit] = positiveHits.hits[hit];
                         print.print(endPrintEventName, clone).then(res => {
                             track.push(res.key);
