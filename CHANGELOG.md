@@ -6,11 +6,12 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ## [2022.8.4] 2022-31-8
 ### Changed
-- conflictSearch now prints with concurrency when select a multiple page report. 
+- conflictSearch now prints with concurrency when selecting a multiple page report. 
 
 ## [2022.8.3] 2022-29-8
 ### Fixed
 - State loaded from snapshot now is set in localforage. This was a regression bug.
+- Drawings made in Measurements now is stored in state and will stick between refreshes and in snapshots.
 
 ## [2022.8.2] - 2022-17-8
 ### Added
