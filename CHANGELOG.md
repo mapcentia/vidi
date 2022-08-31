@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2022.8.4] 2022-31-8
+### Changed
+- conflictSearch now prints with concurrency when select a multiple page report. 
+
 ## [2022.8.3] 2022-29-8
 ### Fixed
 - State loaded from snapshot now is set in localforage. This was a regression bug.

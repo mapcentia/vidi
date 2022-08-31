@@ -168,6 +168,7 @@
     "react-tabs": "^5.1.0",
     "redis": "^2.8.0",
     "redux-thunk": "^2.3.0",
+    "regenerator-runtime": "^0.13.9",
     "reproject": "^1.2.5",
     "request": "^2.88.2",
     "require-globify": "^1.4.1",
