@@ -178,7 +178,7 @@ module.exports = {
                     }
                     const createPool = async function () {
                         const {results, errors} = await PromisePool
-                            .withConcurrency(config.puppeteerProcesses.max)
+                            .withConcurrency(config.puppeteerProcesses.max || 2)
                             .for(plotsArr)
                             .process(async (data, index, pool) => {
                                 return await print.print(endPrintEventName, data);
