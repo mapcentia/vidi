@@ -177,7 +177,6 @@ module.exports = {
                             }
                         }
                     });
-                    break;
                 }
             });
         }
