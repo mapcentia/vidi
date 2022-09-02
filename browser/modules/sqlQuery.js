@@ -415,9 +415,7 @@ module.exports = {
                                         }
                                     }
                                 }
-                                // Enable draggable
-                                if (draggableEnabled) _self.makeDraggable(e.getPopup());
-
+                                
                                 setTimeout(() => {
                                     if (editingIsEnabled && layerIsEditable) {
                                         $(".gc2-edit-tools").css(`display`, `inline`);
