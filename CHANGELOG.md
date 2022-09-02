@@ -16,6 +16,9 @@ and this project adheres to [CalVer](https://calver.org/).
     "popupDraggable": true,
 ```
 
+### Fixed
+- Changing print scale no longer links to `#` - resetting active layers etc.
+
 ### Changed
 - The snapshot list fetch now only include metadata - not the snapshot data itself. When activating a snapshot the data is fetched. This way a long snapshot list will not hog the system down.  
 
