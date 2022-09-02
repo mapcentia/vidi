@@ -1014,8 +1014,8 @@ module.exports = {
 
                         container.append(`
                             <p>
-                            <b>Tilføj: </b><a href="#" class="addMatrikel" alt="Tilføj matrikel">matrikel</a> / <a href="#" class="addEjendom" alt="Tilføj ejendom">ejendom</a></br>
-                            <b>Fjern: </b><a href="#" class="deleteMatrikel" alt="Fjern matrikel">matrikel</a> / <a href="#" class="deleteEjendom" alt="Fjern ejendom">ejendom</a></br>
+                            <b>Tilføj: </b><a class="addMatrikel" alt="Tilføj matrikel">matrikel</a> / <a class="addEjendom" alt="Tilføj ejendom">ejendom</a></br>
+                            <b>Fjern: </b><a class="deleteMatrikel" alt="Fjern matrikel">matrikel</a> / <a  class="deleteEjendom" alt="Fjern ejendom">ejendom</a></br>
                             </p>
                         `)
                         layer.bindPopup(container[0]);
