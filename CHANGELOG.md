@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2022.9.0] 2022-5-9
+### Added
+In addition to the embed attributes `data-vidi-search` and `data-vidi-history` some more attributes are added to hide the buttons the embed-template. The attrubutes can be set to `none`:
+* data-vidi-legend
+* data-vidi-layer
+* data-vidi-background
+* data-vidi-fullscreen
+* data-vidi-about
+* data-vidi-location
+
 ## [2022.8.4] 2022-31-8
 ### Changed
 - conflictSearch now prints with concurrency when selecting a multiple page report. 
@@ -15,7 +25,7 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ## [2022.8.2] - 2022-17-8
 ### Added
-- New runtime config `initZoomCenter`, which will lock Vidi to a specific zoom/center. This will override zoom/center in URL and snapshot link.  
+- New runtime config `initZoomCenter`, which will locks Vidi to a specific zoom/center. This will override zoom/center in URL and snapshot link.  
 
 ## [2022.8.1] - 2022-10-8
 ### Changed
