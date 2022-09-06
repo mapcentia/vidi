@@ -183,7 +183,7 @@ module.exports = {
         // Set up print dialog
         $("#ul-scale").empty();
         for (var i = 0; i < scales.length; i++) {
-            $("#ul-scale").append("<li><a data-scale-ul='" + scales[i] + "' href='#'>" + scales[i] + "</a></li>");
+            $("#ul-scale").append("<li><a data-scale-ul='" + scales[i] + "'>" + scales[i] + "</a></li>");
         }
         $("#print-sticky").unbind("change");
         $("#print-sticky").change(function (e) {
