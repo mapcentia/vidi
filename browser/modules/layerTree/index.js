@@ -315,7 +315,7 @@ module.exports = {
         const layersFromFromUrl = state.layersInUrl();
 
 
-        return result.concat(layersFromFromUrl);
+        return result;
     },
 
     /**
