@@ -313,8 +313,8 @@ module.exports = {
         }
         const layersFromFromUrl = state.layersInUrl();
 
-
-        return result.concat(layersFromFromUrl);
+        // Return only layers from layerTree
+        return result;
     },
 
     /**
