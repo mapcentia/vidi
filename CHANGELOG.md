@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [UNRELEASED]
+### Added
+- toggle `popupDraggable` added to config.js. Makes popups from info draggable. Overwritable in config.json.
+```
+// ========================================
+// Make pop-ups draggable - defaults to 'false'
+// ========================================
+"popupDraggable": true,
+```
+
 ## [2022.9.0] 2022-5-9
 ### Added
 In addition to the embed attributes `data-vidi-search` and `data-vidi-history` some more attributes are added to hide the buttons the embed-template. The attrubutes can be set to `none`:

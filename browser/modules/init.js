@@ -66,6 +66,7 @@ module.exports = {
             infoClickCursorStyle: 'crosshair',
             featureInfoTableOnMap: false,
             showLayerGroupCheckbox: false,
+            popupDraggable: false,
             activeLayers: [],
             initFunction: null,
             snapshot: null,
