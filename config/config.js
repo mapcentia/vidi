@@ -22,7 +22,7 @@ module.exports = {
     // ==========================================
 
     "gc2": {
-        "host": "http://mapgoggc2.geopartner.dk"
+        "host": "https://mapgoggc2.geopartner.dk"
     },
 
     // ===============================================================
