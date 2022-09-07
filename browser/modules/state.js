@@ -39,12 +39,6 @@ var lz = require('lz-string');
 
 /**
  *
- * @type {exports|module.exports}
- */
-var base64 = require('base64-url');
-
-/**
- *
  * @type {string}
  */
 var BACKEND = require('../../config/config.js').backend;

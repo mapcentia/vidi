@@ -39,8 +39,11 @@ Et filter objekt ser sådeles ud:
       }
     }
 
-Når det skal bruges i URL'en skal filter objektet base64 kodes. Det ser ligner dette:
+Når det skal bruges i URL'en skal filter objektet Base64URL kodes. Det ligner dette:
 
 .. code-block:: text
 
     ?initialFilter=ewogICJ0ZXN0Lm11bHRpcG9seWdvbiI6IHsKICAgICJtYXRjaCI6ICJhbn...
+
+.. note::
+    Base64URL er en afart af Base64, som ikke kan indeholde tegnene +=/ og er derfor "url sikker". https://www.npmjs.com/package/base64url
