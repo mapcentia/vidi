@@ -10017,7 +10017,6 @@
   			var closeButton = this._closeButton = create$1('a', prefix + '-close-button', container);
   			closeButton.setAttribute('role', 'button'); // overrides the implicit role=link of <a> elements #7399
   			closeButton.setAttribute('aria-label', 'Close popup');
-  			closeButton.href = '#close';
   			closeButton.innerHTML = '<span aria-hidden="true">&#215;</span>';
 
   			on(closeButton, 'click', this.close, this);
