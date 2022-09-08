@@ -158,7 +158,7 @@ module.exports = {
             backboneEvents.get().on(`${MODULE_NAME}:ready`, () => {
                 let decodedFilters;
                 try {
-                    JSON.parse(base64url.decode(urlparser.urlVars.initialFilter));
+                    decodedFilters = JSON.parse(base64url.decode(urlparser.urlVars.initialFilter));
                 } catch (e) {
                     alert("Bad filter");
                     return
