@@ -39,12 +39,6 @@ var lz = require('lz-string');
 
 /**
  *
- * @type {exports|module.exports}
- */
-var base64 = require('base64-url');
-
-/**
- *
  * @type {string}
  */
 var BACKEND = require('../../config/config.js').backend;
@@ -660,7 +654,6 @@ module.exports = {
      * @returns {Promise}
      */
     applyState: (state, ignoreInitZoomCenter = false) => {
-        console.log("ignoreInitZoomCenter", ignoreInitZoomCenter)
         if (LOG) console.log(`${MODULE_NAME}: applying state`, state);
 
         history.pushState(``, document.title, window.location.pathname + window.location.search);
@@ -670,6 +663,7 @@ module.exports = {
                 reject(`Provided state is empty`);
                 return;
             }
+            _setInternalState(state);
             const applyStateToModules = () => {
                 let promises = [];
                 let modulesWithAppliedState = [];

@@ -156,7 +156,13 @@ module.exports = {
 
         if (urlparser && urlparser.urlVars && urlparser.urlVars.initialFilter) {
             backboneEvents.get().on(`${MODULE_NAME}:ready`, () => {
-                let decodedFilters = JSON.parse(atob(urlparser.urlVars.initialFilter));
+                let decodedFilters;
+                try {
+                    JSON.parse(base64url.decode(urlparser.urlVars.initialFilter));
+                } catch (e) {
+                    alert("Bad filter");
+                    return
+                }
                 for (let layerKey in decodedFilters) {
                     _self.onApplyArbitraryFiltersHandler({
                         layerKey,
@@ -177,7 +183,6 @@ module.exports = {
                             }
                         }
                     });
-                    break;
                 }
             });
         }

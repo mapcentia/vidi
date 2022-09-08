@@ -80,7 +80,7 @@ module.exports = {
             parameters.x = arr.x;
             parameters.y = arr.y;
         }
-        let result = new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             if (parameters.x && parameters.y && parameters.zoom) {
                 cloud.get().setView(new L.LatLng(parseFloat(parameters.y), parseFloat(parameters.x)), parameters.zoom);
                 initMapParameters = parameters
@@ -95,7 +95,6 @@ module.exports = {
                 reject();
             });
         });
-        return result;
     },
 
     getInitMapParameters: () => {
