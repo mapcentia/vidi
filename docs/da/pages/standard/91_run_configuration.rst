@@ -549,4 +549,16 @@ Angives således `/z/x/y`. Dette svarer til det, der vises i Vidi URL'en.
 
 .. rubric:: Fodnoter
 
+.. _configjs_popupdraggable:
+
+popupDraggable
+*****************************************************************
+
+Hvis sat til `true` kan man flytte feature-info pop-up'en på kortet.
+
+.. code-block:: json
+
+    "popupDraggable": false
+
+
 .. [#fragment] Et fragment er den del af en URL der kommer efter `#`.

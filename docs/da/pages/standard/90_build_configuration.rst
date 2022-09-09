@@ -95,20 +95,6 @@ Tallene angiver brededer i hhv. phone, tablet og desktop.
 
     "leftSlideWidths": [300, 400, 550]
 
-
-.. _configjs_popupdraggable:
-
-popupDraggable
-*****************************************************************
-
-Gør at man kan flytte popup på kortet med musen.
-
-.. code-block:: json
-
-    "popupDraggable": false
-
-.. _configjs_complete_example:
-
 .. _configjs_df:
 
 df
