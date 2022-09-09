@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [UNRELEASED]
+### Added
+- toggle `popupDraggable` added to config.js. Makes popups from info draggable. Overwritable in config.json.
+```
+"popupDraggable": true,
+```
+
 ## [2022.9.1] - 2022-7-9
 ### Changed
 - The url parameter `initialFilter` must now be Base64URL encoded, which is safe to use in urls. If filter can't be decoded a alert will tell the user. https://base64.guru/standards/base64url
