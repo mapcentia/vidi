@@ -8,15 +8,16 @@ and this project adheres to [CalVer](https://calver.org/).
 ### Added
 - toggle `popupDraggable` added to config.js. Makes popups from info draggable. Overwritable in config.json.
 ```
-// ========================================
-// Make pop-ups draggable - defaults to 'false'
-// ========================================
 "popupDraggable": true,
 ```
 
+## [2022.9.1] - 2022-7-9
+### Changed
+- The url parameter `initialFilter` must now be Base64URL encoded, which is safe to use in urls. If filter can't be decoded a alert will tell the user. https://base64.guru/standards/base64url
+
 ## [2022.9.0] 2022-5-9
 ### Added
-In addition to the embed attributes `data-vidi-search` and `data-vidi-history` some more attributes are added to hide the buttons the embed-template. The attrubutes can be set to `none`:
+- In addition to the embed attributes `data-vidi-search` and `data-vidi-history` some more attributes are added to hide the buttons the embed-template. The attrubutes can be set to `none`:
 * data-vidi-legend
 * data-vidi-layer
 * data-vidi-background
@@ -24,11 +25,11 @@ In addition to the embed attributes `data-vidi-search` and `data-vidi-history` s
 * data-vidi-about
 * data-vidi-location
 
-## [2022.8.4] 2022-31-8
+## [2022.8.4] - 2022-31-8
 ### Changed
 - conflictSearch now prints with concurrency when selecting a multiple page report. 
 
-## [2022.8.3] 2022-29-8
+## [2022.8.3] - 2022-29-8
 ### Fixed
 - State loaded from snapshot now is set in localforage. This was a regression bug.
 - Drawings made in Measurements now is stored in state and will stick between refreshes and in snapshots.

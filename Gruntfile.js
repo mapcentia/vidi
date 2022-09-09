@@ -18,11 +18,22 @@ module.exports = function (grunt) {
     });
 
     // Default build parameters
-    let copyBootstrapVariablesCommand = 'cp ./config/_variables.less ./public/js/lib/bootstrap-material-design/less';
+    let copyBootstrapVariablesCommand;
     let lessConfig = {"public/css/styles.css": "public/less/styles.default.less"};
     if (theme && theme === 'watsonc') {
-        copyBootstrapVariablesCommand = 'cp ./extensions/' + theme + '/config/_variables.less ./public/js/lib/bootstrap-material-design/less';
-        lessConfig = {"public/css/styles.css": "public/less/styles." + theme + ".less"};
+        if(process.platform === 'win32') {
+            copyBootstrapVariablesCommand = 'copy "extensions\\' + theme + '\\config\\_variables.less" "public\\js\\lib\\bootstrap-material-design\\less';
+            lessConfig = {"public\\css\\styles.css": "public\\less\\styles." + theme + ".less"};
+        } else {
+            copyBootstrapVariablesCommand = 'cp ./extensions/' + theme + '/config/_variables.less ./public/js/lib/bootstrap-material-design/less';
+            lessConfig = {"public/css/styles.css": "public/less/styles." + theme + ".less"};
+        }
+    } else {
+        if(process.platform === 'win32') {
+            copyBootstrapVariablesCommand = 'copy "config\\_variables.less" "public\\js\\lib\\bootstrap-material-design\\less"'
+        } else {
+            copyBootstrapVariablesCommand = 'cp ./config/_variables.less ./public/js/lib/bootstrap-material-design/less';
+        }
     }
 
     grunt.initConfig({
