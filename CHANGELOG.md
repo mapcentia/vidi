@@ -8,7 +8,7 @@ and this project adheres to [CalVer](https://calver.org/).
 ### Changed
 - The url parameter `initialFilter` must now be Base64URL encoded, which is safe to use in urls. If filter can't be decoded a alert will tell the user. https://base64.guru/standards/base64url
 
-## [2022.9.0] 2022-5-9
+## [2022.9.0] - 2022-5-9
 ### Added
 - In addition to the embed attributes `data-vidi-search` and `data-vidi-history` some more attributes are added to hide the buttons the embed-template. The attrubutes can be set to `none`:
 * data-vidi-legend
