@@ -7,7 +7,7 @@ Systemkonfiguration
 .. topic:: Overview
 
     :Date: |today|
-    :Vidi-version: 2020.11.0
+    :Vidi-version: 2022.9.0
     :Forfattere: `giovanniborella <https://github.com/giovanniborella>`_ | `mapcentia <https://github.com/mapcentia>`_
 
 .. contents:: 
@@ -94,6 +94,18 @@ Tallene angiver brededer i hhv. phone, tablet og desktop.
 .. code-block:: json
 
     "leftSlideWidths": [300, 400, 550]
+
+
+.. _configjs_popupdraggable:
+
+popupDraggable
+*****************************************************************
+
+Gør at man kan flytte popup på kortet med musen.
+
+.. code-block:: json
+
+    "popupDraggable": false
 
 .. _configjs_complete_example:
 
