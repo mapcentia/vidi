@@ -317,9 +317,6 @@ module.exports = {
                 result.push(activeLayers[key].fullLayerKey);
             }
         }
-        const layersFromFromUrl = state.layersInUrl();
-
-        // Return only layers from layerTree
         return result;
     },
 

@@ -6,9 +6,9 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ## [UNRELEASED]
 ### Added
-- toggle `popupDraggable` added to config.js. Makes popups from info draggable. Overwritable in config.json.
+- New config option added `popupDraggable`. Makes feature-info popups draggable. Can be set in run-tim config.
 ```
-"popupDraggable": true,
+"popupDraggable": true
 ```
 
 ## [2022.9.1] - 2022-7-9
