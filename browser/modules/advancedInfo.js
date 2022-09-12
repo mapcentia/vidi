@@ -163,12 +163,20 @@ module.exports = {
      *
      */
     init: function () {
-        backboneEvents.get().on(`reset:all reset:${MODULE_ID} off:all` , () => {
+        backboneEvents.get().on(`off:all`, () => {
+            _self.off();
+            // _self.reset();
+        });
+        backboneEvents.get().on(`reset:all reset:${MODULE_ID}`, () => {
             _self.off();
             _self.reset();
         });
-        backboneEvents.get().on(`on:${MODULE_ID}`, () => { _self.on(); });
-        backboneEvents.get().on(`off:${MODULE_ID}`, () => { _self.off(); });
+        backboneEvents.get().on(`on:${MODULE_ID}`, () => {
+            _self.on();
+        });
+        backboneEvents.get().on(`off:${MODULE_ID}`, () => {
+            _self.off();
+        });
 
         $("#advanced-info-btn").on("click", function () {
             _self.control();
@@ -209,93 +217,104 @@ module.exports = {
     },
 
     on: () => {
-        backboneEvents.get().trigger("advancedInfo:turnedOn");
+        if (!drawControl) {
+            backboneEvents.get().trigger("advancedInfo:turnedOn");
 
-        // Reset all SQL Query layers
-        backboneEvents.get().trigger("sqlQuery:clear");
+            // Reset all SQL Query layers
+            // backboneEvents.get().trigger("sqlQuery:clear");
 
-        $("#buffer").show();
+            $("#buffer").show();
 
-       // L.drawLocal = require('./drawLocales/advancedInfo.js');
-        drawControl = new L.Control.Draw({
-            position: 'topright',
-            draw: {
-                polygon: {
-                    title: 'Draw a polygon!',
-                    allowIntersection: true,
-                    drawError: {
-                        color: '#b00b00',
-                        timeout: 1000
+            // L.drawLocal = require('./drawLocales/advancedInfo.js');
+            drawControl = new L.Control.Draw({
+                position: 'topright',
+                draw: {
+                    polygon: {
+                        title: 'Draw a polygon!',
+                        allowIntersection: true,
+                        drawError: {
+                            color: '#b00b00',
+                            timeout: 1000
+                        },
+                        shapeOptions: {
+                            color: '#662d91',
+                            fillOpacity: 0
+                        },
+                        showArea: true
                     },
-                    shapeOptions: {
-                        color: '#662d91',
-                        fillOpacity: 0
+                    polyline: {
+                        metric: true,
+                        shapeOptions: {
+                            color: '#662d91',
+                            fillOpacity: 0
+                        }
                     },
-                    showArea: true
+                    circle: {
+                        shapeOptions: {
+                            color: '#662d91',
+                            fillOpacity: 0
+                        }
+                    },
+                    rectangle: {
+                        shapeOptions: {
+                            color: '#662d91',
+                            fillOpacity: 0
+                        }
+                    },
+                    marker: true,
+                    circlemarker: false
                 },
-                polyline: {
-                    metric: true,
-                    shapeOptions: {
-                        color: '#662d91',
-                        fillOpacity: 0
-                    }
-                },
-                circle: {
-                    shapeOptions: {
-                        color: '#662d91',
-                        fillOpacity: 0
-                    }
-                },
-                rectangle: {
-                    shapeOptions: {
-                        color: '#662d91',
-                        fillOpacity: 0
-                    }
-                },
-                marker: true,
-                circlemarker: false
-            },
-            edit: {
-                featureGroup: drawnItems,
-                remove: false
-            }
-        });
+                edit: {
+                    featureGroup: drawnItems,
+                    remove: false
+                }
+            });
 
-        cloud.get().map.addControl(drawControl);
-        searchOn = true;
+            cloud.get().map.addControl(drawControl);
+            searchOn = true;
 
-        // Unbind events
-        cloud.get().map.off('draw:created');
-        cloud.get().map.off('draw:drawstart');
-        cloud.get().map.off('draw:drawstop');
-        cloud.get().map.off('draw:editstart');
-        // Bind events
-        cloud.get().map.on('draw:created', function (e) {
-            e.layer._vidi_type = "query_draw";
-            if (e.layerType === 'marker') {
+            // Unbind events
+            cloud.get().map.off('draw:created');
+            cloud.get().map.off('draw:drawstart');
+            cloud.get().map.off('draw:drawstop');
+            cloud.get().map.off('draw:editstart');
+            cloud.get().map.off('draw:editstop');
+            cloud.get().map.off('draw:deletestart');
+            cloud.get().map.off('draw:deletestop');
+            cloud.get().map.off('draw:deleted');
+            cloud.get().map.off('draw:edited');
 
-                e.layer._vidi_marker = true;
-            }
-            drawnItems.addLayer(e.layer);
-        });
-        cloud.get().map.on('draw:drawstart', function (e) {
-            // Clear all SQL query layers
-            backboneEvents.get().trigger("sqlQuery:clear");
-        });
-        cloud.get().map.on('draw:drawstop', function (e) {
-            _makeSearch();
-        });
-        cloud.get().map.on('draw:editstop', function (e) {
-            _makeSearch();
-        });
-        cloud.get().map.on('draw:editstart', function (e) {
-            bufferItems.clearLayers();
-        });
-        var po = $('.leaflet-draw-toolbar-top').popover({content: __("Use these tools for querying the overlay maps."), placement: "left"});
-        po.popover("show");
-        setTimeout(function () {
-            po.popover("hide");
-        }, 2500);
+            // Bind events
+            cloud.get().map.on('draw:created', function (e) {
+                e.layer._vidi_type = "query_draw";
+                if (e.layerType === 'marker') {
+
+                    e.layer._vidi_marker = true;
+                }
+                drawnItems.addLayer(e.layer);
+            });
+            cloud.get().map.on('draw:drawstart', function (e) {
+                // Clear all SQL query layers
+                backboneEvents.get().trigger("sqlQuery:clear");
+            });
+            cloud.get().map.on('draw:drawstop', function (e) {
+                _makeSearch();
+            });
+            cloud.get().map.on('draw:editstop', function (e) {
+                _makeSearch();
+            });
+            cloud.get().map.on('draw:editstart', function (e) {
+                bufferItems.clearLayers();
+            });
+            var po = $('.leaflet-draw-toolbar-top').popover({
+                content: __("Use these tools for querying the overlay maps."),
+                placement: "left"
+            });
+            po.popover("show");
+            setTimeout(function () {
+                po.popover("hide");
+            }, 2500);
+        }
     },
 
     /**
@@ -307,7 +326,6 @@ module.exports = {
             backboneEvents.get().trigger(`off:infoClick`);
         } else {
             searchOn = false;
-            
             _self.off();
             backboneEvents.get().trigger(`on:infoClick`);
             backboneEvents.get().trigger("advancedInfo:turnedOff");
@@ -317,17 +335,23 @@ module.exports = {
     off: function () {
         searchOn = false;
         // Clean up
-        _clearDrawItems();
-        $("#advanced-info-btn").prop("checked", false);
+        // _clearDrawItems();
+        // $("#advanced-info-btn").prop("checked", false);
         // Unbind events
         cloud.get().map.off('draw:created');
         cloud.get().map.off('draw:drawstart');
         cloud.get().map.off('draw:drawstop');
         cloud.get().map.off('draw:editstart');
-        try {
+        cloud.get().map.off('draw:editstop');
+        cloud.get().map.off('draw:deletestart');
+        cloud.get().map.off('draw:deletestop');
+        cloud.get().map.off('draw:deleted');
+        cloud.get().map.off('draw:edited');
+
+        if (drawControl) {
             cloud.get().map.removeControl(drawControl);
-        } catch (e) {
         }
+        drawControl = false;
         $("#buffer").hide();
     },
     /**
@@ -353,5 +377,6 @@ module.exports = {
     },
 
     reset: () => _clearDrawItems()
+
 };
 

@@ -21,6 +21,7 @@ var qstore = [];
 var active = false;
 var _self = false;
 let blocked = false;
+let advancedInfo;
 
 /**
  *
@@ -35,6 +36,7 @@ module.exports = {
         layerTree = o.layerTree;
         _layers = o.layers;
         _self = this;
+        advancedInfo = o.advancedInfo;
         return this;
     },
 
@@ -44,7 +46,7 @@ module.exports = {
         });
         backboneEvents.get().on(`off:all`, () => {
             _self.off();
-            _self.reset();
+            // _self.reset();
         });
         backboneEvents.get().on(`on:${MODULE_ID}`, () => {
             _self.active(true);
@@ -153,6 +155,9 @@ module.exports = {
             }
         }
         active = a;
+        if ($("#advanced-info-btn").is(':checked')) {
+            advancedInfo.on();
+        }
     },
 
     on: () => {
