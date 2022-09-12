@@ -181,7 +181,7 @@ Aktiverer Leaflet Cluster Map på laget.
 
 Vektor-punkter punkter kan vises som enten circle markers eller grafiske markers. Førstnævnte kan sammenlignes med vektor-linjer og flader og vil anvende nedenfornævnte Style function.
 
-Men punkter kan også vises som grafisk markers. Vidi har indbygget Leaflet Plugin'en `Extra Markers <https://github.com/coryasilva/Leaflet.ExtraMarkers>`_ med `Font Awesome <https://fontawesome.com>`_ , som anvendes uden videre.
+Men punkter kan også vises som grafisk ikoner. Vidi har indbygget Leaflet Plugin'en `Extra Markers <https://github.com/coryasilva/Leaflet.ExtraMarkers>`_ med `Font Awesome <https://fontawesome.com>`_ , som anvendes uden videre:
 
 .. code-block:: javascript
 
@@ -197,9 +197,44 @@ Men punkter kan også vises som grafisk markers. Vidi har indbygget Leaflet Plug
         });
     }
 
+Her er et eksempel på hvordan et brugerdefineret SVG symbol kan anvendes:
+
+.. code-block:: javascript
+
+    function(feature, latlng) {
+        return L.marker(latlng, {
+            icon: L.icon({
+                iconUrl: "https://geofyn.github.io/mapcentia_vidi_symbols/flaticon/heart.svg",
+                iconSize: [25, 25],
+                iconAnchor: [12, 12],
+                tooltip:'virksomhed'
+            })
+        })
+    }
+
+Markers placeres som standard i "marker-pane", som ligger øverste i kortet. Dvs. at marker-lag ikke kan sorteres mellem andre lag ej heller andre marker-lag. For at kun sortere marker-lag som andre typer af lag, er det nødvendigt at angive i marker-definitionen, at de skal placeres i eget pane.
+
+Hvert lag har sit eget pane, som hedder "schemanavn-lagnavn". Dette kan angives i hhv. ``pane`` og ``shadowPane``. Sidstnævnte anvendes kun ved bruge af ExtraMarkers eller tilsvarende, som har en skygge:
+
+.. code-block:: javascript
+
+    function(feature, latlng) {
+        return L.marker(latlng, {
+            pane: "schemanavn-lagnavn",
+            shadowPane: "schemanavn-lagnavn",
+            icon: L.ExtraMarkers.icon({
+                icon: 'fa-home',
+                markerColor: 'blue',
+                shape: 'circle',
+                prefix: 'fa',
+                iconColor: '#fff'
+            })
+        });
+    }
+
 **Style function**
 
-Funktion til styling af vektor-lag. Funktionen modtager hver enkelt feature i laget og leverer en style tilbage. Man kan derved lave meget anvanceret tematiseringer./
+Funktion til styling af vektor-lag. Funktionen modtager hver enkelt feature i laget og leverer en style tilbage. Man kan derved lave meget anvanceret tematiseringer:
 
 .. code-block:: javascript
 
@@ -239,6 +274,22 @@ Hvis ovenfor er sat, vil denne funktion blive kørt ved hvert refresh.
 **Disable feature info**
 
 Deaktiverer feature-info på vektor-laget.
+
+**Max zoom**
+
+Højeste zoom-level hvor laget skal være synligt. Værdien skal være en tile-set zoom level (0-20). Virker for både vektor og marker lag.
+
+**Min zoom**
+
+Laveste zoom-level hvor laget skal være synligt. Værdien skal være en tile-set zoom level (0-20). Virker for både vektor og marker lag.
+
+**Tooltip template**
+
+Hvis der angives en tooltip template får hver vektorfeature et tooltip/label med værdien. Templaten har adgang til alle attributter for feature:
+
+.. code-block:: html
+
+   <i>{{plannavn}} {{plannr}}</i>
 
 .. _gc2mata_filters:
 
@@ -460,18 +511,18 @@ Aktiver autocomplete på feltet i filtrering.
 Gør til link
 =================================================================
 
-Hvis feltet indholder en web-adresse gøres det til et aktivt link i pop-up'en. Hvis der anvendes en brugerdefineret pop-up, så anvend tre { } udenom feltnavnet, så HTML linket bliver fortolket (se :ref:`gc2mata_infopopup`)
+Hvis feltet indholder en web-adresse gøres det til et aktivt link i pop-up'en.
 
-.. code-block:: handlebars
-
-    {{{felt_med_link}}}
-
+.. note::
+    Hvis der anvendes en brugerdefineret pop-up template, har denne indstilling ingen effekt (se :ref:`gc2mata_infopopup`)
 
 Content
 =================================================================
 
 Hvis feltet indeholder et link til et billede eller mp4-video kan der her vælges typen. Ved brug af standard templaten bliver billedet eller videoen sat ind (se :ref:`gc2mata_infopopup`)
 
+.. note::
+    Hvis der anvendes en brugerdefineret pop-up template, har denne indstilling ingen effekt (se :ref:`gc2mata_infopopup`)
 
 .. _gc2structure_link_prefix:
 
@@ -480,12 +531,28 @@ Link prefix
 
 Hvis :ref:`gc2structure_link` er tjekket af, kan der sættes en tekst-streng foran linket. Fx hvis ``https://`` mangler i linket (fx ``minside.dk/mitdok.pdf``) således det blivet et gyldigt link.
 
+.. note::
+    Hvis der anvendes en brugerdefineret pop-up template, har denne indstilling ingen effekt (se :ref:`gc2mata_infopopup`)
 
 Link suffix
 =================================================================
 
 Som ved :ref:`gc2structure_link_prefix` men bare bagved. Fx hvis feltet kun indeholder en titel på et dokument: ``mitdok``, så kan ``https://minside.dk`` sættes som prefix og ``.pdf`` som suffix. og resultatet bliver ``https://minside.dk/mitdok.pdf``.
 
+.. note::
+    Hvis der anvendes en brugerdefineret pop-up template, har denne indstilling ingen effekt (se :ref:`gc2mata_infopopup`)
+
+Template
+=================================================================
+
+Hvis værdien af et felt skal udtrykkes i pop-up og tabel ved andet end selve den rå værdi kan der indsættes en template for feltet. En template har adgang til alle objektets attributter. Fx kan der defineres en template, som skaber et link med link-tekst og ``title`` og ``aria-label`` attributter fra et andet felt. Fx:
+
+.. code-block:: html
+
+   <a href="{{doklink}}" target="_blank" title="Link til lokalplan {{plannavn}} {{plannr}} som pdf" aria-label="Link til lokalplan {{plannavn}} {{plannr}} som pdf">{{plannr}} {{plannavn}}</a>
+
+.. note::
+    Hvis der anvendes en brugerdefineret pop-up template, har denne indstilling ingen effekt (se :ref:`gc2mata_infopopup`)
 
 Egenskaber
 =================================================================
@@ -501,7 +568,7 @@ Værdier kan komme fra en anden tabel i databasen. Dette angives ved tre paramet
 
 .. code-block:: json
 
-    {'_rel':'schema.tabel', '_value':'feltnavn', '_text':'feltnavn'}
+    {"_rel":"schema.tabel", "_value":"feltnavn", "_text":"feltnavn"}
 
 * ``_rel`` angiver reference-tabellen (eller view) som schema-kvalificeret (schema-navnet skal angives foran tabelnavnet).
 * ``_value`` angiver feltet, som indeholder værdierne.
@@ -513,7 +580,7 @@ Værdier kan angive som en liste af værdi-tekst par i et JSON objekt. Dvs. at d
 
 .. code-block:: json
 
-    {'tekst_1':'1','tekst_2':'2','tekst_3':'3'}
+    {"tekst_1":"1","tekst_2":"2","tekst_3":"3"}
 
 **Værdi liste**
 
@@ -529,7 +596,5 @@ Listen kan både bestå af tal og tekster.
 
 Der kan dannes en drop-down-liste af samtlige unikke værdier som allerede findes i feltet. Det gøres ved at indsætte ``*`` i feltet.
 
-.. note::
-   JSON strengene skal anvende single-qoutes ``'`` og ikke double-qoutes ``"``. Der erbejdes på at double også kan anvendes.
 
 

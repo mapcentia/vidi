@@ -257,7 +257,7 @@ module.exports = {
             }
         });
 
-        $(document).bind('mousemove', function (e) {
+        $(document).on('mousemove.tail', function (e) {
             $('#tail').css({
                 left: e.pageX + 20,
                 top: e.pageY
@@ -621,5 +621,36 @@ module.exports = {
                 $('#full-screen-btn i').html('fullscreen')
             }
         });
+
+        // Check if active vector layers have max/min zoom values
+        let orginallayers = {};
+        const map = cloud.get().map;
+        const moveEndEvent = () => {
+            const layers = map._layers;
+            for (let key in layers) {
+                if (layers.hasOwnProperty(key)) {
+                    const layer = layers[key];
+                    if (layer?.id?.startsWith("v:")) {
+                        orginallayers[layer.id] = jQuery.extend(true, {}, layer._layers);
+                        if (typeof layer?.minZoom === 'number' || typeof layer?.maxZoom === 'number') {
+                            if (map.getZoom() < layer.minZoom || map.getZoom() >= layer.maxZoom) {
+                                $.each(layer._layers, function (i, v) {
+                                    try {
+                                        map.removeLayer(v);
+                                    } catch (e) {
+                                        // console.error(e)
+                                    }
+                                })
+                            } else {
+                                $.each(orginallayers[layer.id], function (i, v) {
+                                    map.addLayer(v);
+                                })
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        map.on('moveend layeradd', moveEndEvent)
     }
 };

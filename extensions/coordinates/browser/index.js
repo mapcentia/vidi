@@ -130,6 +130,14 @@ module.exports = {
             "Lng": {
                 "da_DK": "L",
                 "en_US": "Lng"
+            },
+            "Pan to": {
+                "da_DK": "Gå til",
+                "en_US": "Pan to"
+            },
+            "Coordinate": {
+                "da_DK": "Koordinat",
+                "en_US": "Coordinate"
             }
         };
 

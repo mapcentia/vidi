@@ -4,9 +4,85 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [UNRELEASED]
+### Added
+- New config option added `popupDraggable`. Makes feature-info popups draggable. Can be set in run-tim config.
+```
+"popupDraggable": true
+```
+
+## [2022.9.1] - 2022-7-9
+### Changed
+- The url parameter `initialFilter` must now be Base64URL encoded, which is safe to use in urls. If filter can't be decoded a alert will tell the user. https://base64.guru/standards/base64url
+
+## [2022.9.0] - 2022-5-9
+### Added
+- In addition to the embed attributes `data-vidi-search` and `data-vidi-history` some more attributes are added to hide the buttons the embed-template. The attrubutes can be set to `none`:
+* data-vidi-legend
+* data-vidi-layer
+* data-vidi-background
+* data-vidi-fullscreen
+* data-vidi-about
+* data-vidi-location
+
+## [2022.8.4] - 2022-31-8
+### Changed
+- conflictSearch now prints with concurrency when selecting a multiple page report. 
+
+## [2022.8.3] - 2022-29-8
+### Fixed
+- State loaded from snapshot now is set in localforage. This was a regression bug.
+- Drawings made in Measurements now is stored in state and will stick between refreshes and in snapshots.
+
+## [2022.8.2] - 2022-17-8
+### Added
+- New runtime config `initZoomCenter`, which will locks Vidi to a specific zoom/center. This will override zoom/center in URL and snapshot link.  
+
+## [2022.8.1] - 2022-10-8
+### Changed
+- Lazy load of snapshot data. The loaded snapshot list now only includes metadata - not the snapshot data itself. When activating a snapshot the data is fetched. This way a long snapshot list will load faster and not fill the memory.
+- Added config options to the symbol module.
+
+## [2022.8.0] - 2022-2-8
+### Added
+- New GC2 meta settings for controlling zoom level visibility for vector layers: `vector_min_zoom` and `vector_max_zoom`. The values must be tile set zoom levels.
+- New GC2 meta setting for bind a tooltip to vector layers: `tooltip_template`. This is a mustache/handlebars template where feature properties can be uses:
+```handlebars
+This is a label for feature <b>{{gid}}</b>
+```
+
+### Changed
+- For each activated layer there is now created a map pane named `[schema]-[layer]` and the layer is added to this. The sort layer function will work on the panes instead on layers. This way both tile and vector layers can be sorted between each other.
+
+### Fixed
+- Issue regarding side-by-side base layers: https://github.com/digidem/leaflet-side-by-side/issues/43
+- Issue regarding `featureInfoTableOnMap` and pop-up error when single feature is selected.
+
+## [2022.6.1] - 2022-28-6
+### Added
+- In pop-ups and vector tables values are now replaced with rendered mustache template if provided through GC2.
+
+### Changed
+- Legend moved to upper right corner in embed.tmpl, so it doesn't coflict with the bottom aligned vector table.
+
+### Changed
+- Pop-ups are not longer opened when selecting a row in table, because this will let gc2table control the pop-up and here editing tools are not supported.
+
+### Fixed
+- Full Danish translation of `coordinates` module.
+- Bug regarding nested double mark-up in pop-ups links fixed.
+- Links in pop-ups and tables will not be generated if value is null or empty string.
+
+## [2022.6.0] - 2022-15-6
+### Added
+- The URL parameters `var_matrikelnr` and `var_landsejerlavskode` will trigger search on the specified cadastral number using `danish` module. These parameters are already used in module `conflictSearch`. 
+
+### Changed
+- UTFgrids are now single tiled for better performance due to fewer network reqeusts. But MapCache can't "untile" raw data, so the GC2 Meta setting `cache_utf_grid` will be ignorred.
+- Upgraded to Leafletjs 1.8 and Bootstrap Table 1.2.0.
+
 ## [2022.5.2] - 2022-27-5
 ### Changed
-- Popup in vector layers is now opened when clicking the feature table. This way the close-pop-up event can be fired when clicking somewhere else. This gives a more consistent experience.
 - `crossMultiSelect` on vector features now used `@turf/boolean-intersects` instead of comparing the bounds of features with Leafletjs. This gives the expected result when clicking on stacked vector features. 
 
 ### Fixed

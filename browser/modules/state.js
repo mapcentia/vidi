@@ -39,12 +39,6 @@ var lz = require('lz-string');
 
 /**
  *
- * @type {exports|module.exports}
- */
-var base64 = require('base64-url');
-
-/**
- *
  * @type {string}
  */
 var BACKEND = require('../../config/config.js').backend;
@@ -62,6 +56,8 @@ var layerTree;
 var stateSnapshots;
 
 let extensions;
+
+let utils;
 
 var listened = {};
 
@@ -144,6 +140,7 @@ module.exports = {
         advancedInfo = o.advancedInfo;
         meta = o.meta;
         layerTree = o.layerTree;
+        utils = o.utils;
         backboneEvents = o.backboneEvents;
         extensions = o.extensions;
         _self = this;
@@ -286,12 +283,16 @@ module.exports = {
                         } else {
                             // Set base layer to the first added one
                             setBaseLayer.init(baseLayer.getAvailableBaseLayers()[0].id);
-                            var extent = setting.getExtent();
-                            if (extent !== null) {
-                                cloud.get().zoomToExtent(extent);
-                            } else {
-                                cloud.get().zoomToExtent();
+
+                            if (!utils.parseZoomCenter(window.vidiConfig?.initZoomCenter)) {
+                                const extent = setting.getExtent();
+                                if (extent !== null) {
+                                    cloud.get().zoomToExtent(extent);
+                                } else {
+                                    cloud.get().zoomToExtent();
+                                }
                             }
+
                             if (window.vidiConfig.activeLayers.length > 0) {
                                 setLayers(false);
                             }
@@ -380,6 +381,13 @@ module.exports = {
 
                                 if (response.data.state.modules?.draw?.drawnItems) {
                                     draw.recreateDrawnings(response.data.state.modules.draw.drawnItems);
+                                }
+
+                                // Recreate Measurements
+                                // =====================
+
+                                if (response.data.state.modules?.measurements?.measurements) {
+                                    draw.recreateDrawnings(response.data.state.modules.measurements.measurements);
                                 }
 
                                 // Recreate query draw
@@ -645,8 +653,7 @@ module.exports = {
      *
      * @returns {Promise}
      */
-    applyState: (state) => {
-
+    applyState: (state, ignoreInitZoomCenter = false) => {
         if (LOG) console.log(`${MODULE_NAME}: applying state`, state);
 
         history.pushState(``, document.title, window.location.pathname + window.location.search);
@@ -656,6 +663,7 @@ module.exports = {
                 reject(`Provided state is empty`);
                 return;
             }
+            _setInternalState(state);
             const applyStateToModules = () => {
                 let promises = [];
                 let modulesWithAppliedState = [];
@@ -694,7 +702,7 @@ module.exports = {
             };
 
             if ('map' in state) {
-                anchor.applyMapParameters(state.map).then(() => {
+                anchor.applyMapParameters(state.map, ignoreInitZoomCenter).then(() => {
                     applyStateToModules();
                 }).catch(error => {
                     console.error(error);
@@ -742,6 +750,12 @@ module.exports = {
     },
 
     setExtent: function () {
+        const arr = window.vidiConfig?.initZoomCenter ? utils.parseZoomCenter(window.vidiConfig.initZoomCenter) : null;
+        if (arr) {
+            hashArr[1] = arr.z;
+            hashArr[2] = arr.x;
+            hashArr[3] = arr.y;
+        }
         if (hashArr[1] && hashArr[2] && hashArr[3]) {
             p = geocloud.transformPoint(hashArr[2], hashArr[3], "EPSG:4326", "EPSG:3857");
             cloud.get().zoomToPoint(p.x, p.y, hashArr[1]);

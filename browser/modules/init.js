@@ -66,6 +66,7 @@ module.exports = {
             infoClickCursorStyle: 'crosshair',
             featureInfoTableOnMap: false,
             showLayerGroupCheckbox: false,
+            popupDraggable: false,
             activeLayers: [],
             initFunction: null,
             snapshot: null,
@@ -73,7 +74,8 @@ module.exports = {
                 position: 'right',
                 width: '30%',
                 height: '250px'
-            }
+            },
+            initZoomCenter: null
         };
         // Set default for unset props
         for (let prop in defaults) {
@@ -196,16 +198,36 @@ module.exports = {
         if (urlVars.l) {
             gc2i18n.dict._showLegend = urlVars.l;
         }
-        if (urlVars.s) {
-            gc2i18n.dict._displaySearch = urlVars.s || "inline";
-        }
-        if (urlVars.his) {
-            gc2i18n.dict._displayhistory = urlVars.his || "inline";
-        }
 
         gc2i18n.dict._showHeader = urlVars.h || "inline";
         gc2i18n.dict.brandName = window.vidiConfig.brandName;
         gc2i18n.dict.aboutBox = window.vidiConfig.aboutBox;
+
+        // Start of embed settings for display of buttons
+        if (urlVars.sea) {
+            gc2i18n.dict._displaySearch = urlVars.sea || "inline";
+        }
+        if (urlVars.his) {
+            gc2i18n.dict._displayHistory = urlVars.his || "inline";
+        }
+        if (urlVars.leg) {
+            gc2i18n.dict._displayLegend = urlVars.leg || "inline";
+        }
+        if (urlVars.lay) {
+            gc2i18n.dict._displayLayer = urlVars.lay || "inline";
+        }
+        if (urlVars.bac) {
+            gc2i18n.dict._displayBackground = urlVars.bac || "inline";
+        }
+        if (urlVars.ful) {
+            gc2i18n.dict._displayFullscreen = urlVars.ful || "inline";
+        }
+        if (urlVars.abo) {
+            gc2i18n.dict._displayAbout = urlVars.abo || "inline";
+        }
+        if (urlVars.loc) {
+            gc2i18n.dict._displayLocation = urlVars.loc || "inline";
+        }
 
         // Render the page
         // ===============
