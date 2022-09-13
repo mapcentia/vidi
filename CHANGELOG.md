@@ -10,6 +10,7 @@ and this project adheres to [CalVer](https://calver.org/).
 ```
 "popupDraggable": true
 ```
+- Geometry created by feature-info module now stick after the module is swtiched off. So now it's possible to print maps with feature-info results. To clear the map the "Clear map" tool button can be used. 
 
 ## [2022.9.1] - 2022-7-9
 ### Changed
