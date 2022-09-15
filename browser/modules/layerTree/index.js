@@ -50,7 +50,7 @@ let _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEv
     onEachFeature = [], pointToLayer = [], onSelectedStyle = [], onLoad = [], onSelect = [],
     onMouseOver = [], cm = [], styles = [], tables = {}, childLayersThatShouldBeEnabled = [];
 
-const uuidv4 = require('uuid/v4');
+const { v4: uuidv4 } = require('uuid');
 const React = require('react');
 const ReactDOM = require('react-dom');
 const base64url = require('base64url');

@@ -8,7 +8,7 @@ const React = require('react');
 import TitleFieldComponent from './../../shared/TitleFieldComponent';
 import LoadingOverlay from './../../shared/LoadingOverlay';
 
-const uuidv4 = require('uuid/v4');
+const { v4: uuidv4 } = require('uuid');
 const cookie = require('js-cookie');
 const base64url = require('base64url');
 
