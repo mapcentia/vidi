@@ -137,7 +137,7 @@
     "localforage": "^1.7.4",
     "lodash": "^4.17.15",
     "lz-string": "^1.4.4",
-    "marked": "^1.1.0",
+    "marked": "^4.0.10",
     "md5": "^2.2.1",
     "mobile-drag-drop": "^2.3.0-rc.2",
     "moment": "^2.29.4",
