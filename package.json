@@ -165,7 +165,7 @@
     "react-router": "^4.3.1",
     "react-router-redux": "^4.0.8",
     "react-tabs": "^5.1.0",
-    "redis": "^2.8.0",
+    "redis": "^3.1.1",
     "redux-thunk": "^2.3.0",
     "regenerator-runtime": "^0.13.9",
     "reproject": "^1.2.5",
