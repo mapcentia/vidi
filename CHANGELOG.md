@@ -4,13 +4,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [UNRELEASED]
+## [2022.9.2] - 2022-19-9
 ### Added
 - New config option added `popupDraggable`. Makes feature-info popups draggable. Can be set in run-tim config.
-```
-"popupDraggable": true
+```json
+{
+  "popupDraggable": true
+}
 ```
 - Geometry created by feature-info module now stick after the module is swtiched off. So now it's possible to print maps with feature-info results. To clear the map the "Clear map" tool button can be used. 
+- A sort-by-score mode is added to Danish search module. The setting will sort the address list by a calculated score, so most relavant suggestions will be a the top. If switched off the list will be sorted alphanumeric. For now only works for address not cadastre.
+```json
+{
+  "searchConfig": {
+    "komkode": "*",
+    "sortByScore": true
+  }
+}
+```
 
 ## [2022.9.1] - 2022-7-9
 ### Changed
