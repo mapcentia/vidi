@@ -547,7 +547,6 @@ Angives således `/z/x/y`. Dette svarer til det, der vises i Vidi URL'en.
 
     "initZoomCenter": "/16/9.875/56.142"
 
-.. rubric:: Fodnoter
 
 .. _configjs_popupdraggable:
 
@@ -560,5 +559,6 @@ Hvis sat til `true` kan man flytte feature-info pop-up'en på kortet.
 
     "popupDraggable": false
 
+.. rubric:: Fodnoter
 
 .. [#fragment] Et fragment er den del af en URL der kommer efter `#`.
