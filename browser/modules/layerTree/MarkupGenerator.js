@@ -200,6 +200,11 @@ class MarkupGenerator {
                                     <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Table view`)}" class="material-icons">list</i>
                                 </a>
                             </span>
+                            <span id="layer-tools-style">
+                                <a href="javascript:void(0);" class="js-toggle-style">
+                                    <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Style function`)}" class="material-icons">palette</i>
+                                </a>
+                            </span>
                             <span id="layer-tools-load">
                                 <a href="javascript:void(0);" class="js-toggle-load-strategy">
                                     <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Load strategy`)}" class="material-icons">branding_watermark</i>
@@ -227,6 +232,7 @@ class MarkupGenerator {
             <div class="js-layer-settings-opacity" style="display: none;"></div>
             <div class="js-layer-settings-labels" style="display: none;"></div>
             <div class="js-layer-settings-search" style="display: none;"></div>
+            <div class="js-layer-settings-style" style="display: none;"></div>
             <div class="js-layer-settings-table" id="table_view-${layerKey.replace(".", "_")}" style="display: none;"></div>
             </div>
         </li>`);

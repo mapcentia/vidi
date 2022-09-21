@@ -44,13 +44,14 @@ import {
     feature as turfFeature,
     booleanIntersects as turfIntersects
 } from '@turf/turf'
+import StyleSettingForm from "./StyleSettingForm";
 
 
 let _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEvents,
     onEachFeature = [], pointToLayer = [], onSelectedStyle = [], onLoad = [], onSelect = [],
     onMouseOver = [], cm = [], styles = [], tables = {}, childLayersThatShouldBeEnabled = [];
 
-const { v4: uuidv4 } = require('uuid');
+const {v4: uuidv4} = require('uuid');
 const React = require('react');
 const ReactDOM = require('react-dom');
 const base64url = require('base64url');
@@ -95,7 +96,8 @@ let moduleState = {
     editorFilters: {},
     editorFiltersActive: {},
     fitBoundsActiveOnLayers: {},
-    labelSettings: {}
+    labelSettings: {},
+    vectorStyles: {}
 };
 
 /**
@@ -380,6 +382,11 @@ module.exports = {
                         $(container).find('.js-layer-settings-table').hide(0);
                     };
 
+                    const hideStyleFn = () => {
+                        $(container).find(`.js-toggle-style`).hide(0);
+                        $(container).find('.js-layer-settings-style').hide(0);
+                    };
+
                     const hideOfflineMode = () => {
                         $(container).find(`.js-toggle-layer-offline-mode-container`).css(`display`, `none`);
                     };
@@ -421,6 +428,7 @@ module.exports = {
                             $(container).find(`.js-toggle-load-strategy`).show(0);
                             $(container).find(`.js-toggle-layer-offline-mode-container`).css(`display`, `inline-block`);
                             $(container).find(`.js-toggle-table`).show(0);
+                            $(container).find(`.js-toggle-style`).show(0);
                         } else {
                             hideAddFeature();
                             hideFilters();
@@ -430,12 +438,14 @@ module.exports = {
                             hideLabels();
                             hideTableView();
                             hideSearch();
+                            hideStyleFn()
                         }
                     } else if (desiredSetupType === LAYER.RASTER_TILE || desiredSetupType === LAYER.VECTOR_TILE) {
                         // Opacity and filters should be kept opened after setLayerState()
                         if ($(container).attr(`data-last-layer-type`) !== desiredSetupType) {
                             hideLoadStrategy();
                             hideTableView();
+                            hideStyleFn();
                         }
 
                         hideOfflineMode();
@@ -478,6 +488,7 @@ module.exports = {
                         hideOfflineMode();
                         hideLoadStrategy();
                         hideTableView();
+                        hideStyleFn();
                         hideOpacity();
                         hideLabels();
                         hideSearch();
@@ -617,6 +628,7 @@ module.exports = {
             dynamicLoad: moduleState.dynamicLoad,
             editorFilters: moduleState.editorFilters,
             editorFiltersActive: moduleState.editorFiltersActive,
+            vectorStyles: moduleState.vectorStyles
         };
         return state;
     },
@@ -664,6 +676,9 @@ module.exports = {
             moduleState.predefinedFilters = {};
         }
 
+        // Setting vector styles
+
+
         // Setting virtual layers
         if (newState !== false && `virtualLayers` in newState && Array.isArray(newState.virtualLayers) && newState.virtualLayers.length > 0) {
             let layersCopy = JSON.parse(JSON.stringify(newState.virtualLayers));
@@ -697,7 +712,8 @@ module.exports = {
                 predefinedFilters: {},
                 arbitraryFilters: {},
                 editorFilters: {},
-                editorFiltersActive: {}
+                editorFiltersActive: {},
+                vectorStyles: {}
             };
         } else if (newState.order && newState.order === 'false') {
             newState.order = false;
@@ -954,6 +970,7 @@ module.exports = {
                                 if (forcedState.dynamicLoad) moduleState.dynamicLoad = forcedState.dynamicLoad;
                                 if (forcedState.editorFilters) moduleState.editorFilters = forcedState.editorFilters;
                                 if (forcedState.editorFiltersActive) moduleState.editorFiltersActive = forcedState.editorFiltersActive;
+                                if (forcedState.vectorStyles) moduleState.vectorStyles = forcedState.vectorStyles;
 
                                 if (LOG) console.log(`${MODULE_NAME}: layers that are not in meta`, layersThatAreNotInMeta);
 
@@ -1198,6 +1215,7 @@ module.exports = {
                 applySetting(`virtualLayers`, []);
                 applySetting(`opacitySettings`, {});
                 applySetting(`dynamicLoad`, {});
+                applySetting(`vectorStyles`, {});
 
                 resolve({order, offlineModeSettings});
             });
@@ -1381,7 +1399,8 @@ module.exports = {
         let parentFiltersHash = ``;
         let layerKey = layer.f_table_schema + '.' + layer.f_table_name;
         const layerSpecificQueryLimit = layerTreeUtils.getQueryLimit(meta.parseLayerMeta(layerKey));
-        let sql = `SELECT * FROM ${layerKey} LIMIT ${layerSpecificQueryLimit}`;
+        let sql = `SELECT *
+                   FROM ${layerKey} LIMIT ${layerSpecificQueryLimit}`;
         if (isVirtual) {
             let storeWasFound = false;
             moduleState.virtualLayers.map(item => {
@@ -1422,7 +1441,9 @@ module.exports = {
             // Gathering all WHERE clauses
             if (whereClauses.length > 0) {
                 whereClauses = whereClauses.map(item => `(${item})`);
-                sql = `SELECT * FROM ${layerKey} WHERE (${whereClauses.join(` AND `)}) LIMIT ${layerSpecificQueryLimit}`;
+                sql = `SELECT *
+                       FROM ${layerKey}
+                       WHERE (${whereClauses.join(` AND `)}) LIMIT ${layerSpecificQueryLimit}`;
             }
         }
 
@@ -1717,7 +1738,8 @@ module.exports = {
     createWebGLStore: (layer) => {
         let layerKey = layer.f_table_schema + '.' + layer.f_table_name;
         const layerSpecificQueryLimit = layerTreeUtils.getQueryLimit(meta.parseLayerMeta(layerKey));
-        let sql = `SELECT * FROM ${layerKey} LIMIT ${layerSpecificQueryLimit}`;
+        let sql = `SELECT *
+                   FROM ${layerKey} LIMIT ${layerSpecificQueryLimit}`;
 
         let whereClauses = [];
         let activeFilters = _self.getActiveLayerFilters(layerKey);
@@ -1743,7 +1765,9 @@ module.exports = {
         // Gathering all WHERE clauses
         if (whereClauses.length > 0) {
             whereClauses = whereClauses.map(item => `(${item})`);
-            sql = `SELECT * FROM ${layerKey} WHERE (${whereClauses.join(` AND `)}) LIMIT ${layerSpecificQueryLimit}`;
+            sql = `SELECT *
+                   FROM ${layerKey}
+                   WHERE (${whereClauses.join(` AND `)}) LIMIT ${layerSpecificQueryLimit}`;
         }
 
         let trackingLayerKey = (LAYER.WEBGL + ':' + layerKey);
@@ -2508,8 +2532,7 @@ module.exports = {
                         console.error("Error in point-to-layer function for: " + layerKey);
                     }
                 }
-
-                let vectorStyle = (parsedMeta.vector_style && parsedMeta.vector_style !== "") ? parsedMeta.vector_style : null;
+                let vectorStyle = moduleState.vectorStyles?.[layerKey] && moduleState.vectorStyles[layerKey] !== '' ? moduleState.vectorStyles[layerKey] : parsedMeta.vector_style && parsedMeta.vector_style !== "" ? parsedMeta.vector_style : null;
                 if (vectorStyle) {
                     try {
                         let func = Function('"use strict";return (' + vectorStyle + ')')();
@@ -2519,8 +2542,6 @@ module.exports = {
                     }
 
                 }
-
-
                 _self.createStore(layer, isVirtualGroup);
             }
 
@@ -3222,6 +3243,42 @@ module.exports = {
                     });
                 }
 
+                // Vector styles
+                const settingsStyle = $(layerContainer).find('.js-layer-settings-style')
+                const componentContainerId = `layer-settings-styles-${layerKey}`;
+                settingsStyle.append(`<div id="${componentContainerId}"></div>`);
+
+                let value = '';
+                if (layerKey in moduleState.vectorStyles) {
+                    value = moduleState.vectorStyles[layerKey];
+                }
+
+                setTimeout(() => {
+                    if (document.getElementById(componentContainerId)) {
+                        ReactDOM.render(<StyleSettingForm
+                                layerKey={layerKey}
+                                initialValue={value}
+                                onChange={_self.onChangeStylesHandler}/>,
+                            document.getElementById(componentContainerId));
+                    } else {
+                        console.error(`Unable to find the labels control container`);
+                    }
+                }, 10);
+
+                $(layerContainer).find(`.js-toggle-style`).click(() => {
+                    _self._selectIcon($(layerContainer).find('.js-toggle-style'));
+                    $(layerContainer).find('.js-layer-settings-style').toggle();
+                });
+                // settingsStyle.find('button').click(() => {
+                //     let func;
+                //     try {
+                //         func = Function('"use strict";return (' + settingsStyle.find('textarea')[0].value + ')')();
+                //         _self.setStyle(LAYER.VECTOR + ':' + layerKey, func)
+                //     } catch (e) {
+                //         alert("Error in function")
+                //     }
+                // })
+
                 $(layerContainer).find(`.js-toggle-search`).click(() => {
                     _self._selectIcon($(layerContainer).find('.js-toggle-search'));
                     $(layerContainer).find('.js-layer-settings-search').toggle();
@@ -3360,6 +3417,17 @@ module.exports = {
 
     },
 
+    onChangeStylesHandler: ({layerKey, fn}) => {
+        moduleState.vectorStyles[layerKey] = fn;
+        let func;
+        try {
+            func = Function('"use strict";return (' + fn + ')')();
+            _self.setStyle(LAYER.VECTOR + ':' + layerKey, func)
+        } catch (e) {
+            alert("Error in function")
+        }
+    },
+
     onApplyArbitraryFiltersHandler: ({layerKey, filters}, forcedReloadLayerType = false) => {
         validateFilters(filters);
         moduleState.arbitraryFilters[layerKey] = filters;
@@ -3373,12 +3441,13 @@ module.exports = {
     onApplyFitBoundsFiltersHandler: (layerKey) => {
         let metaData = meta.getMetaByKey(layerKey);
         let whereClause = _self.getActiveLayerFilters(layerKey)[0];
-        let sql = `SELECT 
-                    ST_Xmin(ST_Extent(extent)) AS txmin,
-                    ST_Xmax(ST_Extent(extent)) AS txmax,
-                    ST_Ymin(ST_Extent(extent)) AS tymin,
-                    ST_Ymax(ST_Extent(extent)) AS tymax
-                FROM (SELECT ST_astext(ST_Transform(ST_setsrid(ST_Extent(${metaData.f_geometry_column}),${metaData.srid}),4326)) AS extent FROM ${layerKey} WHERE ${whereClause}) as foo`;
+        let sql = `SELECT ST_Xmin(ST_Extent(extent)) AS txmin,
+                          ST_Xmax(ST_Extent(extent)) AS txmax,
+                          ST_Ymin(ST_Extent(extent)) AS tymin,
+                          ST_Ymax(ST_Extent(extent)) AS tymax
+                   FROM (SELECT ST_astext(ST_Transform(ST_setsrid(ST_Extent(${metaData.f_geometry_column}), ${metaData.srid}), 4326)) AS extent
+                         FROM ${layerKey}
+                         WHERE ${whereClause}) as foo`;
         let q = {
             q: base64url(sql),
             base64: true
@@ -3401,7 +3470,9 @@ module.exports = {
     },
     onApplyDownloadHandler: (layerKey, format) => {
         let whereClause = _self.getActiveLayerFilters(layerKey)[0];
-        let sql = `SELECT * FROM ${layerKey} WHERE ${whereClause}`;
+        let sql = `SELECT *
+                   FROM ${layerKey}
+                   WHERE ${whereClause}`;
         download.download(sql, format)
     },
 
