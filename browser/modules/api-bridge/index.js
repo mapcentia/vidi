@@ -47,7 +47,7 @@ class APIBridge {
 
                         if (queueItem.type === Queue.ADD_REQUEST) {
                             let newFeatureId = false;
-                            let featureIdRaw = response.message['wfs:InsertResult']['ogc:FeatureId']['fid'].split(".");
+                            let featureIdRaw = response.message['wfs:InsertResults']['wfs:Feature']['ogc:FeatureId']['fid'].split(".");
                             if (featureIdRaw.length === 2) {
                                 newFeatureId = featureIdRaw[1];
                             } else {
