@@ -44,7 +44,7 @@ import {
     feature as turfFeature,
     booleanIntersects as turfIntersects
 } from '@turf/turf'
-import StyleSettingForm from "./StyleSettingForm";
+import MetaSettingForm from "./MetaSettingForm";
 
 
 let _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEvents,
@@ -1476,9 +1476,10 @@ module.exports = {
         } else {
             template = defaultTemplate;
         }
-        if (parsedMeta?.tooltip_template && parsedMeta.tooltip_template !== "") {
-            tooltipTemplate = parsedMeta.tooltip_template;
-        }
+        tooltipTemplate = moduleState.vectorStyles?.[layerKey]?.tooltipTmpl && moduleState.vectorStyles[layerKey].tooltipTmpl !== '' ? moduleState.vectorStyles[layerKey].tooltipTmpl : parsedMeta?.tooltip_template && parsedMeta.tooltip_template !== "" ? parsedMeta.tooltip_template : null;
+        // if (parsedMeta?.tooltip_template && parsedMeta.tooltip_template !== "") {
+        //     tooltipTemplate = parsedMeta.tooltip_template;
+        // }
         let fieldConf;
         try {
             fieldConf = JSON.parse(metaData[layerKey].fieldconf);
@@ -2528,25 +2529,29 @@ module.exports = {
                         }
                     }
                 }
-
-                let pointToLayer = (parsedMeta.point_to_layer && parsedMeta.point_to_layer !== "") ? parsedMeta.point_to_layer : null;
-                if (pointToLayer) {
+                let pointToLayerFn = moduleState.vectorStyles?.[layerKey]?.pointToLayerFn && moduleState.vectorStyles[layerKey].pointToLayerFn !== '' ? moduleState.vectorStyles[layerKey].pointToLayerFn : parsedMeta.point_to_layer && parsedMeta.point_to_layer !== "" ? parsedMeta.point_to_layer : null;
+                if (pointToLayerFn) {
                     try {
-                        let func = Function('"use strict";return (' + pointToLayer + ')')();
+                        let func = Function('"use strict";return (' + pointToLayerFn + ')')();
                         _self.setPointToLayer(LAYER.VECTOR + ':' + layerKey, func);
                     } catch (e) {
                         console.error("Error in point-to-layer function for: " + layerKey);
                     }
+                } else {
+                    _self.setPointToLayer(LAYER.VECTOR + ':' + layerKey, null);
                 }
-                let vectorStyle = moduleState.vectorStyles?.[layerKey]?.styleFn && moduleState.vectorStyles[layerKey].styleFn !== '' ? moduleState.vectorStyles[layerKey].styleFn : parsedMeta.vector_style && parsedMeta.vector_style !== "" ? parsedMeta.vector_style : null;
-                if (vectorStyle) {
+                let vectorStyleFn = moduleState.vectorStyles?.[layerKey]?.styleFn && moduleState.vectorStyles[layerKey].styleFn !== '' ? moduleState.vectorStyles[layerKey].styleFn : parsedMeta.vector_style && parsedMeta.vector_style !== "" ? parsedMeta.vector_style : null;
+                if (vectorStyleFn) {
                     try {
-                        let func = Function('"use strict";return (' + vectorStyle + ')')();
+                        let func = Function('"use strict";return (' + vectorStyleFn + ')')();
                         _self.setStyle(LAYER.VECTOR + ':' + layerKey, func);
                     } catch (e) {
                         console.error("Error in style function for: " + layerKey);
                     }
+                } else {
+                    _self.setStyle(LAYER.VECTOR + ':' + layerKey, null);
                 }
+
                 _self.createStore(layer, isVirtualGroup);
             }
 
@@ -3253,16 +3258,19 @@ module.exports = {
                 const componentContainerId = `layer-settings-styles-${layerKey}`;
                 settingsStyle.append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
 
-                let values = {};
+                let values = {
+
+                };
                 if (layerKey in moduleState.vectorStyles) {
                     values = moduleState.vectorStyles[layerKey];
                 } else {
-                    values['styleFn'] = parsedMeta.vector_style;
+                    values['styleFn'] = parsedMeta?.vector_style;
+                    values['pointToLayerFn'] = parsedMeta?.point_to_layer;
                 }
 
                 setTimeout(() => {
                     if (document.getElementById(componentContainerId)) {
-                        ReactDOM.render(<StyleSettingForm
+                        ReactDOM.render(<MetaSettingForm
                                 layerKey={layerKey}
                                 initialValues={values}
                                 onChange={_self.onChangeStylesHandler}/>,
@@ -3415,14 +3423,30 @@ module.exports = {
     onChangeStylesHandler: ({layerKey, obj}) => {
         moduleState.vectorStyles[layerKey] = obj;
         let func;
-        try {
-            func = Function('"use strict";return (' + obj.styleFn + ')')();
-            _self.setStyle(LAYER.VECTOR + ':' + layerKey, func)
-            _self.reloadLayerOnStyleChange(layerKey)
-
-        } catch (e) {
-            alert("Error in function")
+        if (obj?.styleFn === '') {
+            _self.setStyle(LAYER.VECTOR + ':' + layerKey, null)
+        } else {
+            try {
+                func = Function('"use strict";return (' + obj.styleFn + ')')();
+                _self.setStyle(LAYER.VECTOR + ':' + layerKey, func)
+            } catch (e) {
+                alert("Error in style function")
+            }
         }
+
+        if (obj?.pointToLayerFn === '') {
+            _self.setPointToLayer(LAYER.VECTOR + ':' + layerKey, null)
+        } else {
+            try {
+                func = Function('"use strict";return (' + obj.pointToLayerFn + ')')();
+                _self.setPointToLayer(LAYER.VECTOR + ':' + layerKey, func)
+            } catch (e) {
+                alert("Error in point-to-layer function")
+            }
+        }
+        if (obj?.tooltipTmpl === '') {
+        }
+        _self.reloadLayerOnStyleChange(layerKey)
     },
 
     onApplyArbitraryFiltersHandler: ({layerKey, filters}, forcedReloadLayerType = false) => {
@@ -3628,18 +3652,29 @@ module.exports = {
         cm[layer] = c;
     },
 
-    setStyle: function (layerName, style) {
+    setStyle: function (layerName, fn) {
+        if (!fn) {
+            delete styles[layerName];
+        } else {
+            let foundLayers = layers.getMapLayers(false, layerName);
+            if (foundLayers.length === 1) {
+                let layer = foundLayers[0];
+                layer.options.style = fn;
+            }
+            styles[layerName] = fn;
+        }
+    },
+
+    setPointToLayer: function (layerName, fn) {
         let foundLayers = layers.getMapLayers(false, layerName);
         if (foundLayers.length === 1) {
             let layer = foundLayers[0];
-            layer.options.style = style;
+            layer.options.pointToLayer = fn;
         }
-
-        styles[layerName] = style;
-    },
-
-    setPointToLayer: function (layer, fn) {
-        pointToLayer[layer] = fn;
+        if (!fn) {
+            delete pointToLayer[layerName];
+        } else
+        pointToLayer[layerName] = fn;
     },
 
     setOnSelectedStyle: function (layer, style) {
