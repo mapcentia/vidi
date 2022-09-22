@@ -617,13 +617,6 @@ inline .leaflet-control-print {
 .layer-item {
   padding: 0 !important;
 }
-.layer-item label {
-  padding-top: 3px;
-  padding-right: 15px;
-  padding-bottom: 3px;
-  padding-left: 41px;
-  text-indent: -26px;
-}
 .base-layer-item .fa {
   float: right;
   display: none;
@@ -1093,6 +1086,9 @@ h4 small {
 .js-layer-settings-table {
   padding: 5px;
 }
+.js-layer-settings {
+  margin-top: 10px;
+}
 .mouseover-content {
   background-color: rgba(255, 255, 255, 0.8);
   padding: 5px;
@@ -1262,9 +1258,6 @@ h4 small {
 }
 #info-pane > .tab-pane {
   height: 100%;
-}
-.togglebutton {
-  margin-bottom: 6px;
 }
 .help-btn {
   color: rgba(0, 0, 0, 0.26);

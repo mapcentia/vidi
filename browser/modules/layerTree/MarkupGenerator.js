@@ -74,11 +74,11 @@ class MarkupGenerator {
         </div>`);
     }
 
-    getSubgroupControlRecord(base64SubgroupName, name, level, addGroupCheckbox = false ) {
+    getSubgroupControlRecord(base64SubgroupName, name, level, addGroupCheckbox = false) {
         return (`<li
         class="layer-item list-group-item list-subgroup-item"
         data-gc2-subgroup-id="${name}"
-        style="min-height: 36px; margin-top: 1px; background-color: white; border-bottom: 1px solid #CCC;">
+        style="background-color: white; border-bottom: 1px solid #CCC;">
             <span style="display: ${addGroupCheckbox ? "inline" : "none"}; margin-left: -2px" class="checkbox">
                 <label>
                     <input type="checkbox" data-gc2-subgroup-name="${name}" data-gc2-subgroup-level="${level}">
@@ -98,42 +98,39 @@ class MarkupGenerator {
         let tooltip = layer.f_table_abstract || ``;
 
         return (`
-        <li class="layer-item list-group-item" data-gc2-layer-key="${layerKeyWithGeom}" style="min-height: 36px; margin-top: 1px; border-bottom: 1px solid #CCC; background-color: white;">
-            <div style="border-left: 0px solid #ccc">
-                <div style="display: flex; min-height: 40px; justify-content: space-between; flex-wrap: wrap;">
-                    <div style="margin-top: 4px;">
-                        <div style="display: inline-block;">
-                            <div class="checkbox" style="width: 34px; top: 2px">
-                                <label>
-                                    <input type="checkbox"
-                                        ${(layerIsActive ? `checked="checked"` : ``)}
-                                        ${(disableCheckBox ? `disabled` : ``)}
-                                        class="js-show-layer-control"
-                                        id="${layer.f_table_name}"
-                                        data-gc2-id="${layer.f_table_schema}.${layer.f_table_name}"
-                                        data-gc2-layer-type="${layerType}">
-                                </label>
-                            </div>
+        <li class="layer-item list-group-item" data-gc2-layer-key="${layerKeyWithGeom}" style="margin-top: 0; border-bottom: 2px solid #CCC; background-color: white;">
+            <div style="padding: 7px 2px;">
+                <div style="display: flex; align-items: center;">
+                    <div class="togglebutton">
+                        <label style="margin: 0">
+                            <input type="checkbox"
+                                ${(layerIsActive ? `checked="checked"` : ``)}
+                                ${(disableCheckBox ? `disabled` : ``)}
+                                class="js-show-layer-control"
+                                id="${layer.f_table_name}"
+                                data-gc2-id="${layer.f_table_schema}.${layer.f_table_name}"
+                                data-gc2-layer-type="${layerType}">
+                        </label>
+                    </div>
+    
+    
+                    <div style="display: inline-block;" id="layer-information">
+                        <div style="display: flex; align-items: center; column-gap: 5px;">
+                            ${text}${lockedLayer}
+                            <span class="js-tiles-contain-data" style="visibility: ${moduleState.tileContentCache[layerKey] ? "inline" : "hidden"};" data-toggle="tooltip" data-placement="right"
+                                title="${__("Layer is visible")}"><i class="fa fa-eye info-icon" style="color: green;"></i></span>
+                            <span class="js-layer-is-disabled" style="visibility: ${disableCheckBox ? "inline" : "hidden"};" data-toggle="tooltip" data-placement="right"
+                                title="${__("Locked")}"><span class="material-icons" style="font-size: 13px; color: red">lock</span></span>
+                            <span class="js-layer-has-parents info-icon" style="visibility: ${parentLayerKeys.length > 0 ? "inline" : "hidden"};" data-toggle="tooltip" data-placement="right"
+                                title="${__("Parents")}: ${parentLayerKeys.length > 0 ? parentLayerKeys.join(", ") : ""}"><span class="material-icons" style="font-size: 13px">arrow_upward</span></span>
+                            <span class="js-layer-has-children info-icon" style="visibility: ${childLayerKeys.length > 0 ? "inline" : "hidden"};" data-toggle="tooltip" data-placement="right"
+                                title="${__("Children")}: ${childLayerKeys.length > 0 ? childLayerKeys.join(", ") : ""}"><span class="material-icons" style="font-size: 13px">arrow_downward</span></span>
+                            <span style="display: none" class="_gc2_layer_sort_id">(${layer.sort_id})</span>
                         </div>
-        
-                        <div style="display: inline-block;">${layerTypeSelector}</div>
-        
-                        <div style="display: inline-block;" id="layer-information">
-                            <span>
-                                ${text}${lockedLayer}
-                                <span class="js-tiles-contain-data" style="visibility: ${moduleState.tileContentCache[layerKey] ? "inline" : "hidden"};" data-toggle="tooltip" data-placement="right"
-                                    title="${__("Layer is visible")}"><i class="fa fa-eye info-icon" style="color: green;"></i></span>
-                                <span class="js-layer-is-disabled" style="visibility: ${disableCheckBox ? "inline" : "hidden"};" data-toggle="tooltip" data-placement="right"
-                                    title="${__("Locked")}"><span class="material-icons" style="font-size: 13px; color: red">lock</span></span>
-                                <span class="js-layer-has-parents info-icon" style="visibility: ${parentLayerKeys.length > 0 ? "inline" : "hidden"};" data-toggle="tooltip" data-placement="right"
-                                    title="${__("Parents")}: ${parentLayerKeys.length > 0 ? parentLayerKeys.join(", ") : ""}"><span class="material-icons" style="font-size: 13px">arrow_upward</span></span>
-                                <span class="js-layer-has-children info-icon" style="visibility: ${childLayerKeys.length > 0 ? "inline" : "hidden"};" data-toggle="tooltip" data-placement="right"
-                                    title="${__("Children")}: ${childLayerKeys.length > 0 ? childLayerKeys.join(", ") : ""}"><span class="material-icons" style="font-size: 13px">arrow_downward</span></span>
-                                <span style="display: none" class="_gc2_layer_sort_id">(${layer.sort_id})</span>
-                            </span>
-                        </div>
-        
-                        <div style="display: inline-block;">
+                    </div>
+    
+                    <div style="display: inline-block;">
+                        <div style="align-items: center; display: flex">
                             <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-failed-add" style="${queueFailedButtonStyle}" disabled>
                                 <i class="fa fa-plus"></i> <span class="js-value"></span>
                             </button>
@@ -157,13 +154,60 @@ class MarkupGenerator {
                             </button>
                         </div>
                     </div>
-                    <div style="text-align: right; flex-grow: 1;">
-                        <div style="display: inline-block;">
-                            <div class="btn-group" role="group" style="height: 23px; width: 1px; margin: 10px;"></div>
+                    
+                    <div style="display: inline-block; margin-left: auto;">
+                        <div class="btn-group" role="group"></div>
+                    </div>
+                    <div style="display: inline-block;">${layerTypeSelector}</div>
+                    ${addButton}
+                    <button data-toggle="tooltip" data-placement="left" title="${tooltip}" style="padding: 2px 10px; margin: 0; visibility: ${displayInfo};" class="btn info-label" data-gc2-id="${layerKey}"><i style="font-size: 18px;" class="material-icons">info</i></a>
+                    <button disabled style="padding: 2px 10px; margin: 0" class="btn js-settings-panel-btn" role="button" data-toggle="collapse" data-target="#settings-${layer.f_table_schema}-${layer.f_table_name}" aria-expanded="false" aria-controls="collapseExample"><i style="font-size: 18px;" class="material-icons">settings</i></button>
+                    <i style="font-size: 26px;" class="material-icons layer-move-vert">more_vert</i>
+                </div>
+                <div  class="collapse" id="settings-${layer.f_table_schema}-${layer.f_table_name}" style="margin-top: 8px">
+                    <div class="well" style="align-items: center; justify-content: center; display: flex; padding: 3px; margin: 0 5px">
+                        <div class="js-toggles-container" style="display: none;">
+                            <div style="display: flex; align-items: center;">
+                                <span id="layer-tools-search">
+                                    <a href="javascript:void(0);" class="js-toggle-search" >
+                                        <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Search`)}" class="material-icons">search</i>
+                                    </a>
+                                </span>
+                                <span id="layer-tools-opacity">
+                                    <a href="javascript:void(0);" class="js-toggle-opacity">
+                                        <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Opacity`)}" class="material-icons">opacity</i>
+                                    </a>
+                                </span>
+                                <span id="layer-tools-labels">
+                                    <a href="javascript:void(0);" class="js-toggle-labels">
+                                        <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Labels`)}" class="material-icons">label</i>
+                                    </a>
+                                </span>
+                                <span id="layer-tools-table">
+                                    <a href="javascript:void(0);" class="js-toggle-table">
+                                        <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Table view`)}" class="material-icons">list</i>
+                                    </a>
+                                </span>
+                                <span id="layer-tools-style">
+                                    <a href="javascript:void(0);" class="js-toggle-style">
+                                        <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Style function`)}" class="material-icons">palette</i>
+                                    </a>
+                                </span>
+                                <span id="layer-tools-load">
+                                    <a href="javascript:void(0);" class="js-toggle-load-strategy">
+                                        <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Load strategy`)}" class="material-icons">branding_watermark</i>
+                                    </a>
+                                </span>
+                                <span id="layer-tools-filters">
+                                    <a href="javascript:void(0);" class="js-toggle-filters">
+                                        <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Filters`)}" class="material-icons">filter_list</i>
+                                    </a>
+                                <span class="js-toggle-filters-number-of-filters">0</span>
+                                </span>
+                            </div>
                         </div>
-
                         <div class="js-toggle-layer-offline-mode-container" style="display: none;">
-                            <div class="btn-group" role="group" id="layer-tools-offline">
+                            <div class="btn-group" role="group" id="layer-tools-offline" style="display: flex; align-items: center; margin: 0">
                                 <button type="button" data-layer-key="${layerKey}" class="btn btn-success btn-xs js-set-online" title="${__(`Fetch layer data from server`)}" style="padding: 4px" disabled>
                                     <i class="fa fa-signal"></i>
                                 </button>
@@ -178,62 +222,16 @@ class MarkupGenerator {
                                 </button>
                             </div>
                         </div>
-        
-                        <div class="js-toggles-container" style="display: none; padding-right: 10px; padding-left: 10px;">
-                            <span id="layer-tools-search">
-                                <a href="javascript:void(0);" class="js-toggle-search" >
-                                    <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Search`)}" class="material-icons">search</i>
-                                </a>
-                            </span>
-                            <span id="layer-tools-opacity">
-                                <a href="javascript:void(0);" class="js-toggle-opacity">
-                                    <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Opacity`)}" class="material-icons">opacity</i>
-                                </a>
-                            </span>
-                            <span id="layer-tools-labels">
-                                <a href="javascript:void(0);" class="js-toggle-labels">
-                                    <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Labels`)}" class="material-icons">label</i>
-                                </a>
-                            </span>
-                            <span id="layer-tools-table">
-                                <a href="javascript:void(0);" class="js-toggle-table">
-                                    <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Table view`)}" class="material-icons">list</i>
-                                </a>
-                            </span>
-                            <span id="layer-tools-style">
-                                <a href="javascript:void(0);" class="js-toggle-style">
-                                    <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Style function`)}" class="material-icons">palette</i>
-                                </a>
-                            </span>
-                            <span id="layer-tools-load">
-                                <a href="javascript:void(0);" class="js-toggle-load-strategy">
-                                    <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Load strategy`)}" class="material-icons">branding_watermark</i>
-                                </a>
-                            </span>
-                            <span id="layer-tools-filters">
-                                <a href="javascript:void(0);" class="js-toggle-filters">
-                                    <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Filters`)}" class="material-icons">filter_list</i>
-                                </a>
-                            <span class="js-toggle-filters-number-of-filters">0</span>
-                            </span>
-                        </div>
-                        
-                        <i style="float: right; padding-top: 9px; font-size: 26px;" class="material-icons layer-move-vert">more_vert</i>
-        
-                        <div style="float: right; padding-top: 8px; padding-right: 10px;">${addButton}
-                            <a href="javascript:void(0);" data-toggle="tooltip" data-placement="left" title="${tooltip}" style="visibility: ${displayInfo};" class="info-label" data-gc2-id="${layerKey}">${__(`Info`)}</a>
-                        </div>
                     </div>
+                    <div class="js-rejectedByServerItems hidden" style="width: 100%; padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>
+                    <div class="js-layer-settings js-layer-settings-filters" style="display: none;"></div>
+                    <div class="js-layer-settings js-layer-settings-load-strategy" style="display: none;"></div>
+                    <div class="js-layer-settings js-layer-settings-opacity" style="display: none;"></div>
+                    <div class="js-layer-settings js-layer-settings-labels" style="display: none;"></div>
+                    <div class="js-layer-settings js-layer-settings-search" style="display: none;"></div>
+                    <div class="js-layer-settings js-layer-settings-style" style="display: none;"></div>
+                    <div class="js-layer-settings js-layer-settings-table" id="table_view-${layerKey.replace(".", "_")}" style="display: none;"></div>
                 </div>
-            </div>
-            <div class="js-rejectedByServerItems hidden" style="width: 100%; padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>
-            <div class="js-layer-settings-filters" style="display: none;"></div>
-            <div class="js-layer-settings-load-strategy" style="display: none;"></div>
-            <div class="js-layer-settings-opacity" style="display: none;"></div>
-            <div class="js-layer-settings-labels" style="display: none;"></div>
-            <div class="js-layer-settings-search" style="display: none;"></div>
-            <div class="js-layer-settings-style" style="display: none;"></div>
-            <div class="js-layer-settings-table" id="table_view-${layerKey.replace(".", "_")}" style="display: none;"></div>
             </div>
         </li>`);
     }

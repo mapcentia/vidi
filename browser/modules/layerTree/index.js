@@ -399,7 +399,10 @@ module.exports = {
                     const hideAddFeature = () => {
                         $(container).find('.gc2-add-feature').css(`visibility`, `hidden`);
                     };
-
+                    const hideSettingsBtn = () => {
+                        $(container).find('.js-settings-panel-btn').prop(`disabled`, true);
+                        $(container).find('.collapse').collapse('hide');
+                    }
                     const getLayerSwitchControl = () => {
                         let controlElement = $('input[class="js-show-layer-control"][data-gc2-id="' + layerKey + '"]');
                         if (!controlElement || controlElement.length !== 1) {
@@ -423,6 +426,7 @@ module.exports = {
 
                         if (layerIsEnabled) {
                             $(container).find('.gc2-add-feature').css(`visibility`, `visible`);
+                            $(container).find('.js-settings-panel-btn').prop(`disabled`, false);
                             $(container).find(`.js-toggle-search`).show(0);
                             $(container).find(`.js-toggle-filters, .js-toggle-filters-number-of-filters`).show(0);
                             $(container).find(`.js-toggle-load-strategy`).show(0);
@@ -438,7 +442,8 @@ module.exports = {
                             hideLabels();
                             hideTableView();
                             hideSearch();
-                            hideStyleFn()
+                            hideStyleFn();
+                            hideSettingsBtn();
                         }
                     } else if (desiredSetupType === LAYER.RASTER_TILE || desiredSetupType === LAYER.VECTOR_TILE) {
                         // Opacity and filters should be kept opened after setLayerState()
@@ -446,11 +451,13 @@ module.exports = {
                             hideLoadStrategy();
                             hideTableView();
                             hideStyleFn();
+                            hideSettingsBtn();
                         }
 
                         hideOfflineMode();
                         if (layerIsEnabled) {
                             $(container).find('.gc2-add-feature').css(`visibility`, `visible`);
+                            $(container).find('.js-settings-panel-btn').prop(`disabled`, false);
                             $(container).find(`.js-toggle-opacity`).show(0);
                             $(container).find(`.js-toggle-labels`).show(0);
                             $(container).find(`.js-toggle-filters`).show(0);
@@ -462,6 +469,7 @@ module.exports = {
                             hideOpacity();
                             hideLabels();
                             hideSearch();
+                            hideSettingsBtn();
                         }
 
                         // Hide filters if cached, but not if layer has a valid predefined filter
@@ -492,6 +500,7 @@ module.exports = {
                         hideOpacity();
                         hideLabels();
                         hideSearch();
+                        hideSettingsBtn();
                     } else {
                         throw new Error(`${desiredSetupType} control setup is not supported yet`);
                     }
@@ -675,9 +684,6 @@ module.exports = {
         } else {
             moduleState.predefinedFilters = {};
         }
-
-        // Setting vector styles
-
 
         // Setting virtual layers
         if (newState !== false && `virtualLayers` in newState && Array.isArray(newState.virtualLayers) && newState.virtualLayers.length > 0) {
@@ -2532,7 +2538,7 @@ module.exports = {
                         console.error("Error in point-to-layer function for: " + layerKey);
                     }
                 }
-                let vectorStyle = moduleState.vectorStyles?.[layerKey] && moduleState.vectorStyles[layerKey] !== '' ? moduleState.vectorStyles[layerKey] : parsedMeta.vector_style && parsedMeta.vector_style !== "" ? parsedMeta.vector_style : null;
+                let vectorStyle = moduleState.vectorStyles?.[layerKey]?.styleFn && moduleState.vectorStyles[layerKey].styleFn !== '' ? moduleState.vectorStyles[layerKey].styleFn : parsedMeta.vector_style && parsedMeta.vector_style !== "" ? parsedMeta.vector_style : null;
                 if (vectorStyle) {
                     try {
                         let func = Function('"use strict";return (' + vectorStyle + ')')();
@@ -2540,7 +2546,6 @@ module.exports = {
                     } catch (e) {
                         console.error("Error in style function for: " + layerKey);
                     }
-
                 }
                 _self.createStore(layer, isVirtualGroup);
             }
@@ -3246,18 +3251,20 @@ module.exports = {
                 // Vector styles
                 const settingsStyle = $(layerContainer).find('.js-layer-settings-style')
                 const componentContainerId = `layer-settings-styles-${layerKey}`;
-                settingsStyle.append(`<div id="${componentContainerId}"></div>`);
+                settingsStyle.append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
 
-                let value = '';
+                let values = {};
                 if (layerKey in moduleState.vectorStyles) {
-                    value = moduleState.vectorStyles[layerKey];
+                    values = moduleState.vectorStyles[layerKey];
+                } else {
+                    values['styleFn'] = parsedMeta.vector_style;
                 }
 
                 setTimeout(() => {
                     if (document.getElementById(componentContainerId)) {
                         ReactDOM.render(<StyleSettingForm
                                 layerKey={layerKey}
-                                initialValue={value}
+                                initialValues={values}
                                 onChange={_self.onChangeStylesHandler}/>,
                             document.getElementById(componentContainerId));
                     } else {
@@ -3269,15 +3276,6 @@ module.exports = {
                     _self._selectIcon($(layerContainer).find('.js-toggle-style'));
                     $(layerContainer).find('.js-layer-settings-style').toggle();
                 });
-                // settingsStyle.find('button').click(() => {
-                //     let func;
-                //     try {
-                //         func = Function('"use strict";return (' + settingsStyle.find('textarea')[0].value + ')')();
-                //         _self.setStyle(LAYER.VECTOR + ':' + layerKey, func)
-                //     } catch (e) {
-                //         alert("Error in function")
-                //     }
-                // })
 
                 $(layerContainer).find(`.js-toggle-search`).click(() => {
                     _self._selectIcon($(layerContainer).find('.js-toggle-search'));
@@ -3410,19 +3408,18 @@ module.exports = {
 
     onChangeLabelsHandler: ({layerKey, labelsAreEnabled}) => {
         moduleState.labelSettings[layerKey] = labelsAreEnabled;
-        let correspondingLayer = meta.getMetaByKey(layerKey);
-        //backboneEvents.get().trigger(`${MODULE_NAME}:dynamicLoadLayersChange`);
-        //_self.reloadLayer(LAYER.RASTER_TILE + ':' + layerKey);
-        _self.reloadLayerOnLabelChange(layerKey, labelsAreEnabled);
+        _self.reloadLayerOnLabelChange(layerKey);
 
     },
 
-    onChangeStylesHandler: ({layerKey, fn}) => {
-        moduleState.vectorStyles[layerKey] = fn;
+    onChangeStylesHandler: ({layerKey, obj}) => {
+        moduleState.vectorStyles[layerKey] = obj;
         let func;
         try {
-            func = Function('"use strict";return (' + fn + ')')();
+            func = Function('"use strict";return (' + obj.styleFn + ')')();
             _self.setStyle(LAYER.VECTOR + ':' + layerKey, func)
+            _self.reloadLayerOnStyleChange(layerKey)
+
         } catch (e) {
             alert("Error in function")
         }
@@ -3496,6 +3493,10 @@ module.exports = {
 
     reloadLayerOnLabelChange: (layerKey) => {
         _self.reloadLayer(layerKey, false, false, false);
+    },
+
+    reloadLayerOnStyleChange: (layerKey) => {
+        _self.reloadLayer(LAYER.VECTOR + ':' + layerKey, false, false, false);
     },
 
     reloadLayerOnFiltersChange: (layerKey, forcedReloadLayerType = false) => {
