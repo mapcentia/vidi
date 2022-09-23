@@ -2532,7 +2532,7 @@ module.exports = {
                     }
                 }
                 let pointToLayerFn = moduleState.vectorStyles?.[layerKey]?.pointToLayerFn ? moduleState.vectorStyles[layerKey].pointToLayerFn : parsedMeta.point_to_layer && parsedMeta.point_to_layer !== "" ? parsedMeta.point_to_layer : null;
-                if (pointToLayerFn) {
+                if (pointToLayerFn && pointToLayerFn !== '') {
                     try {
                         let func = Function('"use strict";return (' + pointToLayerFn + ')')();
                         _self.setPointToLayer(LAYER.VECTOR + ':' + layerKey, func);
@@ -3425,7 +3425,7 @@ module.exports = {
         if (!obj.pointToLayerFn) {
             obj.pointToLayerFn =
                 `(feature, latlng) => {
-                    return L.circleMarker(latlng, '${layerKey.replace('.', '-')}');
+                    return L.circleMarker(latlng, {pane: '${layerKey.replace('.', '-')}'});
                 }`
         }
         moduleState.vectorStyles[layerKey] = obj;
@@ -3446,7 +3446,7 @@ module.exports = {
             func = Function('"use strict";return (' + obj.pointToLayerFn + ')')();
             _self.setPointToLayer(LAYER.VECTOR + ':' + layerKey, func)
         } catch (e) {
-            alert("Error in point-to-layer function")
+            alert("Error in point-to-layer function 2")
         }
         _self.reloadLayerOnStyleChange(layerKey)
     },
@@ -3669,9 +3669,8 @@ module.exports = {
 
     setPointToLayer: function (layerName, fn) {
         if (fn === null) {
-            fn = (feature, latlng) => {
-                return L.circleMarker(latlng, layerName.replace('.', '-'));
-            }
+            const str = `(feature, latlng) => {return L.circleMarker(latlng, {pane: "${layerName.replace('.', '-').split(':')[1]}"});}`;
+            fn = Function(`"use strict";return (${str})`)();
         }
         let foundLayers = layers.getMapLayers(false, layerName);
         if (foundLayers.length === 1) {
