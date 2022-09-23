@@ -30,17 +30,17 @@ class MarkupGenerator {
     getGroupPanel(base64GroupName, name, addGroupCheckbox = false) {
         return (`<div class="panel panel-default panel-layertree" id="layer-panel-${base64GroupName}" xmlns="http://www.w3.org/1999/html">
             <div class="panel-heading" role="tab" style="padding: 8px 0px 8px 15px;">
-                <h4 class="panel-title">
-                    <i style="float: right;" class="material-icons layer-move-vert">more_vert</i>
-                    <div class="layer-count badge">
-                        <span>0</span> / <span></span>
-                    </div>
-                    <span style="display: ${addGroupCheckbox ? "inline" : "none"}" class="checkbox" id="group-check-box-${base64GroupName}">
+                <h4 class="panel-title" style="display: flex; align-items: center">
+                    <span style="display: ${addGroupCheckbox ? "inline" : "none"}" class="togglebutton" id="group-check-box-${base64GroupName}">
                         <label>
                             <input type="checkbox" data-gc2-group-name="${name}">
                         </label>
                     </span>
                     <a style="display: inline" class="accordion-toggle js-toggle-layer-panel collapsed" data-toggle="collapse" data-parent="#layers" href="#collapse${base64GroupName}">${name}</a>
+                    <div class="layer-count badge" style="margin-left: auto">
+                        <span>0</span> / <span></span>
+                    </div>
+                    <i style="" class="material-icons layer-move-vert">more_vert</i>
                 </h4>
             </div>
             <ul class="list-group" id="group-${base64GroupName}" role="tabpanel"></ul>
@@ -78,16 +78,18 @@ class MarkupGenerator {
         return (`<li
         class="layer-item list-group-item list-subgroup-item"
         data-gc2-subgroup-id="${name}"
-        style="background-color: white; border-bottom: 1px solid #CCC;">
-            <span style="display: ${addGroupCheckbox ? "inline" : "none"}; margin-left: -2px" class="checkbox">
-                <label>
-                    <input type="checkbox" data-gc2-subgroup-name="${name}" data-gc2-subgroup-level="${level}">
-                </label>
-            </span>
-            <button style="margin-left: ${addGroupCheckbox ? "-18px" : "0"}" type="button" class="btn btn-default btn-xs js-subgroup-toggle-button">
-                <i class="fa fa-arrow-down"></i>
-            </button>
-            <div class="js-subgroup-id" style="display: inline; margin-left: 0"></div>
+        style="background-color: white; border-bottom: 2px solid #CCC;">
+            <div style="display: flex; align-items: center; padding: 7px 2px;">
+                <span style="display: ${addGroupCheckbox ? "inline" : "none"};" class="togglebutton">
+                    <label>
+                        <input type="checkbox" data-gc2-subgroup-name="${name}" data-gc2-subgroup-level="${level}">
+                    </label>
+                </span>
+                <button style="margin: 0" type="button" class="btn btn-default btn-xs js-subgroup-toggle-button">
+                    <i class="fa fa-arrow-down"></i>
+                </button>
+                <div class="js-subgroup-id" style="display: flex; align-items: center; flex-grow: 1"></div>
+            </div>
             <div class="js-subgroup-children" id="${base64SubgroupName}" style="padding-left: 30px;"></div>
         </li>`);
     }

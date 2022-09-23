@@ -164,9 +164,9 @@ const calculateOrder = (currentOrder) => {
  * @returns {void}
  */
 const setupLayerNumberIndicator = (base64GroupName, numberOfActiveLayers, numberOfAddedLayers) => {
-    $("#layer-panel-" + base64GroupName + " span:eq(1)").html(numberOfAddedLayers);
+    $("#layer-panel-" + base64GroupName + " .layer-count span:eq(1)").html(numberOfAddedLayers);
     if (numberOfActiveLayers > 0) {
-        $("#layer-panel-" + base64GroupName + " span:eq(0)").html(numberOfActiveLayers);
+        $("#layer-panel-" + base64GroupName + " .layer-count span:eq(0)").html(numberOfActiveLayers);
     }
 };
 

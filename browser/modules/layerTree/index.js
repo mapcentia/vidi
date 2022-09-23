@@ -16,14 +16,13 @@ import {
     LOG,
     MAP_RESOLUTIONS,
     MODULE_NAME,
+    SELECTED_STYLE,
     SUB_GROUP_DIVIDER,
     SYSTEM_FIELD_PREFIX,
-    VIRTUAL_LAYERS_SCHEMA,
     VECTOR_SIDE_TABLE_EL,
-    SELECTED_STYLE
+    VIRTUAL_LAYERS_SCHEMA
 } from './constants';
 import dayjs from 'dayjs';
-import noUiSlider from 'nouislider';
 import mustache from 'mustache';
 import LayerFilter from './LayerFilter';
 import LoadStrategyToggle from './LoadStrategyToggle';
@@ -39,10 +38,10 @@ import OfflineModeControlsManager from './OfflineModeControlsManager';
 import {GROUP_CHILD_TYPE_GROUP, GROUP_CHILD_TYPE_LAYER, LayerSorting} from './LayerSorting';
 import {GEOJSON_PRECISION} from './../constants';
 import {
+    booleanIntersects as turfIntersects,
     buffer as turfBuffer,
-    point as turfPoint,
     feature as turfFeature,
-    booleanIntersects as turfIntersects
+    point as turfPoint
 } from '@turf/turf'
 import MetaSettingForm from "./MetaSettingForm";
 
@@ -624,7 +623,7 @@ module.exports = {
             preparedVirtualLayers.push(localLayer);
         });
 
-        let state = {
+        return {
             order: moduleState.layerTreeOrder,
             arbitraryFilters: moduleState.arbitraryFilters,
             fitBoundsActiveOnLayers: moduleState.fitBoundsActiveOnLayers,
@@ -639,8 +638,6 @@ module.exports = {
             editorFiltersActive: moduleState.editorFiltersActive,
             vectorStyles: moduleState.vectorStyles
         };
-        console.log("state", state);
-        return state;
     },
 
     /**
@@ -657,7 +654,6 @@ module.exports = {
      * @returns {newState}
      */
     applyState: (newState) => {
-        console.log("newState", newState)
         // Setting vector filters
         if (newState !== false && `arbitraryFilters` in newState && typeof newState.arbitraryFilters === `object`) {
             for (let key in newState.arbitraryFilters) {
@@ -2707,10 +2703,10 @@ module.exports = {
         let markup = markupGeneratorInstance.getSubgroupControlRecord(base64SubgroupName, subgroup.id, level, window.vidiConfig.showLayerGroupCheckbox);
 
         $(parentNode).append(markup);
-        $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-id`).append(`<div style="display: inline">
+        $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-id`).append(`
                 ${subgroup.id}
-                <i style="float: right; padding-top: 9px; font-size: 26px;" class="material-icons layer-move-vert layer-move-vert-subgroup">more_vert</i>
-        </div>`);
+                <i style="font-size: 26px; margin-left: auto" class="material-icons layer-move-vert layer-move-vert-subgroup">more_vert</i>
+        `);
 
         $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-toggle-button`).click((event) => {
             // Checking if the subgroup was already drawn

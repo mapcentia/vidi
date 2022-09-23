@@ -578,7 +578,7 @@ module.exports = module.exports = {
                 }
             });
 
-            $(controlElement).parents(".panel-layertree").find("span:eq(0)").html(c);
+            $(controlElement).parents(".panel-layertree").find(".layer-count span:eq(0)").html(c);
         }
 
         pushState.init();

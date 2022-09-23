@@ -753,9 +753,6 @@ body {
 .nav-tabs {
   border-bottom: 0;
 }
-.layer-count {
-  float: right;
-}
 .leaflet-bar button,
 .leaflet-bar button:hover {
   background-color: #fff;
@@ -1315,6 +1312,9 @@ h4 small {
   display: inline-block;
   border-radius: 50%;
   padding: 1px;
+}
+#layers_list label {
+  margin: 0 !important;
 }
 #layers_list .layer-item.list-group-item .active {
   background-color: #03a9f4;
