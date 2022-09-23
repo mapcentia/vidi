@@ -623,6 +623,7 @@ module.exports = {
             preparedVirtualLayers.push(localLayer);
         });
 
+        console.log(moduleState.vectorStyles)
         return {
             order: moduleState.layerTreeOrder,
             arbitraryFilters: moduleState.arbitraryFilters,
@@ -1507,7 +1508,7 @@ module.exports = {
             custom_data,
             styleMap: styles[trackingLayerKey],
             sql,
-            clustering: layerTreeUtils.getIfClustering(meta.parseLayerMeta(layerKey)),
+            clustering: moduleState.vectorStyles?.[layerKey]?.clustering ? moduleState.vectorStyles[layerKey].clustering : layerTreeUtils.getIfClustering(meta.parseLayerMeta(layerKey)),
             onLoad: (l) => {
                 let reloadInterval = meta.parseLayerMeta(layerKey)?.reload_interval;
                 let tableElement = meta.parseLayerMeta(layerKey)?.show_table_on_side;

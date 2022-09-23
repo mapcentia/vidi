@@ -14,6 +14,7 @@ class MetaSettingForm extends React.Component {
         this.handleStyleFnChange = this.handleStyleFnChange.bind(this);
         this.handlePointToLayerChange = this.handlePointToLayerChange.bind(this);
         this.handleTooltipChange = this.handleTooltipChange.bind(this);
+        this.handleClusteringChange = this.handleClusteringChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
     }
 
@@ -28,6 +29,11 @@ class MetaSettingForm extends React.Component {
     handleTooltipChange(event) {
         this.setState({tooltipTmpl: event.target.value});
     }
+
+    handleClusteringChange(event) {
+        this.setState({clustering: !this.state.clustering});
+    }
+
     handleSubmit() {
         this.props.onChange({
             layerKey: this.props.layerKey,
@@ -37,19 +43,35 @@ class MetaSettingForm extends React.Component {
 
     render() {
         return (<div style={{display: 'flex', flexDirection: 'column'}}>
-            <label>Style function
-                <textarea style={{backgroundColor: '#f5f5f5'}} className="form-control" rows="3"
-                          value={this.state.styleFn} onChange={this.handleStyleFnChange}></textarea>
-            </label>
-            <label>Point-to-layer function
-                <textarea style={{backgroundColor: '#f5f5f5'}} className="form-control" rows="3"
-                          value={this.state.pointToLayerFn} onChange={this.handlePointToLayerChange}></textarea>
-            </label>
-            <label>Tooltip template
-                <textarea style={{backgroundColor: '#f5f5f5'}} className="form-control" rows="3"
-                          value={this.state.tooltipTmpl} onChange={this.handleTooltipChange}></textarea>
-            </label>
-            <button className="btn btn-sm" onClick={this.handleSubmit}>Set</button>
+            <div className="form-group" style={{display: 'contents'}}>
+                <label>Style function
+                    <textarea style={{backgroundColor: '#f5f5f5'}} className="form-control" rows="3"
+                              value={this.state.styleFn} onChange={this.handleStyleFnChange}></textarea>
+                </label>
+            </div>
+            <div className="form-group" style={{display: 'contents'}}>
+                <label>Point-to-layer function
+                    <textarea style={{backgroundColor: '#f5f5f5'}} className="form-control" rows="3"
+                              value={this.state.pointToLayerFn} onChange={this.handlePointToLayerChange}></textarea>
+                </label>
+            </div>
+            <div className="form-group" style={{display: 'contents'}}>
+                <label>Tooltip template
+                    <textarea style={{backgroundColor: '#f5f5f5'}} className="form-control" rows="3"
+                              value={this.state.tooltipTmpl} onChange={this.handleTooltipChange}></textarea>
+                </label>
+            </div>
+            <div className="form-group" style={{display: 'contents'}}>
+                <div className="togglebutton">
+                    <label>
+                        <input type="checkbox" defaultChecked={this.state.clustering}
+                               onChange={this.handleClusteringChange}/> Clustering
+                    </label>
+                </div>
+            </div>
+            <div className="form-group" style={{display: 'contents'}}>
+                <button className="btn btn-sm" onClick={this.handleSubmit}>Set</button>
+            </div>
         </div>)
     }
 }
