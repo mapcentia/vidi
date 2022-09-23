@@ -48,8 +48,8 @@ import MetaSettingForm from "./MetaSettingForm";
 
 
 let _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEvents,
-    onEachFeature = [], pointToLayer = [], onSelectedStyle = [], onLoad = [], onSelect = [],
-    onMouseOver = [], cm = [], styles = [], tables = {}, childLayersThatShouldBeEnabled = [];
+    onEachFeature = [], pointToLayer = {}, onSelectedStyle = [], onLoad = [], onSelect = [],
+    onMouseOver = [], cm = [], styles = {}, tables = {}, childLayersThatShouldBeEnabled = [];
 
 const {v4: uuidv4} = require('uuid');
 const React = require('react');
@@ -639,6 +639,7 @@ module.exports = {
             editorFiltersActive: moduleState.editorFiltersActive,
             vectorStyles: moduleState.vectorStyles
         };
+        console.log("state", state);
         return state;
     },
 
@@ -656,6 +657,7 @@ module.exports = {
      * @returns {newState}
      */
     applyState: (newState) => {
+        console.log("newState", newState)
         // Setting vector filters
         if (newState !== false && `arbitraryFilters` in newState && typeof newState.arbitraryFilters === `object`) {
             for (let key in newState.arbitraryFilters) {
@@ -2529,7 +2531,7 @@ module.exports = {
                         }
                     }
                 }
-                let pointToLayerFn = moduleState.vectorStyles?.[layerKey]?.pointToLayerFn && moduleState.vectorStyles[layerKey].pointToLayerFn !== '' ? moduleState.vectorStyles[layerKey].pointToLayerFn : parsedMeta.point_to_layer && parsedMeta.point_to_layer !== "" ? parsedMeta.point_to_layer : null;
+                let pointToLayerFn = moduleState.vectorStyles?.[layerKey]?.pointToLayerFn ? moduleState.vectorStyles[layerKey].pointToLayerFn : parsedMeta.point_to_layer && parsedMeta.point_to_layer !== "" ? parsedMeta.point_to_layer : null;
                 if (pointToLayerFn) {
                     try {
                         let func = Function('"use strict";return (' + pointToLayerFn + ')')();
@@ -3258,9 +3260,7 @@ module.exports = {
                 const componentContainerId = `layer-settings-styles-${layerKey}`;
                 settingsStyle.append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
 
-                let values = {
-
-                };
+                let values = {};
                 if (layerKey in moduleState.vectorStyles) {
                     values = moduleState.vectorStyles[layerKey];
                 } else {
@@ -3421,7 +3421,15 @@ module.exports = {
     },
 
     onChangeStylesHandler: ({layerKey, obj}) => {
+        // If the pointToLayer func is not set we set it to the default one
+        if (!obj.pointToLayerFn) {
+            obj.pointToLayerFn =
+                `(feature, latlng) => {
+                    return L.circleMarker(latlng, '${layerKey.replace('.', '-')}');
+                }`
+        }
         moduleState.vectorStyles[layerKey] = obj;
+        backboneEvents.get().trigger(`${MODULE_NAME}:changed`);
         let func;
         if (obj?.styleFn === '') {
             _self.setStyle(LAYER.VECTOR + ':' + layerKey, null)
@@ -3434,17 +3442,11 @@ module.exports = {
             }
         }
 
-        if (obj?.pointToLayerFn === '') {
-            _self.setPointToLayer(LAYER.VECTOR + ':' + layerKey, null)
-        } else {
-            try {
-                func = Function('"use strict";return (' + obj.pointToLayerFn + ')')();
-                _self.setPointToLayer(LAYER.VECTOR + ':' + layerKey, func)
-            } catch (e) {
-                alert("Error in point-to-layer function")
-            }
-        }
-        if (obj?.tooltipTmpl === '') {
+        try {
+            func = Function('"use strict";return (' + obj.pointToLayerFn + ')')();
+            _self.setPointToLayer(LAYER.VECTOR + ':' + layerKey, func)
+        } catch (e) {
+            alert("Error in point-to-layer function")
         }
         _self.reloadLayerOnStyleChange(layerKey)
     },
@@ -3666,14 +3668,16 @@ module.exports = {
     },
 
     setPointToLayer: function (layerName, fn) {
+        if (fn === null) {
+            fn = (feature, latlng) => {
+                return L.circleMarker(latlng, layerName.replace('.', '-'));
+            }
+        }
         let foundLayers = layers.getMapLayers(false, layerName);
         if (foundLayers.length === 1) {
             let layer = foundLayers[0];
             layer.options.pointToLayer = fn;
         }
-        if (!fn) {
-            delete pointToLayer[layerName];
-        } else
         pointToLayer[layerName] = fn;
     },
 
