@@ -1476,9 +1476,6 @@ module.exports = {
             template = defaultTemplate;
         }
         tooltipTemplate = moduleState.vectorStyles?.[layerKey]?.tooltipTmpl && moduleState.vectorStyles[layerKey].tooltipTmpl !== '' ? moduleState.vectorStyles[layerKey].tooltipTmpl : parsedMeta?.tooltip_template && parsedMeta.tooltip_template !== "" ? parsedMeta.tooltip_template : null;
-        // if (parsedMeta?.tooltip_template && parsedMeta.tooltip_template !== "") {
-        //     tooltipTemplate = parsedMeta.tooltip_template;
-        // }
         let fieldConf;
         try {
             fieldConf = JSON.parse(metaData[layerKey].fieldconf);
@@ -1488,8 +1485,8 @@ module.exports = {
         const pane = layer.f_table_schema + '-' + layer.f_table_name;
         moduleState.vectorStores[trackingLayerKey] = new geocloud.sqlStore({
             map: cloud.get().map,
-            minZoom: parseInt(meta.parseLayerMeta(layerKey)?.vector_min_zoom),
-            maxZoom: parseInt(meta.parseLayerMeta(layerKey)?.vector_max_zoom) + 1,
+            minZoom: typeof moduleState.vectorStyles?.[layerKey]?.minZoom !== 'undefined' ? moduleState.vectorStyles[layerKey].minZoom === '' ? undefined : moduleState.vectorStyles[layerKey].minZoom : parseInt(meta.parseLayerMeta(layerKey)?.vector_min_zoom),
+            maxZoom: typeof moduleState.vectorStyles?.[layerKey]?.maxZoom !== 'undefined' ? moduleState.vectorStyles[layerKey].maxZoom === '' ? undefined : moduleState.vectorStyles[layerKey].maxZoom : parseInt(meta.parseLayerMeta(layerKey)?.vector_max_zoom),
             pane,
             parentFiltersHash,
             jsonp: false,
@@ -3263,6 +3260,9 @@ module.exports = {
                 } else {
                     values['styleFn'] = parsedMeta?.vector_style;
                     values['pointToLayerFn'] = parsedMeta?.point_to_layer;
+                    values['tooltipTmpl'] = parsedMeta?.tooltip_template;
+                    values['minZoom'] = parseInt(parsedMeta?.vector_min_zoom) || undefined;
+                    values['maxZoom'] = parseInt(parsedMeta?.vector_max_zoom) || undefined;
                 }
 
                 setTimeout(() => {

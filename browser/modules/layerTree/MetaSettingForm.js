@@ -15,6 +15,7 @@ class MetaSettingForm extends React.Component {
         this.handlePointToLayerChange = this.handlePointToLayerChange.bind(this);
         this.handleTooltipChange = this.handleTooltipChange.bind(this);
         this.handleClusteringChange = this.handleClusteringChange.bind(this);
+        this.handleZoomChange = this.handleZoomChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
     }
 
@@ -32,6 +33,17 @@ class MetaSettingForm extends React.Component {
 
     handleClusteringChange(event) {
         this.setState({clustering: !this.state.clustering});
+    }
+    handleZoomChange(event) {
+        const int = parseInt(event.target.value) || '';
+        switch (event.target.id) {
+            case 'min-zoom':
+                this.setState({minZoom: int});
+                break;
+            case 'max-zoom':
+                this.setState({maxZoom: int});
+                break;
+        }
     }
 
     handleSubmit() {
@@ -70,7 +82,19 @@ class MetaSettingForm extends React.Component {
                 </div>
             </div>
             <div className="form-group" style={{display: 'contents'}}>
-                <button className="btn btn-sm" onClick={this.handleSubmit}>Set</button>
+                <label>Min zoom
+                    <input type="number" id="min-zoom" style={{backgroundColor: '#f5f5f5'}} className="form-control"
+                              value={this.state.minZoom} onChange={this.handleZoomChange}></input>
+                </label>
+            </div>
+            <div className="form-group" style={{display: 'contents'}}>
+                <label>Max zoom
+                    <input type="number" id="max-zoom" style={{backgroundColor: '#f5f5f5'}} className="form-control"
+                           value={this.state.maxZoom} onChange={this.handleZoomChange}></input>
+                </label>
+            </div>
+            <div className="form-group" style={{display: 'contents'}}>
+                <button className="btn btn-sm btn-primary" onClick={this.handleSubmit}>Set</button>
             </div>
         </div>)
     }
