@@ -1508,7 +1508,7 @@ module.exports = {
             custom_data,
             styleMap: styles[trackingLayerKey],
             sql,
-            clustering: moduleState.vectorStyles?.[layerKey]?.clustering ? moduleState.vectorStyles[layerKey].clustering : layerTreeUtils.getIfClustering(meta.parseLayerMeta(layerKey)),
+            clustering: typeof moduleState.vectorStyles?.[layerKey]?.clustering === 'boolean' ? moduleState.vectorStyles[layerKey].clustering : layerTreeUtils.getIfClustering(meta.parseLayerMeta(layerKey)),
             onLoad: (l) => {
                 let reloadInterval = meta.parseLayerMeta(layerKey)?.reload_interval;
                 let tableElement = meta.parseLayerMeta(layerKey)?.show_table_on_side;
