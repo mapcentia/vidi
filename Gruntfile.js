@@ -84,9 +84,7 @@ module.exports = function (grunt) {
                         'public/js/lib/jquery-ui/jquery-ui.min.css',
                         // Font Awesome
                         'public/css/font-awesome.min.css',
-                        'public/css/font-awesome.v520.solid.css',
-                        'public/css/font-awesome.v520.regular.css',
-                        'public/css/font-awesome.v520.css',
+                        'public/css/font-awesome.v5.15/all.css',
                         // Leaflet
                         'public/js/lib/leaflet/leaflet.css',
                         'public/js/lib/leaflet-draw/leaflet.draw.css',
