@@ -44,7 +44,8 @@ module.exports = {
             //zoomAnimation: false, // https://github.com/Leaflet/Leaflet/issues/3249
             zoomAnimation: (window.vidiTimeout === 0),
             editable: true,
-            maxBoundsViscosity: 1.0
+            maxBoundsViscosity: 1.0,
+            preferCanvas: false
         });
 
         let map = cloud.map;

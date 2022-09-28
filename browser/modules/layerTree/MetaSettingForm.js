@@ -57,13 +57,13 @@ class MetaSettingForm extends React.Component {
         return (<div style={{display: 'flex', flexDirection: 'column'}}>
             <div className="form-group" style={{display: 'contents'}}>
                 <label>Style function
-                    <textarea style={{backgroundColor: '#f5f5f5'}} className="form-control" rows="3"
+                    <textarea style={{backgroundColor: '#f5f5f5'}} className="form-control" rows="7"
                               value={this.state.styleFn} onChange={this.handleStyleFnChange}></textarea>
                 </label>
             </div>
             <div className="form-group" style={{display: 'contents'}}>
                 <label>Point-to-layer function
-                    <textarea style={{backgroundColor: '#f5f5f5'}} className="form-control" rows="3"
+                    <textarea style={{backgroundColor: '#f5f5f5'}} className="form-control" rows="7"
                               value={this.state.pointToLayerFn} onChange={this.handlePointToLayerChange}></textarea>
                 </label>
             </div>

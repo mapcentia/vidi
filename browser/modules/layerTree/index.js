@@ -623,7 +623,6 @@ module.exports = {
             preparedVirtualLayers.push(localLayer);
         });
 
-        console.log(moduleState.vectorStyles)
         return {
             order: moduleState.layerTreeOrder,
             arbitraryFilters: moduleState.arbitraryFilters,
@@ -1475,7 +1474,7 @@ module.exports = {
         } else {
             template = defaultTemplate;
         }
-        tooltipTemplate = moduleState.vectorStyles?.[layerKey]?.tooltipTmpl && moduleState.vectorStyles[layerKey].tooltipTmpl !== '' ? moduleState.vectorStyles[layerKey].tooltipTmpl : parsedMeta?.tooltip_template && parsedMeta.tooltip_template !== "" ? parsedMeta.tooltip_template : null;
+        tooltipTemplate = typeof moduleState.vectorStyles?.[layerKey]?.tooltipTmpl !== 'undefined' ? moduleState.vectorStyles[layerKey].tooltipTmpl === '' ? undefined : moduleState.vectorStyles[layerKey].tooltipTmpl : parsedMeta?.tooltip_template && parsedMeta.tooltip_template !== "" ? parsedMeta.tooltip_template : null;
         let fieldConf;
         try {
             fieldConf = JSON.parse(metaData[layerKey].fieldconf);
@@ -3435,6 +3434,7 @@ module.exports = {
                 func = Function('"use strict";return (' + obj.styleFn + ')')();
                 _self.setStyle(LAYER.VECTOR + ':' + layerKey, func)
             } catch (e) {
+                console.error(e.message)
                 alert("Error in style function")
             }
         }
@@ -3443,6 +3443,7 @@ module.exports = {
             func = Function('"use strict";return (' + obj.pointToLayerFn + ')')();
             _self.setPointToLayer(LAYER.VECTOR + ':' + layerKey, func)
         } catch (e) {
+            console.error(e.message)
             alert("Error in point-to-layer function 2")
         }
         _self.reloadLayerOnStyleChange(layerKey)
