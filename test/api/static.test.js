@@ -8,7 +8,7 @@ const helpers = require(`./../helpers`);
 
 describe('Static PNG API', () => {
     it('should generate PNG image according to provided filters', (done) => {
-        let buff = new Buffer(JSON.stringify({
+        let buff = new Buffer.from(JSON.stringify({
             "test.city_center": {
                 "match":"any",
                 "columns":[{
