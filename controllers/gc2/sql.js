@@ -86,7 +86,6 @@ var query = function (req, response) {
     }
 
     rem.on('response', function(res) {
-        console.log(res.statusCode);
         if (!store) {
             response.writeHead(res.statusCode, headers);
         }
