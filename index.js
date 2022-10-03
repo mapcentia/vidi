@@ -118,7 +118,7 @@ app.enable('trust proxy');
 
 const port = process.env.PORT ? process.env.PORT : 3000;
 const server = http.createServer(app);
-if (!sticky.listen(server, port)) {
+if (!sticky.listen(server, port, {})) {
     // Master code
     server.once('listening', function () {
         console.log(`server started on port ${port}`);
