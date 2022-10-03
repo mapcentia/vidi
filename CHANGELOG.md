@@ -6,7 +6,7 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ## [URELEASED]
 ### Changed
-- Session cookie is now set with an `Expires` attribute, which can be set in `config/config.js`. Before it was set as a non-persistent cookie, which was deleted on exiting the web browser.
+- Session cookie is now set with an `Expires` attribute, which can be set in `config/config.js`. Before it was set as a non-persistent cookie, which was deleted on exiting the web browser. Defaults to 86400 seconds.
 ```json
 {
   "sessionMaxAge": 86400
