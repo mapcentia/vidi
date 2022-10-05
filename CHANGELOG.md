@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [URELEASED]
+## [2022.10.0]
 ### Changed
 - Session cookie is now set with an `Expires` attribute, which can be set in `config/config.js`. Before it was set as a non-persistent cookie, which was deleted on exiting the web browser. Defaults to 86400 seconds.
 ```json
@@ -12,6 +12,8 @@ and this project adheres to [CalVer](https://calver.org/).
   "sessionMaxAge": 86400
 }
 ```
+### Fixed
+- When Vidi started layers in the URL in offline mode, was not set to offline layertree was yet not created. Now offline mode is retrived form state on upstart.
 
 ## [2022.9.2] - 2022-19-9
 ### Added
