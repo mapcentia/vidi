@@ -78,8 +78,8 @@ class APIBridge {
                         if (error.status === 500 && error.responseJSON) {
                             if (error.responseJSON.message && error.responseJSON.message.success === false) {
                                 itemWasReqectedByServer = true;
-                                if (error.responseJSON.message.message.ServiceException) {
-                                    serverErrorMessage = error.responseJSON.message.message.ServiceException;
+                                if (error.responseJSON.message.message['ows:Exception']) {
+                                    serverErrorMessage = error.responseJSON.message.message['ows:Exception']['ows:ExceptionText'];
                                 } else if (error.responseJSON.message.code === 403) {
                                     serverErrorType = `AUTHORIZATION_ERROR`;
                                 } else if (typeof error.responseJSON.message.message === 'string') {
