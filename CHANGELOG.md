@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## UNRELEASED
+### Fixed
+- Update the qeueu statistics when group panel is opened in case of the layer tree component is not rendered yet. Before the qeueu statistics was not shown after a refresh.
+
 ## [2022.10.0] - 2022-5-10
 ### Changed
 - Session cookie is now set with an `Expires` attribute, which can be set in `config/config.js`. Before it was set as a non-persistent cookie, which was deleted on exiting the web browser. Defaults to 86400 seconds.
@@ -13,7 +17,7 @@ and this project adheres to [CalVer](https://calver.org/).
 }
 ```
 ### Fixed
-- When Vidi started layers in the URL in offline mode, was not set to offline layertree was yet not created. Now offline mode is retrived form state on upstart.
+- When Vidi was started URL layers in offline mode, was not set to offline because layertree is yet not created. Now offline mode is retrived form state on upstart.
 
 ## [2022.9.2] - 2022-19-9
 ### Added
