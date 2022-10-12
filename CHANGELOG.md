@@ -91,8 +91,6 @@ This is a label for feature <b>{{gid}}</b>
 
 ### Changed
 - Legend moved to upper right corner in embed.tmpl, so it doesn't coflict with the bottom aligned vector table.
-
-### Changed
 - Pop-ups are not longer opened when selecting a row in table, because this will let gc2table control the pop-up and here editing tools are not supported.
 
 ### Fixed
