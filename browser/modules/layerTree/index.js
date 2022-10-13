@@ -50,7 +50,7 @@ let _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEv
     onEachFeature = [], pointToLayer = [], onSelectedStyle = [], onLoad = [], onSelect = [],
     onMouseOver = [], cm = [], styles = [], tables = {}, childLayersThatShouldBeEnabled = [];
 
-const { v4: uuidv4 } = require('uuid');
+const {v4: uuidv4} = require('uuid');
 const React = require('react');
 const ReactDOM = require('react-dom');
 const base64url = require('base64url');
@@ -121,6 +121,7 @@ module.exports = {
     },
 
     init: function () {
+        _self = this;
         // Update the qeueu statistics when group panel is opened.
         // In case of the layer tree component is not rendered yet
         $(document).arrive('.js-toggle-layer-panel', function (e, data) {
@@ -130,7 +131,10 @@ module.exports = {
                 }, 200);
             })
         });
-        _self = this;
+        // If map is clicked, when clear all selections
+        cloud.get().map.on('click', () => {
+            _self.resetAllVectorLayerStyles();
+        })
         if (window.vidiConfig.enabledExtensions.indexOf(`editor`) !== -1) moduleState.editingIsEnabled = true;
         $(document).arrive('#layers-filter-reset', function (e, data) {
             $(this).on('click', function (e) {
@@ -1390,7 +1394,8 @@ module.exports = {
         let parentFiltersHash = ``;
         let layerKey = layer.f_table_schema + '.' + layer.f_table_name;
         const layerSpecificQueryLimit = layerTreeUtils.getQueryLimit(meta.parseLayerMeta(layerKey));
-        let sql = `SELECT * FROM ${layerKey} LIMIT ${layerSpecificQueryLimit}`;
+        let sql = `SELECT *
+                   FROM ${layerKey} LIMIT ${layerSpecificQueryLimit}`;
         if (isVirtual) {
             let storeWasFound = false;
             moduleState.virtualLayers.map(item => {
@@ -1431,7 +1436,9 @@ module.exports = {
             // Gathering all WHERE clauses
             if (whereClauses.length > 0) {
                 whereClauses = whereClauses.map(item => `(${item})`);
-                sql = `SELECT * FROM ${layerKey} WHERE (${whereClauses.join(` AND `)}) LIMIT ${layerSpecificQueryLimit}`;
+                sql = `SELECT *
+                       FROM ${layerKey}
+                       WHERE (${whereClauses.join(` AND `)}) LIMIT ${layerSpecificQueryLimit}`;
             }
         }
 
@@ -1726,7 +1733,8 @@ module.exports = {
     createWebGLStore: (layer) => {
         let layerKey = layer.f_table_schema + '.' + layer.f_table_name;
         const layerSpecificQueryLimit = layerTreeUtils.getQueryLimit(meta.parseLayerMeta(layerKey));
-        let sql = `SELECT * FROM ${layerKey} LIMIT ${layerSpecificQueryLimit}`;
+        let sql = `SELECT *
+                   FROM ${layerKey} LIMIT ${layerSpecificQueryLimit}`;
 
         let whereClauses = [];
         let activeFilters = _self.getActiveLayerFilters(layerKey);
@@ -1752,7 +1760,9 @@ module.exports = {
         // Gathering all WHERE clauses
         if (whereClauses.length > 0) {
             whereClauses = whereClauses.map(item => `(${item})`);
-            sql = `SELECT * FROM ${layerKey} WHERE (${whereClauses.join(` AND `)}) LIMIT ${layerSpecificQueryLimit}`;
+            sql = `SELECT *
+                   FROM ${layerKey}
+                   WHERE (${whereClauses.join(` AND `)}) LIMIT ${layerSpecificQueryLimit}`;
         }
 
         let trackingLayerKey = (LAYER.WEBGL + ':' + layerKey);
@@ -2025,9 +2035,7 @@ module.exports = {
                                                             </div>`).openOn(cloud.get().map)
                         .on('remove', () => {
                             sqlQuery.resetAll();
-                            if (window.vidiConfig.crossMultiSelect) {
-                                _self.resetAllVectorLayerStyles();
-                            }
+                            _self.resetAllVectorLayerStyles();
                         });
                 }
             }
@@ -3382,12 +3390,13 @@ module.exports = {
     onApplyFitBoundsFiltersHandler: (layerKey) => {
         let metaData = meta.getMetaByKey(layerKey);
         let whereClause = _self.getActiveLayerFilters(layerKey)[0];
-        let sql = `SELECT 
-                    ST_Xmin(ST_Extent(extent)) AS txmin,
-                    ST_Xmax(ST_Extent(extent)) AS txmax,
-                    ST_Ymin(ST_Extent(extent)) AS tymin,
-                    ST_Ymax(ST_Extent(extent)) AS tymax
-                FROM (SELECT ST_astext(ST_Transform(ST_setsrid(ST_Extent(${metaData.f_geometry_column}),${metaData.srid}),4326)) AS extent FROM ${layerKey} WHERE ${whereClause}) as foo`;
+        let sql = `SELECT ST_Xmin(ST_Extent(extent)) AS txmin,
+                          ST_Xmax(ST_Extent(extent)) AS txmax,
+                          ST_Ymin(ST_Extent(extent)) AS tymin,
+                          ST_Ymax(ST_Extent(extent)) AS tymax
+                   FROM (SELECT ST_astext(ST_Transform(ST_setsrid(ST_Extent(${metaData.f_geometry_column}), ${metaData.srid}), 4326)) AS extent
+                         FROM ${layerKey}
+                         WHERE ${whereClause}) as foo`;
         let q = {
             q: base64url(sql),
             base64: true
@@ -3410,7 +3419,9 @@ module.exports = {
     },
     onApplyDownloadHandler: (layerKey, format) => {
         let whereClause = _self.getActiveLayerFilters(layerKey)[0];
-        let sql = `SELECT * FROM ${layerKey} WHERE ${whereClause}`;
+        let sql = `SELECT *
+                   FROM ${layerKey}
+                   WHERE ${whereClause}`;
         download.download(sql, format)
     },
 

@@ -329,7 +329,9 @@ module.exports = {
                                         }
                                     });
                                 
-                                if (draggableEnabled) _self.makeDraggable(popup);
+                                if (draggableEnabled) {
+                                    _self.makeDraggable(popup);
+                                }
 
                                 $("#info-box-pop-up").html(popUpInner);
 
@@ -417,7 +419,9 @@ module.exports = {
                                     }
                                 }
                                 
-                                if (draggableEnabled) _self.makeDraggable(popup);
+                                if (draggableEnabled) {
+                                    _self.makeDraggable(popup);
+                                }
 
                                 setTimeout(() => {
                                     if (editingIsEnabled && layerIsEditable) {
@@ -843,28 +847,18 @@ module.exports = {
      * @param popup {object}
      */
     makeDraggable(popup) {
-        var map = cloud.get().map
-
-        //console.log('makeDrag: ', map, popup);
-
-        //var pos = map.latLngToLayerPoint(popup.getLatLng());
-        // L.DomUtil.setPosition(popup._wrapper.parentNode, pos);
-        var draggable = new L.Draggable(popup._container, popup._wrapper);
-
+        const map = cloud.get().map
+        const draggable = new L.Draggable(popup._container, popup._wrapper);
         // change cursor class
         $(".leaflet-popup-content-wrapper").css('cursor', 'move');
-
         draggable.on('dragstart', function (e) {
             //on first drag, remove the pop-up tip
             $(".leaflet-popup-tip-container").hide();
         });
-
         draggable.on('dragend', function (e) {
             // set the new position
-            var pos = map.layerPointToLatLng(e.target._newPos);
-            popup.setLatLng(pos);
+            popup.setLatLng(map.layerPointToLatLng(e.target._newPos));
         });
-
         draggable.enable();
     }
 };
