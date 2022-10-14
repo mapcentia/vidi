@@ -328,7 +328,7 @@ module.exports = {
                                             editingStarted = false;
                                         }
                                     });
-                                
+
                                 if (draggableEnabled) {
                                     _self.makeDraggable(popup);
                                 }
@@ -418,7 +418,7 @@ module.exports = {
                                         }
                                     }
                                 }
-                                
+
                                 if (draggableEnabled) {
                                     _self.makeDraggable(popup);
                                 }
@@ -846,7 +846,7 @@ module.exports = {
      * makes popup draggable
      * @param popup {object}
      */
-    makeDraggable(popup) {
+    makeDraggable: (popup) => {
         const map = cloud.get().map
         const draggable = new L.Draggable(popup._container, popup._wrapper);
         // change cursor class
@@ -860,5 +860,13 @@ module.exports = {
             popup.setLatLng(map.layerPointToLatLng(e.target._newPos));
         });
         draggable.enable();
+    },
+
+    /**
+     * Get query stores
+     * @returns array
+     */
+    getQstore: () => {
+        return qStoreShadow;
     }
 };

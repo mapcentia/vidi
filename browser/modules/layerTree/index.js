@@ -1585,8 +1585,11 @@ module.exports = {
                         layer.on("click", function (e) {
                             _self.resetAllVectorLayerStyles();
                             try {
-                                e.target.setStyle(SELECTED_STYLE);
+                                if (!window.vidiConfig.crossMultiSelect) {
+                                    e.target.setStyle(SELECTED_STYLE);
+                                }
                             } catch (e) {
+                                console.error(e)
                             }
                             let layerIsEditable = false;
                             let metaDataKeys = meta.getMetaDataKeys();
@@ -1635,8 +1638,11 @@ module.exports = {
                     layer.on("click", function (e) {
                         _self.resetAllVectorLayerStyles();
                         try {
-                            e.target.setStyle(SELECTED_STYLE);
+                            if (!window.vidiConfig.crossMultiSelect) {
+                                e.target.setStyle(SELECTED_STYLE);
+                            }
                         } catch (e) {
+                            console.error(e)
                         }
                         // Cross Multi select disabled
                         if (!window.vidiConfig.crossMultiSelect) {
@@ -1699,7 +1705,7 @@ module.exports = {
                                         if (turfIntersects(clickFeature, feature) && overlay.id) {
                                             intersectingFeatures.push({
                                                 "feature": featureForChecking.feature,
-                                                "layer": overlay,
+                                                "layer": featureForChecking,
                                                 "layerKey": overlay.id.split(":")[1]
                                             });
                                         }
@@ -1889,10 +1895,14 @@ module.exports = {
     },
 
     displayAttributesPopup(features, event, additionalControls = ``, multi = true) {
+        if (window.vidiConfig.crossMultiSelect) {
+            _self.resetAllVectorLayerStyles();
+        }
         event.originalEvent.clickedOnFeature = true;
         let renderedText = null;
         let accordion = "";
         let count = 0;
+        let count2 = 1;
 
         $(".vector-feature-info-panel").remove();
         if (typeof vectorPopUp !== "undefined") {
@@ -1963,7 +1973,7 @@ module.exports = {
                                                 <a style="display: block; color: black" class="feature-info-accordion-toggle accordion-toggle js-toggle-feature-panel" data-toggle="collapse" data-parent="#layers" href="#collapse${randText}" id="a-collapse${randText}">${title}</a>
                                             </h4>
                                         </div>
-                                        <ul class="list-group" id="group-${randText}" role="tabpanel"><div id="collapse${randText}" class="feature-info-accordion-body accordion-body collapse" style="padding: 3px 8px 3px 8px">${renderedText}</div></ul>
+                                        <ul class="list-group" id="group-${randText}" role="tabpanel"><div data-layer-id="${layer._leaflet_id}" id="collapse${randText}" class="feature-info-accordion-body accordion-body collapse" style="padding: 3px 8px 3px 8px">${renderedText}</div></ul>
                                     </div>`;
                         } else {
                             accordion = renderedText;
@@ -1988,12 +1998,28 @@ module.exports = {
                 }
             }
             let func = selectCallBack.bind(this, null, layer, layerKey, _self);
-
             $(document).arrive(`#a-collapse${randText}`, function () {
                 $(this).on('click', function () {
                     let e = $(`#collapse${randText}`);
                     if (!e.hasClass("in")) {
                         func();
+                        sqlQuery.getQstore()?.forEach(store => {
+                            $.each(store.layer._layers, function (i, v) {
+                                if (store.layer && store.layer.resetStyle) {
+                                    store.layer.resetStyle(v);
+                                }
+                            });
+                        })
+                        _self.resetAllVectorLayerStyles();
+                        cloud.get().map.eachLayer(layer => {
+                            if (parseInt(layer._leaflet_id) === parseInt(e[0].dataset.layerId)) {
+                                try {
+                                    layer.setStyle(SELECTED_STYLE);
+                                } catch (e) {
+
+                                }
+                            }
+                        })
                     }
                     $('.feature-info-accordion-body').collapse("hide")
                 });
@@ -2003,42 +2029,45 @@ module.exports = {
                     $(parsedMeta.info_element_selector).html(renderedText)
                 } else {
                     // Set select call when opening a panel
-                    let selectCallBack = () => {
-                    };
-                    if (typeof parsedMeta.select_function !== "undefined" && parsedMeta.select_function !== "") {
-                        try {
-                            selectCallBack = Function('"use strict";return (' + parsedMeta.select_function + ')')();
-                        } catch (e) {
-                            console.info("Error in select function for: " + key);
-                            console.error(e.message);
-                        }
-                    }
-                    let func = selectCallBack.bind(this, null, layer, layerKey, _self);
-                    $(document).arrive(`#a-collapse${randText}`, function () {
-                        $(this).on('click', function () {
-                            let e = $(`#collapse${randText}`);
-                            if (!e.hasClass("in")) {
-                                func();
-                            }
-                            $('.feature-info-accordion-body').collapse("hide")
-                        });
-                    });
+                    // let selectCallBack = () => {
+                    // };
+                    // if (typeof parsedMeta.select_function !== "undefined" && parsedMeta.select_function !== "") {
+                    //     try {
+                    //         selectCallBack = Function('"use strict";return (' + parsedMeta.select_function + ')')();
+                    //     } catch (e) {
+                    //         console.info("Error in select function for: " + key);
+                    //         console.error(e.message);
+                    //     }
+                    // }
+                    // let func = selectCallBack.bind(this, null, layer, layerKey, _self);
+                    // $(document).arrive(`#a-collapse${randText}`, function () {
+                    //     $(this).on('click', function () {
+                    //         let e = $(`#collapse${randText}`);
+                    //         if (!e.hasClass("in")) {
+                    //             func();
+                    //         }
+                    //         $('.feature-info-accordion-body').collapse("hide")
+                    //     });
+                    // });
 
-                    vectorPopUp = L.popup({
-                        autoPan: window.vidiConfig.autoPanPopup,
-                        autoPanPaddingTopLeft: L.point(multi ? 20 : 0, multi ? 300 : 0),
-                        minWidth: 300,
-                        className: `js-vector-layer-popup custom-popup`
-                    }).setLatLng(event.latlng).setContent(`<div>
+                    if (count2 === features.length) {
+                        vectorPopUp = L.popup({
+                            autoPan: window.vidiConfig.autoPanPopup,
+                            autoPanPaddingTopLeft: L.point(multi ? 20 : 0, multi ? 300 : 0),
+                            minWidth: 300,
+                            className: `js-vector-layer-popup custom-popup`
+                        }).setLatLng(event.latlng).setContent(`<div>
                                                                 ${additionalControls}
                                                                 <div style="margin-right: 5px; margin-left: 2px">${accordion}</div>
                                                             </div>`).openOn(cloud.get().map)
-                        .on('remove', () => {
-                            sqlQuery.resetAll();
-                            _self.resetAllVectorLayerStyles();
-                        });
+                            .on('remove', () => {
+                                sqlQuery.resetAll();
+                                _self.resetAllVectorLayerStyles();
+                            });
+                    }
                 }
             }
+            count2++;
         })
         if (count === 1) {
             setTimeout(() => {
