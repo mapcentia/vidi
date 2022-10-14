@@ -1637,12 +1637,10 @@ module.exports = {
                     // If there is no handler for specific layer, then display attributes only
                     layer.on("click", function (e) {
                         _self.resetAllVectorLayerStyles();
-                        try {
-                            if (!window.vidiConfig.crossMultiSelect) {
+                        if (!window.vidiConfig?.crossMultiSelect) {
+                            if (e.target?.setStyle) {
                                 e.target.setStyle(SELECTED_STYLE);
                             }
-                        } catch (e) {
-                            console.error(e)
                         }
                         // Cross Multi select disabled
                         if (!window.vidiConfig.crossMultiSelect) {
@@ -2000,23 +1998,22 @@ module.exports = {
             let func = selectCallBack.bind(this, null, layer, layerKey, _self);
             $(document).arrive(`#a-collapse${randText}`, function () {
                 $(this).on('click', function () {
-                    let e = $(`#collapse${randText}`); sqlQuery.getQstore()?.forEach(store => {
-                            $.each(store.layer._layers, function (i, v) {
-                                if (store.layer && store.layer.resetStyle) {
-                                    store.layer.resetStyle(v);
-                                }
-                            });
-                        })
-                        _self.resetAllVectorLayerStyles();
+                    let e = $(`#collapse${randText}`);
+                    sqlQuery.getQstore()?.forEach(store => {
+                        $.each(store.layer._layers, function (i, v) {
+                            if (store.layer && store.layer.resetStyle) {
+                                store.layer.resetStyle(v);
+                            }
+                        });
+                    })
+                    _self.resetAllVectorLayerStyles();
                     if (!e.hasClass("in")) {
                         func();
 
                         cloud.get().map.eachLayer(layer => {
                             if (parseInt(layer._leaflet_id) === parseInt(e[0].dataset.layerId)) {
-                                try {
+                                if (layer?.setStyle) {
                                     layer.setStyle(SELECTED_STYLE);
-                                } catch (e) {
-
                                 }
                             }
                         })
