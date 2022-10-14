@@ -122,7 +122,7 @@ module.exports = {
 
     init: function () {
         _self = this;
-        // Update the qeueu statistics when group panel is opened.
+        // Update the queue statistics when group panel is opened.
         // In case of the layer tree component is not rendered yet
         $(document).arrive('.js-toggle-layer-panel', function (e, data) {
             $(this).on('click', function (e) {

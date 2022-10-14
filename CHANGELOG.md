@@ -11,7 +11,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - When clicking/tapping on the map, geometry with 'selected' style will be reset if any.
 
 ### Fixed
-- Update the qeueu statistics when group panel is opened in case of the layer tree component is not rendered yet. Before the qeueu statistics was not shown after a refresh.
+- Update the queue statistics when group panel is opened in case of the layer tree component is not rendered yet. Before the qeueu statistics was not shown after a refresh.
 
 ## [2022.10.0] - 2022-5-10
 ### Changed
