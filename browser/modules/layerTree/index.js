@@ -2000,10 +2000,7 @@ module.exports = {
             let func = selectCallBack.bind(this, null, layer, layerKey, _self);
             $(document).arrive(`#a-collapse${randText}`, function () {
                 $(this).on('click', function () {
-                    let e = $(`#collapse${randText}`);
-                    if (!e.hasClass("in")) {
-                        func();
-                        sqlQuery.getQstore()?.forEach(store => {
+                    let e = $(`#collapse${randText}`); sqlQuery.getQstore()?.forEach(store => {
                             $.each(store.layer._layers, function (i, v) {
                                 if (store.layer && store.layer.resetStyle) {
                                     store.layer.resetStyle(v);
@@ -2011,6 +2008,9 @@ module.exports = {
                             });
                         })
                         _self.resetAllVectorLayerStyles();
+                    if (!e.hasClass("in")) {
+                        func();
+
                         cloud.get().map.eachLayer(layer => {
                             if (parseInt(layer._leaflet_id) === parseInt(e[0].dataset.layerId)) {
                                 try {
