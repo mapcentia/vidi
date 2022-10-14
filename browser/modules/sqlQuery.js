@@ -262,10 +262,24 @@ module.exports = {
             if (featureInfoTableOnMap && !backArrowIsAdded) {
                 backArrowIsAdded = true;
                 defaultTemplate = `
-                                <div class='show-when-multiple-hits' style='cursor: pointer;' onclick='javascript:$("#modal-info-body").show();$("#alternative-info-container").hide();$("#click-for-info-slide .modal-title").empty();'>
+                                <div class='show-when-multiple-hits' style='cursor: pointer;'>
                                     <span class='material-icons'  style=''>keyboard_arrow_left </span>
                                     <span style="top: -7px;position: relative;">${__("Back")}</span>
                                 </div>` + defaultTemplate;
+                $(document).arrive('.show-when-multiple-hits', function (e, data) {
+                    $(this).on('click', function (e) {
+                        $("#modal-info-body").show();
+                        $("#alternative-info-container").hide();
+                        $("#click-for-info-slide .modal-title").empty();
+                        _self.getQstore()?.forEach(store => {
+                            $.each(store.layer._layers, function (i, v) {
+                                if (store.layer && store.layer.resetStyle) {
+                                    store.layer.resetStyle(v);
+                                }
+                            });
+                        })
+                    })
+                })
             }
 
             if (parsedMeta.info_element_selector) {
@@ -365,11 +379,12 @@ module.exports = {
 
                         // Set select_function if featureInfoTableOnMap = true
                         if ((typeof parsedMeta.select_function === "undefined" || parsedMeta.select_function === "") && featureInfoTableOnMap) {
-                            let selectFunction = `function(id, layer, key, sqlQuery){
-                                                     $("#modal-info-body").hide();
-                                                     $("#alternative-info-container").show();
-                                                  }`;
-                            selectCallBack = Function('"use strict";return (' + selectFunction + ')')();
+
+                            selectCallBack = function (id, layer, key, sqlQuery) {
+
+                                $("#modal-info-body").hide();
+                                $("#alternative-info-container").show();
+                            };
                         } else if (typeof parsedMeta.select_function !== "undefined" && parsedMeta.select_function !== "") {
                             try {
                                 selectCallBack = Function('"use strict";return (' + parsedMeta.select_function + ')')();
