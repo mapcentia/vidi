@@ -1034,7 +1034,12 @@ geocloud = (function () {
         };
 
         if (defaults.tileCached) {
-            url = defaults.host + "/mapcache/" + defaults.db + "/gmaps/" + layer + ".mvt/{z}/{x}/{y}.mvt";
+            uri = "/mapcache/" + defaults.db + "/gmaps/" + layer + ".mvt/{z}/{x}/{y}.mvt";
+            if ('mapRequestProxy' in defaults && defaults.mapRequestProxy !== false) {
+                url = defaults.mapRequestProxy + uri;
+            } else {
+                url = defaults.host +uri;
+            }
         } else {
             if (!defaults.uri) {
                 uri = "/wms/" + defaults.db + "/" + parts[0] + "?mode=tile&tilemode=gmap&tile={x}+{y}+{z}&layers=" + layer

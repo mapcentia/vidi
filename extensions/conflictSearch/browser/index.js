@@ -157,7 +157,7 @@ var Terraformer = require('terraformer-wkt-parser');
 
 var debounce = require('lodash/debounce');
 
-var _result;
+var _result = {};
 
 /**
  *

@@ -1,6 +1,6 @@
 FROM mapcentia/vidi:base
 MAINTAINER Martin Høgh<mh@mapcentia.com>
-ARG version=2021.8.0
+ARG version=2021.8.1
 
 RUN export DEBIAN_FRONTEND=noninteractive
 ENV DEBIAN_FRONTEND noninteractive

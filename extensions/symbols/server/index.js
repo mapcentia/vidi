@@ -37,16 +37,23 @@ router.get('/api/symbols/:file', function (req, response) {
 });
 
 router.post('/api/symbols/:db', function (req, response) {
-    let db = req.params.db, symbolState = req.body, userName;
-    let {browserId, userId} = shared.getCurrentUserIdentifiers(req);
-    let anonymous = !userId;
+    let db = req.params.db, symbolState = req.body.symbolState, browserId = req.body.userId, userGr = req.body.userGr, tag = req.body.tag;
+    let anonymous = true;
     let arr = [];
 
-    userId = userId || '';
-    for (const id in symbolState) {
-        let p = symbolState[id];
-        let sql = `INSERT INTO settings.symbols (id,rotation,scale,zoom,svg,browserid,userid,anonymous,file,the_geom) VALUES ('${id}',${p.rotation},${p.scale},${p.zoomLevel},'${p.svg}','${browserId}','${userId}',${anonymous},'${p.file}',ST_geomfromtext('POINT(${p.coord.lat} ${p.coord.lng})', 4326)) ON CONFLICT (id) DO UPDATE SET rotation=${p.rotation},scale=${p.scale},zoom=${p.zoomLevel},svg='${p.svg}',browserid='${browserId}',userid='${userId}',anonymous=${anonymous},file='${p.file}',the_geom=ST_geomfromtext('POINT(${p.coord.lat} ${p.coord.lng})', 4326)`;
-        arr.push(sql);
+    try {
+        for (const id in symbolState) {
+            let p = symbolState[id];
+            let sql = `INSERT INTO settings.symbols (id,rotation,scale,zoom,svg,browserid,userid,anonymous,file,the_geom,tag) VALUES ('${id}',${p.rotation},${p.scale},${p.zoomLevel},'${p.svg}','${browserId}','${userGr}',${anonymous},'${p.file}',ST_geomfromtext('POINT(${p.coord.lng} ${p.coord.lat})', 4326),'${tag}') ON CONFLICT (id) DO UPDATE SET rotation=${p.rotation},scale=${p.scale},zoom=${p.zoomLevel},svg='${p.svg}',browserid='${browserId}',userid='${userGr}',anonymous=${anonymous},file='${p.file}',the_geom=ST_geomfromtext('POINT(${p.coord.lng} ${p.coord.lat})', 4326), tag='${tag}'`;
+            arr.push(sql);
+        }
+    } catch (e) {
+        response.header('content-type', 'application/json');
+        response.status(500).send({
+            success: false,
+            message: e.message
+        });
+        return;
     }
     const newlineSql = arr.join("\n");
     const uri = "/api/v2/sql/" + db;

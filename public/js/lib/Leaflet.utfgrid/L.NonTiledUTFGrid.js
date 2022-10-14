@@ -245,7 +245,7 @@
             this.fire('load', e);
         },
         _onImageDone: function onImageDone(e) {
-            this._cache["test"] = JSON.parse(e.path[0].contentWindow.document.body.innerText);
+            this._cache["test"] = JSON.parse(e.target.contentWindow.document.body.innerText);
             // let tmp;
             // leaflet.DomUtil.setOpacity(this._currentImage, 1);
             // leaflet.DomUtil.setOpacity(this._bufferImage, 0);

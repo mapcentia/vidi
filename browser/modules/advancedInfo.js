@@ -1,100 +1,37 @@
 /*
  * @author     Alexander Shumilov
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2022 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
 
-const MODULE_ID = `advancedInfo`;
-
 import {GEOJSON_PRECISION} from './constants';
 
-/**
- * @type {*|exports|module.exports}
- */
-var cloud;
-
-/**
- * @type {*|exports|module.exports}
- */
-var sqlQuery;
-
-/**
- *
- * @type {*|exports|module.exports}
- */
-var reproject = require('reproject');
-
-/**
- *
- * @type {boolean}
- */
-var searchOn = false;
-
-/**
- *
- * @type {L.FeatureGroup}
- */
-var drawnItems = new L.FeatureGroup();
-
-/**
- *
- * @type {L.FeatureGroup}
- */
-var bufferItems = new L.FeatureGroup();
-
-/**
- * @type {*|exports|module.exports}
- */
-var drawControl;
-
-/**
- *
- * @type {Array}
- */
-var qstore = [];
-
-/**
- * @type {*|exports|module.exports}
- */
-var noUiSlider = require('nouislider');
-
-/**
- *
- * @type {Element}
- */
-var bufferSlider;
-
-/**
- *
- * @type {Element}
- */
-var bufferValue;
-
-/**
- *
- * @private
- */
-var _clearDrawItems = function () {
+const MODULE_ID = `advancedInfo`;
+let cloud;
+let sqlQuery;
+const reproject = require('reproject');
+let searchOn = false;
+let drawnItems = new L.FeatureGroup();
+let bufferItems = new L.FeatureGroup();
+let drawControl;
+let qstore = [];
+const noUiSlider = require('nouislider');
+let bufferSlider;
+let bufferValue;
+const _clearDrawItems = function () {
     drawnItems.clearLayers();
     bufferItems.clearLayers();
     sqlQuery.reset(qstore);
 };
-
-var backboneEvents;
-
-var debounce = require('lodash/debounce');
-/**
- *
- * @private
- */
-var _makeSearch = function () {
-    var primitive, coord,
+let backboneEvents;
+const debounce = require('lodash/debounce');
+const _makeSearch = function () {
+    let primitive, coord,
         layer, buffer = parseFloat($("#buffer-value").val());
 
-
-    for (var prop in drawnItems._layers) {
+    for (const prop in drawnItems._layers) {
         layer = drawnItems._layers[prop];
         break;
     }
@@ -114,17 +51,17 @@ var _makeSearch = function () {
             coord = layer.getLatLng();
         }
         // Get utm zone
-        var zone = require('./utmZone.js').getZone(coord.lat, coord.lng);
-        var crss = {
+        const zone = require('./utmZone.js').getZone(coord.lat, coord.lng);
+        const crss = {
             "proj": "+proj=utm +zone=" + zone + " +ellps=WGS84 +datum=WGS84 +units=m +no_defs",
             "unproj": "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
         };
-        var reader = new jsts.io.GeoJSONReader();
-        var writer = new jsts.io.GeoJSONWriter();
-        var geom = reader.read(reproject.reproject(primitive, "unproj", "proj", crss));
-        var buffer4326 = reproject.reproject(writer.write(geom.geometry.buffer(buffer)), "proj", "unproj", crss);
-        var buffered = reader.read(buffer4326);
-        var l = L.geoJson(buffer4326, {
+        const reader = new jsts.io.GeoJSONReader();
+        const writer = new jsts.io.GeoJSONWriter();
+        const geom = reader.read(reproject.reproject(primitive, "unproj", "proj", crss));
+        const buffer4326 = reproject.reproject(writer.write(geom.geometry.buffer(buffer)), "proj", "unproj", crss);
+        const buffered = reader.read(buffer4326);
+        const l = L.geoJson(buffer4326, {
             "color": "#ff7800",
             "weight": 1,
             "opacity": 1,
@@ -154,7 +91,6 @@ module.exports = {
         cloud = o.cloud;
         sqlQuery = o.sqlQuery;
         backboneEvents = o.backboneEvents;
-
         _self = this;
         return this;
     },
@@ -163,12 +99,19 @@ module.exports = {
      *
      */
     init: function () {
-        backboneEvents.get().on(`reset:all reset:${MODULE_ID} off:all` , () => {
+        backboneEvents.get().on(`off:all`, () => {
+            _self.off();
+        });
+        backboneEvents.get().on(`reset:all reset:${MODULE_ID}`, () => {
             _self.off();
             _self.reset();
         });
-        backboneEvents.get().on(`on:${MODULE_ID}`, () => { _self.on(); });
-        backboneEvents.get().on(`off:${MODULE_ID}`, () => { _self.off(); });
+        backboneEvents.get().on(`on:${MODULE_ID}`, () => {
+            _self.on();
+        });
+        backboneEvents.get().on(`off:${MODULE_ID}`, () => {
+            _self.off();
+        });
 
         $("#advanced-info-btn").on("click", function () {
             _self.control();
@@ -209,105 +152,94 @@ module.exports = {
     },
 
     on: () => {
-        backboneEvents.get().trigger("advancedInfo:turnedOn");
-
-        // Reset all SQL Query layers
-        backboneEvents.get().trigger("sqlQuery:clear");
-
-        $("#buffer").show();
-
-       // L.drawLocal = require('./drawLocales/advancedInfo.js');
-        drawControl = new L.Control.Draw({
-            position: 'topright',
-            draw: {
-                polygon: {
-                    title: 'Draw a polygon!',
-                    allowIntersection: true,
-                    drawError: {
-                        color: '#b00b00',
-                        timeout: 1000
+        if (!drawControl) {
+            backboneEvents.get().trigger("advancedInfo:turnedOn");
+            $("#buffer").show();
+            drawControl = new L.Control.Draw({
+                position: 'topright',
+                draw: {
+                    polygon: {
+                        title: 'Draw a polygon!',
+                        allowIntersection: true,
+                        drawError: {
+                            color: '#b00b00',
+                            timeout: 1000
+                        },
+                        shapeOptions: {
+                            color: '#662d91',
+                            fillOpacity: 0
+                        },
+                        showArea: true
                     },
-                    shapeOptions: {
-                        color: '#662d91',
-                        fillOpacity: 0
+                    polyline: {
+                        metric: true,
+                        shapeOptions: {
+                            color: '#662d91',
+                            fillOpacity: 0
+                        }
                     },
-                    showArea: true
+                    circle: {
+                        shapeOptions: {
+                            color: '#662d91',
+                            fillOpacity: 0
+                        }
+                    },
+                    rectangle: {
+                        shapeOptions: {
+                            color: '#662d91',
+                            fillOpacity: 0
+                        }
+                    },
+                    marker: true,
+                    circlemarker: false
                 },
-                polyline: {
-                    metric: true,
-                    shapeOptions: {
-                        color: '#662d91',
-                        fillOpacity: 0
-                    }
-                },
-                circle: {
-                    shapeOptions: {
-                        color: '#662d91',
-                        fillOpacity: 0
-                    }
-                },
-                rectangle: {
-                    shapeOptions: {
-                        color: '#662d91',
-                        fillOpacity: 0
-                    }
-                },
-                marker: true,
-                circlemarker: false
-            },
-            edit: {
-                featureGroup: drawnItems,
-                remove: false
-            }
-        });
+                edit: {
+                    featureGroup: drawnItems,
+                    remove: false
+                }
+            });
+            cloud.get().map.addControl(drawControl);
+            searchOn = true;
+            _self.unbindEvents();
+            // Bind events
+            cloud.get().map.on('draw:created', function (e) {
+                e.layer._vidi_type = "query_draw";
+                if (e.layerType === 'marker') {
 
-        cloud.get().map.addControl(drawControl);
-        searchOn = true;
-
-        // Unbind events
-        cloud.get().map.off('draw:created');
-        cloud.get().map.off('draw:drawstart');
-        cloud.get().map.off('draw:drawstop');
-        cloud.get().map.off('draw:editstart');
-        // Bind events
-        cloud.get().map.on('draw:created', function (e) {
-            e.layer._vidi_type = "query_draw";
-            if (e.layerType === 'marker') {
-
-                e.layer._vidi_marker = true;
-            }
-            drawnItems.addLayer(e.layer);
-        });
-        cloud.get().map.on('draw:drawstart', function (e) {
-            // Clear all SQL query layers
-            backboneEvents.get().trigger("sqlQuery:clear");
-        });
-        cloud.get().map.on('draw:drawstop', function (e) {
-            _makeSearch();
-        });
-        cloud.get().map.on('draw:editstop', function (e) {
-            _makeSearch();
-        });
-        cloud.get().map.on('draw:editstart', function (e) {
-            bufferItems.clearLayers();
-        });
-        var po = $('.leaflet-draw-toolbar-top').popover({content: __("Use these tools for querying the overlay maps."), placement: "left"});
-        po.popover("show");
-        setTimeout(function () {
-            po.popover("hide");
-        }, 2500);
+                    e.layer._vidi_marker = true;
+                }
+                drawnItems.addLayer(e.layer);
+            });
+            cloud.get().map.on('draw:drawstart', function () {
+                // Clear all SQL query layers
+                backboneEvents.get().trigger("sqlQuery:clear");
+            });
+            cloud.get().map.on('draw:drawstop', function () {
+                _makeSearch();
+            });
+            cloud.get().map.on('draw:editstop', function () {
+                _makeSearch();
+            });
+            cloud.get().map.on('draw:editstart', function () {
+                bufferItems.clearLayers();
+            });
+            const po = $('.leaflet-draw-toolbar-top').popover({
+                content: __("Use these tools for querying the overlay maps."),
+                placement: "left"
+            });
+            po.popover("show");
+            setTimeout(function () {
+                po.popover("hide");
+            }, 2500);
+        }
     },
 
-    /**
-     *
-     */
     control: function () {
         if ($("#advanced-info-btn").is(':checked')) {
             _self.on();
             backboneEvents.get().trigger(`off:infoClick`);
         } else {
             searchOn = false;
-            
             _self.off();
             backboneEvents.get().trigger(`on:infoClick`);
             backboneEvents.get().trigger("advancedInfo:turnedOff");
@@ -316,42 +248,39 @@ module.exports = {
 
     off: function () {
         searchOn = false;
-        // Clean up
-        _clearDrawItems();
-        $("#advanced-info-btn").prop("checked", false);
-        // Unbind events
-        cloud.get().map.off('draw:created');
-        cloud.get().map.off('draw:drawstart');
-        cloud.get().map.off('draw:drawstop');
-        cloud.get().map.off('draw:editstart');
-        try {
+        _self.unbindEvents();
+
+        if (drawControl) {
             cloud.get().map.removeControl(drawControl);
-        } catch (e) {
         }
+        drawControl = false;
         $("#buffer").hide();
     },
-    /**
-     *
-     * @returns {boolean}
-     */
+
     getSearchOn: function () {
         return searchOn;
     },
-    /**
-     *
-     * @returns {L.FeatureGroup}
-     */
+
     getDrawLayer: function () {
         return drawnItems;
     },
-    /**
-     *
-     * @returns {L.FeatureGroup}
-     */
+
     getBufferLayer: function () {
         return bufferItems;
     },
 
-    reset: () => _clearDrawItems()
+    reset: () => _clearDrawItems(),
+
+    unbindEvents: () => {
+        cloud.get().map.off('draw:created');
+        cloud.get().map.off('draw:drawstart');
+        cloud.get().map.off('draw:drawstop');
+        cloud.get().map.off('draw:editstart');
+        cloud.get().map.off('draw:editstop');
+        cloud.get().map.off('draw:deletestart');
+        cloud.get().map.off('draw:deletestop');
+        cloud.get().map.off('draw:deleted');
+        cloud.get().map.off('draw:edited');
+    }
 };
 

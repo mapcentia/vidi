@@ -183,7 +183,7 @@ module.exports = {
         // Set up print dialog
         $("#ul-scale").empty();
         for (var i = 0; i < scales.length; i++) {
-            $("#ul-scale").append("<li><a data-scale-ul='" + scales[i] + "' href='#'>" + scales[i] + "</a></li>");
+            $("#ul-scale").append("<li><a data-scale-ul='" + scales[i] + "'>" + scales[i] + "</a></li>");
         }
         $("#print-sticky").unbind("change");
         $("#print-sticky").change(function (e) {
@@ -489,7 +489,8 @@ module.exports = {
             "query_buffer": true,
             "query_result": true,
             "draw": true,
-            "print": true
+            "print": true,
+            "measurements": true
         }, true);
         $.each(e, function (i, v) {
             if (v.type === "Vector") {
@@ -502,7 +503,8 @@ module.exports = {
             "query_buffer": false, // Get query buffer draw
             "query_result": true,
             "draw": true,
-            "print": true
+            "print": true,
+            "measurements": true
         }, true);
         $.each(e, function (i, v) {
             if (v.type === "Vector") {
@@ -515,7 +517,8 @@ module.exports = {
             "query_buffer": true,
             "query_result": false, // Get result
             "draw": true,
-            "print": true
+            "print": true,
+            "measurements": true
         }, true);
         $.each(e, function (i, v) {
             if (v.type === "Vector") {
@@ -528,7 +531,8 @@ module.exports = {
             "query_buffer": true,
             "query_result": true,
             "draw": true,
-            "print": false // Get print
+            "print": false, // Get print
+            "measurements": true
         }, true);
         $.each(e, function (i, v) {
             if (v.type === "Vector") {

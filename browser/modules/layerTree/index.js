@@ -50,7 +50,7 @@ let _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEv
     onEachFeature = [], pointToLayer = [], onSelectedStyle = [], onLoad = [], onSelect = [],
     onMouseOver = [], cm = [], styles = [], tables = {}, childLayersThatShouldBeEnabled = [];
 
-const uuidv4 = require('uuid/v4');
+const {v4: uuidv4} = require('uuid');
 const React = require('react');
 const ReactDOM = require('react-dom');
 const base64url = require('base64url');
@@ -122,6 +122,19 @@ module.exports = {
 
     init: function () {
         _self = this;
+        // Update the queue statistics when group panel is opened.
+        // In case of the layer tree component is not rendered yet
+        $(document).arrive('.js-toggle-layer-panel', function (e, data) {
+            $(this).on('click', function (e) {
+                setTimeout(() => {
+                    _self._statisticsHandler(queueStatistsics.getLastStatistics(), false, true);
+                }, 200);
+            })
+        });
+        // If map is clicked, when clear all selections
+        cloud.get().map.on('click', () => {
+            _self.resetAllVectorLayerStyles();
+        })
         if (window.vidiConfig.enabledExtensions.indexOf(`editor`) !== -1) moduleState.editingIsEnabled = true;
         $(document).arrive('#layers-filter-reset', function (e, data) {
             $(this).on('click', function (e) {
@@ -156,7 +169,13 @@ module.exports = {
 
         if (urlparser && urlparser.urlVars && urlparser.urlVars.initialFilter) {
             backboneEvents.get().on(`${MODULE_NAME}:ready`, () => {
-                let decodedFilters = JSON.parse(atob(urlparser.urlVars.initialFilter));
+                let decodedFilters;
+                try {
+                    decodedFilters = JSON.parse(base64url.decode(urlparser.urlVars.initialFilter));
+                } catch (e) {
+                    alert("Bad filter");
+                    return
+                }
                 for (let layerKey in decodedFilters) {
                     _self.onApplyArbitraryFiltersHandler({
                         layerKey,
@@ -177,7 +196,6 @@ module.exports = {
                             }
                         }
                     });
-                    break;
                 }
             });
         }
@@ -312,10 +330,7 @@ module.exports = {
                 result.push(activeLayers[key].fullLayerKey);
             }
         }
-        const layersFromFromUrl = state.layersInUrl();
-
-
-        return result.concat(layersFromFromUrl);
+        return result;
     },
 
     /**
@@ -1379,7 +1394,8 @@ module.exports = {
         let parentFiltersHash = ``;
         let layerKey = layer.f_table_schema + '.' + layer.f_table_name;
         const layerSpecificQueryLimit = layerTreeUtils.getQueryLimit(meta.parseLayerMeta(layerKey));
-        let sql = `SELECT * FROM ${layerKey} LIMIT ${layerSpecificQueryLimit}`;
+        let sql = `SELECT *
+                   FROM ${layerKey} LIMIT ${layerSpecificQueryLimit}`;
         if (isVirtual) {
             let storeWasFound = false;
             moduleState.virtualLayers.map(item => {
@@ -1420,7 +1436,9 @@ module.exports = {
             // Gathering all WHERE clauses
             if (whereClauses.length > 0) {
                 whereClauses = whereClauses.map(item => `(${item})`);
-                sql = `SELECT * FROM ${layerKey} WHERE (${whereClauses.join(` AND `)}) LIMIT ${layerSpecificQueryLimit}`;
+                sql = `SELECT *
+                       FROM ${layerKey}
+                       WHERE (${whereClauses.join(` AND `)}) LIMIT ${layerSpecificQueryLimit}`;
             }
         }
 
@@ -1460,7 +1478,7 @@ module.exports = {
         moduleState.vectorStores[trackingLayerKey] = new geocloud.sqlStore({
             map: cloud.get().map,
             minZoom: parseInt(meta.parseLayerMeta(layerKey)?.vector_min_zoom),
-            maxZoom: parseInt(meta.parseLayerMeta(layerKey)?.vector_max_zoom),
+            maxZoom: parseInt(meta.parseLayerMeta(layerKey)?.vector_max_zoom) + 1,
             pane,
             parentFiltersHash,
             jsonp: false,
@@ -1567,8 +1585,11 @@ module.exports = {
                         layer.on("click", function (e) {
                             _self.resetAllVectorLayerStyles();
                             try {
-                                e.target.setStyle(SELECTED_STYLE);
+                                if (!window.vidiConfig.crossMultiSelect) {
+                                    e.target.setStyle(SELECTED_STYLE);
+                                }
                             } catch (e) {
+                                console.error(e)
                             }
                             let layerIsEditable = false;
                             let metaDataKeys = meta.getMetaDataKeys();
@@ -1616,9 +1637,10 @@ module.exports = {
                     // If there is no handler for specific layer, then display attributes only
                     layer.on("click", function (e) {
                         _self.resetAllVectorLayerStyles();
-                        try {
-                            e.target.setStyle(SELECTED_STYLE);
-                        } catch (e) {
+                        if (!window.vidiConfig?.crossMultiSelect) {
+                            if (e.target?.setStyle) {
+                                e.target.setStyle(SELECTED_STYLE);
+                            }
                         }
                         // Cross Multi select disabled
                         if (!window.vidiConfig.crossMultiSelect) {
@@ -1681,7 +1703,7 @@ module.exports = {
                                         if (turfIntersects(clickFeature, feature) && overlay.id) {
                                             intersectingFeatures.push({
                                                 "feature": featureForChecking.feature,
-                                                "layer": overlay,
+                                                "layer": featureForChecking,
                                                 "layerKey": overlay.id.split(":")[1]
                                             });
                                         }
@@ -1715,7 +1737,8 @@ module.exports = {
     createWebGLStore: (layer) => {
         let layerKey = layer.f_table_schema + '.' + layer.f_table_name;
         const layerSpecificQueryLimit = layerTreeUtils.getQueryLimit(meta.parseLayerMeta(layerKey));
-        let sql = `SELECT * FROM ${layerKey} LIMIT ${layerSpecificQueryLimit}`;
+        let sql = `SELECT *
+                   FROM ${layerKey} LIMIT ${layerSpecificQueryLimit}`;
 
         let whereClauses = [];
         let activeFilters = _self.getActiveLayerFilters(layerKey);
@@ -1741,7 +1764,9 @@ module.exports = {
         // Gathering all WHERE clauses
         if (whereClauses.length > 0) {
             whereClauses = whereClauses.map(item => `(${item})`);
-            sql = `SELECT * FROM ${layerKey} WHERE (${whereClauses.join(` AND `)}) LIMIT ${layerSpecificQueryLimit}`;
+            sql = `SELECT *
+                   FROM ${layerKey}
+                   WHERE (${whereClauses.join(` AND `)}) LIMIT ${layerSpecificQueryLimit}`;
         }
 
         let trackingLayerKey = (LAYER.WEBGL + ':' + layerKey);
@@ -1868,10 +1893,14 @@ module.exports = {
     },
 
     displayAttributesPopup(features, event, additionalControls = ``, multi = true) {
+        if (window.vidiConfig.crossMultiSelect) {
+            _self.resetAllVectorLayerStyles();
+        }
         event.originalEvent.clickedOnFeature = true;
         let renderedText = null;
         let accordion = "";
         let count = 0;
+        let count2 = 1;
 
         $(".vector-feature-info-panel").remove();
         if (typeof vectorPopUp !== "undefined") {
@@ -1942,7 +1971,7 @@ module.exports = {
                                                 <a style="display: block; color: black" class="feature-info-accordion-toggle accordion-toggle js-toggle-feature-panel" data-toggle="collapse" data-parent="#layers" href="#collapse${randText}" id="a-collapse${randText}">${title}</a>
                                             </h4>
                                         </div>
-                                        <ul class="list-group" id="group-${randText}" role="tabpanel"><div id="collapse${randText}" class="feature-info-accordion-body accordion-body collapse" style="padding: 3px 8px 3px 8px">${renderedText}</div></ul>
+                                        <ul class="list-group" id="group-${randText}" role="tabpanel"><div data-layer-id="${layer._leaflet_id}" id="collapse${randText}" class="feature-info-accordion-body accordion-body collapse" style="padding: 3px 8px 3px 8px">${renderedText}</div></ul>
                                     </div>`;
                         } else {
                             accordion = renderedText;
@@ -1967,12 +1996,27 @@ module.exports = {
                 }
             }
             let func = selectCallBack.bind(this, null, layer, layerKey, _self);
-
             $(document).arrive(`#a-collapse${randText}`, function () {
                 $(this).on('click', function () {
                     let e = $(`#collapse${randText}`);
+                    sqlQuery.getQstore()?.forEach(store => {
+                        $.each(store.layer._layers, function (i, v) {
+                            if (store.layer && store.layer.resetStyle) {
+                                store.layer.resetStyle(v);
+                            }
+                        });
+                    })
+                    _self.resetAllVectorLayerStyles();
                     if (!e.hasClass("in")) {
                         func();
+
+                        cloud.get().map.eachLayer(layer => {
+                            if (parseInt(layer._leaflet_id) === parseInt(e[0].dataset.layerId)) {
+                                if (layer?.setStyle) {
+                                    layer.setStyle(SELECTED_STYLE);
+                                }
+                            }
+                        })
                     }
                     $('.feature-info-accordion-body').collapse("hide")
                 });
@@ -1982,44 +2026,45 @@ module.exports = {
                     $(parsedMeta.info_element_selector).html(renderedText)
                 } else {
                     // Set select call when opening a panel
-                    let selectCallBack = () => {
-                    };
-                    if (typeof parsedMeta.select_function !== "undefined" && parsedMeta.select_function !== "") {
-                        try {
-                            selectCallBack = Function('"use strict";return (' + parsedMeta.select_function + ')')();
-                        } catch (e) {
-                            console.info("Error in select function for: " + key);
-                            console.error(e.message);
-                        }
-                    }
-                    let func = selectCallBack.bind(this, null, layer, layerKey, _self);
-                    $(document).arrive(`#a-collapse${randText}`, function () {
-                        $(this).on('click', function () {
-                            let e = $(`#collapse${randText}`);
-                            if (!e.hasClass("in")) {
-                                func();
-                            }
-                            $('.feature-info-accordion-body').collapse("hide")
-                        });
-                    });
+                    // let selectCallBack = () => {
+                    // };
+                    // if (typeof parsedMeta.select_function !== "undefined" && parsedMeta.select_function !== "") {
+                    //     try {
+                    //         selectCallBack = Function('"use strict";return (' + parsedMeta.select_function + ')')();
+                    //     } catch (e) {
+                    //         console.info("Error in select function for: " + key);
+                    //         console.error(e.message);
+                    //     }
+                    // }
+                    // let func = selectCallBack.bind(this, null, layer, layerKey, _self);
+                    // $(document).arrive(`#a-collapse${randText}`, function () {
+                    //     $(this).on('click', function () {
+                    //         let e = $(`#collapse${randText}`);
+                    //         if (!e.hasClass("in")) {
+                    //             func();
+                    //         }
+                    //         $('.feature-info-accordion-body').collapse("hide")
+                    //     });
+                    // });
 
-                    vectorPopUp = L.popup({
-                        autoPan: window.vidiConfig.autoPanPopup,
-                        autoPanPaddingTopLeft: L.point(multi ? 20 : 0, multi ? 300 : 0),
-                        minWidth: 300,
-                        className: `js-vector-layer-popup custom-popup`
-                    }).setLatLng(event.latlng).setContent(`<div>
+                    if (count2 === features.length) {
+                        vectorPopUp = L.popup({
+                            autoPan: window.vidiConfig.autoPanPopup,
+                            autoPanPaddingTopLeft: L.point(multi ? 20 : 0, multi ? 300 : 0),
+                            minWidth: 300,
+                            className: `js-vector-layer-popup custom-popup`
+                        }).setLatLng(event.latlng).setContent(`<div>
                                                                 ${additionalControls}
                                                                 <div style="margin-right: 5px; margin-left: 2px">${accordion}</div>
                                                             </div>`).openOn(cloud.get().map)
-                        .on('remove', () => {
-                            sqlQuery.resetAll();
-                            if (window.vidiConfig.crossMultiSelect) {
+                            .on('remove', () => {
+                                sqlQuery.resetAll();
                                 _self.resetAllVectorLayerStyles();
-                            }
-                        });
+                            });
+                    }
                 }
             }
+            count2++;
         })
         if (count === 1) {
             setTimeout(() => {
@@ -3371,12 +3416,13 @@ module.exports = {
     onApplyFitBoundsFiltersHandler: (layerKey) => {
         let metaData = meta.getMetaByKey(layerKey);
         let whereClause = _self.getActiveLayerFilters(layerKey)[0];
-        let sql = `SELECT 
-                    ST_Xmin(ST_Extent(extent)) AS txmin,
-                    ST_Xmax(ST_Extent(extent)) AS txmax,
-                    ST_Ymin(ST_Extent(extent)) AS tymin,
-                    ST_Ymax(ST_Extent(extent)) AS tymax
-                FROM (SELECT ST_astext(ST_Transform(ST_setsrid(ST_Extent(${metaData.f_geometry_column}),${metaData.srid}),4326)) AS extent FROM ${layerKey} WHERE ${whereClause}) as foo`;
+        let sql = `SELECT ST_Xmin(ST_Extent(extent)) AS txmin,
+                          ST_Xmax(ST_Extent(extent)) AS txmax,
+                          ST_Ymin(ST_Extent(extent)) AS tymin,
+                          ST_Ymax(ST_Extent(extent)) AS tymax
+                   FROM (SELECT ST_astext(ST_Transform(ST_setsrid(ST_Extent(${metaData.f_geometry_column}), ${metaData.srid}), 4326)) AS extent
+                         FROM ${layerKey}
+                         WHERE ${whereClause}) as foo`;
         let q = {
             q: base64url(sql),
             base64: true
@@ -3399,7 +3445,9 @@ module.exports = {
     },
     onApplyDownloadHandler: (layerKey, format) => {
         let whereClause = _self.getActiveLayerFilters(layerKey)[0];
-        let sql = `SELECT * FROM ${layerKey} WHERE ${whereClause}`;
+        let sql = `SELECT *
+                   FROM ${layerKey}
+                   WHERE ${whereClause}`;
         download.download(sql, format)
     },
 

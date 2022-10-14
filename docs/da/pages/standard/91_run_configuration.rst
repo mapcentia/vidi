@@ -96,6 +96,26 @@ Her følger hvordan de enkelte extensions kan opsættes (Pt. omfatter denne del 
         "embed": {
             "slideOutLayerTree": true,
             "expandFirstInLayerTree": true
+        },
+        "symbols": {
+            "files": [
+                {"file": "symbolset1.json", "title": "Symbolsæt 1"},
+                {"file": "symbolset2.json", "title": "Symbolsæt 2"}
+            ],
+            "options": {
+                "scale": true,
+                "rotate": true,
+                "delete": true,
+                "callback": "function(file, state, operation){alert('Et symbol placeret')}",
+                "validate": "function(file, group, state){return true}"
+            },
+            "symbolOptions": {
+                "symbol34.svg": {
+                    "onlyOne": true,
+                    "rotate": false,
+                    "callback": "function(file, state, operation){alert('Symbol 34 placeret')}"
+                }
+            }
         }
     }
 
@@ -454,7 +474,7 @@ Viser en tjekboks i hver lag-gruppe og under-gruppe, som tænder/slukker alle la
 activeLayers
 *****************************************************************
 
-Liste over lag, som skal tændes fra starten. Lag angives schema qualified og med evt. type præfiks (:v, :mvt, :w). De angivne lag behøver ikke at være includeret i :ref:`schemata<configjs_schemata>`. Hvis Vidi startes med et projekt link, vil denne konfiguration blive ignoreret.
+Liste over lag, som skal tændes fra starten. Lag angives schema qualified og med evt. type præfiks (v:, mvt:, w:). De angivne lag behøver ikke at være includeret i :ref:`schemata<configjs_schemata>`. Hvis Vidi startes med et projekt link, vil denne konfiguration blive ignoreret.
 
 .. code-block:: json
 
@@ -502,6 +522,42 @@ vil kun ``width`` have effekt og tabellen vil altid fylde højden ud. Hvis posit
         "width": "30%",
         "height": "250px"
     }
+
+.. _configjs_initFunction:
+
+initFunction
+*****************************************************************
+
+Her kan angives en JavaScript funktion, som bliver kørt når Vidi er klar. Funktionen skal skrives som en linje tekst startende med `function()` og den efterfølgende blok er den, som bliver eksekveret:
+
+.. code-block:: json
+
+    "initFunction": "function(){alert('Hello world')}"
+
+.. _configjs_initZoomCenter:
+
+initZoomCenter
+*****************************************************************
+
+Hvis sat vil Vidi starte op på det angivet zoom/center. Denne indstilling vil have forrang over zoom/center sat i URL og projekt-link. Kan fx anvendes til at sikre, at alle indlejrede kort starter med samme zoom/center.
+
+Angives således `/z/x/y`. Dette svarer til det, der vises i Vidi URL'en.
+
+.. code-block:: json
+
+    "initZoomCenter": "/16/9.875/56.142"
+
+
+.. _configjs_popupdraggable:
+
+popupDraggable
+*****************************************************************
+
+Hvis sat til `true` kan man flytte feature-info pop-up'en på kortet.
+
+.. code-block:: json
+
+    "popupDraggable": false
 
 .. rubric:: Fodnoter
 

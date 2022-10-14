@@ -4,10 +4,81 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [UNRELEASED]
+## UNRELEASED
+### Changed
+- When using `crossMultiSelect` the geometry for the open accordion panel will now get the 'selected' style.
+- When using `featureInfoTableOnMap` the Back button will reset the 'selected' style.
+- When clicking/tapping on the map, geometry with 'selected' style will be reset if any.
+
+### Fixed
+- Update the queue statistics when group panel is opened in case of the layer tree component is not rendered yet. Before the qeueu statistics was not shown after a refresh.
+
+## [2022.10.0] - 2022-5-10
+### Changed
+- Session cookie is now set with an `Expires` attribute, which can be set in `config/config.js`. Before it was set as a non-persistent cookie, which was deleted on exiting the web browser. Defaults to 86400 seconds.
+```json
+{
+  "sessionMaxAge": 86400
+}
+```
+### Fixed
+- When Vidi was started URL layers in offline mode, was not set to offline because layertree is yet not created. Now offline mode is retrived form state on upstart.
+
+## [2022.9.2] - 2022-19-9
 ### Added
-- New GC2 meta settings for controlling zoom level visibility for vector layers: `vector_min_zoom` and `vector_max_zoom`.
-- New GC2 meta setting for bind a tooltip to vector layers: `tooltip_template`. This is a mustace/handlebars template where feature properties can be uses:
+- New config option added `popupDraggable`. Makes feature-info popups draggable. Can be set in run-tim config.
+```json
+{
+  "popupDraggable": true
+}
+```
+- Geometry created by feature-info module now stick after the module is swtiched off. So now it's possible to print maps with feature-info results. To clear the map the "Clear map" tool button can be used. 
+- A sort-by-score mode is added to Danish search module. The setting will sort the address list by a calculated score, so most relavant suggestions will be a the top. If switched off the list will be sorted alphanumeric. For now only works for address not cadastre.
+```json
+{
+  "searchConfig": {
+    "komkode": "*",
+    "sortByScore": true
+  }
+}
+```
+
+## [2022.9.1] - 2022-7-9
+### Changed
+- The url parameter `initialFilter` must now be Base64URL encoded, which is safe to use in urls. If filter can't be decoded a alert will tell the user. https://base64.guru/standards/base64url
+
+## [2022.9.0] - 2022-5-9
+### Added
+- In addition to the embed attributes `data-vidi-search` and `data-vidi-history` some more attributes are added to hide the buttons the embed-template. The attrubutes can be set to `none`:
+* data-vidi-legend
+* data-vidi-layer
+* data-vidi-background
+* data-vidi-fullscreen
+* data-vidi-about
+* data-vidi-location
+
+## [2022.8.4] - 2022-31-8
+### Changed
+- conflictSearch now prints with concurrency when selecting a multiple page report. 
+
+## [2022.8.3] - 2022-29-8
+### Fixed
+- State loaded from snapshot now is set in localforage. This was a regression bug.
+- Drawings made in Measurements now is stored in state and will stick between refreshes and in snapshots.
+
+## [2022.8.2] - 2022-17-8
+### Added
+- New runtime config `initZoomCenter`, which will locks Vidi to a specific zoom/center. This will override zoom/center in URL and snapshot link.  
+
+## [2022.8.1] - 2022-10-8
+### Changed
+- Lazy load of snapshot data. The loaded snapshot list now only includes metadata - not the snapshot data itself. When activating a snapshot the data is fetched. This way a long snapshot list will load faster and not fill the memory.
+- Added config options to the symbol module.
+
+## [2022.8.0] - 2022-2-8
+### Added
+- New GC2 meta settings for controlling zoom level visibility for vector layers: `vector_min_zoom` and `vector_max_zoom`. The values must be tile set zoom levels.
+- New GC2 meta setting for bind a tooltip to vector layers: `tooltip_template`. This is a mustache/handlebars template where feature properties can be uses:
 ```handlebars
 This is a label for feature <b>{{gid}}</b>
 ```
@@ -15,14 +86,16 @@ This is a label for feature <b>{{gid}}</b>
 ### Changed
 - For each activated layer there is now created a map pane named `[schema]-[layer]` and the layer is added to this. The sort layer function will work on the panes instead on layers. This way both tile and vector layers can be sorted between each other.
 
+### Fixed
+- Issue regarding side-by-side base layers: https://github.com/digidem/leaflet-side-by-side/issues/43
+- Issue regarding `featureInfoTableOnMap` and pop-up error when single feature is selected.
+
 ## [2022.6.1] - 2022-28-6
 ### Added
 - In pop-ups and vector tables values are now replaced with rendered mustache template if provided through GC2.
 
 ### Changed
 - Legend moved to upper right corner in embed.tmpl, so it doesn't coflict with the bottom aligned vector table.
-
-### Changed
 - Pop-ups are not longer opened when selecting a row in table, because this will let gc2table control the pop-up and here editing tools are not supported.
 
 ### Fixed

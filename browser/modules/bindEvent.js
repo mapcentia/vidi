@@ -256,7 +256,7 @@ module.exports = {
             }
         });
 
-        $(document).bind('mousemove', function (e) {
+        $(document).on('mousemove.tail', function (e) {
             $('#tail').css({
                 left: e.pageX + 20,
                 top: e.pageY

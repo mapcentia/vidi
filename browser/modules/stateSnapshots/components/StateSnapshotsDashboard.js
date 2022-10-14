@@ -8,7 +8,7 @@ const React = require('react');
 import TitleFieldComponent from './../../shared/TitleFieldComponent';
 import LoadingOverlay from './../../shared/LoadingOverlay';
 
-const uuidv4 = require('uuid/v4');
+const { v4: uuidv4 } = require('uuid');
 const cookie = require('js-cookie');
 const base64url = require('base64url');
 
@@ -171,12 +171,14 @@ class StateSnapshotsDashboard extends React.Component {
      * Applies snapshot
      *
      * @param {Object} item Applies snapshot
+     * @param ignoreInitZoomCenter
      */
-    applySnapshot(item) {
+    applySnapshot(item, ignoreInitZoomCenter) {
         if (this.props.onStateSnapshotApply) this.props.onStateSnapshotApply();
 
         this.setState({stateApplyingIsBlocked: true});
-        this.props.state.applyState(item.snapshot).then(() => {
+        this.props.state.applyState(item.snapshot, ignoreInitZoomCenter).then(() => {
+            console.log(item.snapshot.modules.print)
             this.setState({stateApplyingIsBlocked: false});
         });
     }
@@ -469,7 +471,13 @@ class StateSnapshotsDashboard extends React.Component {
                 type="button"
                 className="btn btn-xs btn-primary"
                 onClick={() => {
-                    this.applySnapshot(item);
+                    fetch(
+                        `/api/state-snapshots/${vidiConfig.appDatabase}/${item.id}`
+                    ).then((response) => response.text())
+                        .then((data) => {
+                            this.applySnapshot(JSON.parse(base64url.decode(data)), true);
+                        });
+
                 }}
                 disabled={this.state.stateApplyingIsBlocked}
                 title={titles.apply}
@@ -503,21 +511,24 @@ class StateSnapshotsDashboard extends React.Component {
                         {importButton}
                     </div>)}
                     {this.props.playOnly ? false : (
-                        <div style={{display:`flex`}}>
+                        <div style={{display: `flex`}}>
                             <div className="input-group form-group" style={{paddingTop: `8px`}}>
                                 <div style={{display: `flex`, width: `100%`}}>
                                     <a className="input-group-addon" style={{cursor: `pointer`}} onClick={() => {
                                         this.copyToClipboard(permaLink)
-                                    }}><i className="material-icons" style={{fontSize: `18px`}}>content_copy</i>{__(`Copy Vidi link`)}</a>
+                                    }}><i className="material-icons"
+                                          style={{fontSize: `18px`}}>content_copy</i>{__(`Copy Vidi link`)}</a>
                                 </div>
                             </div>
                             {tokenField}
-                            <div className="input-group form-group snapshot-copy-png-link" style={{width: `100%`, paddingTop: `8px`}}>
+                            <div className="input-group form-group snapshot-copy-png-link"
+                                 style={{width: `100%`, paddingTop: `8px`}}>
                                 <div style={{display: `flex`, width: `100%`}}>
                                     <div>
                                         <a className="input-group-addon" style={{cursor: `pointer`}} onClick={() => {
                                             this.copyToClipboard(imageLink)
-                                        }}><i className="material-icons" style={{fontSize: `18px`}}>content_copy</i>{__(`Copy PNG link`)}</a>
+                                        }}><i className="material-icons"
+                                              style={{fontSize: `18px`}}>content_copy</i>{__(`Copy PNG link`)}</a>
                                     </div>
                                     <div style={{paddingLeft: `10px`, paddingRight: `10px`}}>{selectSize}</div>
                                 </div>

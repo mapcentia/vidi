@@ -18,11 +18,22 @@ module.exports = function (grunt) {
     });
 
     // Default build parameters
-    let copyBootstrapVariablesCommand = 'cp ./config/_variables.less ./public/js/lib/bootstrap-material-design/less';
+    let copyBootstrapVariablesCommand;
     let lessConfig = {"public/css/styles.css": "public/less/styles.default.less"};
     if (theme && theme === 'watsonc') {
-        copyBootstrapVariablesCommand = 'cp ./extensions/' + theme + '/config/_variables.less ./public/js/lib/bootstrap-material-design/less';
-        lessConfig = {"public/css/styles.css": "public/less/styles." + theme + ".less"};
+        if(process.platform === 'win32') {
+            copyBootstrapVariablesCommand = 'copy "extensions\\' + theme + '\\config\\_variables.less" "public\\js\\lib\\bootstrap-material-design\\less';
+            lessConfig = {"public\\css\\styles.css": "public\\less\\styles." + theme + ".less"};
+        } else {
+            copyBootstrapVariablesCommand = 'cp ./extensions/' + theme + '/config/_variables.less ./public/js/lib/bootstrap-material-design/less';
+            lessConfig = {"public/css/styles.css": "public/less/styles." + theme + ".less"};
+        }
+    } else {
+        if(process.platform === 'win32') {
+            copyBootstrapVariablesCommand = 'copy "config\\_variables.less" "public\\js\\lib\\bootstrap-material-design\\less"'
+        } else {
+            copyBootstrapVariablesCommand = 'cp ./config/_variables.less ./public/js/lib/bootstrap-material-design/less';
+        }
     }
 
     grunt.initConfig({
@@ -288,6 +299,7 @@ module.exports = function (grunt) {
                         'public/js/lib/bootstrap-material-design/dist/js/ripples.js',
                         'public/js/lib/bootstrap-material-design/dist/js/material.js',
                         'public/js/lib/bootstrap-colorpicker/js/bootstrap-colorpicker.js',
+
                         'node_modules/leaflet.glify/dist/glify-browser.js',
 
                         'node_modules/bootstrap-table/dist/bootstrap-table.js',
