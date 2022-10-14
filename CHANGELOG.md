@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
 ## UNRELEASED
+### Changed
+- When using `crossMultiSelect` the geometry for the open accordion panel will now get the 'selected' style.
+- When using `featureInfoTableOnMap` the Back button will reset the 'selected' style.
+- When clicking/tapping on the map, geometry with 'selected' style will be reset if any.
+
 ### Fixed
 - Update the qeueu statistics when group panel is opened in case of the layer tree component is not rendered yet. Before the qeueu statistics was not shown after a refresh.
 
