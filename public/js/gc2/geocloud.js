@@ -394,7 +394,7 @@ geocloud = (function () {
      * WebGL representation for SQL stored layer
      */
     webGLStore = function (config) {
-        var prop, me = this, map, sql, xhr = {
+        let prop, me = this, map, sql, xhr = {
             abort: function () {/* stub */
             }
         };
@@ -410,7 +410,14 @@ geocloud = (function () {
                 this.defaults[prop] = config[prop];
             }
         }
+        this.destroy = function () {
+            layer.remove();
+            layer = null;
+            geoJSON = null;
+        };
 
+        let layer;
+        let geoJSON;
         this.init();
         this.name = this.defaults.name;
         this.id = this.defaults.id;
@@ -441,12 +448,95 @@ geocloud = (function () {
             sql = this.sql;
             map = me.defaults.map;
             me.loading();
-            let geoJSON = {features: [], type: "FeatureCollection"};
-            let url = this.host + this.uri + '/' + this.db + '?q=' + (this.base64 ? encodeURIComponent(base64.encode(sql)) + "&base64=true" : encodeURIComponent(sql)) +
+            geoJSON = {features: [], type: "FeatureCollection"};
+            let url = this.host + this.uri + '/' + this.db + '?q=' + (this.base64 ? encodeURIComponent(base64url.encode(sql)) + "&base64=true" : encodeURIComponent(sql)) +
                 '&srs=4326&client_encoding=' + this.defaults.clientEncoding +
                 '&key=' + this.defaults.key + '&format=ndjson';
 
-            let i = 0;
+            let i = 1;
+            let first = true;
+
+            if (me.defaults.type === 'POINT') {
+                layer = L.glify.points({
+                    data: geoJSON,
+                    latitudeKey: 1,
+                    longitudeKey: 0,
+                    map: me.defaults.map,
+                    color: function () {
+                        return {r: 255, g: 0, b: 0}
+                    },
+                    size: 10,
+                    vertexShaderSource: function () {
+                        return L.glify.shader.vertex;
+                    },
+                    fragmentShaderSource: function () {
+                        return L.glify.shader.fragment.square;
+                    },
+                    sensitivityHover: 1,
+                    sensitivity: 1,
+                    hover: (e, feature) => {
+                        //console.log(feature)
+                    },
+                    click: (e, feature) => {
+                        //set up a standalone popup (use a popup as a layer)
+                        console.log(e)
+                        L.popup()
+                            .setLatLng(e.latlng)
+                            .setContent(feature.properties.gid + '')
+                            .openOn(me.defaults.map);
+
+                        console.log(feature);
+                    }
+                });
+            } else if (me.defaults.type === 'LINESTRING') {
+                layer = L.glify.lines({
+                    data: geoJSON,
+                    latitudeKey: 1,
+                    longitudeKey: 0,
+                    map: me.defaults.map,
+                    weight: 1,
+                    sensitivity: 0,
+                    click: (e, feature) => {
+                        //set up a standalone popup (use a popup as a layer)
+                        console.log(e)
+                        L.popup()
+                            .setLatLng(e.latlng)
+                            .setContent(feature.properties.gid + '')
+                            .openOn(me.defaults.map);
+
+                        console.log(feature);
+                    }
+                });
+            } else if (me.defaults.type === 'POLYGON' || me.defaults.type === 'MULTIPOLYGON') {
+                layer = L.glify.shapes({
+                    data: geoJSON,
+                    map: me.defaults.map,
+                    color: () => {
+                        return {
+                            r: 1,
+                            g: 0,
+                            b: 0,
+                        };
+                    },
+                    hover: (e, feature) => {
+                        console.log(feature)
+                    },
+                    click: (e, feature) => {
+                        //set up a standalone popup (use a popup as a layer)
+                        console.log(e)
+                        L.popup()
+                            .setLatLng(e.latlng)
+                            .setContent('You clicked the point at longitude:')
+                            .openOn(me.defaults.map);
+                    },
+                    border: false
+                })
+            } else {
+                throw new Error('Layer features type (' + this.defaults.type + ') is not supported by WebGL');
+            }
+            me.layer = layer.layer;
+            me.layer.id = me.defaults.name;
+
             fetch(url)  // make a fetch request to a NDJSON stream service
                 .then((response) => {
                     return ndjsonStream(response.body); //ndjsonStream parses the response.body
@@ -455,150 +545,20 @@ geocloud = (function () {
                 let read;
                 reader.read().then(read = (result) => {
                     if (result.done) {
-                        let layer = false;
-                        geoJSON = me.transformResponse(geoJSON, me.id);
-                        if (me.defaults.type === 'POINT') {
-                            layer = L.glify.points({
-                                latitudeKey: 1,
-                                longitudeKey: 0,
-                                map: me.defaults.map,
-                                size: 8,
-                                data: geoJSON,
-                                sensitivityHover: 3,
-                                hover: (e, feature) => {
-                                    console.log(feature)
-                                },
-                            });
-                        } else if (me.defaults.type === 'LINESTRING') {
-                            layer = L.glify.lines({
-                                latitudeKey: 1,
-                                longitudeKey: 0,
-                                map: me.defaults.map,
-                                data: geoJSON,
-                            });
-                        } else if (me.defaults.type === 'POLYGON' || me.defaults.type === 'MULTIPOLYGON') {
-                            layer = L.glify.shapes({
-                                map: me.defaults.map,
-                                data: geoJSON,
-                                color: () => {
-                                    return {
-                                        r: 1,
-                                        g: 0,
-                                        b: 0,
-                                    };
-                                },
-                                hover: (e, feature) => {
-                                    console.log(feature)
-                                },
-                                click: (e, feature) => {
-                                    //set up a standalone popup (use a popup as a layer)
-                                    console.log(e)
-                                    L.popup()
-                                        .setLatLng(e.latlng)
-                                        .setContent('You clicked the point at longitude:')
-                                        .openOn(me.defaults.map);
-
-                                    console.log(feature);
-                                },
-                                border: false
-                            })
-                        } else {
-                            throw new Error('Layer features type (' + this.defaults.type + ') is not supported by WebGL');
-                        }
-                        me.layer = layer.layer;
-                        me.layer.id = me.defaults.name;
-
                         if (me.onLoad) me.onLoad();
                         me.onLoad(me);
                         if (onLoadCallback) onLoadCallback();
+                        layer.update(geoJSON)
                         return;
                     }
-                    if (Number.isInteger(i/1000)) {
+                    if (Number.isInteger(i / 10000)) {
                         console.log(i)
                     }
                     i++
-                    geoJSON.features.push(result.value)
                     reader.read().then(read);
+                    geoJSON.features.push(result.value)
                 });
             });
-
-
-            //ndjson(me, url);
-
-            /*
-                        xhr = $.ajax({
-                            dataType: (this.defaults.jsonp) ? 'jsonp' : 'json',
-                            async: this.defaults.async,
-                            data: ('q=' + (this.base64 ? encodeURIComponent(base64.encode(sql)) + "&base64=true" : encodeURIComponent(sql)) +
-                                '&srs=' + this.defaults.projection + '&lifetime=' + this.defaults.lifetime + '&client_encoding=' + this.defaults.clientEncoding +
-                                '&key=' + this.defaults.key + '&custom_data=' + this.custom_data),
-                            jsonp: (this.defaults.jsonp) ? 'jsonp_callback' : false,
-                            url: this.host + this.uri + '/' + this.db,
-                            type: this.defaults.method,
-                            success: function (response) {
-                                if (response.success === false && showAlertOnError) {
-                                    alert(response.message);
-                                }
-
-                                if (response.success === true) {
-                                    if (response.features !== null) {
-                                        response = me.transformResponse(response, me.id);
-                                        me.geoJSON = response;
-                                        if (me.maxFeaturesLimit !== false && me.onMaxFeaturesLimitReached !== false && parseInt(me.maxFeaturesLimit) > 0) {
-                                            if (me.geoJSON.features.length >= parseInt(me.maxFeaturesLimit)) {
-                                                console.warn('WebGL store: number of received features exceeds the specified limit (' + me.maxFeaturesLimit + '). Please use filters or adjust the limit.');
-                                                me.geoJSON.features = [];
-                                                response.features = [];
-                                                me.onMaxFeaturesLimitReached();
-                                            }
-                                        }
-
-                                        let layer = false;
-                                        if (me.defaults.type === 'POINT') {
-                                            let data = [];
-                                            me.geoJSON.features.map(feature => data.push(feature.geometry.coordinates));
-
-                                            layer = L.glify.points({
-                                                latitudeKey: 1,
-                                                longitudeKey: 0,
-                                                map: me.defaults.map,
-                                                size: 8,
-                                                data
-                                            });
-                                        } else if (me.defaults.type === 'LINESTRING') {
-                                            layer = L.glify.lines({
-                                                latitudeKey: 1,
-                                                longitudeKey: 0,
-                                                map: me.defaults.map,
-                                                data: me.geoJSON,
-                                            });
-                                        } else if (me.defaults.type === 'POLYGON') {
-                                            layer = L.glify.shapes({
-                                                map: me.defaults.map,
-                                                data: me.geoJSON,
-                                            });
-                                        } else {
-                                            throw new Error('Layer features type (' + this.defaults.type + ') is not supported by WebGL');
-                                        }
-
-                            me.layer = layer.glLayer;
-                            me.layer.id = me.defaults.name;
-                            if (me.onLoad) me.onLoad();
-                        } else {
-                            me.geoJSON = null;
-                        }
-                    }
-
-                                if (onLoadCallback) onLoadCallback();
-                            },
-                            error: this.defaults.error,
-                            complete: function () {
-                                me.onLoad(me);
-                            }
-                        });
-            */
-
-            // return xhr;
         };
 
         this.abort = function () {
@@ -1038,7 +998,7 @@ geocloud = (function () {
             if ('mapRequestProxy' in defaults && defaults.mapRequestProxy !== false) {
                 url = defaults.mapRequestProxy + uri;
             } else {
-                url = defaults.host +uri;
+                url = defaults.host + uri;
             }
         } else {
             if (!defaults.uri) {

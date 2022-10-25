@@ -89,7 +89,7 @@ let moduleState = {
     setLayerOpacityRequests: [],
     setLayerStateRequests: {},
     vectorStores: {},
-    webGLStores: [],
+    webGLStores: {},
     virtualLayers: [],
     tileContentCache: {},
     editorFilters: {},
@@ -247,7 +247,7 @@ module.exports = {
     /**
      * Returns vector stores
      *
-     * @returns {Array}
+     * @returns {Object}
      */
     getStores: () => {
         return moduleState.vectorStores;

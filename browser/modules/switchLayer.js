@@ -54,7 +54,6 @@ module.exports = module.exports = {
                 let layers = _self.getLayersEnabledStatus();
                 for (const property in layers) {
                     let prop = layers[property];
-                    console.log(prop);
                     if (prop.enabled) {
                         _self.init(prop.fullLayerKey, false);
                     }
@@ -98,7 +97,6 @@ module.exports = module.exports = {
      */
     enableVector: (gc2Id, doNotLegend, setupControls, failedBefore) => {
         if (LOG) console.log(`switchLayer: enableVector ${gc2Id}`);
-        //_self.enableCheckBoxesOnChildren(gc2Id);
         let vectorLayerId = LAYER.VECTOR + `:` + gc2Id;
         return new Promise((resolve, reject) => {
             layers.incrementCountLoading(vectorLayerId);
@@ -453,7 +451,7 @@ module.exports = module.exports = {
                 let layer = metaData.data[j];
                 let {isVectorLayer, isRasterTileLayer, isVectorTileLayer} = layerTreeUtils.getPossibleLayerTypes(layer);
                 let defaultLayerType = layerTreeUtils.getDefaultLayerType(layer);
-                sortId =  metaData.data[j].sort_id;
+                sortId = metaData.data[j].sort_id;
 
                 if (LOG) console.log(`switchLayer: ${name}, according to meta, is vector (${isVectorLayer}), raster tile (${isRasterTileLayer}), vector tile (${isVectorTileLayer})`);
                 if (!isVectorLayer && name.startsWith(LAYER.VECTOR + `:`)
@@ -503,7 +501,6 @@ module.exports = module.exports = {
             });
 
             if (enable) {
-
                 const pane = layerTreeUtils.stripPrefix(name).replace('.', '-');
                 if (!cloud.get().map.getPane(pane)) {
                     cloud.get().map.createPane(pane);
@@ -543,6 +540,10 @@ module.exports = module.exports = {
                         $("#pane").css("height", "100%");
                         cloud.get().map.invalidateSize();
                     }
+                }
+                if (name.startsWith(LAYER.WEBGL + ':')) {
+                    let webGLstores = layerTree.getWebGLStores();
+                    webGLstores[name].destroy();
                 }
                 _self.uncheckLayerControl(name, doNotLegend, setupControls);
                 //Remove UTF grid layer
