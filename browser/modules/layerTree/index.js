@@ -16,14 +16,13 @@ import {
     LOG,
     MAP_RESOLUTIONS,
     MODULE_NAME,
+    SELECTED_STYLE,
     SUB_GROUP_DIVIDER,
     SYSTEM_FIELD_PREFIX,
-    VIRTUAL_LAYERS_SCHEMA,
     VECTOR_SIDE_TABLE_EL,
-    SELECTED_STYLE
+    VIRTUAL_LAYERS_SCHEMA
 } from './constants';
 import dayjs from 'dayjs';
-import noUiSlider from 'nouislider';
 import mustache from 'mustache';
 import LayerFilter from './LayerFilter';
 import LoadStrategyToggle from './LoadStrategyToggle';
@@ -39,16 +38,17 @@ import OfflineModeControlsManager from './OfflineModeControlsManager';
 import {GROUP_CHILD_TYPE_GROUP, GROUP_CHILD_TYPE_LAYER, LayerSorting} from './LayerSorting';
 import {GEOJSON_PRECISION} from './../constants';
 import {
+    booleanIntersects as turfIntersects,
     buffer as turfBuffer,
-    point as turfPoint,
     feature as turfFeature,
-    booleanIntersects as turfIntersects
+    point as turfPoint
 } from '@turf/turf'
+import MetaSettingForm from "./MetaSettingForm";
 
 
 let _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEvents,
-    onEachFeature = [], pointToLayer = [], onSelectedStyle = [], onLoad = [], onSelect = [],
-    onMouseOver = [], cm = [], styles = [], tables = {}, childLayersThatShouldBeEnabled = [];
+    onEachFeature = [], pointToLayer = {}, onSelectedStyle = [], onLoad = [], onSelect = [],
+    onMouseOver = [], cm = [], styles = {}, tables = {}, childLayersThatShouldBeEnabled = [];
 
 const {v4: uuidv4} = require('uuid');
 const React = require('react');
@@ -95,7 +95,8 @@ let moduleState = {
     editorFilters: {},
     editorFiltersActive: {},
     fitBoundsActiveOnLayers: {},
-    labelSettings: {}
+    labelSettings: {},
+    vectorStyles: {}
 };
 
 /**
@@ -393,6 +394,11 @@ module.exports = {
                         $(container).find('.js-layer-settings-table').hide(0);
                     };
 
+                    const hideStyleFn = () => {
+                        $(container).find(`.js-toggle-style`).hide(0);
+                        $(container).find('.js-layer-settings-style').hide(0);
+                    };
+
                     const hideOfflineMode = () => {
                         $(container).find(`.js-toggle-layer-offline-mode-container`).css(`display`, `none`);
                     };
@@ -405,7 +411,10 @@ module.exports = {
                     const hideAddFeature = () => {
                         $(container).find('.gc2-add-feature').css(`visibility`, `hidden`);
                     };
-
+                    const hideSettingsBtn = () => {
+                        $(container).find('.js-settings-panel-btn').prop(`disabled`, true);
+                        $(container).find('.collapse').collapse('hide');
+                    }
                     const getLayerSwitchControl = () => {
                         let controlElement = $('input[class="js-show-layer-control"][data-gc2-id="' + layerKey + '"]');
                         if (!controlElement || controlElement.length !== 1) {
@@ -429,11 +438,13 @@ module.exports = {
 
                         if (layerIsEnabled) {
                             $(container).find('.gc2-add-feature').css(`visibility`, `visible`);
+                            $(container).find('.js-settings-panel-btn').prop(`disabled`, false);
                             $(container).find(`.js-toggle-search`).show(0);
                             $(container).find(`.js-toggle-filters, .js-toggle-filters-number-of-filters`).show(0);
                             $(container).find(`.js-toggle-load-strategy`).show(0);
                             $(container).find(`.js-toggle-layer-offline-mode-container`).css(`display`, `inline-block`);
                             $(container).find(`.js-toggle-table`).show(0);
+                            $(container).find(`.js-toggle-style`).show(0);
                         } else {
                             hideAddFeature();
                             hideFilters();
@@ -443,17 +454,22 @@ module.exports = {
                             hideLabels();
                             hideTableView();
                             hideSearch();
+                            hideStyleFn();
+                            hideSettingsBtn();
                         }
                     } else if (desiredSetupType === LAYER.RASTER_TILE || desiredSetupType === LAYER.VECTOR_TILE) {
                         // Opacity and filters should be kept opened after setLayerState()
                         if ($(container).attr(`data-last-layer-type`) !== desiredSetupType) {
                             hideLoadStrategy();
                             hideTableView();
+                            hideStyleFn();
+                            hideSettingsBtn();
                         }
 
                         hideOfflineMode();
                         if (layerIsEnabled) {
                             $(container).find('.gc2-add-feature').css(`visibility`, `visible`);
+                            $(container).find('.js-settings-panel-btn').prop(`disabled`, false);
                             $(container).find(`.js-toggle-opacity`).show(0);
                             $(container).find(`.js-toggle-labels`).show(0);
                             $(container).find(`.js-toggle-filters`).show(0);
@@ -465,6 +481,7 @@ module.exports = {
                             hideOpacity();
                             hideLabels();
                             hideSearch();
+                            hideSettingsBtn();
                         }
 
                         // Hide filters if cached, but not if layer has a valid predefined filter
@@ -491,9 +508,11 @@ module.exports = {
                         hideOfflineMode();
                         hideLoadStrategy();
                         hideTableView();
+                        hideStyleFn();
                         hideOpacity();
                         hideLabels();
                         hideSearch();
+                        hideSettingsBtn();
                     } else {
                         throw new Error(`${desiredSetupType} control setup is not supported yet`);
                     }
@@ -617,7 +636,7 @@ module.exports = {
             preparedVirtualLayers.push(localLayer);
         });
 
-        let state = {
+        return {
             order: moduleState.layerTreeOrder,
             arbitraryFilters: moduleState.arbitraryFilters,
             fitBoundsActiveOnLayers: moduleState.fitBoundsActiveOnLayers,
@@ -630,8 +649,8 @@ module.exports = {
             dynamicLoad: moduleState.dynamicLoad,
             editorFilters: moduleState.editorFilters,
             editorFiltersActive: moduleState.editorFiltersActive,
+            vectorStyles: moduleState.vectorStyles
         };
-        return state;
     },
 
     /**
@@ -710,7 +729,8 @@ module.exports = {
                 predefinedFilters: {},
                 arbitraryFilters: {},
                 editorFilters: {},
-                editorFiltersActive: {}
+                editorFiltersActive: {},
+                vectorStyles: {}
             };
         } else if (newState.order && newState.order === 'false') {
             newState.order = false;
@@ -967,6 +987,7 @@ module.exports = {
                                 if (forcedState.dynamicLoad) moduleState.dynamicLoad = forcedState.dynamicLoad;
                                 if (forcedState.editorFilters) moduleState.editorFilters = forcedState.editorFilters;
                                 if (forcedState.editorFiltersActive) moduleState.editorFiltersActive = forcedState.editorFiltersActive;
+                                if (forcedState.vectorStyles) moduleState.vectorStyles = forcedState.vectorStyles;
 
                                 if (LOG) console.log(`${MODULE_NAME}: layers that are not in meta`, layersThatAreNotInMeta);
 
@@ -1211,6 +1232,7 @@ module.exports = {
                 applySetting(`virtualLayers`, []);
                 applySetting(`opacitySettings`, {});
                 applySetting(`dynamicLoad`, {});
+                applySetting(`vectorStyles`, {});
 
                 resolve({order, offlineModeSettings});
             });
@@ -1465,9 +1487,7 @@ module.exports = {
         } else {
             template = defaultTemplate;
         }
-        if (parsedMeta?.tooltip_template && parsedMeta.tooltip_template !== "") {
-            tooltipTemplate = parsedMeta.tooltip_template;
-        }
+        tooltipTemplate = typeof moduleState.vectorStyles?.[layerKey]?.tooltipTmpl !== 'undefined' ? moduleState.vectorStyles[layerKey].tooltipTmpl === '' ? undefined : moduleState.vectorStyles[layerKey].tooltipTmpl : parsedMeta?.tooltip_template && parsedMeta.tooltip_template !== "" ? parsedMeta.tooltip_template : null;
         let fieldConf;
         try {
             fieldConf = JSON.parse(metaData[layerKey].fieldconf);
@@ -1477,8 +1497,8 @@ module.exports = {
         const pane = layer.f_table_schema + '-' + layer.f_table_name;
         moduleState.vectorStores[trackingLayerKey] = new geocloud.sqlStore({
             map: cloud.get().map,
-            minZoom: parseInt(meta.parseLayerMeta(layerKey)?.vector_min_zoom),
-            maxZoom: parseInt(meta.parseLayerMeta(layerKey)?.vector_max_zoom) + 1,
+            minZoom: typeof moduleState.vectorStyles?.[layerKey]?.minZoom !== 'undefined' ? moduleState.vectorStyles[layerKey].minZoom === '' ? undefined : moduleState.vectorStyles[layerKey].minZoom : parseInt(meta.parseLayerMeta(layerKey)?.vector_min_zoom),
+            maxZoom: typeof moduleState.vectorStyles?.[layerKey]?.maxZoom !== 'undefined' ? moduleState.vectorStyles[layerKey].maxZoom === '' ? undefined : moduleState.vectorStyles[layerKey].maxZoom : parseInt(meta.parseLayerMeta(layerKey)?.vector_max_zoom),
             pane,
             parentFiltersHash,
             jsonp: false,
@@ -1497,7 +1517,7 @@ module.exports = {
             custom_data,
             styleMap: styles[trackingLayerKey],
             sql,
-            clustering: layerTreeUtils.getIfClustering(meta.parseLayerMeta(layerKey)),
+            clustering: typeof moduleState.vectorStyles?.[layerKey]?.clustering === 'boolean' ? moduleState.vectorStyles[layerKey].clustering : layerTreeUtils.getIfClustering(meta.parseLayerMeta(layerKey)),
             onLoad: (l) => {
                 let reloadInterval = meta.parseLayerMeta(layerKey)?.reload_interval;
                 let tableElement = meta.parseLayerMeta(layerKey)?.show_table_on_side;
@@ -2541,28 +2561,28 @@ module.exports = {
                         }
                     }
                 }
-
-                let pointToLayer = (parsedMeta.point_to_layer && parsedMeta.point_to_layer !== "") ? parsedMeta.point_to_layer : null;
-                if (pointToLayer) {
+                let pointToLayerFn = moduleState.vectorStyles?.[layerKey]?.pointToLayerFn ? moduleState.vectorStyles[layerKey].pointToLayerFn : parsedMeta.point_to_layer && parsedMeta.point_to_layer !== "" ? parsedMeta.point_to_layer : null;
+                if (pointToLayerFn && pointToLayerFn !== '') {
                     try {
-                        let func = Function('"use strict";return (' + pointToLayer + ')')();
+                        let func = Function('"use strict";return (' + pointToLayerFn + ')')();
                         _self.setPointToLayer(LAYER.VECTOR + ':' + layerKey, func);
                     } catch (e) {
                         console.error("Error in point-to-layer function for: " + layerKey);
                     }
+                } else {
+                    _self.setPointToLayer(LAYER.VECTOR + ':' + layerKey, null);
                 }
-
-                let vectorStyle = (parsedMeta.vector_style && parsedMeta.vector_style !== "") ? parsedMeta.vector_style : null;
-                if (vectorStyle) {
+                let vectorStyleFn = moduleState.vectorStyles?.[layerKey]?.styleFn && moduleState.vectorStyles[layerKey].styleFn !== '' ? moduleState.vectorStyles[layerKey].styleFn : parsedMeta.vector_style && parsedMeta.vector_style !== "" ? parsedMeta.vector_style : null;
+                if (vectorStyleFn) {
                     try {
-                        let func = Function('"use strict";return (' + vectorStyle + ')')();
+                        let func = Function('"use strict";return (' + vectorStyleFn + ')')();
                         _self.setStyle(LAYER.VECTOR + ':' + layerKey, func);
                     } catch (e) {
                         console.error("Error in style function for: " + layerKey);
                     }
-
+                } else {
+                    _self.setStyle(LAYER.VECTOR + ':' + layerKey, null);
                 }
-
 
                 _self.createStore(layer, isVirtualGroup);
             }
@@ -2717,10 +2737,10 @@ module.exports = {
         let markup = markupGeneratorInstance.getSubgroupControlRecord(base64SubgroupName, subgroup.id, level, window.vidiConfig.showLayerGroupCheckbox);
 
         $(parentNode).append(markup);
-        $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-id`).append(`<div style="display: inline">
+        $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-id`).append(`
                 ${subgroup.id}
-                <i style="float: right; padding-top: 9px; font-size: 26px;" class="material-icons layer-move-vert layer-move-vert-subgroup">more_vert</i>
-        </div>`);
+                <i style="font-size: 26px; margin-left: auto" class="material-icons layer-move-vert layer-move-vert-subgroup">more_vert</i>
+        `);
 
         $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-toggle-button`).click((event) => {
             // Checking if the subgroup was already drawn
@@ -3265,6 +3285,39 @@ module.exports = {
                     });
                 }
 
+                // Vector styles
+                const settingsStyle = $(layerContainer).find('.js-layer-settings-style')
+                const componentContainerId = `layer-settings-styles-${layerKey}`;
+                settingsStyle.append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
+
+                let values = {};
+                if (layerKey in moduleState.vectorStyles) {
+                    values = moduleState.vectorStyles[layerKey];
+                } else {
+                    values['styleFn'] = parsedMeta?.vector_style;
+                    values['pointToLayerFn'] = parsedMeta?.point_to_layer;
+                    values['tooltipTmpl'] = parsedMeta?.tooltip_template;
+                    values['minZoom'] = parseInt(parsedMeta?.vector_min_zoom) || undefined;
+                    values['maxZoom'] = parseInt(parsedMeta?.vector_max_zoom) || undefined;
+                }
+
+                setTimeout(() => {
+                    if (document.getElementById(componentContainerId)) {
+                        ReactDOM.render(<MetaSettingForm
+                                layerKey={layerKey}
+                                initialValues={values}
+                                onChange={_self.onChangeStylesHandler}/>,
+                            document.getElementById(componentContainerId));
+                    } else {
+                        console.error(`Unable to find the labels control container`);
+                    }
+                }, 10);
+
+                $(layerContainer).find(`.js-toggle-style`).click(() => {
+                    _self._selectIcon($(layerContainer).find('.js-toggle-style'));
+                    $(layerContainer).find('.js-layer-settings-style').toggle();
+                });
+
                 $(layerContainer).find(`.js-toggle-search`).click(() => {
                     _self._selectIcon($(layerContainer).find('.js-toggle-search'));
                     $(layerContainer).find('.js-layer-settings-search').toggle();
@@ -3396,11 +3449,41 @@ module.exports = {
 
     onChangeLabelsHandler: ({layerKey, labelsAreEnabled}) => {
         moduleState.labelSettings[layerKey] = labelsAreEnabled;
-        let correspondingLayer = meta.getMetaByKey(layerKey);
-        //backboneEvents.get().trigger(`${MODULE_NAME}:dynamicLoadLayersChange`);
-        //_self.reloadLayer(LAYER.RASTER_TILE + ':' + layerKey);
-        _self.reloadLayerOnLabelChange(layerKey, labelsAreEnabled);
+        _self.reloadLayerOnLabelChange(layerKey);
 
+    },
+
+    onChangeStylesHandler: ({layerKey, obj}) => {
+        // If the pointToLayer func is not set we set it to the default one
+        if (!obj.pointToLayerFn) {
+            obj.pointToLayerFn =
+                `(feature, latlng) => {
+                    return L.circleMarker(latlng, {pane: '${layerKey.replace('.', '-')}'});
+                }`
+        }
+        moduleState.vectorStyles[layerKey] = obj;
+        backboneEvents.get().trigger(`${MODULE_NAME}:changed`);
+        let func;
+        if (obj?.styleFn === '') {
+            _self.setStyle(LAYER.VECTOR + ':' + layerKey, null)
+        } else {
+            try {
+                func = Function('"use strict";return (' + obj.styleFn + ')')();
+                _self.setStyle(LAYER.VECTOR + ':' + layerKey, func)
+            } catch (e) {
+                console.error(e.message)
+                alert("Error in style function")
+            }
+        }
+
+        try {
+            func = Function('"use strict";return (' + obj.pointToLayerFn + ')')();
+            _self.setPointToLayer(LAYER.VECTOR + ':' + layerKey, func)
+        } catch (e) {
+            console.error(e.message)
+            alert("Error in point-to-layer function 2")
+        }
+        _self.reloadLayerOnStyleChange(layerKey)
     },
 
     onApplyArbitraryFiltersHandler: ({layerKey, filters}, forcedReloadLayerType = false) => {
@@ -3471,6 +3554,10 @@ module.exports = {
 
     reloadLayerOnLabelChange: (layerKey) => {
         _self.reloadLayer(layerKey, false, false, false);
+    },
+
+    reloadLayerOnStyleChange: (layerKey) => {
+        _self.reloadLayer(LAYER.VECTOR + ':' + layerKey, false, false, false);
     },
 
     reloadLayerOnFiltersChange: (layerKey, forcedReloadLayerType = false) => {
@@ -3602,18 +3689,30 @@ module.exports = {
         cm[layer] = c;
     },
 
-    setStyle: function (layerName, style) {
+    setStyle: function (layerName, fn) {
+        if (!fn) {
+            delete styles[layerName];
+        } else {
+            let foundLayers = layers.getMapLayers(false, layerName);
+            if (foundLayers.length === 1) {
+                let layer = foundLayers[0];
+                layer.options.style = fn;
+            }
+            styles[layerName] = fn;
+        }
+    },
+
+    setPointToLayer: function (layerName, fn) {
+        if (fn === null) {
+            const str = `(feature, latlng) => {return L.circleMarker(latlng, {pane: "${layerName.replace('.', '-').split(':')[1]}"});}`;
+            fn = Function(`"use strict";return (${str})`)();
+        }
         let foundLayers = layers.getMapLayers(false, layerName);
         if (foundLayers.length === 1) {
             let layer = foundLayers[0];
-            layer.options.style = style;
+            layer.options.pointToLayer = fn;
         }
-
-        styles[layerName] = style;
-    },
-
-    setPointToLayer: function (layer, fn) {
-        pointToLayer[layer] = fn;
+        pointToLayer[layerName] = fn;
     },
 
     setOnSelectedStyle: function (layer, style) {

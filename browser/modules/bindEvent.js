@@ -128,7 +128,7 @@ module.exports = {
                 if (isChecked) {
                     layerTreeUtils.setupLayerNumberIndicator(base64GroupName, layers.length, layers.length);
                 } else {
-                    $("#layer-panel-" + base64GroupName + " span:eq(0)").html(0);
+                    $("#layer-panel-" + base64GroupName + " . layer-count span:eq(0)").html(0);
                 }
             });
         });
