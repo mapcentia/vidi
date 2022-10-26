@@ -1813,6 +1813,13 @@ module.exports = {
     // ========================================
 
     "popupDraggable": false,
+
+    // ========================================
+    // Customize decimals in measure module
+    // ========================================
+
+    "measurementMDecimals": 1,
+    "measurementKmDecimals": 3,
     
     // ========================================
     // Set a width for video elements in popups
