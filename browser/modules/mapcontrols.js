@@ -101,8 +101,6 @@ module.exports = {
             $(container).append($(ClearMapControlOptions.template).attr(`class`, buttonClass).attr(`style`, `padding-top: 6px;`)[0].outerHTML);
             $(container).find(`#mapcontrols-clear-map`).click(ClearMapControlOptions.onclick);
 
-            let historyControl = new L.HistoryControl().addTo(cloud.get().map);
-
             $(container).append(`<a title="${__(`Previous extent`)}"
                 id="mapcontrols-history-backward"
                 class="${buttonClass}" style="padding-top: 6px; color: lightgray;">

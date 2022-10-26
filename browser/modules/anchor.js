@@ -6,8 +6,8 @@
 
 'use strict';
 
-let urlparser = require('./urlparser');
-let db = urlparser.db;
+const urlparser = require('./urlparser');
+const db = urlparser.db;
 let schema = urlparser.schema;
 let cloud, layers, setBaseLayer;
 let _self = false;
@@ -29,7 +29,7 @@ module.exports = {
     init: function () {
         _self = this;
 
-        var param = [], paramStr, parr;
+        let param = [], paramStr, parr;
 
         $.each(this.urlVars(), function (i, v) {
             parr = v.split("#");
@@ -38,14 +38,14 @@ module.exports = {
             }
             param.push(i + "=" + parr.join());
         });
-        var sr = urlparser.staticRoute !== "" && urlparser.staticRoute !== undefined  ? urlparser.staticRoute : null;
+        const sr = urlparser.staticRoute !== "" && urlparser.staticRoute !== undefined  ? urlparser.staticRoute : null;
         paramStr = param.join("&");
         return "/app/" + db + "/" + (schema !== "" ? schema + "/" : "") + (sr ? sr + "/" : "") + ((paramStr === "") ? "" : "?" + paramStr) + this.anchor();
     },
 
     urlVars: function getUrlVars() {
-        var mapvars = {};
-        var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function (m, key, value) {
+        let mapvars = {};
+        window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function (m, key, value) {
             mapvars[key] = value;
         });
         return mapvars;
@@ -105,10 +105,10 @@ module.exports = {
      * @private
      * @returns {string|boolean}
      */
-    anchor: (scheme) => {
+    anchor: (scheme = null) => {
         let mapParameters = _self.getCurrentMapParameters();
         if (mapParameters) {
-            var layerStr;
+            let layerStr;
             if (layers.getLayers() && scheme) {
                 let newArr = [];
                 let arr = mapParameters.layers;
@@ -136,7 +136,7 @@ module.exports = {
     },
 
     getParam: function () {
-        var param = [], paramStr, parr;
+        let param = [], paramStr, parr;
         $.each(this.urlVars(), function (i, v) {
             parr = v.split("#");
             if (parr.length > 1) {
