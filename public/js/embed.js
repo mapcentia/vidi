@@ -30,6 +30,7 @@
                 var noTracking = targetDiv.getAttribute("data-vidi-no-tracking") || "false";
                 var configHost = targetDiv.getAttribute("data-vidi-host") || null;
                 var frameName = targetDiv.getAttribute("data-vidi-frame-name") || null;
+                var fastInit = targetDiv.getAttribute("data-vidi-fast-init") === "true";
                 try {
                     var obj = JSON.parse(atob(token));
                 } catch (e) {
@@ -37,7 +38,7 @@
                 }
                 var host = (configHost || obj.host) + ""; // Port ?
                 // If host is http, then make it protocol relative, so tokens created on http still works when embedded on https sites.
-                // host = host.replace("http:", "");
+                host = host.replace("http:", "");
                 var id = obj.id;
                 var database = obj.database;
                 var schema = obj.schema !== undefined && useSchema ? obj.schema + "/" : "";
@@ -51,7 +52,8 @@
                     "&ful=" + fullscreen +
                     "&abo=" + about +
                     "&loc=" + location +
-                    (frameName ? "&readyCallback=" + frameName : "") + "&notracking=" + noTracking;
+                    (frameName ? "&readyCallback=" + frameName : "") + "&notracking=" + noTracking +
+                    (fastInit ? "&fi=1" : "");
                 var iframe = document.createElement("iframe");
                 iframe.setAttribute("style", "width:" + width + ";height:" + height + ";border: 1px solid rgba(0,0,0,0.1)");
                 iframe.setAttribute("allow", "fullscreen;geolocation");

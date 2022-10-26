@@ -443,7 +443,7 @@ module.exports = {
          * load layers > initialize extensions > initialize state > finish
          */
 
-        if (window.vidiConfig.fastInit) {
+        if (window.vidiConfig.fastInit || urlVars.fi) {
             $("#loadscreen").fadeOut(200);
             modules.state.init().then(() => {
                 // modules.state.listenAny(`extensions:initialized`, [`layerTree`]);
