@@ -75,7 +75,8 @@ module.exports = {
                 width: '30%',
                 height: '250px'
             },
-            initZoomCenter: null
+            initZoomCenter: null,
+            fastInit: false
         };
         // Set default for unset props
         for (let prop in defaults) {
@@ -355,17 +356,7 @@ module.exports = {
             modules[name].init();
         });
 
-        /**
-         * Fetch meta > initialize settings > create layer tree >
-         * load layers > initialize extensions > initialize state > finish
-         */
-        modules.meta.init().then((schemataStr) => {
-            return modules.setting.init(schemataStr);
-        }).catch((error) => {
-            console.log(error); // Stacktrace
-            //alert("Vidi is loaded without schema. Can't set extent or add layers");
-            backboneEvents.get().trigger("ready:meta");
-        }).then(() => {
+        const initExtensions = () => {
             try {
 
                 // Require search module
@@ -445,18 +436,41 @@ module.exports = {
             } catch (e) {
                 console.error("Could not perform application initialization", e.message, e);
             }
-            return modules.layerTree.create();
-        }).finally(() => {
+        }
+
+        /**
+         * Fetch meta > initialize settings > create layer tree >
+         * load layers > initialize extensions > initialize state > finish
+         */
+
+        if (window.vidiConfig.fastInit) {
+            $("#loadscreen").fadeOut(200);
             modules.state.init().then(() => {
-                modules.state.listenAny(`extensions:initialized`, [`layerTree`]);
-                $("#loadscreen").fadeOut(200);
+                // modules.state.listenAny(`extensions:initialized`, [`layerTree`]);
+                initExtensions();
             }).catch((error) => {
                 console.error(error)
             });
-        }).catch((error) => {
-            console.error(error)
-        });
-
+        } else {
+            modules.meta.init().then((schemataStr) => {
+                return modules.setting.init(schemataStr);
+            }).catch((error) => {
+                console.log(error); // Stacktrace
+                backboneEvents.get().trigger("ready:meta");
+            }).then(() => {
+                initExtensions();
+                return modules.layerTree.create();
+            }).finally(() => {
+                $("#loadscreen").fadeOut(200);
+                modules.state.init().then(() => {
+                    modules.state.listenAny(`extensions:initialized`, [`layerTree`]);
+                }).catch((error) => {
+                    console.error(error)
+                });
+            }).catch((error) => {
+                console.error(error)
+            });
+        }
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/service-worker.bundle.js').then((registration) => {
                 let checkInterval = setInterval(() => {
@@ -538,7 +552,7 @@ module.exports = {
                         }
                     }
                 });
-            }).catch(error =>{
+            }).catch(error => {
                 console.error(`Can't get item from localforage`, error);
             });
         } else {
