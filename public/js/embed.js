@@ -38,7 +38,7 @@
                 }
                 var host = (configHost || obj.host) + ""; // Port ?
                 // If host is http, then make it protocol relative, so tokens created on http still works when embedded on https sites.
-                host = host.replace("http:", "");
+                // host = host.replace("http:", "");
                 var id = obj.id;
                 var database = obj.database;
                 var schema = obj.schema !== undefined && useSchema ? obj.schema + "/" : "";
@@ -53,7 +53,8 @@
                     "&abo=" + about +
                     "&loc=" + location +
                     (frameName ? "&readyCallback=" + frameName : "") + "&notracking=" + noTracking +
-                    (fastInit ? "&fi=1" : "");
+                    (fastInit ? "&fi=1" : "") +
+                    "&dps=1";
                 var iframe = document.createElement("iframe");
                 iframe.setAttribute("style", "width:" + width + ";height:" + height + ";border: 1px solid rgba(0,0,0,0.1)");
                 iframe.setAttribute("allow", "fullscreen;geolocation");
