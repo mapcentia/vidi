@@ -445,9 +445,12 @@ module.exports = {
 
         if (window.vidiConfig.fastInit || urlVars.fi) {
             $("#loadscreen").fadeOut(200);
+            initExtensions();
             modules.state.init().then(() => {
                 // modules.state.listenAny(`extensions:initialized`, [`layerTree`]);
-                initExtensions();
+                modules.meta.init().then((schemataStr) => {
+                    modules.layerTree.create();
+                })
             }).catch((error) => {
                 console.error(error)
             });

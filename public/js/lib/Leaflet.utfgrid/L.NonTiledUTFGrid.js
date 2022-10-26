@@ -109,7 +109,7 @@
             if (this.options.crossOrigin) {
                 image.crossOrigin = this.options.crossOrigin;
             }
-            this._div.appendChild(image);
+            //this._div.appendChild(image);
             if (this._map.options.zoomAnimation && leaflet.Browser.any3d) {
                 leaflet.DomUtil.addClass(image, 'leaflet-zoom-animated');
             } else {
@@ -215,9 +215,15 @@
             height *= this._getImageScale();
             // create a key identifying the current request
             this.key = [bounds.getNorthWest(), bounds.getSouthEast(), width, height].join(', ');
+            let _self = this;
             if (this.getImageUrl) {
                 i.src = this.getImageUrl(bounds, width, height);
+                console.log(i.src)
                 i.key = this.key;
+                $.getJSON(i.src, function (data) {
+
+                    _self._cache["test"] = data;
+                });
             } else {
                 this.getImageUrlAsync(bounds, width, height, this.key, (key, url, tag) => {
                     i.key = key;
