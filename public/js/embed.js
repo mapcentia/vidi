@@ -30,7 +30,6 @@
                 var noTracking = targetDiv.getAttribute("data-vidi-no-tracking") || "false";
                 var configHost = targetDiv.getAttribute("data-vidi-host") || null;
                 var frameName = targetDiv.getAttribute("data-vidi-frame-name") || null;
-                var fastInit = targetDiv.getAttribute("data-vidi-fast-init") === "true";
                 try {
                     var obj = JSON.parse(atob(token));
                 } catch (e) {
@@ -53,7 +52,6 @@
                     "&abo=" + about +
                     "&loc=" + location +
                     (frameName ? "&readyCallback=" + frameName : "") + "&notracking=" + noTracking +
-                    (fastInit ? "&fi=1" : "") +
                     "&dps=1";
                 var iframe = document.createElement("iframe");
                 iframe.setAttribute("style", "width:" + width + ";height:" + height + ";border: 1px solid rgba(0,0,0,0.1)");
