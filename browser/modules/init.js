@@ -437,47 +437,53 @@ module.exports = {
          * TODO remove if
          */
 
-        if (true) {
+
+        if (urlVars.state ||  urlparser.hash.length === 0) {
+            console.log("Using fast init")
             $("#loadscreen").fadeOut(200);
             initExtensions();
-            modules.state.init().then(() => {
-                // Only fetch Meta and Settings if schemata pattern are use in either config or URL
-                if (window.vidiConfig.schemata.length > 0 || (schema && schema.length > 0)) {
-                    let schemataStr
-                    if (typeof window.vidiConfig.schemata === "object" && window.vidiConfig.schemata.length > 0) {
-                        schemataStr = window.vidiConfig.schemata.join(",");
-                    } else {
-                        schemataStr = schema;
-                    }
-
-                    // Settings
-                    modules.setting.init(schemataStr).then(() => {
-                        const maxBounds = modules.setting.getMaxBounds();
-                        if (maxBounds) {
-                            modules.cloud.get().setMaxBounds(maxBounds);
+            try {
+                modules.state.init().then(() => {
+                    // Only fetch Meta and Settings if schemata pattern are use in either config or URL
+                    if (window.vidiConfig.schemata.length > 0 || (schema && schema.length > 0)) {
+                        let schemataStr
+                        if (typeof window.vidiConfig.schemata === "object" && window.vidiConfig.schemata.length > 0) {
+                            schemataStr = window.vidiConfig.schemata.join(",");
+                        } else {
+                            schemataStr = schema;
                         }
-                        if (!utils.parseZoomCenter(window.vidiConfig?.initZoomCenter) && !urlVars.state) {
-                            const extent = modules.setting.getExtent();
-                            if (extent !== null) {
-                                modules.cloud.get().zoomToExtent(extent);
-                            } else {
-                                modules.cloud.get().zoomToExtent();
+
+                        // Settings
+                        modules.setting.init(schemataStr).then(() => {
+                            const maxBounds = modules.setting.getMaxBounds();
+                            if (maxBounds) {
+                                modules.cloud.get().setMaxBounds(maxBounds);
                             }
-                        }
-                    })
+                            if (!utils.parseZoomCenter(window.vidiConfig?.initZoomCenter) && !urlVars.state) {
+                                const extent = modules.setting.getExtent();
+                                if (extent !== null) {
+                                    modules.cloud.get().zoomToExtent(extent);
+                                } else {
+                                    modules.cloud.get().zoomToExtent();
+                                }
+                            }
+                        })
 
-                    // Meta
-                    modules.meta.init(null, false, true).then(() => {
-                        modules.state.listenAny(`extensions:initialized`, [`layerTree`]);
-                        modules.layerTree.create();
-                    }).catch((error) => {
-                        console.log(error); // Stacktrace
-                        backboneEvents.get().trigger("ready:meta");
-                    })
-                }
-            }).catch((error) => {
-                console.error(error)
-            })
+                        // Meta
+                        modules.meta.init(null, false, true).then(() => {
+                            modules.state.listenAny(`extensions:initialized`, [`layerTree`]);
+                            modules.layerTree.create();
+                        }).catch((error) => {
+                            console.log(error); // Stacktrace
+                            backboneEvents.get().trigger("ready:meta");
+                        })
+                    }
+                }).catch((error) => {
+                    console.error(error)
+                })
+            } catch (e) {
+               console.error(e)
+            }
         } else {
             modules.meta.init().then((schemataStr) => {
                 return modules.setting.init(schemataStr);
