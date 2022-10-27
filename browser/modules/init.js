@@ -456,7 +456,7 @@ module.exports = {
                         if (maxBounds) {
                             modules.cloud.get().setMaxBounds(maxBounds);
                         }
-                        if (!utils.parseZoomCenter(window.vidiConfig?.initZoomCenter)) {
+                        if (!utils.parseZoomCenter(window.vidiConfig?.initZoomCenter) && !urlVars.state) {
                             const extent = modules.setting.getExtent();
                             if (extent !== null) {
                                 modules.cloud.get().zoomToExtent(extent);
