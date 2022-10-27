@@ -218,10 +218,8 @@
             let _self = this;
             if (this.getImageUrl) {
                 i.src = this.getImageUrl(bounds, width, height);
-                console.log(i.src)
                 i.key = this.key;
                 $.getJSON(i.src, function (data) {
-
                     _self._cache["test"] = data;
                 });
             } else {
