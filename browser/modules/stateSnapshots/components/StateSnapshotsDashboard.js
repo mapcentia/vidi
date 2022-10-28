@@ -425,6 +425,8 @@ class StateSnapshotsDashboard extends React.Component {
                 parameters.push(configParameter);
             }
 
+            parameters.push(`dps=1`)
+
             let permaLink = `${window.location.origin}${this.props.anchor.getUri()}?${parameters.join(`&`)}`;
 
             let token = (item.token ? item.token : false);

@@ -18,6 +18,7 @@ let clearMapControl, defaultMapExtentControl;
 let _self = false;
 
 let embedModeIsEnabled = false;
+let utils;
 
 /**
  * Clear map control
@@ -40,7 +41,7 @@ const ClearMapControlOptions = {
     }
 };
 let ClearMapControl = L.Control.extend({
-    options: { position: 'topright' },
+    options: {position: 'topright'},
     onAdd: () => {
         let container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom leaflet-clear-map');
         $(container).attr(`style`, `backgroundColor: white, width: 30px, height: 30px`);
@@ -48,6 +49,23 @@ let ClearMapControl = L.Control.extend({
         return container;
     }
 });
+
+const setDefaultZoomCenter = () => {
+    let hashArr = [];
+    const arr = window.vidiConfig?.initZoomCenter ? utils.parseZoomCenter(window.vidiConfig.initZoomCenter) : null;
+    if (arr) {
+        hashArr[1] = arr.z;
+        hashArr[2] = arr.x;
+        hashArr[3] = arr.y;
+    }
+    if (hashArr[1] && hashArr[2] && hashArr[3]) {
+        const p = geocloud.transformPoint(hashArr[2], hashArr[3], "EPSG:4326", "EPSG:3857");
+        cloud.get().zoomToPoint(p.x, p.y, hashArr[1]);
+    } else {
+        cloud.get().zoomToExtent(setting.getExtent());
+    }
+
+}
 
 /**
  * Default map extent control
@@ -58,12 +76,11 @@ const DefaultMapExtentControlOptions = {
         class="leaflet-bar-part leaflet-bar-part-single" style="outline: none;">
         <span class="fa fa-home"></span>
     </a>`),
-    onclick: () => {
-        cloud.get().zoomToExtent(setting.getExtent());
-    }
+    onclick: setDefaultZoomCenter
 };
+
 let DefaultMapExtentControl = L.Control.extend({
-    options: { position: 'topright' },
+    options: {position: 'topright'},
     onAdd: () => {
         let container = L.DomUtil.create('div', '');
         $(`.leaflet-control-zoom.leaflet-bar`).prepend(DefaultMapExtentControlOptions.template)[0].onclick = DefaultMapExtentControlOptions.onclick;
@@ -81,6 +98,7 @@ module.exports = {
         backboneEvents = o.backboneEvents;
         setting = o.setting;
         state = o.state;
+        utils = o.utils;
         _self = this;
         return this;
     },
@@ -149,7 +167,7 @@ module.exports = {
             }).addTo(cloud.get().map);
 
             let rubberbandControl = L.Control.boxzoom({
-                position:'topright',
+                position: 'topright',
                 iconClasses: 'fa fa-object-ungroup',
                 title: __(`Click here then draw a square on the map, to zoom in to an area`),
                 enableShiftDrag: true,
@@ -173,4 +191,6 @@ module.exports = {
             resolve();
         });
     },
+
+    setDefaultZoomCenter
 };
