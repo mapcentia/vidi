@@ -56,6 +56,14 @@ const SELECTED_STYLE = {
     dashArray: "8 5",
     lineCap: "butt",
 }
+const VECTOR_STYLE = () => {
+    return {
+        opacity: 1,
+        weight: 3,
+        fillColor: "blue",
+        color: "blue"
+    }
+}
 
 export {
     LOG,
@@ -69,5 +77,6 @@ export {
     SUB_GROUP_DIVIDER,
     MAP_RESOLUTIONS,
     VECTOR_SIDE_TABLE_EL,
-    SELECTED_STYLE
+    SELECTED_STYLE,
+    VECTOR_STYLE
 };
