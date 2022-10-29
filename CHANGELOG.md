@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
 ## UNRELEASED
+### Added
+- The url parameter `dps=1` will prevent browser state from being pushed to history. This parameter will be set by embed.js, so the browser history will not be pushed to the parent frame. Snapshot links will also have this parameter set.
+- A new faster init process is implemented which cuts about 50% of startup time for Vidi. This new init process will automatic invoked unless a URL achor is used - when the old process will be invoked. 
+
 ### Changed
 - When using `crossMultiSelect` the geometry for the open accordion panel will now get the 'selected' style.
 - When using `featureInfoTableOnMap` the Back button will reset the 'selected' style.
@@ -12,6 +16,7 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ### Fixed
 - Update the queue statistics when group panel is opened in case of the layer tree component is not rendered yet. Before the qeueu statistics was not shown after a refresh.
+- Click on set default extent button will now set initZoomCenter if present.
 
 ## [2022.10.0] - 2022-5-10
 ### Changed
