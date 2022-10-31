@@ -167,7 +167,7 @@ module.exports = {
                 c();
             })
         });
-        $("#layers").before(`<div style="display: flex; align-items: center"><div class="form-group" style="flex-grow: 1;"><input placeholder="${__('Layer filter')}" class="form-control" type="text" id="layers-filter" autocomplete="off"></div><div style="width: 18px; display: flex; justify-content:center"><div id="layers-filter-reset" style="display: inline; cursor: pointer"><i class="fas fa-times"></i></div><div id="layers-filter-busy" style="display: none"><i class="fas fa-circle-notch fa-spin"></i></div></div></div>`);
+        $("#layers").before(`<div id="layer-filter-container" style="display: flex; align-items: center"><div class="form-group" style="flex-grow: 1;"><input placeholder="${__('Layer filter')}" class="form-control" type="text" id="layers-filter" autocomplete="off"></div><div style="width: 18px; display: flex; justify-content:center"><div id="layers-filter-reset" style="display: inline; cursor: pointer"><i class="fas fa-times"></i></div><div id="layers-filter-busy" style="display: none"><i class="fas fa-circle-notch fa-spin"></i></div></div></div>`);
 
         if (urlparser && urlparser.urlVars && urlparser.urlVars.initialFilter) {
             backboneEvents.get().on(`${MODULE_NAME}:ready`, () => {
