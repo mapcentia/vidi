@@ -270,18 +270,11 @@ module.exports = {
         // Refresh browser state. E.g. after a session start
         // =================================================
         backboneEvents.get().on('refresh:meta', function () {
-            meta.init().then(() => {
-                return setting.init();
-            }, (error) => {
-                console.log(error); // Stacktrace
-                //alert('Vidi is loaded without schema. Can't set extent or add layers');
-                backboneEvents.get().trigger('ready:meta');
-                state.init();
-            }).then(() => {
-                layerTree.create(false, [], true);
-                state.init();
-
-            });
+            meta.init(null, false, false).then(() => {
+                    backboneEvents.get().trigger('ready:meta');
+                    layerTree.create(false, [], true);
+                }
+            );
         });
 
         // Init some GUI stuff after modules are loaded

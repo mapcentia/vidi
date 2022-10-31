@@ -110,20 +110,15 @@ module.exports = {
         if (!doNotReset) {
             metaData = {data: []};
         }
-        $("#layers").append(`<div id="layer-loading-indicator" style="display: flex; width: 100%; justify-content: center;"><div style="width: 150px; display: inline-block">
-                <div style="text-align: center">${__(`Loading data`)}</div>
-                <div class="progress progress-striped active">
-                    <div class="progress-bar" style="width: 100%"></div>
-                </div>
-            </div>
-            </div>`);
 
         return new Promise(function (resolve, reject) {
 
+            // Set load indicator
+            $('#layer-filter-container').css('pointer-events', 'none').css('opacity', 0.2);
+            $('#layer-loading-indicator').show();
+
             try {
 
-                $('#layer-filter-container').css('pointer-events', 'none').css('opacity', 0.2);
-                $('#layers_list').empty();
                 /**
                  * Loads meta objects from the backend Meta API
                  *
@@ -139,7 +134,8 @@ module.exports = {
                             if (response.data && response.data.length > 0) {
                                 me.addMetaData(response);
                                 ready = true;
-                                $('#layer-filter-container').css('pointer-events', 'auto').css('opacity', 1.0)
+                                $('#layer-filter-container').css('pointer-events', 'auto').css('opacity', 1.0);
+                                $('#layer-loading-indicator').hide();
                                 resolve(schemataStr);
                             } else {
                                 reject();
