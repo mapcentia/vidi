@@ -618,7 +618,7 @@ module.exports = module.exports = {
         if (LOG) console.log(`switchLayer: _removeUtfGrid ${layerName}`);
         let id = "__hidden.utfgrid." + layerName;
         cloud.get().map.eachLayer(function (layer) {
-            if (layer.id === id) {
+            if (id && layer.id === id) {
                 cloud.get().map.removeLayer(layer);
             }
         });
