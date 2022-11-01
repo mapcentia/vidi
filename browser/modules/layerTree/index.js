@@ -1481,11 +1481,7 @@ module.exports = {
             fieldConf = {};
         }
         const pane = layer.f_table_schema + '-' + layer.f_table_name;
-        if (
-            // (typeof moduleState.vectorStores[trackingLayerKey] === "undefined")
-             (typeof moduleState.vectorStores[trackingLayerKey] !== "object" || recreateStores)
-        ) {
-            console.log(`Creating store: ${trackingLayerKey}`)
+        if (typeof moduleState.vectorStores[trackingLayerKey] !== "object" || recreateStores) {
             moduleState.vectorStores[trackingLayerKey] = new geocloud.sqlStore({
                 map: cloud.get().map,
                 minZoom: parseInt(meta.parseLayerMeta(layerKey)?.vector_min_zoom),
