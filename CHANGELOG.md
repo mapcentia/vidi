@@ -15,7 +15,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - When clicking/tapping on the map, geometry with 'selected' style will be reset if any.
 
 ### Fixed
-- Update the queue statistics when group panel is opened in case of the layer tree component is not rendered yet. Before the qeueu statistics was not shown after a refresh.
+- Update the editor queue statistics when group panel is opened in case of the layer tree component is not rendered yet. Before the queue statistics was not shown after a refresh.
 - Click on set default extent button will now set initZoomCenter if present.
 
 ## [2022.10.0] - 2022-5-10
@@ -27,7 +27,7 @@ and this project adheres to [CalVer](https://calver.org/).
 }
 ```
 ### Fixed
-- When Vidi was started URL layers in offline mode, was not set to offline because layertree is yet not created. Now offline mode is retrived form state on upstart.
+- When Vidi was started with URL layers in offline mode, the layers was not set to offline because the layertree was yet not created. Now offline mode is retrived form state on upstart.
 
 ## [2022.9.2] - 2022-19-9
 ### Added
