@@ -655,8 +655,9 @@ module.exports = {
      */
     applyState: (state, ignoreInitZoomCenter = false) => {
         if (LOG) console.log(`${MODULE_NAME}: applying state`, state);
-
-        history.pushState(``, document.title, window.location.pathname + window.location.search);
+        if (!urlVars.dps) {
+            history.pushState(``, document.title, window.location.pathname + window.location.search);
+        }
         let result = new Promise((resolve, reject) => {
             if (!state) {
                 console.error(`Provided state is empty`);
