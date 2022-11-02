@@ -474,6 +474,9 @@ module.exports = {
                             // Don't recreate SQL store from snapshot
                             modules.layerTree.setRecreateStores(false);
                             if (st.modules?.layerTree) {
+                                if (!urlVars.state) {
+                                    st.modules.layerTree.activeLayers = []; // Don't switch on active layer from state unless state id is in the url
+                                }
                                 modules.layerTree.applyState(st.modules.layerTree, true).then(() => {
                                     modules.layerTree.setRecreateStores(true);
                                 });
