@@ -50,7 +50,7 @@ module.exports = {
         let map = cloud.map;
 
         map.createPane('base');
-        map.getPane('base').style.zIndex = 1;
+        map.getPane('base').style.zIndex = 210;
 
         map.getPane('overlayPane').style.zIndex = 1000000;
         map.getPane('shadowPane').style.zIndex = 1001000;

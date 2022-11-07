@@ -17,6 +17,7 @@ and this project adheres to [CalVer](https://calver.org/).
 ### Fixed
 - Update the editor queue statistics when group panel is opened in case of the layer tree component is not rendered yet. Before the queue statistics was not shown after a refresh.
 - Click on set default extent button will now set initZoomCenter if present.
+- It's now possible to use WMS overlays in base layer definitions. Before is was only possible to use GC2 layers for this. 
 
 ## [2022.10.0] - 2022-5-10
 ### Changed
