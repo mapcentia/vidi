@@ -4,6 +4,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2022.11.0] - 2022-8-11
+### Added
+- The url parameter `dps=1` will prevent browser state from being pushed to history. This parameter will be set by embed.js, so the browser history will not be pushed to the parent frame. Snapshot links will also have this parameter set.
+- A new faster init process is implemented which cuts about 50% of startup time for Vidi. This new init process will automatic be invoked unless a URL achor is used - when the old process will be invoked. 
+
+### Changed
+- When using `crossMultiSelect` the geometry for the open accordion panel will now get the 'selected' style.
+- When using `featureInfoTableOnMap` the Back button will reset the 'selected' style.
+- When clicking/tapping on the map, geometry with 'selected' style will be reset if any.
+
+### Fixed
+- Update the editor queue statistics when group panel is opened in case of the layer tree component is not rendered yet. Before the queue statistics was not shown after a refresh.
+- Click on set default extent button will now set initZoomCenter if present.
+- It's now possible to use WMS overlays in base layer definitions. Before is was only possible to use GC2 layers for this. 
+- Komkode filter on esr/sfe search.
+
+## [2022.10.0] - 2022-5-10
+### Changed
+- Session cookie is now set with an `Expires` attribute, which can be set in `config/config.js`. Before it was set as a non-persistent cookie, which was deleted on exiting the web browser. Defaults to 86400 seconds.
+```json
+{
+  "sessionMaxAge": 86400
+}
+```
+### Fixed
+- When Vidi was started with URL layers in offline mode, the layers was not set to offline because the layertree was yet not created. Now offline mode is retrived form state on upstart.
+
 ## [2022.9.2] - 2022-19-9
 ### Added
 - New config option added `popupDraggable`. Makes feature-info popups draggable. Can be set in run-tim config.
@@ -76,8 +103,6 @@ This is a label for feature <b>{{gid}}</b>
 
 ### Changed
 - Legend moved to upper right corner in embed.tmpl, so it doesn't coflict with the bottom aligned vector table.
-
-### Changed
 - Pop-ups are not longer opened when selecting a row in table, because this will let gc2table control the pop-up and here editing tools are not supported.
 
 ### Fixed

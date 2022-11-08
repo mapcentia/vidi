@@ -267,540 +267,552 @@ module.exports = {
                     type1 = "adresse";
                 }
                 let names = [];
-                    (function ca() {
-                        if (window.vidiConfig?.searchConfig?.sortByScore) {
-                            let scriptTpl = template(`def docval = params['_source'].properties.<%= string%>.toLowerCase(); def path = '<%= query%>'; def first = path.indexOf(' '); def str = first > -1 ? path.substring(0, first): path; def index = (float)docval.indexOf(str); return index > -1 ? (1 / index) : 0;`);
-                            let safeQuery = query.toLowerCase().replace(",", "")
-                            switch (type1) {
-                                case "vejnavn,bynavn":
-                                    gids[type1] = [];
-                                    dsl1 = {
-                                        "from": 0,
-                                        "size": size,
-                                        "query": {
-                                            "function_score": {
-                                                "query": {
-                                                    "bool": {
-                                                        "must": {
-                                                            "query_string": {
-                                                                "default_field": "properties.string2",
-                                                                "query": safeQuery,
-                                                                "default_operator": "AND"
-                                                            }
-                                                        },
-                                                        "filter": {
-                                                            "bool": {
-                                                                "should": shouldA
-                                                            }
+                (function ca() {
+                    if (window.vidiConfig?.searchConfig?.sortByScore) {
+                        let scriptTpl = template(`def docval = params['_source'].properties.<%= string%>.toLowerCase(); def path = '<%= query%>'; def first = path.indexOf(' '); def str = first > -1 ? path.substring(0, first): path; def index = (float)docval.indexOf(str); return index > -1 ? (1 / index) : 0;`);
+                        let safeQuery = query.toLowerCase().replace(",", "")
+                        switch (type1) {
+                            case "vejnavn,bynavn":
+                                gids[type1] = [];
+                                dsl1 = {
+                                    "from": 0,
+                                    "size": size,
+                                    "query": {
+                                        "function_score": {
+                                            "query": {
+                                                "bool": {
+                                                    "must": {
+                                                        "query_string": {
+                                                            "default_field": "properties.string2",
+                                                            "query": safeQuery,
+                                                            "default_operator": "AND"
+                                                        }
+                                                    },
+                                                    "filter": {
+                                                        "bool": {
+                                                            "should": shouldA
                                                         }
                                                     }
-                                                },
-                                                "boost_mode": "sum",
-                                                "functions": [
-                                                    {
-                                                        "script_score": {
-                                                            "script": {
-                                                                "source": scriptTpl({'string': 'string2', 'query': safeQuery})
-                                                            }
-                                                        }
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        "aggregations": {
-                                            "properties.postnrnavn": {
-                                                "terms": {
-                                                    "field": "properties.postnrnavn",
-                                                    "size": size,
-                                                },
-                                                "aggregations": {
-                                                    "properties.postnr": {
-                                                        "terms": {
-                                                            "field": "properties.postnr",
-                                                            "size": size
-                                                        },
-                                                        "aggregations": {
-                                                            "properties.kommunekode": {
-                                                                "terms": {
-                                                                    "field": "properties.kommunekode",
-                                                                    "size": size
-                                                                },
-                                                                "aggregations": {
-                                                                    "properties.regionskode": {
-                                                                        "terms": {
-                                                                            "field": "properties.regionskode",
-                                                                            "size": size
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    };
-                                    dsl2 = {
-                                        "from": 0,
-                                        "size": size,
-                                        "query": {
-                                            "function_score": {
-                                                "query": {
-                                                    "bool": {
-                                                        "must": {
-                                                            "query_string": {
-                                                                "default_field": "properties.string3",
-                                                                "query": safeQuery,
-                                                                "default_operator": "AND"
-                                                            }
-                                                        },
-                                                        "filter": {
-                                                            "bool": {
-                                                                "should": shouldA
-                                                            }
-                                                        }
-                                                    }
-                                                },
-
-                                                "boost_mode": "sum",
-
-                                                "functions": [
-                                                    {
-                                                        "script_score": {
-                                                            "script": {
-                                                                "source": scriptTpl({'string': 'string3', 'query': safeQuery})
-                                                            }
-                                                        }
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        "aggregations": {
-                                            "properties.vejnavn": {
-                                                "terms": {
-                                                    "field": "properties.vejnavn",
-                                                    "size": size,
-                                                },
-                                                "aggregations": {
-                                                    "properties.kommunekode": {
-                                                        "terms": {
-                                                            "field": "properties.kommunekode",
-                                                            "size": size
-                                                        },
-                                                        "aggregations": {
-                                                            "properties.regionskode": {
-                                                                "terms": {
-                                                                    "field": "properties.regionskode",
-                                                                    "size": size
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    };
-                                    break;
-                                case "vejnavn_bynavn":
-                                    gids[type1] = [];
-                                    dsl1 = {
-                                        "from": 0,
-                                        "size": size,
-                                        "query": {
-                                            "function_score": {
-                                                "query": {
-                                                    "bool": {
-                                                        "must": {
-                                                            "query_string": {
-                                                                "default_field": "properties.string1",
-                                                                "query": safeQuery,
-                                                                "default_operator": "AND"
-                                                            }
-                                                        },
-                                                        "filter": {
-                                                            "bool": {
-                                                                "should": shouldA
-                                                            }
-                                                        }
-                                                    }
-                                                },
-                                                "boost_mode": "sum",
-
-                                                "functions": [
-                                                    {
-                                                        "script_score": {
-                                                            "script": {
-                                                                "source": scriptTpl({'string': 'string1', 'query': safeQuery})
-                                                            }
-                                                        }
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        "aggregations": {
-                                            "properties.vejnavn": {
-                                                "terms": {
-                                                    "field": "properties.vejnavn",
-                                                    "size": size
-                                                },
-                                                "aggregations": {
-                                                    "properties.postnrnavn": {
-                                                        "terms": {
-                                                            "field": "properties.postnrnavn",
-                                                            "size": size
-                                                        },
-                                                        "aggregations": {
-                                                            "properties.kommunekode": {
-                                                                "terms": {
-                                                                    "field": "properties.kommunekode",
-                                                                    "size": size
-                                                                },
-                                                                "aggregations": {
-                                                                    "properties.regionskode": {
-                                                                        "terms": {
-                                                                            "field": "properties.regionskode",
-                                                                            "size": size
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    };
-                                    break;
-                                case "adresse":
-                                    gids[type1] = [];
-                                    dsl1 = {
-                                        "from": 0,
-                                        "size": size,
-                                        "query": {
-                                            "function_score": {
-                                                "query": {
-                                                    "bool": {
-                                                        "must": {
-                                                            "query_string": {
-                                                                "default_field": "properties.string4",
-                                                                "query": safeQuery,
-                                                                "default_operator": "AND"
-                                                            }
-                                                        },
-                                                        "filter": {
-                                                            "bool": {
-                                                                "should": shouldA
-                                                            }
-                                                        }
-                                                    }
-                                                },
-                                                "functions": [
-                                                    {
-                                                        "script_score": {
-                                                            "script": {
-                                                                "source": scriptTpl({'string': 'string4', 'query': safeQuery})
-                                                            }
-                                                        }
-                                                    }
-                                                ],
-                                                "boost_mode": "sum"
-                                            }
-                                        }
-                                    };
-                                    break;
-                            }
-                        } else {
-                            switch (type1) {
-                                case "vejnavn,bynavn":
-                                    gids[type1] = [];
-                                    dsl1 = {
-                                        "from": 0,
-                                        "size": size,
-                                        "query": {
-                                            "bool": {
-                                                "must": {
-                                                    "query_string": {
-                                                        "default_field": "properties.string2",
-                                                        "query": query.toLowerCase().replace(",", ""),
-                                                        "default_operator": "AND"
-                                                    }
-                                                },
-                                                "filter": {
-                                                    "bool": {
-                                                        "should": shouldA
-                                                    }
-                                                }
-                                            }
-                                        },
-                                        "aggregations": {
-                                            "properties.postnrnavn": {
-                                                "terms": {
-                                                    "field": "properties.postnrnavn",
-                                                    "size": size,
-                                                    "order": {
-                                                        "_term": "asc"
-                                                    }
-                                                },
-                                                "aggregations": {
-                                                    "properties.postnr": {
-                                                        "terms": {
-                                                            "field": "properties.postnr",
-                                                            "size": size
-                                                        },
-                                                        "aggregations": {
-                                                            "properties.kommunekode": {
-                                                                "terms": {
-                                                                    "field": "properties.kommunekode",
-                                                                    "size": size
-                                                                },
-                                                                "aggregations": {
-                                                                    "properties.regionskode": {
-                                                                        "terms": {
-                                                                            "field": "properties.regionskode",
-                                                                            "size": size
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    };
-                                    dsl2 = {
-                                        "from": 0,
-                                        "size": size,
-                                        "query": {
-                                            "bool": {
-                                                "must": {
-                                                    "query_string": {
-                                                        "default_field": "properties.string3",
-                                                        "query": query.toLowerCase().replace(",", ""),
-                                                        "default_operator": "AND"
-                                                    }
-                                                },
-                                                "filter": {
-                                                    "bool": {
-                                                        "should": shouldA
-                                                    }
-                                                }
-                                            }
-                                        },
-                                        "aggregations": {
-                                            "properties.vejnavn": {
-                                                "terms": {
-                                                    "field": "properties.vejnavn",
-                                                    "size": size,
-                                                    "order": {
-                                                        "_term": "asc"
-                                                    }
-                                                },
-                                                "aggregations": {
-                                                    "properties.kommunekode": {
-                                                        "terms": {
-                                                            "field": "properties.kommunekode",
-                                                            "size": size
-                                                        },
-                                                        "aggregations": {
-                                                            "properties.regionskode": {
-                                                                "terms": {
-                                                                    "field": "properties.regionskode",
-                                                                    "size": size
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    };
-                                    break;
-                                case "vejnavn_bynavn":
-                                    gids[type1] = [];
-                                    dsl1 = {
-                                        "from": 0,
-                                        "size": size,
-                                        "query": {
-                                            "bool": {
-                                                "must": {
-                                                    "query_string": {
-                                                        "default_field": "properties.string1",
-                                                        "query": query.toLowerCase().replace(",", ""),
-                                                        "default_operator": "AND"
-                                                    }
-                                                },
-                                                "filter": {
-                                                    "bool": {
-                                                        "should": shouldA
-                                                    }
-                                                }
-                                            }
-                                        },
-                                        "aggregations": {
-                                            "properties.vejnavn": {
-                                                "terms": {
-                                                    "field": "properties.vejnavn",
-                                                    "size": size,
-                                                    "order": {
-                                                        "_term": "asc"
-                                                    }
-                                                },
-                                                "aggregations": {
-                                                    "properties.postnrnavn": {
-                                                        "terms": {
-                                                            "field": "properties.postnrnavn",
-                                                            "size": size
-                                                        },
-                                                        "aggregations": {
-                                                            "properties.kommunekode": {
-                                                                "terms": {
-                                                                    "field": "properties.kommunekode",
-                                                                    "size": size
-                                                                },
-                                                                "aggregations": {
-                                                                    "properties.regionskode": {
-                                                                        "terms": {
-                                                                            "field": "properties.regionskode",
-                                                                            "size": size
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    };
-                                    break;
-                                case "adresse":
-                                    gids[type1] = [];
-                                    dsl1 = {
-                                        "from": 0,
-                                        "size": size,
-                                        "query": {
-                                            "bool": {
-                                                "must": {
-                                                    "query_string": {
-                                                        "default_field": "properties.string5",
-                                                        "query": query.toLowerCase().replace(",", ""),
-                                                        "default_operator": "AND"
-                                                    }
-                                                },
-                                                "filter": {
-                                                    "bool": {
-                                                        "should": shouldA
-                                                    }
-                                                }
-                                            }
-                                        },
-
-                                        "sort": [
-                                            {
-                                                "properties.vejnavn": {
-                                                    "order": "asc"
                                                 }
                                             },
-                                            {
-                                                "properties.husnr": {
-                                                    "order": "asc"
+                                            "boost_mode": "sum",
+                                            "functions": [
+                                                {
+                                                    "script_score": {
+                                                        "script": {
+                                                            "source": scriptTpl({
+                                                                'string': 'string2',
+                                                                'query': safeQuery
+                                                            })
+                                                        }
+                                                    }
                                                 }
+                                            ]
+                                        }
+                                    },
+                                    "aggregations": {
+                                        "properties.postnrnavn": {
+                                            "terms": {
+                                                "field": "properties.postnrnavn",
+                                                "size": size,
                                             },
-                                            {
-                                                "properties.litra": {
-                                                    "order": "asc"
+                                            "aggregations": {
+                                                "properties.postnr": {
+                                                    "terms": {
+                                                        "field": "properties.postnr",
+                                                        "size": size
+                                                    },
+                                                    "aggregations": {
+                                                        "properties.kommunekode": {
+                                                            "terms": {
+                                                                "field": "properties.kommunekode",
+                                                                "size": size
+                                                            },
+                                                            "aggregations": {
+                                                                "properties.regionskode": {
+                                                                    "terms": {
+                                                                        "field": "properties.regionskode",
+                                                                        "size": size
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
                                                 }
                                             }
-                                        ]
-                                    };
-                                    break;
-                            }
+                                        }
+                                    }
+                                };
+                                dsl2 = {
+                                    "from": 0,
+                                    "size": size,
+                                    "query": {
+                                        "function_score": {
+                                            "query": {
+                                                "bool": {
+                                                    "must": {
+                                                        "query_string": {
+                                                            "default_field": "properties.string3",
+                                                            "query": safeQuery,
+                                                            "default_operator": "AND"
+                                                        }
+                                                    },
+                                                    "filter": {
+                                                        "bool": {
+                                                            "should": shouldA
+                                                        }
+                                                    }
+                                                }
+                                            },
+
+                                            "boost_mode": "sum",
+
+                                            "functions": [
+                                                {
+                                                    "script_score": {
+                                                        "script": {
+                                                            "source": scriptTpl({
+                                                                'string': 'string3',
+                                                                'query': safeQuery
+                                                            })
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "aggregations": {
+                                        "properties.vejnavn": {
+                                            "terms": {
+                                                "field": "properties.vejnavn",
+                                                "size": size,
+                                            },
+                                            "aggregations": {
+                                                "properties.kommunekode": {
+                                                    "terms": {
+                                                        "field": "properties.kommunekode",
+                                                        "size": size
+                                                    },
+                                                    "aggregations": {
+                                                        "properties.regionskode": {
+                                                            "terms": {
+                                                                "field": "properties.regionskode",
+                                                                "size": size
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                };
+                                break;
+                            case "vejnavn_bynavn":
+                                gids[type1] = [];
+                                dsl1 = {
+                                    "from": 0,
+                                    "size": size,
+                                    "query": {
+                                        "function_score": {
+                                            "query": {
+                                                "bool": {
+                                                    "must": {
+                                                        "query_string": {
+                                                            "default_field": "properties.string1",
+                                                            "query": safeQuery,
+                                                            "default_operator": "AND"
+                                                        }
+                                                    },
+                                                    "filter": {
+                                                        "bool": {
+                                                            "should": shouldA
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "boost_mode": "sum",
+
+                                            "functions": [
+                                                {
+                                                    "script_score": {
+                                                        "script": {
+                                                            "source": scriptTpl({
+                                                                'string': 'string1',
+                                                                'query': safeQuery
+                                                            })
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "aggregations": {
+                                        "properties.vejnavn": {
+                                            "terms": {
+                                                "field": "properties.vejnavn",
+                                                "size": size
+                                            },
+                                            "aggregations": {
+                                                "properties.postnrnavn": {
+                                                    "terms": {
+                                                        "field": "properties.postnrnavn",
+                                                        "size": size
+                                                    },
+                                                    "aggregations": {
+                                                        "properties.kommunekode": {
+                                                            "terms": {
+                                                                "field": "properties.kommunekode",
+                                                                "size": size
+                                                            },
+                                                            "aggregations": {
+                                                                "properties.regionskode": {
+                                                                    "terms": {
+                                                                        "field": "properties.regionskode",
+                                                                        "size": size
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                };
+                                break;
+                            case "adresse":
+                                gids[type1] = [];
+                                dsl1 = {
+                                    "from": 0,
+                                    "size": size,
+                                    "query": {
+                                        "function_score": {
+                                            "query": {
+                                                "bool": {
+                                                    "must": {
+                                                        "query_string": {
+                                                            "default_field": "properties.string4",
+                                                            "query": safeQuery,
+                                                            "default_operator": "AND"
+                                                        }
+                                                    },
+                                                    "filter": {
+                                                        "bool": {
+                                                            "should": shouldA
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "functions": [
+                                                {
+                                                    "script_score": {
+                                                        "script": {
+                                                            "source": scriptTpl({
+                                                                'string': 'string4',
+                                                                'query': safeQuery
+                                                            })
+                                                        }
+                                                    }
+                                                }
+                                            ],
+                                            "boost_mode": "sum"
+                                        }
+                                    }
+                                };
+                                break;
                         }
-                        $.ajax({
-                            url: AHOST + '/api/v2/elasticsearch/search/' + ADB + '/dar/adgangsadresser_view',
-                            data: JSON.stringify(dsl1),
-                            contentType: "application/json; charset=utf-8",
-                            scriptCharset: "utf-8",
-                            dataType: 'json',
-                            type: "POST",
-                            success: function (response) {
-                                if (response.hits === undefined) return;
-                                if (type1 === "vejnavn,bynavn") {
-                                    if (response.aggregations === undefined) return;
-                                    if (response.aggregations["properties.postnrnavn"] === undefined) return;
-                                    $.each(response.aggregations["properties.postnrnavn"].buckets, function (i, hit) {
-                                        var str = hit.key;
-                                        names.push({value: str});
-                                    });
-                                    $.ajax({
-                                        url: AHOST + '/api/v2/elasticsearch/search/' + ADB + '/dar/adgangsadresser_view',
-                                        data: JSON.stringify(dsl2),
-                                        contentType: "application/json; charset=utf-8",
-                                        scriptCharset: "utf-8",
-                                        dataType: 'json',
-                                        type: "POST",
-                                        success: function (response) {
-                                            if (response.hits === undefined) return;
-                                            if (type1 === "vejnavn,bynavn") {
-                                                if (response.aggregations === undefined) return;
-                                                if (response.aggregations["properties.vejnavn"] === undefined) return;
-                                                $.each(response.aggregations["properties.vejnavn"].buckets, function (i, hit) {
-                                                    var str = hit.key;
-                                                    names.push({value: str});
-                                                });
+                    } else {
+                        switch (type1) {
+                            case "vejnavn,bynavn":
+                                gids[type1] = [];
+                                dsl1 = {
+                                    "from": 0,
+                                    "size": size,
+                                    "query": {
+                                        "bool": {
+                                            "must": {
+                                                "query_string": {
+                                                    "default_field": "properties.string2",
+                                                    "query": query.toLowerCase().replace(",", ""),
+                                                    "default_operator": "AND"
+                                                }
+                                            },
+                                            "filter": {
+                                                "bool": {
+                                                    "should": shouldA
+                                                }
                                             }
-                                            if (names.length === 1 && (type1 === "vejnavn,bynavn" || type1 === "vejnavn_bynavn")) {
-                                                type1 = "adresse";
-                                                names = [];
-                                                gids[type1] = [];
-                                                ca();
-                                            } else {
-                                                cb(names);
-                                            }
-
                                         }
-                                    })
-                                } else if (type1 === "vejnavn_bynavn") {
-                                    if (response.aggregations === undefined) return;
-                                    if (response.aggregations["properties.vejnavn"] === undefined) return;
-                                    $.each(response.aggregations["properties.vejnavn"].buckets, function (i, hit) {
-                                        var str = hit.key;
-                                        $.each(hit["properties.postnrnavn"].buckets, function (m, n) {
-                                            var tmp = str;
-                                            tmp = tmp + ", " + n.key;
-                                            names.push({value: tmp});
-                                        });
-
-                                    });
-                                    if (names.length === 1 && (type1 === "vejnavn,bynavn" || type1 === "vejnavn_bynavn")) {
-                                        type1 = "adresse";
-                                        names = [];
-                                        gids[type1] = [];
-                                        ca();
-                                    } else {
-                                        cb(names);
+                                    },
+                                    "aggregations": {
+                                        "properties.postnrnavn": {
+                                            "terms": {
+                                                "field": "properties.postnrnavn",
+                                                "size": size,
+                                                "order": {
+                                                    "_term": "asc"
+                                                }
+                                            },
+                                            "aggregations": {
+                                                "properties.postnr": {
+                                                    "terms": {
+                                                        "field": "properties.postnr",
+                                                        "size": size
+                                                    },
+                                                    "aggregations": {
+                                                        "properties.kommunekode": {
+                                                            "terms": {
+                                                                "field": "properties.kommunekode",
+                                                                "size": size
+                                                            },
+                                                            "aggregations": {
+                                                                "properties.regionskode": {
+                                                                    "terms": {
+                                                                        "field": "properties.regionskode",
+                                                                        "size": size
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
-
-                                } else if (type1 === "adresse") {
-                                    $.each(response.hits.hits, function (i, hit) {
-                                        var str = hit._source.properties.string4;
-                                        gids[type1][str] = hit._source.properties.gid;
-                                        names.push({value: str});
-                                    });
-                                    if (names.length === 1 && (type1 === "vejnavn,bynavn" || type1 === "vejnavn_bynavn")) {
-                                        type1 = "adresse";
-                                        names = [];
-                                        gids[type1] = [];
-                                        ca();
-                                    } else {
-                                        cb(names);
+                                };
+                                dsl2 = {
+                                    "from": 0,
+                                    "size": size,
+                                    "query": {
+                                        "bool": {
+                                            "must": {
+                                                "query_string": {
+                                                    "default_field": "properties.string3",
+                                                    "query": query.toLowerCase().replace(",", ""),
+                                                    "default_operator": "AND"
+                                                }
+                                            },
+                                            "filter": {
+                                                "bool": {
+                                                    "should": shouldA
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "aggregations": {
+                                        "properties.vejnavn": {
+                                            "terms": {
+                                                "field": "properties.vejnavn",
+                                                "size": size,
+                                                "order": {
+                                                    "_term": "asc"
+                                                }
+                                            },
+                                            "aggregations": {
+                                                "properties.kommunekode": {
+                                                    "terms": {
+                                                        "field": "properties.kommunekode",
+                                                        "size": size
+                                                    },
+                                                    "aggregations": {
+                                                        "properties.regionskode": {
+                                                            "terms": {
+                                                                "field": "properties.regionskode",
+                                                                "size": size
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
+                                };
+                                break;
+                            case "vejnavn_bynavn":
+                                gids[type1] = [];
+                                dsl1 = {
+                                    "from": 0,
+                                    "size": size,
+                                    "query": {
+                                        "bool": {
+                                            "must": {
+                                                "query_string": {
+                                                    "default_field": "properties.string1",
+                                                    "query": query.toLowerCase().replace(",", ""),
+                                                    "default_operator": "AND"
+                                                }
+                                            },
+                                            "filter": {
+                                                "bool": {
+                                                    "should": shouldA
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "aggregations": {
+                                        "properties.vejnavn": {
+                                            "terms": {
+                                                "field": "properties.vejnavn",
+                                                "size": size,
+                                                "order": {
+                                                    "_term": "asc"
+                                                }
+                                            },
+                                            "aggregations": {
+                                                "properties.postnrnavn": {
+                                                    "terms": {
+                                                        "field": "properties.postnrnavn",
+                                                        "size": size
+                                                    },
+                                                    "aggregations": {
+                                                        "properties.kommunekode": {
+                                                            "terms": {
+                                                                "field": "properties.kommunekode",
+                                                                "size": size
+                                                            },
+                                                            "aggregations": {
+                                                                "properties.regionskode": {
+                                                                    "terms": {
+                                                                        "field": "properties.regionskode",
+                                                                        "size": size
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                };
+                                break;
+                            case "adresse":
+                                gids[type1] = [];
+                                dsl1 = {
+                                    "from": 0,
+                                    "size": size,
+                                    "query": {
+                                        "bool": {
+                                            "must": {
+                                                "query_string": {
+                                                    "default_field": "properties.string5",
+                                                    "query": query.toLowerCase().replace(",", ""),
+                                                    "default_operator": "AND"
+                                                }
+                                            },
+                                            "filter": {
+                                                "bool": {
+                                                    "should": shouldA
+                                                }
+                                            }
+                                        }
+                                    },
+
+                                    "sort": [
+                                        {
+                                            "properties.vejnavn": {
+                                                "order": "asc"
+                                            }
+                                        },
+                                        {
+                                            "properties.husnr": {
+                                                "order": "asc"
+                                            }
+                                        },
+                                        {
+                                            "properties.litra": {
+                                                "order": "asc"
+                                            }
+                                        }
+                                    ]
+                                };
+                                break;
+                        }
+                    }
+                    $.ajax({
+                        url: AHOST + '/api/v2/elasticsearch/search/' + ADB + '/dar/adgangsadresser_view',
+                        data: JSON.stringify(dsl1),
+                        contentType: "application/json; charset=utf-8",
+                        scriptCharset: "utf-8",
+                        dataType: 'json',
+                        type: "POST",
+                        success: function (response) {
+                            if (response.hits === undefined) return;
+                            if (type1 === "vejnavn,bynavn") {
+                                if (response.aggregations === undefined) return;
+                                if (response.aggregations["properties.postnrnavn"] === undefined) return;
+                                $.each(response.aggregations["properties.postnrnavn"].buckets, function (i, hit) {
+                                    var str = hit.key;
+                                    names.push({value: str});
+                                });
+                                $.ajax({
+                                    url: AHOST + '/api/v2/elasticsearch/search/' + ADB + '/dar/adgangsadresser_view',
+                                    data: JSON.stringify(dsl2),
+                                    contentType: "application/json; charset=utf-8",
+                                    scriptCharset: "utf-8",
+                                    dataType: 'json',
+                                    type: "POST",
+                                    success: function (response) {
+                                        if (response.hits === undefined) return;
+                                        if (type1 === "vejnavn,bynavn") {
+                                            if (response.aggregations === undefined) return;
+                                            if (response.aggregations["properties.vejnavn"] === undefined) return;
+                                            $.each(response.aggregations["properties.vejnavn"].buckets, function (i, hit) {
+                                                var str = hit.key;
+                                                names.push({value: str});
+                                            });
+                                        }
+                                        if (names.length === 1 && (type1 === "vejnavn,bynavn" || type1 === "vejnavn_bynavn")) {
+                                            type1 = "adresse";
+                                            names = [];
+                                            gids[type1] = [];
+                                            ca();
+                                        } else {
+                                            cb(names);
+                                        }
+
+                                    }
+                                })
+                            } else if (type1 === "vejnavn_bynavn") {
+                                if (response.aggregations === undefined) return;
+                                if (response.aggregations["properties.vejnavn"] === undefined) return;
+                                $.each(response.aggregations["properties.vejnavn"].buckets, function (i, hit) {
+                                    var str = hit.key;
+                                    $.each(hit["properties.postnrnavn"].buckets, function (m, n) {
+                                        var tmp = str;
+                                        tmp = tmp + ", " + n.key;
+                                        names.push({value: tmp});
+                                    });
+
+                                });
+                                if (names.length === 1 && (type1 === "vejnavn,bynavn" || type1 === "vejnavn_bynavn")) {
+                                    type1 = "adresse";
+                                    names = [];
+                                    gids[type1] = [];
+                                    ca();
+                                } else {
+                                    cb(names);
                                 }
 
+                            } else if (type1 === "adresse") {
+                                $.each(response.hits.hits, function (i, hit) {
+                                    var str = hit._source.properties.string4;
+                                    gids[type1][str] = hit._source.properties.gid;
+                                    names.push({value: str});
+                                });
+                                if (names.length === 1 && (type1 === "vejnavn,bynavn" || type1 === "vejnavn_bynavn")) {
+                                    type1 = "adresse";
+                                    names = [];
+                                    gids[type1] = [];
+                                    ca();
+                                } else {
+                                    cb(names);
+                                }
                             }
-                        })
-                    })();
+
+                        }
+                    })
+                })();
             }
         }, {
             name: 'matrikel',
@@ -969,6 +981,11 @@ module.exports = {
                                                         "query": qry,
                                                         "default_operator": "AND"
                                                     }
+                                                },
+                                                "filter": {
+                                                    "bool": {
+                                                        "should": shouldM
+                                                    }
                                                 }
                                             }
                                         }
@@ -1035,6 +1052,11 @@ module.exports = {
                                                         "default_field": "properties.sfe_ejendomsnummer",
                                                         "query": query.toLowerCase(),
                                                         "default_operator": "AND"
+                                                    }
+                                                },
+                                                "filter": {
+                                                    "bool": {
+                                                        "should": shouldM
                                                     }
                                                 }
                                             }
@@ -1147,7 +1169,15 @@ module.exports = {
                         placeStores[key] = getPlaceStore();
                         placeStores[key].db = MDB;
                         placeStores[key].host = MHOST;
-                        placeStores[key].sql = `SELECT sfe_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE sfe_ejendomsnummer = (SELECT sfe_ejendomsnummer FROM matrikel.jordstykke WHERE landsejerlavskode=${urlparser.urlVars.var_landsejerlavskode} AND matrikelnummer='${urlparser.urlVars.var_matrikelnr.toLowerCase()}') group by sfe_ejendomsnummer`;
+                        placeStores[key].sql = `SELECT sfe_ejendomsnummer,
+                                                       ST_Multi(ST_Union(the_geom)),
+                                                       ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)), 4326)) as geojson
+                                                FROM matrikel.jordstykke
+                                                WHERE sfe_ejendomsnummer = (SELECT sfe_ejendomsnummer
+                                                                            FROM matrikel.jordstykke
+                                                                            WHERE landsejerlavskode = ${urlparser.urlVars.var_landsejerlavskode}
+                                                                              AND matrikelnummer = '${urlparser.urlVars.var_matrikelnr.toLowerCase()}')
+                                                group by sfe_ejendomsnummer`;
                         placeStores[key].load();
                         fromVarsIsDone = true;
                     }

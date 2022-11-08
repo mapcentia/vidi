@@ -6,20 +6,18 @@
 
 'use strict';
 
-var modules;
-var tmpl;
-var urlparser = require('./../modules/urlparser');
-var urlVars = urlparser.urlVars;
-var backboneEvents;
+import {fallback} from "async/internal/setImmediate";
+
+let modules;
+let tmpl;
+const urlparser = require('./../modules/urlparser');
+const urlVars = urlparser.urlVars;
+let backboneEvents;
+let utils;
 
 const semver = require('semver');
 const md5 = require('md5');
 const cookie = require('js-cookie');
-
-const DEFAULT_STARTUP_MODAL_SUPRESSION_TEMPLATES = ["print.tmpl", "blank.tmpl", {
-    regularExpression: true,
-    name: 'print_[\\w]+\\.tmpl'
-}];
 
 import mustache from 'mustache';
 
@@ -33,6 +31,7 @@ module.exports = {
     set: function (o) {
         modules = o;
         backboneEvents = o.backboneEvents;
+        utils = o.utils;
         return this;
     },
 
@@ -75,7 +74,7 @@ module.exports = {
                 width: '30%',
                 height: '250px'
             },
-            initZoomCenter: null
+            initZoomCenter: null,
         };
         // Set default for unset props
         for (let prop in defaults) {
@@ -159,7 +158,7 @@ module.exports = {
      *
      */
     render: function () {
-        var me = this;
+        const me = this;
 
         // Render template and set some styling
         // ====================================
@@ -170,7 +169,7 @@ module.exports = {
         // ====================================
 
         if (typeof urlVars.tmpl !== "undefined") {
-            var par = urlVars.tmpl.split("#");
+            let par = urlVars.tmpl.split("#");
             if (par.length > 1) {
                 par.pop();
             }
@@ -189,7 +188,7 @@ module.exports = {
             gc2i18n.dict.printDateTime = decodeURIComponent(urlVars.td);
             gc2i18n.dict.printDate = decodeURIComponent(urlVars.d);
             gc2i18n.dict.printFrame = parseInt(decodeURIComponent(urlVars.frame)) + 1;
-            gc2i18n.dict.showFrameNumber = decodeURIComponent(urlVars.frameN) === "1" ? false : true;
+            gc2i18n.dict.showFrameNumber = decodeURIComponent(urlVars.frameN) !== "1";
             window.vidiTimeout = 1000;
         } else {
             window.vidiTimeout = 0;
@@ -238,7 +237,7 @@ module.exports = {
             me.startApp();
         } else {
             $.get("/api/template/" + urlparser.db + "/" + tmpl, function (template) {
-                var rendered = mustache.render(template, gc2i18n.dict);
+                const rendered = mustache.render(template, gc2i18n.dict);
                 $("#main-container").html(rendered);
                 console.info("Loaded external template: " + tmpl);
                 me.startApp();
@@ -252,10 +251,9 @@ module.exports = {
      *
      */
     startApp: function () {
-        let humanUsedTemplate = !(urlVars.px && urlVars.py);
+        let humanUsedTemplate = !(urlVars.px && urlVars.py), schema;
         if (`tmpl` in urlVars) {
-            let supressedModalTemplates = DEFAULT_STARTUP_MODAL_SUPRESSION_TEMPLATES;
-            supressedModalTemplates = window.vidiConfig.startupModalSupressionTemplates;
+            let supressedModalTemplates = window.vidiConfig.startupModalSupressionTemplates;
             supressedModalTemplates.map(item => {
                 if (typeof item === 'string' || item instanceof String) {
                     // Exact string template name
@@ -328,7 +326,7 @@ module.exports = {
         let splitLocation = window.location.pathname.split(`/`);
         if (splitLocation.length === 4 || splitLocation.length === 5) {
             let database = splitLocation[2];
-            let schema = splitLocation[3];
+            schema = splitLocation[3];
             if (!schema || schema.length === 0) {
                 console.log(`Schema not provided in URL`);
             } else {
@@ -350,22 +348,12 @@ module.exports = {
         modules.state.setExtent();
 
         // Calling mandatory init method
-        [`backboneEvents`, `socketId`, `bindEvent`, `baseLayer`, `infoClick`,
+        [`anchor`, `backboneEvents`, `socketId`, `bindEvent`, `baseLayer`, `infoClick`,
             `advancedInfo`, `draw`, `measurements`, `mapcontrols`, `stateSnapshots`, `print`, `layerTree`, `reset`].map(name => {
             modules[name].init();
         });
 
-        /**
-         * Fetch meta > initialize settings > create layer tree >
-         * load layers > initialize extensions > initialize state > finish
-         */
-        modules.meta.init().then((schemataStr) => {
-            return modules.setting.init(schemataStr);
-        }).catch((error) => {
-            console.log(error); // Stacktrace
-            //alert("Vidi is loaded without schema. Can't set extent or add layers");
-            backboneEvents.get().trigger("ready:meta");
-        }).then(() => {
+        const initExtensions = () => {
             try {
 
                 // Require search module
@@ -445,18 +433,85 @@ module.exports = {
             } catch (e) {
                 console.error("Could not perform application initialization", e.message, e);
             }
-            return modules.layerTree.create();
-        }).finally(() => {
+        }
+
+        /**
+         * TODO remove if
+         */
+
+
+        if (urlVars.state || urlparser.hash.length === 0) {
+            console.log("Using fast init")
+            $("#loadscreen").fadeOut(200);
+            initExtensions();
             modules.state.init().then(() => {
-                modules.state.listenAny(`extensions:initialized`, [`layerTree`]);
+                // Only fetch Meta and Settings if schemata pattern are use in either config or URL
+                if (window.vidiConfig.schemata.length > 0 || (schema && schema.length > 0)) {
+                    let schemataStr
+                    if (typeof window.vidiConfig.schemata === "object" && window.vidiConfig.schemata.length > 0) {
+                        schemataStr = window.vidiConfig.schemata.join(",");
+                    } else {
+                        schemataStr = schema;
+                    }
+                    // Settings
+                    modules.setting.init(schemataStr).then(() => {
+                        const maxBounds = modules.setting.getMaxBounds();
+                        if (maxBounds) {
+                            modules.cloud.get().setMaxBounds(maxBounds);
+                        }
+                        if (!utils.parseZoomCenter(window.vidiConfig?.initZoomCenter) && !urlVars.state) {
+                            const extent = modules.setting.getExtent();
+                            if (extent !== null) {
+                                modules.cloud.get().zoomToExtent(extent);
+                            } else {
+                                modules.cloud.get().zoomToExtent();
+                            }
+                        }
+                    })
+                    // Meta
+                    modules.meta.init(null, false, true).then(() => {
+                        modules.state.getState().then(st => {
+                            // Don't recreate SQL store from snapshot
+                            modules.layerTree.setRecreateStores(false);
+                            if (st.modules?.layerTree) {
+                                if (!urlVars.state) {
+                                    st.modules.layerTree.activeLayers = []; // Don't switch on active layer from state unless state id is in the url
+                                }
+                                modules.layerTree.applyState(st.modules.layerTree, true).then(() => {
+                                    modules.layerTree.setRecreateStores(true);
+                                });
+                            } else {
+                                modules.layerTree.create();
+                            }
+                        })
+                    }).catch((error) => {
+                        console.log(error); // Stacktrace
+                        backboneEvents.get().trigger("ready:meta");
+                    })
+                }
+            }).catch((error) => {
+                console.error(error)
+            })
+        } else {
+            modules.meta.init().then((schemataStr) => {
+                return modules.setting.init(schemataStr);
+            }).catch((error) => {
+                console.log(error); // Stacktrace
+                backboneEvents.get().trigger("ready:meta");
+            }).then(() => {
+                initExtensions();
+                return modules.layerTree.create();
+            }).finally(() => {
                 $("#loadscreen").fadeOut(200);
+                modules.state.init().then(() => {
+                    modules.state.listenAny(`extensions:initialized`, [`layerTree`]);
+                }).catch((error) => {
+                    console.error(error)
+                });
             }).catch((error) => {
                 console.error(error)
             });
-        }).catch((error) => {
-            console.error(error)
-        });
-
+        }
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/service-worker.bundle.js').then((registration) => {
                 let checkInterval = setInterval(() => {
@@ -508,7 +563,7 @@ module.exports = {
                                             registration.unregister();
                                         }
                                     });
-                                    Promise.all(unregisteringRequests).then((values) => {
+                                    Promise.all(unregisteringRequests).then(() => {
                                         // Clear caches
                                         caches.keys().then(function (names) {
                                             for (let name of names) {
@@ -529,7 +584,7 @@ module.exports = {
                         } else if (typeof value === "undefined" || semver.valid(value) === null) {
                             console.warn(`Seems like current application version is invalid, resetting it`);
                             localforage.setItem('appVersion', '1.0.0').then(() => {
-                            }).catch(error => {
+                            }).catch(() => {
                                 localforage.setItem('appExtensionsBuild', '0').then(() => {
                                 }).catch(error => {
                                     console.error(`Unable to store current application version`, error);
@@ -538,7 +593,7 @@ module.exports = {
                         }
                     }
                 });
-            }).catch(error =>{
+            }).catch(error => {
                 console.error(`Can't get item from localforage`, error);
             });
         } else {

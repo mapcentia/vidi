@@ -262,10 +262,24 @@ module.exports = {
             if (featureInfoTableOnMap && !backArrowIsAdded) {
                 backArrowIsAdded = true;
                 defaultTemplate = `
-                                <div class='show-when-multiple-hits' style='cursor: pointer;' onclick='javascript:$("#modal-info-body").show();$("#alternative-info-container").hide();$("#click-for-info-slide .modal-title").empty();'>
+                                <div class='show-when-multiple-hits' style='cursor: pointer;'>
                                     <span class='material-icons'  style=''>keyboard_arrow_left </span>
                                     <span style="top: -7px;position: relative;">${__("Back")}</span>
                                 </div>` + defaultTemplate;
+                $(document).arrive('.show-when-multiple-hits', function (e, data) {
+                    $(this).on('click', function (e) {
+                        $("#modal-info-body").show();
+                        $("#alternative-info-container").hide();
+                        $("#click-for-info-slide .modal-title").empty();
+                        _self.getQstore()?.forEach(store => {
+                            $.each(store.layer._layers, function (i, v) {
+                                if (store.layer && store.layer.resetStyle) {
+                                    store.layer.resetStyle(v);
+                                }
+                            });
+                        })
+                    })
+                })
             }
 
             if (parsedMeta.info_element_selector) {
@@ -328,8 +342,10 @@ module.exports = {
                                             editingStarted = false;
                                         }
                                     });
-                                
-                                if (draggableEnabled) _self.makeDraggable(popup);
+
+                                if (draggableEnabled) {
+                                    _self.makeDraggable(popup);
+                                }
 
                                 $("#info-box-pop-up").html(popUpInner);
 
@@ -363,11 +379,12 @@ module.exports = {
 
                         // Set select_function if featureInfoTableOnMap = true
                         if ((typeof parsedMeta.select_function === "undefined" || parsedMeta.select_function === "") && featureInfoTableOnMap) {
-                            let selectFunction = `function(id, layer, key, sqlQuery){
-                                                     $("#modal-info-body").hide();
-                                                     $("#alternative-info-container").show();
-                                                  }`;
-                            selectCallBack = Function('"use strict";return (' + selectFunction + ')')();
+
+                            selectCallBack = function (id, layer, key, sqlQuery) {
+
+                                $("#modal-info-body").hide();
+                                $("#alternative-info-container").show();
+                            };
                         } else if (typeof parsedMeta.select_function !== "undefined" && parsedMeta.select_function !== "") {
                             try {
                                 selectCallBack = Function('"use strict";return (' + parsedMeta.select_function + ')')();
@@ -416,8 +433,10 @@ module.exports = {
                                         }
                                     }
                                 }
-                                
-                                if (draggableEnabled) _self.makeDraggable(popup);
+
+                                if (draggableEnabled) {
+                                    _self.makeDraggable(popup);
+                                }
 
                                 setTimeout(() => {
                                     if (editingIsEnabled && layerIsEditable) {
@@ -842,29 +861,27 @@ module.exports = {
      * makes popup draggable
      * @param popup {object}
      */
-    makeDraggable(popup) {
-        var map = cloud.get().map
-
-        //console.log('makeDrag: ', map, popup);
-
-        //var pos = map.latLngToLayerPoint(popup.getLatLng());
-        // L.DomUtil.setPosition(popup._wrapper.parentNode, pos);
-        var draggable = new L.Draggable(popup._container, popup._wrapper);
-
+    makeDraggable: (popup) => {
+        const map = cloud.get().map
+        const draggable = new L.Draggable(popup._container, popup._wrapper);
         // change cursor class
         $(".leaflet-popup-content-wrapper").css('cursor', 'move');
-
         draggable.on('dragstart', function (e) {
             //on first drag, remove the pop-up tip
             $(".leaflet-popup-tip-container").hide();
         });
-
         draggable.on('dragend', function (e) {
             // set the new position
-            var pos = map.layerPointToLatLng(e.target._newPos);
-            popup.setLatLng(pos);
+            popup.setLatLng(map.layerPointToLatLng(e.target._newPos));
         });
-
         draggable.enable();
+    },
+
+    /**
+     * Get query stores
+     * @returns array
+     */
+    getQstore: () => {
+        return qStoreShadow;
     }
 };

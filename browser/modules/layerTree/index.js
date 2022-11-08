@@ -20,6 +20,8 @@ import {
     SUB_GROUP_DIVIDER,
     SYSTEM_FIELD_PREFIX,
     VECTOR_SIDE_TABLE_EL,
+    SELECTED_STYLE,
+    VECTOR_STYLE,
     VIRTUAL_LAYERS_SCHEMA
 } from './constants';
 import dayjs from 'dayjs';
@@ -75,6 +77,7 @@ let extensions = false, editor = false, qstore = [], reloadIntervals = [], vecto
 let filterComp = {};
 let lastFilter;
 let utils;
+let recreateStores = true;
 let moduleState = {
     isReady: false,
     wasBuilt: false,
@@ -123,6 +126,19 @@ module.exports = {
 
     init: function () {
         _self = this;
+        // Update the queue statistics when group panel is opened.
+        // In case of the layer tree component is not rendered yet
+        $(document).arrive('.js-toggle-layer-panel', function (e, data) {
+            $(this).on('click', function (e) {
+                setTimeout(() => {
+                    _self._statisticsHandler(queueStatistsics.getLastStatistics(), false, true);
+                }, 200);
+            })
+        });
+        // If map is clicked, when clear all selections
+        cloud.get().map.on('click', () => {
+            _self.resetAllVectorLayerStyles();
+        })
         if (window.vidiConfig.enabledExtensions.indexOf(`editor`) !== -1) moduleState.editingIsEnabled = true;
         $(document).arrive('#layers-filter-reset', function (e, data) {
             $(this).on('click', function (e) {
@@ -153,7 +169,7 @@ module.exports = {
                 c();
             })
         });
-        $("#layers").before(`<div style="display: flex; align-items: center"><div class="form-group" style="flex-grow: 1;"><input placeholder="${__('Layer filter')}" class="form-control" type="text" id="layers-filter" autocomplete="off"></div><div style="width: 18px; display: flex; justify-content:center"><div id="layers-filter-reset" style="display: inline; cursor: pointer"><i class="fas fa-times"></i></div><div id="layers-filter-busy" style="display: none"><i class="fas fa-circle-notch fa-spin"></i></div></div></div>`);
+        $("#layers").before(`<div id="layer-filter-container" style="display: flex; align-items: center"><div class="form-group" style="flex-grow: 1;"><input placeholder="${__('Layer filter')}" class="form-control" type="text" id="layers-filter" autocomplete="off"></div><div style="width: 18px; display: flex; justify-content:center"><div id="layers-filter-reset" style="display: inline; cursor: pointer"><i class="fas fa-times"></i></div><div id="layers-filter-busy" style="display: none"><i class="fas fa-circle-notch fa-spin"></i></div></div></div>`);
 
         if (urlparser && urlparser.urlVars && urlparser.urlVars.initialFilter) {
             backboneEvents.get().on(`${MODULE_NAME}:ready`, () => {
@@ -201,6 +217,10 @@ module.exports = {
         state.listen(MODULE_NAME, `opacityChange`);
         state.listen(MODULE_NAME, `dynamicLoadLayersChange`);
         state.listen(MODULE_NAME, `settleForcedState`);
+    },
+
+    setRecreateStores: (b) => {
+        recreateStores = b;
     },
 
     /**
@@ -653,7 +673,7 @@ module.exports = {
      * @param newState
      * @returns {newState}
      */
-    applyState: (newState) => {
+    applyState: (newState, dt = false) => {
         // Setting vector filters
         if (newState !== false && `arbitraryFilters` in newState && typeof newState.arbitraryFilters === `object`) {
             for (let key in newState.arbitraryFilters) {
@@ -722,7 +742,7 @@ module.exports = {
         } else if (newState.order && newState.order === 'false') {
             newState.order = false;
         }
-        return _self.create(newState);
+        return _self.create(newState, [], false, null, dt);
     },
 
 
@@ -736,7 +756,7 @@ module.exports = {
      *
      * @returns {Promise}
      */
-    create: (forcedState = false, ignoredInitialStateKeys = [], dontRegisterEvents = false, filter = null) => {
+    create: (forcedState = false, ignoredInitialStateKeys = [], dontRegisterEvents = false, filter = null, dt = false) => {
         if (LOG) console.log(`${MODULE_NAME}: create`, moduleState.isBeingBuilt, forcedState);
 
         queueStatistsics.setLastStatistics(false);
@@ -907,7 +927,7 @@ module.exports = {
                         if (LOG) console.log(`${MODULE_NAME}: disabling active layers`, enabledLayers);
                         for (let key in enabledLayers) {
                             if (enabledLayers[key].enabled) {
-                                switchLayer.init(key, false, true, false);
+                                if (!dt) switchLayer.init(key, false, true, false);
                             }
                         }
                     }
@@ -1071,7 +1091,7 @@ module.exports = {
                                                     let layersAreActivatedPromises = [];
                                                     activeLayers.map(layerName => {
                                                         let noPrefixName = layerTreeUtils.stripPrefix(layerName);
-                                                        layersAreActivatedPromises.push(switchLayer.init(layerName, true, true));
+                                                        if (!dt) layersAreActivatedPromises.push(switchLayer.init(layerName, true, true));
                                                     });
 
                                                     Promise.all(layersAreActivatedPromises).then(() => {
@@ -1482,252 +1502,258 @@ module.exports = {
             fieldConf = {};
         }
         const pane = layer.f_table_schema + '-' + layer.f_table_name;
-        moduleState.vectorStores[trackingLayerKey] = new geocloud.sqlStore({
-            map: cloud.get().map,
-            minZoom: typeof moduleState.vectorStyles?.[layerKey]?.minZoom !== 'undefined' ? moduleState.vectorStyles[layerKey].minZoom === '' ? undefined : moduleState.vectorStyles[layerKey].minZoom : parseInt(meta.parseLayerMeta(layerKey)?.vector_min_zoom),
-            maxZoom: typeof moduleState.vectorStyles?.[layerKey]?.maxZoom !== 'undefined' ? moduleState.vectorStyles[layerKey].maxZoom === '' ? undefined : moduleState.vectorStyles[layerKey].maxZoom : parseInt(meta.parseLayerMeta(layerKey)?.vector_max_zoom),
-            pane,
-            parentFiltersHash,
-            jsonp: false,
-            method: "POST",
-            host: "",
-            db: urlparser.db,
-            maxFeaturesLimit: layerSpecificQueryLimit,
-            onMaxFeaturesLimitReached: () => {
-                _self.maxFeaturesNotification(layerKey);
-            },
-            uri: "/api/sql",
-            clickable: true,
-            id: trackingLayerKey,
-            name: trackingLayerKey,
-            lifetime: 0,
-            custom_data,
-            styleMap: styles[trackingLayerKey],
-            sql,
-            clustering: typeof moduleState.vectorStyles?.[layerKey]?.clustering === 'boolean' ? moduleState.vectorStyles[layerKey].clustering : layerTreeUtils.getIfClustering(meta.parseLayerMeta(layerKey)),
-            onLoad: (l) => {
-                let reloadInterval = meta.parseLayerMeta(layerKey)?.reload_interval;
-                let tableElement = meta.parseLayerMeta(layerKey)?.show_table_on_side;
-                // Create side table once
-                if (tableElement && !$('#' + VECTOR_SIDE_TABLE_EL).length && window.vidiConfig.template === "embed.tmpl") {
-                    let styles;
-                    let height = null;
-                    let tableBodyHeight;
-                    const h = window.vidiConfig.vectorTable.height;
-                    const w = window.vidiConfig.vectorTable.width;
-                    const position = window.vidiConfig.vectorTable.position;
-                    const e = $('#pane');
-                    if (position === 'right') {
-                        styles = `width: ${w}; float: right;`;
-                        e.css("width", `calc(100vw - ${w})`);
-                        e.css("left", "0");
-                        tableBodyHeight = "calc(100vh - 34px)";
-                        height = $(window).height();
-                    } else if (position === 'bottom') {
-                        styles = `width: 100%; height: ${h}; bottom: 0; position: fixed;`;
-                        e.css("height", `calc(100vh - ${h})`);
-                        height = parseInt(h);
-                        tableBodyHeight = (height - 34) + "px"
+        if (typeof moduleState.vectorStores[trackingLayerKey] !== "object" || recreateStores) {
+            moduleState.vectorStores[trackingLayerKey] = new geocloud.sqlStore({
+                map: cloud.get().map,
+                minZoom: parseInt(meta.parseLayerMeta(layerKey)?.vector_min_zoom),
+                maxZoom: parseInt(meta.parseLayerMeta(layerKey)?.vector_max_zoom) + 1,
+                pane,
+                parentFiltersHash,
+                jsonp: false,
+                method: "POST",
+                host: "",
+                db: urlparser.db,
+                maxFeaturesLimit: layerSpecificQueryLimit,
+                onMaxFeaturesLimitReached: () => {
+                    _self.maxFeaturesNotification(layerKey);
+                },
+                uri: "/api/sql",
+                clickable: true,
+                id: trackingLayerKey,
+                name: trackingLayerKey,
+                lifetime: 0,
+                custom_data,
+                styleMap: styles[trackingLayerKey],
+                sql,
+                clustering: layerTreeUtils.getIfClustering(meta.parseLayerMeta(layerKey)),
+                onLoad: (l) => {
+                    let reloadInterval = meta.parseLayerMeta(layerKey)?.reload_interval;
+                    let tableElement = meta.parseLayerMeta(layerKey)?.show_table_on_side;
+                    // Create side table once
+                    if (tableElement && !$('#' + VECTOR_SIDE_TABLE_EL).length && window.vidiConfig.template === "embed.tmpl") {
+                        let styles;
+                        let height = null;
+                        let tableBodyHeight;
+                        const h = window.vidiConfig.vectorTable.height;
+                        const w = window.vidiConfig.vectorTable.width;
+                        const position = window.vidiConfig.vectorTable.position;
+                        const e = $('#pane');
+                        if (position === 'right') {
+                            styles = `width: ${w}; float: right;`;
+                            e.css("width", `calc(100vw - ${w})`);
+                            e.css("left", "0");
+                            tableBodyHeight = "calc(100vh - 34px)";
+                            height = $(window).height();
+                        } else if (position === 'bottom') {
+                            styles = `width: 100%; height: ${h}; bottom: 0; position: fixed;`;
+                            e.css("height", `calc(100vh - ${h})`);
+                            height = parseInt(h);
+                            tableBodyHeight = (height - 34) + "px"
+                        }
+                        if (position === 'right' || position === 'bottom') {
+                            e.before(`<div id="${VECTOR_SIDE_TABLE_EL}" style="${styles}; background-color: white; " data-vidi-vector-table-id="${trackingLayerKey}"></div>`)
+                            _self.createTable(layerKey, true, "#" + VECTOR_SIDE_TABLE_EL, {
+                                showToggle: false,
+                                showExport: false,
+                                showColumns: false,
+                                showSearch: false,
+                                cardView: false,
+                                height: height,
+                                tableBodyHeight: tableBodyHeight
+                            });
+                        }
                     }
-                    if (position === 'right' || position === 'bottom') {
-                        e.before(`<div id="${VECTOR_SIDE_TABLE_EL}" style="${styles}; background-color: white; " data-vidi-vector-table-id="${trackingLayerKey}"></div>`)
-                        _self.createTable(layerKey, true, "#" + VECTOR_SIDE_TABLE_EL, {
-                            showToggle: false,
-                            showExport: false,
-                            showColumns: false,
-                            showSearch: false,
-                            cardView: false,
-                            height: height,
-                            tableBodyHeight: tableBodyHeight
-                        });
+                    if (reloadInterval && reloadInterval !== "") {
+                        let reloadCallback = meta.parseLayerMeta(layerKey)?.reload_callback;
+                        let func = reloadCallback && reloadCallback !== "" ? Function('"use strict";return (' + reloadCallback + ')')() : () => {
+                        };
+                        func(l, cloud.get().map);
+                        clearInterval(reloadIntervals[layerKey]);
+                        reloadIntervals[layerKey] = setInterval(() => {
+                            l.load();
+                        }, parseInt(reloadInterval));
                     }
-                }
-                if (reloadInterval && reloadInterval !== "") {
-                    let reloadCallback = meta.parseLayerMeta(layerKey)?.reload_callback;
-                    let func = reloadCallback && reloadCallback !== "" ? Function('"use strict";return (' + reloadCallback + ')')() : () => {
-                    };
-                    func(l, cloud.get().map);
-                    clearInterval(reloadIntervals[layerKey]);
-                    reloadIntervals[layerKey] = setInterval(() => {
-                        l.load();
-                    }, parseInt(reloadInterval));
-                }
-                layers.decrementCountLoading(l.id);
-                backboneEvents.get().trigger("doneLoading:layers", l.id);
-                // We fire activeLayersChange event on load, so we are sure state is updated
-                backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
-                if (typeof onLoad[LAYER.VECTOR + ':' + layerKey] === "function") {
-                    onLoad[LAYER.VECTOR + ':' + layerKey](l);
-                }
-                if (l.geoJSON === null) {
-                    return
-                }
-                sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + layerKey, l.geoJSON.features);
-            },
-            transformResponse: (response, id) => {
-                return apiBridgeInstance.transformResponseHandler(response, id);
-            },
-            onEachFeature: (feature, layer) => {
-                if (parsedMeta?.hover_active) {
-                    _self.mouseOver(layer, fieldConf, template);
-                }
-                if (tooltipTemplate) {
-                    _self.toolTip(layer, feature, tooltipTemplate, pane);
-                }
-                if ((LAYER.VECTOR + ':' + layerKey) in onEachFeature) {
-                    /*
-                        Checking for correct onEachFeature structure
-                    */
-                    if (`fn` in onEachFeature[LAYER.VECTOR + ':' + layerKey] === false || !onEachFeature[LAYER.VECTOR + ':' + layerKey].fn ||
-                        `caller` in onEachFeature[LAYER.VECTOR + ':' + layerKey] === false || !onEachFeature[LAYER.VECTOR + ':' + layerKey].caller) {
-                        throw new Error(`Invalid onEachFeature structure`);
+                    layers.decrementCountLoading(l.id);
+                    backboneEvents.get().trigger("doneLoading:layers", l.id);
+                    // We fire activeLayersChange event on load, so we are sure state is updated
+                    backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
+                    if (typeof onLoad[LAYER.VECTOR + ':' + layerKey] === "function") {
+                        onLoad[LAYER.VECTOR + ':' + layerKey](l);
                     }
-                    if (onEachFeature[LAYER.VECTOR + ':' + layerKey].caller === `editor`) {
+                    if (l.geoJSON === null) {
+                        return
+                    }
+                    sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + layerKey, l.geoJSON.features);
+                },
+                transformResponse: (response, id) => {
+                    return apiBridgeInstance.transformResponseHandler(response, id);
+                },
+                onEachFeature: (feature, layer) => {
+                    if (parsedMeta?.hover_active) {
+                        _self.mouseOver(layer, fieldConf, template);
+                    }
+                    if (tooltipTemplate) {
+                        _self.toolTip(layer, feature, tooltipTemplate, pane);
+                    }
+                    if ((LAYER.VECTOR + ':' + layerKey) in onEachFeature) {
                         /*
-                            If the handler was set by the editor extension, then display the attributes popup and editing buttons
+                            Checking for correct onEachFeature structure
                         */
-                        if (`editor` in extensions) {
-                            editor = extensions.editor.index;
+                        if (`fn` in onEachFeature[LAYER.VECTOR + ':' + layerKey] === false || !onEachFeature[LAYER.VECTOR + ':' + layerKey].fn ||
+                            `caller` in onEachFeature[LAYER.VECTOR + ':' + layerKey] === false || !onEachFeature[LAYER.VECTOR + ':' + layerKey].caller) {
+                            throw new Error(`Invalid onEachFeature structure`);
                         }
-                        layer.on("click", function (e) {
-                            _self.resetAllVectorLayerStyles();
-                            try {
-                                e.target.setStyle(SELECTED_STYLE);
-                            } catch (e) {
+                        if (onEachFeature[LAYER.VECTOR + ':' + layerKey].caller === `editor`) {
+                            /*
+                                If the handler was set by the editor extension, then display the attributes popup and editing buttons
+                            */
+                            if (`editor` in extensions) {
+                                editor = extensions.editor.index;
                             }
-                            let layerIsEditable = false;
-                            let metaDataKeys = meta.getMetaDataKeys();
-                            if (metaDataKeys[layerKey] && `meta` in metaDataKeys[layerKey]) {
-                                let parsedMeta = _self.parseLayerMeta(metaDataKeys[layerKey]);
-                                if (parsedMeta && `vidi_layer_editable` in parsedMeta && parsedMeta.vidi_layer_editable) {
-                                    layerIsEditable = true;
-                                }
-                            } else {
-                                throw new Error(`metaDataKeys[${layerKey}] is undefined`);
-                            }
-
-                            let editingButtonsMarkup = ``;
-                            if (moduleState.editingIsEnabled && layerIsEditable) {
-                                editingButtonsMarkup = markupGeneratorInstance.getEditingButtons();
-                            }
-
-                            _self.displayAttributesPopup([{
-                                feature: feature,
-                                layer: layer,
-                                layerKey: layerKey
-                            }], e, editingButtonsMarkup, false);
-
-                            if (moduleState.editingIsEnabled && layerIsEditable) {
-                                $(`.js-vector-layer-popup`).find(".ge-start-edit").unbind("click.ge-start-edit").bind("click.ge-start-edit", function () {
-                                    let layerMeta = meta.getMetaByKey(layerKey);
-                                    editor.edit(layer, layerKey + "." + layerMeta.f_geometry_column, null, true);
-                                });
-
-                                $(`.js-vector-layer-popup`).find(".ge-delete").unbind("click.ge-delete").bind("click.ge-delete", (e) => {
-                                    if (window.confirm("Are you sure? Changes will not be saved!")) {
-                                        let layerMeta = meta.getMetaByKey(layerKey);
-                                        editor.delete(layer, layerKey + "." + layerMeta.f_geometry_column, null, true);
+                            layer.on("click", function (e) {
+                                _self.resetAllVectorLayerStyles();
+                                try {
+                                    if (!window.vidiConfig.crossMultiSelect) {
+                                        e.target.setStyle(SELECTED_STYLE);
                                     }
-                                });
-                            } else {
-                                $(`.js-vector-layer-popup`).find(".ge-start-edit").hide();
-                                $(`.js-vector-layer-popup`).find(".ge-delete").hide();
-                            }
-                        });
-                    }
+                                } catch (e) {
+                                    console.error(e)
+                                }
+                                let layerIsEditable = false;
+                                let metaDataKeys = meta.getMetaDataKeys();
+                                if (metaDataKeys[layerKey] && `meta` in metaDataKeys[layerKey]) {
+                                    let parsedMeta = _self.parseLayerMeta(metaDataKeys[layerKey]);
+                                    if (parsedMeta && `vidi_layer_editable` in parsedMeta && parsedMeta.vidi_layer_editable) {
+                                        layerIsEditable = true;
+                                    }
+                                } else {
+                                    throw new Error(`metaDataKeys[${layerKey}] is undefined`);
+                                }
 
-                    onEachFeature[LAYER.VECTOR + ':' + layerKey].fn(feature, layer);
-                } else {
-                    // If there is no handler for specific layer, then display attributes only
-                    layer.on("click", function (e) {
-                        _self.resetAllVectorLayerStyles();
-                        try {
-                            e.target.setStyle(SELECTED_STYLE);
-                        } catch (e) {
-                        }
-                        // Cross Multi select disabled
-                        if (!window.vidiConfig.crossMultiSelect) {
-                            _self.displayAttributesPopup([{
+                                let editingButtonsMarkup = ``;
+                                if (moduleState.editingIsEnabled && layerIsEditable) {
+                                    editingButtonsMarkup = markupGeneratorInstance.getEditingButtons();
+                                }
+
+                                _self.displayAttributesPopup([{
                                     feature: feature,
                                     layer: layer,
                                     layerKey: layerKey
-                                }],
-                                e, '', false);
-                            return
+                                }], e, editingButtonsMarkup, false);
+
+                                if (moduleState.editingIsEnabled && layerIsEditable) {
+                                    $(`.js-vector-layer-popup`).find(".ge-start-edit").unbind("click.ge-start-edit").bind("click.ge-start-edit", function () {
+                                        let layerMeta = meta.getMetaByKey(layerKey);
+                                        editor.edit(layer, layerKey + "." + layerMeta.f_geometry_column, null, true);
+                                    });
+
+                                    $(`.js-vector-layer-popup`).find(".ge-delete").unbind("click.ge-delete").bind("click.ge-delete", (e) => {
+                                        if (window.confirm("Are you sure? Changes will not be saved!")) {
+                                            let layerMeta = meta.getMetaByKey(layerKey);
+                                            editor.delete(layer, layerKey + "." + layerMeta.f_geometry_column, null, true);
+                                        }
+                                    });
+                                } else {
+                                    $(`.js-vector-layer-popup`).find(".ge-start-edit").hide();
+                                    $(`.js-vector-layer-popup`).find(".ge-delete").hide();
+                                }
+                            });
                         }
 
-                        // Cross multi select enabled
-                        let coord3857 = utils.transform("EPSG:4326", "EPSG:3857", [e.latlng.lng, e.latlng.lat]);
-                        let wkt = "POINT(" + coord3857[0] + " " + coord3857[1] + ")";
-                        let intersectingFeatures = [];
-                        // Get active raster tile layers, so we can check if database should be queried
-                        let activelayers = layers.getMapLayers() ? layers.getLayers().split(",") : [];
-                        let activeTilelayers = activelayers.filter(layer => !layer.startsWith(LAYER.VECTOR + ':') && !layer.startsWith(LAYER.VECTOR_TILE + ':') && !layer.startsWith(LAYER.WEBGL + ':'))
-                        // Filter tiles layer without pixels
-                        activeTilelayers = activeTilelayers.filter((key) => {
-                            if (typeof moduleState.tileContentCache[key] === "boolean" && moduleState.tileContentCache[key] === true) {
-                                return true;
+                        onEachFeature[LAYER.VECTOR + ':' + layerKey].fn(feature, layer);
+                    } else {
+                        // If there is no handler for specific layer, then display attributes only
+                        layer.on("click", function (e) {
+                            _self.resetAllVectorLayerStyles();
+                            if (!window.vidiConfig?.crossMultiSelect) {
+                                if (e.target?.setStyle) {
+                                    e.target.setStyle(SELECTED_STYLE);
+                                }
                             }
-                        })
-                        if (activeTilelayers.length > 0) {
-                            sqlQuery.init(qstore, wkt, "3857", (store) => {
-                                setTimeout(() => {
-                                    if (store.geoJSON) {
-                                        sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + store.key, store.geoJSON.features);
-                                        store.layer.eachLayer((layer) => {
-                                            intersectingFeatures.push({
-                                                feature: layer.feature,
-                                                layer: layer,
-                                                layerKey: store.key
-                                            });
-                                        })
-                                    }
-                                    layers.decrementCountLoading("_vidi_sql_" + store.id);
-                                    backboneEvents.get().trigger("doneLoading:layers", "_vidi_sql_" + store.id);
-                                    if (layers.getCountLoading() === 0) {
-                                        _self.displayAttributesPopup(intersectingFeatures, e);
-                                    }
-                                }, 200)
-                            }, null, [coord3857[0], coord3857[1]]);
-                        }
-                        const distance = 10 * MAP_RESOLUTIONS[cloud.get().getZoom()];
-                        const clickFeature = turfBuffer(turfPoint([e.latlng.lng, e.latlng.lat]), distance, {units: 'meters'});
-                        let mapObj = cloud.get().map;
-                        for (let l in mapObj._layers) {
-                            let overlay = mapObj._layers[l];
-                            if (overlay._layers) {
-                                for (let f in overlay._layers) {
-                                    let featureForChecking = overlay._layers[f];
-                                    if (!featureForChecking?.feature?.geometry) {
-                                        continue;
-                                    }
-                                    let feature = turfFeature(featureForChecking.feature.geometry);
-                                    try {
-                                        if (turfIntersects(clickFeature, feature) && overlay.id) {
-                                            intersectingFeatures.push({
-                                                "feature": featureForChecking.feature,
-                                                "layer": overlay,
-                                                "layerKey": overlay.id.split(":")[1]
-                                            });
+                            // Cross Multi select disabled
+                            if (!window.vidiConfig.crossMultiSelect) {
+                                _self.displayAttributesPopup([{
+                                        feature: feature,
+                                        layer: layer,
+                                        layerKey: layerKey
+                                    }],
+                                    e, '', false);
+                                return
+                            }
+
+                            // Cross multi select enabled
+                            let coord3857 = utils.transform("EPSG:4326", "EPSG:3857", [e.latlng.lng, e.latlng.lat]);
+                            let wkt = "POINT(" + coord3857[0] + " " + coord3857[1] + ")";
+                            let intersectingFeatures = [];
+                            // Get active raster tile layers, so we can check if database should be queried
+                            let activelayers = layers.getMapLayers() ? layers.getLayers().split(",") : [];
+                            let activeTilelayers = activelayers.filter(layer => !layer.startsWith(LAYER.VECTOR + ':') && !layer.startsWith(LAYER.VECTOR_TILE + ':') && !layer.startsWith(LAYER.WEBGL + ':'))
+                            // Filter tiles layer without pixels
+                            activeTilelayers = activeTilelayers.filter((key) => {
+                                if (typeof moduleState.tileContentCache[key] === "boolean" && moduleState.tileContentCache[key] === true) {
+                                    return true;
+                                }
+                            })
+                            if (activeTilelayers.length > 0) {
+                                sqlQuery.init(qstore, wkt, "3857", (store) => {
+                                    setTimeout(() => {
+                                        if (store.geoJSON) {
+                                            sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + store.key, store.geoJSON.features);
+                                            store.layer.eachLayer((layer) => {
+                                                intersectingFeatures.push({
+                                                    feature: layer.feature,
+                                                    layer: layer,
+                                                    layerKey: store.key
+                                                });
+                                            })
                                         }
-                                    } catch (e) {
-                                        console.log(e);
+                                        layers.decrementCountLoading("_vidi_sql_" + store.id);
+                                        backboneEvents.get().trigger("doneLoading:layers", "_vidi_sql_" + store.id);
+                                        if (layers.getCountLoading() === 0) {
+                                            _self.displayAttributesPopup(intersectingFeatures, e);
+                                        }
+                                    }, 200)
+                                }, null, [coord3857[0], coord3857[1]]);
+                            }
+                            const distance = 10 * MAP_RESOLUTIONS[cloud.get().getZoom()];
+                            const clickFeature = turfBuffer(turfPoint([e.latlng.lng, e.latlng.lat]), distance, {units: 'meters'});
+                            let mapObj = cloud.get().map;
+                            for (let l in mapObj._layers) {
+                                let overlay = mapObj._layers[l];
+                                if (overlay._layers) {
+                                    for (let f in overlay._layers) {
+                                        let featureForChecking = overlay._layers[f];
+                                        if (!featureForChecking?.feature?.geometry) {
+                                            continue;
+                                        }
+                                        let feature = turfFeature(featureForChecking.feature.geometry);
+                                        try {
+                                            if (turfIntersects(clickFeature, feature) && overlay.id) {
+                                                intersectingFeatures.push({
+                                                    "feature": featureForChecking.feature,
+                                                    "layer": featureForChecking,
+                                                    "layerKey": overlay.id.split(":")[1]
+                                                });
+                                            }
+                                        } catch (e) {
+                                            console.log(e);
+                                        }
                                     }
                                 }
                             }
-                        }
-                        // No active raster tile layers - open the pop-up
-                        if (activeTilelayers.length === 0) {
-                            _self.displayAttributesPopup(intersectingFeatures, e);
-                        }
-                    });
-                }
-            },
-            pointToLayer: (pointToLayer.hasOwnProperty(LAYER.VECTOR + ':' + layerKey) ? pointToLayer[LAYER.VECTOR + ':' + layerKey] : (feature, latlng) => {
-                return L.circleMarker(latlng, {pane});
-            }),
-            error: layerTreeUtils.storeErrorHandler
-        });
+                            // No active raster tile layers - open the pop-up
+                            if (activeTilelayers.length === 0) {
+                                _self.displayAttributesPopup(intersectingFeatures, e);
+                            }
+                        });
+                    }
+                },
+                pointToLayer: (pointToLayer.hasOwnProperty(LAYER.VECTOR + ':' + layerKey) ? pointToLayer[LAYER.VECTOR + ':' + layerKey] : (feature, latlng) => {
+                    return L.circleMarker(latlng, {pane});
+                }),
+                error: layerTreeUtils.storeErrorHandler
+            });
+        }
     },
 
     /**
@@ -1896,10 +1922,14 @@ module.exports = {
     },
 
     displayAttributesPopup(features, event, additionalControls = ``, multi = true) {
+        if (window.vidiConfig.crossMultiSelect) {
+            _self.resetAllVectorLayerStyles();
+        }
         event.originalEvent.clickedOnFeature = true;
         let renderedText = null;
         let accordion = "";
         let count = 0;
+        let count2 = 1;
 
         $(".vector-feature-info-panel").remove();
         if (typeof vectorPopUp !== "undefined") {
@@ -1970,7 +2000,7 @@ module.exports = {
                                                 <a style="display: block; color: black" class="feature-info-accordion-toggle accordion-toggle js-toggle-feature-panel" data-toggle="collapse" data-parent="#layers" href="#collapse${randText}" id="a-collapse${randText}">${title}</a>
                                             </h4>
                                         </div>
-                                        <ul class="list-group" id="group-${randText}" role="tabpanel"><div id="collapse${randText}" class="feature-info-accordion-body accordion-body collapse" style="padding: 3px 8px 3px 8px">${renderedText}</div></ul>
+                                        <ul class="list-group" id="group-${randText}" role="tabpanel"><div data-layer-id="${layer._leaflet_id}" id="collapse${randText}" class="feature-info-accordion-body accordion-body collapse" style="padding: 3px 8px 3px 8px">${renderedText}</div></ul>
                                     </div>`;
                         } else {
                             accordion = renderedText;
@@ -1995,12 +2025,27 @@ module.exports = {
                 }
             }
             let func = selectCallBack.bind(this, null, layer, layerKey, _self);
-
             $(document).arrive(`#a-collapse${randText}`, function () {
                 $(this).on('click', function () {
                     let e = $(`#collapse${randText}`);
+                    sqlQuery.getQstore()?.forEach(store => {
+                        $.each(store.layer._layers, function (i, v) {
+                            if (store.layer && store.layer.resetStyle) {
+                                store.layer.resetStyle(v);
+                            }
+                        });
+                    })
+                    _self.resetAllVectorLayerStyles();
                     if (!e.hasClass("in")) {
                         func();
+
+                        cloud.get().map.eachLayer(layer => {
+                            if (parseInt(layer._leaflet_id) === parseInt(e[0].dataset.layerId)) {
+                                if (layer?.setStyle) {
+                                    layer.setStyle(SELECTED_STYLE);
+                                }
+                            }
+                        })
                     }
                     $('.feature-info-accordion-body').collapse("hide")
                 });
@@ -2010,44 +2055,45 @@ module.exports = {
                     $(parsedMeta.info_element_selector).html(renderedText)
                 } else {
                     // Set select call when opening a panel
-                    let selectCallBack = () => {
-                    };
-                    if (typeof parsedMeta.select_function !== "undefined" && parsedMeta.select_function !== "") {
-                        try {
-                            selectCallBack = Function('"use strict";return (' + parsedMeta.select_function + ')')();
-                        } catch (e) {
-                            console.info("Error in select function for: " + key);
-                            console.error(e.message);
-                        }
-                    }
-                    let func = selectCallBack.bind(this, null, layer, layerKey, _self);
-                    $(document).arrive(`#a-collapse${randText}`, function () {
-                        $(this).on('click', function () {
-                            let e = $(`#collapse${randText}`);
-                            if (!e.hasClass("in")) {
-                                func();
-                            }
-                            $('.feature-info-accordion-body').collapse("hide")
-                        });
-                    });
+                    // let selectCallBack = () => {
+                    // };
+                    // if (typeof parsedMeta.select_function !== "undefined" && parsedMeta.select_function !== "") {
+                    //     try {
+                    //         selectCallBack = Function('"use strict";return (' + parsedMeta.select_function + ')')();
+                    //     } catch (e) {
+                    //         console.info("Error in select function for: " + key);
+                    //         console.error(e.message);
+                    //     }
+                    // }
+                    // let func = selectCallBack.bind(this, null, layer, layerKey, _self);
+                    // $(document).arrive(`#a-collapse${randText}`, function () {
+                    //     $(this).on('click', function () {
+                    //         let e = $(`#collapse${randText}`);
+                    //         if (!e.hasClass("in")) {
+                    //             func();
+                    //         }
+                    //         $('.feature-info-accordion-body').collapse("hide")
+                    //     });
+                    // });
 
-                    vectorPopUp = L.popup({
-                        autoPan: window.vidiConfig.autoPanPopup,
-                        autoPanPaddingTopLeft: L.point(multi ? 20 : 0, multi ? 300 : 0),
-                        minWidth: 300,
-                        className: `js-vector-layer-popup custom-popup`
-                    }).setLatLng(event.latlng).setContent(`<div>
+                    if (count2 === features.length) {
+                        vectorPopUp = L.popup({
+                            autoPan: window.vidiConfig.autoPanPopup,
+                            autoPanPaddingTopLeft: L.point(multi ? 20 : 0, multi ? 300 : 0),
+                            minWidth: 300,
+                            className: `js-vector-layer-popup custom-popup`
+                        }).setLatLng(event.latlng).setContent(`<div>
                                                                 ${additionalControls}
                                                                 <div style="margin-right: 5px; margin-left: 2px">${accordion}</div>
                                                             </div>`).openOn(cloud.get().map)
-                        .on('remove', () => {
-                            sqlQuery.resetAll();
-                            if (window.vidiConfig.crossMultiSelect) {
+                            .on('remove', () => {
+                                sqlQuery.resetAll();
                                 _self.resetAllVectorLayerStyles();
-                            }
-                        });
+                            });
+                    }
                 }
             }
+            count2++;
         })
         if (count === 1) {
             setTimeout(() => {

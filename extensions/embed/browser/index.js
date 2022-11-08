@@ -17,6 +17,7 @@ let anchor;
 let legend;
 let metaDataKeys;
 let lc;
+let mapcontrols;
 
 /**
  *
@@ -32,6 +33,7 @@ module.exports = {
         meta = o.meta;
         legend = o.legend;
         anchor = o.anchor;
+        mapcontrols = o.mapcontrols;
         return this;
     },
     init: () => {
@@ -53,7 +55,7 @@ module.exports = {
                 left: "0"
             }, 500)
             let bp = 2170;
-            let sw =$( window ).width();
+            let sw = $(window).width();
             if (sw < bp && sw > 500) {
                 $("#legend-dialog").animate({
                     left: "30.2%"
@@ -89,13 +91,7 @@ module.exports = {
         });
 
         $("#zoom-default-btn").on("click", () => {
-            let parameters = anchor.getInitMapParameters();
-            if (parameters) {
-                cloud.get().setView(new L.LatLng(parseFloat(parameters.y), parseFloat(parameters.x)), parameters.zoom);
-            } else {
-                cloud.get().zoomToExtent(setting.getExtent());
-            }
-
+            mapcontrols.setDefaultZoomCenter();
         });
 
         $("#measurements-module-btn").on("click", () => {

@@ -6,21 +6,11 @@
 
 'use strict';
 
-/**
- * @type {*|exports|module.exports}
- */
-var anchor;
-
-/**
- *
- * @type {boolean}
- */
-var first = true;
-
-/**
- * @type {int}
- */
-var t;
+let anchor;
+let first = true;
+let t;
+const urlparser = require('./urlparser');
+const urlVars = urlparser.urlVars;
 
 /**
  *
@@ -35,7 +25,9 @@ module.exports = module.exports = {
         // We don't set any state until 1 secs after the first request. This way CartoDB layers become ready.
         t = first ? 1000 : 0;
         setTimeout(function () {
-            history.pushState(null, null, anchor.init());
+            if (!urlVars.dps) {
+                history.pushState(null, null, anchor.init());
+            }
             first = false;
         }, t);
     }

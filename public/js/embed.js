@@ -51,7 +51,8 @@
                     "&ful=" + fullscreen +
                     "&abo=" + about +
                     "&loc=" + location +
-                    (frameName ? "&readyCallback=" + frameName : "") + "&notracking=" + noTracking;
+                    (frameName ? "&readyCallback=" + frameName : "") + "&notracking=" + noTracking +
+                    "&dps=1";
                 var iframe = document.createElement("iframe");
                 iframe.setAttribute("style", "width:" + width + ";height:" + height + ";border: 1px solid rgba(0,0,0,0.1)");
                 iframe.setAttribute("allow", "fullscreen;geolocation");
