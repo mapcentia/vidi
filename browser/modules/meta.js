@@ -131,11 +131,11 @@ module.exports = {
                         url: '/api/meta/' + db + '/' + schemataStr,
                         scriptCharset: "utf-8",
                         success: function (response) {
+                            $('#layer-filter-container').css('pointer-events', 'auto').css('opacity', 1.0);
+                            $('#layer-loading-indicator').hide();
                             if (response.data && response.data.length > 0) {
                                 me.addMetaData(response);
                                 ready = true;
-                                $('#layer-filter-container').css('pointer-events', 'auto').css('opacity', 1.0);
-                                $('#layer-loading-indicator').hide();
                                 resolve(schemataStr);
                             } else {
                                 reject();
