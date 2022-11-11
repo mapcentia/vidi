@@ -141,7 +141,9 @@ var gc2table = (function () {
             let row = $('*[data-uniqueid="' + id + '"]');
             row.addClass("selected");
             try {
-                m.map._layers[id].setStyle(selectedStyle);
+                if (setSelectedStyle) {
+                    m.map._layers[id].setStyle(selectedStyle);
+                }
             } catch (e) {
                 console.warn("Can't set style on marker")
             }
