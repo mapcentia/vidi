@@ -477,9 +477,9 @@ module.exports = {
                             }
                             // Set activeLayers from config if not snapshot
                             if (!urlVars.state) {
-                                modules.layerTree.setRecreateStores(false);
                                 st.modules.layerTree.activeLayers = window.vidiConfig.activeLayers;
                             }
+                            modules.layerTree.setRecreateStores(false);
                             modules.layerTree.applyState(st.modules.layerTree, true).then(() => {
                                 modules.layerTree.setRecreateStores(true);
                                 // Switch on activeLayers from config if not snapshot
