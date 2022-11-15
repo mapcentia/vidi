@@ -2019,38 +2019,13 @@ module.exports = {
                 if (typeof parsedMeta.info_element_selector !== "undefined" && parsedMeta.info_element_selector !== "" && renderedText !== null) {
                     $(parsedMeta.info_element_selector).html(renderedText)
                 } else {
-                    // Set select call when opening a panel
-                    // let selectCallBack = () => {
-                    // };
-                    // if (typeof parsedMeta.select_function !== "undefined" && parsedMeta.select_function !== "") {
-                    //     try {
-                    //         selectCallBack = Function('"use strict";return (' + parsedMeta.select_function + ')')();
-                    //     } catch (e) {
-                    //         console.info("Error in select function for: " + key);
-                    //         console.error(e.message);
-                    //     }
-                    // }
-                    // let func = selectCallBack.bind(this, null, layer, layerKey, _self);
-                    // $(document).arrive(`#a-collapse${randText}`, function () {
-                    //     $(this).on('click', function () {
-                    //         let e = $(`#collapse${randText}`);
-                    //         if (!e.hasClass("in")) {
-                    //             func();
-                    //         }
-                    //         $('.feature-info-accordion-body').collapse("hide")
-                    //     });
-                    // });
-
                     if (count2 === features.length) {
                         vectorPopUp = L.popup({
                             autoPan: window.vidiConfig.autoPanPopup,
                             autoPanPaddingTopLeft: L.point(multi ? 20 : 0, multi ? 300 : 0),
                             minWidth: 300,
                             className: `js-vector-layer-popup custom-popup`
-                        }).setLatLng(event.latlng).setContent(`<div>
-                                                                ${additionalControls}
-                                                                <div style="margin-right: 5px; margin-left: 2px">${accordion}</div>
-                                                            </div>`).openOn(cloud.get().map)
+                        }).setLatLng(event.latlng).setContent(`${additionalControls}${accordion}`).openOn(cloud.get().map)
                             .on('remove', () => {
                                 if (`editor` in extensions) {
                                     editor = extensions.editor.index;

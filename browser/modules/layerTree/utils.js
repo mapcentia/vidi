@@ -171,25 +171,6 @@ const setupLayerNumberIndicator = (base64GroupName, numberOfActiveLayers, number
 };
 
 /**
- * Default template for feature popup
- */
-const getDefaultTemplate = () => {
-    return `<div class="vidi-popup-content">
-        <div class="form-group gc2-edit-tools">
-            {{#_vidi_content.fields}}
-                {{#title}}<h4>{{title}}</h4>{{/title}}
-                {{#value}}
-                <p {{#type}}class="{{ type }}"{{/type}}>{{{ value }}}</p>
-                {{/value}}
-                {{^value}}
-                <p class="empty">null</p>
-                {{/value}}
-            {{/_vidi_content.fields}}
-        </div>
-    </div>`;
-};
-
-/**
  * Removes layer type prefix from the layer name
  *
  * @param {String} layerName Initial layer name
@@ -442,7 +423,6 @@ module.exports = {
     queryServiceWorker,
     applyOpacityToLayer,
     calculateOrder,
-    getDefaultTemplate,
     storeErrorHandler,
     stripPrefix,
     getQueryLimit,

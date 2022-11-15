@@ -61,7 +61,7 @@ require('snackbarjs');
 
 let editToolsHtml = `
         <div class="form-group gc2-edit-tools" data-edit-layer-id="{{_vidi_edit_layer_id}}" data-edit-layer-name="{{_vidi_edit_layer_name}}" data-edit-vector="{{_vidi_edit_vector}}" style="display: inline; width: 90%;">
-            <div class="btn-group btn-group-justified">
+            <div class="btn-group btn-group-justified" style="margin: 10px 0;">
                 <div class="btn-group">
                     <button class="btn btn-primary btn-xs popup-edit-btn">
                         <i class="fa fa-pencil" aria-hidden="true"></i>
@@ -239,7 +239,6 @@ module.exports = {
                 }
             }
 
-            let editingStarted = false;
             let isEmpty = true;
             let srid = metaDataKeys[value].srid;
             let key = "_vidi_sql_" + index;
@@ -338,8 +337,6 @@ module.exports = {
                                     .on('remove', () => {
                                         if (!editor?.getEditedFeature()) {
                                             _self.resetAll();
-                                        } else {
-                                            editingStarted = false;
                                         }
                                     });
 
@@ -437,18 +434,6 @@ module.exports = {
                                 if (draggableEnabled) {
                                     _self.makeDraggable(popup);
                                 }
-
-                                setTimeout(() => {
-                                    if (editingIsEnabled && layerIsEditable) {
-                                        $(".gc2-edit-tools").css(`display`, `inline`);
-                                        $(".popup-edit-btn").show();
-                                        $(".popup-delete-btn").show();
-                                    } else {
-                                        $(".gc2-edit-tools").css(`display`, `none`);
-                                        $(".popup-edit-btn").hide();
-                                        $(".popup-delete-btn").hide();
-                                    }
-                                }, 100);
                             });
                         }
                         // Here inside onLoad we call loadDataInTable(), so the table is populated

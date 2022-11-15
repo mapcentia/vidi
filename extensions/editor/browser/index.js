@@ -54,6 +54,13 @@ const MODULE_NAME = `editor`;
 const EDITOR_FORM_CONTAINER_ID = 'editor-attr-form';
 const EDITOR_CONTAINER_ID = 'editor-attr-dialog';
 const MAX_NODE_IN_FEATURE = 1000; // If number of nodes exceed this number, when the geometry editor is not enabled.
+const EDIT_STYLE = {
+    color: 'blue',
+    fillOpacity: 0,
+    weight: 6,
+    opacity: 0.6,
+    dashArray: null
+}
 
 const serviceWorkerCheck = () => {
     if (!('serviceWorker' in navigator) || !navigator.serviceWorker || !navigator.serviceWorker.controller) {
@@ -135,7 +142,7 @@ module.exports = {
                 }
 
                 let t = ($(this).data('gc2-key'));
-                _self.add(t, null, true, isVectorLayer);
+                _self.add(t, true, isVectorLayer);
                 e.stopPropagation();
             });
         });
@@ -161,6 +168,13 @@ module.exports = {
                 isVectorLayer = vector;
                 _self.edit(getLayerById(id), name, isVectorLayer)
                 e.stopPropagation();
+            });
+            $(this).find('.popup-delete-btn').on("click", function (e) {
+                if (window.confirm(__(`Are you sure you want to delete the feature?`))) {
+                    isVectorLayer = vector;
+                    _self.delete(getLayerById(id), name, isVectorLayer)
+                    e.stopPropagation();
+                }
             });
         });
 
@@ -385,11 +399,10 @@ module.exports = {
     /**
      * Add new features to layer
      * @param k
-     * @param qstore
      * @param doNotRemoveEditor
      * @param isVector
      */
-    add: function (k, qstore, doNotRemoveEditor, isVector = false) {
+    add: function (k, doNotRemoveEditor, isVector = false) {
         isVectorLayer = isVector;
         _self.stopEdit();
         editedFeature = false;
@@ -476,11 +489,7 @@ module.exports = {
                  */
                 const featureIsSaved = () => {
                     console.log('Editor: featureIsSaved, updating', schemaQualifiedName);
-
                     switchLayer.registerLayerDataAlternation(schemaQualifiedName);
-
-                    sqlQuery.reset(qstore);
-
                     me.stopEdit();
 
                     // Reloading only vector layers, as uncommited changes can be displayed only for vector layers
@@ -654,7 +663,6 @@ module.exports = {
      * Change existing feature
      * @param e
      * @param k
-     * @param qstore
      * @param isVector
      */
     edit: function (e, k, isVector = false) {
@@ -662,9 +670,11 @@ module.exports = {
         _self.stopEdit();
         editedFeature = e;
         nonCommitedEditedFeature = {};
+        if (!isVector) {
+            e.setStyle(EDIT_STYLE)
+        }
         const editFeature = () => {
             serviceWorkerCheck();
-
             let React = require('react');
 
             let ReactDOM = require('react-dom');
@@ -714,7 +724,6 @@ module.exports = {
                     ).addTo(cloud.get().map);
                     sqlQuery.reset();
                     editor = markers[0].enableEdit();
-                    sqlQuery.reset(qstore);
                     break;
 
                 case "MultiPoint":
@@ -733,7 +742,6 @@ module.exports = {
                         editor = markers[i].enableEdit();
 
                     });
-                    sqlQuery.reset(qstore);
                     break;
 
                 default:
@@ -887,10 +895,7 @@ module.exports = {
 
                 const featureIsUpdated = () => {
                     console.log('Editor: featureIsUpdated, isVectorLayer:', isVectorLayer);
-
                     switchLayer.registerLayerDataAlternation(schemaQualifiedName);
-
-                    sqlQuery.reset(qstore);
                     me.stopEdit();
 
                     // Reloading only vector layers, as uncommited changes can be displayed only for vector layers
@@ -988,10 +993,9 @@ module.exports = {
      * Delete feature from layer
      * @param e
      * @param k
-     * @param qstore
      * @param isVector
      */
-    delete: function (e, k, qstore, isVector = false) {
+    delete: function (e, k, isVector = false) {
         isVectorLayer = isVector;
         _self.stopEdit();
         editedFeature = false;
@@ -1005,9 +1009,6 @@ module.exports = {
 
             const featureIsDeleted = () => {
                 console.log('Editor: featureIsDeleted, isVectorLayer:', isVectorLayer);
-
-                sqlQuery.reset(qstore);
-
                 cloud.get().map.closePopup();
 
                 // Reloading only vector layers, as uncommited changes can be displayed only for vector layers

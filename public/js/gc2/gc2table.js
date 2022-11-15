@@ -167,11 +167,11 @@ var gc2table = (function () {
                     renderedText = Handlebars.compile(template)(layer.feature.properties);
                 }
                 if (!renderInfoIn) {
-                    layer.bindPopup("<div id='popup-test'></div>" + renderedText || str, {
+                    layer.bindPopup(renderedText || str, {
                         className: "custom-popup gc2table-custom-popup",
                         autoPan: autoPan,
                         closeButton: true,
-                        minWidth: 160
+                        minWidth: 300,
                     }).openPopup();
                 } else {
                     $(renderInfoIn).html(renderedText);
