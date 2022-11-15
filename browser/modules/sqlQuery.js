@@ -60,11 +60,11 @@ const jquery = require('jquery');
 require('snackbarjs');
 
 let editToolsHtml = `
-        <div class="form-group gc2-edit-tools" style="display: none; width: 90%;">
+        <div class="form-group gc2-edit-tools" data-edit-layer-id="{{_vidi_edit_layer_id}}" data-edit-layer-name="{{_vidi_edit_layer_name}}" data-edit-vector="{{_vidi_edit_vector}}" style="display: inline; width: 90%;">
             <div class="btn-group btn-group-justified">
                 <div class="btn-group">
                     <button class="btn btn-primary btn-xs popup-edit-btn">
-                        <i class="fa fa-pencil-alt" aria-hidden="true"></i>
+                        <i class="fa fa-pencil" aria-hidden="true"></i>
                     </button>
                 </div>
                 <div class="btn-group">
@@ -263,7 +263,7 @@ module.exports = {
                 backArrowIsAdded = true;
                 defaultTemplate = `
                                 <div class='show-when-multiple-hits' style='cursor: pointer;'>
-                                    <span class='material-icons'  style=''>keyboard_arrow_left </span>
+                                    <span class='material-icons' style=''>keyboard_arrow_left </span>
                                     <span style="top: -7px;position: relative;">${__("Back")}</span>
                                 </div>` + defaultTemplate;
                 $(document).arrive('.show-when-multiple-hits', function (e, data) {
@@ -336,7 +336,7 @@ module.exports = {
                                     .setContent(`<div id="info-box-pop-up"></div>`)
                                     .openOn(cloud.get().map)
                                     .on('remove', () => {
-                                        if (!editingStarted) {
+                                        if (!editor?.getEditedFeature()) {
                                             _self.resetAll();
                                         } else {
                                             editingStarted = false;
@@ -449,19 +449,6 @@ module.exports = {
                                         $(".popup-delete-btn").hide();
                                     }
                                 }, 100);
-
-                                $(".popup-edit-btn").unbind("click.popup-edit-btn").bind("click.popup-edit-btn", function () {
-                                    // We reset the query layer and use a unaltered layer for editor
-                                    layerObj.reset();
-                                    editor.edit(layersClone, _key_, qstore);
-                                    editingStarted = true;
-                                });
-
-                                $(".popup-delete-btn").unbind("click.popup-delete-btn").bind("click.popup-delete-btn", function () {
-                                    if (window.confirm(__(`Are you sure you want to delete the feature?`))) {
-                                        editor.delete(e, _key_, qstore);
-                                    }
-                                });
                             });
                         }
                         // Here inside onLoad we call loadDataInTable(), so the table is populated

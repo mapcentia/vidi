@@ -1,6 +1,6 @@
 /*
  * @author     Alexander Shumilov
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2022 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -113,6 +113,7 @@ module.exports = {
      *
      */
     init: function () {
+        const _self = this;
         if (`watsonc` in window.vidiConfig.enabledExtensions) {
             console.log(`Editor extension is disabled due to the enabled watsonc`);
             return;
@@ -135,6 +136,30 @@ module.exports = {
 
                 let t = ($(this).data('gc2-key'));
                 _self.add(t, null, true, isVectorLayer);
+                e.stopPropagation();
+            });
+        });
+
+        const getLayerById = (id) => {
+            let l;
+            cloud.get().map.eachLayer(layer => {
+                if (layer._leaflet_id === id) {
+                    l = layer;
+                }
+            })
+            return l;
+        }
+
+        // Listen to arrival of edit tools
+        $(document).arrive('.gc2-edit-tools', {
+            existing: true
+        }, function () {
+            let id = parseInt(($(this).data('edit-layer-id')));
+            let name = ($(this).data('edit-layer-name'));
+            let vector = ($(this).data('edit-vector'));
+            $(this).find('.popup-edit-btn').on("click", function (e) {
+                isVectorLayer = vector;
+                _self.edit(getLayerById(id), name, isVectorLayer)
                 e.stopPropagation();
             });
         });
@@ -362,7 +387,7 @@ module.exports = {
      * @param k
      * @param qstore
      * @param doNotRemoveEditor
-     * @param isVectorLayer
+     * @param isVector
      */
     add: function (k, qstore, doNotRemoveEditor, isVector = false) {
         isVectorLayer = isVector;
@@ -630,9 +655,9 @@ module.exports = {
      * @param e
      * @param k
      * @param qstore
-     * @param isVectorLayer
+     * @param isVector
      */
-    edit: function (e, k, qstore, isVector = false) {
+    edit: function (e, k, isVector = false) {
         isVectorLayer = isVector;
         _self.stopEdit();
         editedFeature = e;
@@ -744,11 +769,13 @@ module.exports = {
             }
 
             _self.enableSnapping(e.feature.geometry.type, true, e);
-
             // Delete some system attributes
             let eventFeatureCopy = JSON.parse(JSON.stringify(e.feature));
             delete eventFeatureCopy.properties._vidi_content;
             delete eventFeatureCopy.properties._id;
+            delete eventFeatureCopy.properties._vidi_edit_layer_id;
+            delete eventFeatureCopy.properties._vidi_edit_layer_name;
+            delete eventFeatureCopy.properties._vidi_edit_vector;
 
             // Set NULL values to undefined, because NULL is a type
             Object.keys(eventFeatureCopy.properties).map(key => {
@@ -796,6 +823,9 @@ module.exports = {
                 let GeoJSON = e.toGeoJSON(GEOJSON_PRECISION), featureCollection;
                 delete GeoJSON.properties._vidi_content;
                 delete GeoJSON.properties._id;
+                delete GeoJSON.properties._vidi_edit_layer_id;
+                delete GeoJSON.properties._vidi_edit_layer_name;
+                delete GeoJSON.properties._vidi_edit_vector;
 
                 // HACK to handle (Multi)Point layers
                 // Update the GeoJSON from markers
@@ -882,11 +912,6 @@ module.exports = {
 
             cloud.get().map.closePopup();
             ReactDOM.unmountComponentAtNode(document.getElementById(EDITOR_FORM_CONTAINER_ID));
-            /*for (let key in schema.properties) {
-                if (key in eventFeatureCopy.properties && eventFeatureCopy.properties[key]) {
-                    eventFeatureCopy.properties[key] = `` + eventFeatureCopy.properties[key];
-                }
-            }*/
             let eventFeatureParsed = {};
             for (let [key, value] of Object.entries(eventFeatureCopy.properties)) {
                 if (fields[key].type.includes("timestamp with time zone")) {
@@ -911,7 +936,6 @@ module.exports = {
                     </Form>
                 </div>
             ), document.getElementById(EDITOR_FORM_CONTAINER_ID));
-
             _self.openAttributesDialog();
         };
         let confirmMessage = __(`Application is offline, tiles will not be updated. Proceed?`);
@@ -965,7 +989,7 @@ module.exports = {
      * @param e
      * @param k
      * @param qstore
-     * @param isVectorLayer
+     * @param isVector
      */
     delete: function (e, k, qstore, isVector = false) {
         isVectorLayer = isVector;
@@ -1027,7 +1051,6 @@ module.exports = {
 
     /**
      * Stop editing and clean up
-     * @param editedFeature
      */
     stopEdit: function () {
         backboneEvents.get().trigger('unblock:infoClick');
@@ -1072,6 +1095,9 @@ module.exports = {
             $(".editor-attr-dialog__expand-less").show();
             $(".editor-attr-dialog__expand-more").hide();
         });
+
+        editedFeature = false;
+        sqlQuery.resetAll();
     },
 
     /**
@@ -1094,6 +1120,10 @@ module.exports = {
             });
         });
     },
+
+    getEditedFeature: () => {
+        return editedFeature;
+    }
 };
 
 

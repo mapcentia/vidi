@@ -136,34 +136,38 @@ var gc2table = (function () {
         });
 
         object.on("selected" + "_" + uid, function (id) {
+            const layer = m.map._layers[id];
             clearSelection();
             if (id === undefined) return;
             let row = $('*[data-uniqueid="' + id + '"]');
             row.addClass("selected");
             try {
                 if (setSelectedStyle) {
-                    m.map._layers[id].setStyle(selectedStyle);
+                    layer.setStyle(selectedStyle);
                 }
             } catch (e) {
                 console.warn("Can't set style on marker")
             }
 
-            onSelect(id, m.map._layers[id], key, caller);
+            onSelect(id, layer, key, caller);
 
             if (openPopUp) {
                 let str = "<table>", renderedText;
+                layer.feature.properties._vidi_edit_layer_id = layer._leaflet_id;
+                layer.feature.properties._vidi_edit_layer_name = key;
+                layer.feature.properties._vidi_edit_vector = false;
                 $.each(cm, function (i, v) {
                     if (typeof v.showInPopup === "undefined" || (typeof v.showInPopup === "boolean" && v.showInPopup === true)) {
-                        str = str + "<tr><td>" + v.header + "</td><td>" + m.map._layers[id].feature.properties[v.dataIndex] + "</td></tr>";
+                        str = str + "<tr><td>" + v.header + "</td><td>" + layer.feature.properties[v.dataIndex] + "</td></tr>";
                     }
                 });
                 str = str + "</table>";
 
                 if (template) {
-                    renderedText = Handlebars.compile(template)(m.map._layers[id].feature.properties);
+                    renderedText = Handlebars.compile(template)(layer.feature.properties);
                 }
                 if (!renderInfoIn) {
-                    m.map._layers[id].bindPopup("<div id='popup-test'></div>" + renderedText || str, {
+                    layer.bindPopup("<div id='popup-test'></div>" + renderedText || str, {
                         className: "custom-popup gc2table-custom-popup",
                         autoPan: autoPan,
                         closeButton: true,
@@ -173,7 +177,7 @@ var gc2table = (function () {
                     $(renderInfoIn).html(renderedText);
                 }
 
-                m.map._layers[id].on('popupclose', function (e) {
+                layer.on('popupclose', function (e) {
                     // Removing the selectedStyle from feature
                     let databaseIdentifier = getDatabaseIdForLayerId(id);
                     if (uncheckedIds.indexOf(databaseIdentifier) > -1) {
@@ -185,7 +189,7 @@ var gc2table = (function () {
                     if (onPopupClose) onPopupClose(id);
                 });
 
-                object.trigger("openpopup" + "_" + uid, m.map._layers[id], clonedLayers[id]);
+                object.trigger("openpopup" + "_" + uid, layer, clonedLayers[id]);
             }
         });
 

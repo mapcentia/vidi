@@ -134,8 +134,9 @@ module.exports = {
             })
         });
         // If map is clicked, when clear all selections
+        // TODO prevent click throgh on circle marker
         cloud.get().map.on('click', () => {
-            _self.resetAllVectorLayerStyles();
+            // _self.resetAllVectorLayerStyles();
         })
         if (window.vidiConfig.enabledExtensions.indexOf(`editor`) !== -1) moduleState.editingIsEnabled = true;
         $(document).arrive('#layers-filter-reset', function (e, data) {
@@ -1574,7 +1575,7 @@ module.exports = {
                     if (tooltipTemplate) {
                         _self.toolTip(layer, feature, tooltipTemplate, pane);
                     }
-                    if ((LAYER.VECTOR + ':' + layerKey) in onEachFeature) {
+                    if ((LAYER.VECTOR + ':' + layerKey) in onEachFeature && !window.vidiConfig.crossMultiSelect) {
                         /*
                             Checking for correct onEachFeature structure
                         */
@@ -1609,33 +1610,12 @@ module.exports = {
                                     throw new Error(`metaDataKeys[${layerKey}] is undefined`);
                                 }
 
-                                let editingButtonsMarkup = ``;
-                                if (moduleState.editingIsEnabled && layerIsEditable) {
-                                    editingButtonsMarkup = markupGeneratorInstance.getEditingButtons();
-                                }
-
                                 _self.displayAttributesPopup([{
                                     feature: feature,
                                     layer: layer,
-                                    layerKey: layerKey
-                                }], e, editingButtonsMarkup, false);
-
-                                if (moduleState.editingIsEnabled && layerIsEditable) {
-                                    $(`.js-vector-layer-popup`).find(".ge-start-edit").unbind("click.ge-start-edit").bind("click.ge-start-edit", function () {
-                                        let layerMeta = meta.getMetaByKey(layerKey);
-                                        editor.edit(layer, layerKey + "." + layerMeta.f_geometry_column, null, true);
-                                    });
-
-                                    $(`.js-vector-layer-popup`).find(".ge-delete").unbind("click.ge-delete").bind("click.ge-delete", (e) => {
-                                        if (window.confirm("Are you sure? Changes will not be saved!")) {
-                                            let layerMeta = meta.getMetaByKey(layerKey);
-                                            editor.delete(layer, layerKey + "." + layerMeta.f_geometry_column, null, true);
-                                        }
-                                    });
-                                } else {
-                                    $(`.js-vector-layer-popup`).find(".ge-start-edit").hide();
-                                    $(`.js-vector-layer-popup`).find(".ge-delete").hide();
-                                }
+                                    layerKey: layerKey,
+                                    vector: true
+                                }], e, '', false);
                             });
                         }
 
@@ -1654,7 +1634,8 @@ module.exports = {
                                 _self.displayAttributesPopup([{
                                         feature: feature,
                                         layer: layer,
-                                        layerKey: layerKey
+                                        layerKey: layerKey,
+                                        vector: true
                                     }],
                                     e, '', false);
                                 return
@@ -1709,10 +1690,11 @@ module.exports = {
                                         try {
                                             if (turfIntersects(clickFeature, feature) && overlay.id) {
                                                 intersectingFeatures.push({
-                                                    "feature": featureForChecking.feature,
-                                                    "layer": featureForChecking,
-                                                    "layerKey": overlay.id.split(":")[1]
-                                                });
+                                                    feature: featureForChecking.feature,
+                                                    layer: featureForChecking,
+                                                    layerKey: overlay.id.split(":")[1],
+                                                    vector: true
+                                                })
                                             }
                                         } catch (e) {
                                             console.log(e);
@@ -1918,6 +1900,7 @@ module.exports = {
             let layerKey = f.layerKey;
             let feature = f.feature;
             let layer = f.layer;
+            let vector = f?.vector || false
 
             let parsedMeta = _self.parseLayerMeta(meta.getMetaByKey(layerKey, false));
             let properties = JSON.parse(JSON.stringify(feature.properties));
@@ -1928,6 +1911,10 @@ module.exports = {
                     }
                 }
             }
+
+            properties._vidi_edit_layer_id = layer._leaflet_id;
+            properties._vidi_edit_layer_name= layerKey;
+            properties._vidi_edit_vector= vector;
 
             let i = properties._vidi_content.fields.length;
             while (i--) {
@@ -1991,7 +1978,6 @@ module.exports = {
             } catch (e) {
                 console.info("Error in pop-up template for: " + layerKey, e);
             }
-
             // Set select call when opening a panel
             let selectCallBack = () => {
             };
@@ -2066,7 +2052,12 @@ module.exports = {
                                                                 <div style="margin-right: 5px; margin-left: 2px">${accordion}</div>
                                                             </div>`).openOn(cloud.get().map)
                             .on('remove', () => {
-                                sqlQuery.resetAll();
+                                if (`editor` in extensions) {
+                                    editor = extensions.editor.index;
+                                }
+                                if (!editor?.getEditedFeature()) {
+                                    sqlQuery.resetAll();
+                                }
                                 _self.resetAllVectorLayerStyles();
                             });
                     }
