@@ -57,9 +57,17 @@ const MAX_NODE_IN_FEATURE = 1000; // If number of nodes exceed this number, when
 const EDIT_STYLE = {
     color: 'blue',
     fillOpacity: 0,
-    weight: 6,
+    weight: 4,
     opacity: 0.6,
     dashArray: null
+}
+const EDIT_MARKER = {
+    icon: L.AwesomeMarkers.icon({
+            icon: 'arrows-alt',
+            markerColor: 'blue',
+            prefix: 'fa'
+        }
+    )
 }
 
 const serviceWorkerCheck = () => {
@@ -439,11 +447,11 @@ module.exports = {
 
             // Start editor with the right type
             if (type === "POLYGON" || type === "MULTIPOLYGON") {
-                editor = cloud.get().map.editTools.startPolygon();
+                editor = cloud.get().map.editTools.startPolygon(null, EDIT_STYLE);
             } else if (type === "LINESTRING" || type === "MULTILINESTRING") {
-                editor = cloud.get().map.editTools.startPolyline();
+                editor = cloud.get().map.editTools.startPolyline(null, EDIT_STYLE);
             } else if (type === "POINT" || type === "MULTIPOINT") {
-                editor = cloud.get().map.editTools.startMarker();
+                editor = cloud.get().map.editTools.startMarker(null, EDIT_MARKER);
             } else {
                 throw new Error(`Unable to detect type`);
             }
@@ -713,14 +721,7 @@ module.exports = {
                 case "Point":
                     markers[0] = L.marker(
                         e.getLatLng(),
-                        {
-                            icon: L.AwesomeMarkers.icon({
-                                    icon: 'arrows-alt',
-                                    markerColor: 'blue',
-                                    prefix: 'fa'
-                                }
-                            )
-                        }
+                        EDIT_MARKER
                     ).addTo(cloud.get().map);
                     sqlQuery.reset();
                     editor = markers[0].enableEdit();

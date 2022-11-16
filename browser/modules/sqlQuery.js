@@ -64,7 +64,7 @@ let editToolsHtml = `
             <div class="btn-group btn-group-justified" style="margin: 10px 0;">
                 <div class="btn-group">
                     <button class="btn btn-primary btn-xs popup-edit-btn">
-                        <i class="fa fa-pencil" aria-hidden="true"></i>
+                        <i class="fa fa-pencil-alt" aria-hidden="true"></i>
                     </button>
                 </div>
                 <div class="btn-group">

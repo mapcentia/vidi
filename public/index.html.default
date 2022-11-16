@@ -21,7 +21,7 @@
   ~ @author     Martin Høgh <mh@mapcentia.com>
   ~ @copyright  2013-2022 MapCentia ApS
   ~ @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
-  ~ @version    2022.11.0
+  ~ @version    2022.11.1
 
   -->
 <html lang="en">
@@ -43,6 +43,7 @@
     <link rel="preload" href="/fonts/roboto-v18-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/fonts/roboto-v18-latin-500.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/fonts/roboto-v18-latin-300.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/icons/MaterialIcons-Regular.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/js/lib/bootstrap/dist/fonts/glyphicons-halflings-regular.woff2" as="font" type="font/woff2" crossorigin>
     <!-- Build -->
@@ -54,7 +55,9 @@
     <link rel="stylesheet" href="/js/lib/jquery-ui/jquery-ui.min.css">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="/css/font-awesome.min.css"/>
-    <link rel="stylesheet" href="/css/font-awesome.v5.15/all.css"/>
+    <link rel="stylesheet" href="/css/font-awesome.v520.solid.css"/>
+    <link rel="stylesheet" href="/css/font-awesome.v520.regular.css"/>
+    <link rel="stylesheet" href="/css/font-awesome.v520.css"/>
     <!-- Leafet -->
     <link rel="stylesheet" href="/js/lib/leaflet/leaflet.css">
     <link rel="stylesheet" href="/js/lib/leaflet-history/leaflet-history.css">

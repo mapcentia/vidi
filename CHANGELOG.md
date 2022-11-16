@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2022.11.1] - 2022-16-11
+### Changed
+- Reworked editor tools in popups. Now a central listner in the Editor module will invoke editing. Vector and raster now use the same markup definition for the editor tools.
+- Editing can now be invoked from the accordion popup.
+- The editor geometry for raster is now blue.
+- The same marker is now used for both editing and adding points.
+- Geometry from Draw module is no longer dashed when selected.
+
 ## [2022.11.0] - 2022-8-11
 ### Added
 - The url parameter `dps=1` will prevent browser state from being pushed to history. This parameter will be set by embed.js, so the browser history will not be pushed to the parent frame. Snapshot links will also have this parameter set.
