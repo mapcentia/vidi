@@ -60,7 +60,7 @@ const jquery = require('jquery');
 require('snackbarjs');
 
 let editToolsHtml = `
-        <div class="form-group gc2-edit-tools" data-edit-layer-id="{{_vidi_edit_layer_id}}" data-edit-layer-name="{{_vidi_edit_layer_name}}" data-edit-vector="{{_vidi_edit_vector}}" style="display: inline; width: 90%;">
+        <div class="form-group gc2-edit-tools" data-edit-layer-id="{{_vidi_edit_layer_id}}" data-edit-layer-name="{{_vidi_edit_layer_name}}" data-edit-vector="{{_vidi_edit_vector}}" style="display: {{_vidi_edit_display}};">
             <div class="btn-group btn-group-justified" style="margin: 10px 0;">
                 <div class="btn-group">
                     <button class="btn btn-primary btn-xs popup-edit-btn">
@@ -82,7 +82,6 @@ let editToolsHtml = `
  */
 let defaultTemplate =
     `<div class="vidi-popup-content">
-        ${editToolsHtml}
         <h3 class="popup-title">{{_vidi_content.title}}</h3>
         {{#_vidi_content.fields}}
             {{#if value}}
@@ -312,9 +311,11 @@ module.exports = {
 
                     isEmpty = layerObj.isEmpty();
 
-                    template = (typeof metaDataKeys[value].infowindow !== "undefined" && metaDataKeys[value].infowindow.template !== "") ? metaDataKeys[value].infowindow.template : metaDataKeys[value].type === "RASTER" ? defaultTemplateRaster : defaultTemplate;
-
-                    template = (parsedMeta.info_template && parsedMeta.info_template !== "") ? editToolsHtml + parsedMeta.info_template : template;
+                    template =  metaDataKeys[value].type === "RASTER" ? defaultTemplateRaster : defaultTemplate;
+                    template = parsedMeta.info_template && parsedMeta.info_template !== "" ? parsedMeta.info_template : template;
+                    if (editingIsEnabled && layerIsEditable) {
+                        template = editToolsHtml + template;
+                    }
 
                     if (!isEmpty && !not_querable) {
 
@@ -814,6 +815,9 @@ module.exports = {
         let metaDataKeys = meta.getMetaDataKeys();
         let parsedMeta = layerTree.parseLayerMeta(metaDataKeys[layerKey]);
         template = (parsedMeta.info_template && parsedMeta.info_template !== "") ? parsedMeta.info_template : defaultTemplate;
+        if (window.vidiConfig.enabledExtensions.includes('editor')) {
+            template = editToolsHtml + template;
+        }
         return template;
     },
 

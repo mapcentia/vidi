@@ -1593,12 +1593,8 @@ module.exports = {
                             layer.on("click", function (e) {
                                 _self.resetAllVectorLayerStyles();
                                 sqlQuery.resetAll();
-                                try {
-                                    if (!window.vidiConfig.crossMultiSelect) {
-                                        e.target.setStyle(SELECTED_STYLE);
-                                    }
-                                } catch (e) {
-                                    console.error(e)
+                                if (!window.vidiConfig.crossMultiSelect && e.target?.setStyle) {
+                                    e.target.setStyle(SELECTED_STYLE);
                                 }
                                 let layerIsEditable = false;
                                 let metaDataKeys = meta.getMetaDataKeys();
@@ -1712,7 +1708,7 @@ module.exports = {
                     }
                 },
                 pointToLayer: (pointToLayer.hasOwnProperty(LAYER.VECTOR + ':' + layerKey) ? pointToLayer[LAYER.VECTOR + ':' + layerKey] : (feature, latlng) => {
-                    return L.circleMarker(latlng, {pane});
+                    return L.circleMarker(latlng, {pane, bubblingMouseEvents: false});
                 }),
                 error: layerTreeUtils.storeErrorHandler
             });
@@ -1905,6 +1901,7 @@ module.exports = {
             let vector = f?.vector || false
 
             let parsedMeta = _self.parseLayerMeta(meta.getMetaByKey(layerKey, false));
+            let editDisplay = parsedMeta.vidi_layer_editable ? 'inline' : 'none';
             let properties = JSON.parse(JSON.stringify(feature.properties));
             for (var key in properties) {
                 if (properties.hasOwnProperty(key)) {
@@ -1915,8 +1912,10 @@ module.exports = {
             }
 
             properties._vidi_edit_layer_id = layer._leaflet_id;
-            properties._vidi_edit_layer_name= layerKey;
-            properties._vidi_edit_vector= vector;
+            properties._vidi_edit_layer_name = layerKey;
+            properties._vidi_edit_vector = vector;
+            properties._vidi_edit_display = editDisplay;
+
 
             let i = properties._vidi_content.fields.length;
             while (i--) {

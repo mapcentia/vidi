@@ -784,6 +784,7 @@ module.exports = {
             delete eventFeatureCopy.properties._vidi_edit_layer_id;
             delete eventFeatureCopy.properties._vidi_edit_layer_name;
             delete eventFeatureCopy.properties._vidi_edit_vector;
+            delete eventFeatureCopy.properties._vidi_edit_display;
 
             // Set NULL values to undefined, because NULL is a type
             Object.keys(eventFeatureCopy.properties).map(key => {
@@ -834,6 +835,7 @@ module.exports = {
                 delete GeoJSON.properties._vidi_edit_layer_id;
                 delete GeoJSON.properties._vidi_edit_layer_name;
                 delete GeoJSON.properties._vidi_edit_vector;
+                delete GeoJSON.properties._vidi_edit_display;
 
                 // HACK to handle (Multi)Point layers
                 // Update the GeoJSON from markers
