@@ -134,7 +134,6 @@ module.exports = {
             })
         });
         // If map is clicked, when clear all selections
-        // TODO prevent click throgh on circle marker
         cloud.get().map.on('preclick', () => {
             _self.resetAllVectorLayerStyles();
             sqlQuery.resetAll()
