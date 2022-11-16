@@ -185,8 +185,9 @@ var gc2table = (function () {
                     } else {
                         store.layer.resetStyle(store.layer._layers[id]);
                     }
-
-                    if (onPopupClose) onPopupClose(id);
+                    if (onPopupClose) {
+                        onPopupClose(id);
+                    }
                 });
 
                 object.trigger("openpopup" + "_" + uid, layer, clonedLayers[id]);

@@ -135,8 +135,9 @@ module.exports = {
         });
         // If map is clicked, when clear all selections
         // TODO prevent click throgh on circle marker
-        cloud.get().map.on('click', () => {
-            // _self.resetAllVectorLayerStyles();
+        cloud.get().map.on('preclick', () => {
+            _self.resetAllVectorLayerStyles();
+            sqlQuery.resetAll()
         })
         if (window.vidiConfig.enabledExtensions.indexOf(`editor`) !== -1) moduleState.editingIsEnabled = true;
         $(document).arrive('#layers-filter-reset', function (e, data) {
@@ -1592,6 +1593,7 @@ module.exports = {
                             }
                             layer.on("click", function (e) {
                                 _self.resetAllVectorLayerStyles();
+                                sqlQuery.resetAll();
                                 try {
                                     if (!window.vidiConfig.crossMultiSelect) {
                                         e.target.setStyle(SELECTED_STYLE);
@@ -1624,6 +1626,7 @@ module.exports = {
                         // If there is no handler for specific layer, then display attributes only
                         layer.on("click", function (e) {
                             _self.resetAllVectorLayerStyles();
+                            sqlQuery.resetAll();
                             if (!window.vidiConfig?.crossMultiSelect) {
                                 if (e.target?.setStyle) {
                                     e.target.setStyle(SELECTED_STYLE);
