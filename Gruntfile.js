@@ -321,18 +321,6 @@ module.exports = function (grunt) {
                 }
             }
         },
-        gitpull: {
-            production: {
-                options: {}
-            }
-        },
-        gitreset: {
-            production: {
-                options: {
-                    mode: 'hard'
-                }
-            }
-        },
         shell: {
             default: {
                 command: [
@@ -393,7 +381,6 @@ module.exports = function (grunt) {
 
     grunt.loadNpmTasks('grunt-templates-hogan');
     grunt.loadNpmTasks('grunt-browserify');
-    grunt.loadNpmTasks('grunt-git');
     grunt.loadNpmTasks('grunt-shell');
     grunt.loadNpmTasks('grunt-contrib-less');
     grunt.loadNpmTasks('grunt-contrib-uglify-es');
@@ -403,7 +390,6 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-env');
     grunt.loadNpmTasks('grunt-contrib-handlebars');
     grunt.loadNpmTasks('grunt-contrib-watch');
-    grunt.loadNpmTasks('grunt-watchify');
     grunt.loadNpmTasks('grunt-version');
 
     grunt.registerTask('default', ['prepareAssets', 'browserify:publish', 'browserify:publish_sw_dev', 'extension-css', 'shell:default', 'hogan', 'version']);
