@@ -433,7 +433,7 @@ module.exports = module.exports = {
                                             </div>`);
                         let slider = sliderEl.find('.js-baselayer-opacity-slider');
                         slider.on('input change', (e) => {
-                            let sliderValue = (parseFloat(e.target.value));
+                            let sliderValue = parseFloat(e.target.value);
                             overlayOpacity = sliderValue;
                             if (overlayLayer) {
                                 overlayLayer.setOpacity(sliderValue / 100);

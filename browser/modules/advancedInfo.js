@@ -17,9 +17,9 @@ let drawnItems = new L.FeatureGroup();
 let bufferItems = new L.FeatureGroup();
 let drawControl;
 let qstore = [];
-const noUiSlider = require('nouislider');
-let bufferSlider;
+let sliderEl;
 let bufferValue;
+const BUFFER_START_VALUE = "40";
 const _clearDrawItems = function () {
     drawnItems.clearLayers();
     bufferItems.clearLayers();
@@ -30,6 +30,7 @@ const debounce = require('lodash/debounce');
 const _makeSearch = function () {
     let primitive, coord,
         layer, buffer = parseFloat($("#buffer-value").val());
+    console.log(buffer)
 
     for (const prop in drawnItems._layers) {
         layer = drawnItems._layers[prop];
@@ -121,34 +122,22 @@ module.exports = {
         cloud.get().map.addLayer(drawnItems);
         cloud.get().map.addLayer(bufferItems);
 
-        bufferSlider = document.getElementById('buffer-slider');
+        sliderEl = $('#buffer-slider');
         bufferValue = document.getElementById('buffer-value');
-        try {
-            noUiSlider.create(bufferSlider, {
-                start: 40,
-                connect: "lower",
-                step: 1,
-                range: {
-                    min: 0,
-                    max: 500
-                }
-            });
-            bufferSlider.noUiSlider.on('update', debounce(function (values, handle) {
-                bufferValue.value = values[handle];
-                if (typeof bufferItems._layers[Object.keys(bufferItems._layers)[0]] !== "undefined" && typeof bufferItems._layers[Object.keys(bufferItems._layers)[0]]._leaflet_id !== "undefined") {
-                    bufferItems.clearLayers();
-                    _makeSearch()
-                }
-            }, 300));
+        bufferValue.value = BUFFER_START_VALUE;
 
-            // When the input changes, set the slider value
-            bufferValue.addEventListener('change', function () {
-                bufferSlider.noUiSlider.set([this.value]);
-            });
-
-        } catch (e) {
-            console.info(e.message);
-        }
+        sliderEl.append(`<div class="range"">
+                                            <input type="range"  min="0" max="500" value="${BUFFER_START_VALUE}" class="js-info-buffer-slider form-range">
+                                            </div>`);
+        let slider = sliderEl.find('.js-info-buffer-slider');
+        slider.on('input change', debounce(function (values) {
+            bufferValue.value = parseFloat(values.target.value);
+            console.log(bufferValue.value)
+            if (typeof bufferItems._layers[Object.keys(bufferItems._layers)[0]] !== "undefined" && typeof bufferItems._layers[Object.keys(bufferItems._layers)[0]]._leaflet_id !== "undefined") {
+                bufferItems.clearLayers();
+                _makeSearch()
+            }
+        }, 300));
     },
 
     on: () => {

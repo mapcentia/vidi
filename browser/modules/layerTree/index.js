@@ -24,7 +24,6 @@ import {
     VECTOR_STYLE
 } from './constants';
 import dayjs from 'dayjs';
-import noUiSlider from 'nouislider';
 import mustache from 'mustache';
 import LayerFilter from './LayerFilter';
 import LoadStrategyToggle from './LoadStrategyToggle';

@@ -6,7 +6,9 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ## [UNRELEASED] - 2022-17-11
 ### Changed
-- Double base layer slider is changed from noUiSlider to native HTML range input.
+- Changed from noUiSlider to native HTML range input:
+  - Base layers
+  - Advanced info
 
 ## [2022.11.1] - 2022-16-11
 ### Changed
