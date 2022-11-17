@@ -81,7 +81,7 @@ module.exports = function (grunt) {
                         'public/fonts/fonts.css',
                         'public/icons/material-icons.css',
                         // jQuery UI
-                        'public/js/lib/jquery-ui/jquery-ui.min.css',
+                        // 'public/js/lib/jquery-ui/jquery-ui.min.css',
                         // Font Awesome
                         'public/css/font-awesome.min.css',
                         'public/css/font-awesome.v520.solid.css',
@@ -289,8 +289,10 @@ module.exports = function (grunt) {
                         'public/js/lib/leaflet-geometryutil/leaflet.geometryutil.js',
                         'public/js/lib/Path.Drag.js/src/Path.Drag.js',
                         'public/js/lib/leaflet-side-by-side/leaflet-side-by-side.min.js',
-                        'public/js/lib/jquery-ui/jquery-ui.min.js',
-                        'public/js/lib/jquery-ui-touch/jquery.ui.touch-punch.min.js',
+
+                        'node_modules/jquery-ui/dist/jquery-ui.js',
+                        'node_modules/jquery-ui-touch-punch-c/jquery.ui.touch-punch.js',
+
                         'public/js/lib/jsts/jsts.min.js',
                         'public/js/lib/leaflet-dash-flow/L.Path.DashFlow.js',
                         'public/js/lib/handlebars/handlebars.js',
