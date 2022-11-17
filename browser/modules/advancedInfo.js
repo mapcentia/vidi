@@ -132,12 +132,18 @@ module.exports = {
         let slider = sliderEl.find('.js-info-buffer-slider');
         slider.on('input change', debounce(function (values) {
             bufferValue.value = parseFloat(values.target.value);
-            console.log(bufferValue.value)
             if (typeof bufferItems._layers[Object.keys(bufferItems._layers)[0]] !== "undefined" && typeof bufferItems._layers[Object.keys(bufferItems._layers)[0]]._leaflet_id !== "undefined") {
                 bufferItems.clearLayers();
                 _makeSearch()
             }
         }, 300));
+        // When the input changes, set the slider value
+        bufferValue.addEventListener('change', function () {
+            slider.val(this.value);
+            bufferValue.value = this.value;
+            bufferItems.clearLayers();
+            _makeSearch()
+        });
     },
 
     on: () => {
