@@ -1,12 +1,10 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2022 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
-
-import noUiSlider from 'nouislider';
 
 const MODULE_NAME = `baseLayer`;
 
@@ -417,8 +415,8 @@ module.exports = module.exports = {
                             </div>
                         </div>
                         <div>
-                            <div style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px; padding-top: 0;">
-                                <div class="js-side-by-side-layer-opacity-slider slider shor slider-material-orange"></div>
+                            <div style="margin: 10px  0 20px 0">
+                                <div class="js-side-by-side-layer-opacity-slider"></div>
                             </div>
                         </div>
                     </div>`);
@@ -428,33 +426,20 @@ module.exports = module.exports = {
                             throw new Error(`Invalid initial value for slider: ${initialValue}`);
                         }
 
-                        let slider = $("#base-layer-list").find(`.js-side-by-side-layer-opacity-slider`).get(0);
-                        if (slider) {
-                            if (`noUiSlider` in slider) {
-                                slider.noUiSlider.destroy();
+                        let sliderEl = $("#base-layer-list").find(`.js-side-by-side-layer-opacity-slider`);
+                        sliderEl.empty();
+                        sliderEl.append(`<div class="range"">
+                                            <input type="range"  min="10" max="90" value="${initialValue}" class="js-baselayer-opacity-slider form-range">
+                                            </div>`);
+                        let slider = sliderEl.find('.js-baselayer-opacity-slider');
+                        slider.on('input change', (e) => {
+                            let sliderValue = (parseFloat(e.target.value));
+                            overlayOpacity = sliderValue;
+                            if (overlayLayer) {
+                                overlayLayer.setOpacity(sliderValue / 100);
+                                backboneEvents.get().trigger(`${MODULE_NAME}:side-by-side-mode-change`);
                             }
-
-                            noUiSlider.create(slider, {
-                                start: initialValue,
-                                connect: `lower`,
-                                step: 10,
-                                range: {
-                                    'min': 10,
-                                    'max': 90
-                                }
-                            });
-
-                            slider.noUiSlider.on(`update`, (values, handle, unencoded, tap, positions) => {
-                                let sliderValue = parseFloat(values[handle]);
-                                overlayOpacity = sliderValue;
-                                if (overlayLayer) {
-                                    overlayLayer.setOpacity(sliderValue / 100);
-                                    backboneEvents.get().trigger(`${MODULE_NAME}:side-by-side-mode-change`);
-                                }
-                            });
-                        } else {
-                            throw new Error(`Unable to find the slider container node`);
-                        }
+                        });
                     };
 
                     $(`#base-layer-list`).find(`.js-two-layers-at-once-mode-control-container`).remove();
