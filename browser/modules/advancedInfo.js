@@ -30,7 +30,6 @@ const debounce = require('lodash/debounce');
 const _makeSearch = function () {
     let primitive, coord,
         layer, buffer = parseFloat($("#buffer-value").val());
-    console.log(buffer)
 
     for (const prop in drawnItems._layers) {
         layer = drawnItems._layers[prop];
@@ -118,7 +117,6 @@ module.exports = {
             _self.control();
         });
 
-        //TEST
         cloud.get().map.addLayer(drawnItems);
         cloud.get().map.addLayer(bufferItems);
 
@@ -140,9 +138,7 @@ module.exports = {
         // When the input changes, set the slider value
         bufferValue.addEventListener('change', function () {
             slider.val(this.value);
-            bufferValue.value = this.value;
-            bufferItems.clearLayers();
-            _makeSearch()
+            slider.trigger('change');
         });
     },
 
