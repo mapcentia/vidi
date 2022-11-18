@@ -122,7 +122,9 @@ module.exports = {
 
         sliderEl = $('#buffer-slider');
         bufferValue = document.getElementById('buffer-value');
-        bufferValue.value = BUFFER_START_VALUE;
+        if (bufferValue) {
+            bufferValue.value = BUFFER_START_VALUE;
+        }
 
         sliderEl.append(`<div class="range"">
                                             <input type="range"  min="0" max="500" value="${BUFFER_START_VALUE}" class="js-info-buffer-slider form-range">
@@ -136,10 +138,12 @@ module.exports = {
             }
         }, 300));
         // When the input changes, set the slider value
-        bufferValue.addEventListener('change', function () {
-            slider.val(this.value);
-            slider.trigger('change');
-        });
+        if (bufferValue) {
+            bufferValue.addEventListener('change', function () {
+                slider.val(this.value);
+                slider.trigger('change');
+            });
+        }
     },
 
     on: () => {

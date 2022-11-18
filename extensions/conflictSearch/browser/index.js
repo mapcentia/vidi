@@ -338,8 +338,9 @@ module.exports = module.exports = {
 
         sliderEl = $('#conflict-buffer-slider');
         bufferValue = document.getElementById('conflict-buffer-value');
-        bufferValue.value = startBuffer;
-
+        if (bufferValue) {
+            bufferValue.value = startBuffer;
+        }
         sliderEl.append(`<div class="range"">
                                             <input type="range"  min="-5" max="500" value="${startBuffer}" class="js-info-buffer-slider form-range">
                                             </div>`);
@@ -353,11 +354,12 @@ module.exports = module.exports = {
             }
         }, 300));
         // When the input changes, set the slider value
-        bufferValue.addEventListener('change', function () {
-            slider.val(this.value);
-            slider.trigger('change');
-        });
-
+        if (bufferValue) {
+            bufferValue.addEventListener('change', function () {
+                slider.val(this.value);
+                slider.trigger('change');
+            });
+        }
         backboneEvents.get().on("ready:meta", function () {
             metaData = meta.getMetaData();
         })
