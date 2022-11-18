@@ -1,6 +1,6 @@
 FROM mapcentia/vidi:base
 MAINTAINER Martin Høgh<mh@mapcentia.com>
-ARG version=2021.8.1
+ARG version=2022.11.2
 
 RUN export DEBIAN_FRONTEND=noninteractive
 ENV DEBIAN_FRONTEND noninteractive
@@ -20,13 +20,13 @@ RUN cd ~/vidi &&\
 	npm install
 
 # Build a custom bundle of proj4js with only UTM
-RUN cd ~ &&\
-    npm install -g grunt-cli &&\
-    git clone https://github.com/proj4js/proj4js.git &&\
-    cd proj4js &&\
-    npm install &&\
-    grunt build:utm &&\
-    cp dist/* /root/vidi/node_modules/proj4/dist/
+#RUN cd ~ &&\
+#    npm install -g grunt-cli &&\
+#    git clone https://github.com/proj4js/proj4js.git &&\
+#    cd proj4js &&\
+#    npm install &&\
+#    grunt build:utm &&\
+#    cp dist/* /root/vidi/node_modules/proj4/dist/
 
 RUN cd ~/vidi/public/js/lib/bootstrap-material-design &&\
 	npm install
