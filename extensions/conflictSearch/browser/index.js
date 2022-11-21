@@ -139,11 +139,6 @@ var searchStr = "";
 
 var searchLoadedLayers = true;
 
-/**
- *
- */
-var Terraformer = require('terraformer-wkt-parser');
-
 var debounce = require('lodash/debounce');
 
 var _result = {};
@@ -338,7 +333,7 @@ module.exports = module.exports = {
         sliderEl = $('#conflict-buffer-slider');
         bufferValue = document.getElementById('conflict-buffer-value');
         if (bufferValue) {
-            bufferValue.value = startBuffer;
+            bufferValue.value = currentBufferValue = startBuffer;
         }
         sliderEl.append(`<div class="range"">
                                             <input type="range"  min="-5" max="500" value="${startBuffer}" class="js-info-buffer-slider form-range">
@@ -441,7 +436,8 @@ module.exports = module.exports = {
                         fillOpacity: 0
                     }
                 },
-                marker: true
+                marker: true,
+                circlemarker: false
             },
             edit: {
                 featureGroup: drawnItems,

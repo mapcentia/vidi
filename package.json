@@ -176,7 +176,6 @@
     "socket.io-client": "^1.7.1",
     "sticky-session": "^1.1.2",
     "terraformer": "^1.0.12",
-    "terraformer-wkt-parser": "^1.2.1",
     "underscore": "^1.10.2",
     "utf8": "^3.0.0",
     "uuid": "^9.0.0",
