@@ -292,10 +292,11 @@ module.exports = function (grunt) {
 
                         'node_modules/jquery-ui/dist/jquery-ui.js',
                         'node_modules/jquery-ui-touch-punch-c/jquery.ui.touch-punch.js',
+                        'node_modules/handlebars/dist/handlebars.js',
 
-                        'public/js/lib/jsts/jsts.min.js',
                         'public/js/lib/leaflet-dash-flow/L.Path.DashFlow.js',
-                        'public/js/lib/handlebars/handlebars.js',
+
+
                         'public/js/lib/typeahead.js/typeahead.jquery.js',
                         'public/js/lib/bootstrap/dist/js/bootstrap.js',
                         'public/js/lib/bootstrap-material-design/dist/js/ripples.js',
@@ -303,7 +304,6 @@ module.exports = function (grunt) {
                         'public/js/lib/bootstrap-colorpicker/js/bootstrap-colorpicker.js',
 
                         'node_modules/leaflet.glify/dist/glify-browser.js',
-
                         'node_modules/bootstrap-table/dist/bootstrap-table.js',
                         'node_modules/bootstrap-table/dist/bootstrap-table-locale-all.js',
                         'node_modules/bootstrap-table/dist/extensions/export/bootstrap-table-export.js',

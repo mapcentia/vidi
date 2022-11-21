@@ -45,12 +45,6 @@ var serializeLayers;
 var urlparser = require('./../../../browser/modules/urlparser');
 
 /**
- *
- * @type {*|exports|module.exports}
- */
-var reproject = require('reproject');
-
-/**
  * @type {string}
  */
 var db = urlparser.db;
@@ -153,6 +147,11 @@ var Terraformer = require('terraformer-wkt-parser');
 var debounce = require('lodash/debounce');
 
 var _result = {};
+
+import {
+    buffer as turfBuffer
+} from '@turf/turf'
+const wicket = require('wicket');
 
 /**
  *
@@ -565,6 +564,7 @@ module.exports = module.exports = {
      * @param text
      * @param callBack
      * @param id Set specific layer id to use. Else the first in drawnItems will be used
+     * @param fromDrawing
      */
     makeSearch: function (text, callBack, id = null, fromDrawing = false) {
         var primitive, coord,
@@ -622,12 +622,7 @@ module.exports = module.exports = {
                         let buffer = l._mRadius;
                         let primitive = l.toGeoJSON(GEOJSON_PRECISION);
                         primitive.type = "Feature"; // Must be there
-                        // Get utm zone
-                        let reader = new jsts.io.GeoJSONReader();
-                        let writer = new jsts.io.GeoJSONWriter();
-                        let geom = reader.read(reproject.reproject(primitive, "unproj", "proj", crss));
-                        let buffer4326 = reproject.reproject(writer.write(geom.geometry.buffer(buffer)), "proj", "unproj", crss);
-                        collection.geometries.push(buffer4326)
+                        collection.geometries.push(turfBuffer(primitive, buffer, {units: 'meters'}))
                     } else {
                         collection.geometries.push(l.toGeoJSON(GEOJSON_PRECISION).geometry)
                     }
@@ -657,20 +652,8 @@ module.exports = module.exports = {
         }
         if (primitive) {
             setCrss(layer);
-            primitive.type = "Feature"; // Must be there
-            var reader = new jsts.io.GeoJSONReader();
-            var writer = new jsts.io.GeoJSONWriter();
-            var geom = reader.read(reproject.reproject(primitive, "unproj", "proj", crss));
-            // buffer4326
-            var buffer4326 = reproject.reproject(writer.write(geom.geometry.buffer(buffer)), "proj", "unproj", crss);
-
-            if (buffer === 0) {
-                projWktWithBuffer = Terraformer.convert(writer.write(geom.geometry));
-            } else {
-                projWktWithBuffer = Terraformer.convert(writer.write(geom.geometry.buffer(buffer)));
-            }
-
-            var l = L.geoJson(buffer4326, {
+            const geom = turfBuffer(primitive, buffer, {units: 'meters'});
+            var l = L.geoJson(geom, {
                 "color": "#ff7800",
                 "weight": 1,
                 "opacity": 1,
@@ -698,19 +681,13 @@ module.exports = module.exports = {
                 schemataStr = schemata.join(",");
             }
 
-            var projWktWithBuffer;
-            if (buffer === 0) {
-                projWktWithBuffer = Terraformer.convert(writer.write(geom.geometry));
-            } else {
-                projWktWithBuffer = Terraformer.convert(writer.write(geom.geometry.buffer(buffer)));
-            }
             preProcessor({
-                "projWktWithBuffer": projWktWithBuffer
+                // "projWktWithBuffer": projWktWithBuffer
             }).then(function () {
                 xhr = $.ajax({
                     method: "POST",
                     url: "/api/extension/conflictSearch",
-                    data: "db=" + db + "&schema=" + (searchLoadedLayers ? schemataStr : "") + (searchStr !== "" ? "," + searchStr : "") + "&socketId=" + socketId.get() + "&layers=" + visibleLayers.join(",") + "&buffer=" + bufferValue + "&text=" + currentFromText + "&wkt=" + Terraformer.convert(buffer4326),
+                    data: "db=" + db + "&schema=" + (searchLoadedLayers ? schemataStr : "") + (searchStr !== "" ? "," + searchStr : "") + "&socketId=" + socketId.get() + "&layers=" + visibleLayers.join(",") + "&buffer=" + bufferValue + "&text=" + currentFromText + "&wkt=" + new wicket.Wkt().read(JSON.stringify(geom.geometry)).write(),
                     scriptCharset: "utf-8",
                     success: _self.handleResult,
                     error: function () {
@@ -957,7 +934,7 @@ module.exports = module.exports = {
         });
 
         backboneEvents.get().trigger("end:conflictSearch", {
-            "projWktWithBuffer": projWktWithBuffer,
+            // "projWktWithBuffer": projWktWithBuffer,
             "file": response.file
         });
 

@@ -11,7 +11,7 @@ import {GEOJSON_PRECISION} from './constants';
 const MODULE_ID = `advancedInfo`;
 let cloud;
 let sqlQuery;
-const reproject = require('reproject');
+const wicket = require('wicket');
 let searchOn = false;
 let drawnItems = new L.FeatureGroup();
 let bufferItems = new L.FeatureGroup();
@@ -27,6 +27,9 @@ const _clearDrawItems = function () {
 };
 let backboneEvents;
 const debounce = require('lodash/debounce');
+import {
+    buffer as turfBuffer
+} from '@turf/turf'
 const _makeSearch = function () {
     let primitive, coord,
         layer, buffer = parseFloat($("#buffer-value").val());
@@ -45,23 +48,8 @@ const _makeSearch = function () {
     }
     primitive = layer.toGeoJSON(GEOJSON_PRECISION);
     if (primitive) {
-        if (typeof layer.getBounds !== "undefined") {
-            coord = layer.getBounds().getSouthWest();
-        } else {
-            coord = layer.getLatLng();
-        }
-        // Get utm zone
-        const zone = require('./utmZone.js').getZone(coord.lat, coord.lng);
-        const crss = {
-            "proj": "+proj=utm +zone=" + zone + " +ellps=WGS84 +datum=WGS84 +units=m +no_defs",
-            "unproj": "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
-        };
-        const reader = new jsts.io.GeoJSONReader();
-        const writer = new jsts.io.GeoJSONWriter();
-        const geom = reader.read(reproject.reproject(primitive, "unproj", "proj", crss));
-        const buffer4326 = reproject.reproject(writer.write(geom.geometry.buffer(buffer)), "proj", "unproj", crss);
-        const buffered = reader.read(buffer4326);
-        const l = L.geoJson(buffer4326, {
+        const geom = turfBuffer(primitive, buffer, {units: 'meters'});
+        const l = L.geoJson(geom, {
             "color": "#ff7800",
             "weight": 1,
             "opacity": 1,
@@ -71,7 +59,7 @@ const _makeSearch = function () {
         l._layers[Object.keys(l._layers)[0]]._vidi_type = "query_buffer";
         // Reset all SQL Query layers, in case another tools has
         // created a layer while this one was switch on
-        sqlQuery.init(qstore, buffered.toText(), "4326");
+        sqlQuery.init(qstore, new wicket.Wkt().read(JSON.stringify(geom.geometry)).write(), "4326");
     }
 };
 
