@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [UNRELEASED] - 2022-21-11
+### Changed
+- Removed Jsts as a dependency. Now using Turf in `advancedInfo` and `conflict`.
+
 ## [2022.11.2] - 2022-17-11
 ### Changed
 - Changed from noUiSlider to native HTML range input in these modules. noUiSlider packages is no longer installed:
