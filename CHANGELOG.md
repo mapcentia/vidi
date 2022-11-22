@@ -4,9 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [UNRELEASED] - 2022-21-11
+## [2022.11.3] - 2022-22-11
 ### Changed
 - Removed Jsts as a dependency. Now using Turf in `advancedInfo` and `conflict`.
+- Upgrade of Grunt.
+- Upgrade to bullseye in Dockerfile.
+
+### Fixed
+- Bug in `conflict` module after change to native range input slider.
 
 ## [2022.11.2] - 2022-17-11
 ### Changed
