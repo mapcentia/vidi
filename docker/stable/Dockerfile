@@ -1,15 +1,12 @@
 FROM mapcentia/vidi:base
 MAINTAINER Martin Høgh<mh@mapcentia.com>
-ARG version=2022.11.2
 
 RUN export DEBIAN_FRONTEND=noninteractive
 ENV DEBIAN_FRONTEND noninteractive
 
 # Clone Vidi from GitHub
 RUN cd  ~ &&\
-	git  clone https://github.com/mapcentia/vidi.git &&\
-	cd vidi &&\
-	git checkout tags/$version
+	git  clone https://github.com/mapcentia/vidi.git
 
 # Install grunt
 RUN cd ~/vidi &&\
