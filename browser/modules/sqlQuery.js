@@ -311,7 +311,7 @@ module.exports = {
 
                     isEmpty = layerObj.isEmpty();
 
-                    template =  metaDataKeys[value].type === "RASTER" ? defaultTemplateRaster : defaultTemplate;
+                    template = metaDataKeys[value].type === "RASTER" ? defaultTemplateRaster : defaultTemplate;
                     template = parsedMeta.info_template && parsedMeta.info_template !== "" ? parsedMeta.info_template : template;
                     if (editingIsEnabled && layerIsEditable) {
                         template = editToolsHtml + template;
@@ -562,6 +562,13 @@ module.exports = {
             } else {
                 fieldStr = "*";
             }
+
+            const extent = [
+                cloud.get().getExtent().left,
+                cloud.get().getExtent().bottom,
+                cloud.get().getExtent().right,
+                cloud.get().getExtent().top
+            ]
             // Get applied filters from layerTree as a WHERE clause
             let filters = layerTree.getFilterStr(keyWithoutGeom) ? layerTree.getFilterStr(keyWithoutGeom) : "1=1";
             const schemaQualifiedName = "\"" + value.split(".")[0] + "\".\"" + value.split(".")[1] + "\"";
@@ -577,18 +584,16 @@ module.exports = {
                         cloud.get().map.getSize().y,
                         cloud.get().map.latLngToContainerPoint(infoClickPoint).x,
                         cloud.get().map.latLngToContainerPoint(infoClickPoint).y,
-                        cloud.get().getExtent().left,
-                        cloud.get().getExtent().bottom,
-                        cloud.get().getExtent().right,
-                        cloud.get().getExtent().top
+                        ...extent
                     ];
                 } else {
+                    const envelope = `"${f_geometry_column}" && ST_Transform(ST_MakeEnvelope(${extent.join(',')}, 4326), ${srid})`;
                     if (geoType !== "POLYGON" && geoType !== "MULTIPOLYGON" && (!advancedInfo.getSearchOn())) {
-                        sql = "SELECT " + fieldStr + " FROM (SELECT * FROM " + schemaQualifiedName + " WHERE " + filters + ") AS foo WHERE round(ST_Distance(ST_Transform(\"" + f_geometry_column + "\"," + proj + "), ST_GeomFromText('" + wkt + "'," + proj + "))) < " + distance;
+                        sql = "SELECT " + fieldStr + " FROM (SELECT * FROM " + schemaQualifiedName + " WHERE " + filters + ") AS foo WHERE " + envelope + " AND round(ST_Distance(\"" + f_geometry_column + "\", ST_Transform(ST_GeomFromText('" + wkt + "'," + proj + ")," + srid +"))) < " + distance;
                         if (versioning) {
                             sql = sql + " AND gc2_version_end_date IS NULL ";
                         }
-                        sql = sql + " ORDER BY round(ST_Distance(ST_Transform(\"" + f_geometry_column + "\"," + proj + "), ST_GeomFromText('" + wkt + "'," + proj + ")))";
+                        sql = sql + " ORDER BY round(ST_Distance(\"" + f_geometry_column + "\", ST_Transform(ST_GeomFromText('" + wkt + "'," + proj + ")," + srid + ")))";
                     } else {
                         sql = "SELECT " + fieldStr + " FROM (SELECT * FROM " + schemaQualifiedName + " WHERE " + filters + ") AS foo WHERE ST_Intersects(ST_Transform(ST_geomfromtext('" + wkt + "'," + proj + ")," + srid + ")," + f_geometry_column + ")";
                         if (versioning) {
