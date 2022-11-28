@@ -1670,7 +1670,7 @@ module.exports = {
                     }
                 }
             },
-            "hvidkildegods2": { // Your print templates. "print" is the default
+            "hvidkildegods_print": { // Your print templates. "print" is the default
                 A4: {
                     l: {
                         mapsizePx: [1060, 730],
