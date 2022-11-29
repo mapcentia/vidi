@@ -225,6 +225,7 @@ module.exports = {
                             }
                         }
                     }
+                    // This is used if fastInit is not used
                     layersToActivate = removeDuplicates(layersToActivate.concat(window.vidiConfig.activeLayers));
 
                     /**
@@ -291,10 +292,6 @@ module.exports = {
                                 } else {
                                     cloud.get().zoomToExtent();
                                 }
-                            }
-
-                            if (window.vidiConfig.activeLayers.length > 0) {
-                                setLayers(false);
                             }
                             initResolve();
                         }

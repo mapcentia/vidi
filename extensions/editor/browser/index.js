@@ -1,6 +1,6 @@
 /*
  * @author     Alexander Shumilov
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2022 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -54,6 +54,21 @@ const MODULE_NAME = `editor`;
 const EDITOR_FORM_CONTAINER_ID = 'editor-attr-form';
 const EDITOR_CONTAINER_ID = 'editor-attr-dialog';
 const MAX_NODE_IN_FEATURE = 1000; // If number of nodes exceed this number, when the geometry editor is not enabled.
+const EDIT_STYLE = {
+    color: 'blue',
+    fillOpacity: 0,
+    weight: 4,
+    opacity: 0.6,
+    dashArray: null
+}
+const EDIT_MARKER = {
+    icon: L.AwesomeMarkers.icon({
+            icon: 'arrows-alt',
+            markerColor: 'blue',
+            prefix: 'fa'
+        }
+    )
+}
 
 const serviceWorkerCheck = () => {
     if (!('serviceWorker' in navigator) || !navigator.serviceWorker || !navigator.serviceWorker.controller) {
@@ -113,6 +128,7 @@ module.exports = {
      *
      */
     init: function () {
+        const _self = this;
         if (`watsonc` in window.vidiConfig.enabledExtensions) {
             console.log(`Editor extension is disabled due to the enabled watsonc`);
             return;
@@ -134,8 +150,39 @@ module.exports = {
                 }
 
                 let t = ($(this).data('gc2-key'));
-                _self.add(t, null, true, isVectorLayer);
+                _self.add(t, true, isVectorLayer);
                 e.stopPropagation();
+            });
+        });
+
+        const getLayerById = (id) => {
+            let l;
+            cloud.get().map.eachLayer(layer => {
+                if (layer._leaflet_id === id) {
+                    l = layer;
+                }
+            })
+            return l;
+        }
+
+        // Listen to arrival of edit tools
+        $(document).arrive('.gc2-edit-tools', {
+            existing: true
+        }, function () {
+            let id = parseInt(($(this).data('edit-layer-id')));
+            let name = ($(this).data('edit-layer-name'));
+            let vector = ($(this).data('edit-vector'));
+            $(this).find('.popup-edit-btn').on("click", function (e) {
+                isVectorLayer = vector;
+                _self.edit(getLayerById(id), name, isVectorLayer)
+                e.stopPropagation();
+            });
+            $(this).find('.popup-delete-btn').on("click", function (e) {
+                if (window.confirm(__(`Are you sure you want to delete the feature?`))) {
+                    isVectorLayer = vector;
+                    _self.delete(getLayerById(id), name, isVectorLayer)
+                    e.stopPropagation();
+                }
             });
         });
 
@@ -360,11 +407,10 @@ module.exports = {
     /**
      * Add new features to layer
      * @param k
-     * @param qstore
      * @param doNotRemoveEditor
-     * @param isVectorLayer
+     * @param isVector
      */
-    add: function (k, qstore, doNotRemoveEditor, isVector = false) {
+    add: function (k, doNotRemoveEditor, isVector = false) {
         isVectorLayer = isVector;
         _self.stopEdit();
         editedFeature = false;
@@ -401,11 +447,11 @@ module.exports = {
 
             // Start editor with the right type
             if (type === "POLYGON" || type === "MULTIPOLYGON") {
-                editor = cloud.get().map.editTools.startPolygon();
+                editor = cloud.get().map.editTools.startPolygon(null, EDIT_STYLE);
             } else if (type === "LINESTRING" || type === "MULTILINESTRING") {
-                editor = cloud.get().map.editTools.startPolyline();
+                editor = cloud.get().map.editTools.startPolyline(null, EDIT_STYLE);
             } else if (type === "POINT" || type === "MULTIPOINT") {
-                editor = cloud.get().map.editTools.startMarker();
+                editor = cloud.get().map.editTools.startMarker(null, EDIT_MARKER);
             } else {
                 throw new Error(`Unable to detect type`);
             }
@@ -451,11 +497,7 @@ module.exports = {
                  */
                 const featureIsSaved = () => {
                     console.log('Editor: featureIsSaved, updating', schemaQualifiedName);
-
                     switchLayer.registerLayerDataAlternation(schemaQualifiedName);
-
-                    sqlQuery.reset(qstore);
-
                     me.stopEdit();
 
                     // Reloading only vector layers, as uncommited changes can be displayed only for vector layers
@@ -629,17 +671,18 @@ module.exports = {
      * Change existing feature
      * @param e
      * @param k
-     * @param qstore
-     * @param isVectorLayer
+     * @param isVector
      */
-    edit: function (e, k, qstore, isVector = false) {
+    edit: function (e, k, isVector = false) {
         isVectorLayer = isVector;
         _self.stopEdit();
         editedFeature = e;
         nonCommitedEditedFeature = {};
+        if (!isVector) {
+            e.setStyle(EDIT_STYLE)
+        }
         const editFeature = () => {
             serviceWorkerCheck();
-
             let React = require('react');
 
             let ReactDOM = require('react-dom');
@@ -678,18 +721,10 @@ module.exports = {
                 case "Point":
                     markers[0] = L.marker(
                         e.getLatLng(),
-                        {
-                            icon: L.AwesomeMarkers.icon({
-                                    icon: 'arrows-alt',
-                                    markerColor: 'blue',
-                                    prefix: 'fa'
-                                }
-                            )
-                        }
+                        EDIT_MARKER
                     ).addTo(cloud.get().map);
                     sqlQuery.reset();
                     editor = markers[0].enableEdit();
-                    sqlQuery.reset(qstore);
                     break;
 
                 case "MultiPoint":
@@ -708,7 +743,6 @@ module.exports = {
                         editor = markers[i].enableEdit();
 
                     });
-                    sqlQuery.reset(qstore);
                     break;
 
                 default:
@@ -744,11 +778,14 @@ module.exports = {
             }
 
             _self.enableSnapping(e.feature.geometry.type, true, e);
-
             // Delete some system attributes
             let eventFeatureCopy = JSON.parse(JSON.stringify(e.feature));
             delete eventFeatureCopy.properties._vidi_content;
             delete eventFeatureCopy.properties._id;
+            delete eventFeatureCopy.properties._vidi_edit_layer_id;
+            delete eventFeatureCopy.properties._vidi_edit_layer_name;
+            delete eventFeatureCopy.properties._vidi_edit_vector;
+            delete eventFeatureCopy.properties._vidi_edit_display;
 
             // Set NULL values to undefined, because NULL is a type
             Object.keys(eventFeatureCopy.properties).map(key => {
@@ -796,6 +833,10 @@ module.exports = {
                 let GeoJSON = e.toGeoJSON(GEOJSON_PRECISION), featureCollection;
                 delete GeoJSON.properties._vidi_content;
                 delete GeoJSON.properties._id;
+                delete GeoJSON.properties._vidi_edit_layer_id;
+                delete GeoJSON.properties._vidi_edit_layer_name;
+                delete GeoJSON.properties._vidi_edit_vector;
+                delete GeoJSON.properties._vidi_edit_display;
 
                 // HACK to handle (Multi)Point layers
                 // Update the GeoJSON from markers
@@ -857,10 +898,7 @@ module.exports = {
 
                 const featureIsUpdated = () => {
                     console.log('Editor: featureIsUpdated, isVectorLayer:', isVectorLayer);
-
                     switchLayer.registerLayerDataAlternation(schemaQualifiedName);
-
-                    sqlQuery.reset(qstore);
                     me.stopEdit();
 
                     // Reloading only vector layers, as uncommited changes can be displayed only for vector layers
@@ -882,11 +920,6 @@ module.exports = {
 
             cloud.get().map.closePopup();
             ReactDOM.unmountComponentAtNode(document.getElementById(EDITOR_FORM_CONTAINER_ID));
-            /*for (let key in schema.properties) {
-                if (key in eventFeatureCopy.properties && eventFeatureCopy.properties[key]) {
-                    eventFeatureCopy.properties[key] = `` + eventFeatureCopy.properties[key];
-                }
-            }*/
             let eventFeatureParsed = {};
             for (let [key, value] of Object.entries(eventFeatureCopy.properties)) {
                 if (fields[key].type.includes("timestamp with time zone")) {
@@ -911,7 +944,6 @@ module.exports = {
                     </Form>
                 </div>
             ), document.getElementById(EDITOR_FORM_CONTAINER_ID));
-
             _self.openAttributesDialog();
         };
         let confirmMessage = __(`Application is offline, tiles will not be updated. Proceed?`);
@@ -964,10 +996,9 @@ module.exports = {
      * Delete feature from layer
      * @param e
      * @param k
-     * @param qstore
-     * @param isVectorLayer
+     * @param isVector
      */
-    delete: function (e, k, qstore, isVector = false) {
+    delete: function (e, k, isVector = false) {
         isVectorLayer = isVector;
         _self.stopEdit();
         editedFeature = false;
@@ -981,9 +1012,6 @@ module.exports = {
 
             const featureIsDeleted = () => {
                 console.log('Editor: featureIsDeleted, isVectorLayer:', isVectorLayer);
-
-                sqlQuery.reset(qstore);
-
                 cloud.get().map.closePopup();
 
                 // Reloading only vector layers, as uncommited changes can be displayed only for vector layers
@@ -1027,7 +1055,6 @@ module.exports = {
 
     /**
      * Stop editing and clean up
-     * @param editedFeature
      */
     stopEdit: function () {
         backboneEvents.get().trigger('unblock:infoClick');
@@ -1072,6 +1099,9 @@ module.exports = {
             $(".editor-attr-dialog__expand-less").show();
             $(".editor-attr-dialog__expand-more").hide();
         });
+
+        editedFeature = false;
+        sqlQuery.resetAll();
     },
 
     /**
@@ -1094,6 +1124,10 @@ module.exports = {
             });
         });
     },
+
+    getEditedFeature: () => {
+        return editedFeature;
+    }
 };
 
 

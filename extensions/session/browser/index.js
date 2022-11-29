@@ -13,6 +13,10 @@ let sessionInstance = false;
 let userName = null;
 let isStatusChecked = false;
 let exId = `login-modal-body`;
+const config = require('./../../../config/config.js');
+const urlparser = require('./../../../browser/modules/urlparser');
+const urlVars = urlparser.urlVars;
+const cookie = require('js-cookie');
 
 /**
  *
@@ -29,6 +33,13 @@ module.exports = {
         let parent = this;
         let React = require('react');
         let ReactDOM = require('react-dom');
+
+        if (typeof urlVars.session === "string") {
+            const MAXAGE = (config.sessionMaxAge || 86400) / 86400; // In days
+            // Try to remove existing cookie
+            document.cookie = 'connect.gc2=; Max-Age=0; path=/; domain=' + location.host;
+            cookie.set("connect.gc2", urlVars.session, {expires: MAXAGE});
+        }
 
         // Check if signed in
         //===================

@@ -45,20 +45,9 @@ var serializeLayers;
 var urlparser = require('./../../../browser/modules/urlparser');
 
 /**
- *
- * @type {*|exports|module.exports}
- */
-var reproject = require('reproject');
-
-/**
  * @type {string}
  */
 var db = urlparser.db;
-
-/**
- * @type {*|exports|module.exports}
- */
-var noUiSlider = require('nouislider');
 
 /**
  * @type {*|exports|module.exports}
@@ -69,7 +58,7 @@ var io = require('socket.io-client');
  *
  * @type {Element}
  */
-var bufferSlider;
+var sliderEl;
 
 /**
  *
@@ -150,14 +139,14 @@ var searchStr = "";
 
 var searchLoadedLayers = true;
 
-/**
- *
- */
-var Terraformer = require('terraformer-wkt-parser');
-
 var debounce = require('lodash/debounce');
 
 var _result = {};
+
+import {
+    buffer as turfBuffer
+} from '@turf/turf'
+const wicket = require('wicket');
 
 /**
  *
@@ -340,36 +329,31 @@ module.exports = module.exports = {
             me.makeSearch($("#conflict-custom-search").val());
         }, id, false, getProperty);
 
-        bufferSlider = document.getElementById('conflict-buffer-slider');
+
+        sliderEl = $('#conflict-buffer-slider');
         bufferValue = document.getElementById('conflict-buffer-value');
-        try {
-            noUiSlider.create(bufferSlider, {
-                start: startBuffer,
-                connect: "lower",
-                step: 0.01,
-                range: {
-                    min: -5,
-                    max: 500
-                }
-            });
-            bufferSlider.noUiSlider.on('update', function (values, handle) {
-                bufferValue.value = values[handle];
-                currentBufferValue = bufferValue.value;
-            });
-            bufferSlider.noUiSlider.on('change', debounce(function (values, handle) {
-                //currentBufferValue = values[handle];
+        if (bufferValue) {
+            bufferValue.value = currentBufferValue = startBuffer;
+        }
+        sliderEl.append(`<div class="range"">
+                                            <input type="range"  min="-5" max="500" value="${startBuffer}" class="js-info-buffer-slider form-range">
+                                            </div>`);
+        let slider = sliderEl.find('.js-info-buffer-slider');
+        slider.on('input change', debounce(function (values) {
+            bufferValue.value = parseFloat(values.target.value);
+            currentBufferValue = bufferValue.value;
+            if (typeof bufferItems._layers[Object.keys(bufferItems._layers)[0]] !== "undefined" && typeof bufferItems._layers[Object.keys(bufferItems._layers)[0]]._leaflet_id !== "undefined") {
                 bufferItems.clearLayers();
                 me.makeSearch()
-
-            }, 300));
-            // When the input changes, set the slider value
+            }
+        }, 300));
+        // When the input changes, set the slider value
+        if (bufferValue) {
             bufferValue.addEventListener('change', function () {
-                bufferSlider.noUiSlider.set([this.value]);
+                slider.val(this.value);
+                slider.trigger('change');
             });
-        } catch (e) {
         }
-
-        // TODO extensios are are initiated AFTER "ready:meta", so below is newer reached
         backboneEvents.get().on("ready:meta", function () {
             metaData = meta.getMetaData();
         })
@@ -385,7 +369,7 @@ module.exports = module.exports = {
         noHitsTable = $("#nohits-content tbody");
         errorTable = $("#error-content tbody");
         let c = 0;
-        backboneEvents.get().on("end:conflictSearch", ()=>{
+        backboneEvents.get().on("end:conflictSearch", () => {
             c = 0;
         })
         // Start listen to the web socket
@@ -452,7 +436,8 @@ module.exports = module.exports = {
                         fillOpacity: 0
                     }
                 },
-                marker: true
+                marker: true,
+                circlemarker: false
             },
             edit: {
                 featureGroup: drawnItems,
@@ -511,12 +496,20 @@ module.exports = module.exports = {
         }, 2500);
 
         if (urlparser.urlVars?.var_landsejerlavskode && urlparser.urlVars?.var_matrikelnr) {
-            setTimeout(()=> {
+            setTimeout(() => {
                 if (!fromVarsIsDone) {
                     let placeStore = getPlaceStore();
                     placeStore.db = search.getMDB();
                     placeStore.host = search.getMHOST();
-                    placeStore.sql = `SELECT sfe_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE sfe_ejendomsnummer = (SELECT sfe_ejendomsnummer FROM matrikel.jordstykke WHERE landsejerlavskode=${urlparser.urlVars.var_landsejerlavskode} AND matrikelnummer='${urlparser.urlVars.var_matrikelnr.toLowerCase()}') group by sfe_ejendomsnummer`;
+                    placeStore.sql = `SELECT sfe_ejendomsnummer,
+                                             ST_Multi(ST_Union(the_geom)),
+                                             ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)), 4326)) as geojson
+                                      FROM matrikel.jordstykke
+                                      WHERE sfe_ejendomsnummer = (SELECT sfe_ejendomsnummer
+                                                                  FROM matrikel.jordstykke
+                                                                  WHERE landsejerlavskode = ${urlparser.urlVars.var_landsejerlavskode}
+                                                                    AND matrikelnummer = '${urlparser.urlVars.var_matrikelnr.toLowerCase()}')
+                                      group by sfe_ejendomsnummer`;
                     placeStore.load();
                     fromVarsIsDone = true;
                 }
@@ -567,6 +560,7 @@ module.exports = module.exports = {
      * @param text
      * @param callBack
      * @param id Set specific layer id to use. Else the first in drawnItems will be used
+     * @param fromDrawing
      */
     makeSearch: function (text, callBack, id = null, fromDrawing = false) {
         var primitive, coord,
@@ -624,12 +618,7 @@ module.exports = module.exports = {
                         let buffer = l._mRadius;
                         let primitive = l.toGeoJSON(GEOJSON_PRECISION);
                         primitive.type = "Feature"; // Must be there
-                        // Get utm zone
-                        let reader = new jsts.io.GeoJSONReader();
-                        let writer = new jsts.io.GeoJSONWriter();
-                        let geom = reader.read(reproject.reproject(primitive, "unproj", "proj", crss));
-                        let buffer4326 = reproject.reproject(writer.write(geom.geometry.buffer(buffer)), "proj", "unproj", crss);
-                        collection.geometries.push(buffer4326)
+                        collection.geometries.push(turfBuffer(primitive, buffer, {units: 'meters'}))
                     } else {
                         collection.geometries.push(l.toGeoJSON(GEOJSON_PRECISION).geometry)
                     }
@@ -659,20 +648,8 @@ module.exports = module.exports = {
         }
         if (primitive) {
             setCrss(layer);
-            primitive.type = "Feature"; // Must be there
-            var reader = new jsts.io.GeoJSONReader();
-            var writer = new jsts.io.GeoJSONWriter();
-            var geom = reader.read(reproject.reproject(primitive, "unproj", "proj", crss));
-            // buffer4326
-            var buffer4326 = reproject.reproject(writer.write(geom.geometry.buffer(buffer)), "proj", "unproj", crss);
-
-            if (buffer === 0) {
-                projWktWithBuffer = Terraformer.convert(writer.write(geom.geometry));
-            } else {
-                projWktWithBuffer = Terraformer.convert(writer.write(geom.geometry.buffer(buffer)));
-            }
-
-            var l = L.geoJson(buffer4326, {
+            const geom = turfBuffer(primitive, buffer, {units: 'meters'});
+            var l = L.geoJson(geom, {
                 "color": "#ff7800",
                 "weight": 1,
                 "opacity": 1,
@@ -700,19 +677,13 @@ module.exports = module.exports = {
                 schemataStr = schemata.join(",");
             }
 
-            var projWktWithBuffer;
-            if (buffer === 0) {
-                projWktWithBuffer = Terraformer.convert(writer.write(geom.geometry));
-            } else {
-                projWktWithBuffer = Terraformer.convert(writer.write(geom.geometry.buffer(buffer)));
-            }
             preProcessor({
-                "projWktWithBuffer": projWktWithBuffer
+                // "projWktWithBuffer": projWktWithBuffer
             }).then(function () {
                 xhr = $.ajax({
                     method: "POST",
                     url: "/api/extension/conflictSearch",
-                    data: "db=" + db + "&schema=" + (searchLoadedLayers ? schemataStr : "") + (searchStr !== "" ? "," + searchStr : "") + "&socketId=" + socketId.get() + "&layers=" + visibleLayers.join(",") + "&buffer=" + bufferValue + "&text=" + currentFromText + "&wkt=" + Terraformer.convert(buffer4326),
+                    data: "db=" + db + "&schema=" + (searchLoadedLayers ? schemataStr : "") + (searchStr !== "" ? "," + searchStr : "") + "&socketId=" + socketId.get() + "&layers=" + visibleLayers.join(",") + "&buffer=" + bufferValue + "&text=" + currentFromText + "&wkt=" + new wicket.Wkt().read(JSON.stringify(geom.geometry)).write(),
                     scriptCharset: "utf-8",
                     success: _self.handleResult,
                     error: function () {
@@ -823,8 +794,7 @@ module.exports = module.exports = {
         $('#conflict-main-tabs a[href="#conflict-result-content"]').tab('show');
         if (window.vidiConfig.template === "conflict.tmpl") {
             $('#conflict-result-content a[href="#hits-data-content"]').tab('show');
-        }
-        else {
+        } else {
             $('#conflict-result-content a[href="#hits-content"]').tab('show');
         }
         $('#conflict-open-pdf').attr("href", "/html?id=" + response.file)
@@ -960,7 +930,7 @@ module.exports = module.exports = {
         });
 
         backboneEvents.get().trigger("end:conflictSearch", {
-            "projWktWithBuffer": projWktWithBuffer,
+            // "projWktWithBuffer": projWktWithBuffer,
             "file": response.file
         });
 
@@ -998,8 +968,10 @@ module.exports = module.exports = {
     getBufferItems: function () {
         return bufferItems;
     },
-    setValueForNoUiSlider: function (v) {
-        bufferSlider.noUiSlider.set([v]);
+    setValueForSlider: function (v) {
+        let slider = sliderEl.find('.js-info-buffer-slider');
+        slider.val(v);
+        bufferValue.value = v;
     },
     getFromVarsIsDone: function () {
         return fromVarsIsDone;
@@ -1012,7 +984,7 @@ let dom = `
         <div>
             <label for="conflict-buffer-value" class="control-label">Buffer</label>
             <input id="conflict-buffer-value" class="form-control">
-            <div id="conflict-buffer-slider" class="slider shor"></div>
+            <div id="conflict-buffer-slider" style="margin-bottom: 20px"></div>
         </div>
     </div>
     <div id="conflict-places" class="places" style="margin-bottom: 20px; display: none">

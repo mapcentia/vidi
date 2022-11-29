@@ -54,7 +54,7 @@ class LayerSorting {
      * @returns {Array}
      */
     sortLayers(order, notSortedLayersAndSubgroupsForCurrentGroup, groupName) {
-        if (order === false) {
+        if (!order) {
             return notSortedLayersAndSubgroupsForCurrentGroup;
         } else if (this.validateOrderObject(order) === false) {
             console.error(`Invalid order object`, order);

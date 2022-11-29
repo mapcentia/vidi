@@ -82,11 +82,6 @@ module.exports = {
         }
         (function poll() {
             if (typeof L.control.locate !== "undefined") {
-                if (typeof urlVars.session === "string") {
-                    // Try to remove existing cookie
-                    document.cookie = 'connect.gc2=; Max-Age=0; path=/; domain=' + location.host;
-                    cookie.set("connect.gc2", urlVars.session);
-                }
                 let loadConfig = function () {
                     let configParam;
                     if (configFile.startsWith("/")) {
@@ -472,17 +467,23 @@ module.exports = {
                     modules.meta.init(null, false, true).then(() => {
                         modules.state.getState().then(st => {
                             // Don't recreate SQL store from snapshot
-                            modules.layerTree.setRecreateStores(false);
-                            if (st.modules?.layerTree) {
-                                if (!urlVars.state) {
-                                    st.modules.layerTree.activeLayers = []; // Don't switch on active layer from state unless state id is in the url
-                                }
-                                modules.layerTree.applyState(st.modules.layerTree, true).then(() => {
-                                    modules.layerTree.setRecreateStores(true);
-                                });
-                            } else {
-                                modules.layerTree.create();
+                            if (!st.modules?.layerTree) {
+                                st.modules.layerTree = {};
                             }
+                            // Set activeLayers from config if not snapshot
+                            if (!urlVars.state) {
+                                st.modules.layerTree.activeLayers = window.vidiConfig.activeLayers;
+                            }
+                            modules.layerTree.setRecreateStores(false);
+                            modules.layerTree.applyState(st.modules.layerTree, true).then(() => {
+                                modules.layerTree.setRecreateStores(true);
+                                // Switch on activeLayers from config if not snapshot
+                                if (!urlVars.state) {
+                                    st.modules.layerTree.activeLayers.forEach((l) => {
+                                        modules.switchLayer.init(l, true)
+                                    })
+                                }
+                            });
                         })
                     }).catch((error) => {
                         console.log(error); // Stacktrace

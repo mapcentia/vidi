@@ -135,8 +135,9 @@ module.exports = {
             })
         });
         // If map is clicked, when clear all selections
-        cloud.get().map.on('click', () => {
+        cloud.get().map.on('preclick', () => {
             _self.resetAllVectorLayerStyles();
+            sqlQuery.resetAll()
         })
         if (window.vidiConfig.enabledExtensions.indexOf(`editor`) !== -1) moduleState.editingIsEnabled = true;
         $(document).arrive('#layers-filter-reset', function (e, data) {
@@ -1594,7 +1595,7 @@ module.exports = {
                     if (tooltipTemplate) {
                         _self.toolTip(layer, feature, tooltipTemplate, pane);
                     }
-                    if ((LAYER.VECTOR + ':' + layerKey) in onEachFeature) {
+                    if ((LAYER.VECTOR + ':' + layerKey) in onEachFeature && !window.vidiConfig.crossMultiSelect) {
                         /*
                             Checking for correct onEachFeature structure
                         */
@@ -1611,12 +1612,9 @@ module.exports = {
                             }
                             layer.on("click", function (e) {
                                 _self.resetAllVectorLayerStyles();
-                                try {
-                                    if (!window.vidiConfig.crossMultiSelect) {
-                                        e.target.setStyle(SELECTED_STYLE);
-                                    }
-                                } catch (e) {
-                                    console.error(e)
+                                sqlQuery.resetAll();
+                                if (!window.vidiConfig.crossMultiSelect && e.target?.setStyle) {
+                                    e.target.setStyle(SELECTED_STYLE);
                                 }
                                 let layerIsEditable = false;
                                 let metaDataKeys = meta.getMetaDataKeys();
@@ -1629,33 +1627,12 @@ module.exports = {
                                     throw new Error(`metaDataKeys[${layerKey}] is undefined`);
                                 }
 
-                                let editingButtonsMarkup = ``;
-                                if (moduleState.editingIsEnabled && layerIsEditable) {
-                                    editingButtonsMarkup = markupGeneratorInstance.getEditingButtons();
-                                }
-
                                 _self.displayAttributesPopup([{
                                     feature: feature,
                                     layer: layer,
-                                    layerKey: layerKey
-                                }], e, editingButtonsMarkup, false);
-
-                                if (moduleState.editingIsEnabled && layerIsEditable) {
-                                    $(`.js-vector-layer-popup`).find(".ge-start-edit").unbind("click.ge-start-edit").bind("click.ge-start-edit", function () {
-                                        let layerMeta = meta.getMetaByKey(layerKey);
-                                        editor.edit(layer, layerKey + "." + layerMeta.f_geometry_column, null, true);
-                                    });
-
-                                    $(`.js-vector-layer-popup`).find(".ge-delete").unbind("click.ge-delete").bind("click.ge-delete", (e) => {
-                                        if (window.confirm("Are you sure? Changes will not be saved!")) {
-                                            let layerMeta = meta.getMetaByKey(layerKey);
-                                            editor.delete(layer, layerKey + "." + layerMeta.f_geometry_column, null, true);
-                                        }
-                                    });
-                                } else {
-                                    $(`.js-vector-layer-popup`).find(".ge-start-edit").hide();
-                                    $(`.js-vector-layer-popup`).find(".ge-delete").hide();
-                                }
+                                    layerKey: layerKey,
+                                    vector: true
+                                }], e, '', false);
                             });
                         }
 
@@ -1664,6 +1641,7 @@ module.exports = {
                         // If there is no handler for specific layer, then display attributes only
                         layer.on("click", function (e) {
                             _self.resetAllVectorLayerStyles();
+                            sqlQuery.resetAll();
                             if (!window.vidiConfig?.crossMultiSelect) {
                                 if (e.target?.setStyle) {
                                     e.target.setStyle(SELECTED_STYLE);
@@ -1674,7 +1652,8 @@ module.exports = {
                                 _self.displayAttributesPopup([{
                                         feature: feature,
                                         layer: layer,
-                                        layerKey: layerKey
+                                        layerKey: layerKey,
+                                        vector: true
                                     }],
                                     e, '', false);
                                 return
@@ -1729,10 +1708,11 @@ module.exports = {
                                         try {
                                             if (turfIntersects(clickFeature, feature) && overlay.id) {
                                                 intersectingFeatures.push({
-                                                    "feature": featureForChecking.feature,
-                                                    "layer": featureForChecking,
-                                                    "layerKey": overlay.id.split(":")[1]
-                                                });
+                                                    feature: featureForChecking.feature,
+                                                    layer: featureForChecking,
+                                                    layerKey: overlay.id.split(":")[1],
+                                                    vector: true
+                                                })
                                             }
                                         } catch (e) {
                                             console.log(e);
@@ -1748,7 +1728,7 @@ module.exports = {
                     }
                 },
                 pointToLayer: (pointToLayer.hasOwnProperty(LAYER.VECTOR + ':' + layerKey) ? pointToLayer[LAYER.VECTOR + ':' + layerKey] : (feature, latlng) => {
-                    return L.circleMarker(latlng, {pane});
+                    return L.circleMarker(latlng, {pane, bubblingMouseEvents: false});
                 }),
                 error: layerTreeUtils.storeErrorHandler
             });
@@ -1938,8 +1918,10 @@ module.exports = {
             let layerKey = f.layerKey;
             let feature = f.feature;
             let layer = f.layer;
+            let vector = f?.vector || false
 
             let parsedMeta = _self.parseLayerMeta(meta.getMetaByKey(layerKey, false));
+            let editDisplay = parsedMeta.vidi_layer_editable ? 'inline' : 'none';
             let properties = JSON.parse(JSON.stringify(feature.properties));
             for (var key in properties) {
                 if (properties.hasOwnProperty(key)) {
@@ -1948,6 +1930,12 @@ module.exports = {
                     }
                 }
             }
+
+            properties._vidi_edit_layer_id = layer._leaflet_id;
+            properties._vidi_edit_layer_name = layerKey;
+            properties._vidi_edit_vector = vector;
+            properties._vidi_edit_display = editDisplay;
+
 
             let i = properties._vidi_content.fields.length;
             while (i--) {
@@ -2011,7 +1999,6 @@ module.exports = {
             } catch (e) {
                 console.info("Error in pop-up template for: " + layerKey, e);
             }
-
             // Set select call when opening a panel
             let selectCallBack = () => {
             };
@@ -2053,40 +2040,20 @@ module.exports = {
                 if (typeof parsedMeta.info_element_selector !== "undefined" && parsedMeta.info_element_selector !== "" && renderedText !== null) {
                     $(parsedMeta.info_element_selector).html(renderedText)
                 } else {
-                    // Set select call when opening a panel
-                    // let selectCallBack = () => {
-                    // };
-                    // if (typeof parsedMeta.select_function !== "undefined" && parsedMeta.select_function !== "") {
-                    //     try {
-                    //         selectCallBack = Function('"use strict";return (' + parsedMeta.select_function + ')')();
-                    //     } catch (e) {
-                    //         console.info("Error in select function for: " + key);
-                    //         console.error(e.message);
-                    //     }
-                    // }
-                    // let func = selectCallBack.bind(this, null, layer, layerKey, _self);
-                    // $(document).arrive(`#a-collapse${randText}`, function () {
-                    //     $(this).on('click', function () {
-                    //         let e = $(`#collapse${randText}`);
-                    //         if (!e.hasClass("in")) {
-                    //             func();
-                    //         }
-                    //         $('.feature-info-accordion-body').collapse("hide")
-                    //     });
-                    // });
-
                     if (count2 === features.length) {
                         vectorPopUp = L.popup({
                             autoPan: window.vidiConfig.autoPanPopup,
                             autoPanPaddingTopLeft: L.point(multi ? 20 : 0, multi ? 300 : 0),
                             minWidth: 300,
                             className: `js-vector-layer-popup custom-popup`
-                        }).setLatLng(event.latlng).setContent(`<div>
-                                                                ${additionalControls}
-                                                                <div style="margin-right: 5px; margin-left: 2px">${accordion}</div>
-                                                            </div>`).openOn(cloud.get().map)
+                        }).setLatLng(event.latlng).setContent(`${additionalControls}${accordion}`).openOn(cloud.get().map)
                             .on('remove', () => {
-                                sqlQuery.resetAll();
+                                if (`editor` in extensions) {
+                                    editor = extensions.editor.index;
+                                }
+                                if (!editor?.getEditedFeature()) {
+                                    sqlQuery.resetAll();
+                                }
                                 _self.resetAllVectorLayerStyles();
                             });
                     }
