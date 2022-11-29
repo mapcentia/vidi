@@ -7,7 +7,7 @@ ENV DEBIAN_FRONTEND noninteractive
 
 # Install packages
 RUN apt-get -y update --allow-releaseinfo-change
-RUN apt-get -y install wget curl vim git supervisor postgresql-client default-jre gnupg2 locales libssl-dev libxss-dev pdftk bzip2
+RUN apt-get -y install wget curl vim git supervisor postgresql-client default-jre gnupg2 locales libssl-dev libxss-dev pdftk bzip2 chromium
 
 RUN curl -sL https://deb.nodesource.com/setup_14.x -o nodesource_setup.sh &&\
     bash nodesource_setup.sh &&\
