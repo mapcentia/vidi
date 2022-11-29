@@ -4,7 +4,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## UNRELEASED
+## [UNRELEASED] - 2022-29-11
+### Changed
+- Cookie set in URL are now set with Expires. Also code moved from init.js to extensions/session.
+
+## [2022.11.3] - 2022-22-11
+### Changed
+- Removed Jsts as a dependency. Now using Turf in `advancedInfo` and `conflict`.
+- Upgrade of Grunt.
+- Upgrade to bullseye in Dockerfile.
+
+### Fixed
+- Bug in `conflict` module after change to native range input slider.
+
+## [2022.11.2] - 2022-17-11
+### Changed
+- Changed from noUiSlider to native HTML range input in these modules. noUiSlider packages is no longer installed:
+  - Base layers
+  - Advanced info
+  - Conflict
+- jQuery upgraded to 3.6.1
+
+## [2022.11.1] - 2022-16-11
+### Changed
+- Reworked editor tools in popups. Now a central listner in the Editor module will invoke editing. Vector and raster now use the same markup definition for the editor tools.
+- Editing can now be invoked from the accordion popup.
+- The editor geometry for raster is now blue.
+- The same marker is now used for both editing and adding points.
+- Geometry from Draw module is no longer dashed when selected.
+
+## [2022.11.0] - 2022-8-11
 ### Added
 - The url parameter `dps=1` will prevent browser state from being pushed to history. This parameter will be set by embed.js, so the browser history will not be pushed to the parent frame. Snapshot links will also have this parameter set.
 - A new faster init process is implemented which cuts about 50% of startup time for Vidi. This new init process will automatic be invoked unless a URL achor is used - when the old process will be invoked. 
@@ -15,8 +44,10 @@ and this project adheres to [CalVer](https://calver.org/).
 - When clicking/tapping on the map, geometry with 'selected' style will be reset if any.
 
 ### Fixed
-- Update the queue statistics when group panel is opened in case of the layer tree component is not rendered yet. Before the qeueu statistics was not shown after a refresh.
+- Update the editor queue statistics when group panel is opened in case of the layer tree component is not rendered yet. Before the queue statistics was not shown after a refresh.
 - Click on set default extent button will now set initZoomCenter if present.
+- It's now possible to use WMS overlays in base layer definitions. Before is was only possible to use GC2 layers for this. 
+- Komkode filter on esr/sfe search.
 
 ## [2022.10.0] - 2022-5-10
 ### Changed
@@ -27,7 +58,7 @@ and this project adheres to [CalVer](https://calver.org/).
 }
 ```
 ### Fixed
-- When Vidi was started URL layers in offline mode, was not set to offline because layertree is yet not created. Now offline mode is retrived form state on upstart.
+- When Vidi was started with URL layers in offline mode, the layers was not set to offline because the layertree was yet not created. Now offline mode is retrived form state on upstart.
 
 ## [2022.9.2] - 2022-19-9
 ### Added

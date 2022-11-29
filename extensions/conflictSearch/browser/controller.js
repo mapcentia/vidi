@@ -66,7 +66,7 @@ module.exports = {
                 setTimeout(() => {
                     stateFromDb = null;
                 }, 0);
-                conflictSearch.setValueForNoUiSlider(stateFromDb.bufferValue);
+                conflictSearch.setValueForSlider(stateFromDb.bufferValue);
                 conflictSearch.handleResult(stateFromDb);
                 reportType = stateFromDb.reportType;
                 $("input[name='conflict-report-type'][value='" + reportType + "']").prop("checked", true);
@@ -74,7 +74,7 @@ module.exports = {
             }
             state.getModuleState(MODULE_ID).then(initialState => {
                 if (initialState) {
-                    conflictSearch.setValueForNoUiSlider(initialState.bufferValue);
+                    conflictSearch.setValueForSlider(initialState.bufferValue);
                     if (typeof urlparser.urlVars?.var_landsejerlavskode === "undefined" || conflictSearch.getFromVarsIsDone()) {
                         conflictSearch.handleResult(initialState);
                     }

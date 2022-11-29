@@ -81,7 +81,7 @@ module.exports = function (grunt) {
                         'public/fonts/fonts.css',
                         'public/icons/material-icons.css',
                         // jQuery UI
-                        'public/js/lib/jquery-ui/jquery-ui.min.css',
+                        // 'public/js/lib/jquery-ui/jquery-ui.min.css',
                         // Font Awesome
                         'public/css/font-awesome.min.css',
                         'public/css/font-awesome.v5.15/all.css',
@@ -287,11 +287,14 @@ module.exports = function (grunt) {
                         'public/js/lib/leaflet-geometryutil/leaflet.geometryutil.js',
                         'public/js/lib/Path.Drag.js/src/Path.Drag.js',
                         'public/js/lib/leaflet-side-by-side/leaflet-side-by-side.min.js',
-                        'public/js/lib/jquery-ui/jquery-ui.min.js',
-                        'public/js/lib/jquery-ui-touch/jquery.ui.touch-punch.min.js',
-                        'public/js/lib/jsts/jsts.min.js',
+
+                        'node_modules/jquery-ui/dist/jquery-ui.js',
+                        'node_modules/jquery-ui-touch-punch-c/jquery.ui.touch-punch.js',
+                        'node_modules/handlebars/dist/handlebars.js',
+
                         'public/js/lib/leaflet-dash-flow/L.Path.DashFlow.js',
-                        'public/js/lib/handlebars/handlebars.js',
+
+
                         'public/js/lib/typeahead.js/typeahead.jquery.js',
                         'public/js/lib/bootstrap/dist/js/bootstrap.js',
                         'public/js/lib/bootstrap-material-design/dist/js/ripples.js',
@@ -299,7 +302,6 @@ module.exports = function (grunt) {
                         'public/js/lib/bootstrap-colorpicker/js/bootstrap-colorpicker.js',
 
                         'node_modules/leaflet.glify/dist/glify-browser.js',
-
                         'node_modules/bootstrap-table/dist/bootstrap-table.js',
                         'node_modules/bootstrap-table/dist/bootstrap-table-locale-all.js',
                         'node_modules/bootstrap-table/dist/extensions/export/bootstrap-table-export.js',
@@ -314,18 +316,6 @@ module.exports = function (grunt) {
             publish: {
                 files: {
                     'public/index.html': ['public/index.html']
-                }
-            }
-        },
-        gitpull: {
-            production: {
-                options: {}
-            }
-        },
-        gitreset: {
-            production: {
-                options: {
-                    mode: 'hard'
                 }
             }
         },
@@ -389,7 +379,6 @@ module.exports = function (grunt) {
 
     grunt.loadNpmTasks('grunt-templates-hogan');
     grunt.loadNpmTasks('grunt-browserify');
-    grunt.loadNpmTasks('grunt-git');
     grunt.loadNpmTasks('grunt-shell');
     grunt.loadNpmTasks('grunt-contrib-less');
     grunt.loadNpmTasks('grunt-contrib-uglify-es');
@@ -399,7 +388,6 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-env');
     grunt.loadNpmTasks('grunt-contrib-handlebars');
     grunt.loadNpmTasks('grunt-contrib-watch');
-    grunt.loadNpmTasks('grunt-watchify');
     grunt.loadNpmTasks('grunt-version');
 
     grunt.registerTask('default', ['prepareAssets', 'browserify:publish', 'browserify:publish_sw_dev', 'extension-css', 'shell:default', 'hogan', 'version']);

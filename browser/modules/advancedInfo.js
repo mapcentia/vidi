@@ -11,15 +11,15 @@ import {GEOJSON_PRECISION} from './constants';
 const MODULE_ID = `advancedInfo`;
 let cloud;
 let sqlQuery;
-const reproject = require('reproject');
+const wicket = require('wicket');
 let searchOn = false;
 let drawnItems = new L.FeatureGroup();
 let bufferItems = new L.FeatureGroup();
 let drawControl;
 let qstore = [];
-const noUiSlider = require('nouislider');
-let bufferSlider;
+let sliderEl;
 let bufferValue;
+const BUFFER_START_VALUE = "40";
 const _clearDrawItems = function () {
     drawnItems.clearLayers();
     bufferItems.clearLayers();
@@ -27,6 +27,9 @@ const _clearDrawItems = function () {
 };
 let backboneEvents;
 const debounce = require('lodash/debounce');
+import {
+    buffer as turfBuffer
+} from '@turf/turf'
 const _makeSearch = function () {
     let primitive, coord,
         layer, buffer = parseFloat($("#buffer-value").val());
@@ -45,23 +48,8 @@ const _makeSearch = function () {
     }
     primitive = layer.toGeoJSON(GEOJSON_PRECISION);
     if (primitive) {
-        if (typeof layer.getBounds !== "undefined") {
-            coord = layer.getBounds().getSouthWest();
-        } else {
-            coord = layer.getLatLng();
-        }
-        // Get utm zone
-        const zone = require('./utmZone.js').getZone(coord.lat, coord.lng);
-        const crss = {
-            "proj": "+proj=utm +zone=" + zone + " +ellps=WGS84 +datum=WGS84 +units=m +no_defs",
-            "unproj": "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
-        };
-        const reader = new jsts.io.GeoJSONReader();
-        const writer = new jsts.io.GeoJSONWriter();
-        const geom = reader.read(reproject.reproject(primitive, "unproj", "proj", crss));
-        const buffer4326 = reproject.reproject(writer.write(geom.geometry.buffer(buffer)), "proj", "unproj", crss);
-        const buffered = reader.read(buffer4326);
-        const l = L.geoJson(buffer4326, {
+        const geom = turfBuffer(primitive, buffer, {units: 'meters'});
+        const l = L.geoJson(geom, {
             "color": "#ff7800",
             "weight": 1,
             "opacity": 1,
@@ -71,7 +59,7 @@ const _makeSearch = function () {
         l._layers[Object.keys(l._layers)[0]]._vidi_type = "query_buffer";
         // Reset all SQL Query layers, in case another tools has
         // created a layer while this one was switch on
-        sqlQuery.init(qstore, buffered.toText(), "4326");
+        sqlQuery.init(qstore, new wicket.Wkt().read(JSON.stringify(geom.geometry)).write(), "4326");
     }
 };
 
@@ -117,37 +105,32 @@ module.exports = {
             _self.control();
         });
 
-        //TEST
         cloud.get().map.addLayer(drawnItems);
         cloud.get().map.addLayer(bufferItems);
 
-        bufferSlider = document.getElementById('buffer-slider');
+        sliderEl = $('#buffer-slider');
         bufferValue = document.getElementById('buffer-value');
-        try {
-            noUiSlider.create(bufferSlider, {
-                start: 40,
-                connect: "lower",
-                step: 1,
-                range: {
-                    min: 0,
-                    max: 500
-                }
-            });
-            bufferSlider.noUiSlider.on('update', debounce(function (values, handle) {
-                bufferValue.value = values[handle];
-                if (typeof bufferItems._layers[Object.keys(bufferItems._layers)[0]] !== "undefined" && typeof bufferItems._layers[Object.keys(bufferItems._layers)[0]]._leaflet_id !== "undefined") {
-                    bufferItems.clearLayers();
-                    _makeSearch()
-                }
-            }, 300));
+        if (bufferValue) {
+            bufferValue.value = BUFFER_START_VALUE;
+        }
 
-            // When the input changes, set the slider value
+        sliderEl.append(`<div class="range"">
+                                            <input type="range"  min="0" max="500" value="${BUFFER_START_VALUE}" class="js-info-buffer-slider form-range">
+                                            </div>`);
+        let slider = sliderEl.find('.js-info-buffer-slider');
+        slider.on('input change', debounce(function (values) {
+            bufferValue.value = parseFloat(values.target.value);
+            if (typeof bufferItems._layers[Object.keys(bufferItems._layers)[0]] !== "undefined" && typeof bufferItems._layers[Object.keys(bufferItems._layers)[0]]._leaflet_id !== "undefined") {
+                bufferItems.clearLayers();
+                _makeSearch()
+            }
+        }, 300));
+        // When the input changes, set the slider value
+        if (bufferValue) {
             bufferValue.addEventListener('change', function () {
-                bufferSlider.noUiSlider.set([this.value]);
+                slider.val(this.value);
+                slider.trigger('change');
             });
-
-        } catch (e) {
-            console.info(e.message);
         }
     },
 

@@ -83,7 +83,7 @@ module.exports = {
                     wkt = "POINT(" + coords.x + " " + coords.y + ")";
 
                     // Cross Multi select disabled
-                    if (!window.vidiConfig.crossMultiSelect || window.vidiConfig.enabledExtensions.includes('editor')) {
+                    if (!window.vidiConfig.crossMultiSelect) {
                         sqlQuery.init(qstore, wkt, "3857", null, null, [coords.lat, coords.lng], false, false, false, (layerId) => {
                             setTimeout(() => {
                                 let parentLayer = cloud.get().map._layers[layerId];
