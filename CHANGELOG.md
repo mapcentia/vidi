@@ -7,6 +7,8 @@ and this project adheres to [CalVer](https://calver.org/).
 ## [UNRELEASED] - 2022-29-11
 ### Changed
 - Cookie set in URL are now set with Expires. Also code moved from init.js to extensions/session.
+- Redesign of layer element in layer tree. Extensive use of flex-boxes.
+- Merge of WebGL layer branch.
 
 ## [2022.11.3] - 2022-22-11
 ### Changed
