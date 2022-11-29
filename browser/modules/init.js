@@ -82,11 +82,6 @@ module.exports = {
         }
         (function poll() {
             if (typeof L.control.locate !== "undefined") {
-                if (typeof urlVars.session === "string") {
-                    // Try to remove existing cookie
-                    document.cookie = 'connect.gc2=; Max-Age=0; path=/; domain=' + location.host;
-                    cookie.set("connect.gc2", urlVars.session);
-                }
                 let loadConfig = function () {
                     let configParam;
                     if (configFile.startsWith("/")) {

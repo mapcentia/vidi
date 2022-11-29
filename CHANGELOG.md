@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [UNRELEASED] - 2022-29-11
+### Changed
+- Cookie set in URL are now set with Expires. Also code moved from init.js to extensions/session.
+
 ## [2022.11.3] - 2022-22-11
 ### Changed
 - Removed Jsts as a dependency. Now using Turf in `advancedInfo` and `conflict`.
