@@ -98,12 +98,13 @@ module.exports = function (grunt) {
                         'public/js/lib/Leaflet.markercluster/MarkerCluster.css',
                         'public/js/lib/Leaflet.markercluster/MarkerCluster.Default.css',
                         // Bootstrap
+                        'node_modules/bootstrap-select/dist/css/bootstrap-select.css',
+                        'node_modules/bootstrap-table/dist/bootstrap-table.css',
                         'public/js/lib/bootstrap/dist/css/bootstrap.css',
+
                         'public/js/lib/snackbarjs/snackbar.min.css',
                         'public/js/lib/bootstrap-material-design/dist/css/ripples.css',
                         'public/js/lib/bootstrap-material-datetimepicker/bootstrap-material-datetimepicker.css',
-                        'public/js/lib/bootstrap-select/bootstrap-select.css',
-                        'public/js/lib/bootstrap-table/bootstrap-table.css',
                         'public/js/lib/bootstrap-material-design/dist/css/bootstrap-material-design.css',
                         'public/js/lib/bootstrap-colorpicker/css/bootstrap-colorpicker.css',
                         //custom
@@ -294,9 +295,8 @@ module.exports = function (grunt) {
 
                         'public/js/lib/leaflet-dash-flow/L.Path.DashFlow.js',
 
-
                         'public/js/lib/typeahead.js/typeahead.jquery.js',
-                        'public/js/lib/bootstrap/dist/js/bootstrap.js',
+                        'node_modules/bootstrap/dist/js/bootstrap.js',
                         'public/js/lib/bootstrap-material-design/dist/js/ripples.js',
                         'public/js/lib/bootstrap-material-design/dist/js/material.js',
                         'public/js/lib/bootstrap-colorpicker/js/bootstrap-colorpicker.js',
