@@ -20,6 +20,7 @@ let qstore = [];
 let sliderEl;
 let bufferValue;
 const BUFFER_START_VALUE = "40";
+const BUFFER_MAX_VALUE = "1000";
 const _clearDrawItems = function () {
     drawnItems.clearLayers();
     bufferItems.clearLayers();
@@ -115,7 +116,7 @@ module.exports = {
         }
 
         sliderEl.append(`<div class="range"">
-                                            <input type="range"  min="0" max="500" value="${BUFFER_START_VALUE}" class="js-info-buffer-slider form-range">
+                                            <input type="range"  min="0" max="${BUFFER_MAX_VALUE}" value="${BUFFER_START_VALUE}" class="js-info-buffer-slider form-range">
                                             </div>`);
         let slider = sliderEl.find('.js-info-buffer-slider');
         slider.on('input change', debounce(function (values) {
