@@ -11,7 +11,7 @@ var fetch = require('node-fetch');
 const wkt = require('wkt');
 
 
-const debug = true;
+const debug = false;
 function addZero(i) {
     if (i < 10) {
       i = "0" + i;

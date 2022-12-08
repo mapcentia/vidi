@@ -25,6 +25,7 @@ import MatrikelTable from './MatrikelTable';
 import DAWASearch from './DAWASearch';
 import SaveIcon from '@material-ui/icons/Save';
 import IconButton from '@material-ui/core/IconButton';
+import CheckIcon from '@material-ui/icons/Check';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import FolderIcon from '@material-ui/icons/Folder';
 import ErrorIcon from '@material-ui/icons/Error';
@@ -496,7 +497,7 @@ module.exports = {
 
                             // Click event - info
                             mapObj.on("click", function (e) {
-                                //TODO: Enable only if extension is active?!
+                                // TODO: Enable only if extension is active?!
                                 me.findMatrikel(e);
                             });
 
@@ -847,7 +848,7 @@ module.exports = {
                         }
                         
 
-                        // TODO: make value checks more robust.
+                        // make value checks more robust.
                         return new Promise(function(resolve, reject) {
                             // Comes from DAWA Adresse
                             if (matr.hasOwnProperty('adresse')) {
@@ -952,7 +953,7 @@ module.exports = {
                             dashArray: 3
                         };
 
-                        // TODO: If matrikel is in active list, show it
+                        // If matrikel is in active list, show it
                         if (_self.alreadyInActive(feature.properties.key)){
                             // In list
                             basic.fillOpacity = 0.50
@@ -1022,7 +1023,7 @@ module.exports = {
                             </p>
                         `)
 
-                        // TODO: Add information on other cases
+                        // Add information on other cases
                         
                         getConnectedCases(p.ejerlavkode, p.matrikelnr)
                             .then(r => {
