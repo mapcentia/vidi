@@ -330,7 +330,6 @@ module.exports = {
                 }
 
                 if (fields[key]) {
-                    console.log(fields[key].type)
                     switch (fields[key].type) {
                         case `smallint`:
                         case `integer`:
