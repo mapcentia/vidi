@@ -25,8 +25,9 @@ import MatrikelTable from './MatrikelTable';
 import DAWASearch from './DAWASearch';
 import SaveIcon from '@material-ui/icons/Save';
 import IconButton from '@material-ui/core/IconButton';
-import CircularProgress from '@material-ui/core/CircularProgress';
 import CheckIcon from '@material-ui/icons/Check';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import FolderIcon from '@material-ui/icons/Folder';
 import ErrorIcon from '@material-ui/icons/Error';
 import Tooltip from '@material-ui/core/Tooltip';
 import { reject } from 'async';
@@ -294,6 +295,34 @@ module.exports = {
                             });
                     })
                 }
+                
+            var getConnectedCases = function (ejerlavkode, matrikelnr) {
+                    // Get connected cases for display
+                    return new Promise(function (resolve, reject) {
+                        let obj = {
+                            matrikelnr: matrikelnr,
+                            ejerlavkode: ejerlavkode
+                        }
+                        let opts = {
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json'
+                            },
+                            method: 'POST',
+                            body: JSON.stringify(obj)
+                        }
+                        // Do async job and resolve
+                        fetch('/api/extension/getConnectedCases', opts)
+                            .then(r => {
+                                const data = r.json();
+                                resolve(data)
+                            })
+                            .catch(e => {
+                                console.log(e)
+                                reject(e)
+                            });
+                    })
+                }
 
                 var getJordstykkeByCoordinate = function(E,N,utm=true) {
                     var hostName = 'https://dawa.aws.dk/jordstykker?';
@@ -421,7 +450,6 @@ module.exports = {
                             showForm: false
                         };
 
-                        this.readContents = this.readContents.bind(this);
                         this.deleteMatrikel = this.deleteMatrikel.bind(this);
                         this.focusMatrikel = this.focusMatrikel.bind(this);
                         this.addMatrikel = this.addMatrikel.bind(this);
@@ -469,7 +497,7 @@ module.exports = {
 
                             // Click event - info
                             mapObj.on("click", function (e) {
-                                //TODO: Enable only if extension is active?!
+                                // TODO: Enable only if extension is active?!
                                 me.findMatrikel(e);
                             });
 
@@ -488,31 +516,6 @@ module.exports = {
                             // Remove click handeler
                             mapObj.off('click');
                         });
-                    }
-
-                    /**
-                     * Handle file selected
-                     * @param {*} files 
-                     */
-                    onDrop(files) {
-                        const _self = this;
-
-                        //TODO: Handle more?
-
-                        var r = new FileReader();
-                        r.readAsDataURL(files[0])
-                        r.onloadend = function() {
-                            let b64 = r.result
-                            _self.readContents(b64)
-                        }
-                    }
-
-                    /**
-                     * Reads content of uploaded ZIP-file
-                     * @param {*} blob 
-                     */
-                    readContents(blob) {
-                        var _self = this;                            
                     }
 
                     hasChanges() {
@@ -789,7 +792,7 @@ module.exports = {
                         })
                     }
 
-                    addMatrikelToMap(feat){
+                    addMatrikelToMap(feat) {
                         const _self = this;
                         return new Promise(function(resolve, reject) {
                             // check if exists already
@@ -822,6 +825,7 @@ module.exports = {
                             })
                         } else {
                             // Let user know it's already in list!
+                            // TODO: only show this once
                             //console.log(id)
                             let x = id
                             let msg = `${x.matrikelnr}, ${x.ejerlavsnavn} er allerede valgt.`
@@ -844,7 +848,7 @@ module.exports = {
                         }
                         
 
-                        // TODO: make value checks more robust.
+                        // make value checks more robust.
                         return new Promise(function(resolve, reject) {
                             // Comes from DAWA Adresse
                             if (matr.hasOwnProperty('adresse')) {
@@ -918,7 +922,7 @@ module.exports = {
                             }
 
                             // Comes from Docunote
-                            if (matr.hasOwnProperty('personId')) {
+                            if (matr.hasOwnProperty('personId')) { 
                                 try {
                                     clean.ejerlavskode = matr.customData.ejerlavskode
                                     clean.ejerlavsnavn = (itsSomething(matr.lastName)) ? unableToGetValue : matr.lastName
@@ -949,7 +953,7 @@ module.exports = {
                             dashArray: 3
                         };
 
-                        // TODO: If matrikel is in active list, show it
+                        // If matrikel is in active list, show it
                         if (_self.alreadyInActive(feature.properties.key)){
                             // In list
                             basic.fillOpacity = 0.50
@@ -1018,7 +1022,45 @@ module.exports = {
                             <b>Fjern: </b><a class="deleteMatrikel" alt="Fjern matrikel">matrikel</a> / <a  class="deleteEjendom" alt="Fjern ejendom">ejendom</a></br>
                             </p>
                         `)
-                        layer.bindPopup(container[0]);
+
+                        // Add information on other cases
+                        
+                        getConnectedCases(p.ejerlavkode, p.matrikelnr)
+                            .then(r => {
+                                if (r.length > 0) {
+                                    try {
+                                        container.append(`<p><b>Relaterede sager:</b></p>`)
+                                        
+                                        container.append(`<p>`)
+                                        r.forEach(c => {
+
+                                            let icon = ''
+                                            if (c.status == '3') { // 
+                                                icon = '<i style="color: grey;" class="fas fa-folder"></i>' // lukket
+                                            } else if (c.status == '2') {
+                                                icon = '<i style="color: purple;" class="fas fa-folder"></i>' // ?
+                                            } else {
+                                                icon = '<i style="color: green;" class="fas fa-folder"></i>' // aktiv
+                                            }
+
+                                            let created = c.created.split('T')[0]
+                                            
+                                            container.append(`<div title="${c.title} \r\n\r\n ${c.description}">${icon} <a href="docunote:/casenumber=${c.number}">${c.number} (${created})</a></div>`)
+                                        })
+                                        container.append(`</p>`)
+                                    }
+                                    catch (error) {
+                                        console.log(error)
+                                    }
+                                } else {
+                                    container.append(`<p><b>Ingen relaterede sager</b></p>`)
+                                }
+                            })
+                        
+
+                        // Add popup
+                        var popup = L.popup({ Width: 350 }).setContent(container[0]);
+                        layer.bindPopup(popup)
                     
                         // Set Highlight
                         layer.on({

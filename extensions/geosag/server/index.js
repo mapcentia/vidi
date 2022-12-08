@@ -87,7 +87,7 @@ function getDocunote(endpoint) {
                 yell(api.method + ': ' + api.url + ' - Recieved - ERROR');
                 reject(err);
             } else {
-                yell(body)
+                // yell(body)
                 yell(api.method + ': ' + api.url + ' - Recieved - OK');
                 resolve(body);
             }
@@ -130,7 +130,7 @@ function verifyUser(request) {
                 resolve({success: true, message:'User allowed'});
             } else {
                 yell(`Blocked access for ${request.connection.remoteAddress}/${request.headers['x-forwarded-for']}`, true)
-                yell(`Address not in ${dn.allow_from}`, true)
+                // yell(`Address not in ${dn.allow_from}`, true)
                 reject({success: false, message:'User not allowed'});
             }
     });  
@@ -327,6 +327,86 @@ function createMatrikelPart(matr) {
 
 }
 
+function getConnectedCases(partNodeType, partNodeId) {
+    // Get all connected cases
+    return new Promise(function (resolve, reject) {
+        getDocunote(`Cases/pickername/${dn.partsPicker}/partNodeType/${partNodeType}/partRecordId/${partNodeId}`)
+        .then(r => {
+            resolve(r)
+        })
+        .catch(e => {
+                reject(e);
+            }
+        )
+    }); 
+}
+
+router.post('/api/extension/getConnectedCases', function (req, response) {
+    response.setHeader('Content-Type', 'application/json');
+
+    // Validation block
+    try {
+        // Ejerlavskode not in call
+        if (!req.body.hasOwnProperty("ejerlavkode")) {
+            response.status(401).json({
+                error: "ejerlavkode mangler i kaldet"
+            });
+            return;
+        }
+        // Matrikler not in call
+        if (!req.body.hasOwnProperty("matrikelnr")) {
+            response.status(401).json({
+                error: "matrikelnr mangler i kaldet"
+            });
+            return;
+        }
+    } catch (error) {
+        yell(error)
+        response.status(500).json(error);
+    }
+
+    // Logic
+    try {
+        console.log(req.body)
+        verifyUser(req)
+            .then(function(user) {
+                // user is allowed
+
+                // Check if matrs exist already
+                let jobs = [];
+                let matr = { key: req.body.ejerlavkode + req.body.matrikelnr }
+                return matrikelExists(matr)
+            })
+            .then(function (exists) {
+                // Move existing into parts
+                console.log(exists)
+                
+                // if values  in exists are undefined, retun empty array
+                if (exists.partNodeType == undefined || exists.partRecordId == undefined) {
+                    response.status(200).json([]);
+                }
+                else {
+                    return getConnectedCases(exists.partNodeType, exists.partRecordId)
+                }
+
+
+            })
+            .then(function(connectedCases) {
+                response.status(200).json(connectedCases);
+                return;
+            })
+            .catch(function(error) {
+                response.status(500).json(error);
+                return;
+            });
+
+    } catch (error) {
+        yell(error)
+        response.status(500).json(error);
+    }
+
+});
+
 router.post('/api/extension/saveMatrChanges', function (req, response) {
     response.setHeader('Content-Type', 'application/json');
 
@@ -339,20 +419,20 @@ router.post('/api/extension/saveMatrChanges', function (req, response) {
         //    });
         //    return;
         //}
-    // Sagsnummer not in call
-    if (!req.body.hasOwnProperty("sagsnr")) {
-        response.status(401).json({
-            error: "Sagsnummer mangler i kaldet"
-        });
-        return;
-    }
-    // Matrikler not in call
-    if (!req.body.hasOwnProperty("matrs")) {
-        response.status(401).json({
-            error: "Matrikler mangler i kaldet"
-        });
-        return;
-    }
+        // Sagsnummer not in call
+        if (!req.body.hasOwnProperty("sagsnr")) {
+            response.status(401).json({
+                error: "Sagsnummer mangler i kaldet"
+            });
+            return;
+        }
+        // Matrikler not in call
+        if (!req.body.hasOwnProperty("matrs")) {
+            response.status(401).json({
+                error: "Matrikler mangler i kaldet"
+            });
+            return;
+        }
     } catch (error) {
         yell(error)
         response.status(500).json(error);
@@ -446,7 +526,7 @@ router.post('/api/extension/saveMatrChanges', function (req, response) {
                     ]
                 }
                 
-                yell(newPicker)
+                F(newPicker)
 
 
                 return postDocunote('Cases/'+ caseId+'/pickers', newPicker);
