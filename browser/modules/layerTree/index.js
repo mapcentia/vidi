@@ -1984,7 +1984,7 @@ module.exports = {
                             accordion += `<div class="panel panel-default vector-feature-info-panel" id="vector-feature-info-panel-${randText}" style="box-shadow: none;border-radius: 0; margin-bottom: 0">
                                         <div class="panel-heading" role="tab" style="padding: 8px 0px 8px 15px;border-bottom: 1px white solid">
                                             <h4 class="panel-title">
-                                                <a style="display: block; color: black" class="feature-info-accordion-toggle accordion-toggle js-toggle-feature-panel" data-toggle="collapse" data-parent="#layers" href="#collapse${randText}" id="a-collapse${randText}">${title}</a>
+                                                <a style="display: block; color: black" class="feature-info-accordion-toggle accordion-toggle js-toggle-feature-panel" data-bs-toggle="collapse" data-parent="#layers" href="#collapse${randText}" id="a-collapse${randText}">${title}</a>
                                             </h4>
                                         </div>
                                         <ul class="list-group" id="group-${randText}" role="tabpanel"><div data-layer-id="${layer._leaflet_id}" id="collapse${randText}" class="feature-info-accordion-body accordion-body collapse" style="padding: 3px 8px 3px 8px">${renderedText}</div></ul>

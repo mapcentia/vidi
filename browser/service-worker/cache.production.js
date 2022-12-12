@@ -37,7 +37,6 @@ let urlsToCache = [
     '/icons/MaterialIcons-Regular.ttf',
     '/icons/material-icons.css',
     '/js/templates.js',
-    '/js/leaflet-easybutton/easy-button.css',
     '/locale',
     '/api/config/vidi.json'
 ];

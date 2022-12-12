@@ -3,45 +3,6 @@
  * @copyright  2013-2018 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
-/*
-
-To get this list of colors inject jQuery at http://www.google.com/design/spec/style/color.html#color-color-palette
-
-Then, run this script to get the list.
-
-
-(function() {
-  var colors = {}, main = {};
-  $(".color-group").each(function() {
-    var color = $(this).find(".name").text().trim().toLowerCase().replace(" ", "-");
-    colors[color] = {};
-
-    $(this).find(".color").not(".main-color").each(function() {
-      var shade = $(this).find(".shade").text().trim(),
-          hex   = $(this).find(".hex").text().trim();
-
-      colors[color][shade] = hex;
-    });
-    main[color] = color + "-" + $(this).find(".main-color .shade").text().trim();
-
-  });
-  var LESS = "";
-  $.each(colors, function(name, shades) {
-    LESS += "\n\n";
-    $.each(shades, function(shade, hex) {
-      LESS += "@" + name + "-" + shade + ": " + hex + ";\n";
-    });
-    if (main[name]) {
-      LESS += "@" + name + ": " + main[name] + ";\n";
-    }
-  });
-  console.log(LESS);
-})();
-
-
-*/
-/* ANIMATION */
-/* SHADOWS */
 body {
   margin: 0;
   padding: 0;
@@ -660,7 +621,6 @@ inline .leaflet-control-print {
   margin-bottom: 0;
 }
 .custom-popup .leaflet-popup-content-wrapper a {
-  color: #222;
   text-decoration: underline;
 }
 .custom-popup .leaflet-popup-tip-container {
@@ -824,26 +784,6 @@ body {
 }
 #side-panel hr {
   margin-left: -20px;
-}
-#side-panel ul {
-  overflow: hidden !important;
-  list-style-type: none;
-  padding: 0px 17px;
-}
-#side-panel ul li {
-  padding: 7px 0;
-}
-#side-panel ul li .material-icons {
-  margin-right: 17px;
-  padding: 2px;
-  border-radius: 50%;
-}
-#side-panel ul li .material-icons:hover {
-  background-color: #eeeeee;
-}
-#side-panel ul li.active .material-icons {
-  background-color: #03a9f4;
-  color: white;
 }
 .list-group .list-group-separator:before {
   width: 100%;
@@ -1317,7 +1257,6 @@ h4 small {
   margin: 0 !important;
 }
 #layers_list .layer-item.list-group-item .active {
-  background-color: #03a9f4;
   color: white;
 }
 .layer-move-vert {
@@ -1608,7 +1547,7 @@ td.rdtYear:hover {
   cursor: help;
 }
 .list-subgroup-item {
-  border-left: 2px solid #222 !important;
+  border-left: 2px solid !important;
 }
 .symbols-rotate,
 .symbols-delete,

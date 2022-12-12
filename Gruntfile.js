@@ -73,18 +73,14 @@ module.exports = function (grunt) {
             build: {
                 options: {
                     target: "./build",
-                    rebase: true
+                    rebase: true,
                 },
                 files: {
                     'public/css/build/all.min.css': [
-                        // Material Design fonts
-                        'public/fonts/fonts.css',
-                        'public/icons/material-icons.css',
-                        // jQuery UI
-                        // 'public/js/lib/jquery-ui/jquery-ui.min.css',
+                        // Bootstrap icons
+                        'node_modules/bootstrap-icons/font/bootstrap-icons.css',
                         // Font Awesome
-                        'public/css/font-awesome.min.css',
-                        'public/css/font-awesome.v5.15/all.css',
+                        'node_modules/@fortawesome/fontawesome-free/css/all.css',
                         // Leaflet
                         'public/js/lib/leaflet/leaflet.css',
                         'public/js/lib/leaflet-draw/leaflet.draw.css',
@@ -100,12 +96,9 @@ module.exports = function (grunt) {
                         // Bootstrap
                         'node_modules/bootstrap-select/dist/css/bootstrap-select.css',
                         'node_modules/bootstrap-table/dist/bootstrap-table.css',
-                        'public/js/lib/bootstrap/dist/css/bootstrap.css',
+                        'node_modules/bootstrap/dist/css/bootstrap.css',
 
                         'public/js/lib/snackbarjs/snackbar.min.css',
-                        'public/js/lib/bootstrap-material-design/dist/css/ripples.css',
-                        'public/js/lib/bootstrap-material-datetimepicker/bootstrap-material-datetimepicker.css',
-                        'public/js/lib/bootstrap-material-design/dist/css/bootstrap-material-design.css',
                         'public/js/lib/bootstrap-colorpicker/css/bootstrap-colorpicker.css',
                         //custom
                         'public/css/styles.min.css'
@@ -296,9 +289,7 @@ module.exports = function (grunt) {
                         'public/js/lib/leaflet-dash-flow/L.Path.DashFlow.js',
 
                         'public/js/lib/typeahead.js/typeahead.jquery.js',
-                        'node_modules/bootstrap/dist/js/bootstrap.js',
-                        'public/js/lib/bootstrap-material-design/dist/js/ripples.js',
-                        'public/js/lib/bootstrap-material-design/dist/js/material.js',
+                        'node_modules/bootstrap/dist/js/bootstrap.bundle.js',
                         'public/js/lib/bootstrap-colorpicker/js/bootstrap-colorpicker.js',
 
                         'node_modules/leaflet.glify/dist/glify-browser.js',

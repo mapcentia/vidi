@@ -14,6 +14,7 @@ router.get('/api/baselayer', function (req, response) {
     url = config.host + "/api/v1/baselayerjs/" + db;
 
     request.get(url, function (err, res, body) {
+        console.log(url)
 
         if (err) {
 

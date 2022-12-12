@@ -43,8 +43,6 @@
     <link rel="preload" href="/fonts/roboto-v18-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/fonts/roboto-v18-latin-500.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/fonts/roboto-v18-latin-300.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="/icons/MaterialIcons-Regular.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="/js/lib/bootstrap/dist/fonts/glyphicons-halflings-regular.woff2" as="font" type="font/woff2" crossorigin>
     <!-- Build -->
     <link rel="stylesheet" href="/css/build/all.min.css">
 </head>

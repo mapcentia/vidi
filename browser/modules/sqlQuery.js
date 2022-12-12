@@ -690,7 +690,7 @@ module.exports = {
                                         let tmpl = `<div id="${carouselId}" class="carousel slide" data-ride="carousel">
                                                     <ol class="carousel-indicators">
                                                         {{#@root}}
-                                                        <li data-target="#${carouselId}" data-slide-to="{{@index}}"  class="{{#if @first}}active{{/if}}"></li>
+                                                        <li data-bs-target="#${carouselId}" data-slide-to="{{@index}}"  class="{{#if @first}}active{{/if}}"></li>
                                                         {{/@root}}
                                                     </ol>
                                                     <div class="carousel-inner" role="listbox">

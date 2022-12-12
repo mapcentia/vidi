@@ -112,6 +112,7 @@ if (config.staticRoutes) {
     }
 }
 app.use('/', express.static(path.join(__dirname, 'public'), {maxage: '100d'}));
+app.use('/node_modules', express.static(path.join(__dirname, 'node_modules'), {maxage: '100d'}));
 app.use(require('./controllers'));
 app.use(require('./extensions'));
 app.enable('trust proxy');

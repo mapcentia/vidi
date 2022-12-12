@@ -36,7 +36,7 @@ class MarkupGenerator {
                             <input type="checkbox" data-gc2-group-name="${name}">
                         </label>
                     </span>
-                    <a style="display: inline" class="accordion-toggle js-toggle-layer-panel collapsed" data-toggle="collapse" data-parent="#layers" href="#collapse${base64GroupName}">${name}</a>
+                    <a style="display: inline" class="accordion-toggle js-toggle-layer-panel collapsed" data-bs-toggle="collapse" data-parent="#layers" href="#collapse${base64GroupName}">${name}</a>
                     <div class="layer-count badge" style="margin-left: auto">
                         <span>0</span> / <span></span>
                     </div>
@@ -103,12 +103,12 @@ class MarkupGenerator {
         <li class="layer-item list-group-item" data-gc2-layer-key="${layerKeyWithGeom}" style="margin-top: 0; border-bottom: 2px solid #CCC; background-color: white;">
             <div style="padding: 7px 2px;">
                 <div style="display: flex; align-items: center;">
-                    <div class="togglebutton">
-                        <label style="margin: 0">
+                    <div class="form-check form-switch">
+                        <label style="margin: 0" class="form-check-label">
                             <input type="checkbox"
                                 ${(layerIsActive ? `checked="checked"` : ``)}
                                 ${(disableCheckBox ? `disabled` : ``)}
-                                class="js-show-layer-control"
+                                class="js-show-layer-control form-check-input"
                                 id="${layer.f_table_name}"
                                 data-gc2-id="${layer.f_table_schema}.${layer.f_table_name}"
                                 data-gc2-layer-type="${layerType}">
@@ -163,7 +163,8 @@ class MarkupGenerator {
                     <div style="display: inline-block;">${layerTypeSelector}</div>
                     ${addButton}
                     <button data-toggle="tooltip" data-placement="left" title="${tooltip}" style="padding: 2px 10px; margin: 0; visibility: ${displayInfo};" class="btn info-label" data-gc2-id="${layerKey}"><i style="font-size: 18px;" class="material-icons">info</i></a>
-                    <button disabled style="padding: 2px 10px; margin: 0" class="btn js-settings-panel-btn" role="button" data-toggle="collapse" data-target="#settings-${layer.f_table_schema}-${layer.f_table_name}" aria-expanded="false" aria-controls="collapseExample"><i style="font-size: 18px;" class="material-icons">settings</i></button>
+                    <button disabled style="padding: 2px 10px; margin: 0" class="btn js-settings-panel-btn" role="button" data-bs-toggle="collapse" data-bs-target="#settings-${layer.f_table_schema}-${layer.f_table_name}" aria-expanded="false" aria-controls="collapseExample"><i style="font-size: 18px;" class="material-icons">settings</i></button>
+                    
                     <i style="font-size: 26px;" class="material-icons layer-move-vert">more_vert</i>
                 </div>
                 <div  class="collapse" id="settings-${layer.f_table_schema}-${layer.f_table_name}" style="margin-top: 8px">
