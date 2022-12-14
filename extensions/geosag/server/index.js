@@ -526,7 +526,7 @@ router.post('/api/extension/saveMatrChanges', function (req, response) {
                     ]
                 }
                 
-                F(newPicker)
+                yell(newPicker)
 
 
                 return postDocunote('Cases/'+ caseId+'/pickers', newPicker);
