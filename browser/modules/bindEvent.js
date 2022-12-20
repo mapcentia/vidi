@@ -311,32 +311,32 @@ module.exports = {
         // Set up the open/close functions for side panel
         let searchPanelOpen, width, defaultCollapsedWidth = 260;
 
-        backboneEvents.get().on('show:leftSlidePanel', () => {
-            let localCollapsedWidth = Math.max.apply(Math, $('#side-panel #main-tabs > li > a, #side-panel #main-tabs > li [role="tab"]').map(function () {
-                return $(this).width();
-            }).get());
-            if (localCollapsedWidth > 0) {
-                if (localCollapsedWidth < 170) localCollapsedWidth = 170;
-                localCollapsedWidth = localCollapsedWidth + 80;
-            } else {
-                localCollapsedWidth = defaultCollapsedWidth + 80;
-            }
-            $('#search-ribbon').css('right', '-' + (width - localCollapsedWidth) + 'px');
-            $('#pane').css('right', (localCollapsedWidth - BUTTON_WITH) + 'px');
-            $('#map').css('width', 'calc(100% - ' + (localCollapsedWidth / 2) + 'px)');
-            searchPanelOpen = true;
-            $('.slide-collapsed').hide();
-            $('.slide-expanded').show();
-        });
-        backboneEvents.get().on(`hide:leftSlidePanel`, () => {
-            $('#pane').css('right', '0');
-            $('#map').css('width', '100%');
-            $('#search-ribbon').css('right', '-' + (width - BUTTON_WITH) + 'px');
-            searchPanelOpen = false;
-            $('#side-panel ul li').removeClass('active');
-            $('.slide-collapsed').show();
-            $('.slide-expanded').hide();
-        });
+        // backboneEvents.get().on('show:leftSlidePanel', () => {
+        //     let localCollapsedWidth = Math.max.apply(Math, $('#side-panel #main-tabs > li > a, #side-panel #main-tabs > li [role="tab"]').map(function () {
+        //         return $(this).width();
+        //     }).get());
+        //     if (localCollapsedWidth > 0) {
+        //         if (localCollapsedWidth < 170) localCollapsedWidth = 170;
+        //         localCollapsedWidth = localCollapsedWidth + 80;
+        //     } else {
+        //         localCollapsedWidth = defaultCollapsedWidth + 80;
+        //     }
+        //     $('#search-ribbon').css('right', '-' + (width - localCollapsedWidth) + 'px');
+        //     $('#pane').css('right', (localCollapsedWidth - BUTTON_WITH) + 'px');
+        //     $('#map').css('width', 'calc(100% - ' + (localCollapsedWidth / 2) + 'px)');
+        //     searchPanelOpen = true;
+        //     $('.slide-collapsed').hide();
+        //     $('.slide-expanded').show();
+        // });
+        // backboneEvents.get().on(`hide:leftSlidePanel`, () => {
+        //     $('#pane').css('right', '0');
+        //     $('#map').css('width', '100%');
+        //     $('#search-ribbon').css('right', '-' + (width - BUTTON_WITH) + 'px');
+        //     searchPanelOpen = false;
+        //     $('#side-panel ul li').removeClass('active');
+        //     $('.slide-collapsed').show();
+        //     $('.slide-expanded').hide();
+        // });
 
         // Bottom dialog
         $('.close-hide').on('click touchstart', function () {
@@ -414,7 +414,7 @@ module.exports = {
         });
 
         // Module icons
-        $('#side-panel ul li a').on('click', function () {
+        $('#mainLayerOffcanvas ul li a').on('click', function () {
             backboneEvents.get().trigger('off:all');
             let moduleTitle = $(this).data('module-title');
             let e = $('#module-container');
@@ -451,7 +451,7 @@ module.exports = {
         });
 
         // Listen for extensions
-        $(document).arrive('#side-panel ul li a', function () {
+        $(document).arrive('#mainLayerOffcanvas ul li a', function () {
             $(this).on('click', function () {
                 backboneEvents.get().trigger('off:all');
                 const moduleId = $(this).data('module-id');

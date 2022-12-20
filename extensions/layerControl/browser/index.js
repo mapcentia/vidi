@@ -41,13 +41,18 @@ module.exports = {
 
         const imageSize = 36;
 
-        const offcanvasEl = document.getElementById('offcanvasLayerControl');
-        offcanvasEl.addEventListener('hidden.bs.offcanvas', event => {
-            $("#offcanvasLayerControlBtn").show();
-        });
-        offcanvasEl.addEventListener('shown.bs.offcanvas', event => {
-            $("#offcanvasLayerControlBtn").hide();
-        })
+        try {
+
+            const offcanvasEl = document.getElementById('offcanvasLayerControl');
+            offcanvasEl.addEventListener('hidden.bs.offcanvas', event => {
+                $("#offcanvasLayerControlBtn").show();
+            });
+            offcanvasEl.addEventListener('shown.bs.offcanvas', event => {
+                $("#offcanvasLayerControlBtn").hide();
+            })
+        } catch (e) {
+            
+        }
 
         const Label = styled.label`
           cursor: pointer;

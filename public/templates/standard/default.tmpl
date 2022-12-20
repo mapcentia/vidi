@@ -125,11 +125,14 @@
 <!--    </div>-->
 <!--</div>-->
 
-<div>
-    <button style="position: absolute; display: none" class="btn btn-primary" type="button" data-bds-toggle="offcanvas"
+<div class="fade-then-dragging">
+    <button id="offcanvasLayerControlBtn"
+            style="position: absolute; left: 10px; top: 10px; text-transform: uppercase; display: inline"
+            class="btn btn-light" type="button"
+            data-bs-toggle="offcanvas"
             data-bs-target="#mainLayerOffcanvas" aria-controls="mainLayerOffcanvas" onclick="new bootstrap.Offcanvas('#mainLayerOffcanvas').show();
 ">
-        Layers 1
+        Lag
     </button>
     <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="mainLayerOffcanvas">
         <div class="offcanvas-header">
@@ -643,12 +646,14 @@
 </div>
 
 <div class="fade-then-dragging">
-    <button id="offcanvasLayerControlBtn" style="position: absolute; left: 10px; top: 10px; text-transform: uppercase;"
+    <button id="offcanvasLayerControlBtn"
+            style="position: absolute; left: 10px; top: 10px; text-transform: uppercase; display: none"
             class="btn btn-light" type="button"
             data-bs-toggle="offcanvas"
             data-bs-target="#offcanvasLayerControl" aria-controls="offcanvasLayerControl">
         <i class="bi bi-geo-alt"></i> Find faciliteter på kort
     </button>
+
     <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="offcanvasLayerControl">
         <div class="offcanvas-header">
             <h5 class="offcanvas-title" id="offcanvasLayerControlLabel">Find faciliteter på kort</h5>
@@ -656,6 +661,7 @@
         </div>
         <div style="overflow: auto" id="layer-control"></div>
     </div>
+
     <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="offcanvasInfo">
         <div class="offcanvas-header">
             <h5 class="offcanvas-title">Info</h5>

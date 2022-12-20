@@ -128,11 +128,15 @@ module.exports = {
     init: function () {
         _self = this;
 
-        infoOffCanvas = new bootstrap.Offcanvas('#offcanvasInfo');
-        document.getElementById('offcanvasInfo').addEventListener('hide.bs.offcanvas', event => {
-            _self.resetAllVectorLayerStyles();
-            sqlQuery.resetAll();
-        })
+        try {
+            infoOffCanvas = new bootstrap.Offcanvas('#offcanvasInfo');
+            document.getElementById('offcanvasInfo').addEventListener('hide.bs.offcanvas', event => {
+                _self.resetAllVectorLayerStyles();
+                sqlQuery.resetAll();
+            })
+        } catch (e) {
+            
+        }
 
         // Update the queue statistics when group panel is opened.
         // In case of the layer tree component is not rendered yet
