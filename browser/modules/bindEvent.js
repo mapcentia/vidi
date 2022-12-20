@@ -280,11 +280,6 @@ module.exports = {
         // Init some GUI stuff after modules are loaded
         // ============================================
         $('[data-toggle=tooltip]').tooltip();
-        try {
-            $.material.init();
-        } catch (e) {
-            console.warn('Material Design could not be initiated');
-        }
 
         touchScroll('.tab-pane');
         touchScroll('#info-modal-body-wrapper');

@@ -59,6 +59,7 @@ let backArrowIsAdded = false;
 const jquery = require('jquery');
 require('snackbarjs');
 
+
 let editToolsHtml = `
         <div class="form-group gc2-edit-tools" data-edit-layer-id="{{_vidi_edit_layer_id}}" data-edit-layer-name="{{_vidi_edit_layer_name}}" data-edit-vector="{{_vidi_edit_vector}}" style="display: {{_vidi_edit_display}};">
             <div class="btn-group btn-group-justified" style="margin: 10px 0;">
@@ -213,6 +214,7 @@ module.exports = {
 
         backboneEvents.get().trigger("start:sqlQuery");
 
+
         $.each(layers, function (index, value) {
             // No need to search in the already displayed vector layers
             if (value.indexOf('v:') === 0) {
@@ -281,6 +283,7 @@ module.exports = {
             }
 
             if (parsedMeta.info_element_selector) {
+                _self.openInfoSlidePanel();
                 $(parsedMeta.info_element_selector).empty();
             }
 
@@ -327,25 +330,28 @@ module.exports = {
                             </div>
                             <div id="alternative-info-container" class="alternative-info-container-right" style="display:none"></div>`;
 
-                            // Add alternative-info-container to pop-up if featureInfoTableOnMap or else in left slide panel
                             if (featureInfoTableOnMap) {
-                                var popup = L.popup({
-                                    minWidth: 350
-                                })
-                                    .setLatLng(infoClickPoint)
-                                    .setContent(`<div id="info-box-pop-up"></div>`)
-                                    .openOn(cloud.get().map)
-                                    .on('remove', () => {
-                                        if (!editor?.getEditedFeature()) {
-                                            _self.resetAll();
-                                        }
-                                    });
+                                if (parsedMeta?.info_element_selector && parsedMeta.info_element_selector !== '') {
+                                    $('#offcanvas-info-container').html(popUpInner);
+                                } else {
+                                    const popup = L.popup({
+                                        minWidth: 350
+                                    })
+                                        .setLatLng(infoClickPoint)
+                                        .setContent(`<div id="info-box-pop-up"></div>`)
+                                        .openOn(cloud.get().map)
+                                        .on('remove', () => {
+                                            if (editor && editor.getEditedFeature()) {
+                                                _self.resetAll();
+                                            }
+                                        });
 
-                                if (draggableEnabled) {
-                                    _self.makeDraggable(popup);
+                                    if (draggableEnabled) {
+                                        _self.makeDraggable(popup);
+                                    }
+
+                                    $("#info-box-pop-up").html(popUpInner);
                                 }
-
-                                $("#info-box-pop-up").html(popUpInner);
 
                             } else {
                                 $("#info-box").html(popUpInner);
@@ -375,28 +381,30 @@ module.exports = {
                             <table class="table" data-detail-view="${dataDetailView}" data-detail-formatter="detailFormatter" data-show-toggle="${dataShowToggle}" data-show-export="${dataShowExport}" data-show-columns="${dataShowColumns}"></table>
                         </div>`);
 
-                        // Set select_function if featureInfoTableOnMap = true
-                        if ((typeof parsedMeta.select_function === "undefined" || parsedMeta.select_function === "") && featureInfoTableOnMap) {
-
-                            selectCallBack = function (id, layer, key, sqlQuery) {
-
-                                $("#modal-info-body").hide();
-                                $("#alternative-info-container").show();
-                            };
-                        } else if (typeof parsedMeta.select_function !== "undefined" && parsedMeta.select_function !== "") {
+                        let s = () => {
+                        };
+                        if (typeof parsedMeta.select_function !== "undefined" && parsedMeta.select_function !== "") {
                             try {
-                                selectCallBack = Function('"use strict";return (' + parsedMeta.select_function + ')')();
+                                s = Function('"use strict";return (' + parsedMeta.select_function + ')')();
                             } catch (e) {
                                 console.info("Error in select function for: " + _key_);
                                 console.error(e.message);
                             }
                         }
+                        // Set select_function if featureInfoTableOnMap = true
+                        if (featureInfoTableOnMap) {
+                            selectCallBack = function (id, layer, key, sqlQuery) {
+                                $("#modal-info-body").hide();
+                                $("#alternative-info-container").show();
+                                s(id, layer, key, sqlQuery);
+                            };
+                        }
+
                         cm = _self.prepareDataForTableView(value, layerObj.geoJSON.features);
                         $('#tab_' + storeId).tab('show');
 
                         hit = true;
                         count.hits = count.hits + Object.keys(layerObj.layer._layers).length;
-
                         let _table = gc2table.init({
                             el: "#_" + storeId + " table",
                             ns: "#_" + storeId,
@@ -414,7 +422,8 @@ module.exports = {
                             locale: window._vidiLocale.replace("_", "-"),
                             template: template,
                             pkey: pkey,
-                            renderInfoIn: !!parsedMeta.info_element_selector || featureInfoTableOnMap ? "#alternative-info-container" : null,
+                            // renderInfoIn: '#offcanvas-info-container',
+                            renderInfoIn: parsedMeta?.info_element_selector && parsedMeta.info_element_selector !== '' && !featureInfoTableOnMap ? '#offcanvas-info-container' : featureInfoTableOnMap ? '#alternative-info-container' : null,
                             onSelect: selectCallBack,
                             key: keyWithoutGeom,
                             caller: _self,
@@ -589,7 +598,7 @@ module.exports = {
                 } else {
                     const envelope = `"${f_geometry_column}" && ST_Transform(ST_MakeEnvelope(${extent.join(',')}, 4326), ${srid})`;
                     if (geoType !== "POLYGON" && geoType !== "MULTIPOLYGON" && (!advancedInfo.getSearchOn())) {
-                        sql = "SELECT " + fieldStr + " FROM (SELECT * FROM " + schemaQualifiedName + " WHERE " + filters + ") AS foo WHERE " + envelope + " AND round(ST_Distance(\"" + f_geometry_column + "\", ST_Transform(ST_GeomFromText('" + wkt + "'," + proj + ")," + srid +"))) < " + distance;
+                        sql = "SELECT " + fieldStr + " FROM (SELECT * FROM " + schemaQualifiedName + " WHERE " + filters + ") AS foo WHERE " + envelope + " AND round(ST_Distance(\"" + f_geometry_column + "\", ST_Transform(ST_GeomFromText('" + wkt + "'," + proj + ")," + srid + "))) < " + distance;
                         if (versioning) {
                             sql = sql + " AND gc2_version_end_date IS NULL ";
                         }
@@ -827,15 +836,19 @@ module.exports = {
     },
 
     openInfoSlidePanel: function (layerKey = null) {
-        let e = $("#click-for-info-slide.slide-left");
-        e.show();
-        e.animate({left: "0"}, 200);
-        if (layerKey) {
-            let metaDataKeys = meta.getMetaDataKeys();
-            let title = typeof metaDataKeys[layerKey].f_table_title !== "undefined" ? metaDataKeys[layerKey].f_table_title : metaDataKeys[layerKey].f_table_name;
-            $("#click-for-info-slide .modal-title").html(title);
-
-        }
+        layerTree.getInfoOffCanvas().show()
+        // let e = $("#click-for-info-slide.slide-left");
+        // e.show();
+        // e.animate({left: "0"}, 200);
+        // if (layerKey) {
+        //     let metaDataKeys = meta.getMetaDataKeys();
+        //     let title = typeof metaDataKeys[layerKey].f_table_title !== "undefined" ? metaDataKeys[layerKey].f_table_title : metaDataKeys[layerKey].f_table_name;
+        //     $("#click-for-info-slide .modal-title").html(title);
+        //
+        // }
+    },
+    closeInfoSlidePanel: function () {
+        layerTree.getInfoOffCanvas().hide();
     },
 
     /**

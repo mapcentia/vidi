@@ -15,14 +15,6 @@ body {
   font-family: @pane_font-family;
 }
 
-.modal-title {
-  line-height: 1;
-}
-
-.modal-open {
-  overflow: auto !important;
-}
-
 #container {
   position: absolute;
   width: 100%;
@@ -33,8 +25,6 @@ body {
   position: absolute;
   width: 100%;
   transition: opacity 250ms;
-  -moz-transition: opacity 250ms;
-  -webkit-transition: opacity 250ms;
   height: 100%;
   top: 0;
   right: 0;
@@ -56,11 +46,6 @@ body {
 
 .leaflet-touch .leaflet-control-layers, .leaflet-touch .leaflet-bar {
   border: none;
-}
-
-.leaflet-control-boxzoom {
-  //width: 34px !important;
-  //height: 34px !important;
 }
 
 .leaflet-bar a, .leaflet-bar a:hover {
@@ -85,15 +70,6 @@ body {
 .leaflet-touch .leaflet-bar a:last-child {
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
-}
-
-#side-panel {
-  width: 100%;
-  right: 0;
-  border: 0;
-  overflow: scroll;
-  height: calc(~'100vh - 30px');
-  background-color: white;
 }
 
 #legend {
@@ -322,66 +298,9 @@ input[type="checkbox"] {
   font-family: @popover-content_font-family;
 }
 
-.leaflet-top {
-  top: 50px;
-}
-
-/*
-.leaflet-top {
-    right: 0px !important;
-    left: auto !important;
-    opacity: 0.8;
-    top: auto !important;
-    bottom: 0px !important;
-}
-
-.leaflet-control-zoom {
-    right: 10px !important;
-    bottom: 40px !important;
-}
-
-.leaflet-control-zoom a, .leaflet-control-zoom a:hover {
-    height: 30px !important;
-    width: 30px !important;
-    font-size: 15px;
-    font-weight: normal;
-    text-decoration: none;
-    line-height: 30px !important;
-}
-*/
-.ol-zoom,
-.olControlZoom {
-  right: 20px;
-  left: auto !important;
-  bottom: 30px;
-  background: #000000 !important;
-  opacity: 0.7;
-}
-
-.ol-zoom-in,
-.ol-zoom-out,
-.olControlZoomIn,
-.olControlZoomOut {
-  height: 30px !important;
-  width: 30px !important;
-  font-weight: bold;
-  text-decoration: none;
-}
-
-.ol-zoom a,
-.ol-zoom a:hover,
-.olControlZoom a {
-  font-size: 16px !important;
-  font-weight: bold !important;
-  background: none !important;
-  line-height: 28px !important;
-  text-decoration: none;
-  color: white;
-}
-
-div.olControlZoom {
-  top: auto !important;
-}
+//.leaflet-top {
+//  top: 50px;
+//}
 
 .leaflet-draw-actions > li > a {
   color: #ffffff;
@@ -579,10 +498,6 @@ div.olControlZoom {
   font-weight: bold;
 }
 
-.twitter-typeahead {
-  width: 100%;
-}
-
 .places .tt-dropdown-menu {
   overflow-y: auto;
 }
@@ -687,11 +602,6 @@ div.olControlZoom {
   border-top: 1px solid #e6e6e6;
 }
 
-inline
-.leaflet-control-print {
-  display: none !important;
-}
-
 .base-layer-item {
   cursor: pointer;
 }
@@ -716,10 +626,6 @@ inline
 
 .form-group {
   margin: 0 !important;
-}
-
-.alert {
-  margin-bottom: 10px;
 }
 
 .custom-popup .leaflet-popup-content {
@@ -776,28 +682,6 @@ body {
   padding: 0;
 }
 
-.navbar {
-  left: auto;
-  background: none;
-  border: none;
-}
-
-.navmenu {
-  height: 100%;
-  box-shadow: 0 1px 12px 0 rgba(0, 0, 0, 0.12);
-  position: fixed;
-}
-
-.navmenu-brand {
-  display: block;
-  font-size: 18px;
-  line-height: 28px;
-  padding: 10px 15px;
-  margin: 0;
-  font-style: normal;
-  color: white !important;
-}
-
 #info-modal, #info-modal-top {
   position: fixed;
   top: 0;
@@ -832,22 +716,6 @@ body {
   padding: 0;
 }
 
-#module-container {
-  position: fixed;
-  top: 0;
-  z-index: 2000;
-  height: 100%;
-  background-color: white;
-  -webkit-box-sizing: border-box;
-  box-sizing: border-box;
-  display: inline;
-  box-shadow: 0 1px 12px 0 rgba(0, 0, 0, 0.12);
-}
-
-#module-container .modal-header {
-  padding: 10px;
-}
-
 .slide-right {
   //right: -100%;
   position: fixed;
@@ -856,10 +724,6 @@ body {
 .slide-left {
   left: -100%;
   box-shadow: rgba(0, 0, 0, 0.2) 0 27px 24px 0, rgba(0, 0, 0, 0.22) 0 40px 77px 0;
-}
-
-.nav-tabs {
-  border-bottom: 0;
 }
 
 .leaflet-bar button,
@@ -918,176 +782,15 @@ body {
   line-height: 30px;
 }
 
-.leaflet-control-graphicscale-inner {
-  margin-right: 10px;
-}
-
-.leaflet-control-graphicscale .label {
-  color: black !important;
-  background: none !important;
-}
-
-.leaflet-control-graphicscale {
-  background-color: white;
-  padding: 10px 10px 3px 10px;
-  border-radius: 2px;
-  -webkit-box-shadow: 0 1px 6px 0 rgba(0, 0, 0, 0.12), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
-  box-shadow: 0 1px 6px 0 rgba(0, 0, 0, 0.12), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
-}
-
 .leaflet-control-toolbar .leaflet-toolbar-1 {
   right: 26px !important;
   left: inherit !important;
-}
-
-#main-tabs {
-  overflow: hidden !important;
-
-}
-
-#side-panel hr {
-  margin-left: -20px;
-}
-
-//#side-panel ul {
-//  overflow: hidden !important;
-//  list-style-type: none;
-//  padding: 0px 17px;
-//}
-
-//#side-panel ul li {
-//  padding: 7px 0;
-//}
-//
-//#side-panel ul li .material-icons {
-//  margin-right: 17px;
-//  padding: 2px;
-//  border-radius: 50%;
-//
-//}
-
-//#side-panel ul li .material-icons:hover {
-//  background-color: #eeeeee;
-//
-//}
-//
-//#side-panel ul li.active .material-icons {
-//  color: white;
-//}
-
-.list-group .list-group-separator:before {
-  width: 100%;
-  margin: 0 !important;
-}
-
-.list-group-item {
-  padding: 10px 14px;
-  overflow: visible !important;
 }
 
 .leaflet-control-measure .leaflet-control-measure-toggle,
 .leaflet-control-measure .leaflet-control-measure-toggle:hover {
   width: 26px;
   height: 26px;
-}
-
-/* Template-specific stuff
- *
- * Customizations just for the template; these are not necessary for anything
- * with disabling the responsiveness.
- */
-/* Finesse the page header spacing */
-.page-header {
-  margin-bottom: 30px;
-}
-
-.page-header .lead {
-  margin-bottom: 10px;
-}
-
-/* Non-responsive overrides
- *
- * Utilitze the following CSS to disable the responsive-ness of the container,
- * grid system, and navbar.
- */
-/* Reset the container */
-/* Always float the navbar header */
-.navbar-header {
-  float: left;
-}
-
-/* Undo the collapsing navbar */
-.navbar-collapse {
-  display: block !important;
-  height: auto !important;
-  padding-bottom: 0;
-  overflow: visible !important;
-}
-
-.navbar-collapse {
-  border-top: 0;
-}
-
-/* Always apply the floated nav */
-.navbar-nav {
-  float: left;
-  margin: 0;
-}
-
-/* Redeclare since we override the float above */
-.navbar-nav.navbar-right {
-  float: right;
-}
-
-.popover > .arrow,
-.popover > .arrow:after {
-  display: inline;
-}
-
-.popover.left > .arrow {
-  border-left-color: rgba(101, 101, 101, 0);
-}
-
-.popover.left > .arrow:after {
-  border-left-color: rgba(101, 101, 101, 0.9);
-}
-
-.baselayer-label {
-  width: 100%;
-}
-
-.overlay-label {
-  width: calc(~'100% - 50px');
-}
-
-.info-label {
-  visibility: hidden;
-  cursor: pointer;
-}
-
-.edit-label {
-  visibility: hidden;
-  cursor: pointer;
-}
-
-.close {
-  top: -7px !important;
-  font-size: 29px;
-  font-weight: inherit;
-}
-
-#info-modal-legend {
-  padding: 0;
-  margin-top: 20px;
-}
-
-#info-modal .modal-body img {
-  width: 100%;
-}
-
-#info-modal-body-wrapper, #module-container-wrapper {
-  overflow: auto;
-  height: calc(~'100vh - 48px');
 }
 
 #searchinput {
@@ -1132,9 +835,6 @@ input[type=text]::-ms-clear {
 }
 
 .loadingIndicator .ng-hide {
-  /* visibility:hidden; */
-  /* opacity:0; */
-  /* -webkit-transition-delay:.25s; */
   transition-delay: .25s;
 }
 
@@ -1195,10 +895,6 @@ input[type=text]::-ms-clear {
   width: inherit !important;
 }
 
-.form-control-wrapper {
-  margin: 10px 0;
-}
-
 /* Make edit marker stay on top of dimension markers*/
 .my-own-class {
   z-index: 10000 !important;
@@ -1206,16 +902,6 @@ input[type=text]::-ms-clear {
 
 .control-label {
   white-space: nowrap;
-}
-
-h4 small {
-  font-size: 65%;
-}
-
-.colorpicker {
-  width: 152px;
-  right: 0;
-  left: auto;
 }
 
 #layer-search-list .layer-item:not(.layer-search-is-added) label:hover {
@@ -1377,41 +1063,6 @@ h4 small {
   right: 0;
 }
 
-#search-border {
-  position: relative;
-  float: left;
-  width: 40px;
-  height: 100%;
-}
-
-#search-ribbon {
-  position: fixed;
-  min-width: 100px;
-  top: 0;
-  height: 48px;
-  background-color: white;
-  box-shadow: 0 1px 12px 0 rgba(0, 0, 0, 0.12);
-}
-
-#search-ribbon > div > i {
-  top: 15px;
-  font-size: 1.4em;
-  line-height: 1em;
-  color: #1f4164;
-  padding-left: 12px;
-  position: absolute;
-  cursor: pointer;
-}
-
-#search-container {
-  padding-left: 24px;
-  height: 100%;
-}
-
-.slider-btn span {
-  padding-top: 12px;
-}
-
 #search-content {
   height: calc(~'100vh - 78px');
 }
@@ -1441,21 +1092,6 @@ h4 small {
   color: black !important;
 }
 
-.watsonc-custom-popup {
-  width: 240px;
-}
-
-#map, #pane, #search-ribbon, #module-container, #info-modal {
-  -webkit-transition: all 500ms ease-out;
-  -moz-transition: all 500ms ease-out;
-  -o-transition: all 500ms ease-out;
-  transition: all 500ms ease-out;
-}
-
-#layer-slide-body-wrapper > div, #click-for-info-slide-wrapper > div {
-  height: calc(~'100vh - 58px');
-}
-
 #conflict-result-content {
   height: 100% !important;
 }
@@ -1469,13 +1105,8 @@ h4 small {
 }
 
 .help-btn {
-  //position: fixed;
   color: rgba(0, 0, 0, 0.26);
   cursor: help;
-}
-
-.brand-icon {
-  margin-right: 20px;
 }
 
 .dialog-bottom-wide {
@@ -1497,19 +1128,6 @@ h4 small {
   width: 100% !important;
 }
 
-.navbar .navbar-brand i {
-  font-size: 30px;
-}
-
-.navbar .navbar-brand {
-  padding-top: 10px !important;
-  padding-bottom: 10px !important;
-}
-
-#module-container-body {
-  padding: 0 4px 4px 0;
-}
-
 .bootstrap-table .table:not(.table-condensed),
 .bootstrap-table .table:not(.table-condensed) > tbody > tr > th,
 .bootstrap-table .table:not(.table-condensed) > tfoot > tr > th,
@@ -1519,40 +1137,6 @@ h4 small {
   padding: 3px 6px !important;
 }
 
-@media (min-width: 769px) {
-  .navbar .navbar-brand {
-    margin-left: 0 !important;
-    padding-left: 0;
-
-  }
-}
-
-@media (max-width: 768px) {
-  .navbar .navbar-brand {
-    margin-left: 0 !important;
-    padding-left: 16px;
-  }
-}
-
-#layers_list .layer-item.list-group-item a {
-  display: inline-block;
-  border-radius: 50%;
-  padding: 1px;
-}
-
-#layers_list label {
-  margin: 0 !important;
-}
-
-#layers_list .layer-item.list-group-item .active {
-  color: white;
-}
-
-.layer-move-vert {
-  font-size: 18px;
-  color: rgba(0, 0, 0, 0.5);
-  cursor: move;
-}
 
 #tail {
   background-color: white;

@@ -1,4 +1,4 @@
-FROM debian:bullseye-slim
+FROM debian:buster-slim
 
 MAINTAINER Martin Høgh<mh@mapcentia.com>
 

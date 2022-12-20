@@ -21,7 +21,8 @@ import {
     VIRTUAL_LAYERS_SCHEMA,
     VECTOR_SIDE_TABLE_EL,
     SELECTED_STYLE,
-    VECTOR_STYLE
+    VECTOR_STYLE,
+    SELECTED_ICON_SCALE
 } from './constants';
 import dayjs from 'dayjs';
 import mustache from 'mustache';
@@ -100,6 +101,7 @@ let moduleState = {
     labelSettings: {},
     vectorStyles: {}
 };
+let infoOffCanvas;
 
 /**
  *
@@ -125,6 +127,13 @@ module.exports = {
 
     init: function () {
         _self = this;
+
+        infoOffCanvas = new bootstrap.Offcanvas('#offcanvasInfo');
+        document.getElementById('offcanvasInfo').addEventListener('hide.bs.offcanvas', event => {
+            _self.resetAllVectorLayerStyles();
+            sqlQuery.resetAll();
+        })
+
         // Update the queue statistics when group panel is opened.
         // In case of the layer tree component is not rendered yet
         $(document).arrive('.js-toggle-layer-panel', function (e, data) {
@@ -643,8 +652,21 @@ module.exports = {
             preparedVirtualLayers.push(localLayer);
         });
 
+        let order = false;
+        if (false) {
+            order = moduleState.layerTreeOrder
+        } else if (typeof latestFullTreeStructure === 'object') {
+            order = latestFullTreeStructure.map(g => {
+                return {
+                    id: g.id, children: g.children.map(l => {
+                        if (l.layer?.f_table_schema)
+                            return {id: l.layer.f_table_schema + '.' + l.layer.f_table_name, type: 'layer'}
+                    })
+                }
+            })
+        }
         return {
-            order: moduleState.layerTreeOrder,
+            order,
             arbitraryFilters: moduleState.arbitraryFilters,
             fitBoundsActiveOnLayers: moduleState.fitBoundsActiveOnLayers,
             labelSettings: moduleState.labelSettings,
@@ -1599,11 +1621,11 @@ module.exports = {
                         /*
                             Checking for correct onEachFeature structure
                         */
-                        if (`fn` in onEachFeature[LAYER.VECTOR + ':' + layerKey] === false || !onEachFeature[LAYER.VECTOR + ':' + layerKey].fn ||
-                            `caller` in onEachFeature[LAYER.VECTOR + ':' + layerKey] === false || !onEachFeature[LAYER.VECTOR + ':' + layerKey].caller) {
+                        if (!(`fn` in onEachFeature[LAYER.VECTOR + ':' + layerKey]) || !onEachFeature[LAYER.VECTOR + ':' + layerKey].fn || !(`caller` in onEachFeature[LAYER.VECTOR + ':' + layerKey]) || !onEachFeature[LAYER.VECTOR + ':' + layerKey].caller) {
                             throw new Error(`Invalid onEachFeature structure`);
                         }
                         if (onEachFeature[LAYER.VECTOR + ':' + layerKey].caller === `editor`) {
+                            // TODO Is this used?
                             /*
                                 If the handler was set by the editor extension, then display the attributes popup and editing buttons
                             */
@@ -1613,6 +1635,12 @@ module.exports = {
                             layer.on("click", function (e) {
                                 _self.resetAllVectorLayerStyles();
                                 sqlQuery.resetAll();
+
+                                // Scale icon markers
+                                if (e.target?._icon) {
+                                    _self.scaleIcon(e.target._icon)
+                                }
+
                                 if (!window.vidiConfig.crossMultiSelect && e.target?.setStyle) {
                                     e.target.setStyle(SELECTED_STYLE);
                                 }
@@ -1642,13 +1670,17 @@ module.exports = {
                         layer.on("click", function (e) {
                             _self.resetAllVectorLayerStyles();
                             sqlQuery.resetAll();
+                            // Cross Multi select disabled
                             if (!window.vidiConfig?.crossMultiSelect) {
                                 if (e.target?.setStyle) {
                                     e.target.setStyle(SELECTED_STYLE);
+
                                 }
-                            }
-                            // Cross Multi select disabled
-                            if (!window.vidiConfig.crossMultiSelect) {
+                                // Scale icon markers
+                                if (e.target?._icon) {
+                                    _self.scaleIcon(e.target._icon)
+                                }
+
                                 _self.displayAttributesPopup([{
                                         feature: feature,
                                         layer: layer,
@@ -1902,7 +1934,7 @@ module.exports = {
 
     displayAttributesPopup(features, event, additionalControls = ``, multi = true) {
         if (window.vidiConfig.crossMultiSelect) {
-            _self.resetAllVectorLayerStyles();
+            // _self.resetAllVectorLayerStyles();
         }
         event.originalEvent.clickedOnFeature = true;
         let renderedText = null;
@@ -2012,8 +2044,26 @@ module.exports = {
             }
             let func = selectCallBack.bind(this, null, layer, layerKey, _self);
             $(document).arrive(`#a-collapse${randText}`, function () {
+                const e = $(`#collapse${randText}`);
+                const bsCollapse = document.getElementById(`collapse${randText}`);
+                bsCollapse.addEventListener('hidden.bs.collapse', event => {
+                    // Do something
+                })
+                bsCollapse.addEventListener('shown.bs.collapse', event => {
+                    func();
+                    cloud.get().map.eachLayer(layer => {
+                        if (parseInt(layer._leaflet_id) === parseInt(e[0].dataset.layerId)) {
+                            if (layer?.setStyle) {
+                                layer.setStyle(SELECTED_STYLE);
+                            }
+                            if (layer?._icon) {
+                                _self.scaleIcon(layer._icon);
+                            }
+                        }
+                    })
+                })
                 $(this).on('click', function () {
-                    let e = $(`#collapse${randText}`);
+                    _self.resetAllVectorLayerStyles();
                     sqlQuery.getQstore()?.forEach(store => {
                         $.each(store.layer._layers, function (i, v) {
                             if (store.layer && store.layer.resetStyle) {
@@ -2021,24 +2071,12 @@ module.exports = {
                             }
                         });
                     })
-                    _self.resetAllVectorLayerStyles();
-                    if (!e.hasClass("in")) {
-                        func();
-
-                        cloud.get().map.eachLayer(layer => {
-                            if (parseInt(layer._leaflet_id) === parseInt(e[0].dataset.layerId)) {
-                                if (layer?.setStyle) {
-                                    layer.setStyle(SELECTED_STYLE);
-                                }
-                            }
-                        })
-                    }
-                    $('.feature-info-accordion-body').collapse("hide")
                 });
             });
             if (count > 0) {
                 if (typeof parsedMeta.info_element_selector !== "undefined" && parsedMeta.info_element_selector !== "" && renderedText !== null) {
-                    $(parsedMeta.info_element_selector).html(renderedText)
+                    sqlQuery.openInfoSlidePanel();
+                    $('#offcanvas-info-container').html(renderedText)
                 } else {
                     if (count2 === features.length) {
                         vectorPopUp = L.popup({
@@ -2063,7 +2101,11 @@ module.exports = {
         })
         if (count === 1) {
             setTimeout(() => {
-                $(".js-toggle-feature-panel:first").trigger('click');
+                try {
+                    const bsCollapse = new bootstrap.Collapse(`.feature-info-accordion-body`)[0];
+                } catch (e) {
+
+                }
             }, 200);
         }
     },
@@ -3750,8 +3792,16 @@ module.exports = {
     },
 
     resetAllVectorLayerStyles: () => {
+        sqlQuery.closeInfoSlidePanel();
         $.each(moduleState.vectorStores, function (u, store) {
             $.each(store.layer._layers, function (i, v) {
+                if (v?._icon) {
+                    const style = getComputedStyle(v._icon);
+                    let matrix = new DOMMatrix(style.transform);
+                    matrix.a = matrix.d = 1;
+                    v._icon.style.transform = matrix.toString();
+                    // v._icon.style.transition = 'transform 0s ease-in-out'
+                }
                 try {
                     if (store.layer && store.layer.resetStyle) {
                         store.layer.resetStyle(v);
@@ -3761,5 +3811,18 @@ module.exports = {
                 }
             });
         })
+    },
+
+    scaleIcon: (icon) => {
+        const style = getComputedStyle(icon);
+        const matrix = new DOMMatrix(style.transform);
+        matrix.a = matrix.d = SELECTED_ICON_SCALE;
+        icon.style.transformOrigin = 'center';
+        icon.style.transform = matrix.toString();
+        // icon.style.transition = 'transform .1s ease-in-out'
+    },
+    getInfoOffCanvas: () => {
+        return infoOffCanvas;
     }
+
 };

@@ -465,6 +465,7 @@ module.exports = {
                     })
                     // Meta
                     modules.meta.init(null, false, true).then(() => {
+                        backboneEvents.get().trigger("ready:meta");
                         modules.state.getState().then(st => {
                             // Don't recreate SQL store from snapshot
                             if (!st.modules?.layerTree) {
@@ -503,6 +504,7 @@ module.exports = {
                 initExtensions();
                 return modules.layerTree.create();
             }).finally(() => {
+                backboneEvents.get().trigger("ready:meta");
                 $("#loadscreen").fadeOut(200);
                 modules.state.init().then(() => {
                     modules.state.listenAny(`extensions:initialized`, [`layerTree`]);

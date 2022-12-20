@@ -175,6 +175,7 @@
     "socket.io": "^1.7.1",
     "socket.io-client": "^1.7.1",
     "sticky-session": "^1.1.2",
+    "styled-components": "^5.3.6",
     "terraformer": "^1.0.12",
     "underscore": "^1.10.2",
     "utf8": "^3.0.0",

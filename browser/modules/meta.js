@@ -34,10 +34,6 @@ let metaData = {data: []};
  */
 let metaDataLatestLoaded;
 
-/**
- *
- * @type {Array}
- */
 let metaDataKeys = [];
 
 /**

@@ -65,6 +65,8 @@ const VECTOR_STYLE = () => {
     }
 }
 
+const SELECTED_ICON_SCALE = 1.3;
+
 export {
     LOG,
     MODULE_NAME,
@@ -78,5 +80,6 @@ export {
     MAP_RESOLUTIONS,
     VECTOR_SIDE_TABLE_EL,
     SELECTED_STYLE,
-    VECTOR_STYLE
+    VECTOR_STYLE,
+    SELECTED_ICON_SCALE
 };
