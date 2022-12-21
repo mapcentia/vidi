@@ -9,16 +9,6 @@ var fs = require('fs');
 module.exports = function (grunt) {
     "use strict";
 
-    // Detecting optional theme
-    let theme = false;
-    process.argv.forEach(val => {
-        if (val.indexOf(`--theme=`) !== -1) {
-            theme = val.replace(`--theme=`, ``);
-        }
-    });
-
-    // Default build parameters
-    let copyBootstrapVariablesCommand;
     let lessConfig = {"public/css/styles.css": "public/less/styles.default.less"};
 
     grunt.initConfig({
@@ -296,12 +286,6 @@ module.exports = function (grunt) {
             }
         },
         shell: {
-            default: {
-                command: [
-                    copyBootstrapVariablesCommand,
-                    'grunt --gruntfile ./public/js/lib/bootstrap-material-design/Gruntfile.js dist-less'
-                ].join('&&')
-            },
             buildDocs: {
                 command: 'sphinx-build ./docs/da ./docs/html'
             }
@@ -325,13 +309,8 @@ module.exports = function (grunt) {
     });
 
     grunt.registerTask('prepareAssets', 'Updates assets if specific modules are enabled', function () {
-        if (theme && theme === 'watsonc') {
-            fs.createReadStream('./extensions/watsonc/public/index.html').pipe(fs.createWriteStream('./public/index.html'));
-            fs.createReadStream('./extensions/watsonc/public/favicon.ico').pipe(fs.createWriteStream('./public/favicon.ico'));
-        } else {
-            fs.createReadStream('./public/index.html.default').pipe(fs.createWriteStream('./public/index.html'));
-            fs.createReadStream('./public/favicon.ico.default').pipe(fs.createWriteStream('./public/favicon.ico'));
-        }
+        fs.createReadStream('./public/index.html.default').pipe(fs.createWriteStream('./public/index.html'));
+        fs.createReadStream('./public/favicon.ico.default').pipe(fs.createWriteStream('./public/favicon.ico'));
     });
 
     grunt.registerTask('appendBuildHashToVersion', 'Appends the build hash to the application version', function () {
