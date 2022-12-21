@@ -345,8 +345,8 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-version');
 
-    grunt.registerTask('default', ['prepareAssets', 'browserify:publish', 'browserify:publish_sw_dev', 'css', 'shell:default', 'hogan', 'version']);
-    grunt.registerTask('production', ['env:prod', 'hogan', 'prepareAssets', 'browserify:publish', 'browserify:publish_sw', 'css', 'shell:default', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust', 'version', 'appendBuildHashToVersion']);
+    grunt.registerTask('default', ['prepareAssets', 'browserify:publish', 'browserify:publish_sw_dev', 'css', 'hogan', 'version']);
+    grunt.registerTask('production', ['env:prod', 'hogan', 'prepareAssets', 'browserify:publish', 'browserify:publish_sw', 'css', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust', 'version', 'appendBuildHashToVersion']);
     grunt.registerTask('production-test', ['env:prod', 'browserify:publish']);
     grunt.registerTask('css', ['less', 'cssmin']);
 };
