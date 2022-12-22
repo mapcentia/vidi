@@ -161,7 +161,7 @@ module.exports = {
                 }
             })
             if (l.length === 0) {
-                sqlQuery.closeInfoSlidePanel();
+                // sqlQuery.closeInfoSlidePanel();
             }
         })
         if (window.vidiConfig.enabledExtensions.indexOf(`editor`) !== -1) moduleState.editingIsEnabled = true;
@@ -1713,7 +1713,14 @@ module.exports = {
                             let intersectingFeatures = [];
                             // Get active raster tile layers, so we can check if database should be queried
                             let activelayers = layers.getMapLayers() ? layers.getLayers().split(",") : [];
-                            let activeTilelayers = activelayers.filter(layer => !layer.startsWith(LAYER.VECTOR + ':') && !layer.startsWith(LAYER.VECTOR_TILE + ':') && !layer.startsWith(LAYER.WEBGL + ':'))
+                            let activeTilelayers = activelayers.filter(e => {
+                                if (e.split(':').length === 1) {
+                                    const m = meta.getMetaByKey(e)
+                                    if (m?.not_querable !== true) {
+                                        return true;
+                                    }
+                                }
+                            })
                             // Filter tiles layer without pixels
                             activeTilelayers = activeTilelayers.filter((key) => {
                                 if (typeof moduleState.tileContentCache[key] === "boolean" && moduleState.tileContentCache[key] === true) {
