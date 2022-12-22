@@ -71,7 +71,7 @@ module.exports = function (grunt) {
                         // Bootstrap
                         'node_modules/bootstrap-select/dist/css/bootstrap-select.css',
                         'node_modules/bootstrap-table/dist/bootstrap-table.css',
-                        'node_modules/bootstrap/dist/css/bootstrap.css',
+                        'scss/custom.css',
 
                         'public/js/lib/snackbarjs/snackbar.min.css',
                         'public/js/lib/bootstrap-colorpicker/css/bootstrap-colorpicker.css',
@@ -305,6 +305,16 @@ module.exports = function (grunt) {
                     src: ['index.html']
                 }]
             }
+        },
+        sass: {
+            dist: {                            // Target
+                options: {                       // Target options
+                    style: 'expanded'
+                },
+                files: {
+                    'scss/custom.css': 'scss/custom.scss'       // 'destination': 'source'
+                }
+            }
         }
     });
 
@@ -344,9 +354,11 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-handlebars');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-version');
+    grunt.loadNpmTasks('grunt-contrib-sass');
+
 
     grunt.registerTask('default', ['prepareAssets', 'browserify:publish', 'browserify:publish_sw_dev', 'css', 'hogan', 'version']);
     grunt.registerTask('production', ['env:prod', 'hogan', 'prepareAssets', 'browserify:publish', 'browserify:publish_sw', 'css', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust', 'version', 'appendBuildHashToVersion']);
     grunt.registerTask('production-test', ['env:prod', 'browserify:publish']);
-    grunt.registerTask('css', ['less', 'cssmin']);
+    grunt.registerTask('css', ['less','sass', 'cssmin']);
 };
