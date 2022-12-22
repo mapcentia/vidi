@@ -2083,21 +2083,26 @@ module.exports = {
                     $('#offcanvas-info-container').html(renderedText)
                 } else {
                     if (count2 === features.length) {
-                        vectorPopUp = L.popup({
-                            autoPan: window.vidiConfig.autoPanPopup,
-                            autoPanPaddingTopLeft: L.point(multi ? 20 : 0, multi ? 300 : 0),
-                            minWidth: 300,
-                            className: `js-vector-layer-popup custom-popup`
-                        }).setLatLng(event.latlng).setContent(`${additionalControls}${accordion}`).openOn(cloud.get().map)
-                            .on('remove', () => {
-                                if (`editor` in extensions) {
-                                    editor = extensions.editor.index;
-                                }
-                                if (!editor?.getEditedFeature()) {
-                                    sqlQuery.resetAll();
-                                }
-                                _self.resetAllVectorLayerStyles();
-                            });
+                        if (window.vidiConfig.forceOffCanvasInfo === true) {
+                            sqlQuery.openInfoSlidePanel();
+                            $('#offcanvas-info-container').html(`${additionalControls}${accordion}`)
+                        } else {
+                            vectorPopUp = L.popup({
+                                autoPan: window.vidiConfig.autoPanPopup,
+                                autoPanPaddingTopLeft: L.point(multi ? 20 : 0, multi ? 300 : 0),
+                                minWidth: 300,
+                                className: `js-vector-layer-popup custom-popup`
+                            }).setLatLng(event.latlng).setContent(`${additionalControls}${accordion}`).openOn(cloud.get().map)
+                                .on('remove', () => {
+                                    if (`editor` in extensions) {
+                                        editor = extensions.editor.index;
+                                    }
+                                    if (!editor?.getEditedFeature()) {
+                                        sqlQuery.resetAll();
+                                    }
+                                    _self.resetAllVectorLayerStyles();
+                                });
+                        }
                     }
                 }
             }
@@ -3796,7 +3801,7 @@ module.exports = {
     },
 
     resetAllVectorLayerStyles: () => {
-        sqlQuery.closeInfoSlidePanel();
+        //sqlQuery.closeInfoSlidePanel();
         $.each(moduleState.vectorStores, function (u, store) {
             $.each(store.layer._layers, function (i, v) {
                 if (v?._icon) {

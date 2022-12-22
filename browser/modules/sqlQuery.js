@@ -255,13 +255,14 @@ module.exports = {
             let fieldConf = metaDataKeys?.[value]?.fieldconf !== "" ? JSON.parse(metaDataKeys[value].fieldconf) : null;
             let parsedMeta = layerTree.parseLayerMeta(metaDataKeys[value]);
             let featureInfoTableOnMap = window.vidiConfig.featureInfoTableOnMap === true && simple;
+            let forceOffCanvasInfo = window.vidiConfig.forceOffCanvasInfo === true;
             let f_geometry_column = metaDataKeys[value].f_geometry_column
             let styleForSelectedFeatures;
+            let defaultTemplateWithBackBtn = false;
 
             // Back arrow to template if featureInfoTableOnMap is true
-            if (featureInfoTableOnMap && !backArrowIsAdded) {
-                backArrowIsAdded = true;
-                defaultTemplate = `
+            if ((featureInfoTableOnMap || forceOffCanvasInfo) && !backArrowIsAdded) {
+                defaultTemplateWithBackBtn = `
                                 <div class='show-when-multiple-hits' style='cursor: pointer;'>
                                     <span class='material-icons' style=''>keyboard_arrow_left </span>
                                     <span style="top: -7px;position: relative;">${__("Back")}</span>
@@ -314,7 +315,7 @@ module.exports = {
 
                     isEmpty = layerObj.isEmpty();
 
-                    template = metaDataKeys[value].type === "RASTER" ? defaultTemplateRaster : defaultTemplate;
+                    template = metaDataKeys[value].type === "RASTER" ? defaultTemplateRaster : defaultTemplateWithBackBtn ? defaultTemplateWithBackBtn : defaultTemplate;
                     template = parsedMeta.info_template && parsedMeta.info_template !== "" ? parsedMeta.info_template : template;
                     if (editingIsEnabled && layerIsEditable) {
                         template = editToolsHtml + template;
@@ -330,8 +331,8 @@ module.exports = {
                             </div>
                             <div id="alternative-info-container" class="alternative-info-container-right" style="display:none"></div>`;
 
-                            if (featureInfoTableOnMap) {
-                                if (parsedMeta?.info_element_selector && parsedMeta.info_element_selector !== '') {
+                            if (featureInfoTableOnMap || forceOffCanvasInfo) {
+                                if ((parsedMeta?.info_element_selector && parsedMeta.info_element_selector !== '') || forceOffCanvasInfo) {
                                     $('#offcanvas-info-container').html(popUpInner);
                                 } else {
                                     const popup = L.popup({
@@ -392,7 +393,7 @@ module.exports = {
                             }
                         }
                         // Set select_function if featureInfoTableOnMap = true
-                        if (featureInfoTableOnMap) {
+                        if (featureInfoTableOnMap || forceOffCanvasInfo) {
                             selectCallBack = function (id, layer, key, sqlQuery) {
                                 $("#modal-info-body").hide();
                                 $("#alternative-info-container").show();
@@ -423,7 +424,7 @@ module.exports = {
                             template: template,
                             pkey: pkey,
                             // renderInfoIn: '#offcanvas-info-container',
-                            renderInfoIn: parsedMeta?.info_element_selector && parsedMeta.info_element_selector !== '' && !featureInfoTableOnMap ? '#offcanvas-info-container' : featureInfoTableOnMap ? '#alternative-info-container' : null,
+                            renderInfoIn: (parsedMeta?.info_element_selector && parsedMeta.info_element_selector !== '' && !featureInfoTableOnMap) ? '#offcanvas-info-container' : featureInfoTableOnMap || forceOffCanvasInfo ? '#alternative-info-container' : null,
                             onSelect: selectCallBack,
                             key: keyWithoutGeom,
                             caller: _self,

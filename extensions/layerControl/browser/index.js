@@ -150,9 +150,6 @@ module.exports = {
                 const metaData = meta.getMetaDataKeys();
                 let activeLayers = layerTree.getActiveLayers().map(e => e.split(':').reverse()[0]);
                 let l = layerTree.getState().order;
-                console.log(activeLayers)
-                console.log(l)
-
                 let groupsComps = []
                 for (let i = 0; i < l.length; i++) {
                     let layerControls = l[i].children.map((e) => {
