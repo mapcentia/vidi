@@ -283,11 +283,6 @@ module.exports = {
                 })
             }
 
-            if (parsedMeta.info_element_selector) {
-                _self.openInfoSlidePanel();
-                $(parsedMeta.info_element_selector).empty();
-            }
-
             if (typeof parsedMeta.tiles_selected_style !== "undefined" && parsedMeta.tiles_selected_style !== "") {
                 try {
                     styleForSelectedFeatures = JSON.parse(parsedMeta.tiles_selected_style);
@@ -332,7 +327,7 @@ module.exports = {
                             <div id="alternative-info-container" class="alternative-info-container-right" style="display:none"></div>`;
 
                             if (featureInfoTableOnMap || forceOffCanvasInfo) {
-                                if ((parsedMeta?.info_element_selector && parsedMeta.info_element_selector !== '') || forceOffCanvasInfo) {
+                                if (forceOffCanvasInfo) {
                                     $('#offcanvas-info-container').html(popUpInner);
                                 } else {
                                     const popup = L.popup({
@@ -424,29 +419,27 @@ module.exports = {
                             template: template,
                             pkey: pkey,
                             // renderInfoIn: '#offcanvas-info-container',
-                            renderInfoIn: (parsedMeta?.info_element_selector && parsedMeta.info_element_selector !== '' && !featureInfoTableOnMap) ? '#offcanvas-info-container' : featureInfoTableOnMap || forceOffCanvasInfo ? '#alternative-info-container' : null,
+                            renderInfoIn: featureInfoTableOnMap || forceOffCanvasInfo ? '#alternative-info-container' : null,
                             onSelect: selectCallBack,
                             key: keyWithoutGeom,
                             caller: _self,
                             styleSelected: styleForSelectedFeatures,
                             setZoom: parsedMeta?.zoom_on_table_click ? parsedMeta.zoom_on_table_click : false,
                         });
-                        if (!parsedMeta.info_element_selector) {
-                            _table.object.on("openpopup" + "_" + _table.uid, function (e, layersClone) {
-                                let popup = e.getPopup();
-                                if (popup?._closeButton) {
-                                    popup._closeButton.onclick = function () {
-                                        if (onPopupCloseButtonClick) {
-                                            onPopupCloseButtonClick(e._leaflet_id);
-                                        }
+                        _table.object.on("openpopup" + "_" + _table.uid, function (e, layersClone) {
+                            let popup = e.getPopup();
+                            if (popup?._closeButton) {
+                                popup._closeButton.onclick = function () {
+                                    if (onPopupCloseButtonClick) {
+                                        onPopupCloseButtonClick(e._leaflet_id);
                                     }
                                 }
+                            }
 
-                                if (draggableEnabled) {
-                                    _self.makeDraggable(popup);
-                                }
-                            });
-                        }
+                            if (draggableEnabled) {
+                                _self.makeDraggable(popup);
+                            }
+                        });
                         // Here inside onLoad we call loadDataInTable(), so the table is populated
                         _table.loadDataInTable(false, true);
 
@@ -495,6 +488,7 @@ module.exports = {
                     count.index++;
                     if (count.index === layers.length) {
                         if (!hit) {
+                            _self.closeInfoSlidePanel();
                             $(`#${elementPrefix}modal-info-body`).hide();
                             jquery.snackbar({
                                 content: "<span id=`conflict-progress`>" + __("Didn't find anything") + "</span>",
@@ -502,7 +496,9 @@ module.exports = {
                                 timeout: 2000
                             });
                         } else {
-                            _self.openInfoSlidePanel();
+                            if (forceOffCanvasInfo) {
+                                _self.openInfoSlidePanel();
+                            }
                             $(`#${elementPrefix}main-tabs a[href="#${elementPrefix}info-content"]`).tab('show');
                             if (zoomToResult) {
                                 cloud.get().zoomToExtentOfgeoJsonStore(qstore[storeId], 16);

@@ -150,8 +150,19 @@ module.exports = {
         // If map is clicked, when clear all selections
         cloud.get().map.on('preclick', () => {
             _self.resetAllVectorLayerStyles();
-            sqlQuery.resetAll()
-            sqlQuery.closeInfoSlidePanel();
+            sqlQuery.resetAll();
+            // If no queryable tile layers are active then close the off canvas.
+            const l = _self.getActiveLayers().filter(e => {
+                if (e.split(':').length === 1) {
+                    const m = meta.getMetaByKey(e)
+                    if (m?.not_querable !== true) {
+                        return true;
+                    }
+                }
+            })
+            if (l.length === 0) {
+                sqlQuery.closeInfoSlidePanel();
+            }
         })
         if (window.vidiConfig.enabledExtensions.indexOf(`editor`) !== -1) moduleState.editingIsEnabled = true;
         $(document).arrive('#layers-filter-reset', function (e, data) {
@@ -2081,34 +2092,29 @@ module.exports = {
                 });
             });
             if (count > 0) {
-                if (typeof parsedMeta.info_element_selector !== "undefined" && parsedMeta.info_element_selector !== "" && renderedText !== null) {
-                    sqlQuery.openInfoSlidePanel();
-                    $('#offcanvas-info-container').html(renderedText)
-                } else {
-                    if (count2 === features.length) {
-                        if (multi) {
-                            accordion = `<div class="accordion vector-feature-info-panel" id="vector-feature-info-panel">${accordion}</div>`;
-                        }
-                        if (window.vidiConfig.forceOffCanvasInfo === true) {
-                            sqlQuery.openInfoSlidePanel();
-                            $('#offcanvas-info-container').html(`${additionalControls}${accordion}`)
-                        } else {
-                            vectorPopUp = L.popup({
-                                autoPan: window.vidiConfig.autoPanPopup,
-                                autoPanPaddingTopLeft: L.point(multi ? 20 : 0, multi ? 300 : 0),
-                                minWidth: 300,
-                                className: `js-vector-layer-popup custom-popup`
-                            }).setLatLng(event.latlng).setContent(`${additionalControls}${accordion}`).openOn(cloud.get().map)
-                                .on('remove', () => {
-                                    if (`editor` in extensions) {
-                                        editor = extensions.editor.index;
-                                    }
-                                    if (!editor?.getEditedFeature()) {
-                                        sqlQuery.resetAll();
-                                    }
-                                    _self.resetAllVectorLayerStyles();
-                                });
-                        }
+                if (count2 === features.length) {
+                    if (multi) {
+                        accordion = `<div class="accordion vector-feature-info-panel" id="vector-feature-info-panel">${accordion}</div>`;
+                    }
+                    if (window.vidiConfig.forceOffCanvasInfo === true) {
+                        sqlQuery.openInfoSlidePanel();
+                        $('#offcanvas-info-container').html(`${additionalControls}${accordion}`)
+                    } else {
+                        vectorPopUp = L.popup({
+                            autoPan: window.vidiConfig.autoPanPopup,
+                            autoPanPaddingTopLeft: L.point(multi ? 20 : 0, multi ? 300 : 0),
+                            minWidth: 300,
+                            className: `js-vector-layer-popup custom-popup`
+                        }).setLatLng(event.latlng).setContent(`${additionalControls}${accordion}`).openOn(cloud.get().map)
+                            .on('remove', () => {
+                                if (`editor` in extensions) {
+                                    editor = extensions.editor.index;
+                                }
+                                if (!editor?.getEditedFeature()) {
+                                    sqlQuery.resetAll();
+                                }
+                                _self.resetAllVectorLayerStyles();
+                            });
                     }
                 }
             }
@@ -2116,7 +2122,7 @@ module.exports = {
         })
         if (count === 1) {
             setTimeout(() => {
-               $('#vector-feature-info-panel .accordion-button').trigger('click');
+                $('#vector-feature-info-panel .accordion-button').trigger('click');
             }, 200);
         }
     },
