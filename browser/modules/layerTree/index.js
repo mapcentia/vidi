@@ -135,7 +135,7 @@ module.exports = {
                 sqlQuery.resetAll();
             })
         } catch (e) {
-            
+
         }
 
         // Update the queue statistics when group panel is opened.
@@ -151,6 +151,7 @@ module.exports = {
         cloud.get().map.on('preclick', () => {
             _self.resetAllVectorLayerStyles();
             sqlQuery.resetAll()
+            sqlQuery.closeInfoSlidePanel();
         })
         if (window.vidiConfig.enabledExtensions.indexOf(`editor`) !== -1) moduleState.editingIsEnabled = true;
         $(document).arrive('#layers-filter-reset', function (e, data) {
@@ -2017,14 +2018,16 @@ module.exports = {
                     if (typeof parsedMeta.disable_vector_feature_info === "undefined" || parsedMeta.disable_vector_feature_info === false) {
                         count++;
                         if (multi) {
-                            accordion += `<div class="panel panel-default vector-feature-info-panel" id="vector-feature-info-panel-${randText}" style="box-shadow: none;border-radius: 0; margin-bottom: 0">
-                                        <div class="panel-heading" role="tab" style="padding: 8px 0px 8px 15px;border-bottom: 1px white solid">
-                                            <h4 class="panel-title">
-                                                <a style="display: block; color: black" class="feature-info-accordion-toggle accordion-toggle js-toggle-feature-panel" data-bs-toggle="collapse" data-parent="#layers" href="#collapse${randText}" id="a-collapse${randText}">${title}</a>
+                            accordion += `
+                                        <div class="accordion-item">
+                                            <h4 class="accordion-header">
+                                                <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#collapse${randText}" id="a-collapse${randText}">${title}</button>
                                             </h4>
+                                            <div class="accordion-collapse collapse" data-layer-id="${layer._leaflet_id}" id="collapse${randText}" data-bs-parent="#vector-feature-info-panel">
+                                                <div class="feature-info-accordion-body accordion-body">${renderedText}</div>
+                                            </div>
                                         </div>
-                                        <ul class="list-group" id="group-${randText}" role="tabpanel"><div data-layer-id="${layer._leaflet_id}" id="collapse${randText}" class="feature-info-accordion-body accordion-body collapse" style="padding: 3px 8px 3px 8px">${renderedText}</div></ul>
-                                    </div>`;
+                                    `;
                         } else {
                             accordion = renderedText;
                         }
@@ -2083,6 +2086,9 @@ module.exports = {
                     $('#offcanvas-info-container').html(renderedText)
                 } else {
                     if (count2 === features.length) {
+                        if (multi) {
+                            accordion = `<div class="accordion vector-feature-info-panel" id="vector-feature-info-panel">${accordion}</div>`;
+                        }
                         if (window.vidiConfig.forceOffCanvasInfo === true) {
                             sqlQuery.openInfoSlidePanel();
                             $('#offcanvas-info-container').html(`${additionalControls}${accordion}`)
@@ -2110,11 +2116,7 @@ module.exports = {
         })
         if (count === 1) {
             setTimeout(() => {
-                try {
-                    const bsCollapse = new bootstrap.Collapse(`.feature-info-accordion-body`)[0];
-                } catch (e) {
-
-                }
+               $('#vector-feature-info-panel .accordion-button').trigger('click');
             }, 200);
         }
     },
@@ -3801,7 +3803,6 @@ module.exports = {
     },
 
     resetAllVectorLayerStyles: () => {
-        //sqlQuery.closeInfoSlidePanel();
         $.each(moduleState.vectorStores, function (u, store) {
             $.each(store.layer._layers, function (i, v) {
                 if (v?._icon) {

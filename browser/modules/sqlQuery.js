@@ -502,6 +502,7 @@ module.exports = {
                                 timeout: 2000
                             });
                         } else {
+                            _self.openInfoSlidePanel();
                             $(`#${elementPrefix}main-tabs a[href="#${elementPrefix}info-content"]`).tab('show');
                             if (zoomToResult) {
                                 cloud.get().zoomToExtentOfgeoJsonStore(qstore[storeId], 16);
