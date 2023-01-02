@@ -534,6 +534,30 @@ Her kan angives en JavaScript funktion, som bliver kørt når Vidi er klar. Funk
 
     "initFunction": "function(){alert('Hello world')}"
 
+.. _configjs_initZoomCenter:
+
+initZoomCenter
+*****************************************************************
+
+Hvis sat vil Vidi starte op på det angivet zoom/center. Denne indstilling vil have forrang over zoom/center sat i URL og projekt-link. Kan fx anvendes til at sikre, at alle indlejrede kort starter med samme zoom/center.
+
+Angives således `/z/x/y`. Dette svarer til det, der vises i Vidi URL'en.
+
+.. code-block:: json
+
+    "initZoomCenter": "/16/9.875/56.142"
+
+
+.. _configjs_popupdraggable:
+
+popupDraggable
+*****************************************************************
+
+Hvis sat til `true` kan man flytte feature-info pop-up'en på kortet.
+
+.. code-block:: json
+
+    "popupDraggable": false
 
 .. rubric:: Fodnoter
 

@@ -21,6 +21,8 @@ const config = require('../../../config/config.js');
 const printC = config.print.templates;
 const scales = config.print.scales;
 const urlparser = require('../../../browser/modules/urlparser');
+const {PromisePool} = require('@supercharge/promise-pool');
+require("regenerator-runtime/runtime");
 
 
 /**
@@ -44,6 +46,8 @@ module.exports = {
         state.listen(MODULE_ID, `state_change`);
 
         let endPrintEventName = "end:conflictPrint";
+        let numOfHits;
+        let count;
 
         $('input[name="conflict-report-type"]').on("change", () => {
             reportType = $('input[name="conflict-report-type"]:checked').val();
@@ -62,7 +66,7 @@ module.exports = {
                 setTimeout(() => {
                     stateFromDb = null;
                 }, 0);
-                conflictSearch.setValueForNoUiSlider(stateFromDb.bufferValue);
+                conflictSearch.setValueForSlider(stateFromDb.bufferValue);
                 conflictSearch.handleResult(stateFromDb);
                 reportType = stateFromDb.reportType;
                 $("input[name='conflict-report-type'][value='" + reportType + "']").prop("checked", true);
@@ -70,7 +74,7 @@ module.exports = {
             }
             state.getModuleState(MODULE_ID).then(initialState => {
                 if (initialState) {
-                    conflictSearch.setValueForNoUiSlider(initialState.bufferValue);
+                    conflictSearch.setValueForSlider(initialState.bufferValue);
                     if (typeof urlparser.urlVars?.var_landsejerlavskode === "undefined" || conflictSearch.getFromVarsIsDone()) {
                         conflictSearch.handleResult(initialState);
                     }
@@ -88,6 +92,7 @@ module.exports = {
 
         // Handle GUI when print is done. Using at custom event, so standard print is not triggered
         backboneEvents.get().on(endPrintEventName, function (response) {
+            $("#conflict-print-progress").html(`${count++}/${numOfHits}`);
             console.log("GEMessage:LaunchURL:" + urlparser.urlObj.protocol + "://" + urlparser.urlObj.host + "/tmp/print/pdf/" + response.key + ".pdf");
         });
 
@@ -127,7 +132,7 @@ module.exports = {
 
         // Click event for print button
         $("#conflict-print-btn").on("click", function () {
-
+                count = 0;
                 // Trigger print dialog off
                 $("#conflict-set-print-area-btn").prop("disabled", true);
                 $("#conflict-get-print-fieldset").prop("disabled", true);
@@ -165,102 +170,53 @@ module.exports = {
                         }
                     }
                     let hits = positiveHits.hits
-                    let numOfHits = Object.keys(hits).length;
+                    numOfHits = Object.keys(hits).length;
                     let track = [];
-                    let count = 0;
                     $.snackbar({
                         id: "snackbar-conflict-print",
                         content: "<span>" + __("Prints completed") + " <span id='conflict-print-progress'>0/" + numOfHits + "</span></span>",
                         htmlAllowed: true,
                         timeout: 1000000
                     });
-                    let iter = n => {
+
+                    let plotsArr = [];
+                    for (const property in positiveHits.hits) {
                         let clone = JSON.parse(JSON.stringify(positiveHits));
-                        let hit = Object.keys(hits)[n]
                         clone.hits = {};
-                        clone.layer = positiveHits.hits[hit].table;
-                        clone.hits = []
-                        clone.hits[0] = positiveHits.hits[hit];
-                        
-                        console.log(clone, track);
-
-                        print.print(endPrintEventName, clone).then(res => {
-                            console.log(res);
-                            track.push(res.key);
-                            count++;
-                            $("#conflict-print-progress").html(`${count}/${numOfHits}`);
-                            if (numOfHits === count) {
-                                print.cleanUp(true);
-                                $("#conflict-set-print-area-btn").prop("disabled", false);
-                                $.ajax({
-                                    dataType: `json`,
-                                    method: `POST`,
-                                    url: `/api/mergePrint/`,
-                                    contentType: `application/json`,
-                                    data: JSON.stringify(track),
-                                    scriptCharset: `utf-8`,
-                                    success: (response) => {
-                                        $("#conflict-get-print-fieldset").prop("disabled", false);
-                                        $("#conflict-download-pdf, #conflict-open-pdf").prop("href", "/tmp/print/pdf/" + response.key + ".pdf");
-                                        $("#conflict-print-btn").button('reset');
-                                        backboneEvents.get().trigger("end:conflictSearchPrint", response);
-                                        setTimeout(function () {
-                                            $("#snackbar-conflict-print").snackbar("hide");
-                                        }, 200);
-                                    },
-                                    error: (err) => {
-                                        console.error(err);
-                                        reject(err)
-                                    }
-                                    //error: reject
-                                });
-                            } else {
-                                iter(count)
-                            }
-                        }, () => {
-                            setTimeout(() => iter(count), 1000);
-                        });
+                        clone.layer = positiveHits.hits[property].table;
+                        clone.hits[property] = positiveHits.hits[property];
+                        plotsArr.push(clone);
                     }
-                    iter(count);
+                    const createPool = async function () {
+                        const {results, errors} = await PromisePool
+                            .withConcurrency(config.puppeteerProcesses.max || 2)
+                            .for(plotsArr)
+                            .process(async (data, index, pool) => {
+                                return await print.print(endPrintEventName, data);
+                            });
+                        print.cleanUp(true);
+                        track = results.map(e => e.key);
+                        $("#conflict-set-print-area-btn").prop("disabled", false);
+                        fetch('/api/mergePrint/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(track),
+                        }).then((response) => response.json())
+                            .then((data) => {
+                                $("#conflict-get-print-fieldset").prop("disabled", false);
+                                $("#conflict-download-pdf, #conflict-open-pdf").prop("href", "/tmp/print/pdf/" + data.key + ".pdf");
+                                $("#conflict-print-btn").button('reset');
+                                backboneEvents.get().trigger("end:conflictSearchPrint", data);
+                                setTimeout(function () {
+                                    $("#snackbar-conflict-print").snackbar("hide");
+                                }, 200);
+                            });
+                    }
+                    createPool().then(r => {
+                    });
                 }
-
-                // for (const property in positiveHits.hits) {
-                //     let clone = JSON.parse(JSON.stringify(positiveHits));
-                //     clone.hits = {};
-                //     clone.layer = property;
-                //     clone.hits[property] = positiveHits.hits[property];
-                //     print.print(endPrintEventName, clone).then((res) => {
-                //         track.push(res.key);
-                //         count++
-                //         $("#conflict-print-progress").html(`${count}/${numOfHits}`);
-                //         if (numOfHits === count) {
-                //             console.log(track);
-                //             print.cleanUp(true);
-                //             $("#conflict-set-print-area-btn").prop("disabled", false);
-                //             $.ajax({
-                //                 dataType: `json`,
-                //                 method: `POST`,
-                //                 url: `/api/mergePrint/`,
-                //                 contentType: `application/json`,
-                //                 data: JSON.stringify(track),
-                //                 scriptCharset: `utf-8`,
-                //                 success: (response) => {
-                //                     console.log(response);
-                //                     $("#conflict-get-print-fieldset").prop("disabled", false);
-                //                     $("#conflict-download-pdf, #conflict-open-pdf").prop("href", "/tmp/print/pdf/" + response.key + ".pdf");
-                //                     $("#conflict-print-btn").button('reset');
-                //                     backboneEvents.get().trigger("end:conflictSearchPrint", response);
-                //                     setTimeout(function () {
-                //                         $("#snackbar-conflict-print").snackbar("hide");
-                //                     }, 200);
-                //
-                //                 },
-                //                 //error: reject
-                //             });
-                //         } else {
-                //         }
-                //     });
-                // }
             }
         );
 

@@ -51,10 +51,6 @@ Der en række data attributer, som skal/kan sættes:
  * Højde på kort. standard 100%
 * **data-vidi-tmpl (valgfri)**
  * Hvilken template kortet skal bruge. Standard embed.tmpl, som er en template beregnet til indlejring.
-* **data-vidi-search (valgfri)**
- * Kan sættes til "none" hvis søgeboksen skal skjules. Standard ikke sat.
-* **data-vidi-history (valgfri)**
- * Kan sættes til "none" hvis forrige/næste udsnit kanpperne skal skjules. Standard ikke sat.
 * **data-vidi-use-config (valgfri)**
  * Kan sættes til "true" og derved bruges config'en fra token, hvis den indeholder en config.
 * **data-vidi-use-schema (valgfri)**
@@ -65,6 +61,24 @@ Der en række data attributer, som skal/kan sættes:
  * Navn på det indsatte kort. Dette er nødvendig hvis :ref:`embed_api` skal anvendes.
 * **data-vidi-no-tracking (valgfri)**
  * Kan sættes til "true" for at undgå at Vidi's tracking cookie bliver sat. Cookien anvendes bl.a til anonyme projekter og print, hvilket der typisk ikke er behov for på indlejrede kort.
+Følgende attributer styrer hvilke funktioner, der skal være synlige. Standard er, at alle funktioner er synlige, men kan sættes til "none" hvis funktionen skal skjules:
+
+* **data-vidi-search (valgfri)**
+ * Ssøgeboksen.
+* **data-vidi-history (valgfri)**
+ * Forrige/næste udsnit knapperne.
+* **data-vidi-legend (valgfri)**
+ * Signatur-knappen.
+* **data-vidi-layer (valgfri)**
+ * Lag-knappen.
+* **data-vidi-background (valgfri)**
+ * Baggrund-knappen.
+* **data-vidi-fullscreen (valgfri)**
+ * Fuldskærms-knappen.
+* **data-vidi-about (valgfri)**
+ * Om-knappen.
+* **data-vidi-location (valgfri)**
+ * Find-mig-knappen.
 
 
 .. _embed_api:

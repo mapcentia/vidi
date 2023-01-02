@@ -44,7 +44,7 @@ module.exports = module.exports = {
             "query_buffer": true,
             "query_result": true,
             "print": true,
-            "measurement": false,
+            "measurements": false,
             "draw": true
         }, strictMode);
 
@@ -71,7 +71,7 @@ module.exports = module.exports = {
             "query_buffer": true,
             "query_result": true,
             "print": true,
-            "measurement": true,
+            "measurements": true,
             "draw": false
         }, strictMode);
 
@@ -92,7 +92,7 @@ module.exports = module.exports = {
             "query_buffer": true,
             "query_result": true,
             "print": true,
-            "measurement": true,
+            "measurements": true,
             "draw": true
         }, strictMode);
 
@@ -113,7 +113,7 @@ module.exports = module.exports = {
             "query_buffer": false,
             "query_result": true,
             "print": true,
-            "measurement": true,
+            "measurements": true,
             "draw": true
         }, strictMode);
 
@@ -392,7 +392,7 @@ var _encoders = {
 
                 featureGeoJson.style = style;
                 featureGeoJson._vidi_type = feature._vidi_type;
-                if (feature._vidi_type === "draw") {
+                if (feature._vidi_type === "draw" || feature._vidi_type === "measurements") {
                     featureGeoJson._vidi_extremities = feature._extremities || feature.feature._vidi_extremities;
                 }
                 featureGeoJson._vidi_measurementLayer = feature._measurementLayer ? true : false;

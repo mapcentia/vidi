@@ -64,6 +64,9 @@ module.exports = {
 
         state.listenTo(MODULE_NAME, _self);
         state.listen(MODULE_NAME, `update`);
+        state.getModuleState(MODULE_NAME).then(initialState => {
+            _self.applyState(initialState)
+        });
 
         // Detect if the embed template is used
         if ($(`#floating-container-secondary`).length === 1) {
@@ -208,7 +211,7 @@ module.exports = {
             if (triggerEvents) backboneEvents.get().trigger(`${MODULE_NAME}:turnedOn`);
             drawOn = true;
 
-            L.drawLocal = require('./drawLocales/draw.js');            
+            L.drawLocal = require('./drawLocales/draw.js');
 
             drawControl = new L.Control.Draw({
                 position: 'topright',
@@ -382,9 +385,9 @@ module.exports = {
 
     /**
      * Recreates drawnings on the map
-     * 
+     *
      * @param {Object} parr Features to draw
-     * 
+     *
      * @return {void}
      */
     recreateDrawnings: (parr) => {
@@ -415,9 +418,10 @@ module.exports = {
      * Returns current module state
      */
     getState: () => {
+        // console.log("GET STATE")
         let state = false;
         if (drawOn) {
-            state = JSON.stringify(serializeLayers.serializeMeasurementItems(true));
+            state = serializeLayers.serializeMeasurementItems(true);
         }
 
         return { measurements: state };
@@ -433,9 +437,9 @@ module.exports = {
             }
 
             if (newState && `measurements` in newState && newState.measurements) {
-                _self.recreateDrawnings(JSON.parse(newState.measurements));
+                _self.recreateDrawnings(newState.measurements);
             }
-            
+
             resolve();
         });
     },

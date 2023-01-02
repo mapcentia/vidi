@@ -19,6 +19,12 @@
                 var tmpl = targetDiv.getAttribute("data-vidi-tmpl") || "embed.tmpl";
                 var search = targetDiv.getAttribute("data-vidi-search") || "";
                 var history = targetDiv.getAttribute("data-vidi-history") || "";
+                var legend = targetDiv.getAttribute("data-vidi-legend") || "";
+                var layer = targetDiv.getAttribute("data-vidi-layer") || "";
+                var background = targetDiv.getAttribute("data-vidi-background") || "";
+                var fullscreen = targetDiv.getAttribute("data-vidi-fullscreen") || "";
+                var about = targetDiv.getAttribute("data-vidi-about") || "";
+                var location = targetDiv.getAttribute("data-vidi-location") || "";
                 var useSchema = targetDiv.getAttribute("data-vidi-use-schema") === "true";
                 var useConfig = targetDiv.getAttribute("data-vidi-use-config") === "true";
                 var noTracking = targetDiv.getAttribute("data-vidi-no-tracking") || "false";
@@ -36,7 +42,17 @@
                 var database = obj.database;
                 var schema = obj.schema !== undefined && useSchema ? obj.schema + "/" : "";
                 var config = obj.config !== undefined && useConfig ? obj.config : "";
-                var src = host + "/app/" + database + "/" + schema + "?config=" + config + "&state=" + id + "&tmpl=" + tmpl + "&s=" + search + "&his=" + history + (frameName ? "&readyCallback=" + frameName : "") + "&notracking=" + noTracking;
+                var src = host + "/app/" + database + "/" + schema + "?config=" + config + "&state=" + id + "&tmpl=" + tmpl +
+                    "&sea=" + search +
+                    "&his=" + history +
+                    "&leg=" + legend +
+                    "&lay=" + layer +
+                    "&bac=" + background +
+                    "&ful=" + fullscreen +
+                    "&abo=" + about +
+                    "&loc=" + location +
+                    (frameName ? "&readyCallback=" + frameName : "") + "&notracking=" + noTracking +
+                    "&dps=1";
                 var iframe = document.createElement("iframe");
                 iframe.setAttribute("style", "width:" + width + ";height:" + height + ";border: 1px solid rgba(0,0,0,0.1)");
                 iframe.setAttribute("allow", "fullscreen;geolocation");

@@ -85,21 +85,39 @@ module.exports = module.exports = {
                         if (typeof v.overlays === "object") {
                             for (u = 0; u < v.overlays.length; u = u + 1) {
                                 const layerName = v.overlays[u].id;
-                                l = cloud.get().addTileLayers($.extend({
-                                    layers: [v.overlays[u].id],
-                                    db: v.overlays[u].db,
-                                    host: v.overlays[u].host || "",
-                                    type: "tms",
-                                    pane: "base",
-                                    loadEvent: function () {
+                                if (v.overlays[u].type === "wms") {
+                                    const bl = v.overlays[u];
+                                    l = [new L.TileLayer.WMS(bl.url,
+                                        $.extend({
+                                            pane: "base"
+                                        }, bl)
+                                    )];
+                                    l[0].on("loading", function () {
+                                                layers.incrementCountLoading(layerName);
+                                                backboneEvents.get().trigger("startLoading:layers", layerName);
+                                            });
+                                    l[0].on("load", function () {
                                         layers.decrementCountLoading(layerName);
                                         backboneEvents.get().trigger("doneLoading:layers", layerName);
-                                    },
-                                    loadingEvent: function () {
-                                        layers.incrementCountLoading(layerName);
-                                        backboneEvents.get().trigger("startLoading:layers", layerName);
-                                    },
-                                }, v.overlays[u].config));
+                                    });
+                                    l[0].addTo(cloud.get().map)
+                                } else {
+                                    l = cloud.get().addTileLayers($.extend({
+                                        layers: [v.overlays[u].id],
+                                        db: v.overlays[u].db,
+                                        host: v.overlays[u].host || "",
+                                        type: "tms",
+                                        pane: "base",
+                                        loadEvent: function () {
+                                            layers.decrementCountLoading(layerName);
+                                            backboneEvents.get().trigger("doneLoading:layers", layerName);
+                                        },
+                                        loadingEvent: function () {
+                                            layers.incrementCountLoading(layerName);
+                                            backboneEvents.get().trigger("startLoading:layers", layerName);
+                                        },
+                                    }, v.overlays[u].config));
+                                }
 
                                 // Set prefix on id, so the layer will not be returned by layers.getLayers
                                 l[0].id = "__hidden." + v.overlays[u].id;

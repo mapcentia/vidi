@@ -10,13 +10,13 @@ module.exports = {
     // Base instance URL
     PAGE_URL_BASE: `http://127.0.0.1:3000/`,
     // Vidi instance with default template
-    PAGE_URL_DEFAULT: `http://127.0.0.1:3000/app/aleksandrshumilov/public/#osm/13/39.2963/-6.8335/`,
+    PAGE_URL_DEFAULT: `https://vidi.swarm.gc2.io/app/aleksandrshumilov/public/#osm/13/39.2963/-6.8335/`,
     // Vidi instance that works with newest backend (swarm.gc2.io testing:aDvvi9802dmosd)
-    PAGE_URL_LATEST_GC2: `https://vidi.alexshumilov.ru:8086/app/testing/public/#osm/13/39.2963/-6.8335/`,
+    PAGE_URL_LATEST_GC2: `https://vidi.swarm.gc2.io/app/testing/public/#osm/13/39.2963/-6.8335/`,
     // Vidi instance with default template without SSL
-    PAGE_URL_DEFAULT_NO_SSL: `http://vidi.alexshumilov.ru:8084/app/aleksandrshumilov/public/#osm/13/39.2963/-6.8335/`,
+    PAGE_URL_DEFAULT_NO_SSL: `http://vidi.swarm.gc2.io/app/aleksandrshumilov/public/#osm/13/39.2963/-6.8335/`,
     // Vidi instance with embedded template
-    PAGE_URL_EMBEDDED: `https://vidi.alexshumilov.ru:8082/app/aleksandrshumilov/public/#osm/13/39.2963/-6.8335/`,
+    PAGE_URL_EMBEDDED: `https://vidi.swarm.gc2.io/app/aleksandrshumilov/public/#osm/13/39.2963/-6.8335/`,
     PAGE_LOAD_TIMEOUT: 1000,
     EMULATED_SCREEN: {
         viewport: {

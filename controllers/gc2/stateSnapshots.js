@@ -8,7 +8,7 @@ let config = require('./../../config/config');
 let express = require('express');
 let router = express.Router();
 const base64url = require('base64url');
-const uuid = require('uuid/v1');
+const { v1: uuidv1 } = require('uuid');
 const request = require('request');
 const shared = require('./shared');
 
@@ -184,7 +184,7 @@ router.post('/api/state-snapshots/:dataBase', (req, res, next) => {
             shared.throwError(res, 'INVALID_SNAPSHOT_OWNERSHIP');
         }
         if (save) {
-            let generatedKey = `state_snapshot_` + uuid();
+            let generatedKey = `state_snapshot_` + uuidv1();
             let currentDate = new Date();
             stateSnapshotCopy.id = generatedKey;
             stateSnapshotCopy.created_at = currentDate.toISOString();

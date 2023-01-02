@@ -185,7 +185,7 @@
                                     <div>
                                         <label for="buffer-value" class="control-label">{{Buffer}}</label>
                                         <input id="buffer-value" class="form-control">
-                                        <div id="buffer-slider" class="slider shor"></div>
+                                        <div id="buffer-slider"></div>
                                     </div>
                                 </div>
                                 <div id="info-box"></div>
@@ -196,7 +196,16 @@
                                 <div class="help-btn" onclick="javascript:createAlert($(this), '{{Help text overlays}}')">
                                     <i class="material-icons help-btn">help_outline</i></div>
                                 <div></div>
-                                <div class="form-group" id="layers" role="tablist"></div>
+                                <div id="layer-loading-indicator" style="display: flex; width: 100%; justify-content: center;"><div style="width: 150px; display: inline-block">
+                                    <div style="text-align: center">{{Loading data}}</div>
+                                    <div class="progress progress-striped active">
+                                        <div class="progress-bar" style="width: 100%"></div>
+                                    </div>
+                                </div>
+                                </div>
+                                <div id="layer-filter-container">
+                                    <div class="form-group" id="layers" role="tablist"></div>
+                                </div>
                             </div>
                             <div role="tabpanel" class="tab-pane fade" id="baselayer-content">
                                 <div class="help-btn" onclick="javascript:createAlert($(this), '{{Help text baselayers}}')">

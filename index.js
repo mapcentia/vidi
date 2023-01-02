@@ -23,6 +23,8 @@ let config = require('./config/config.js');
 let store;
 let app = express();
 
+const MAXAGE = (config.sessionMaxAge || 86400) * 1000;
+
 if (!config?.gc2?.host) {
     if (!config?.gc2) {
         config.gc2 = {};
@@ -74,15 +76,13 @@ if (typeof config?.redis?.host === "string") {
     });
     store = new redisStore({
         client: client,
-        ttl: 86400
+        ttl: MAXAGE
     });
 } else {
     let fileStore = require('session-file-store')(session);
     store = new fileStore({
-        ttl: 86400,
-        logFn: function () {
-        },
-        path: "/tmp/sessions"
+        path: "/tmp/sessions",
+        ttl: MAXAGE
     });
 }
 let sess = {
@@ -91,7 +91,7 @@ let sess = {
     resave: false,
     saveUninitialized: false,
     name: "connect.gc2",
-    cookie: {secure: false, httpOnly: false}
+    cookie: {secure: false, httpOnly: false, maxAge: MAXAGE},
 };
 
 if (app.get('env') === 'production') {
@@ -118,7 +118,7 @@ app.enable('trust proxy');
 
 const port = process.env.PORT ? process.env.PORT : 3000;
 const server = http.createServer(app);
-if (!sticky.listen(server, port)) {
+if (!sticky.listen(server, port, {})) {
     // Master code
     server.once('listening', function () {
         console.log(`server started on port ${port}`);

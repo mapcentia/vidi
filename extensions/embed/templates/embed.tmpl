@@ -516,10 +516,10 @@
     }
 
     #mapcontrols-history-backward {
-        display: {{_displayhistory}};
+        display: {{_displayHistory}};
     }
     #mapcontrols-history-forward {
-        display: {{_displayhistory}};
+        display: {{_displayHistory}};
     }
 
     #map, #pane {
@@ -539,23 +539,23 @@
                     class="material-icons">remove</i></a>
         </div>
         <div id="floating-container-secondary">
-            <a href="javascript:void(0)" id="find-me-btn"
+            <a href="javascript:void(0)" id="find-me-btn" style="display: {{_displayLocation}}"
                class="btn btn-default btn-fab btn-fab-mini embed-find-me"><i
                     class="material-icons">location_on</i>
             </a>
-            <a id="burger-btn"
+            <a id="burger-btn" style="display: {{_displayLayer}}"
                class="btn btn-default btn-fab btn-fab-mini map-tool-btn embed-burger"><i
                     class="material-icons">layers</i></a>
 
-            <a href="#base-layers-dialog" id="base-layers-btn"
+            <a href="#base-layers-dialog" id="base-layers-btn" style="display: {{_displayBackground}}"
                class="btn btn-default btn-fab btn-fab-mini map-tool-btn embed-base-layers"><i
                     class="material-icons">map</i></a>
 
-            <a href="#full-screen" id="full-screen-btn"
+            <a href="#full-screen" id="full-screen-btn" style="display: {{_displayFullscreen}}"
                class="btn btn-default btn-fab btn-fab-mini map-tool-btn embed-full-screen"><i
                     class="material-icons">fullscreen</i></a>
 
-            <a href="#" id="about-btn" data-target="#about-modal" data-toggle="modal"
+            <a href="#" id="about-btn" data-target="#about-modal" data-toggle="modal" style="display: {{_displayAbout}}"
                class="btn btn-default btn-fab btn-fab-mini map-tool-btn embed-about"><i
                     class="material-icons">question_answer</i></a>
 
@@ -565,7 +565,7 @@
                 <i class="material-icons gc2-session-unlock">lock_open</i>
             </a>
         </div>
-        <div id="embed-legend-panel">
+        <div id="embed-legend-panel" style="display: {{_displayLegend}}">
             <div class="panel panel-default">
                 <div class="panel-heading" data-toggle="collapse" data-target="#demo">{{Legend}}</div>
                 <div class="panel-body collapse" id="demo">

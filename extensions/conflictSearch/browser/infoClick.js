@@ -76,7 +76,7 @@ module.exports = {
      *
      */
     reset: function () {
-        sqlQuery.reset(qstore);
+        // sqlQuery.reset(qstore);
     },
 
     /**

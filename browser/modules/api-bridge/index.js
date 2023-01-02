@@ -8,6 +8,8 @@
 
 const Queue = require('./Queue');
 
+const state = require('./../state');
+
 const { LOG, QUEUE_DEFAULT_PKEY } = require('./constants');
 
 let singletoneInstance = false;
@@ -25,6 +27,18 @@ let singletoneInstance = false;
 class APIBridge {
     constructor() {
         console.log('APIBridge: initializing');
+
+        // When init then set offline mode on layers from state
+        // because layertree is not created and offline mode
+        // can not be detected from that
+        state.getState().then((s)=>{
+            if (s.modules.layerTree) {
+                const obj =s.modules.layerTree.layersOfflineMode;
+                for (const property in obj) {
+                    this._forcedOfflineLayers[property] = obj[property];
+                }
+            }
+        });
 
         this._forcedOfflineLayers = {};
         this._queue = new Queue((queueItem, queue) => {
@@ -47,7 +61,7 @@ class APIBridge {
 
                         if (queueItem.type === Queue.ADD_REQUEST) {
                             let newFeatureId = false;
-                            let featureIdRaw = response.message['wfs:InsertResult']['ogc:FeatureId']['fid'].split(".");
+                            let featureIdRaw = response.message['wfs:InsertResults']['wfs:Feature']['ogc:FeatureId']['fid'].split(".");
                             if (featureIdRaw.length === 2) {
                                 newFeatureId = featureIdRaw[1];
                             } else {
@@ -64,8 +78,8 @@ class APIBridge {
                         if (error.status === 500 && error.responseJSON) {
                             if (error.responseJSON.message && error.responseJSON.message.success === false) {
                                 itemWasReqectedByServer = true;
-                                if (error.responseJSON.message.message.ServiceException) {
-                                    serverErrorMessage = error.responseJSON.message.message.ServiceException;
+                                if (error.responseJSON.message.message['ows:Exception']) {
+                                    serverErrorMessage = error.responseJSON.message.message['ows:Exception']['ows:ExceptionText'];
                                 } else if (error.responseJSON.message.code === 403) {
                                     serverErrorType = `AUTHORIZATION_ERROR`;
                                 } else if (typeof error.responseJSON.message.message === 'string') {
