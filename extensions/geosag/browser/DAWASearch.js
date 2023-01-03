@@ -5,9 +5,12 @@
  */
 
 import React from 'react';
-import { throttle, debounce } from "throttle-debounce";
+//import { throttle, debounce } from "throttle-debounce";
 import IconButton from '@material-ui/core/IconButton';
 import ClearIcon from '@material-ui/icons/Clear';
+
+import debounce from 'lodash.debounce';
+import throttle from 'lodash.throttle';
 
 
 function uniqBy(a, key) {
@@ -42,8 +45,8 @@ class DAWASearch extends React.Component {
             triggerAtChar: (props.triggerAtChar === undefined ) ? 0 : parseInt(props.triggerAtChar)
 
         };
-        this.autocompleteSearchDebounced = debounce(1200, this.autocompleteSearch);
-        this.autocompleteSearchThrottled = throttle(1200, this.autocompleteSearch);
+        this.autocompleteSearchDebounced = debounce(this.autocompleteSearch, 1200);
+        this.autocompleteSearchThrottled = throttle(this.autocompleteSearch, 1200);
         this.escFunction = this.escFunction.bind(this);
 
     }

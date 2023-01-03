@@ -6,9 +6,6 @@ var https = require('https');
 var moment = require('moment');
 var config = require('../../../config/config');
 var dn = require('../../../config/gp/config.geosag');
-var he = require('he');
-var fetch = require('node-fetch');
-const wkt = require('wkt');
 
 
 const debug = false;
