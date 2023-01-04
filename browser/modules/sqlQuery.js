@@ -60,8 +60,8 @@ const jquery = require('jquery');
 require('snackbarjs');
 
 let editToolsHtml = `
-        <div class="form-group gc2-edit-tools" style="display: none; width: 90%;">
-            <div class="btn-group btn-group-justified">
+        <div class="form-group gc2-edit-tools" data-edit-layer-id="{{_vidi_edit_layer_id}}" data-edit-layer-name="{{_vidi_edit_layer_name}}" data-edit-vector="{{_vidi_edit_vector}}" style="display: {{_vidi_edit_display}};">
+            <div class="btn-group btn-group-justified" style="margin: 10px 0;">
                 <div class="btn-group">
                     <button class="btn btn-primary btn-xs popup-edit-btn">
                         <i class="fa fa-pencil-alt" aria-hidden="true"></i>
@@ -82,7 +82,6 @@ let editToolsHtml = `
  */
 let defaultTemplate =
     `<div class="vidi-popup-content">
-        ${editToolsHtml}
         <h3 class="popup-title">{{_vidi_content.title}}</h3>
         {{#_vidi_content.fields}}
             {{#if value}}
@@ -238,7 +237,6 @@ module.exports = {
                 }
             }
 
-            let editingStarted = false;
             let isEmpty = true;
             let srid = metaDataKeys[value].srid;
             let key = "_vidi_sql_" + index;
@@ -261,10 +259,24 @@ module.exports = {
             if (featureInfoTableOnMap && !backArrowIsAdded) {
                 backArrowIsAdded = true;
                 defaultTemplate = `
-                                <div class='show-when-multiple-hits' style='cursor: pointer;' onclick='javascript:$("#modal-info-body").show();$("#alternative-info-container").hide();$("#click-for-info-slide .modal-title").empty();'>
-                                    <span class='material-icons'  style=''>keyboard_arrow_left </span>
+                                <div class='show-when-multiple-hits' style='cursor: pointer;'>
+                                    <span class='material-icons' style=''>keyboard_arrow_left </span>
                                     <span style="top: -7px;position: relative;">${__("Back")}</span>
                                 </div>` + defaultTemplate;
+                $(document).arrive('.show-when-multiple-hits', function (e, data) {
+                    $(this).on('click', function (e) {
+                        $("#modal-info-body").show();
+                        $("#alternative-info-container").hide();
+                        $("#click-for-info-slide .modal-title").empty();
+                        _self.getQstore()?.forEach(store => {
+                            $.each(store.layer._layers, function (i, v) {
+                                if (store.layer && store.layer.resetStyle) {
+                                    store.layer.resetStyle(v);
+                                }
+                            });
+                        })
+                    })
+                })
             }
 
             if (parsedMeta.info_element_selector) {
@@ -298,9 +310,11 @@ module.exports = {
 
                     isEmpty = layerObj.isEmpty();
 
-                    template = (typeof metaDataKeys[value].infowindow !== "undefined" && metaDataKeys[value].infowindow.template !== "") ? metaDataKeys[value].infowindow.template : metaDataKeys[value].type === "RASTER" ? defaultTemplateRaster : defaultTemplate;
-
-                    template = (parsedMeta.info_template && parsedMeta.info_template !== "") ? editToolsHtml + parsedMeta.info_template : template;
+                    template = metaDataKeys[value].type === "RASTER" ? defaultTemplateRaster : defaultTemplate;
+                    template = parsedMeta.info_template && parsedMeta.info_template !== "" ? parsedMeta.info_template : template;
+                    if (editingIsEnabled && layerIsEditable) {
+                        template = editToolsHtml + template;
+                    }
 
                     if (!isEmpty && !not_querable) {
 
@@ -321,15 +335,15 @@ module.exports = {
                                     .setContent(`<div id="info-box-pop-up"></div>`)
                                     .openOn(cloud.get().map)
                                     .on('remove', () => {
-                                        if (!editingStarted) {
+                                        if (!editor?.getEditedFeature()) {
                                             _self.resetAll();
-                                        } else {
-                                            editingStarted = false;
                                         }
                                     });
-                                    
-                                if (draggableEnabled) _self.makeDraggable(popup);
-                                
+
+                                if (draggableEnabled) {
+                                    _self.makeDraggable(popup);
+                                }
+
                                 $("#info-box-pop-up").html(popUpInner);
 
                             } else {
@@ -362,11 +376,12 @@ module.exports = {
 
                         // Set select_function if featureInfoTableOnMap = true
                         if ((typeof parsedMeta.select_function === "undefined" || parsedMeta.select_function === "") && featureInfoTableOnMap) {
-                            let selectFunction = `function(id, layer, key, sqlQuery){
-                                                     $("#modal-info-body").hide();
-                                                     $("#alternative-info-container").show();
-                                                  }`;
-                            selectCallBack = Function('"use strict";return (' + selectFunction + ')')();
+
+                            selectCallBack = function (id, layer, key, sqlQuery) {
+
+                                $("#modal-info-body").hide();
+                                $("#alternative-info-container").show();
+                            };
                         } else if (typeof parsedMeta.select_function !== "undefined" && parsedMeta.select_function !== "") {
                             try {
                                 selectCallBack = Function('"use strict";return (' + parsedMeta.select_function + ')')();
@@ -415,31 +430,10 @@ module.exports = {
                                         }
                                     }
                                 }
-                                
-                                setTimeout(() => {
-                                    if (editingIsEnabled && layerIsEditable) {
-                                        $(".gc2-edit-tools").css(`display`, `inline`);
-                                        $(".popup-edit-btn").show();
-                                        $(".popup-delete-btn").show();
-                                    } else {
-                                        $(".gc2-edit-tools").css(`display`, `none`);
-                                        $(".popup-edit-btn").hide();
-                                        $(".popup-delete-btn").hide();
-                                    }
-                                }, 100);
 
-                                $(".popup-edit-btn").unbind("click.popup-edit-btn").bind("click.popup-edit-btn", function () {
-                                    // We reset the query layer and use a unaltered layer for editor
-                                    layerObj.reset();
-                                    editor.edit(layersClone, _key_, qstore);
-                                    editingStarted = true;
-                                });
-
-                                $(".popup-delete-btn").unbind("click.popup-delete-btn").bind("click.popup-delete-btn", function () {
-                                    if (window.confirm(__(`Are you sure you want to delete the feature?`))) {
-                                        editor.delete(e, _key_, qstore);
-                                    }
-                                });
+                                if (draggableEnabled) {
+                                    _self.makeDraggable(popup);
+                                }
                             });
                         }
                         // Here inside onLoad we call loadDataInTable(), so the table is populated
@@ -567,6 +561,13 @@ module.exports = {
             } else {
                 fieldStr = "*";
             }
+
+            const extent = [
+                cloud.get().getExtent().left,
+                cloud.get().getExtent().bottom,
+                cloud.get().getExtent().right,
+                cloud.get().getExtent().top
+            ]
             // Get applied filters from layerTree as a WHERE clause
             let filters = layerTree.getFilterStr(keyWithoutGeom) ? layerTree.getFilterStr(keyWithoutGeom) : "1=1";
             const schemaQualifiedName = "\"" + value.split(".")[0] + "\".\"" + value.split(".")[1] + "\"";
@@ -582,18 +583,16 @@ module.exports = {
                         cloud.get().map.getSize().y,
                         cloud.get().map.latLngToContainerPoint(infoClickPoint).x,
                         cloud.get().map.latLngToContainerPoint(infoClickPoint).y,
-                        cloud.get().getExtent().left,
-                        cloud.get().getExtent().bottom,
-                        cloud.get().getExtent().right,
-                        cloud.get().getExtent().top
+                        ...extent
                     ];
                 } else {
+                    const envelope = `"${f_geometry_column}" && ST_Transform(ST_MakeEnvelope(${extent.join(',')}, 4326), ${srid})`;
                     if (geoType !== "POLYGON" && geoType !== "MULTIPOLYGON" && (!advancedInfo.getSearchOn())) {
-                        sql = "SELECT " + fieldStr + " FROM (SELECT * FROM " + schemaQualifiedName + " WHERE " + filters + ") AS foo WHERE round(ST_Distance(ST_Transform(\"" + f_geometry_column + "\"," + proj + "), ST_GeomFromText('" + wkt + "'," + proj + "))) < " + distance;
+                        sql = "SELECT " + fieldStr + " FROM (SELECT * FROM " + schemaQualifiedName + " WHERE " + filters + ") AS foo WHERE " + envelope + " AND round(ST_Distance(\"" + f_geometry_column + "\", ST_Transform(ST_GeomFromText('" + wkt + "'," + proj + ")," + srid +"))) < " + distance;
                         if (versioning) {
                             sql = sql + " AND gc2_version_end_date IS NULL ";
                         }
-                        sql = sql + " ORDER BY round(ST_Distance(ST_Transform(\"" + f_geometry_column + "\"," + proj + "), ST_GeomFromText('" + wkt + "'," + proj + ")))";
+                        sql = sql + " ORDER BY round(ST_Distance(\"" + f_geometry_column + "\", ST_Transform(ST_GeomFromText('" + wkt + "'," + proj + ")," + srid + ")))";
                     } else {
                         sql = "SELECT " + fieldStr + " FROM (SELECT * FROM " + schemaQualifiedName + " WHERE " + filters + ") AS foo WHERE ST_Intersects(ST_Transform(ST_geomfromtext('" + wkt + "'," + proj + ")," + srid + ")," + f_geometry_column + ")";
                         if (versioning) {
@@ -820,6 +819,9 @@ module.exports = {
         let metaDataKeys = meta.getMetaDataKeys();
         let parsedMeta = layerTree.parseLayerMeta(metaDataKeys[layerKey]);
         template = (parsedMeta.info_template && parsedMeta.info_template !== "") ? parsedMeta.info_template : defaultTemplate;
+        if (window.vidiConfig.enabledExtensions.includes('editor')) {
+            template = editToolsHtml + template;
+        }
         return template;
     },
 
@@ -839,30 +841,28 @@ module.exports = {
      * makes popup draggable
      * @param popup {object}
      */
-    makeDraggable(popup){
-        var map = cloud.get().map
-
-        //console.log('makeDrag: ', map, popup);
-
-        //var pos = map.latLngToLayerPoint(popup.getLatLng());
-        // L.DomUtil.setPosition(popup._wrapper.parentNode, pos);
-        var draggable = new L.Draggable(popup._container, popup._wrapper);
-
+    makeDraggable: (popup) => {
+        const map = cloud.get().map
+        const draggable = new L.Draggable(popup._container, popup._wrapper);
         // change cursor class
-        $(".leaflet-popup-content-wrapper").css('cursor','move');
-
-        draggable.on('dragstart', function(e) {
+        $(".leaflet-popup-content-wrapper").css('cursor', 'move');
+        draggable.on('dragstart', function (e) {
             //on first drag, remove the pop-up tip
             $(".leaflet-popup-tip-container").hide();
         });
-
-        draggable.on('dragend', function(e) {
+        draggable.on('dragend', function (e) {
             // set the new position
-            var pos = map.layerPointToLatLng(e.target._newPos);
-            popup.setLatLng(pos);
+            popup.setLatLng(map.layerPointToLatLng(e.target._newPos));
         });
-
         draggable.enable();
+    },
+
+    /**
+     * Get query stores
+     * @returns array
+     */
+    getQstore: () => {
+        return qStoreShadow;
     }
 
     

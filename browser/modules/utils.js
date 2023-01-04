@@ -137,5 +137,28 @@ module.exports = {
             }
         }
         return fullScreenMode;
+    },
+
+    /**
+     *
+     * @param string
+     * @returns {null|{x: *, y: *, z: *}}
+     */
+    parseZoomCenter: function (string) {
+        if (!string) return null;
+        const arr = string.split('/');
+        if (
+            !isNaN(parseInt(arr[1])) &&
+            !isNaN(parseInt(arr[2])) &&
+            !isNaN(parseInt(arr[3]))
+        )   {
+            return {
+                z: arr[1],
+                x: arr[2],
+                y: arr[3],
+            }
+        } else {
+            return null;
+        }
     }
 };

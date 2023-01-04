@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2022 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -10,20 +10,20 @@
  *
  * @type {*|exports|module.exports}
  */
-var urlparser = require('./urlparser');
+const urlparser = require('./urlparser');
 
 /**
  * @type {string}
  */
-var db = urlparser.db;
+const db = urlparser.db;
 
 /**
  * @type {string}
  */
-var urlVars = urlparser.urlVars;
+const urlVars = urlparser.urlVars;
 
 /**
- * The full meta dat object
+ * The full meta data object
  * @type {{data: Array}}
  */
 let metaData = {data: []};
@@ -32,35 +32,35 @@ let metaData = {data: []};
  * Object that holds the latest loaded meta data
  * @type {{data: Array}}
  */
-var metaDataLatestLoaded;
+let metaDataLatestLoaded;
 
 /**
  *
  * @type {Array}
  */
-var metaDataKeys = [];
+let metaDataKeys = [];
 
 /**
  *
  * @type {Array}
  */
-var metaDataKeysTitle = [];
+let metaDataKeysTitle = [];
 
 /**
  *
  * @type {boolean}
  */
-var ready = false;
+let ready = false;
 
 /**
  * @type {string}
  */
-var host;
+let host;
 
 /**
  *
  */
-var backboneEvents, stateSnapshots;
+let backboneEvents, stateSnapshots;
 
 let _self = false;
 
@@ -93,10 +93,11 @@ module.exports = {
      *
      * @param str
      * @param doNotLoadExisting
+     * @param doNotReset
      * @returns {Promise<any>}
      */
     init: function (str, doNotLoadExisting, doNotReset) {
-        var me = this,
+        let me = this,
             schemataStr = urlparser.schema;
 
         // Reset
@@ -112,6 +113,10 @@ module.exports = {
 
         return new Promise(function (resolve, reject) {
 
+            // Set load indicator
+            $('#layer-filter-container').css('pointer-events', 'none').css('opacity', 0.2);
+            $('#layer-loading-indicator').show();
+
             try {
 
                 /**
@@ -126,6 +131,8 @@ module.exports = {
                         url: '/api/meta/' + db + '/' + schemataStr,
                         scriptCharset: "utf-8",
                         success: function (response) {
+                            $('#layer-filter-container').css('pointer-events', 'auto').css('opacity', 1.0);
+                            $('#layer-loading-indicator').hide();
                             if (response.data && response.data.length > 0) {
                                 me.addMetaData(response);
                                 ready = true;
@@ -141,7 +148,7 @@ module.exports = {
                     });
                 };
 
-                var schemata;
+                let schemata;
                 if (!doNotLoadExisting) {
                     if (`snapshot` in window.vidiConfig && window.vidiConfig.snapshot && window.vidiConfig.snapshot.indexOf(`state_snapshot_`) === 0) {
                         stateSnapshots.getSnapshotByID(window.vidiConfig.snapshot).then(snapshot => {
@@ -198,8 +205,7 @@ module.exports = {
         let parsedMeta = false;
         if (`meta` in data && data.meta) {
             try {
-                let localMeta = JSON.parse(data.meta);
-                parsedMeta = localMeta;
+                parsedMeta = JSON.parse(data.meta);
             } catch (e) {
             }
         }
@@ -230,7 +236,7 @@ module.exports = {
             }
         });
 
-        for (var i = 0; i < data.data.length; i++) {
+        for (let i = 0; i < data.data.length; i++) {
             metaDataKeys[data.data[i].f_table_schema + "." + data.data[i].f_table_name] = data.data[i];
             metaDataKeysTitle[data.data[i].f_table_title] = data.data[i].f_table_title ? data.data[i] : null;
         }
@@ -269,6 +275,7 @@ module.exports = {
      *
      * @param {String} layerKey Layer identifier
      *
+     * @param throwException
      * @throws {Exception} If layer with provided key does not exist
      */
     getMetaByKey: (layerKey, throwException = true) => {

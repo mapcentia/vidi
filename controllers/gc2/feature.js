@@ -8,6 +8,7 @@ var express = require('express');
 var router = express.Router();
 var config = require('../../config/config.js').gc2;
 var request = require('request');
+let app = express();
 
 router.put('/api/feature/:db/:layer/:srs', function (req, response) {
     var db = req.params.db, layer = req.params.layer, srs = req.params.srs, body = req.body, userName;
@@ -21,13 +22,18 @@ router.put('/api/feature/:db/:layer/:srs', function (req, response) {
 
     var uri = "/api/v2/feature/" + userName + "/" + layer + "/"  + srs;
 
+    let headers = {
+        'GC2-API-KEY': req.session.gc2ApiKey
+    }
+    if (app.get('env') === 'test') {
+        headers.Cookie = "XDEBUG_SESSION=XDEBUG_SESSION;";
+    }
+
     var options = {
         method: 'PUT',
         uri: config.host + uri,
         json: body,
-        headers: {
-            'GC2-API-KEY': req.session.gc2ApiKey
-        }
+        headers
     };
 
     console.log(body)

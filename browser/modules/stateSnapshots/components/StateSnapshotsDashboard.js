@@ -8,7 +8,7 @@ const React = require('react');
 import TitleFieldComponent from './../../shared/TitleFieldComponent';
 import LoadingOverlay from './../../shared/LoadingOverlay';
 
-const uuidv4 = require('uuid/v4');
+const { v4: uuidv4 } = require('uuid');
 const cookie = require('js-cookie');
 const base64url = require('base64url');
 
@@ -171,12 +171,14 @@ class StateSnapshotsDashboard extends React.Component {
      * Applies snapshot
      *
      * @param {Object} item Applies snapshot
+     * @param ignoreInitZoomCenter
      */
-    applySnapshot(item) {
+    applySnapshot(item, ignoreInitZoomCenter) {
         if (this.props.onStateSnapshotApply) this.props.onStateSnapshotApply();
 
         this.setState({stateApplyingIsBlocked: true});
-        this.props.state.applyState(item.snapshot).then(() => {
+        this.props.state.applyState(item.snapshot, ignoreInitZoomCenter).then(() => {
+            console.log(item.snapshot.modules.print)
             this.setState({stateApplyingIsBlocked: false});
         });
     }
@@ -423,6 +425,8 @@ class StateSnapshotsDashboard extends React.Component {
                 parameters.push(configParameter);
             }
 
+            parameters.push(`dps=1`)
+
             let permaLink = `${window.location.origin}${this.props.anchor.getUri()}?${parameters.join(`&`)}`;
 
             let token = (item.token ? item.token : false);
@@ -473,7 +477,7 @@ class StateSnapshotsDashboard extends React.Component {
                         `/api/state-snapshots/${vidiConfig.appDatabase}/${item.id}`
                     ).then((response) => response.text())
                         .then((data) => {
-                            this.applySnapshot(JSON.parse(base64url.decode(data)));
+                            this.applySnapshot(JSON.parse(base64url.decode(data)), true);
                         });
 
                 }}

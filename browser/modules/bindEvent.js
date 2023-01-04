@@ -128,7 +128,7 @@ module.exports = {
                 if (isChecked) {
                     layerTreeUtils.setupLayerNumberIndicator(base64GroupName, layers.length, layers.length);
                 } else {
-                    $("#layer-panel-" + base64GroupName + " span:eq(0)").html(0);
+                    $("#layer-panel-" + base64GroupName + " . layer-count span:eq(0)").html(0);
                 }
             });
         });
@@ -256,7 +256,7 @@ module.exports = {
             }
         });
 
-        $(document).bind('mousemove', function (e) {
+        $(document).on('mousemove.tail', function (e) {
             $('#tail').css({
                 left: e.pageX + 20,
                 top: e.pageY
@@ -270,18 +270,11 @@ module.exports = {
         // Refresh browser state. E.g. after a session start
         // =================================================
         backboneEvents.get().on('refresh:meta', function () {
-            meta.init().then(() => {
-                return setting.init();
-            }, (error) => {
-                console.log(error); // Stacktrace
-                //alert('Vidi is loaded without schema. Can't set extent or add layers');
-                backboneEvents.get().trigger('ready:meta');
-                state.init();
-            }).then(() => {
-                layerTree.create(false, [], true);
-                state.init();
-
-            });
+            meta.init(null, false, false).then(() => {
+                    backboneEvents.get().trigger('ready:meta');
+                    layerTree.create(false, [], true);
+                }
+            );
         });
 
         // Init some GUI stuff after modules are loaded

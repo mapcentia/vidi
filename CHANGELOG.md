@@ -5,20 +5,111 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [UNRELEASED]
-### Added
-- toggle `popupDraggable` added to config. Makes popups from info draggable. 
-```
-    // ========================================
-    // Make pop-ups draggable - defaults to 'false'
-    // ========================================
+## [2022.12.0] - 2022-8-12
+### Changed
+- Cookie set in URL are now set with Expires. Also code moved from init.js to extensions/session.
+- Redesign of layer element in layer tree. Extensive use of flex-boxes.
+- Merge of WebGL layer branch.
 
-    "popupDraggable": true,
-```
+## [2022.11.3] - 2022-22-11
+### Changed
+- Removed Jsts as a dependency. Now using Turf in `advancedInfo` and `conflict`.
+- Upgrade of Grunt.
+- Upgrade to bullseye in Dockerfile.
 
 ### Fixed
-- Changing print scale no longer links to `#` - resetting active layers etc.
+- Bug in `conflict` module after change to native range input slider.
 
+## [2022.11.2] - 2022-17-11
+### Changed
+- Changed from noUiSlider to native HTML range input in these modules. noUiSlider packages is no longer installed:
+  - Base layers
+  - Advanced info
+  - Conflict
+- jQuery upgraded to 3.6.1
+
+## [2022.11.1] - 2022-16-11
+### Changed
+- Reworked editor tools in popups. Now a central listner in the Editor module will invoke editing. Vector and raster now use the same markup definition for the editor tools.
+- Editing can now be invoked from the accordion popup.
+- The editor geometry for raster is now blue.
+- The same marker is now used for both editing and adding points.
+- Geometry from Draw module is no longer dashed when selected.
+
+## [2022.11.0] - 2022-8-11
+### Added
+- The url parameter `dps=1` will prevent browser state from being pushed to history. This parameter will be set by embed.js, so the browser history will not be pushed to the parent frame. Snapshot links will also have this parameter set.
+- A new faster init process is implemented which cuts about 50% of startup time for Vidi. This new init process will automatic be invoked unless a URL achor is used - when the old process will be invoked. 
+
+### Changed
+- When using `crossMultiSelect` the geometry for the open accordion panel will now get the 'selected' style.
+- When using `featureInfoTableOnMap` the Back button will reset the 'selected' style.
+- When clicking/tapping on the map, geometry with 'selected' style will be reset if any.
+
+### Fixed
+- Update the editor queue statistics when group panel is opened in case of the layer tree component is not rendered yet. Before the queue statistics was not shown after a refresh.
+- Click on set default extent button will now set initZoomCenter if present.
+- It's now possible to use WMS overlays in base layer definitions. Before is was only possible to use GC2 layers for this. 
+- Komkode filter on esr/sfe search.
+
+## [2022.10.0] - 2022-5-10
+### Changed
+- Session cookie is now set with an `Expires` attribute, which can be set in `config/config.js`. Before it was set as a non-persistent cookie, which was deleted on exiting the web browser. Defaults to 86400 seconds.
+```json
+{
+  "sessionMaxAge": 86400
+}
+```
+### Fixed
+- When Vidi was started with URL layers in offline mode, the layers was not set to offline because the layertree was yet not created. Now offline mode is retrived form state on upstart.
+
+## [2022.9.2] - 2022-19-9
+### Added
+- New config option added `popupDraggable`. Makes feature-info popups draggable. Can be set in run-tim config.
+```json
+{
+  "popupDraggable": true
+}
+```
+- Geometry created by feature-info module now stick after the module is swtiched off. So now it's possible to print maps with feature-info results. To clear the map the "Clear map" tool button can be used. 
+- A sort-by-score mode is added to Danish search module. The setting will sort the address list by a calculated score, so most relavant suggestions will be a the top. If switched off the list will be sorted alphanumeric. For now only works for address not cadastre.
+```json
+{
+  "searchConfig": {
+    "komkode": "*",
+    "sortByScore": true
+  }
+}
+```
+
+## [2022.9.1] - 2022-7-9
+### Changed
+- The url parameter `initialFilter` must now be Base64URL encoded, which is safe to use in urls. If filter can't be decoded a alert will tell the user. https://base64.guru/standards/base64url
+
+## [2022.9.0] - 2022-5-9
+### Added
+- In addition to the embed attributes `data-vidi-search` and `data-vidi-history` some more attributes are added to hide the buttons the embed-template. The attrubutes can be set to `none`:
+* data-vidi-legend
+* data-vidi-layer
+* data-vidi-background
+* data-vidi-fullscreen
+* data-vidi-about
+* data-vidi-location
+
+## [2022.8.4] - 2022-31-8
+### Changed
+- conflictSearch now prints with concurrency when selecting a multiple page report. 
+
+## [2022.8.3] - 2022-29-8
+### Fixed
+- State loaded from snapshot now is set in localforage. This was a regression bug.
+- Drawings made in Measurements now is stored in state and will stick between refreshes and in snapshots.
+
+## [2022.8.2] - 2022-17-8
+### Added
+- New runtime config `initZoomCenter`, which will locks Vidi to a specific zoom/center. This will override zoom/center in URL and snapshot link.  
+
+## [2022.8.1] - 2022-10-8
 ### Changed
 - The snapshot list fetch now only include metadata - not the snapshot data itself. When activating a snapshot the data is fetched. This way a long snapshot list will not hog the system down.  
 
@@ -43,8 +134,6 @@ This is a label for feature <b>{{gid}}</b>
 
 ### Changed
 - Legend moved to upper right corner in embed.tmpl, so it doesn't coflict with the bottom aligned vector table.
-
-### Changed
 - Pop-ups are not longer opened when selecting a row in table, because this will let gc2table control the pop-up and here editing tools are not supported.
 
 ### Fixed

@@ -20,10 +20,10 @@ import {
     SYSTEM_FIELD_PREFIX,
     VIRTUAL_LAYERS_SCHEMA,
     VECTOR_SIDE_TABLE_EL,
-    SELECTED_STYLE
+    SELECTED_STYLE,
+    VECTOR_STYLE
 } from './constants';
 import dayjs from 'dayjs';
-import noUiSlider from 'nouislider';
 import mustache from 'mustache';
 import LayerFilter from './LayerFilter';
 import LoadStrategyToggle from './LoadStrategyToggle';
@@ -39,18 +39,19 @@ import OfflineModeControlsManager from './OfflineModeControlsManager';
 import {GROUP_CHILD_TYPE_GROUP, GROUP_CHILD_TYPE_LAYER, LayerSorting} from './LayerSorting';
 import {GEOJSON_PRECISION} from './../constants';
 import {
+    booleanIntersects as turfIntersects,
     buffer as turfBuffer,
-    point as turfPoint,
     feature as turfFeature,
-    booleanIntersects as turfIntersects
+    point as turfPoint
 } from '@turf/turf'
+import MetaSettingForm from "./MetaSettingForm";
 
 
 let _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEvents,
-    onEachFeature = [], pointToLayer = [], onSelectedStyle = [], onLoad = [], onSelect = [],
-    onMouseOver = [], cm = [], styles = [], tables = {}, childLayersThatShouldBeEnabled = [];
+    onEachFeature = [], pointToLayer = {}, onSelectedStyle = [], onLoad = [], onSelect = [],
+    onMouseOver = [], cm = [], styles = {}, tables = {}, childLayersThatShouldBeEnabled = [];
 
-const uuidv4 = require('uuid/v4');
+const {v4: uuidv4} = require('uuid');
 const React = require('react');
 const ReactDOM = require('react-dom');
 const base64url = require('base64url');
@@ -75,6 +76,7 @@ let extensions = false, editor = false, qstore = [], reloadIntervals = [], vecto
 let filterComp = {};
 let lastFilter;
 let utils;
+let recreateStores = true;
 let moduleState = {
     isReady: false,
     wasBuilt: false,
@@ -89,13 +91,14 @@ let moduleState = {
     setLayerOpacityRequests: [],
     setLayerStateRequests: {},
     vectorStores: {},
-    webGLStores: [],
+    webGLStores: {},
     virtualLayers: [],
     tileContentCache: {},
     editorFilters: {},
     editorFiltersActive: {},
     fitBoundsActiveOnLayers: {},
-    labelSettings: {}
+    labelSettings: {},
+    vectorStyles: {}
 };
 
 /**
@@ -122,6 +125,20 @@ module.exports = {
 
     init: function () {
         _self = this;
+        // Update the queue statistics when group panel is opened.
+        // In case of the layer tree component is not rendered yet
+        $(document).arrive('.js-toggle-layer-panel', function (e, data) {
+            $(this).on('click', function (e) {
+                setTimeout(() => {
+                    _self._statisticsHandler(queueStatistsics.getLastStatistics(), false, true);
+                }, 200);
+            })
+        });
+        // If map is clicked, when clear all selections
+        cloud.get().map.on('preclick', () => {
+            _self.resetAllVectorLayerStyles();
+            sqlQuery.resetAll()
+        })
         if (window.vidiConfig.enabledExtensions.indexOf(`editor`) !== -1) moduleState.editingIsEnabled = true;
         $(document).arrive('#layers-filter-reset', function (e, data) {
             $(this).on('click', function (e) {
@@ -152,11 +169,17 @@ module.exports = {
                 c();
             })
         });
-        $("#layers").before(`<div style="display: flex; align-items: center"><div class="form-group" style="flex-grow: 1;"><input placeholder="${__('Layer filter')}" class="form-control" type="text" id="layers-filter" autocomplete="off"></div><div style="width: 18px; display: flex; justify-content:center"><div id="layers-filter-reset" style="display: inline; cursor: pointer"><i class="fas fa-times"></i></div><div id="layers-filter-busy" style="display: none"><i class="fas fa-circle-notch fa-spin"></i></div></div></div>`);
+        $("#layers").before(`<div id="layer-filter-container" style="display: flex; align-items: center"><div class="form-group" style="flex-grow: 1;"><input placeholder="${__('Layer filter')}" class="form-control" type="text" id="layers-filter" autocomplete="off"></div><div style="width: 18px; display: flex; justify-content:center"><div id="layers-filter-reset" style="display: inline; cursor: pointer"><i class="fas fa-times"></i></div><div id="layers-filter-busy" style="display: none"><i class="fas fa-circle-notch fa-spin"></i></div></div></div>`);
 
         if (urlparser && urlparser.urlVars && urlparser.urlVars.initialFilter) {
             backboneEvents.get().on(`${MODULE_NAME}:ready`, () => {
-                let decodedFilters = JSON.parse(atob(urlparser.urlVars.initialFilter));
+                let decodedFilters;
+                try {
+                    decodedFilters = JSON.parse(base64url.decode(urlparser.urlVars.initialFilter));
+                } catch (e) {
+                    alert("Bad filter");
+                    return
+                }
                 for (let layerKey in decodedFilters) {
                     _self.onApplyArbitraryFiltersHandler({
                         layerKey,
@@ -177,7 +200,6 @@ module.exports = {
                             }
                         }
                     });
-                    break;
                 }
             });
         }
@@ -195,6 +217,10 @@ module.exports = {
         state.listen(MODULE_NAME, `opacityChange`);
         state.listen(MODULE_NAME, `dynamicLoadLayersChange`);
         state.listen(MODULE_NAME, `settleForcedState`);
+    },
+
+    setRecreateStores: (b) => {
+        recreateStores = b;
     },
 
     /**
@@ -229,7 +255,7 @@ module.exports = {
     /**
      * Returns vector stores
      *
-     * @returns {Array}
+     * @returns {Object}
      */
     getStores: () => {
         return moduleState.vectorStores;
@@ -312,9 +338,6 @@ module.exports = {
                 result.push(activeLayers[key].fullLayerKey);
             }
         }
-        const layersFromFromUrl = state.layersInUrl();
-
-
         return result;
     },
 
@@ -378,6 +401,11 @@ module.exports = {
                         $(container).find('.js-layer-settings-table').hide(0);
                     };
 
+                    const hideStyleFn = () => {
+                        $(container).find(`.js-toggle-style`).hide(0);
+                        $(container).find('.js-layer-settings-style').hide(0);
+                    };
+
                     const hideOfflineMode = () => {
                         $(container).find(`.js-toggle-layer-offline-mode-container`).css(`display`, `none`);
                     };
@@ -390,7 +418,10 @@ module.exports = {
                     const hideAddFeature = () => {
                         $(container).find('.gc2-add-feature').css(`visibility`, `hidden`);
                     };
-
+                    const hideSettingsBtn = () => {
+                        $(container).find('.js-settings-panel-btn').prop(`disabled`, true);
+                        $(container).find('.collapse').collapse('hide');
+                    }
                     const getLayerSwitchControl = () => {
                         let controlElement = $('input[class="js-show-layer-control"][data-gc2-id="' + layerKey + '"]');
                         if (!controlElement || controlElement.length !== 1) {
@@ -414,11 +445,13 @@ module.exports = {
 
                         if (layerIsEnabled) {
                             $(container).find('.gc2-add-feature').css(`visibility`, `visible`);
+                            $(container).find('.js-settings-panel-btn').prop(`disabled`, false);
                             $(container).find(`.js-toggle-search`).show(0);
                             $(container).find(`.js-toggle-filters, .js-toggle-filters-number-of-filters`).show(0);
                             $(container).find(`.js-toggle-load-strategy`).show(0);
                             $(container).find(`.js-toggle-layer-offline-mode-container`).css(`display`, `inline-block`);
                             $(container).find(`.js-toggle-table`).show(0);
+                            $(container).find(`.js-toggle-style`).show(0);
                         } else {
                             hideAddFeature();
                             hideFilters();
@@ -428,17 +461,22 @@ module.exports = {
                             hideLabels();
                             hideTableView();
                             hideSearch();
+                            hideStyleFn();
+                            hideSettingsBtn();
                         }
                     } else if (desiredSetupType === LAYER.RASTER_TILE || desiredSetupType === LAYER.VECTOR_TILE) {
                         // Opacity and filters should be kept opened after setLayerState()
                         if ($(container).attr(`data-last-layer-type`) !== desiredSetupType) {
                             hideLoadStrategy();
                             hideTableView();
+                            hideStyleFn();
+                            hideSettingsBtn();
                         }
 
                         hideOfflineMode();
                         if (layerIsEnabled) {
                             $(container).find('.gc2-add-feature').css(`visibility`, `visible`);
+                            $(container).find('.js-settings-panel-btn').prop(`disabled`, false);
                             $(container).find(`.js-toggle-opacity`).show(0);
                             $(container).find(`.js-toggle-labels`).show(0);
                             $(container).find(`.js-toggle-filters`).show(0);
@@ -450,6 +488,7 @@ module.exports = {
                             hideOpacity();
                             hideLabels();
                             hideSearch();
+                            hideSettingsBtn();
                         }
 
                         // Hide filters if cached, but not if layer has a valid predefined filter
@@ -476,9 +515,11 @@ module.exports = {
                         hideOfflineMode();
                         hideLoadStrategy();
                         hideTableView();
+                        hideStyleFn();
                         hideOpacity();
                         hideLabels();
                         hideSearch();
+                        hideSettingsBtn();
                     } else {
                         throw new Error(`${desiredSetupType} control setup is not supported yet`);
                     }
@@ -602,7 +643,7 @@ module.exports = {
             preparedVirtualLayers.push(localLayer);
         });
 
-        let state = {
+        return {
             order: moduleState.layerTreeOrder,
             arbitraryFilters: moduleState.arbitraryFilters,
             fitBoundsActiveOnLayers: moduleState.fitBoundsActiveOnLayers,
@@ -615,8 +656,8 @@ module.exports = {
             dynamicLoad: moduleState.dynamicLoad,
             editorFilters: moduleState.editorFilters,
             editorFiltersActive: moduleState.editorFiltersActive,
+            vectorStyles: moduleState.vectorStyles
         };
-        return state;
     },
 
     /**
@@ -632,7 +673,7 @@ module.exports = {
      * @param newState
      * @returns {newState}
      */
-    applyState: (newState) => {
+    applyState: (newState, dt = false) => {
         // Setting vector filters
         if (newState !== false && `arbitraryFilters` in newState && typeof newState.arbitraryFilters === `object`) {
             for (let key in newState.arbitraryFilters) {
@@ -695,12 +736,13 @@ module.exports = {
                 predefinedFilters: {},
                 arbitraryFilters: {},
                 editorFilters: {},
-                editorFiltersActive: {}
+                editorFiltersActive: {},
+                vectorStyles: {}
             };
         } else if (newState.order && newState.order === 'false') {
             newState.order = false;
         }
-        return _self.create(newState);
+        return _self.create(newState, [], false, null, dt);
     },
 
 
@@ -714,7 +756,7 @@ module.exports = {
      *
      * @returns {Promise}
      */
-    create: (forcedState = false, ignoredInitialStateKeys = [], dontRegisterEvents = false, filter = null) => {
+    create: (forcedState = false, ignoredInitialStateKeys = [], dontRegisterEvents = false, filter = null, dt = false) => {
         if (LOG) console.log(`${MODULE_NAME}: create`, moduleState.isBeingBuilt, forcedState);
 
         queueStatistsics.setLastStatistics(false);
@@ -885,7 +927,7 @@ module.exports = {
                         if (LOG) console.log(`${MODULE_NAME}: disabling active layers`, enabledLayers);
                         for (let key in enabledLayers) {
                             if (enabledLayers[key].enabled) {
-                                switchLayer.init(key, false, true, false);
+                                if (!dt) switchLayer.init(key, false, true, false);
                             }
                         }
                     }
@@ -952,6 +994,7 @@ module.exports = {
                                 if (forcedState.dynamicLoad) moduleState.dynamicLoad = forcedState.dynamicLoad;
                                 if (forcedState.editorFilters) moduleState.editorFilters = forcedState.editorFilters;
                                 if (forcedState.editorFiltersActive) moduleState.editorFiltersActive = forcedState.editorFiltersActive;
+                                if (forcedState.vectorStyles) moduleState.vectorStyles = forcedState.vectorStyles;
 
                                 if (LOG) console.log(`${MODULE_NAME}: layers that are not in meta`, layersThatAreNotInMeta);
 
@@ -1048,7 +1091,7 @@ module.exports = {
                                                     let layersAreActivatedPromises = [];
                                                     activeLayers.map(layerName => {
                                                         let noPrefixName = layerTreeUtils.stripPrefix(layerName);
-                                                        layersAreActivatedPromises.push(switchLayer.init(layerName, true, true));
+                                                        if (!dt) layersAreActivatedPromises.push(switchLayer.init(layerName, true, true));
                                                     });
 
                                                     Promise.all(layersAreActivatedPromises).then(() => {
@@ -1196,6 +1239,7 @@ module.exports = {
                 applySetting(`virtualLayers`, []);
                 applySetting(`opacitySettings`, {});
                 applySetting(`dynamicLoad`, {});
+                applySetting(`vectorStyles`, {});
 
                 resolve({order, offlineModeSettings});
             });
@@ -1379,7 +1423,8 @@ module.exports = {
         let parentFiltersHash = ``;
         let layerKey = layer.f_table_schema + '.' + layer.f_table_name;
         const layerSpecificQueryLimit = layerTreeUtils.getQueryLimit(meta.parseLayerMeta(layerKey));
-        let sql = `SELECT * FROM ${layerKey} LIMIT ${layerSpecificQueryLimit}`;
+        let sql = `SELECT *
+                   FROM ${layerKey} LIMIT ${layerSpecificQueryLimit}`;
         if (isVirtual) {
             let storeWasFound = false;
             moduleState.virtualLayers.map(item => {
@@ -1420,7 +1465,9 @@ module.exports = {
             // Gathering all WHERE clauses
             if (whereClauses.length > 0) {
                 whereClauses = whereClauses.map(item => `(${item})`);
-                sql = `SELECT * FROM ${layerKey} WHERE (${whereClauses.join(` AND `)}) LIMIT ${layerSpecificQueryLimit}`;
+                sql = `SELECT *
+                       FROM ${layerKey}
+                       WHERE (${whereClauses.join(` AND `)}) LIMIT ${layerSpecificQueryLimit}`;
             }
         }
 
@@ -1447,9 +1494,7 @@ module.exports = {
         } else {
             template = defaultTemplate;
         }
-        if (parsedMeta?.tooltip_template && parsedMeta.tooltip_template !== "") {
-            tooltipTemplate = parsedMeta.tooltip_template;
-        }
+        tooltipTemplate = typeof moduleState.vectorStyles?.[layerKey]?.tooltipTmpl !== 'undefined' ? moduleState.vectorStyles[layerKey].tooltipTmpl === '' ? undefined : moduleState.vectorStyles[layerKey].tooltipTmpl : parsedMeta?.tooltip_template && parsedMeta.tooltip_template !== "" ? parsedMeta.tooltip_template : null;
         let fieldConf;
         try {
             fieldConf = JSON.parse(metaData[layerKey].fieldconf);
@@ -1457,252 +1502,237 @@ module.exports = {
             fieldConf = {};
         }
         const pane = layer.f_table_schema + '-' + layer.f_table_name;
-        moduleState.vectorStores[trackingLayerKey] = new geocloud.sqlStore({
-            map: cloud.get().map,
-            minZoom: parseInt(meta.parseLayerMeta(layerKey)?.vector_min_zoom),
-            maxZoom: parseInt(meta.parseLayerMeta(layerKey)?.vector_max_zoom) + 1,
-            pane,
-            parentFiltersHash,
-            jsonp: false,
-            method: "POST",
-            host: "",
-            db: urlparser.db,
-            maxFeaturesLimit: layerSpecificQueryLimit,
-            onMaxFeaturesLimitReached: () => {
-                _self.maxFeaturesNotification(layerKey);
-            },
-            uri: "/api/sql",
-            clickable: true,
-            id: trackingLayerKey,
-            name: trackingLayerKey,
-            lifetime: 0,
-            custom_data,
-            styleMap: styles[trackingLayerKey],
-            sql,
-            clustering: layerTreeUtils.getIfClustering(meta.parseLayerMeta(layerKey)),
-            onLoad: (l) => {
-                let reloadInterval = meta.parseLayerMeta(layerKey)?.reload_interval;
-                let tableElement = meta.parseLayerMeta(layerKey)?.show_table_on_side;
-                // Create side table once
-                if (tableElement && !$('#' + VECTOR_SIDE_TABLE_EL).length && window.vidiConfig.template === "embed.tmpl") {
-                    let styles;
-                    let height = null;
-                    let tableBodyHeight;
-                    const h = window.vidiConfig.vectorTable.height;
-                    const w = window.vidiConfig.vectorTable.width;
-                    const position = window.vidiConfig.vectorTable.position;
-                    const e = $('#pane');
-                    if (position === 'right') {
-                        styles = `width: ${w}; float: right;`;
-                        e.css("width", `calc(100vw - ${w})`);
-                        e.css("left", "0");
-                        tableBodyHeight = "calc(100vh - 34px)";
-                        height = $(window).height();
-                    } else if (position === 'bottom') {
-                        styles = `width: 100%; height: ${h}; bottom: 0; position: fixed;`;
-                        e.css("height", `calc(100vh - ${h})`);
-                        height = parseInt(h);
-                        tableBodyHeight = (height - 34) + "px"
+        if (typeof moduleState.vectorStores[trackingLayerKey] !== "object" || recreateStores) {
+            moduleState.vectorStores[trackingLayerKey] = new geocloud.sqlStore({
+                map: cloud.get().map,
+                minZoom: parseInt(meta.parseLayerMeta(layerKey)?.vector_min_zoom),
+                maxZoom: parseInt(meta.parseLayerMeta(layerKey)?.vector_max_zoom) + 1,
+                pane,
+                parentFiltersHash,
+                jsonp: false,
+                method: "POST",
+                host: "",
+                db: urlparser.db,
+                maxFeaturesLimit: layerSpecificQueryLimit,
+                onMaxFeaturesLimitReached: () => {
+                    _self.maxFeaturesNotification(layerKey);
+                },
+                uri: "/api/sql",
+                clickable: true,
+                id: trackingLayerKey,
+                name: trackingLayerKey,
+                lifetime: 0,
+                custom_data,
+                styleMap: styles[trackingLayerKey],
+                sql,
+                clustering: layerTreeUtils.getIfClustering(meta.parseLayerMeta(layerKey)),
+                onLoad: (l) => {
+                    let reloadInterval = meta.parseLayerMeta(layerKey)?.reload_interval;
+                    let tableElement = meta.parseLayerMeta(layerKey)?.show_table_on_side;
+                    // Create side table once
+                    if (tableElement && !$('#' + VECTOR_SIDE_TABLE_EL).length && window.vidiConfig.template === "embed.tmpl") {
+                        let styles;
+                        let height = null;
+                        let tableBodyHeight;
+                        const h = window.vidiConfig.vectorTable.height;
+                        const w = window.vidiConfig.vectorTable.width;
+                        const position = window.vidiConfig.vectorTable.position;
+                        const e = $('#pane');
+                        if (position === 'right') {
+                            styles = `width: ${w}; float: right;`;
+                            e.css("width", `calc(100vw - ${w})`);
+                            e.css("left", "0");
+                            tableBodyHeight = "calc(100vh - 34px)";
+                            height = $(window).height();
+                        } else if (position === 'bottom') {
+                            styles = `width: 100%; height: ${h}; bottom: 0; position: fixed;`;
+                            e.css("height", `calc(100vh - ${h})`);
+                            height = parseInt(h);
+                            tableBodyHeight = (height - 34) + "px"
+                        }
+                        if (position === 'right' || position === 'bottom') {
+                            e.before(`<div id="${VECTOR_SIDE_TABLE_EL}" style="${styles}; background-color: white; " data-vidi-vector-table-id="${trackingLayerKey}"></div>`)
+                            _self.createTable(layerKey, true, "#" + VECTOR_SIDE_TABLE_EL, {
+                                showToggle: false,
+                                showExport: false,
+                                showColumns: false,
+                                showSearch: false,
+                                cardView: false,
+                                height: height,
+                                tableBodyHeight: tableBodyHeight
+                            });
+                        }
                     }
-                    if (position === 'right' || position === 'bottom') {
-                        e.before(`<div id="${VECTOR_SIDE_TABLE_EL}" style="${styles}; background-color: white; " data-vidi-vector-table-id="${trackingLayerKey}"></div>`)
-                        _self.createTable(layerKey, true, "#" + VECTOR_SIDE_TABLE_EL, {
-                            showToggle: false,
-                            showExport: false,
-                            showColumns: false,
-                            showSearch: false,
-                            cardView: false,
-                            height: height,
-                            tableBodyHeight: tableBodyHeight
-                        });
+                    if (reloadInterval && reloadInterval !== "") {
+                        let reloadCallback = meta.parseLayerMeta(layerKey)?.reload_callback;
+                        let func = reloadCallback && reloadCallback !== "" ? Function('"use strict";return (' + reloadCallback + ')')() : () => {
+                        };
+                        func(l, cloud.get().map);
+                        clearInterval(reloadIntervals[layerKey]);
+                        reloadIntervals[layerKey] = setInterval(() => {
+                            l.load();
+                        }, parseInt(reloadInterval));
                     }
-                }
-                if (reloadInterval && reloadInterval !== "") {
-                    let reloadCallback = meta.parseLayerMeta(layerKey)?.reload_callback;
-                    let func = reloadCallback && reloadCallback !== "" ? Function('"use strict";return (' + reloadCallback + ')')() : () => {
-                    };
-                    func(l, cloud.get().map);
-                    clearInterval(reloadIntervals[layerKey]);
-                    reloadIntervals[layerKey] = setInterval(() => {
-                        l.load();
-                    }, parseInt(reloadInterval));
-                }
-                layers.decrementCountLoading(l.id);
-                backboneEvents.get().trigger("doneLoading:layers", l.id);
-                // We fire activeLayersChange event on load, so we are sure state is updated
-                backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
-                if (typeof onLoad[LAYER.VECTOR + ':' + layerKey] === "function") {
-                    onLoad[LAYER.VECTOR + ':' + layerKey](l);
-                }
-                if (l.geoJSON === null) {
-                    return
-                }
-                sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + layerKey, l.geoJSON.features);
-            },
-            transformResponse: (response, id) => {
-                return apiBridgeInstance.transformResponseHandler(response, id);
-            },
-            onEachFeature: (feature, layer) => {
-                if (parsedMeta?.hover_active) {
-                    _self.mouseOver(layer, fieldConf, template);
-                }
-                if (tooltipTemplate) {
-                    _self.toolTip(layer, feature, tooltipTemplate, pane);
-                }
-                if ((LAYER.VECTOR + ':' + layerKey) in onEachFeature) {
-                    /*
-                        Checking for correct onEachFeature structure
-                    */
-                    if (`fn` in onEachFeature[LAYER.VECTOR + ':' + layerKey] === false || !onEachFeature[LAYER.VECTOR + ':' + layerKey].fn ||
-                        `caller` in onEachFeature[LAYER.VECTOR + ':' + layerKey] === false || !onEachFeature[LAYER.VECTOR + ':' + layerKey].caller) {
-                        throw new Error(`Invalid onEachFeature structure`);
+                    layers.decrementCountLoading(l.id);
+                    backboneEvents.get().trigger("doneLoading:layers", l.id);
+                    // We fire activeLayersChange event on load, so we are sure state is updated
+                    backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
+                    if (typeof onLoad[LAYER.VECTOR + ':' + layerKey] === "function") {
+                        onLoad[LAYER.VECTOR + ':' + layerKey](l);
                     }
-                    if (onEachFeature[LAYER.VECTOR + ':' + layerKey].caller === `editor`) {
+                    if (l.geoJSON === null) {
+                        return
+                    }
+                    sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + layerKey, l.geoJSON.features);
+                },
+                transformResponse: (response, id) => {
+                    return apiBridgeInstance.transformResponseHandler(response, id);
+                },
+                onEachFeature: (feature, layer) => {
+                    if (parsedMeta?.hover_active) {
+                        _self.mouseOver(layer, fieldConf, template);
+                    }
+                    if (tooltipTemplate) {
+                        _self.toolTip(layer, feature, tooltipTemplate, pane);
+                    }
+                    if ((LAYER.VECTOR + ':' + layerKey) in onEachFeature && !window.vidiConfig.crossMultiSelect) {
                         /*
-                            If the handler was set by the editor extension, then display the attributes popup and editing buttons
+                            Checking for correct onEachFeature structure
                         */
-                        if (`editor` in extensions) {
-                            editor = extensions.editor.index;
+                        if (`fn` in onEachFeature[LAYER.VECTOR + ':' + layerKey] === false || !onEachFeature[LAYER.VECTOR + ':' + layerKey].fn ||
+                            `caller` in onEachFeature[LAYER.VECTOR + ':' + layerKey] === false || !onEachFeature[LAYER.VECTOR + ':' + layerKey].caller) {
+                            throw new Error(`Invalid onEachFeature structure`);
                         }
-                        layer.on("click", function (e) {
-                            _self.resetAllVectorLayerStyles();
-                            try {
-                                e.target.setStyle(SELECTED_STYLE);
-                            } catch (e) {
+                        if (onEachFeature[LAYER.VECTOR + ':' + layerKey].caller === `editor`) {
+                            /*
+                                If the handler was set by the editor extension, then display the attributes popup and editing buttons
+                            */
+                            if (`editor` in extensions) {
+                                editor = extensions.editor.index;
                             }
-                            let layerIsEditable = false;
-                            let metaDataKeys = meta.getMetaDataKeys();
-                            if (metaDataKeys[layerKey] && `meta` in metaDataKeys[layerKey]) {
-                                let parsedMeta = _self.parseLayerMeta(metaDataKeys[layerKey]);
-                                if (parsedMeta && `vidi_layer_editable` in parsedMeta && parsedMeta.vidi_layer_editable) {
-                                    layerIsEditable = true;
+                            layer.on("click", function (e) {
+                                _self.resetAllVectorLayerStyles();
+                                sqlQuery.resetAll();
+                                if (!window.vidiConfig.crossMultiSelect && e.target?.setStyle) {
+                                    e.target.setStyle(SELECTED_STYLE);
                                 }
-                            } else {
-                                throw new Error(`metaDataKeys[${layerKey}] is undefined`);
-                            }
-
-                            let editingButtonsMarkup = ``;
-                            if (moduleState.editingIsEnabled && layerIsEditable) {
-                                editingButtonsMarkup = markupGeneratorInstance.getEditingButtons();
-                            }
-
-                            _self.displayAttributesPopup([{
-                                feature: feature,
-                                layer: layer,
-                                layerKey: layerKey
-                            }], e, editingButtonsMarkup, false);
-
-                            if (moduleState.editingIsEnabled && layerIsEditable) {
-                                $(`.js-vector-layer-popup`).find(".ge-start-edit").unbind("click.ge-start-edit").bind("click.ge-start-edit", function () {
-                                    let layerMeta = meta.getMetaByKey(layerKey);
-                                    editor.edit(layer, layerKey + "." + layerMeta.f_geometry_column, null, true);
-                                });
-
-                                $(`.js-vector-layer-popup`).find(".ge-delete").unbind("click.ge-delete").bind("click.ge-delete", (e) => {
-                                    if (window.confirm("Are you sure? Changes will not be saved!")) {
-                                        let layerMeta = meta.getMetaByKey(layerKey);
-                                        editor.delete(layer, layerKey + "." + layerMeta.f_geometry_column, null, true);
+                                let layerIsEditable = false;
+                                let metaDataKeys = meta.getMetaDataKeys();
+                                if (metaDataKeys[layerKey] && `meta` in metaDataKeys[layerKey]) {
+                                    let parsedMeta = _self.parseLayerMeta(metaDataKeys[layerKey]);
+                                    if (parsedMeta && `vidi_layer_editable` in parsedMeta && parsedMeta.vidi_layer_editable) {
+                                        layerIsEditable = true;
                                     }
-                                });
-                            } else {
-                                $(`.js-vector-layer-popup`).find(".ge-start-edit").hide();
-                                $(`.js-vector-layer-popup`).find(".ge-delete").hide();
-                            }
-                        });
-                    }
+                                } else {
+                                    throw new Error(`metaDataKeys[${layerKey}] is undefined`);
+                                }
 
-                    onEachFeature[LAYER.VECTOR + ':' + layerKey].fn(feature, layer);
-                } else {
-                    // If there is no handler for specific layer, then display attributes only
-                    layer.on("click", function (e) {
-                        _self.resetAllVectorLayerStyles();
-                        try {
-                            e.target.setStyle(SELECTED_STYLE);
-                        } catch (e) {
-                        }
-                        // Cross Multi select disabled
-                        if (!window.vidiConfig.crossMultiSelect) {
-                            _self.displayAttributesPopup([{
+                                _self.displayAttributesPopup([{
                                     feature: feature,
                                     layer: layer,
-                                    layerKey: layerKey
-                                }],
-                                e, '', false);
-                            return
+                                    layerKey: layerKey,
+                                    vector: true
+                                }], e, '', false);
+                            });
                         }
 
-                        // Cross multi select enabled
-                        let coord3857 = utils.transform("EPSG:4326", "EPSG:3857", [e.latlng.lng, e.latlng.lat]);
-                        let wkt = "POINT(" + coord3857[0] + " " + coord3857[1] + ")";
-                        let intersectingFeatures = [];
-                        // Get active raster tile layers, so we can check if database should be queried
-                        let activelayers = layers.getMapLayers() ? layers.getLayers().split(",") : [];
-                        let activeTilelayers = activelayers.filter(layer => !layer.startsWith(LAYER.VECTOR + ':') && !layer.startsWith(LAYER.VECTOR_TILE + ':') && !layer.startsWith(LAYER.WEBGL + ':'))
-                        // Filter tiles layer without pixels
-                        activeTilelayers = activeTilelayers.filter((key) => {
-                            if (typeof moduleState.tileContentCache[key] === "boolean" && moduleState.tileContentCache[key] === true) {
-                                return true;
+                        onEachFeature[LAYER.VECTOR + ':' + layerKey].fn(feature, layer);
+                    } else {
+                        // If there is no handler for specific layer, then display attributes only
+                        layer.on("click", function (e) {
+                            _self.resetAllVectorLayerStyles();
+                            sqlQuery.resetAll();
+                            if (!window.vidiConfig?.crossMultiSelect) {
+                                if (e.target?.setStyle) {
+                                    e.target.setStyle(SELECTED_STYLE);
+                                }
                             }
-                        })
-                        if (activeTilelayers.length > 0) {
-                            sqlQuery.init(qstore, wkt, "3857", (store) => {
-                                setTimeout(() => {
-                                    if (store.geoJSON) {
-                                        sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + store.key, store.geoJSON.features);
-                                        store.layer.eachLayer((layer) => {
-                                            intersectingFeatures.push({
-                                                feature: layer.feature,
-                                                layer: layer,
-                                                layerKey: store.key
-                                            });
-                                        })
-                                    }
-                                    layers.decrementCountLoading("_vidi_sql_" + store.id);
-                                    backboneEvents.get().trigger("doneLoading:layers", "_vidi_sql_" + store.id);
-                                    if (layers.getCountLoading() === 0) {
-                                        _self.displayAttributesPopup(intersectingFeatures, e);
-                                    }
-                                }, 200)
-                            }, null, [coord3857[0], coord3857[1]]);
-                        }
-                        const distance = 10 * MAP_RESOLUTIONS[cloud.get().getZoom()];
-                        const clickFeature = turfBuffer(turfPoint([e.latlng.lng, e.latlng.lat]), distance, {units: 'meters'});
-                        let mapObj = cloud.get().map;
-                        for (let l in mapObj._layers) {
-                            let overlay = mapObj._layers[l];
-                            if (overlay._layers) {
-                                for (let f in overlay._layers) {
-                                    let featureForChecking = overlay._layers[f];
-                                    if (!featureForChecking?.feature?.geometry) {
-                                        continue;
-                                    }
-                                    let feature = turfFeature(featureForChecking.feature.geometry);
-                                    try {
-                                        if (turfIntersects(clickFeature, feature) && overlay.id) {
-                                            intersectingFeatures.push({
-                                                "feature": featureForChecking.feature,
-                                                "layer": overlay,
-                                                "layerKey": overlay.id.split(":")[1]
-                                            });
+                            // Cross Multi select disabled
+                            if (!window.vidiConfig.crossMultiSelect) {
+                                _self.displayAttributesPopup([{
+                                        feature: feature,
+                                        layer: layer,
+                                        layerKey: layerKey,
+                                        vector: true
+                                    }],
+                                    e, '', false);
+                                return
+                            }
+
+                            // Cross multi select enabled
+                            let coord3857 = utils.transform("EPSG:4326", "EPSG:3857", [e.latlng.lng, e.latlng.lat]);
+                            let wkt = "POINT(" + coord3857[0] + " " + coord3857[1] + ")";
+                            let intersectingFeatures = [];
+                            // Get active raster tile layers, so we can check if database should be queried
+                            let activelayers = layers.getMapLayers() ? layers.getLayers().split(",") : [];
+                            let activeTilelayers = activelayers.filter(layer => !layer.startsWith(LAYER.VECTOR + ':') && !layer.startsWith(LAYER.VECTOR_TILE + ':') && !layer.startsWith(LAYER.WEBGL + ':'))
+                            // Filter tiles layer without pixels
+                            activeTilelayers = activeTilelayers.filter((key) => {
+                                if (typeof moduleState.tileContentCache[key] === "boolean" && moduleState.tileContentCache[key] === true) {
+                                    return true;
+                                }
+                            })
+                            if (activeTilelayers.length > 0) {
+                                sqlQuery.init(qstore, wkt, "3857", (store) => {
+                                    setTimeout(() => {
+                                        if (store.geoJSON) {
+                                            sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + store.key, store.geoJSON.features);
+                                            store.layer.eachLayer((layer) => {
+                                                intersectingFeatures.push({
+                                                    feature: layer.feature,
+                                                    layer: layer,
+                                                    layerKey: store.key
+                                                });
+                                            })
                                         }
-                                    } catch (e) {
-                                        console.log(e);
+                                        layers.decrementCountLoading("_vidi_sql_" + store.id);
+                                        backboneEvents.get().trigger("doneLoading:layers", "_vidi_sql_" + store.id);
+                                        if (layers.getCountLoading() === 0) {
+                                            _self.displayAttributesPopup(intersectingFeatures, e);
+                                        }
+                                    }, 200)
+                                }, null, [coord3857[0], coord3857[1]]);
+                            }
+                            const distance = 10 * MAP_RESOLUTIONS[cloud.get().getZoom()];
+                            const clickFeature = turfBuffer(turfPoint([e.latlng.lng, e.latlng.lat]), distance, {units: 'meters'});
+                            let mapObj = cloud.get().map;
+                            for (let l in mapObj._layers) {
+                                let overlay = mapObj._layers[l];
+                                if (overlay._layers) {
+                                    for (let f in overlay._layers) {
+                                        let featureForChecking = overlay._layers[f];
+                                        if (!featureForChecking?.feature?.geometry) {
+                                            continue;
+                                        }
+                                        let feature = turfFeature(featureForChecking.feature.geometry);
+                                        try {
+                                            if (turfIntersects(clickFeature, feature) && overlay.id) {
+                                                intersectingFeatures.push({
+                                                    feature: featureForChecking.feature,
+                                                    layer: featureForChecking,
+                                                    layerKey: overlay.id.split(":")[1],
+                                                    vector: true
+                                                })
+                                            }
+                                        } catch (e) {
+                                            console.log(e);
+                                        }
                                     }
                                 }
                             }
-                        }
-                        // No active raster tile layers - open the pop-up
-                        if (activeTilelayers.length === 0) {
-                            _self.displayAttributesPopup(intersectingFeatures, e);
-                        }
-                    });
-                }
-            },
-            pointToLayer: (pointToLayer.hasOwnProperty(LAYER.VECTOR + ':' + layerKey) ? pointToLayer[LAYER.VECTOR + ':' + layerKey] : (feature, latlng) => {
-                return L.circleMarker(latlng, {pane});
-            }),
-            error: layerTreeUtils.storeErrorHandler
-        });
+                            // No active raster tile layers - open the pop-up
+                            if (activeTilelayers.length === 0) {
+                                _self.displayAttributesPopup(intersectingFeatures, e);
+                            }
+                        });
+                    }
+                },
+                pointToLayer: (pointToLayer.hasOwnProperty(LAYER.VECTOR + ':' + layerKey) ? pointToLayer[LAYER.VECTOR + ':' + layerKey] : (feature, latlng) => {
+                    return L.circleMarker(latlng, {pane, bubblingMouseEvents: false});
+                }),
+                error: layerTreeUtils.storeErrorHandler
+            });
+        }
     },
 
     /**
@@ -1715,7 +1745,8 @@ module.exports = {
     createWebGLStore: (layer) => {
         let layerKey = layer.f_table_schema + '.' + layer.f_table_name;
         const layerSpecificQueryLimit = layerTreeUtils.getQueryLimit(meta.parseLayerMeta(layerKey));
-        let sql = `SELECT * FROM ${layerKey} LIMIT ${layerSpecificQueryLimit}`;
+        let sql = `SELECT *
+                   FROM ${layerKey} LIMIT ${layerSpecificQueryLimit}`;
 
         let whereClauses = [];
         let activeFilters = _self.getActiveLayerFilters(layerKey);
@@ -1741,7 +1772,9 @@ module.exports = {
         // Gathering all WHERE clauses
         if (whereClauses.length > 0) {
             whereClauses = whereClauses.map(item => `(${item})`);
-            sql = `SELECT * FROM ${layerKey} WHERE (${whereClauses.join(` AND `)}) LIMIT ${layerSpecificQueryLimit}`;
+            sql = `SELECT *
+                   FROM ${layerKey}
+                   WHERE (${whereClauses.join(` AND `)}) LIMIT ${layerSpecificQueryLimit}`;
         }
 
         let trackingLayerKey = (LAYER.WEBGL + ':' + layerKey);
@@ -1868,10 +1901,14 @@ module.exports = {
     },
 
     displayAttributesPopup(features, event, additionalControls = ``, multi = true) {
+        if (window.vidiConfig.crossMultiSelect) {
+            _self.resetAllVectorLayerStyles();
+        }
         event.originalEvent.clickedOnFeature = true;
         let renderedText = null;
         let accordion = "";
         let count = 0;
+        let count2 = 1;
 
         $(".vector-feature-info-panel").remove();
         if (typeof vectorPopUp !== "undefined") {
@@ -1881,8 +1918,10 @@ module.exports = {
             let layerKey = f.layerKey;
             let feature = f.feature;
             let layer = f.layer;
+            let vector = f?.vector || false
 
             let parsedMeta = _self.parseLayerMeta(meta.getMetaByKey(layerKey, false));
+            let editDisplay = parsedMeta.vidi_layer_editable ? 'inline' : 'none';
             let properties = JSON.parse(JSON.stringify(feature.properties));
             for (var key in properties) {
                 if (properties.hasOwnProperty(key)) {
@@ -1891,6 +1930,12 @@ module.exports = {
                     }
                 }
             }
+
+            properties._vidi_edit_layer_id = layer._leaflet_id;
+            properties._vidi_edit_layer_name = layerKey;
+            properties._vidi_edit_vector = vector;
+            properties._vidi_edit_display = editDisplay;
+
 
             let i = properties._vidi_content.fields.length;
             while (i--) {
@@ -1942,7 +1987,7 @@ module.exports = {
                                                 <a style="display: block; color: black" class="feature-info-accordion-toggle accordion-toggle js-toggle-feature-panel" data-toggle="collapse" data-parent="#layers" href="#collapse${randText}" id="a-collapse${randText}">${title}</a>
                                             </h4>
                                         </div>
-                                        <ul class="list-group" id="group-${randText}" role="tabpanel"><div id="collapse${randText}" class="feature-info-accordion-body accordion-body collapse" style="padding: 3px 8px 3px 8px">${renderedText}</div></ul>
+                                        <ul class="list-group" id="group-${randText}" role="tabpanel"><div data-layer-id="${layer._leaflet_id}" id="collapse${randText}" class="feature-info-accordion-body accordion-body collapse" style="padding: 3px 8px 3px 8px">${renderedText}</div></ul>
                                     </div>`;
                         } else {
                             accordion = renderedText;
@@ -1954,7 +1999,6 @@ module.exports = {
             } catch (e) {
                 console.info("Error in pop-up template for: " + layerKey, e);
             }
-
             // Set select call when opening a panel
             let selectCallBack = () => {
             };
@@ -1967,12 +2011,27 @@ module.exports = {
                 }
             }
             let func = selectCallBack.bind(this, null, layer, layerKey, _self);
-
             $(document).arrive(`#a-collapse${randText}`, function () {
                 $(this).on('click', function () {
                     let e = $(`#collapse${randText}`);
+                    sqlQuery.getQstore()?.forEach(store => {
+                        $.each(store.layer._layers, function (i, v) {
+                            if (store.layer && store.layer.resetStyle) {
+                                store.layer.resetStyle(v);
+                            }
+                        });
+                    })
+                    _self.resetAllVectorLayerStyles();
                     if (!e.hasClass("in")) {
                         func();
+
+                        cloud.get().map.eachLayer(layer => {
+                            if (parseInt(layer._leaflet_id) === parseInt(e[0].dataset.layerId)) {
+                                if (layer?.setStyle) {
+                                    layer.setStyle(SELECTED_STYLE);
+                                }
+                            }
+                        })
                     }
                     $('.feature-info-accordion-body').collapse("hide")
                 });
@@ -1981,45 +2040,26 @@ module.exports = {
                 if (typeof parsedMeta.info_element_selector !== "undefined" && parsedMeta.info_element_selector !== "" && renderedText !== null) {
                     $(parsedMeta.info_element_selector).html(renderedText)
                 } else {
-                    // Set select call when opening a panel
-                    let selectCallBack = () => {
-                    };
-                    if (typeof parsedMeta.select_function !== "undefined" && parsedMeta.select_function !== "") {
-                        try {
-                            selectCallBack = Function('"use strict";return (' + parsedMeta.select_function + ')')();
-                        } catch (e) {
-                            console.info("Error in select function for: " + key);
-                            console.error(e.message);
-                        }
-                    }
-                    let func = selectCallBack.bind(this, null, layer, layerKey, _self);
-                    $(document).arrive(`#a-collapse${randText}`, function () {
-                        $(this).on('click', function () {
-                            let e = $(`#collapse${randText}`);
-                            if (!e.hasClass("in")) {
-                                func();
-                            }
-                            $('.feature-info-accordion-body').collapse("hide")
-                        });
-                    });
-
-                    vectorPopUp = L.popup({
-                        autoPan: window.vidiConfig.autoPanPopup,
-                        autoPanPaddingTopLeft: L.point(multi ? 20 : 0, multi ? 300 : 0),
-                        minWidth: 300,
-                        className: `js-vector-layer-popup custom-popup`
-                    }).setLatLng(event.latlng).setContent(`<div>
-                                                                ${additionalControls}
-                                                                <div style="margin-right: 5px; margin-left: 2px">${accordion}</div>
-                                                            </div>`).openOn(cloud.get().map)
-                        .on('remove', () => {
-                            sqlQuery.resetAll();
-                            if (window.vidiConfig.crossMultiSelect) {
+                    if (count2 === features.length) {
+                        vectorPopUp = L.popup({
+                            autoPan: window.vidiConfig.autoPanPopup,
+                            autoPanPaddingTopLeft: L.point(multi ? 20 : 0, multi ? 300 : 0),
+                            minWidth: 300,
+                            className: `js-vector-layer-popup custom-popup`
+                        }).setLatLng(event.latlng).setContent(`${additionalControls}${accordion}`).openOn(cloud.get().map)
+                            .on('remove', () => {
+                                if (`editor` in extensions) {
+                                    editor = extensions.editor.index;
+                                }
+                                if (!editor?.getEditedFeature()) {
+                                    sqlQuery.resetAll();
+                                }
                                 _self.resetAllVectorLayerStyles();
-                            }
-                        });
+                            });
+                    }
                 }
             }
+            count2++;
         })
         if (count === 1) {
             setTimeout(() => {
@@ -2496,28 +2536,28 @@ module.exports = {
                         }
                     }
                 }
-
-                let pointToLayer = (parsedMeta.point_to_layer && parsedMeta.point_to_layer !== "") ? parsedMeta.point_to_layer : null;
-                if (pointToLayer) {
+                let pointToLayerFn = moduleState.vectorStyles?.[layerKey]?.pointToLayerFn ? moduleState.vectorStyles[layerKey].pointToLayerFn : parsedMeta.point_to_layer && parsedMeta.point_to_layer !== "" ? parsedMeta.point_to_layer : null;
+                if (pointToLayerFn && pointToLayerFn !== '') {
                     try {
-                        let func = Function('"use strict";return (' + pointToLayer + ')')();
+                        let func = Function('"use strict";return (' + pointToLayerFn + ')')();
                         _self.setPointToLayer(LAYER.VECTOR + ':' + layerKey, func);
                     } catch (e) {
                         console.error("Error in point-to-layer function for: " + layerKey);
                     }
+                } else {
+                    _self.setPointToLayer(LAYER.VECTOR + ':' + layerKey, null);
                 }
-
-                let vectorStyle = (parsedMeta.vector_style && parsedMeta.vector_style !== "") ? parsedMeta.vector_style : null;
-                if (vectorStyle) {
+                let vectorStyleFn = moduleState.vectorStyles?.[layerKey]?.styleFn && moduleState.vectorStyles[layerKey].styleFn !== '' ? moduleState.vectorStyles[layerKey].styleFn : parsedMeta.vector_style && parsedMeta.vector_style !== "" ? parsedMeta.vector_style : null;
+                if (vectorStyleFn) {
                     try {
-                        let func = Function('"use strict";return (' + vectorStyle + ')')();
+                        let func = Function('"use strict";return (' + vectorStyleFn + ')')();
                         _self.setStyle(LAYER.VECTOR + ':' + layerKey, func);
                     } catch (e) {
                         console.error("Error in style function for: " + layerKey);
                     }
-
+                } else {
+                    _self.setStyle(LAYER.VECTOR + ':' + layerKey, null);
                 }
-
 
                 _self.createStore(layer, isVirtualGroup);
             }
@@ -2672,10 +2712,10 @@ module.exports = {
         let markup = markupGeneratorInstance.getSubgroupControlRecord(base64SubgroupName, subgroup.id, level, window.vidiConfig.showLayerGroupCheckbox);
 
         $(parentNode).append(markup);
-        $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-id`).append(`<div style="display: inline">
+        $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-id`).append(`
                 ${subgroup.id}
-                <i style="float: right; padding-top: 9px; font-size: 26px;" class="material-icons layer-move-vert layer-move-vert-subgroup">more_vert</i>
-        </div>`);
+                <i style="font-size: 26px; margin-left: auto" class="material-icons layer-move-vert layer-move-vert-subgroup">more_vert</i>
+        `);
 
         $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-toggle-button`).click((event) => {
             // Checking if the subgroup was already drawn
@@ -3220,6 +3260,39 @@ module.exports = {
                     });
                 }
 
+                // Vector styles
+                const settingsStyle = $(layerContainer).find('.js-layer-settings-style')
+                const componentContainerId = `layer-settings-styles-${layerKey}`;
+                settingsStyle.append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
+
+                let values = {};
+                if (layerKey in moduleState.vectorStyles) {
+                    values = moduleState.vectorStyles[layerKey];
+                } else {
+                    values['styleFn'] = parsedMeta?.vector_style;
+                    values['pointToLayerFn'] = parsedMeta?.point_to_layer;
+                    values['tooltipTmpl'] = parsedMeta?.tooltip_template;
+                    values['minZoom'] = parseInt(parsedMeta?.vector_min_zoom) || undefined;
+                    values['maxZoom'] = parseInt(parsedMeta?.vector_max_zoom) || undefined;
+                }
+
+                setTimeout(() => {
+                    if (document.getElementById(componentContainerId)) {
+                        ReactDOM.render(<MetaSettingForm
+                                layerKey={layerKey}
+                                initialValues={values}
+                                onChange={_self.onChangeStylesHandler}/>,
+                            document.getElementById(componentContainerId));
+                    } else {
+                        console.error(`Unable to find the labels control container`);
+                    }
+                }, 10);
+
+                $(layerContainer).find(`.js-toggle-style`).click(() => {
+                    _self._selectIcon($(layerContainer).find('.js-toggle-style'));
+                    $(layerContainer).find('.js-layer-settings-style').toggle();
+                });
+
                 $(layerContainer).find(`.js-toggle-search`).click(() => {
                     _self._selectIcon($(layerContainer).find('.js-toggle-search'));
                     $(layerContainer).find('.js-layer-settings-search').toggle();
@@ -3351,11 +3424,41 @@ module.exports = {
 
     onChangeLabelsHandler: ({layerKey, labelsAreEnabled}) => {
         moduleState.labelSettings[layerKey] = labelsAreEnabled;
-        let correspondingLayer = meta.getMetaByKey(layerKey);
-        //backboneEvents.get().trigger(`${MODULE_NAME}:dynamicLoadLayersChange`);
-        //_self.reloadLayer(LAYER.RASTER_TILE + ':' + layerKey);
-        _self.reloadLayerOnLabelChange(layerKey, labelsAreEnabled);
+        _self.reloadLayerOnLabelChange(layerKey);
 
+    },
+
+    onChangeStylesHandler: ({layerKey, obj}) => {
+        // If the pointToLayer func is not set we set it to the default one
+        if (!obj.pointToLayerFn) {
+            obj.pointToLayerFn =
+                `(feature, latlng) => {
+                    return L.circleMarker(latlng, {pane: '${layerKey.replace('.', '-')}'});
+                }`
+        }
+        moduleState.vectorStyles[layerKey] = obj;
+        backboneEvents.get().trigger(`${MODULE_NAME}:changed`);
+        let func;
+        if (obj?.styleFn === '') {
+            _self.setStyle(LAYER.VECTOR + ':' + layerKey, null)
+        } else {
+            try {
+                func = Function('"use strict";return (' + obj.styleFn + ')')();
+                _self.setStyle(LAYER.VECTOR + ':' + layerKey, func)
+            } catch (e) {
+                console.error(e.message)
+                alert("Error in style function")
+            }
+        }
+
+        try {
+            func = Function('"use strict";return (' + obj.pointToLayerFn + ')')();
+            _self.setPointToLayer(LAYER.VECTOR + ':' + layerKey, func)
+        } catch (e) {
+            console.error(e.message)
+            alert("Error in point-to-layer function 2")
+        }
+        _self.reloadLayerOnStyleChange(layerKey)
     },
 
     onApplyArbitraryFiltersHandler: ({layerKey, filters}, forcedReloadLayerType = false) => {
@@ -3371,12 +3474,13 @@ module.exports = {
     onApplyFitBoundsFiltersHandler: (layerKey) => {
         let metaData = meta.getMetaByKey(layerKey);
         let whereClause = _self.getActiveLayerFilters(layerKey)[0];
-        let sql = `SELECT 
-                    ST_Xmin(ST_Extent(extent)) AS txmin,
-                    ST_Xmax(ST_Extent(extent)) AS txmax,
-                    ST_Ymin(ST_Extent(extent)) AS tymin,
-                    ST_Ymax(ST_Extent(extent)) AS tymax
-                FROM (SELECT ST_astext(ST_Transform(ST_setsrid(ST_Extent(${metaData.f_geometry_column}),${metaData.srid}),4326)) AS extent FROM ${layerKey} WHERE ${whereClause}) as foo`;
+        let sql = `SELECT ST_Xmin(ST_Extent(extent)) AS txmin,
+                          ST_Xmax(ST_Extent(extent)) AS txmax,
+                          ST_Ymin(ST_Extent(extent)) AS tymin,
+                          ST_Ymax(ST_Extent(extent)) AS tymax
+                   FROM (SELECT ST_astext(ST_Transform(ST_setsrid(ST_Extent(${metaData.f_geometry_column}), ${metaData.srid}), 4326)) AS extent
+                         FROM ${layerKey}
+                         WHERE ${whereClause}) as foo`;
         let q = {
             q: base64url(sql),
             base64: true
@@ -3399,7 +3503,9 @@ module.exports = {
     },
     onApplyDownloadHandler: (layerKey, format) => {
         let whereClause = _self.getActiveLayerFilters(layerKey)[0];
-        let sql = `SELECT * FROM ${layerKey} WHERE ${whereClause}`;
+        let sql = `SELECT *
+                   FROM ${layerKey}
+                   WHERE ${whereClause}`;
         download.download(sql, format)
     },
 
@@ -3423,6 +3529,10 @@ module.exports = {
 
     reloadLayerOnLabelChange: (layerKey) => {
         _self.reloadLayer(layerKey, false, false, false);
+    },
+
+    reloadLayerOnStyleChange: (layerKey) => {
+        _self.reloadLayer(LAYER.VECTOR + ':' + layerKey, false, false, false);
     },
 
     reloadLayerOnFiltersChange: (layerKey, forcedReloadLayerType = false) => {
@@ -3554,18 +3664,30 @@ module.exports = {
         cm[layer] = c;
     },
 
-    setStyle: function (layerName, style) {
+    setStyle: function (layerName, fn) {
+        if (!fn) {
+            delete styles[layerName];
+        } else {
+            let foundLayers = layers.getMapLayers(false, layerName);
+            if (foundLayers.length === 1) {
+                let layer = foundLayers[0];
+                layer.options.style = fn;
+            }
+            styles[layerName] = fn;
+        }
+    },
+
+    setPointToLayer: function (layerName, fn) {
+        if (fn === null) {
+            const str = `(feature, latlng) => {return L.circleMarker(latlng, {pane: "${layerName.replace('.', '-').split(':')[1]}"});}`;
+            fn = Function(`"use strict";return (${str})`)();
+        }
         let foundLayers = layers.getMapLayers(false, layerName);
         if (foundLayers.length === 1) {
             let layer = foundLayers[0];
-            layer.options.style = style;
+            layer.options.pointToLayer = fn;
         }
-
-        styles[layerName] = style;
-    },
-
-    setPointToLayer: function (layer, fn) {
-        pointToLayer[layer] = fn;
+        pointToLayer[layerName] = fn;
     },
 
     setOnSelectedStyle: function (layer, style) {

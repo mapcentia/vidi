@@ -6,20 +6,18 @@
 
 'use strict';
 
-var modules;
-var tmpl;
-var urlparser = require('./../modules/urlparser');
-var urlVars = urlparser.urlVars;
-var backboneEvents;
+import {fallback} from "async/internal/setImmediate";
+
+let modules;
+let tmpl;
+const urlparser = require('./../modules/urlparser');
+const urlVars = urlparser.urlVars;
+let backboneEvents;
+let utils;
 
 const semver = require('semver');
 const md5 = require('md5');
 const cookie = require('js-cookie');
-
-const DEFAULT_STARTUP_MODAL_SUPRESSION_TEMPLATES = ["print.tmpl", "blank.tmpl", {
-    regularExpression: true,
-    name: 'print_[\\w]+\\.tmpl'
-}];
 
 import mustache from 'mustache';
 
@@ -33,6 +31,7 @@ module.exports = {
     set: function (o) {
         modules = o;
         backboneEvents = o.backboneEvents;
+        utils = o.utils;
         return this;
     },
 
@@ -69,6 +68,7 @@ module.exports = {
             measurementMDecimals: 1,
             measurementKmDecimals: 2,
             showLayerGroupCheckbox: false,
+            popupDraggable: false,
             activeLayers: [],
             initFunction: null,
             snapshot: null,
@@ -76,7 +76,8 @@ module.exports = {
                 position: 'right',
                 width: '30%',
                 height: '250px'
-            }
+            },
+            initZoomCenter: null,
         };
         // Set default for unset props
         for (let prop in defaults) {
@@ -84,11 +85,6 @@ module.exports = {
         }
         (function poll() {
             if (typeof L.control.locate !== "undefined") {
-                if (typeof urlVars.session === "string") {
-                    // Try to remove existing cookie
-                    document.cookie = 'connect.gc2=; Max-Age=0; path=/; domain=' + location.host;
-                    cookie.set("connect.gc2", urlVars.session);
-                }
                 let loadConfig = function () {
                     let configParam;
                     if (configFile.startsWith("/")) {
@@ -160,7 +156,7 @@ module.exports = {
      *
      */
     render: function () {
-        var me = this;
+        const me = this;
 
         // Render template and set some styling
         // ====================================
@@ -171,7 +167,7 @@ module.exports = {
         // ====================================
 
         if (typeof urlVars.tmpl !== "undefined") {
-            var par = urlVars.tmpl.split("#");
+            let par = urlVars.tmpl.split("#");
             if (par.length > 1) {
                 par.pop();
             }
@@ -190,7 +186,7 @@ module.exports = {
             gc2i18n.dict.printDateTime = decodeURIComponent(urlVars.td);
             gc2i18n.dict.printDate = decodeURIComponent(urlVars.d);
             gc2i18n.dict.printFrame = parseInt(decodeURIComponent(urlVars.frame)) + 1;
-            gc2i18n.dict.showFrameNumber = decodeURIComponent(urlVars.frameN) === "1" ? false : true;
+            gc2i18n.dict.showFrameNumber = decodeURIComponent(urlVars.frameN) !== "1";
             window.vidiTimeout = 1000;
         } else {
             window.vidiTimeout = 0;
@@ -199,16 +195,36 @@ module.exports = {
         if (urlVars.l) {
             gc2i18n.dict._showLegend = urlVars.l;
         }
-        if (urlVars.s) {
-            gc2i18n.dict._displaySearch = urlVars.s || "inline";
-        }
-        if (urlVars.his) {
-            gc2i18n.dict._displayhistory = urlVars.his || "inline";
-        }
 
         gc2i18n.dict._showHeader = urlVars.h || "inline";
         gc2i18n.dict.brandName = window.vidiConfig.brandName;
         gc2i18n.dict.aboutBox = window.vidiConfig.aboutBox;
+
+        // Start of embed settings for display of buttons
+        if (urlVars.sea) {
+            gc2i18n.dict._displaySearch = urlVars.sea || "inline";
+        }
+        if (urlVars.his) {
+            gc2i18n.dict._displayHistory = urlVars.his || "inline";
+        }
+        if (urlVars.leg) {
+            gc2i18n.dict._displayLegend = urlVars.leg || "inline";
+        }
+        if (urlVars.lay) {
+            gc2i18n.dict._displayLayer = urlVars.lay || "inline";
+        }
+        if (urlVars.bac) {
+            gc2i18n.dict._displayBackground = urlVars.bac || "inline";
+        }
+        if (urlVars.ful) {
+            gc2i18n.dict._displayFullscreen = urlVars.ful || "inline";
+        }
+        if (urlVars.abo) {
+            gc2i18n.dict._displayAbout = urlVars.abo || "inline";
+        }
+        if (urlVars.loc) {
+            gc2i18n.dict._displayLocation = urlVars.loc || "inline";
+        }
 
         // Render the page
         // ===============
@@ -219,7 +235,7 @@ module.exports = {
             me.startApp();
         } else {
             $.get("/api/template/" + urlparser.db + "/" + tmpl, function (template) {
-                var rendered = mustache.render(template, gc2i18n.dict);
+                const rendered = mustache.render(template, gc2i18n.dict);
                 $("#main-container").html(rendered);
                 console.info("Loaded external template: " + tmpl);
                 me.startApp();
@@ -233,10 +249,9 @@ module.exports = {
      *
      */
     startApp: function () {
-        let humanUsedTemplate = !(urlVars.px && urlVars.py);
+        let humanUsedTemplate = !(urlVars.px && urlVars.py), schema;
         if (`tmpl` in urlVars) {
-            let supressedModalTemplates = DEFAULT_STARTUP_MODAL_SUPRESSION_TEMPLATES;
-            supressedModalTemplates = window.vidiConfig.startupModalSupressionTemplates;
+            let supressedModalTemplates = window.vidiConfig.startupModalSupressionTemplates;
             supressedModalTemplates.map(item => {
                 if (typeof item === 'string' || item instanceof String) {
                     // Exact string template name
@@ -309,7 +324,7 @@ module.exports = {
         let splitLocation = window.location.pathname.split(`/`);
         if (splitLocation.length === 4 || splitLocation.length === 5) {
             let database = splitLocation[2];
-            let schema = splitLocation[3];
+            schema = splitLocation[3];
             if (!schema || schema.length === 0) {
                 console.log(`Schema not provided in URL`);
             } else {
@@ -331,22 +346,12 @@ module.exports = {
         modules.state.setExtent();
 
         // Calling mandatory init method
-        [`backboneEvents`, `socketId`, `bindEvent`, `baseLayer`, `infoClick`,
+        [`anchor`, `backboneEvents`, `socketId`, `bindEvent`, `baseLayer`, `infoClick`,
             `advancedInfo`, `draw`, `measurements`, `mapcontrols`, `stateSnapshots`, `print`, `layerTree`, `reset`].map(name => {
             modules[name].init();
         });
 
-        /**
-         * Fetch meta > initialize settings > create layer tree >
-         * load layers > initialize extensions > initialize state > finish
-         */
-        modules.meta.init().then((schemataStr) => {
-            return modules.setting.init(schemataStr);
-        }).catch((error) => {
-            console.log(error); // Stacktrace
-            //alert("Vidi is loaded without schema. Can't set extent or add layers");
-            backboneEvents.get().trigger("ready:meta");
-        }).then(() => {
+        const initExtensions = () => {
             try {
 
                 // Require search module
@@ -426,18 +431,91 @@ module.exports = {
             } catch (e) {
                 console.error("Could not perform application initialization", e.message, e);
             }
-            return modules.layerTree.create();
-        }).finally(() => {
+        }
+
+        /**
+         * TODO remove if
+         */
+
+
+        if (urlVars.state || urlparser.hash.length === 0) {
+            console.log("Using fast init")
+            $("#loadscreen").fadeOut(200);
+            initExtensions();
             modules.state.init().then(() => {
-                modules.state.listenAny(`extensions:initialized`, [`layerTree`]);
+                // Only fetch Meta and Settings if schemata pattern are use in either config or URL
+                if (window.vidiConfig.schemata.length > 0 || (schema && schema.length > 0)) {
+                    let schemataStr
+                    if (typeof window.vidiConfig.schemata === "object" && window.vidiConfig.schemata.length > 0) {
+                        schemataStr = window.vidiConfig.schemata.join(",");
+                    } else {
+                        schemataStr = schema;
+                    }
+                    // Settings
+                    modules.setting.init(schemataStr).then(() => {
+                        const maxBounds = modules.setting.getMaxBounds();
+                        if (maxBounds) {
+                            modules.cloud.get().setMaxBounds(maxBounds);
+                        }
+                        if (!utils.parseZoomCenter(window.vidiConfig?.initZoomCenter) && !urlVars.state) {
+                            const extent = modules.setting.getExtent();
+                            if (extent !== null) {
+                                modules.cloud.get().zoomToExtent(extent);
+                            } else {
+                                modules.cloud.get().zoomToExtent();
+                            }
+                        }
+                    })
+                    // Meta
+                    modules.meta.init(null, false, true).then(() => {
+                        modules.state.getState().then(st => {
+                            // Don't recreate SQL store from snapshot
+                            if (!st.modules?.layerTree) {
+                                st.modules.layerTree = {};
+                            }
+                            // Set activeLayers from config if not snapshot
+                            if (!urlVars.state) {
+                                st.modules.layerTree.activeLayers = window.vidiConfig.activeLayers;
+                            }
+                            modules.layerTree.setRecreateStores(false);
+                            modules.layerTree.applyState(st.modules.layerTree, true).then(() => {
+                                modules.layerTree.setRecreateStores(true);
+                                // Switch on activeLayers from config if not snapshot
+                                if (!urlVars.state) {
+                                    st.modules.layerTree.activeLayers.forEach((l) => {
+                                        modules.switchLayer.init(l, true)
+                                    })
+                                }
+                            });
+                        })
+                    }).catch((error) => {
+                        console.log(error); // Stacktrace
+                        backboneEvents.get().trigger("ready:meta");
+                    })
+                }
+            }).catch((error) => {
+                console.error(error)
+            })
+        } else {
+            modules.meta.init().then((schemataStr) => {
+                return modules.setting.init(schemataStr);
+            }).catch((error) => {
+                console.log(error); // Stacktrace
+                backboneEvents.get().trigger("ready:meta");
+            }).then(() => {
+                initExtensions();
+                return modules.layerTree.create();
+            }).finally(() => {
                 $("#loadscreen").fadeOut(200);
+                modules.state.init().then(() => {
+                    modules.state.listenAny(`extensions:initialized`, [`layerTree`]);
+                }).catch((error) => {
+                    console.error(error)
+                });
             }).catch((error) => {
                 console.error(error)
             });
-        }).catch((error) => {
-            console.error(error)
-        });
-
+        }
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/service-worker.bundle.js').then((registration) => {
                 let checkInterval = setInterval(() => {
@@ -489,7 +567,7 @@ module.exports = {
                                             registration.unregister();
                                         }
                                     });
-                                    Promise.all(unregisteringRequests).then((values) => {
+                                    Promise.all(unregisteringRequests).then(() => {
                                         // Clear caches
                                         caches.keys().then(function (names) {
                                             for (let name of names) {
@@ -510,7 +588,7 @@ module.exports = {
                         } else if (typeof value === "undefined" || semver.valid(value) === null) {
                             console.warn(`Seems like current application version is invalid, resetting it`);
                             localforage.setItem('appVersion', '1.0.0').then(() => {
-                            }).catch(error => {
+                            }).catch(() => {
                                 localforage.setItem('appExtensionsBuild', '0').then(() => {
                                 }).catch(error => {
                                     console.error(`Unable to store current application version`, error);
@@ -519,7 +597,7 @@ module.exports = {
                         }
                     }
                 });
-            }).catch(error =>{
+            }).catch(error => {
                 console.error(`Can't get item from localforage`, error);
             });
         } else {

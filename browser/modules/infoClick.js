@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2022 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -10,17 +10,18 @@ import {LAYER} from "./layerTree/constants";
 
 const MODULE_ID = `infoClick`;
 
-var cloud;
-var backboneEvents;
-var utils;
-var clicktimer;
-var sqlQuery;
-var layerTree;
-var _layers;
-var qstore = [];
-var active = false;
-var _self = false;
+let cloud;
+let backboneEvents;
+let utils;
+let clicktimer;
+let sqlQuery;
+let layerTree;
+let _layers;
+let qstore = [];
+let active = false;
+let _self = false;
 let blocked = false;
+let advancedInfo;
 
 /**
  *
@@ -35,6 +36,7 @@ module.exports = {
         layerTree = o.layerTree;
         _layers = o.layers;
         _self = this;
+        advancedInfo = o.advancedInfo;
         return this;
     },
 
@@ -44,7 +46,7 @@ module.exports = {
         });
         backboneEvents.get().on(`off:all`, () => {
             _self.off();
-            _self.reset();
+            // _self.reset();
         });
         backboneEvents.get().on(`on:${MODULE_ID}`, () => {
             _self.active(true);
@@ -71,17 +73,17 @@ module.exports = {
             // Reset all SQL Query layers
             backboneEvents.get().trigger("sqlQuery:clear");
 
-            var event = new geocloud.clickEvent(e, cloud.get());
+            const event = new geocloud.clickEvent(e, cloud.get());
             if (clicktimer) {
                 clearTimeout(clicktimer);
             } else {
                 clicktimer = setTimeout(function () {
                     clicktimer = undefined;
-                    var coords = event.getCoordinate(), wkt;
+                    let coords = event.getCoordinate(), wkt;
                     wkt = "POINT(" + coords.x + " " + coords.y + ")";
 
                     // Cross Multi select disabled
-                    if (!window.vidiConfig.crossMultiSelect || window.vidiConfig.enabledExtensions.includes('editor')) {
+                    if (!window.vidiConfig.crossMultiSelect) {
                         sqlQuery.init(qstore, wkt, "3857", null, null, [coords.lat, coords.lng], false, false, false, (layerId) => {
                             setTimeout(() => {
                                 let parentLayer = cloud.get().map._layers[layerId];
@@ -120,17 +122,10 @@ module.exports = {
         });
     },
 
-    /**
-     *
-     */
     reset: function () {
         sqlQuery.reset(qstore);
     },
 
-    /**
-     *
-     * @param a {boolean}
-     */
     active: function (a) {
         if (!a) {
             this.reset();
@@ -153,11 +148,13 @@ module.exports = {
             }
         }
         active = a;
+        if ($("#advanced-info-btn").is(':checked')) {
+            advancedInfo.on();
+        }
     },
 
     on: () => {
         active = true;
-
     },
 
     off: () => {
@@ -165,5 +162,4 @@ module.exports = {
         utils.cursorStyle().reset();
     }
 };
-
 

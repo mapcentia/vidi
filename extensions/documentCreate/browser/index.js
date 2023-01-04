@@ -81,18 +81,6 @@ const GUI_CONTROL_STATE = {
   }
 
 /**
- *
- * @type {exports|module.exports}
- */
-var jsts = require('jsts');
-
-/**
- *
- * @type {*|exports|module.exports}
- */
-var reproject = require('reproject');
-
-/**
  * @type {string}
  */
 var db = urlparser.db;
@@ -127,13 +115,6 @@ if (urlparser.urlVars.filterKey) {
 if (urlparser.urlVars.fileIdent) {
     fileIdent = urlparser.urlVars.fileIdent;
 }
-/**
- *
- */
-var Terraformer = require('terraformer-wkt-parser');
-var transformPoint;
-
-var _result;
 
 var _USERSTR = "";
 

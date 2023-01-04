@@ -6,12 +6,13 @@
 
 'use strict';
 
-let urlparser = require('./urlparser');
-let db = urlparser.db;
+const urlparser = require('./urlparser');
+const db = urlparser.db;
 let schema = urlparser.schema;
 let cloud, layers, setBaseLayer;
 let _self = false;
 let initMapParameters;
+let utils;
 
 /**
  *
@@ -22,12 +23,13 @@ module.exports = {
         cloud = o.cloud;
         layers = o.layers;
         setBaseLayer = o.setBaseLayer;
+        utils = o.utils;
         return this;
     },
     init: function () {
         _self = this;
 
-        var param = [], paramStr, parr;
+        let param = [], paramStr, parr;
 
         $.each(this.urlVars(), function (i, v) {
             parr = v.split("#");
@@ -36,14 +38,14 @@ module.exports = {
             }
             param.push(i + "=" + parr.join());
         });
-        var sr = urlparser.staticRoute !== "" && urlparser.staticRoute !== undefined  ? urlparser.staticRoute : null;
+        const sr = urlparser.staticRoute !== "" && urlparser.staticRoute !== undefined  ? urlparser.staticRoute : null;
         paramStr = param.join("&");
         return "/app/" + db + "/" + (schema !== "" ? schema + "/" : "") + (sr ? sr + "/" : "") + ((paramStr === "") ? "" : "?" + paramStr) + this.anchor();
     },
 
     urlVars: function getUrlVars() {
-        var mapvars = {};
-        var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function (m, key, value) {
+        let mapvars = {};
+        window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function (m, key, value) {
             mapvars[key] = value;
         });
         return mapvars;
@@ -71,8 +73,14 @@ module.exports = {
         return result;
     },
 
-    applyMapParameters: (parameters) => {
-        let result = new Promise((resolve, reject) => {
+    applyMapParameters: (parameters, ignoreInitZoomCenter) => {
+        const arr = window.vidiConfig?.initZoomCenter ? utils.parseZoomCenter(window.vidiConfig.initZoomCenter) : null;
+        if (arr && !ignoreInitZoomCenter) {
+            parameters.zoom = arr.z;
+            parameters.x = arr.x;
+            parameters.y = arr.y;
+        }
+        return new Promise((resolve, reject) => {
             if (parameters.x && parameters.y && parameters.zoom) {
                 cloud.get().setView(new L.LatLng(parseFloat(parameters.y), parseFloat(parameters.x)), parameters.zoom);
                 initMapParameters = parameters
@@ -87,8 +95,6 @@ module.exports = {
                 reject();
             });
         });
-
-        return result;
     },
 
     getInitMapParameters: () => {
@@ -99,10 +105,10 @@ module.exports = {
      * @private
      * @returns {string|boolean}
      */
-    anchor: (scheme) => {
+    anchor: (scheme = null) => {
         let mapParameters = _self.getCurrentMapParameters();
         if (mapParameters) {
-            var layerStr;
+            let layerStr;
             if (layers.getLayers() && scheme) {
                 let newArr = [];
                 let arr = mapParameters.layers;
@@ -130,7 +136,7 @@ module.exports = {
     },
 
     getParam: function () {
-        var param = [], paramStr, parr;
+        let param = [], paramStr, parr;
         $.each(this.urlVars(), function (i, v) {
             parr = v.split("#");
             if (parr.length > 1) {

@@ -42,10 +42,10 @@ const LAYER_TYPE_DEFAULT = LAYER.RASTER_TILE;
  * Layer type icons
  */
 let icons = {};
-icons[LAYER.VECTOR] = `<i class="material-icons">gesture</i>`;
-icons[LAYER.RASTER_TILE] = `<i class="material-icons">border_all</i>`;
-icons[LAYER.VECTOR_TILE] = `<i class="material-icons">domain</i>`;
-icons[LAYER.WEBGL] = `<i class="material-icons">grain</i>`;
+icons[LAYER.VECTOR] = `<i style="font-size: 18px" class="material-icons">gesture</i>`;
+icons[LAYER.RASTER_TILE] = `<i style="font-size: 18px" class="material-icons">border_all</i>`;
+icons[LAYER.VECTOR_TILE] = `<i style="font-size: 18px" class="material-icons">domain</i>`;
+icons[LAYER.WEBGL] = `<i style="font-size: 18px" class="material-icons">grain</i>`;
 const ICONS = icons;
 
 const VECTOR_SIDE_TABLE_EL = 'vector-side-table';
@@ -55,6 +55,14 @@ const SELECTED_STYLE = {
     weight: 5,
     dashArray: "8 5",
     lineCap: "butt",
+}
+const VECTOR_STYLE = () => {
+    return {
+        opacity: 1,
+        weight: 3,
+        fillColor: "blue",
+        color: "blue"
+    }
 }
 
 export {
@@ -69,5 +77,6 @@ export {
     SUB_GROUP_DIVIDER,
     MAP_RESOLUTIONS,
     VECTOR_SIDE_TABLE_EL,
-    SELECTED_STYLE
+    SELECTED_STYLE,
+    VECTOR_STYLE
 };
