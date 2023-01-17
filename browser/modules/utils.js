@@ -40,7 +40,7 @@ module.exports = {
             iconRaw = icon;
         } else {
             icon = icon || "help";
-            iconRaw = `<i data-container="body" data-toggle="tooltip" data-placement="left" title="${name}" class="material-icons">${icon}</i>`;
+            iconRaw = `<i data-container="body" data-toggle="tooltip" data-placement="left" title="${name}" class="bi ${icon}"></i>`;
         }
 
         if (moduleId === false) {
@@ -48,7 +48,7 @@ module.exports = {
         }
 
         $(`<li role="presentation">
-            <a data-bs-toggle="tab" data-module-id="${moduleId}" href="#${id}-content" aria-controls role="tab" data-toggle="tab" data-module-title="${name}">${iconRaw}${name}</a>
+            <a class="nav-link" data-bs-toggle="tab" data-module-id="${moduleId}" href="#${id}-content" aria-controls role="tab" data-toggle="tab" data-module-title="${name}">${iconRaw}</a>
         </li>`).appendTo("#main-tabs");
         $(`<div role="tabpanel" class="tab-pane fade" id="${id}-content"></div>`).appendTo(".tab-content.main-content");
         $(`<div class="help-btn"><i class="material-icons help-btn">help_outline</i></div>`).appendTo(el).on("click", function () {

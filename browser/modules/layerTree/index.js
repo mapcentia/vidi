@@ -341,12 +341,16 @@ module.exports = {
         let activeFilters = _self.getActiveLayerFilters(layerKey);
         let parentFilters = _self.getParentLayerFilters(layerKey);
         let overallFilters = activeFilters.concat(parentFilters);
+        const bg = $(`[data-gc2-layer-key^="${layerKey}"]`);
+        bg.find(`.js-toggle-filters-number-of-filters`).text(overallFilters.length);
         if (overallFilters.length > 0) {
             let data = {};
             data[layerKey] = overallFilters;
             parameterString = `filters=` + base64url(JSON.stringify(data));
+            bg.find(`.rounded-pill`).show();
+        } else {
+            bg.find(`.rounded-pill`).hide();
         }
-        $(`[data-gc2-layer-key^="${layerKey}"]`).find(`.js-toggle-filters-number-of-filters`).text(overallFilters.length);
         return parameterString;
     },
 
@@ -669,7 +673,7 @@ module.exports = {
         });
 
         let order = false;
-        if (false) {
+        if (!false) {
             order = moduleState.layerTreeOrder
         } else if (typeof latestFullTreeStructure === 'object') {
             order = latestFullTreeStructure.map(g => {
@@ -1086,7 +1090,7 @@ module.exports = {
                                     arr = layerSortingInstance.sortGroups(order, notSortedGroupsArray);
                                 }
 
-                                $("#layers").append(`<div id="layers_list"></div>`);
+                                $("#layers").append(`<div id="layers_list" class="vstack gap-2"></div>`);
 
                                 // Filling up groups and underlying layers (except ungrouped ones)
                                 latestFullTreeStructure = [];
@@ -1487,8 +1491,13 @@ module.exports = {
             if (parentFilters && parentFilters.length > 0) {
                 parentFiltersHash = btoa(JSON.stringify(parentFilters));
             }
-
-            $(`[data-gc2-layer-key="${layerKey + `.` + layer.f_geometry_column}"]`).find(`.js-toggle-filters-number-of-filters`).text(activeFilters.length);
+            const bg = $(`[data-gc2-layer-key="${layerKey + `.` + layer.f_geometry_column}"]`);
+            bg.find(`.js-toggle-filters-number-of-filters`).text(activeFilters.length);
+            if (activeFilters.length > 0) {
+                bg.find(`.rounded-pill`).show();
+            } else {
+               bg.find(`.rounded-pill`).hide();
+            }
 
             // Checking if versioning is enabled for layer
             if (`versioning` in layer && layer.versioning) {
@@ -1812,8 +1821,13 @@ module.exports = {
             whereClauses.push(item);
         });
 
-        $(`[data-gc2-layer-key="${layerKey + `.` + layer.f_geometry_column}"]`).find(`.js-toggle-filters-number-of-filters`).text(activeFilters.length);
-
+        const bg = $(`[data-gc2-layer-key="${layerKey + `.` + layer.f_geometry_column}"]`);
+        bg.find(`.js-toggle-filters-number-of-filters`).text(activeFilters.length);
+        if (activeFilters.length > 0) {
+            bg.find(`.rounded-pill`).show();
+        } else {
+            bg.find(`.rounded-pill`).hide();
+        }
         // Checking if versioning is enabled for layer
         if (`versioning` in layer && layer.versioning) {
             whereClauses.push(`gc2_version_end_date is null`);
@@ -2780,7 +2794,7 @@ module.exports = {
         $(parentNode).append(markup);
         $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-id`).append(`
                 ${subgroup.id}
-                <i style="font-size: 26px; margin-left: auto" class="material-icons layer-move-vert layer-move-vert-subgroup">more_vert</i>
+                <i style="font-size: 26px; margin-left: auto" class="bi-grip-vertical layer-move-vert layer-move-vert-subgroup"></i>
         `);
 
         $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-toggle-button`).click((event) => {
@@ -3049,6 +3063,20 @@ module.exports = {
             $(parentNode).append(layerControlRecord);
 
             _self.setLayerState(defaultLayerType, layerKey, true, layerIsActive, true, isVirtual, layerControlRecord);
+
+            // Toggle settings button active on/off
+            // This is necessary bacause data-bs-toggle is already set to "collapse"
+            // and can not be used to "button" also.
+            setTimeout(() => {
+                const settingsCollapsible = document.getElementById(`settings-${layer.f_table_schema}-${layer.f_table_name}`);
+                const btn = document.getElementById(`settings-${layer.f_table_schema}-${layer.f_table_name}-btn`);
+                settingsCollapsible.addEventListener('shown.bs.collapse', event => {
+                    btn.classList.add('active');
+                })
+                settingsCollapsible.addEventListener('hidden.bs.collapse', event => {
+                    btn.classList.remove('active');
+                })
+            }, 100)
         }
     },
 
@@ -3241,7 +3269,13 @@ module.exports = {
                     }
 
                     let activeFilters = _self.getActiveLayerFilters(layerKey);
-                    $(layerContainer).find(`.js-toggle-filters-number-of-filters`).text(activeFilters.length);
+                    const bg = $(layerContainer);
+                    bg.find(`.js-toggle-filters-number-of-filters`).text(activeFilters.length);
+                    if (activeFilters.length > 0) {
+                        bg.find(`.rounded-pill`).show();
+                    } else {
+                        bg.find(`.rounded-pill`).hide();
+                    }
                     setTimeout(() => {
                         if (document.getElementById(componentContainerId)) {
                             filterComp[layerKey] = ReactDOM.render(

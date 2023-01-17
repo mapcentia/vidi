@@ -12,6 +12,11 @@ $accordion-icon-active-color: "#ffffff";
 
 // 8. Add additional custom code here
 
+.offcanvas {
+  --bs-offcanvas-width: 600px;
+  --bs-offcanvas-padding-x: 0;
+}
+
 .accordion {
   --bs-accordion-active-bg: rgb(0, 73, 152);
   --bs-accordion-active-color: #ffffff;
@@ -25,6 +30,11 @@ $accordion-icon-active-color: "#ffffff";
 .leaflet-popup-content .accordion {
   --bs-accordion-btn-padding-x: .5rem;
   --bs-accordion-btn-padding-y: .5rem;
-  --bs-accordion-body-padding-x: .5rem;
+  --bs-accordion-body-padding-x: 0;
   --bs-accordion-body-padding-y: .3rem;
+}
+
+.form-check {
+  margin-bottom: 0;
+  padding-left: 0;
 }

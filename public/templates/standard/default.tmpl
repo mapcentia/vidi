@@ -127,7 +127,7 @@
 
 <div class="fade-then-dragging">
     <button id="offcanvasLayerControlBtn"
-            style="position: absolute; left: 10px; top: 10px; text-transform: uppercase; display: none"
+            style="position: absolute; left: 10px; top: 10px; text-transform: uppercase; display: inline"
             class="btn btn-light" type="button"
             data-bs-toggle="offcanvas"
             data-bs-target="#mainLayerOffcanvas" aria-controls="mainLayerOffcanvas" onclick="new bootstrap.Offcanvas('#mainLayerOffcanvas').show();
@@ -139,16 +139,15 @@
             <h5 class="offcanvas-title" id="mainLayerOffcanvasLabel">Offcanvas</h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
-        <div class="offcanvas-body">
-            <div class="d-flex align-items-start">
+        <div class="offcanvas-body" style="scrollbar-gutter: stable">
+            <div class="d-flex align-items-start flex-row-reverse">
                 <!-- Nav tabs -->
-                <ul class="nav flex-column nav-pills me-3" role="tablist" id="main-tabs">
+                <ul class="nav flex-column nav-pills" role="tablist" id="main-tabs">
                     <li role="presentation" class="nav-item">
                         <a class="nav-link" data-bs-toggle="tab" href="#search-content" aria-controls="search-content"
                            data-module-title="{{Search}}" role="tab" data-toggle="tab">
                             <i data-container="body" data-toggle="tooltip" data-placement="left"
-                               title="{{Search}}" class="material-icons">search</i>
-                            <span class="module-title">{{Search}}</span>
+                               title="{{Search}}" class="bi bi-search"></i>
                         </a>
                     </li>
 
@@ -156,8 +155,7 @@
                         <a class="nav-link" data-bs-toggle="tab" data-module-id="infoClick" href="#info-content"
                            data-module-title="{{Info}}" aria-controls="info-content" role="tab" data-toggle="tab">
                             <i data-container="body" data-toggle="tooltip" data-placement="left"
-                               title="{{Info}}" class="material-icons">info</i>
-                            <span class="module-title">{{Info}}</span>
+                               title="{{Info}}" class="bi bi-info-square"></i>
                         </a>
                     </li>
 
@@ -165,8 +163,7 @@
                         <a class="nav-link" data-bs-toggle="tab" data-module-id="layerTree" href="#layer-content"
                            data-module-title="{{Layers}}" aria-controls="" role="tab" data-toggle="tab">
                             <i data-container="body" data-toggle="tooltip" data-placement="left"
-                               title="{{Layers}}" class="material-icons">layers</i>
-                            <span class="module-title">{{Layers}}</span>
+                               title="{{Layers}}" class="bi bi-layers"></i>
                         </a>
                     </li>
 
@@ -174,55 +171,54 @@
                         <a class="nav-link" data-bs-toggle="tab" data-module-id="baseLayer" href="#baselayer-content"
                            data-module-title="{{Baselayers}}" aria-controls="" role="tab" data-toggle="tab">
                             <i data-container="body" data-toggle="tooltip" data-placement="left"
-                               title="{{Baselayers}}" class="bi-alarm"></i>
-                            <span class="module-title">{{Baselayers}}</span>
+                               title="{{Baselayers}}" class="bi bi-map"></i>
                         </a>
                     </li>
 
                     <li role="presentation">
-                        <a data-bs-toggle="tab" data-module-id="legend" href="#legend-content" aria-controls=""
+                        <a class="nav-link" data-bs-toggle="tab" data-module-id="legend" href="#legend-content"
+                           aria-controls=""
                            data-module-title="{{Legend}}" role="tab" data-toggle="tab">
                             <i data-container="body" data-toggle="tooltip" data-placement="left"
-                               title="{{Legend}}" class="material-icons">format_color_text</i>
-                            <span class="module-title">{{Legend}}</span>
+                               title="{{Legend}}" class="bi bi-card-text"></i>
                         </a>
                     </li>
 
                     <li role="presentation">
-                        <a data-bs-toggle="tab" data-module-id="draw" href="#draw-content" aria-controls=""
+                        <a class="nav-link" data-bs-toggle="tab" data-module-id="draw" href="#draw-content"
+                           aria-controls=""
                            data-module-title="{{Draw}}" role="tab" data-toggle="tab">
                             <i data-container="body" data-toggle="tooltip" data-placement="left"
-                               title="{{Draw}}" class="material-icons">create</i>
-                            <span class="module-title">{{Draw}}</span>
+                               title="{{Draw}}" class="bi bi-pencil"></i>
                         </a>
                     </li>
 
                     <li role="presentation">
-                        <a data-bs-toggle="tab" data-module-id="stateSnapshots" href="#state-snapshots-content"
+                        <a class="nav-link" data-bs-toggle="tab" data-module-id="stateSnapshots"
+                           href="#state-snapshots-content"
                            aria-controls=""
                            data-module-title="{{State snapshots}}" role="tab" data-toggle="tab">
                             <i data-container="body" data-toggle="tooltip" data-placement="left"
-                               title="{{State snapshots}}" class="material-icons">folder</i>
-                            <span class="module-title">{{State snapshots}}</span>
+                               title="{{State snapshots}}" class="bi bi-folder"></i>
                         </a>
                     </li>
 
                     <li role="presentation">
-                        <a data-bs-toggle="tab" data-module-id="print" href="#print-content" aria-controls=""
+                        <a class="nav-link" data-bs-toggle="tab" data-module-id="print" href="#print-content"
+                           aria-controls=""
                            data-module-title="{{Print}}" role="tab" data-toggle="tab">
                             <i data-container="body" data-toggle="tooltip" data-placement="left"
-                               title="{{Print}}" class="material-icons">print</i>
-                            <span class="module-title">{{Print}}</span>
+                               title="{{Print}}" class="bi bi-file-pdf"></i>
                         </a>
                     </li>
 
                     <hr>
                 </ul>
                 <!-- Tab panes -->
-                <div class="tab-content main-content">
+                <div class="tab-content main-content w-100">
                     <div role="tabpanel" class="tab-pane fade" id="search-content">
                         <div class="help-btn" onclick="javascript:createAlert($(this), '{{Search places}}')">
-                            <i class="material-icons help-btn">help_outline</i></div>
+                            <i class="bi bi-question help-btn"></i></div>
                         <div></div>
                         <div id="place-search">
                             <div class="places">
@@ -647,7 +643,7 @@
 
 <div class="fade-then-dragging">
     <button id="offcanvasLayerControlBtn"
-            style="position: absolute; left: 10px; top: 10px; text-transform: uppercase; display: inline"
+            style="position: absolute; left: 10px; top: 10px; text-transform: uppercase; display: none"
             class="btn btn-light" type="button"
             data-bs-toggle="offcanvas"
             data-bs-target="#offcanvasLayerControl" aria-controls="offcanvasLayerControl">
@@ -667,6 +663,19 @@
             <h5 class="offcanvas-title">Info</h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
-        <div class="offcanvas-body" style="overflow: auto" id="offcanvas-info-container"></div>
+        <div class="offcanvas-body" id="offcanvas-info-container"></div>
+    </div>
+</div>
+
+<div class="toast-container bottom-0 end-0 p-3">
+    <div id="my-toast" class="toast align-items-center text-bg-primary border-0" role="alert" aria-live="assertive"
+         aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">
+                Hello, world! This is a toast message.
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                    aria-label="Close"></button>
+        </div>
     </div>
 </div>
