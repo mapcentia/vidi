@@ -210,8 +210,8 @@ module.exports = {
 
                         clicktimer = setTimeout(function () {
                             let coords = event.getCoordinate(), p, pUtm, url;
-                            p = utils.transform("EPSG:3857", "EPSG:4326", json.parse(json.stringify(coords)));
-                            pUtm = utils.transform("EPSG:3857", "+proj=utm +zone=32 +ellps=WGS84 +datum=WGS84 +units=m +no_defs", json.parse(json.stringify(coords)));
+                            p = utils.transform("EPSG:3857", "EPSG:4326", JSON.parse(JSON.stringify(coords)));
+                            pUtm = utils.transform("EPSG:3857", "+proj=utm +zone=32 +ellps=WGS84 +datum=WGS84 +units=m +no_defs", JSON.parse(JSON.stringify(coords)));
                             clicktimer = undefined;
 
                             switch (me.state.selectedOption) {
