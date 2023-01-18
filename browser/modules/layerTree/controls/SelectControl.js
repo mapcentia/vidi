@@ -1,6 +1,6 @@
 /*
  * @author     Alexander Shumilov
- * @copyright  2013-2019 MapCentia ApS
+ * @copyright  2013-2023 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -22,7 +22,7 @@ class SelectControl extends React.Component {
             options.push(<option key={`option_${index}`} value={option.value}>{option.alias}</option>)
         });
 
-        return (<select id={this.props.id} value={this.props.value} className="form-control" onChange={(event) => { this.props.onChange(event.target.value) }}>
+        return (<select id={this.props.id} value={this.props.value} className="form-control form-control-sm" onChange={(event) => { this.props.onChange(event.target.value) }}>
             {options}
         </select>);
     }

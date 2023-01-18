@@ -7,20 +7,20 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
-    validateFilters,
-    MATCHES,
-    EXPRESSIONS_FOR_STRINGS,
-    EXPRESSIONS_FOR_NUMBERS,
+    EXPRESSIONS_FOR_BOOLEANS,
     EXPRESSIONS_FOR_DATES,
-    EXPRESSIONS_FOR_BOOLEANS
+    EXPRESSIONS_FOR_NUMBERS,
+    EXPRESSIONS_FOR_STRINGS,
+    MATCHES,
+    validateFilters
 } from './filterUtils';
 import {
-    StringControl,
-    NumberControl,
+    AutocompleteControl,
     BooleanControl,
-    DatetimeControl,
     DateControl,
-    AutocompleteControl
+    DatetimeControl,
+    NumberControl,
+    StringControl
 } from './controls';
 
 /**
@@ -260,7 +260,7 @@ class VectorLayerFilter extends React.Component {
 
         return (<select
             id={`column_select_` + layerKey + `_` + index}
-            className="form-control"
+            className="form-control form-control-sm"
             onChange={(event) => {
                 this.changeFieldname(event.target.value, index)
             }}
@@ -278,7 +278,7 @@ class VectorLayerFilter extends React.Component {
     renderExpressionControl(column, index, layerKey) {
         let expressionControl;
         if (column.fieldname === DUMMY_RULE.fieldname || column.expression === DUMMY_RULE.expression) {
-            expressionControl = (<p className="text-secondary" style={{paddingTop: `12px`}}>{__(`Select field`)}</p>);
+            expressionControl = (<p> </p>);
         } else {
             let expressionOptions = [];
             for (let key in this.state.layer.fields) {
@@ -294,7 +294,7 @@ class VectorLayerFilter extends React.Component {
 
             expressionControl = (<select
                 id={`expression_select_` + layerKey + `_` + index}
-                className="form-control"
+                className="form-control form-control-sm"
                 onChange={(event) => {
                     this.changeExpression(event.target.value, index)
                 }}
@@ -386,7 +386,7 @@ class VectorLayerFilter extends React.Component {
                 this.changeMatchType(event.target.value)
             }}
             value={this.state.arbitraryFilters.match}
-            className="form-control" style={{
+            className="form-control form-control-sm" style={{
             display: `inline`,
             width: SELECT_WIDTH
         }}>{matchSelectorOptions}</select>);
@@ -413,9 +413,9 @@ class VectorLayerFilter extends React.Component {
                 valueIsValid = this.isValid(column.value, type);
             }
 
-            let ruleValidityIndicator = (<span style={{color: 'green'}}><i className="fa fa-check-circle"></i></span>);
+            let ruleValidityIndicator = (<span style={{color: 'green'}}><i className="bi bi-check-circle"></i></span>);
             if (!valueIsValid) {
-                ruleValidityIndicator = (<span style={{color: 'red'}}><i className="fa fa-ban"></i></span>);
+                ruleValidityIndicator = (<span style={{color: 'red'}}><i className="bi bi-slash-circle"></i></span>);
                 allRulesAreValid = false;
             }
 
@@ -461,21 +461,18 @@ class VectorLayerFilter extends React.Component {
                 }
             }
 
-            let divStyle = {paddingRight: `10px`};
-            let controlDivStyle = divStyle;
-            controlDivStyle.maxWidth = `160px`;
-            filterControls.push(<div key={`column_` + index} style={{display: `flex`}}>
-                <div className="form-group" style={divStyle}>
-                    <button className="btn btn-xs btn-warning" type="button"
+            filterControls.push(<div key={`column_` + index} className="d-flex align-items-center gap-1">
+                <div className="form-group">
+                    <button className="btn btn-light btn-sm" type="button"
                             onClick={this.onRuleDelete.bind(this, index)}
                             style={{display: this.props.isFilterImmutable ? "none" : "inline"}}>
-                        <i className="fa fa-minus"></i>
+                        <i className="bi bi-dash"></i>
                     </button>
                 </div>
-                <div className="form-group" style={divStyle}>{fieldControl}</div>
-                <div className="form-group" style={divStyle}>{expressionControl}</div>
-                <div className="form-group" style={controlDivStyle}>{control}</div>
-                <div style={{paddingRight: `10px`, paddingTop: `16px`}}>{ruleValidityIndicator}</div>
+                <div className="form-group">{fieldControl}</div>
+                <div className="form-group">{expressionControl}</div>
+                <div className="form-group">{control}</div>
+                <div className="d-flex align-items-center">{ruleValidityIndicator}</div>
             </div>);
         });
 
@@ -519,18 +516,18 @@ class VectorLayerFilter extends React.Component {
                     <div className="form-group" style={{display: this.props.isFilterImmutable ? "none" : "inline"}}>
                         <p>{__(`Match`)} {matchSelector} {__(`of the following`)}</p>
                     </div>
-                    <div>{filterControls}</div>
-                    <div>
-                        <button className="btn btn-sm" type="button" onClick={this.onRuleAdd.bind(this)}
+                    <div className="d-flex flex-column gap-1">{filterControls}</div>
+                    <div className="d-flex flex-column gap-1">
+                        <button className="btn btn-light btn-sm" type="button" onClick={this.onRuleAdd.bind(this)}
                                 style={{display: this.props.isFilterImmutable ? "none" : "inline"}}>
-                            <i className="fa fa-plus"></i> {__(`Add condition`)}
+                            <i className="bi bi-plus"></i> {__(`Add condition`)}
                         </button>
                         <button className="btn btn-sm btn-success" type="button" disabled={!allRulesAreValid}
                                 onClick={this.onRulesApply.bind(this)}>
-                            <i className="fa fa-check"></i> {__(`Apply`)}
+                            <i className="bi bi-check"></i> {__(`Apply`)}
                         </button>
                         <button className="btn btn-sm" type="button" onClick={this.onRulesClear.bind(this)}>
-                            <i className="fa fa-eraser"></i> {__(`Disable`)}
+                            <i className="bi bi-eraser"></i> {__(`Disable`)}
                         </button>
                     </div>
                 </div>
@@ -615,8 +612,8 @@ class VectorLayerFilter extends React.Component {
                         <button style={!this.state.editorFiltersActive ? {
                             pointerEvents: "none",
                             opacity: "0.2"
-                        } : {}} type="button" className="btn btn-xs btn-success" onClick={this.applyEditor.bind(this)}>
-                            <i className="fa fa-check"></i> {__(`Apply`)}
+                        } : {}} type="button" className="btn btn-sm btn-success" onClick={this.applyEditor.bind(this)}>
+                            <i className="bi bi-check"></i> {__(`Apply`)}
                         </button>
                     </div>
                 </div>
@@ -624,14 +621,14 @@ class VectorLayerFilter extends React.Component {
         };
 
         const buildResetButton = () => {
-            return (<button className="btn btn-xs btn-danger" onClick={this.handleReset.bind(this)}>
-                <i className="fa fa-reply"></i> {__(`Reset filter`)}</button>)
+            return (<button className="btn btn-sm btn-danger" onClick={this.handleReset.bind(this)}>
+                <i className="bi bi-reply"></i> {__(`Reset filter`)}</button>)
         };
 
         const buildFitBoundsButton = () => {
-            return (<button disabled={!this.state.fitBoundsActiveOnLayer} className="btn btn-xs btn-info"
+            return (<button disabled={!this.state.fitBoundsActiveOnLayer} className="btn btn-sm btn-info"
                             onClick={this.handleFitBounds.bind(this)}>
-                <i className="fa fa-arrows-alt"></i> {__(`Fit bounds to filter`)}</button>)
+                <i className="bi bi-arrows-fullscreen"></i> {__(`Fit bounds to filter`)}</button>)
         };
 
         const buildDownloadButton = () => {
@@ -647,7 +644,7 @@ class VectorLayerFilter extends React.Component {
                     </div>
                     <div className='form-group col-md-6'>
                         <select
-                            className="form-control"
+                            className="form-control form-control-sm"
                             onChange={(event) => {
                                 this.changeDownLoadFormat(event.target.value)
                             }}
