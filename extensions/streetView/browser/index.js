@@ -209,9 +209,9 @@ module.exports = {
                         }
 
                         clicktimer = setTimeout(function () {
-
-                            let coords = event.getCoordinate(), p, url;
-                            p = utils.transform("EPSG:3857", "EPSG:4326", coords);
+                            let coords = event.getCoordinate(), p, pUtm, url;
+                            p = utils.transform("EPSG:3857", "EPSG:4326", json.parse(json.stringify(coords)));
+                            pUtm = utils.transform("EPSG:3857", "+proj=utm +zone=32 +ellps=WGS84 +datum=WGS84 +units=m +no_defs", json.parse(json.stringify(coords)));
                             clicktimer = undefined;
 
                             switch (me.state.selectedOption) {
@@ -224,7 +224,7 @@ module.exports = {
                                     break;
 
                                 case "skraafoto":
-                                    url = "https://skraafoto.kortforsyningen.dk/oblivisionjsoff/index.aspx?project=Denmark&lon=" + p.x + "&lat=" + p.y;
+                                    url = `https://skraafoto.dataforsyningen.dk/viewer.html?center=${pUtm.x},${pUtm.y}&orientation=north`;
                                     break;
 
                                 case "cowi":

@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2023.1.0] - 2023-18-1
+### Fixed
+- Update to new Skråfoto viewer in Streetview module. 
+
 ## [2022.12.0] - 2022-8-12
 ### Changed
 - Cookie set in URL are now set with Expires. Also code moved from init.js to extensions/session.
