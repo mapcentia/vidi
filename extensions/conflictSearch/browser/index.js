@@ -570,20 +570,7 @@ module.exports = module.exports = {
             errorTable = $("#error-content tbody"),
             hitsData = $("#hits-data"),
             row, fileId, searchFinish, geomStr,
-            visibleLayers = cloud.getAllTypesOfVisibleLayers().split(";"), crss;
-
-        const setCrss = (layer) => {
-            if (typeof layer.getBounds !== "undefined") {
-                coord = layer.getBounds().getSouthWest();
-            } else {
-                coord = layer.getLatLng();
-            }
-            var zone = require('./../../../browser/modules/utmZone.js').getZone(coord.lat, coord.lng);
-            crss = {
-                "proj": "+proj=utm +zone=" + zone + " +ellps=WGS84 +datum=WGS84 +units=m +no_defs",
-                "unproj": "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
-            };
-        }
+            visibleLayers = cloud.getAllTypesOfVisibleLayers().split(";");
 
         let _self = this;
         visibleLayers = cloud.getAllTypesOfVisibleLayers().split(";");
@@ -606,7 +593,6 @@ module.exports = module.exports = {
             if (id) {
                 layer = layer._layers[id];
             } else {
-                setCrss(layer);
                 let collection = {
                     "type": "GeometryCollection",
                     "geometries": [],
@@ -647,7 +633,6 @@ module.exports = module.exports = {
             primitive = primitive.features[0];
         }
         if (primitive) {
-            setCrss(layer);
             const geom = turfBuffer(primitive, buffer, {units: 'meters'});
             var l = L.geoJson(geom, {
                 "color": "#ff7800",
