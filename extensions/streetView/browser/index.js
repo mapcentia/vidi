@@ -292,7 +292,7 @@ module.exports = {
             }
         }
 
-        utils.createMainTab(exId, __("Street View"), __("Info"), require('./../../../browser/modules/height')().max, "photo_camera", false, exId);
+        utils.createMainTab(exId, __("Street View"), __("Info"), require('./../../../browser/modules/height')().max, "bi-camera", false, exId);
 
         // Append to DOM
         //==============
