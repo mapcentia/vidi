@@ -1,6 +1,6 @@
 /*
  * @author     Alexander Shumilov
- * @copyright  2013-2021 MapCentia ApS
+ * @copyright  2013-2023 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -19,6 +19,7 @@ import {
     BooleanControl,
     DateControl,
     DatetimeControl,
+    TimeControl,
     NumberControl,
     StringControl
 } from './controls';
@@ -31,9 +32,10 @@ const SELECT_WIDTH = `50px`;
 const STRING_TYPES = [`text`, `string`, `character`, `character varying`, `uuid`];
 const NUMBER_TYPES = [`smallint`, `bigint`, `integer`, `double precision`, `numeric`, `decimal`, 'real'];
 const DATE_TYPES = [`date`];
+const TIME_TYPES = [`time with time zone`, `time without time zone`];
 const DATETIME_TYPES = [`timestamp`, `timestamp with time zone`, `timestamp without time zone`];
 const BOOLEAN_TYPES = [`boolean`];
-const ALLOWED_TYPES_IN_FILTER = [].concat(STRING_TYPES).concat(NUMBER_TYPES).concat(DATETIME_TYPES).concat(DATE_TYPES).concat(BOOLEAN_TYPES).filter((v, i, a) => a.indexOf(v) === i);
+const ALLOWED_TYPES_IN_FILTER = [].concat(STRING_TYPES).concat(NUMBER_TYPES).concat(DATETIME_TYPES).concat(DATE_TYPES).concat(TIME_TYPES).concat(BOOLEAN_TYPES).filter((v, i, a) => a.indexOf(v) === i);
 
 const PREDEFINED_TAB = 0;
 const ARBITRARY_TAB = 1;
@@ -158,7 +160,7 @@ class VectorLayerFilter extends React.Component {
         let expressionSet = EXPRESSIONS_FOR_STRINGS;
         if (NUMBER_TYPES.indexOf(type) !== -1) {
             expressionSet = EXPRESSIONS_FOR_NUMBERS;
-        } else if (DATE_TYPES.indexOf(type) !== -1 || DATETIME_TYPES.indexOf(type) !== -1) {
+        } else if (DATE_TYPES.indexOf(type) !== -1 || DATETIME_TYPES.indexOf(type) !== -1 || TIME_TYPES.indexOf(type) !== -1) {
             expressionSet = EXPRESSIONS_FOR_DATES;
         } else if (BOOLEAN_TYPES.indexOf(type) !== -1) {
             expressionSet = EXPRESSIONS_FOR_BOOLEANS;
@@ -278,7 +280,7 @@ class VectorLayerFilter extends React.Component {
     renderExpressionControl(column, index, layerKey) {
         let expressionControl;
         if (column.fieldname === DUMMY_RULE.fieldname || column.expression === DUMMY_RULE.expression) {
-            expressionControl = (<p> </p>);
+            expressionControl = (<p></p>);
         } else {
             let expressionOptions = [];
             for (let key in this.state.layer.fields) {
@@ -454,6 +456,8 @@ class VectorLayerFilter extends React.Component {
                     control = (<DateControl id={id} value={column.value} onChange={changeHandler}/>);
                 } else if (DATETIME_TYPES.indexOf(type) !== -1) {
                     control = (<DatetimeControl id={id} value={column.value} onChange={changeHandler}/>);
+                } else if (TIME_TYPES.indexOf(type) !== -1) {
+                    control = (<TimeControl id={id} value={column.value} onChange={changeHandler}/>);
                 } else if (BOOLEAN_TYPES.indexOf(type) !== -1) {
                     control = (<BooleanControl id={id} value={column.value} onChange={changeHandler}/>);
                 } else {
@@ -471,7 +475,7 @@ class VectorLayerFilter extends React.Component {
                 </div>
                 <div className="form-group">{fieldControl}</div>
                 <div className="form-group">{expressionControl}</div>
-                <div className="form-group">{control}</div>
+                <div className="form-group flex-fill">{control}</div>
                 <div className="d-flex align-items-center">{ruleValidityIndicator}</div>
             </div>);
         });
