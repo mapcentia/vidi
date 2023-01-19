@@ -341,17 +341,29 @@ module.exports = {
         let activeFilters = _self.getActiveLayerFilters(layerKey);
         let parentFilters = _self.getParentLayerFilters(layerKey);
         let overallFilters = activeFilters.concat(parentFilters);
-        const bg = $(`[data-gc2-layer-key^="${layerKey}"]`);
-        bg.find(`.js-toggle-filters-number-of-filters`).text(overallFilters.length);
         if (overallFilters.length > 0) {
             let data = {};
             data[layerKey] = overallFilters;
             parameterString = `filters=` + base64url(JSON.stringify(data));
-            bg.find(`.rounded-pill`).show();
-        } else {
-            bg.find(`.rounded-pill`).hide();
         }
+        _self.activeFiltersChange(layerKey)
+
         return parameterString;
+    },
+
+    activeFiltersChange: (layerKey) => {
+        const bg = $(`[data-gc2-layer-key^="${layerKey}"]`);
+        let activeFilters = _self.getActiveLayerFilters(layerKey);
+        let parentFilters = _self.getParentLayerFilters(layerKey);
+        let overallFilters = activeFilters.concat(parentFilters);
+        const show = overallFilters.length > 0;
+        if (show) {
+            console.log("TEST")
+            bg.find(`.rounded-pill`).removeClass('d-none');
+        } else {
+            bg.find(`.rounded-pill`).addClass('d-none');
+        }
+        bg.find(`.set-extent-btn`).prop('disabled', !show);
     },
 
     /**
@@ -406,7 +418,6 @@ module.exports = {
                     let parsedMeta = meta.parseLayerMeta(layerKey);
 
                     const hideFilters = () => {
-                        $(container).find(`.js-toggle-filters, .js-toggle-filters-number-of-filters`).hide(0);
                         $(container).find('.js-layer-settings-filters').hide(0);
                     };
 
@@ -451,6 +462,10 @@ module.exports = {
                         $(container).find('.js-settings-panel-btn').prop(`disabled`, true);
                         $(container).find('.collapse').collapse('hide');
                     }
+
+                    const deactivateAll = () => {
+                        $(container).find('.js-toggle-btn').removeClass(`active`);
+                    }
                     const getLayerSwitchControl = () => {
                         let controlElement = $('input[class="js-show-layer-control"][data-gc2-id="' + layerKey + '"]');
                         if (!controlElement || controlElement.length !== 1) {
@@ -476,7 +491,6 @@ module.exports = {
                             $(container).find('.gc2-add-feature').css(`visibility`, `visible`);
                             $(container).find('.js-settings-panel-btn').prop(`disabled`, false);
                             $(container).find(`.js-toggle-search`).show(0);
-                            $(container).find(`.js-toggle-filters, .js-toggle-filters-number-of-filters`).show(0);
                             $(container).find(`.js-toggle-load-strategy`).show(0);
                             $(container).find(`.js-toggle-layer-offline-mode-container`).css(`display`, `inline-block`);
                             $(container).find(`.js-toggle-table`).show(0);
@@ -492,6 +506,7 @@ module.exports = {
                             hideSearch();
                             hideStyleFn();
                             hideSettingsBtn();
+                            deactivateAll();
                         }
                     } else if (desiredSetupType === LAYER.RASTER_TILE || desiredSetupType === LAYER.VECTOR_TILE) {
                         // Opacity and filters should be kept opened after setLayerState()
@@ -509,7 +524,6 @@ module.exports = {
                             $(container).find(`.js-toggle-opacity`).show(0);
                             $(container).find(`.js-toggle-labels`).show(0);
                             $(container).find(`.js-toggle-filters`).show(0);
-                            $(container).find(`.js-toggle-filters-number-of-filters`).show(0);
                             $(container).find(`.js-toggle-search`).show(0);
                         } else {
                             hideAddFeature();
@@ -518,6 +532,7 @@ module.exports = {
                             hideLabels();
                             hideSearch();
                             hideSettingsBtn();
+                            deactivateAll();
                         }
 
                         // Hide filters if cached, but not if layer has a valid predefined filter
@@ -549,9 +564,11 @@ module.exports = {
                         hideLabels();
                         hideSearch();
                         hideSettingsBtn();
+                        deactivateAll();
                     } else {
                         throw new Error(`${desiredSetupType} control setup is not supported yet`);
                     }
+                    _self.activeFiltersChange(layerKey)
 
                     // Open filter dialog.
                     if (desiredSetupType === LAYER.RASTER_TILE || desiredSetupType === LAYER.VECTOR_TILE || desiredSetupType === LAYER.VECTOR) {
@@ -1487,17 +1504,10 @@ module.exports = {
             overallFilters.map(item => {
                 whereClauses.push(item);
             });
-
             if (parentFilters && parentFilters.length > 0) {
                 parentFiltersHash = btoa(JSON.stringify(parentFilters));
             }
-            const bg = $(`[data-gc2-layer-key="${layerKey + `.` + layer.f_geometry_column}"]`);
-            bg.find(`.js-toggle-filters-number-of-filters`).text(activeFilters.length);
-            if (activeFilters.length > 0) {
-                bg.find(`.rounded-pill`).show();
-            } else {
-               bg.find(`.rounded-pill`).hide();
-            }
+            _self.activeFiltersChange(layerKey)
 
             // Checking if versioning is enabled for layer
             if (`versioning` in layer && layer.versioning) {
@@ -1820,14 +1830,7 @@ module.exports = {
         overallFilters.map(item => {
             whereClauses.push(item);
         });
-
-        const bg = $(`[data-gc2-layer-key="${layerKey + `.` + layer.f_geometry_column}"]`);
-        bg.find(`.js-toggle-filters-number-of-filters`).text(activeFilters.length);
-        if (activeFilters.length > 0) {
-            bg.find(`.rounded-pill`).show();
-        } else {
-            bg.find(`.rounded-pill`).hide();
-        }
+        _self.activeFiltersChange(layerKey)
         // Checking if versioning is enabled for layer
         if (`versioning` in layer && layer.versioning) {
             whereClauses.push(`gc2_version_end_date is null`);
@@ -2805,10 +2808,10 @@ module.exports = {
             }
 
             if (subgroupRootElement.find(`.js-subgroup-children`).first().is(`:visible`)) {
-                subgroupRootElement.find(`.js-subgroup-toggle-button`).first().html(`<i class="fa fa-arrow-down"></i>`);
+                subgroupRootElement.find(`.js-subgroup-toggle-button`).first().html(`<i class="bi bi-arrow-down"></i>`);
                 subgroupRootElement.find(`.js-subgroup-children`).first().hide();
             } else {
-                subgroupRootElement.find(`.js-subgroup-toggle-button`).first().html(`<i class="fa fa-arrow-up"></i>`);
+                subgroupRootElement.find(`.js-subgroup-toggle-button`).first().html(`<i class="bi bi-arrow-up"></i>`);
                 subgroupRootElement.find(`.js-subgroup-children`).first().show();
             }
         });
@@ -3265,17 +3268,15 @@ module.exports = {
                     if (moduleState.fitBoundsActiveOnLayers && layerKey in moduleState.fitBoundsActiveOnLayers) {
                         localFitBoundsActiveOnLayer = moduleState.fitBoundsActiveOnLayers[layerKey];
                     } else {
-                        localFitBoundsActiveOnLayer = false;
+                        if (_self.getActiveLayerFilters(layerKey)?.length > 0) {
+                            localFitBoundsActiveOnLayer = true;
+                            console.log(_self.getActiveLayerFilters(layerKey))
+                        } else {
+                            localFitBoundsActiveOnLayer = false;
+                        }
                     }
 
-                    let activeFilters = _self.getActiveLayerFilters(layerKey);
-                    const bg = $(layerContainer);
-                    bg.find(`.js-toggle-filters-number-of-filters`).text(activeFilters.length);
-                    if (activeFilters.length > 0) {
-                        bg.find(`.rounded-pill`).show();
-                    } else {
-                        bg.find(`.rounded-pill`).hide();
-                    }
+                    _self.activeFiltersChange(layerKey)
                     setTimeout(() => {
                         if (document.getElementById(componentContainerId)) {
                             filterComp[layerKey] = ReactDOM.render(
@@ -3299,6 +3300,7 @@ module.exports = {
                                     editorFiltersActive={localEditorFiltersActive}
                                     isFilterImmutable={isFilterImmutable}
                                     db={db}
+                                    getActiveLayerFilters={_self.getActiveLayerFilters}
                                 />, document.getElementById(componentContainerId));
                             $(layerContainer).find('.js-layer-settings-filters').hide(0);
 

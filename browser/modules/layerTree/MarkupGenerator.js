@@ -73,21 +73,20 @@ class MarkupGenerator {
 
     getSubgroupControlRecord(base64SubgroupName, name, level, addGroupCheckbox = false) {
         return (`<li
-        class="layer-item list-group-item list-subgroup-item"
-        data-gc2-subgroup-id="${name}"
-        style="display: flex">
-            <div style="display: flex; align-items: center; padding: 7px 2px;">
+        class="layer-item list-group-item list-subgroup-item d-flex flex-column"
+        data-gc2-subgroup-id="${name}">
+            <div class="d-flex align-items-center">
                 <span style="display: ${addGroupCheckbox ? "inline" : "none"};" class="togglebutton">
                     <label>
                         <input type="checkbox" data-gc2-subgroup-name="${name}" data-gc2-subgroup-level="${level}">
                     </label>
                 </span>
-                <button style="margin: 0" type="button" class="btn btn-default btn-xs js-subgroup-toggle-button">
-                    <i class="fa fa-arrow-down"></i>
+                <button type="button" class="btn btn-light btn-sm js-subgroup-toggle-button">
+                    <i class="bi bi-arrow-down"></i>
                 </button>
-                <div class="js-subgroup-id" style="display: flex; align-items: center; flex-grow: 1"></div>
+                <div class="js-subgroup-id d-flex align-items-center flex-grow-1"></div>
             </div>
-            <div class="js-subgroup-children" id="${base64SubgroupName}" style="padding-left: 30px;"></div>
+            <div class="js-subgroup-children" id="${base64SubgroupName}"></div>
         </li>`);
     }
 
@@ -173,47 +172,47 @@ class MarkupGenerator {
                                                                                                   <div class="js-toggles-container" style="display: none;">
                                                                                                   <div style="display: flex; align-items: center;" class="gap-1">
                                                                                                   <span id="layer-tools-search">
-                                                                                                  <button href="javascript:void(0);" class="${toolBtnClass} js-toggle-search" >
+                                                                                                  <button href="javascript:void(0);" class="${toolBtnClass} js-toggle-search js-toggle-btn" >
                                                                                                   <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Search`)}" class="bi bi-search"></i>
                                                                                                   </button>
                                                                                                   </span>
                                                                                                   <span id="layer-tools-opacity">
-                                                                                                  <button href="javascript:void(0);" class="${toolBtnClass} js-toggle-opacity">
+                                                                                                  <button href="javascript:void(0);" class="${toolBtnClass} js-toggle-opacity js-toggle-btn">
                                                                                                   <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Opacity`)}" class="bi bi-droplet"></i>
                                                                                                   </button>
                                                                                                   </span>
                                                                                                   <span id="layer-tools-labels">
-                                                                                                  <button href="javascript:void(0);" class="${toolBtnClass} js-toggle-labels">
+                                                                                                  <button href="javascript:void(0);" class="${toolBtnClass} js-toggle-labels js-toggle-btn">
                                                                                                   <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Labels`)}" class="bi bi-tag"></i>
                                                                                                   </button>
                                                                                                   </span>
                                                                                                   <span id="layer-tools-table">
-                                                                                                  <button href="javascript:void(0);" class="${toolBtnClass} js-toggle-table">
+                                                                                                  <button href="javascript:void(0);" class="${toolBtnClass} js-toggle-table js-toggle-btn">
                                                                                                   <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Table view`)}" class="bi bi-table"></i>
                                                                                                   </button>
                                                                                                   </span>
                                                                                                   <span id="layer-tools-style">
-                                                                                                  <button href="javascript:void(0);" class="${toolBtnClass} js-toggle-style">
+                                                                                                  <button href="javascript:void(0);" class="${toolBtnClass} js-toggle-style js-toggle-btn">
                                                                                                   <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Style function`)}" class="bi bi-palette"></i>
                                                                                                   </button>
                                                                                                   </span>
                                                                                                   <span id="layer-tools-load">
-                                                                                                  <button href="javascript:void(0);" class="${toolBtnClass} js-toggle-load-strategy">
+                                                                                                  <button href="javascript:void(0);" class="${toolBtnClass} js-toggle-load-strategy js-toggle-btn">
                                                                                                   <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Load strategy`)}" class="bi bi-cloud"></i>
                                                                                                   </button>
                                                                                                   </span>
                                                                                                   <span id="layer-tools-filters">
-                                                                                                  <button href="javascript:void(0);" class="${toolBtnClass} js-toggle-filters position-relative">
+                                                                                                  <button href="javascript:void(0);" class="${toolBtnClass} js-toggle-filters position-relative js-toggle-btn">
                                                                                                   <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Filters`)}" class="bi bi-filter"></i>
-                                                                                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                                                                                  <span class="js-toggle-filters-number-of-filters">0</span>
+                                                                                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none">
+                                                                                                  <span class="js-toggle-filters-number-of-filters">!</span>
                                                                                                                     </span>
                                                                                                   </button>
                                                                                                   </span>
                                                                                                   </div>
                                                                                                   </div>
                                                                                                   <div class="js-toggle-layer-offline-mode-container" style="display: none;">
-                                                                                                  <div class="btn-group d-flex align-items-center" role="group" id="layer-tools-offline">
+                                                                                                  <div class="d-flex align-items-center" role="group" id="layer-tools-offline">
                                                                                                   <button type="button" data-layer-key="${layerKey}" class="btn btn-light btn-sm js-set-online" title="${__(`Fetch layer data from server`)}" disabled>
                                                                                                   <i class="bi bi-wifi"></i>
                                                                                                   </button>

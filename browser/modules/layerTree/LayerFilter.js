@@ -112,7 +112,6 @@ class VectorLayerFilter extends React.Component {
             disabledPredefinedFilters,
             editorFilters: props.editorFilters,
             editorFiltersActive: props.editorFiltersActive,
-            fitBoundsActiveOnLayer: props.fitBoundsActiveOnLayer,
             downLoadFormat: 'geojson'
         };
     }
@@ -130,7 +129,6 @@ class VectorLayerFilter extends React.Component {
     }
 
     onRulesApply() {
-        this.setState({fitBoundsActiveOnLayer: true})
         this.props.onApplyArbitrary({
             layerKey: (this.props.layer.f_table_schema + `.` + this.props.layer.f_table_name),
             filters: JSON.parse(JSON.stringify(this.state.arbitraryFilters))
@@ -139,7 +137,6 @@ class VectorLayerFilter extends React.Component {
 
     onRulesClear() {
         let layerKey = this.props.layer.f_table_schema + `.` + this.props.layer.f_table_name;
-        this.setState({fitBoundsActiveOnLayer: false});
         this.props.onDisableArbitrary(layerKey);
         this.props.onApplyArbitrary({
             layerKey: layerKey,
@@ -363,7 +360,6 @@ class VectorLayerFilter extends React.Component {
         validateFilters(resetArbitraryFilters);
         this.onRulesClear();
         this.setState({arbitraryFilters: resetArbitraryFilters});
-        this.setState({fitBoundsActiveOnLayer: false});
     }
 
     handleFitBounds() {
@@ -513,26 +509,27 @@ class VectorLayerFilter extends React.Component {
             };
 
             return (
-                <div className="js-arbitrary-filters" style={this.state.editorFiltersActive ? {
+                <div className="js-arbitrary-filters gap-1 d-flex flex-column" style={this.state.editorFiltersActive ? {
                     pointerEvents: "none",
                     opacity: "0.2"
                 } : {}}>
                     <div className="form-group" style={{display: this.props.isFilterImmutable ? "none" : "inline"}}>
-                        <p>{__(`Match`)} {matchSelector} {__(`of the following`)}</p>
+                        {__(`Match`)} {matchSelector} {__(`of the following`)}
                     </div>
                     <div className="d-flex flex-column gap-1">{filterControls}</div>
-                    <div className="d-flex flex-column gap-1">
+                    <div className="d-flex gap-1">
                         <button className="btn btn-light btn-sm" type="button" onClick={this.onRuleAdd.bind(this)}
                                 style={{display: this.props.isFilterImmutable ? "none" : "inline"}}>
-                            <i className="bi bi-plus"></i> {__(`Add condition`)}
+                            <i className="bi bi-plus"></i>
                         </button>
-                        <button className="btn btn-sm btn-success" type="button" disabled={!allRulesAreValid}
+                        <button className="btn btn-light btn-sm" type="button" disabled={!allRulesAreValid}
                                 onClick={this.onRulesApply.bind(this)}>
                             <i className="bi bi-check"></i> {__(`Apply`)}
                         </button>
-                        <button className="btn btn-sm" type="button" onClick={this.onRulesClear.bind(this)}>
+                        <button className="btn btn-light btn-sm" type="button" onClick={this.onRulesClear.bind(this)}>
                             <i className="bi bi-eraser"></i> {__(`Disable`)}
                         </button>
+                        {buildResetButton()}
                     </div>
                 </div>
             );
@@ -545,26 +542,25 @@ class VectorLayerFilter extends React.Component {
             let predefinedFiltersTab = [];
             this.state.predefinedFilters.map((item, index) => {
                 let filterIsActive = (this.state.disabledPredefinedFilters.indexOf(item.name) === -1);
+                const id = `tile_filter_` + (this.props.layer.f_table_schema + `.` + this.props.layer.f_table_name);
                 predefinedFiltersTab.push(
                     <div key={`tile_filter_` + index} style={this.state.editorFiltersActive ? {
                         pointerEvents: "none",
                         opacity: "0.2"
                     } : {}}>
-                        <div style={{display: `inline-block`}}>
-                            <div className="checkbox">
-                                <label>
-                                    <input
-                                        checked={filterIsActive}
-                                        onChange={(event) => {
-                                            this.handlePredefinedFiltersChange(event, item.name)
-                                        }}
-                                        type="checkbox"
-                                        name={`tile_filter_` + (this.props.layer.f_table_schema + `.` + this.props.layer.f_table_name)}/>
-                                </label>
-                            </div>
-                        </div>
-                        <div style={{display: `inline-block`}}>
-                            <span>{item.name}</span>
+                        <div className="form-check">
+                            <label className="form-check-label d-flex align-items-center gap-1">
+                                <input
+                                    className="form-check-input"
+                                    checked={filterIsActive}
+                                    onChange={(event) => {
+                                        this.handlePredefinedFiltersChange(event, item.name)
+                                    }}
+                                    type="checkbox"
+                                    name={id}
+                                />
+                                {item.name}
+                            </label>
                         </div>
                     </div>
                 );
@@ -630,7 +626,7 @@ class VectorLayerFilter extends React.Component {
         };
 
         const buildFitBoundsButton = () => {
-            return (<button disabled={!this.state.fitBoundsActiveOnLayer} className="btn btn-sm btn-info"
+            return (<button className="btn btn-sm btn-info set-extent-btn"
                             onClick={this.handleFitBounds.bind(this)}>
                 <i className="bi bi-arrows-fullscreen"></i> {__(`Fit bounds to filter`)}</button>)
         };
@@ -640,7 +636,6 @@ class VectorLayerFilter extends React.Component {
                 <div className='row'>
                     <div className='form-group col-md-6' style={{paddingBottom: "0px"}}>
                         <button
-                            disabled={!this.state.fitBoundsActiveOnLayer}
                             className="btn btn-xs btn-info"
                             onClick={this.handleDownload.bind(this)}>
                             <i className="fa fa-download"></i> {__(`Download`)}
@@ -652,7 +647,6 @@ class VectorLayerFilter extends React.Component {
                             onChange={(event) => {
                                 this.changeDownLoadFormat(event.target.value)
                             }}
-                            disabled={!this.state.fitBoundsActiveOnLayer}
                         >
                             <option value={'geojson'}>GeoJson</option>
                             <option value={'csv'}>Csv</option>
@@ -667,17 +661,19 @@ class VectorLayerFilter extends React.Component {
         let tabControl = false;
         if (Object.keys(this.state.predefinedFilters).length > 0) {
             tabControl = (<div>
-                <div className="btn-group btn-group-justified" role="group">
-                    <div className="btn-group" role="group">
-                        <button type="button" className="btn btn-default"
-                                disabled={this.state.activeTab === PREDEFINED_TAB}
-                                onClick={this.switchActiveTab.bind(this)}>{__(`Predefined`)}</button>
-                    </div>
-                    <div className="btn-group" role="group">
-                        <button type="button" className="btn btn-default"
-                                disabled={this.state.activeTab === ARBITRARY_TAB}
-                                onClick={this.switchActiveTab.bind(this)}>{__(`Arbitrary`)}</button>
-                    </div>
+                <div className="btn-group" role="group">
+                    <input type="radio" id="predefined-filter-tab" name="sdsd" className="btn-check"
+                           checked={this.state.activeTab === PREDEFINED_TAB}
+                           onChange={this.switchActiveTab.bind(this)}/>
+                    <label className="btn btn-outline-primary btn-sm" htmlFor="predefined-filter-tab">
+                        {__(`Predefined`)}
+                    </label>
+                    <input type="radio" id="arbitrary-filter-tab" name="sdsd" className="btn-check"
+                           checked={this.state.activeTab === ARBITRARY_TAB}
+                           onChange={this.switchActiveTab.bind(this)}/>
+                    <label className="btn btn-outline-primary btn-sm" htmlFor="arbitrary-filter-tab">
+                        {__(`Arbitrary`)}
+                    </label>
                 </div>
             </div>);
 
@@ -691,13 +687,12 @@ class VectorLayerFilter extends React.Component {
         }
 
         return (
-            <div>
+            <div className="d-flex flex-column gap-1">
                 {tabControl}
                 {activeFiltersTab}
                 <div className="filter-functions">
                     {buildWhereClauseField()}
                     <div className="row">
-                        <div className="col-md-6">{buildResetButton()}</div>
                         <div className="col-md-6">{buildFitBoundsButton()}</div>
                     </div>
                     <div className="row">

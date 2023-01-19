@@ -22,7 +22,7 @@ class SelectControl extends React.Component {
             options.push(<option key={`option_${index}`} value={option.value}>{option.alias}</option>)
         });
 
-        return (<select id={this.props.id} value={this.props.value} className="form-control form-control-sm" onChange={(event) => { this.props.onChange(event.target.value) }}>
+        return (<select id={this.props.id} value={this.props.value} className="form-select form-select-sm" onChange={(event) => { this.props.onChange(event.target.value) }}>
             {options}
         </select>);
     }
