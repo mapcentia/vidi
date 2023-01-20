@@ -366,8 +366,10 @@ class VectorLayerFilter extends React.Component {
         this.props.onApplyFitBounds(this.props.layer.f_table_schema + `.` + this.props.layer.f_table_name);
     }
 
-    handleDownload() {
-        this.props.onApplyDownload(this.props.layer.f_table_schema + `.` + this.props.layer.f_table_name, this.state.downLoadFormat);
+    handleDownload(e) {
+        e.preventDefault();
+        const format = e.target.getAttribute("data-format");
+        this.props.onApplyDownload(this.props.layer.f_table_schema + `.` + this.props.layer.f_table_name, format);
     }
 
     render() {
@@ -592,23 +594,20 @@ class VectorLayerFilter extends React.Component {
                     marginTop: "25px",
                     display: this.props.isFilterImmutable ? "none" : "inline"
                 }}>
-                    <div style={!this.state.editorFiltersActive ? {pointerEvents: "none", opacity: "0.2"} : {}}>
-                        <div style={{marginLeft: "10px", marginRight: "10px"}}>
-                            <textarea
-                                style={{"width": "100%", " boxSizing": "border-box", "height": "26px"}}
-                                onChange={handleChange}
-                                name={`editor_filter_` + (this.props.layer.f_table_schema + `.` + this.props.layer.f_table_name)}
-                                value={JSON.stringify(
-                                    this.state.editorFilters
-                                )}
-                            />
-                        </div>
-                    </div>
-                    <div>
-                        <label>
-                            <input type="checkbox" checked={this.state.editorFiltersActive}
-                                   onChange={this.activateEditor.bind(this)}/> {__(`Filter editor`)}
-                        </label>
+                    <label className="form-check-label d-flex align-items-center gap-1">
+                        <input className="form-check-input" type="checkbox" checked={this.state.editorFiltersActive}
+                               onChange={this.activateEditor.bind(this)}/>
+                        {__(`Filter editor`)}
+                    </label>
+                    <div style={!this.state.editorFiltersActive ? {pointerEvents: "none", display: "none"} : {}}>
+                        <textarea
+                            style={{"width": "100%", " boxSizing": "border-box", "height": "26px"}}
+                            onChange={handleChange}
+                            name={`editor_filter_` + (this.props.layer.f_table_schema + `.` + this.props.layer.f_table_name)}
+                            value={JSON.stringify(
+                                this.state.editorFilters
+                            )}
+                        />
                         <button style={!this.state.editorFiltersActive ? {
                             pointerEvents: "none",
                             opacity: "0.2"
@@ -626,33 +625,33 @@ class VectorLayerFilter extends React.Component {
         };
 
         const buildFitBoundsButton = () => {
-            return (<button className="btn btn-sm btn-info set-extent-btn"
+            return (<button className="btn btn-sm btn-light set-extent-btn"
                             onClick={this.handleFitBounds.bind(this)}>
                 <i className="bi bi-arrows-fullscreen"></i> {__(`Fit bounds to filter`)}</button>)
         };
 
         const buildDownloadButton = () => {
             return (
-                <div className='row'>
-                    <div className='form-group col-md-6' style={{paddingBottom: "0px"}}>
-                        <button
-                            className="btn btn-xs btn-info"
-                            onClick={this.handleDownload.bind(this)}>
-                            <i className="fa fa-download"></i> {__(`Download`)}
-                        </button>
-                    </div>
-                    <div className='form-group col-md-6'>
-                        <select
-                            className="form-control form-control-sm"
-                            onChange={(event) => {
-                                this.changeDownLoadFormat(event.target.value)
-                            }}
-                        >
-                            <option value={'geojson'}>GeoJson</option>
-                            <option value={'csv'}>Csv</option>
-                            <option value={'excel'}>Excel</option>
-                        </select>
-                    </div>
+                <div className="btn-group" role="group">
+                    <button type="button" className="btn btn-light btn-sm dropdown-toggle" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                        Download
+                    </button>
+                    <ul className="dropdown-menu">
+                        <li><a data-format="geojson" className="dropdown-item" href="javascript:void(0)"
+                               onClick={this.handleDownload.bind(this)}>GeoJSON</a></li>
+                        <li><a data-format="csv" className="dropdown-item" href="javascript:void(0)"
+                               onClick={this.handleDownload.bind(this)}>CSV</a></li>
+                        <li><a data-format="excel" className="dropdown-item" href="javascript:void(0)"
+                               onClick={this.handleDownload.bind(this)}>Excel</a></li>
+                        <li>
+                            <hr className="dropdown-divider"/>
+                        </li>
+                        <li><a data-format="ogr/GPKG" className="dropdown-item" href="javascript:void(0)"
+                               onClick={this.handleDownload.bind(this)}>GeoPackage</a></li>
+                        <li><a data-format="ogr/ESRI Shapefile" className="dropdown-item" href="javascript:void(0)"
+                               onClick={this.handleDownload.bind(this)}>ESRI Shapefile</a></li>
+                    </ul>
                 </div>
             )
         };
@@ -690,11 +689,9 @@ class VectorLayerFilter extends React.Component {
             <div className="d-flex flex-column gap-1">
                 {tabControl}
                 {activeFiltersTab}
+                {buildFitBoundsButton()}
                 <div className="filter-functions">
                     {buildWhereClauseField()}
-                    <div className="row">
-                        <div className="col-md-6">{buildFitBoundsButton()}</div>
-                    </div>
                     <div className="row">
                         <div className="col-md-6">{buildDownloadButton()}</div>
                     </div>

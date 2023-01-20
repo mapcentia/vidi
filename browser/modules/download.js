@@ -28,9 +28,13 @@ module.exports = {
                         filename = 'file.xlsx';
                         type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
                         break;
-                    default:
+                    case "geojson":
                         filename = 'file.geojson';
                         type = 'application/json';
+                        break;
+                    default:
+                        filename = 'file.zip';
+                        type = 'application/zip';
                         break;
                 }
                 let blob = new Blob([request.response], {type: type});
