@@ -8,6 +8,7 @@ var fs = require('fs');
 var moment = require('moment');
 var config = require('../../../config/config.js');
 var session = require ('../../session/server');
+const { VERSION } = require('underscore');
 
 /**
 *
@@ -39,6 +40,8 @@ const STATUSCODE = 5
 const DAYSSINCE = 25569
 // milisecs pr. day
 const MILISECSDAY = 86400000
+
+const APIVERSION = 'v2'
 
 /**
  * Endpoint for editing location
@@ -793,7 +796,7 @@ function ReqToGC2(session, requrl, db) {
     }
 
     var options = {
-        url: GC2_HOST + '/api/v1/sql/' + userstr + '?q='+requrl + '&key='+session.gc2ApiKey,
+        url: GC2_HOST + '/api/'+APIVERSION+'/sql/' + userstr + '?q='+requrl + '&key='+session.gc2ApiKey,
         headers: {
             'GC2-API-KEY': session.gc2ApiKey
         }
@@ -826,7 +829,7 @@ function SqlInsertToGC2(session, requrl, db) {
         var userstr = session.gc2UserName;
     }
     var options = {
-        url: GC2_HOST + '/api/v1/sql/' + userstr + '?q='+requrl + '&key='+session.gc2ApiKey,
+        url: GC2_HOST + '/api/'+APIVERSION+'/sql/' + userstr + '?q='+requrl + '&key='+session.gc2ApiKey,
         headers: {
             'GC2-API-KEY': session.gc2ApiKey
         }

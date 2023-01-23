@@ -85,7 +85,7 @@ const GUI_CONTROL_STATE = {
  */
 var db = urlparser.db;
 var schema = urlparser.schema;
-
+var gc2ApiVersion = 'v2';
 var thePreviousServiceValue = undefined;
 
 /**
@@ -298,7 +298,7 @@ var documentCreateGetFilterBounds = function (key, isfileIdent = false) {map
 
     // query SQL for stuff
     $.ajax({
-        url: GC2_HOST + '/api/v1/sql/' + _USERSTR + '?q='+qrystr,
+        url: GC2_HOST + '/api/' + gc2ApiVersion + '/sql/' + _USERSTR + '?q='+qrystr,
         type: "get",
         async: false,
         success: function(data) {
@@ -357,7 +357,7 @@ var documentGetExistingCasesFilter = function (key, isfileIdent = false) {
 
     // query SQL for stuff
     $.ajax({
-        url: GC2_HOST + '/api/v1/sql/' +_USERSTR + '?q='+qrystr,
+        url: GC2_HOST + '/api/' + gc2ApiVersion + '/sql/' +_USERSTR + '?q='+qrystr,
         type: "get",
         async: false,
         success: function(data) {
@@ -1054,7 +1054,7 @@ var loadAndInitFilters = function (active_state) {
                     " limit (1))" + 
                     " select lastSynchronization, lastData, showalert FROM cte1, cte2, cte3"
         $.ajax({
-            url: GC2_HOST + '/api/v1/sql/' + _USERSTR + '?q='+qrystr,
+            url: GC2_HOST + '/api/' + gc2ApiVersion + '/sql/' + _USERSTR + '?q='+qrystr,
             type: "get",
             async: false,
             success: function(data) {
