@@ -3168,7 +3168,7 @@ module.exports = {
                         }
                     }
                     // Opacity slider
-                    $(layerContainer).find('.js-layer-settings-opacity').append(`<div class="range" style="padding: 10px;">
+                    $(layerContainer).find('.js-layer-settings-opacity').append(`<div class="range">
                         <input type="range"  min="1" max="100" value="${initialSliderValue * 100}" class="js-opacity-slider form-range">
                     </div>`);
 
@@ -3402,44 +3402,47 @@ module.exports = {
 
                 // PostgreSQL search is for all types of layers
                 $(layerContainer).find('.js-layer-settings-search').append(
-                    `<div style="padding-left: 15px; padding-right: 10px; padding-bottom: 20px; padding-top: 20px;">
-                        <div>
-                            <form class="form" onsubmit="return false">
+                    `
+                    <div>
+                        <form class="row g-2" onsubmit="return false">
+                            <div class="col-auto">
+                                <input type="text" class="js-search-input form-control form-control-sm" placeholder="Abc123")}">
+                            </div>
+                            <div class="col-auto">
+                                <button type="submit" class="btn btn-primary btn-sm">${__("Search")}</button>
+                            </div>
+                            <div class="form-inline" style="display: none">
                                 <div class="form-group">
-                                    <input type="test" class="js-search-input form-control" placeholder="${__("Search")}">
+                                    <label>${__("Method")}</label>
+                                    <select class="form-control js-search-method">
+                                    <option value="like">${__("Like")}</option>
+                                    <option value="tsvector">${__("Tsvector")}</option>                                      
+                                    <option value="similarity">${__("Similarity")}</option>
+                                    </select>
                                 </div>
-                                <div class="form-inline">
-                                    <div class="form-group">
-                                        <label>${__("Method")}</label>
-                                        <select class="form-control js-search-method">
-                                        <option value="like">${__("Like")}</option>
-                                        <option value="tsvector">${__("Tsvector")}</option>                                      
-                                        <option value="similarity">${__("Similarity")}</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>${__("Similarity")}</label>
-                                        <select class="form-control js-search-similarity">
-                                        <option value="1">100 %</option>
-                                        <option value="0.9">90 %</option>
-                                        <option value="0.8" selected>80 %</option>
-                                        <option value="0.7">70 %</option>
-                                        <option value="0.6">60 %</option>
-                                        <option value="0.5">50 %</option>
-                                        <option value="0.4">40 %</option>
-                                        <option value="0.3">30 %</option>
-                                        <option value="0.2">20 %</option>
-                                        <option value="0.1">10 %</option>
-                                        </select>
-                                    </div>
+                                <div class="form-group">
+                                    <label>${__("Similarity")}</label>
+                                    <select class="form-control js-search-similarity">
+                                    <option value="1">100 %</option>
+                                    <option value="0.9">90 %</option>
+                                    <option value="0.8" selected>80 %</option>
+                                    <option value="0.7">70 %</option>
+                                    <option value="0.6">60 %</option>
+                                    <option value="0.5">50 %</option>
+                                    <option value="0.4">40 %</option>
+                                    <option value="0.3">30 %</option>
+                                    <option value="0.2">20 %</option>
+                                    <option value="0.1">10 %</option>
+                                    </select>
                                 </div>
-                                <div class="alert alert-warning no-searchable-fields" style="display: none;">
-                                    ${__("No searchable fields on layer")}
-                                </div>
-                                <div class="searchable-fields" style="display: none;">${__("Searchable fields")} </div>
-                            </form>
-                        </div>
-                    </div>`
+                            </div>
+                            <div class="alert alert-warning no-searchable-fields" style="display: none;">
+                                ${__("No searchable fields on layer")}
+                            </div>
+                            <div class="searchable-fields" style="display: none;">${__("Searchable fields")} </div>
+                        </form>
+                    </div>
+                    `
                 );
 
                 let search = $(layerContainer).find('.js-layer-settings-search').find(`form`).get(0);
@@ -3461,7 +3464,7 @@ module.exports = {
                         });
                     }
 
-                    $(search).on('change', (e) => {
+                    $(search).on('submit', (e) => {
                         let fieldConf = JSON.parse(layer.fieldconf) || {}, searchFields = [], whereClauses = [];
                         $.each(fieldConf, function (i, val) {
                             if (typeof val.searchable === "boolean" && val.searchable === true) {
