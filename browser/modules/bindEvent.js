@@ -33,6 +33,10 @@ let readyCallbackIsfired = false;
 let firstGroupIsOpened = false;
 let urlVars = urlparser.urlVars;
 
+let mainLayerOffcanvas;
+let offcanvasEdit;
+
+
 
 /**
  *
@@ -59,6 +63,12 @@ module.exports = {
     },
     init: function () {
         apiBridgeInstance = APIBridgeSingletone();
+
+        mainLayerOffcanvas = new bootstrap.Offcanvas('#mainLayerOffcanvas');
+        offcanvasEdit = new bootstrap.Offcanvas('#offcanvasEdit');
+
+        $("#offcanvasLayerControlBtn").on("click", () => mainLayerOffcanvas.show());
+        $("#offcanvasEditBtn").on("click", () => offcanvasEdit.show());
 
         let doneL = false, doneB = false, loadingL = 0, loadingB = 0;
         const fadeWhenDraggingClass = $(".fade-then-dragging");

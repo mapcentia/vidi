@@ -81,23 +81,23 @@
     <div class="modal-body"></div>
 </div>
 
-<div id="editor-attr-dialog" class="dialog-bottom fade-then-dragging">
-    <div class="modal-header">
-        <button type="button" class="close editor-attr-dialog__close-hide" data-module="editor" aria-hidden="true"><i
-                class="material-icons">close</i>
-        </button>
-        <button type="button" class="close editor-attr-dialog__expand-more" aria-hidden="true"><i
-                class="material-icons">expand_less</i>
-        </button>
-        <button type="button" class="close editor-attr-dialog__expand-less" aria-hidden="true"><i
-                class="material-icons">expand_more</i>
-        </button>
-        <h3 class="modal-title">Attributes</h3>
-    </div>
-    <div class="modal-body">
-        <div class="form-group" id="editor-attr-form"></div>
-    </div>
-</div>
+<!--<div id="editor-attr-dialog" class="dialog-bottom fade-then-dragging">-->
+<!--    <div class="modal-header">-->
+<!--        <button type="button" class="close editor-attr-dialog__close-hide" data-module="editor" aria-hidden="true"><i-->
+<!--                class="material-icons">close</i>-->
+<!--        </button>-->
+<!--        <button type="button" class="close editor-attr-dialog__expand-more" aria-hidden="true"><i-->
+<!--                class="material-icons">expand_less</i>-->
+<!--        </button>-->
+<!--        <button type="button" class="close editor-attr-dialog__expand-less" aria-hidden="true"><i-->
+<!--                class="material-icons">expand_more</i>-->
+<!--        </button>-->
+<!--        <h3 class="modal-title">Attributes</h3>-->
+<!--    </div>-->
+<!--    <div class="modal-body">-->
+<!--        <div class="form-group" id="editor-attr-form"></div>-->
+<!--    </div>-->
+<!--</div>-->
 
 <div id="vector-layer-table-view-dialog" class="dialog-bottom fade-then-dragging dialog-bottom-wide">
     <div class="modal-header">
@@ -129,11 +129,29 @@
     <button id="offcanvasLayerControlBtn"
             style="position: absolute; left: 10px; top: 10px; text-transform: uppercase; display: inline"
             class="btn btn-light" type="button"
-            data-bs-toggle="offcanvas"
-            data-bs-target="#mainLayerOffcanvas" aria-controls="mainLayerOffcanvas" onclick="new bootstrap.Offcanvas('#mainLayerOffcanvas').show();
-">
+    >
         Lag
     </button>
+    <button id="offcanvasEditBtn"
+            style="position: absolute; left: 100px; top: 10px; text-transform: uppercase; display: inline"
+            class="btn btn-secondary" type="button"
+    >
+        Attr
+    </button>
+    <button id="editStopBtn"
+            style="position: absolute; left: 200px; top: 10px; text-transform: uppercase; display: inline"
+            class="btn btn-danger" type="button"
+    >
+        Stop
+    </button>
+    <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="offcanvasLayerControl">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="offcanvasLayerControlLabel">Find faciliteter på kort</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body" id="layer-control"></div>
+    </div>
+
     <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="mainLayerOffcanvas">
         <div class="offcanvas-header">
             <h5 class="offcanvas-title" id="mainLayerOffcanvasLabel">Offcanvas</h5>
@@ -639,6 +657,22 @@
             </div>
         </div>
     </div>
+
+    <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="offcanvasEdit">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title">Edit</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body" id="editor-attr-form"></div>
+    </div>
+
+    <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="offcanvasInfo">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title">Info</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body" id="offcanvas-info-container"></div>
+    </div>
 </div>
 
 <div class="fade-then-dragging">
@@ -650,21 +684,6 @@
         <i class="bi bi-geo-alt"></i> Find faciliteter på kort
     </button>
 
-    <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="offcanvasLayerControl">
-        <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="offcanvasLayerControlLabel">Find faciliteter på kort</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-        </div>
-        <div class="offcanvas-body" id="layer-control"></div>
-    </div>
-
-    <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="offcanvasInfo">
-        <div class="offcanvas-header">
-            <h5 class="offcanvas-title">Info</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-        </div>
-        <div class="offcanvas-body" id="offcanvas-info-container"></div>
-    </div>
 </div>
 
 <div class="toast-container bottom-0 end-0 p-3">
