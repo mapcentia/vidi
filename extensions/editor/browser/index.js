@@ -133,6 +133,7 @@ module.exports = {
             console.log(`Editor extension is disabled due to the enabled watsonc`);
             return;
         }
+        $("#editStopBtn").on("click", ()=> _self.stopEdit());
 
         if (vidiConfig.enabledExtensions.indexOf(`embed`) !== -1) {
             embedIsEnabled = true;
@@ -410,6 +411,10 @@ module.exports = {
      * @param isVector
      */
     add: function (k, doNotRemoveEditor, isVector = false) {
+        if (editedFeature) {
+            alert("Ongoing edit. Please stop editing before starting a new one");
+            return;
+        }
         isVectorLayer = isVector;
         _self.stopEdit();
         editedFeature = false;
@@ -673,6 +678,10 @@ module.exports = {
      * @param isVector
      */
     edit: function (e, k, isVector = false) {
+        if (editedFeature) {
+            alert("Ongoing edit. Please stop editing before starting a new one");
+            return;
+        }
         isVectorLayer = isVector;
         _self.stopEdit();
         editedFeature = e;
@@ -971,24 +980,8 @@ module.exports = {
      * @returns {void}
      */
     openAttributesDialog: () => {
-        if (embedIsEnabled && ($(window).width() < PANEL_DOCKING_PARAMETER || $(window).height() < (PANEL_DOCKING_PARAMETER / 2))) {
-            let e = $("#" + EDITOR_CONTAINER_ID);
-            e.animate({
-                bottom: ((e.height() * -1) + 30) + "px"
-            }, 500, () => {
-                $(".editor-attr-dialog__expand-less").hide();
-                $(".editor-attr-dialog__expand-more").show();
-            });
+        $("#offcanvasEditBtn").trigger("click")
 
-            $('#layer-slide').find('.close').trigger('click');
-        } else {
-            $("#" + EDITOR_CONTAINER_ID).animate({
-                bottom: "0"
-            }, 500, () => {
-                $(".editor-attr-dialog__expand-less").show();
-                $(".editor-attr-dialog__expand-more").hide();
-            });
-        }
     },
 
     /**
@@ -1076,7 +1069,7 @@ module.exports = {
             if (editedFeature.feature.geometry.type !== `Point` && editedFeature.feature.geometry.type !== `MultiPoint`) {
                 editedFeature.disableEdit();
                 if (featureWasEdited) {
-                    switchLayer.init(editedFeature.id, false);
+                    // switchLayer.init(editedFeature.id, false);
                     switchLayer.init(editedFeature.id, true);
                 }
             }
@@ -1091,13 +1084,6 @@ module.exports = {
 
         featureWasEdited = false;
 
-        // Close the attribute dialog
-        $("#" + EDITOR_CONTAINER_ID).animate({
-            bottom: "-100%"
-        }, 500, function () {
-            $(".editor-attr-dialog__expand-less").show();
-            $(".editor-attr-dialog__expand-more").hide();
-        });
 
         editedFeature = false;
         sqlQuery.resetAll();
@@ -1128,5 +1114,4 @@ module.exports = {
         return editedFeature;
     }
 };
-
 
