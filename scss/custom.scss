@@ -14,10 +14,20 @@ $dropdown-link-active-bg: white;
 
 // 8. Add additional custom code here
 
+:root {
+  --bs-primary: red;
+
+}
+
 .offcanvas {
   --bs-offcanvas-width: 600px;
-  --bs-offcanvas-padding-x: 0;
 }
+.navbar {
+  z-index: 99999;
+}
+
+
+
 
 .accordion {
   --bs-accordion-active-bg: rgb(0, 73, 152);

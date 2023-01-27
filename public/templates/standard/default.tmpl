@@ -1,6 +1,6 @@
 <style>
     .leaflet-control-custom, .history-control, .leaflet-control-boxzoom {
-        display: none;
+        display: inline;
     }
 </style>
 <!-- map -->
@@ -34,36 +34,19 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                        aria-hidden="true">&times;</span></button>
-                <h3 class="modal-title" id="login-modalLabel"></h3>
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" id="login-modal-body">
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">{{Close}}</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{Close}}</button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- KeplerGL Modal -->
-<div class="modal fade" id="keplergl-modal" tabindex="-1" role="dialog" aria-labelledby="click-modalLabel">
-    <div class="modal-dialog" role="document" style="width: 95%; height: 95%;">
-        <div class="modal-content" style="height: 100%;">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                        aria-hidden="true">&times;</span></button>
-                <h3 class="modal-title" id="keplergl-modalLabel">KeplerGL</h3>
-            </div>
-            <div class="modal-body" id="keplergl-modal-body" style="height: calc(100% - 51px);">
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">{{Close}}</button>
-            </div>
-        </div>
-    </div>
-</div>
+
 
 <div id="legend-dialog" class="dialog-bottom fade-then-dragging">
     <div class="modal-header">
@@ -125,13 +108,46 @@
 <!--    </div>-->
 <!--</div>-->
 
+
+
+<nav class="navbar navbar-expand-sm bg-light">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">Navbar</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <button id="offcanvasLayerControlBtn"
+                    class="btn btn-light me-auto" type="button"
+            >
+                Lag
+            </button>
+            <ul class="navbar-nav mb-2 me-2 mb-lg-0">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Hjælp
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#">Action</a></li>
+                        <li><a class="dropdown-item" href="#">Another action</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#">Something else here</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <form class="d-flex me-2 mb-2 mb-lg-0" role="search">
+                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                <button class="btn btn-outline-primary" type="submit">Søg</button>
+            </form>
+            <button class="btn btn-outline-secondary me-2 mb-2 mb-lg-0"><i class="bi bi-question-circle"></i></button>
+            <button class="btn btn-outline-secondary me-2 mb-2 mb-lg-0"><i class="bi bi-arrow-repeat"></i></button>
+            <button class="btn btn-primary mb-2 mb-lg-0" data-bs-toggle="modal" data-bs-target="#login-modal">Login</button>
+        </div>
+    </div>
+</nav>
+
 <div class="fade-then-dragging">
-    <button id="offcanvasLayerControlBtn"
-            style="position: absolute; left: 10px; top: 10px; text-transform: uppercase; display: inline"
-            class="btn btn-light" type="button"
-    >
-        Lag
-    </button>
     <button id="offcanvasEditBtn"
             style="position: absolute; left: 100px; top: 10px; text-transform: uppercase; display: inline"
             class="btn btn-secondary" type="button"
@@ -145,7 +161,7 @@
         Stop
     </button>
     <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="offcanvasLayerControl">
-        <div class="offcanvas-header">
+        <div class="offcanvas-header mt-5">
             <h5 class="offcanvas-title" id="offcanvasLayerControlLabel">Find faciliteter på kort</h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
@@ -153,14 +169,14 @@
     </div>
 
     <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="mainLayerOffcanvas">
-        <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="mainLayerOffcanvasLabel">Offcanvas</h5>
+        <div class="offcanvas-header mt-5">
+            <h5 class="offcanvas-title" id="mainLayerOffcanvasLabel">Lag</h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body" style="scrollbar-gutter: stable">
             <div class="d-flex align-items-start flex-row-reverse">
                 <!-- Nav tabs -->
-                <ul class="nav flex-column nav-pills" role="tablist" id="main-tabs">
+                <ul class="nav flex-column nav-pills sticky-top" role="tablist" id="main-tabs">
                     <li role="presentation" class="nav-item">
                         <a class="nav-link" data-bs-toggle="tab" href="#search-content" aria-controls="search-content"
                            data-module-title="{{Search}}" role="tab" data-toggle="tab">
@@ -249,7 +265,7 @@
                     </div>
                     <div role="tabpanel" class="tab-pane fade" id="info-content">
                         <div class="help-btn" onclick="javascript:createAlert($(this), '{{Info text}}')">
-                            <i class="material-icons help-btn">help_outline</i></div>
+                            <i class="bi bi-question-circle help-btn"></i></div>
                         <div></div>
                         <div class="togglebutton">
                             <label>
@@ -269,7 +285,7 @@
                     </div>
                     <div role="tabpanel" class="tab-pane fade" id="layer-content">
                         <div class="help-btn" onclick="javascript:createAlert($(this), '{{Help text overlays}}')">
-                            <i class="material-icons help-btn">help_outline</i></div>
+                            <i class="bi bi-question-circle help-btn"></i></div>
                         <div></div>
                         <div id="layer-loading-indicator" style="display: flex; width: 100%; justify-content: center;">
                             <div style="width: 150px; display: inline-block">
@@ -285,13 +301,13 @@
                     </div>
                     <div role="tabpanel" class="tab-pane fade" id="baselayer-content">
                         <div class="help-btn" onclick="javascript:createAlert($(this), '{{Help text baselayers}}')">
-                            <i class="material-icons help-btn">help_outline</i></div>
+                            <i class="bi bi-question-circle help-btn"></i></div>
                         <div></div>
                         <div class="form-group" id="base-layer-list"></div>
                     </div>
                     <div role="tabpanel" class="tab-pane fade" id="legend-content">
                         <div class="help-btn" onclick="javascript:createAlert($(this), '{{Help text legend}}')">
-                            <i class="material-icons help-btn">help_outline</i></div>
+                            <i class="bi bi-question-circle help-btn"></i></div>
                         <div></div>
                         <a href="#legend-dialog" id="btn-show-legend-in-map" data-module="legend"
                            class="btn btn-raised btn-xs map-tool-btn">{{Show legend on top the map}}</a>
@@ -299,7 +315,7 @@
                     </div>
                     <div role="tabpanel" class="tab-pane fade" id="draw-content">
                         <div class="help-btn" onclick="javascript:createAlert($(this), '{{Help text draw}}')">
-                            <i class="material-icons help-btn">help_outline</i>
+                            <i class="bi bi-question-circle help-btn"></i>
                         </div>
                         <div></div>
                         <div class="panel panel-default">
@@ -517,13 +533,13 @@
                     <div role="tabpanel" class="tab-pane fade" id="state-snapshots-content">
                         <div class="help-btn"
                              onclick="javascript:createAlert($(this), '{{StateSnapshots description}}')">
-                            <i class="material-icons help-btn">help_outline</i></div>
+                            <i class="bi bi-question-circle help-btn"></i></div>
                         <div></div>
                         <div class="form-group" id="state-snapshots" role="tablist"></div>
                     </div>
                     <div role="tabpanel" class="tab-pane fade" id="print-content">
                         <div class="help-btn" onclick="javascript:createAlert($(this), '{{Help text print}}')">
-                            <i class="material-icons help-btn">help_outline</i></div>
+                            <i class="bi bi-question-circle help-btn"></i></div>
                         <div></div>
                         <div class="btn-toolbar bs-component" style="margin: 0;">
                             <div class="btn-group">
@@ -659,7 +675,7 @@
     </div>
 
     <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="offcanvasEdit">
-        <div class="offcanvas-header">
+        <div class="offcanvas-header mt-5">
             <h5 class="offcanvas-title">Edit</h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
@@ -667,7 +683,7 @@
     </div>
 
     <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="offcanvasInfo">
-        <div class="offcanvas-header">
+        <div class="offcanvas-header mt-5">
             <h5 class="offcanvas-title">Info</h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
