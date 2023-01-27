@@ -569,7 +569,7 @@ module.exports = module.exports = {
             }
         }
 
-        let controlElement = $('input[class="js-show-layer-control"][data-gc2-id="' + layerTreeUtils.stripPrefix(layerName) + '"]');
+        let controlElement = $('input[data-gc2-id="' + layerTreeUtils.stripPrefix(layerName) + '"].js-show-layer-control');
         if (controlElement.length === 1) {
             let siblings = $(controlElement).parents(".accordion-body").find("input.js-show-layer-control"), c = 0;
 
