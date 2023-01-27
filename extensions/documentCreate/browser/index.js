@@ -148,22 +148,21 @@ var config = require('../../../config/config.js');
 var resultLayer = new L.FeatureGroup()
 var DClayers = [];
 
-/**
- * Tilføjer liste af lag som har korrekt tag
- */
-/*
-try {
-    metaData.data.forEach(function(d) {
-      if (d.tags) {
-        if (d.tags.includes(config.extensionConfig.documentCreate.metaTag)) {
-            DClayers.push(d.f_table_schema+'.'+d.f_table_name);
-        }
-      }
-    });
-} catch (error) {
-    console.info('documentCreate - Kunne ikke finde lag med korrekt tag')
-    
-}*/
+//var populateLayers = function() {
+//    DClayers = [];
+//    try {
+//        meta.getMetaData().data.forEach(function(d) {
+//        if (d.tags) {
+//            if (d.tags.includes(config.extensionConfig.documentCreate.metaTag)) {
+//                DClayers.push(d.f_table_schema+'.'+d.f_table_name);
+//            }
+//        }
+//        });
+//        
+//    } catch (error) {
+//        console.info('documentCreate - Kunne ikke finde lag med korrekt tag')   
+//    }
+//}
 /*
 TODO fix formular så den ikke nulstilles hver gang
 */
@@ -229,32 +228,24 @@ var getExistingDocs = function (key, fileIdent = false) {
     $('#documentList-feature-content').append('</tbody></table>')    
     
     // TODO fix zoom-to
-    var bounds = []
-    var bounds = documentCreateGetFilterBounds(key, fileIdent)
-    if (bounds.length !== 0) {
-        //There is stuff, go there
-        var myBounds = new L.LatLngBounds(bounds)
-        //console.log(myBounds)
-        //wait for ready event!
-        backboneEvents.get().once('allDoneLoading:layers', () => {
-            cloud.get().map.fitBounds(myBounds, {maxZoom: config.extensionConfig.documentCreate.maxZoom});
-            // reload cosmetic layer (if layer ident is found and specified)
-            if (fileIdent) {
-                layersToReload.forEach(element => {
-                    // Get information from config.json
-                    var conf = config.extensionConfig.documentCreate.tables.find(x => x.docunotecaseutilitytype == element)
-            
-                    // set the cosmetic backgroundlayer visible (if specified)
-                    if (conf.cosmeticbackgroundlayer) {
-                        if (!(layerTree.getState().activeLayers.includes(conf.cosmeticbackgroundlayer))) {
-                            console.log('reload wms')
-                            layerTree.reloadLayer(conf.cosmeticbackgroundlayer);
-                        }
-                    }
-                });
+    zoomToFeature(key)
+    // reload cosmetic layer (if layer ident is found and specified)
+    if (fileIdent) {
+        layersToReload.forEach(element => {
+            // Get information from config.json
+            var conf = config.extensionConfig.documentCreate.tables.find(x => x.docunotecaseutilitytype == element)
+    
+            // set the cosmetic backgroundlayer visible (if specified)
+            if (conf.cosmeticbackgroundlayer) {
+                console.log(conf)
+                if (!(layerTree.getActiveLayers().includes(conf.cosmeticbackgroundlayer))) {
+                    console.log('reload wms')
+                    layerTree.reloadLayer(conf.cosmeticbackgroundlayer);
+                }
             }
-        }) 
+        });
     }
+
     if (fileIdent) {
         // we are in a editing session
         SetGUI_ControlState(GUI_CONTROL_STATE.FEATURE_INFO_VISIBLE + GUI_CONTROL_STATE.EDIT_CONTROLS_VISIBLE);
@@ -263,6 +254,19 @@ var getExistingDocs = function (key, fileIdent = false) {
         // we are in a create session
         SetGUI_ControlState(GUI_CONTROL_STATE.FEATURE_INFO_VISIBLE);
     }
+};
+
+var zoomToFeature = function (fileIdent) {
+    // TODO fix zoom-to
+    var bounds = []
+    var bounds = documentCreateGetFilterBounds(fileIdent, true)
+    
+    //There is stuff, go there
+    if (bounds.length !== 0) {
+        var myBounds = new L.LatLngBounds(bounds)
+        console.log('Zooming to!:', myBounds)
+        cloud.get().map.fitBounds(myBounds, {maxZoom: config.extensionConfig.documentCreate.maxZoom});
+    }    
 };
 
 
@@ -330,7 +334,13 @@ var documentGetExistingCasesFilter = function (key, isfileIdent = false) {
     var tables = []
     var result = []
 
+    if (DClayers.length == 0) {
+        //no layers to query
+        return null
+    }
+
     for (let l in DClayers) {
+
         // set the filter based on config
         var tablename = DClayers[l].split('.')[1]
         var filterCol, filterExp;
@@ -356,13 +366,14 @@ var documentGetExistingCasesFilter = function (key, isfileIdent = false) {
     //qrystr = qrystr + ') select ST_Extent(ST_Transform(ST_SetSRID(geom,4326),3857)) from cte' //Example for anything but 4326 - should be automatic TODO
 
     // query SQL for stuff
+
     $.ajax({
         url: GC2_HOST + '/api/' + gc2ApiVersion + '/sql/' +_USERSTR + '?q='+qrystr,
         type: "get",
         async: false,
         success: function(data) {
             //check for stuff
-            console.log(data)
+            //console.log(data)
             if (data.features.length == 0 ||
                 data.features[0].properties == null ||
                 data.features[0].properties.fileident == null) {
@@ -401,6 +412,10 @@ var documentGetExistingCasesFilter = function (key, isfileIdent = false) {
                 //create list with links
                 result = data.features;
             }
+        },
+        error: function (e) {
+            console.log(e.responseJSON);
+            return null
         }
     });
     return result;
@@ -563,7 +578,7 @@ var getEjdNr = function(adgangsadresseid) {
         type: "get",
         async: false,
         success: function(data,status) {
-            console.log(data)
+            //console.log(data)
             if (data[0].adgangsadresse == null) {
                 //nothing.. return null
                 return null
@@ -753,6 +768,8 @@ var buildFeatureMeta = function (layer, previousLayer = undefined) {
             //Get information from config.json
             var confLayer = config.extensionConfig.documentCreate.tables.find(x => x.table == d.f_table_name)
             // set the backgroundlayer invisible
+            
+            //What? 
             if (confLayer && confLayer.cosmeticbackgroundlayer) {
                 switchLayer.init(confLayer.cosmeticbackgroundlayer, false, false, false);
             }
@@ -774,8 +791,8 @@ var buildFeatureMeta = function (layer, previousLayer = undefined) {
         // set the backgroundlayer visible
         if (conf.cosmeticbackgroundlayer) {
             //layerTree.reloadLayer(conf.cosmeticbackgroundlayer);
-            if (!(layerTree.getState().activeLayers.includes(conf.cosmeticbackgroundlayer))) {
-                console.log('reload wms')
+            if (!(layerTree.getActiveLayers().includes(conf.cosmeticbackgroundlayer))) {
+                //console.log('reload wms')
                 layerTree.reloadLayer(conf.cosmeticbackgroundlayer);
              }
 
@@ -1008,11 +1025,8 @@ var SetGUI_ControlState = function (state_Enum) {
  * @private
  */
 var loadAndInitFilters = function (active_state) {
-    try {
-        //check login status
-        if (active_state === true) {   
-            buildServiceSelect(select_id);
-        }        
+    try {   
+        buildServiceSelect(select_id);     
     } catch (error) {
         console.info('documentCreate - Kunne ikke bygge ServiceSelect')
         console.log(error.stack);
@@ -1034,7 +1048,7 @@ var loadAndInitFilters = function (active_state) {
                 clearExistingDocFilters()
             }
         } catch (error) {
-            //console.log(error.stack);
+            console.log(error.stack);
             console.info('loadAndInitFilters - failed due to layers are not yet loaded, firstRunnervariable is reset');
             firstRunner = true;
         }
@@ -1324,6 +1338,7 @@ module.exports = {
                 backboneEvents.get().on("allDoneLoading:layers", function () {
                     console.log("inside allDoneLoading:layers, DClayers.length: " + DClayers.length + " me.state.active: " + me.state.active + " firstRunner: " + firstRunner);
 //                    backboneEvents.get().trigger("refresh:meta");
+                    
                     loadAndInitFilters(me.state.active);
                 });
 
