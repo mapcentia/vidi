@@ -173,7 +173,7 @@ module.exports = {
         });
         $(document).arrive('#layers-filter', function (e, data) {
             const filterBusy = $('#layers-filter-busy');
-            const filterReset = $('#layers-filter-reset');
+            const filterReset = $('#layers-filter-reset i');
             let timeOut;
             $(this).on('input', function (e) {
                 clearTimeout(timeOut)
@@ -194,7 +194,18 @@ module.exports = {
                 c();
             })
         });
-        $("#layers").before(`<div id="layer-filter-container" style="display: flex; align-items: center"><div class="form-group" style="flex-grow: 1;"><input placeholder="${__('Layer filter')}" class="form-control" type="text" id="layers-filter" autocomplete="off"></div><div style="width: 18px; display: flex; justify-content:center"><div id="layers-filter-reset" style="display: inline; cursor: pointer"><i class="fas fa-times"></i></div><div id="layers-filter-busy" style="display: none"><i class="fas fa-circle-notch fa-spin"></i></div></div></div>`);
+        $("#layers").before(`
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text" id="basic-addon1">@</span>
+                                    <input placeholder="${__('Layer filter')}" class="form-control" type="text" id="layers-filter" autocomplete="off">
+                                    <button id="layers-filter-reset" class="btn btn-outline-secondary" type="button" id="button-addon2">
+                                        <i class="bi bi-x-lg"></i>
+                                        <div id="layers-filter-busy" style="display: none" class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                                    </button>
+                                  
+                                </div>
+                             
+                             `);
 
         if (urlparser && urlparser.urlVars && urlparser.urlVars.initialFilter) {
             backboneEvents.get().on(`${MODULE_NAME}:ready`, () => {
