@@ -192,7 +192,7 @@ var Base64 = {
 function createAlert(el, text) {
     if (el.next().children().length === 0) {
         el.next().html(`<div class="alert alert-dismissible alert-info" role="alert">
-                                                                            <button type="button" class="close" data-dismiss="alert">×</button>${text}
+                                                                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>${text}
                                                                         </div>`);
     } else {
         el.next().find(".alert").alert('close');
