@@ -1,6 +1,6 @@
 /*
  * @author     Alexander Shumilov
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2023 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -29,7 +29,7 @@ class ImageUploadWidget extends React.Component {
             height: 0,
             crop: false,
             quality: 80,
-            callback: function(data, width, height) {
+            callback: function (data, width, height) {
                 _self.setState({
                     loadedImageData: data
                 });
@@ -51,18 +51,19 @@ class ImageUploadWidget extends React.Component {
         let control = false;
         if (this.state.loadedImageData) {
             control = (<div>
-                <div>
+                <div className="mb-3">
                     <img src={this.state.loadedImageData}/>
                 </div>
                 <div>
-                    <button type="button" className="btn btn-secondary btn-block" onClick={this.deleteImage}>
-                        <i className="material-icons">delete</i>
+                    <button type="button" className="btn btn-outline-danger btn-block" onClick={this.deleteImage}>
+                        <i className="bi bi-slash-circle"></i>
                     </button>
                 </div>
             </div>);
         } else {
             control = (<div>
-                <Dropzone onDrop={this.onDrop.bind(this)} style={{width: '100%', height: '50px', padding: '5px', border: '1px green dashed'}}>
+                <Dropzone onDrop={this.onDrop.bind(this)}
+                          style={{width: '100%', height: '50px', padding: '5px', border: '1px green dashed'}}>
                     <p>Drop files here, or click to select files to upload</p>
                 </Dropzone>
             </div>);
@@ -70,6 +71,6 @@ class ImageUploadWidget extends React.Component {
 
         return (control);
     }
-};
+}
 
 module.exports = ImageUploadWidget;

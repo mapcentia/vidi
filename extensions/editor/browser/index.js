@@ -31,7 +31,18 @@ let apiBridgeInstance = false;
 
 let multiply = require('geojson-multiply');
 
-import Form from "@rjsf/core";
+import {withTheme} from '@rjsf/core';
+import {Theme} from '@rjsf/bootstrap-4';
+import validator from "@rjsf/validator-ajv8";
+import SelectWidget from "./SelectWidget.jsx";
+import TimeWidget from "./TimeWidget.jsx";
+
+const Theme5 = {
+    ...Theme,
+    widgets: {...Theme.widgets, SelectWidget}
+}
+
+const Form = withTheme(Theme5);
 
 let markers = [];
 
@@ -48,7 +59,7 @@ let switchLayer;
 
 const ImageUploadWidget = require('./ImageUploadWidget');
 
-const widgets = {'imageupload': ImageUploadWidget};
+const widgets = {'imageupload': ImageUploadWidget, 'time': TimeWidget};
 
 const MODULE_NAME = `editor`;
 const EDITOR_FORM_CONTAINER_ID = 'editor-attr-form';
@@ -133,7 +144,7 @@ module.exports = {
             console.log(`Editor extension is disabled due to the enabled watsonc`);
             return;
         }
-        $("#editStopBtn").on("click", ()=> _self.stopEdit());
+        $("#editStopBtn").on("click", () => _self.stopEdit());
 
         if (vidiConfig.enabledExtensions.indexOf(`embed`) !== -1) {
             embedIsEnabled = true;
@@ -252,7 +263,7 @@ module.exports = {
                             tooltipSettings.className = `api-bridge-popup-warning`;
 
                             content = `<div class="js-feature-notification-tooltip">
-                                <i class="fa fa-exclamation"></i> ${__(`Awaiting network`)}
+                                <i class="bi bi-exclamation"></i> ${__(`Awaiting network`)}
                                 <span class="js-tooltip-content"></span>
                             </div>`;
                         } else if (feature.meta.apiRecognitionStatus === 'rejected_by_server') {
@@ -261,13 +272,13 @@ module.exports = {
                             if (feature.meta.serverErrorType) {
                                 if (feature.meta.serverErrorType === `REGULAR_ERROR`) {
                                     content = `<div class="js-feature-notification-tooltip">
-                                        <i class="fa fa-exclamation"></i> ${__(`Error`)}
+                                        <i class="bi bi-exclamation"></i> ${__(`Error`)}
                                         <span class="js-tooltip-content"></span>
                                     </div>`;
                                 } else if (feature.meta.serverErrorType === `AUTHORIZATION_ERROR`) {
                                     tooltipSettings.className = `api-bridge-popup-warning`;
                                     content = `<div class="js-feature-notification-tooltip">
-                                        <i class="fa fa-exclamation"></i> ${__(`Awaiting login`)}
+                                        <i class="bi bi-exclamation"></i> ${__(`Awaiting login`)}
                                         <span class="js-tooltip-content"></span>
                                     </div>`;
                                 } else {
@@ -275,7 +286,7 @@ module.exports = {
                                 }
                             } else {
                                 content = `<div class="js-feature-notification-tooltip">
-                                    <i class="fa fa-exclamation"></i> ${__(`Error`)}
+                                    <i class="bi bi-exclamation"></i> ${__(`Error`)}
                                     <span class="js-tooltip-content"></span>
                                 </div>`;
                             }
@@ -343,11 +354,12 @@ module.exports = {
                         case `double precision`:
                             properties[key].type = `number`;
                             break;
-                        // case `time without time zone`:
-                        //     uiSchema[key] = {
-                        //         'ui:widget': 'time'
-                        //     };
-                        //     break;
+                        case `time with time zone`:
+                        case `time without time zone`:
+                            uiSchema[key] = {
+                                'ui:widget': 'time'
+                            };
+                            break;
                         case `date`:
                             uiSchema[key] = {
                                 'ui:widget': 'date'
@@ -528,6 +540,7 @@ module.exports = {
             ReactDOM.render((
                 <div style={{"padding": "15px"}}>
                     <Form
+                        validator={validator}
                         className="feature-attribute-editing-form"
                         schema={schema} noHtml5Validate
                         uiSchema={uiSchema}
@@ -940,6 +953,7 @@ module.exports = {
             ReactDOM.render((
                 <div style={{"padding": "15px"}}>
                     <Form
+                        validator={validator}
                         className="feature-attribute-editing-form"
                         schema={schema} noHtml5Validate
                         widgets={widgets}
