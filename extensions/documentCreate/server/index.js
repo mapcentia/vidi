@@ -85,8 +85,8 @@ router.post('/api/extension/documentCreateSendFeature', function (req, response)
 
     //Check for existing cases if so use existing parentid
     getExistinAdrCaseGc2Promise.then(function(resultExistingAdrCase) {
-        console.log(resultExistingAdrCase)
-        console.log(resultExistingAdrCase.features)
+        //console.log(resultExistingAdrCase)
+        //console.log(resultExistingAdrCase.features)
         
         if (resultExistingAdrCase.features.length) {
             // adressesagen er oprettet i DN så skal der bare oprettes henvendelsessager under denne
@@ -96,9 +96,9 @@ router.post('/api/extension/documentCreateSendFeature', function (req, response)
             
             var postReqCaseToDnPromise = postCaseToDn(bodyreq);
             postReqCaseToDnPromise.then(function(result) {
-                console.log(result)
+                //console.log(result)
                 if ('caseId' in result) {
-                    console.log(result)
+                    //console.log(result)
                     //response.send('Sag oprettet i DN')
                     req.body.features[0].properties.fileident = result.caseId
                     req.body.features[0].properties.casenumber = result.number
@@ -121,7 +121,7 @@ router.post('/api/extension/documentCreateSendFeature', function (req, response)
  //                   }
 
                     postCaseToGc2Promise.then(function(result){
-                        console.log(result)
+                        //console.log(result)
                         response.status(200).send(resultjson)
                     }, function(err) {
                         response.status(500).send('ikke oprettet')
@@ -167,7 +167,7 @@ router.post('/api/extension/documentCreateSendFeature', function (req, response)
                     var postReqCaseToDnPromise = postCaseToDn(bodyreq);
                     postReqCaseToDnPromise.then(function(resultpostdn) {
                         if ('caseId' in resultpostdn) {
-                            console.log(resultpostdn)
+                            //console.log(resultpostdn)
                             //response.status(200).send('Sag oprettet i DN med journalnummer: ' +result.caseId )
                             req.body.features[0].properties.fileident = resultpostdn.caseId
                             req.body.features[0].properties.casenumber = resultpostdn.number
@@ -191,7 +191,7 @@ router.post('/api/extension/documentCreateSendFeature', function (req, response)
 
                             var postCaseToGc2Promise = postToGC2(req, req.body.db);
                             postCaseToGc2Promise.then(function(result){
-                                console.log(result)
+                                //console.log(result)
                                 response.status(200).send(resultjson)
                             }, function(err) {
                                 response.status(500).send('ikke oprettet')
@@ -212,7 +212,7 @@ router.post('/api/extension/documentCreateSendFeature', function (req, response)
 
 */                
             }, function(err) {
-                console.log(err)
+                //console.log(err)
                 response.status(500).send('Fejl, ejendomssagen eksistere ikke i Docunote ' + err)
             })
 
@@ -233,7 +233,7 @@ function addPartRequestCase(caseId, adrguid){
     var getAdrIdPromise = getPartId(adrguid);
 
     Promise.all([getAdrIdPromise]).then(function(values) {
-        console.log(values)
+        //console.log(values)
         partbody = makePartBodyHenvendelse(caseId,values[0].companyId)
         putPartToCaseDn(partbody,caseId)
     })
@@ -277,18 +277,16 @@ function GetParentFolder(ejdCaseId, parentId, parenttype, dnTitle, esrnr, enhadr
                     for (i = 0; i < values[0].length; i++) {
                         // Get adressepart
                         if (values[0][i].pickerName == "Adresse") {
-                            // 
                             result.adresseid = values[0][i].parts[0].partRecordId;
-                            console.log(result)
+                            //console.log(result)
                         }
                     }
                     for (i = 0; i < values[1].length; i++) {
                         // if kundehenvendelser found use this folder as result else remain current result
                         if (values[1][i].name == "Kundehenvendelser") {
-                            // 
                             result.parentid = values[1][i].nodeId;
                             result.parenttype = values[1][i].nodeType;
-                            console.log(result)
+                            //console.log(result)
                         }
                     }
 
@@ -319,7 +317,7 @@ function GetParentFolder(ejdCaseId, parentId, parenttype, dnTitle, esrnr, enhadr
                     })
                     
                 }, function (error) {
-                    console.log(error)
+                    //console.log(error)
                     if (error.message == "Duplicate SynchronizeSource SynchronizeIdentifier pair") {
                         var getcasepromise = ReqToDn('https://docunoteapi.vmr.dk/api/v1/Cases/synchronizeSource/24/synchronizeId/'+adgadrguid)
                         getcasepromise.then(function(casebody) {
@@ -394,7 +392,7 @@ function addPartsToCase(esrnr, adrguid, caseId) {
 
     //   Promise.all([getEsrIdPromise,getAdrIdPromise]).then(function(values) {
     Promise.all([getEsrIdPromise,getAdrIdPromise]).then(function (values) {
-        console.log(values)
+        //console.log(values)
         partbody = makePartBody(caseId, values[0].companyId, values[1].companyId)
         putPartToCaseDn(partbody, caseId)
     })
@@ -499,12 +497,12 @@ function getFoldersDn(caseid, nodetype) {
    
         request.get(dnoptions, function (err, res, body) {
             if (!err) {
-                console.log(body)
+                //console.log(body)
                 //postToGC2(req)
                 resolve(JSON.parse(body));                
             }
             else {
-                console.log(err)
+                //console.log(err)
                 reject(err)
             }
         });
@@ -524,7 +522,7 @@ function GetDawaAddress(adrguid) {
                 resolve(JSON.parse(body));
             }
             else {
-                console.log(err)
+                //console.log(err)
                 reject(err);
             }
         });
@@ -534,7 +532,7 @@ function GetDawaAddress(adrguid) {
 // format address as in lifaois 
 
 function oisAddressFormatter(adrString){
-    console.log("adrString: " + adrString);
+    //console.log("adrString: " + adrString);
     var adrSplit = adrString.split(",")
     var nr = adrSplit[0].match(/\d+/)
     var padnr = new Array(4 - nr[0].length + 1).join("0") + nr[0];
@@ -554,7 +552,7 @@ function getParentCaseDn(esrnr) {
     return new Promise(function(resolve, reject) {
         request.get(dnoptions, function (err, res, body) {
             if (!err) {
-                console.log(body)
+                //console.log(body)
                 //postToGC2(req)
                 //return body.parentid;
                 resolve(JSON.parse(body));
@@ -648,7 +646,7 @@ function postCompanyToDn(compbody) {
             });
             res.on('data', function (chunk) {
                 chunks.push(chunk);
-                console.log('Response: ' + chunk);
+                //console.log('Response: ' + chunk);
             });
             res.on("end", function () {
                 var jsfile = new Buffer.concat(chunks); 
@@ -701,7 +699,7 @@ function postCaseToDn(casebody) {
                 });
                 res.on('data', function (chunk) {
                     chunks.push(chunk);
-                    console.log('Response: ' + chunk);
+                    //console.log('Response: ' + chunk);
                 });
                 res.on("end", function () {
                     var jsfile = new Buffer.concat(chunks); 
@@ -749,7 +747,7 @@ function putPartToCaseDn(partbody, caseId) {
                 //reject(e);
             });
             res.on('data', function (chunk) {
-                chunks.push(chunk);
+                //chunks.push(chunk);
                 console.log('Response: ' + chunk);
             });
             res.on("end", function () {
@@ -807,9 +805,10 @@ function ReqToGC2(session, requrl, db) {
         // Do async job
         request.get(options, function(err, resp, body) {
             if (err) {
+                console.log(err)
                 reject(err);
             } else {
-                console.log(resp)
+                //console.log(resp)
                 if (JSON.parse(body).features && JSON.parse(body).features.length) {
                     resolve(JSON.parse(body));
                 } else { 
@@ -840,9 +839,10 @@ function SqlInsertToGC2(session, requrl, db) {
         // Do async job
         request.get(options, function(err, resp, body) {
             if (err) {
+                console.log(err)
                 reject(err);
             } else {
-                console.log(resp)
+                //console.log(resp)
                 resolve(JSON.parse(body));
             }
         })
