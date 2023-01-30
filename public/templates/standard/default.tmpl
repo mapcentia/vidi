@@ -47,7 +47,6 @@
 </div>
 
 
-
 <div id="legend-dialog" class="dialog-bottom fade-then-dragging">
     <div class="modal-header">
         <button type="button" class="close close-hide" data-module="legend" aria-hidden="true"><i
@@ -64,23 +63,6 @@
     <div class="modal-body"></div>
 </div>
 
-<!--<div id="editor-attr-dialog" class="dialog-bottom fade-then-dragging">-->
-<!--    <div class="modal-header">-->
-<!--        <button type="button" class="close editor-attr-dialog__close-hide" data-module="editor" aria-hidden="true"><i-->
-<!--                class="material-icons">close</i>-->
-<!--        </button>-->
-<!--        <button type="button" class="close editor-attr-dialog__expand-more" aria-hidden="true"><i-->
-<!--                class="material-icons">expand_less</i>-->
-<!--        </button>-->
-<!--        <button type="button" class="close editor-attr-dialog__expand-less" aria-hidden="true"><i-->
-<!--                class="material-icons">expand_more</i>-->
-<!--        </button>-->
-<!--        <h3 class="modal-title">Attributes</h3>-->
-<!--    </div>-->
-<!--    <div class="modal-body">-->
-<!--        <div class="form-group" id="editor-attr-form"></div>-->
-<!--    </div>-->
-<!--</div>-->
 
 <div id="vector-layer-table-view-dialog" class="dialog-bottom fade-then-dragging dialog-bottom-wide">
     <div class="modal-header">
@@ -109,57 +91,71 @@
 <!--</div>-->
 
 
-
 <nav class="navbar navbar-expand-sm bg-light">
     <div class="container-fluid">
         <a class="navbar-brand" href="#">Navbar</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
 
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav flex-row gap-1">
             <button id="offcanvasLayerControlBtn"
-                    class="btn btn-light me-auto" type="button"
+                    class="btn btn-light" type="button"
             >
                 Lag
             </button>
-            <ul class="navbar-nav mb-2 me-2 mb-lg-0">
+            <button id="offcanvasEditBtn"
+                    class="btn btn-secondary nav-edit-btn edit-attr-btn d-none" disabled type="button"
+            >
+                <i class="bi bi-geo-alt"></i> <span class="d-none d-md-inline">Attributter</span>
+            </button>
+            <button id="editStopBtn"
+                    class="btn btn-danger nav-edit-btn d-none" type="button"
+            >
+
+                <i class="bi bi-geo-alt"></i> <span class="d-none d-md-inline">Stop edit</span>
+            </button>
+
+        </div>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
+            <ul class="navbar-nav me-2">
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                       aria-expanded="false">
                         Hjælp
                     </a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="#">Action</a></li>
                         <li><a class="dropdown-item" href="#">Another action</a></li>
-                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
                         <li><a class="dropdown-item" href="#">Something else here</a></li>
                     </ul>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Reset</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Om</a>
+                </li>
             </ul>
-            <form class="d-flex me-2 mb-2 mb-lg-0" role="search">
-                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                <button class="btn btn-outline-primary" type="submit">Søg</button>
-            </form>
-            <button class="btn btn-outline-secondary me-2 mb-2 mb-lg-0"><i class="bi bi-question-circle"></i></button>
-            <button class="btn btn-outline-secondary me-2 mb-2 mb-lg-0"><i class="bi bi-arrow-repeat"></i></button>
-            <button class="btn btn-primary mb-2 mb-lg-0" data-bs-toggle="modal" data-bs-target="#login-modal">Login</button>
+            <!--            <form class="d-flex me-2 mb-2 mb-lg-0" role="search">-->
+            <!--                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">-->
+            <!--                <button class="btn btn-outline-primary" type="submit">Søg</button>-->
+            <!--            </form>-->
+            <div class="navbar-nav me-2">
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#login-modal">
+                    Login
+                </button>
+            </div>
         </div>
     </div>
 </nav>
 
 <div class="fade-then-dragging">
-    <button id="offcanvasEditBtn"
-            style="position: absolute; left: 100px; top: 10px; text-transform: uppercase; display: inline"
-            class="btn btn-secondary" type="button"
-    >
-        Attr
-    </button>
-    <button id="editStopBtn"
-            style="position: absolute; left: 200px; top: 10px; text-transform: uppercase; display: inline"
-            class="btn btn-danger" type="button"
-    >
-        Stop
-    </button>
     <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="offcanvasLayerControl">
         <div class="offcanvas-header mt-5">
             <h5 class="offcanvas-title" id="offcanvasLayerControlLabel">Find faciliteter på kort</h5>

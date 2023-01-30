@@ -66,6 +66,12 @@ module.exports = {
 
         mainLayerOffcanvas = new bootstrap.Offcanvas('#mainLayerOffcanvas');
         offcanvasEdit = new bootstrap.Offcanvas('#offcanvasEdit');
+        document.getElementById('offcanvasEdit').addEventListener('shown.bs.offcanvas', event => {
+            $(".edit-attr-btn").prop("disabled", true)
+        })
+        document.getElementById('offcanvasEdit').addEventListener('hidden.bs.offcanvas', event => {
+            $(".edit-attr-btn").prop("disabled", false)
+        })
 
         $("#offcanvasLayerControlBtn").on("click", () => mainLayerOffcanvas.show());
         $("#offcanvasEditBtn").on("click", () => offcanvasEdit.show());
@@ -524,5 +530,18 @@ module.exports = {
             }
         }
         map.on('moveend layeradd', moveEndEvent)
+    },
+    showOffcanvasLayers: () => {
+       mainLayerOffcanvas.show()
+    },
+    hideOffcanvasLayers: () => {
+        mainLayerOffcanvas.hide()
+    },
+    showOffcanvasEdit: () => {
+        offcanvasEdit.show();
+    },
+    hideOffcanvasEdit: () => {
+        offcanvasEdit.hide();
     }
-};
+
+}

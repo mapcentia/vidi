@@ -106,6 +106,8 @@ let _self = false;
 
 let vectorLayers;
 
+let bindEvent;
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -126,6 +128,7 @@ module.exports = {
         layerTree = o.layerTree;
         switchLayer = o.switchLayer;
         backboneEvents = o.backboneEvents;
+        bindEvent = o.bindEvent;
 
         _self = this;
         try {
@@ -994,8 +997,8 @@ module.exports = {
      * @returns {void}
      */
     openAttributesDialog: () => {
-        $("#offcanvasEditBtn").trigger("click")
-
+        $("#offcanvasEditBtn").trigger("click");
+        $(".nav-edit-btn").removeClass("d-none")
     },
 
     /**
@@ -1065,6 +1068,8 @@ module.exports = {
     stopEdit: function () {
         backboneEvents.get().trigger('unblock:infoClick');
         cloud.get().map.editTools.stopDrawing();
+        $(".nav-edit-btn").addClass("d-none");
+        bindEvent.hideOffcanvasEdit()
 
         if (editor) {
             cloud.get().map.removeLayer(editor);
