@@ -227,26 +227,30 @@ var getExistingDocs = function (key, fileIdent = false) {
     }
     $('#documentList-feature-content').append('</tbody></table>')    
     
-    // TODO fix zoom-to
-    zoomToFeature(key)
     // reload cosmetic layer (if layer ident is found and specified)
-    if (fileIdent) {
+    if (fileIdent && caseFound) {
+        var Promises = [];
         layersToReload.forEach(element => {
+
             // Get information from config.json
             var conf = config.extensionConfig.documentCreate.tables.find(x => x.docunotecaseutilitytype == element)
     
             // set the cosmetic backgroundlayer visible (if specified)
             if (conf.cosmeticbackgroundlayer) {
-                console.log(conf)
-                if (!(layerTree.getActiveLayers().includes(conf.cosmeticbackgroundlayer))) {
-                    console.log('reload wms')
-                    layerTree.reloadLayer(conf.cosmeticbackgroundlayer);
-                }
+                Promises.push(layerTree.reloadLayer(conf.cosmeticbackgroundlayer))
             }
+
+            // load the layer
+            Promises.push(layerTree.reloadLayer(conf.table))
+        });
+
+        // resoleve all promises
+        Promise.all(Promises).then(function(values) {
+            //console.log(values);
         });
     }
 
-    if (fileIdent) {
+    if (fileIdent && caseFound) {
         // we are in a editing session
         SetGUI_ControlState(GUI_CONTROL_STATE.FEATURE_INFO_VISIBLE + GUI_CONTROL_STATE.EDIT_CONTROLS_VISIBLE);
         //snack(__('Viser henvendelser på sagsnr. ') + ' ' + caseNumber)
@@ -254,23 +258,34 @@ var getExistingDocs = function (key, fileIdent = false) {
         // we are in a create session
         SetGUI_ControlState(GUI_CONTROL_STATE.FEATURE_INFO_VISIBLE);
     }
+
+    // fix zoom-to
+    if (fileIdent && caseFound) {
+        zoomToFeature(key)
+    }
+
 };
 
 var zoomToFeature = function (fileIdent) {
     // TODO fix zoom-to
-    var bounds = []
     var bounds = documentCreateGetFilterBounds(fileIdent, true)
     
     //There is stuff, go there
-    if (bounds.length !== 0) {
+    if (!bounds) {
+        return null;
+    } else {
         var myBounds = new L.LatLngBounds(bounds)
-        console.log('Zooming to!:', myBounds)
+        //console.log('Zooming to!:', myBounds)
         cloud.get().map.fitBounds(myBounds, {maxZoom: config.extensionConfig.documentCreate.maxZoom});
     }    
 };
 
 
-var documentCreateGetFilterBounds = function (key, isfileIdent = false) {map
+var documentCreateGetFilterBounds = function (key, isfileIdent = false) {
+
+    if (DClayers.length == 0) {
+        return null
+    }
 
     //build query
     var qrystr = 'WITH CTE (geom) AS ('
@@ -476,35 +491,40 @@ var documentCreateBuildFilter = function (key = undefined, isfileIdent = false) 
 var documentCreateApplyFilter = function (filter) {
     // ensure all filters, layers, and states are active,
     // before attempting to apply filters
+
+    console.log(DClayers.length, _USERSTR.length, firstRunner)
+    console.log(filter)
     if (DClayers.length > 0 &&
         _USERSTR.length > 0 &&
         firstRunner === false) {
+
 
         for (let layerKey in filter){
             console.log('documentCreate - Apply filter to '+layerKey)
 
             //Make sure layer is on
             //TODO tænd laget hvis det ikke allerede er tændt! - skal være tændt før man kan ApplyFilter
-            layerTree.reloadLayer(layerKey)            
-                
-            //Toggle the filter
-            if (filter[layerKey].columns.length == 0) {
-                // insert fixed dummy filter
-                // in order to filter out all features from layer
-                var blankfeed = {expression: "=",
-                                fieldname: "adresse",
-                                restriction: false,
-                                value: "---"};
-                filter[layerKey].columns.push(blankfeed);
+            layerTree.reloadLayer(layerKey).then(result => {
+                console.log('documentCreate - layer reloaded')
+                //Toggle the filter
+                if (filter[layerKey].columns.length == 0) {
+                    // insert fixed dummy filter
+                    // in order to filter out all features from layer
+                    var blankfeed = {expression: "=",
+                                    fieldname: "adresse",
+                                    restriction: false,
+                                    value: "---"};
+                    filter[layerKey].columns.push(blankfeed);
 
-                layerTree.onApplyArbitraryFiltersHandler({ layerKey,filters: filter[layerKey]}, 't');
-            } else {
-                layerTree.onApplyArbitraryFiltersHandler({ layerKey,filters: filter[layerKey]}, 't');
-            }
+                    layerTree.onApplyArbitraryFiltersHandler({ layerKey,filters: filter[layerKey]}, 't');
+                } else {
+                    layerTree.onApplyArbitraryFiltersHandler({ layerKey,filters: filter[layerKey]}, 't');
+                }
+            });           
             //Reload
-            layerTree.reloadLayerOnFiltersChange(layerKey)
-
-            continue;
+            layerTree.reloadLayer(layerKey).then(result => {
+                console.log('documentCreate - layer reloaded')
+            });
         }
     }
 };
@@ -771,7 +791,8 @@ var buildFeatureMeta = function (layer, previousLayer = undefined) {
             
             //What? 
             if (confLayer && confLayer.cosmeticbackgroundlayer) {
-                switchLayer.init(confLayer.cosmeticbackgroundlayer, false, false, false);
+                //switchLayer.init(confLayer.cosmeticbackgroundlayer, false, false, false);
+                layerTree.reloadLayer(confLayer.cosmeticbackgroundlayer);
             }
         }
 
@@ -790,12 +811,7 @@ var buildFeatureMeta = function (layer, previousLayer = undefined) {
 
         // set the backgroundlayer visible
         if (conf.cosmeticbackgroundlayer) {
-            //layerTree.reloadLayer(conf.cosmeticbackgroundlayer);
-            if (!(layerTree.getActiveLayers().includes(conf.cosmeticbackgroundlayer))) {
-                //console.log('reload wms')
-                layerTree.reloadLayer(conf.cosmeticbackgroundlayer);
-             }
-
+            layerTree.reloadLayer(conf.cosmeticbackgroundlayer);
         }
         
         for (col in fields) {
@@ -1336,8 +1352,8 @@ module.exports = {
                 });
                 
                 backboneEvents.get().on("allDoneLoading:layers", function () {
-                    console.log("inside allDoneLoading:layers, DClayers.length: " + DClayers.length + " me.state.active: " + me.state.active + " firstRunner: " + firstRunner);
-//                    backboneEvents.get().trigger("refresh:meta");
+                    //console.log("inside allDoneLoading:layers, DClayers.length: " + DClayers.length + " me.state.active: " + me.state.active + " firstRunner: " + firstRunner);
+                    //backboneEvents.get().trigger("refresh:meta");
                     
                     loadAndInitFilters(me.state.active);
                 });
