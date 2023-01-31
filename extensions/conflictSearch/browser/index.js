@@ -144,7 +144,8 @@ var debounce = require('lodash/debounce');
 var _result = {};
 
 import {
-    buffer as turfBuffer
+    buffer as turfBuffer,
+    union as turfUnion,
 } from '@turf/turf'
 const wicket = require('wicket');
 
@@ -608,9 +609,9 @@ module.exports = module.exports = {
             } else {
                 setCrss(layer);
                 let collection = {
-                    "type": "GeometryCollection",
-                    "geometries": [],
-                    "properties": layer._layers[Object.keys(layer._layers)[0]].feature.properties
+                    "type": "FeatureCollection",
+                    "features": [],
+                    //"properties": layer._layers[Object.keys(layer._layers)[0]].feature.properties
                 }
                 layer.eachLayer((l) => {
                     // We use a buffer to recreate a circle from the GeoJSON point
@@ -618,13 +619,14 @@ module.exports = module.exports = {
                         let buffer = l._mRadius;
                         let primitive = l.toGeoJSON(GEOJSON_PRECISION);
                         primitive.type = "Feature"; // Must be there
-                        collection.geometries.push(turfBuffer(primitive, buffer, {units: 'meters'}))
+                        collection.features.push(turfBuffer(primitive, buffer, {units: 'meters'}))
                     } else {
-                        collection.geometries.push(l.toGeoJSON(GEOJSON_PRECISION).geometry)
+                        collection.features.push(l.toGeoJSON(GEOJSON_PRECISION).geometry)
                     }
                 })
-                let newLayer = L.geoJSON(collection);
+                let newLayer = L.geoJSON(collection)
                 layer = newLayer;
+            
             }
         } else if (id) {
             layer = drawnItems._layers[id];
@@ -643,12 +645,23 @@ module.exports = module.exports = {
             }
         }
         primitive = layer.toGeoJSON(GEOJSON_PRECISION);
-        if (typeof primitive.features !== "undefined") {
-            primitive = primitive.features[0];
+
+        // Ensure primitive is a feature, when id is set
+        if (id) {
+            primitive.type = "Feature";
         }
+
         if (primitive) {
             setCrss(layer);
-            const geom = turfBuffer(primitive, buffer, {units: 'meters'});
+            var geom = turfBuffer(primitive, buffer, {units: 'meters'});
+            
+            // When handeling a featurecollection, we need to merge buffers into a single multipolygon
+            if (typeof geom.features !== "undefined") {
+                let polygons = geom.features
+                let union = polygons.reduce((a, b) => turfUnion(a, b), polygons[0]); // turf v7 will support union on featurecollection, v6 does not.
+                geom = union;
+            }
+
             var l = L.geoJson(geom, {
                 "color": "#ff7800",
                 "weight": 1,
