@@ -112,7 +112,7 @@ module.exports = {
         state.listen(MODULE_ID, `state_change`);
         backboneEvents.get().on("end:print", function (response) {
             console.log("Response", response)
-            $("#get-print-fieldset").prop("disabled", false);
+            $("#open-pdf, #open-pdf-toggle").show();
             if (response.format === "pdf") {
                 $("#download-pdf, #open-pdf").attr("href", "/tmp/print/pdf/" + response.key + ".pdf");
             } else if (response.format === "png") {
@@ -122,25 +122,22 @@ module.exports = {
             }
             $("#download-pdf").attr("download", response.key);
             $("#open-html").attr("href", response.url);
-            $("#start-print-btn").button('reset');
+            $("#start-print-btn").find("span").hide();
             $(".dropdown-toggle.start-print-btn").prop("disabled", false);
             // GeoEnviron
             console.log("GEMessage:LaunchURL:" + urlparser.urlObj.protocol + "://" + urlparser.urlObj.host + "/tmp/print/pdf/" + response.key + ".pdf");
         });
         $("#start-print-btn").on("click", function () {
-            if (_self.print()) {
-                $(this).button('loading');
+            $("#open-pdf, #open-pdf-toggle").hide();
+            const format = $("#start-print-png-btn").val();
+            if (_self.print("end:print", null, format === "png")) {
+                $(this).find("span").show()
+
                 $(".dropdown-toggle.start-print-btn").prop("disabled", true);
                 $("#get-print-fieldset").prop("disabled", true);
             }
         });
-        $("#start-print-png-btn").on("click", function () {
-            if (_self.print("end:print", null, true)) {
-                $("#start-print-btn").button('loading');
-                $(".dropdown-toggle.start-print-btn").prop("disabled", true);
-                $("#get-print-fieldset").prop("disabled", true);
-            }
-        });
+
         $("#add-print-box-btn").on("click", function () {
             boxCount++;
             _self.control(null, null, null, null, null, null, null, null, null, null, null, false);
@@ -183,7 +180,7 @@ module.exports = {
         // Set up print dialog
         $("#ul-scale").empty();
         for (var i = 0; i < scales.length; i++) {
-            $("#ul-scale").append("<li><a data-scale-ul='" + scales[i] + "'>" + scales[i] + "</a></li>");
+            $("#ul-scale").append("<li><a class='dropdown-item' data-scale-ul='" + scales[i] + "'>" + scales[i] + "</a></li>");
         }
         $("#print-sticky").unbind("change");
         $("#print-sticky").change(function (e) {
@@ -203,11 +200,11 @@ module.exports = {
                 if (i.charAt(0) !== "_") {
                     numOfPrintTmpl = numOfPrintTmpl + 1;
                 }
-                $("#print-tmpl").append('<div class="radio radio-primary"><label><input type="radio" class="print print-tmpl" name="print-tmpl" id="' + i + '" value="' + i + '">' + i + '</label></div>');
+                $("#print-tmpl").append('<input type="radio" class="print print-tmpl btn-check" name="print-tmpl" id="' + i + '" value="' + i + '"><label class="btn btn-sm btn-outline-secondary" for="' + i + '">' + i + '</label>');
             }
         });
         if (numOfPrintTmpl > 1) {
-            $("#print-tmpl").parent("div").show();
+            $("#print-tmpl").show();
         }
         var me = this;
         var change = function () {
@@ -257,7 +254,7 @@ module.exports = {
             $("#print-orientation").empty();
 
             $.each(printC[e.target.value], function (i, v) {
-                $("#print-size").append('<div class="radio radio-primary"><label><input type="radio" class="print print-size" name="print-size" id="' + i + '" value="' + i + '">' + i + '</label></div>');
+                $("#print-size").append('<input type="radio" class="print print-size btn-check" name="print-size" id="' + i + '" value="' + i + '"><label class="btn btn-sm btn-outline-secondary" for="' + i + '">' + i + '</label>');
             });
             // Click the first options in size
             setTimeout(function () {
@@ -272,7 +269,7 @@ module.exports = {
                     $("input:radio[name=print-orientation]:first").trigger("click");
                 }, 5);
                 $.each(printC[$('input[name=print-tmpl]:checked', '#print-form').val()][e.target.value], function (i, v) {
-                    $("#print-orientation").append('<div class="radio radio-primary"><label><input type="radio" class="print print-orientation" name="print-orientation" id="' + i + '" value="' + i + '">' + (i === "l" ? "Landscape" : "Portrait") + '</label></div>');
+                    $("#print-orientation").append('<input type="radio" class="print print-orientation btn-check" name="print-orientation" id="' + i + '" value="' + i + '"><label for="' + i + '" class="btn btn-sm btn-outline-secondary">' + (i === "l" ? "Landscape" : "Portrait") + '</label>');
                 });
                 $(".print-orientation").unbind("change");
                 $(".print-orientation").change(function (e) {

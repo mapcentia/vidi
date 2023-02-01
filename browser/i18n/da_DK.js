@@ -102,6 +102,7 @@ module.exports = {
         "Help text print": "Lav skaleret PDF kort. Juster den orange firkant i kortet for at sætte udsnittets omfang og skala.",
         "Activate drawing tools": "Aktivér tegneværktøjer",
         "Activate print tools": "Aktivér printværktøjer",
+        "Make": "Lav",
         "Make PDF": "Lav PDF",
         "Make PNG": "Lav PNG",
         "Download": "Download",

@@ -102,6 +102,7 @@ module.exports = {
         "Help text print": "Make scaled PDF map. Tweak the orange square in the map to set view extent and scale.",
         "Activate drawing tools": "Activate drawing tools",
         "Activate print tools": "Activate print tools",
+        "Make": "Make",
         "Make PDF": "Make PDF",
         "Make PNG": "Make PNG",
         "Download": "Download",

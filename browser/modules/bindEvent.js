@@ -63,24 +63,28 @@ module.exports = {
     init: function () {
         apiBridgeInstance = APIBridgeSingletone();
 
-        mainLayerOffcanvas = new bootstrap.Offcanvas('#mainLayerOffcanvas');
-        offcanvasEdit = new bootstrap.Offcanvas('#offcanvasEdit');
-        document.getElementById('offcanvasEdit').addEventListener('shown.bs.offcanvas', event => {
-            $(".edit-attr-btn").prop("disabled", true)
-        })
-        document.getElementById('offcanvasEdit').addEventListener('hidden.bs.offcanvas', event => {
-            $(".edit-attr-btn").prop("disabled", false)
-        })
+        try {
+            mainLayerOffcanvas = new bootstrap.Offcanvas('#mainLayerOffcanvas');
+            offcanvasEdit = new bootstrap.Offcanvas('#offcanvasEdit');
+            document.getElementById('offcanvasEdit').addEventListener('shown.bs.offcanvas', event => {
+                $(".edit-attr-btn").prop("disabled", true)
+            })
+            document.getElementById('offcanvasEdit').addEventListener('hidden.bs.offcanvas', event => {
+                $(".edit-attr-btn").prop("disabled", false)
+            })
 
-        document.getElementById('mainLayerOffcanvas').addEventListener('shown.bs.offcanvas', event => {
-            $("#offcanvasLayerControlBtn").prop("disabled", true)
-        })
-        document.getElementById('mainLayerOffcanvas').addEventListener('hidden.bs.offcanvas', event => {
-            $("#offcanvasLayerControlBtn").prop("disabled", false)
-        })
+            document.getElementById('mainLayerOffcanvas').addEventListener('shown.bs.offcanvas', event => {
+                $("#offcanvasLayerControlBtn").prop("disabled", true)
+            })
+            document.getElementById('mainLayerOffcanvas').addEventListener('hidden.bs.offcanvas', event => {
+                $("#offcanvasLayerControlBtn").prop("disabled", false)
+            })
 
-        $("#offcanvasLayerControlBtn").on("click", () => mainLayerOffcanvas.show());
-        $("#offcanvasEditBtn").on("click", () => offcanvasEdit.show());
+            $("#offcanvasLayerControlBtn").on("click", () => mainLayerOffcanvas.show());
+            $("#offcanvasEditBtn").on("click", () => offcanvasEdit.show());
+        } catch (e) {
+            
+        }
 
         let doneL = false, doneB = false, loadingL = 0, loadingB = 0;
         const fadeWhenDraggingClass = $(".fade-then-dragging");
@@ -335,37 +339,6 @@ module.exports = {
             });
         });
 
-        // Set up the open/close functions for side panel
-        let searchPanelOpen, width, defaultCollapsedWidth = 260;
-
-        // backboneEvents.get().on('show:leftSlidePanel', () => {
-        //     let localCollapsedWidth = Math.max.apply(Math, $('#side-panel #main-tabs > li > a, #side-panel #main-tabs > li [role="tab"]').map(function () {
-        //         return $(this).width();
-        //     }).get());
-        //     if (localCollapsedWidth > 0) {
-        //         if (localCollapsedWidth < 170) localCollapsedWidth = 170;
-        //         localCollapsedWidth = localCollapsedWidth + 80;
-        //     } else {
-        //         localCollapsedWidth = defaultCollapsedWidth + 80;
-        //     }
-        //     $('#search-ribbon').css('right', '-' + (width - localCollapsedWidth) + 'px');
-        //     $('#pane').css('right', (localCollapsedWidth - BUTTON_WITH) + 'px');
-        //     $('#map').css('width', 'calc(100% - ' + (localCollapsedWidth / 2) + 'px)');
-        //     searchPanelOpen = true;
-        //     $('.slide-collapsed').hide();
-        //     $('.slide-expanded').show();
-        // });
-        // backboneEvents.get().on(`hide:leftSlidePanel`, () => {
-        //     $('#pane').css('right', '0');
-        //     $('#map').css('width', '100%');
-        //     $('#search-ribbon').css('right', '-' + (width - BUTTON_WITH) + 'px');
-        //     searchPanelOpen = false;
-        //     $('#side-panel ul li').removeClass('active');
-        //     $('.slide-collapsed').show();
-        //     $('.slide-expanded').hide();
-        // });
-
-
         $('#btn-show-legend-in-map').on("click", () => {
             $('#legend-toast-body').append($('#legend'));
             const b = $('#btn-show-legend-in-map');
@@ -383,44 +356,6 @@ module.exports = {
             t.show();
         })
 
-        // Bottom dialog
-        $('.close-hide').on('click touchstart', function () {
-            const id = ($(this)).parent().parent().attr('id');
-            // If print when deactivate
-            if ($(this).data('module') === 'print') {
-                backboneEvents.get().trigger(`off:print`);
-            }
-            // If legend when deactivate
-            if ($(this).data('module') === 'legend') {
-            }
-            $('#' + id).animate({
-                bottom: '-100%'
-            }, 500, function () {
-                $(id + ' .expand-less').show();
-                $(id + ' .expand-more').hide();
-            });
-        });
-
-        $('.expand-less').on('click touchstart', function () {
-            const id = '#' + ($(this)).parent().parent().attr('id');
-            $(id).animate({
-                bottom: (($(id).height() * -1) + 10) + 'px'
-            }, 500, function () {
-                $(id + ' .expand-less').hide();
-                $(id + ' .expand-more').show();
-            });
-        });
-
-        $('.expand-more').on('click touchstart', function () {
-            const id = ($(this)).parent().parent().attr('id');
-            $('#' + id).animate({
-                bottom: '0'
-            }, 500, function () {
-                $('#' + id + ' .expand-less').show();
-                $('#' + id + ' .expand-more').hide();
-            });
-        });
-
         $('.map-tool-btn').on('click', function (e) {
             e.preventDefault();
             const id = ($(this)).attr('href');
@@ -431,15 +366,6 @@ module.exports = {
             if ($(this).data('module') === 'print') {
                 backboneEvents.get().trigger(`on:print`);
             }
-            // If legend when deactivate
-            if ($(this).data('module') === 'legend') {
-            }
-            $(id).animate({
-                bottom: '0'
-            }, 500, function () {
-                $(id + ' .expand-less').show();
-                $(id + ' .expand-more').hide();
-            })
         });
 
         // Hiding all panels with visible modules
@@ -450,12 +376,8 @@ module.exports = {
             }
         });
 
-        $('.slide-right > .modal-header > button[class="close"]').click(() => {
-            backboneEvents.get().trigger('off:all');
-        });
-
         // Module icons
-        $('#mainLayerOffcanvas ul li a').on('click', function () {
+        $('#main-tabs a').on('click', function () {
             backboneEvents.get().trigger('off:all');
             let moduleTitle = $(this).data('module-title');
             let e = $('#mainLayerOffcanvas');
@@ -484,15 +406,8 @@ module.exports = {
             // id.addClass('active');
         });
 
-        $('#click-for-info-slide.slide-left .close').on('click', function () {
-            $('#click-for-info-slide.slide-left').animate({
-                left: '-100%'
-            }, 500)
-            sqlQuery.resetAll();
-        });
-
         // Listen for extensions
-        $(document).arrive('#mainLayerOffcanvas ul li a', function () {
+        $(document).arrive('#main-tabs a', function () {
             $(this).on('click', function () {
                 backboneEvents.get().trigger('off:all');
                 const moduleId = $(this).data('module-id');
@@ -516,6 +431,7 @@ module.exports = {
                 id.addClass('active');
             });
         })
+
         // Listen for fullscreen changes
         document.addEventListener('fullscreenchange', function () {
             if (document.fullscreenElement) {
