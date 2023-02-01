@@ -202,30 +202,32 @@ module.exports = {
                     <div className="login">
                         <form onSubmit={this.handleSubmit}>
                             <div style={{display: this.state.auth ? 'none' : 'inline'}}>
-                                <div className="form-group">
-                                    <label htmlFor="session-email">User name</label>
+                                <div className="form-floating mb-3">
                                     <input
                                         id="sessionScreenName"
                                         className="form-control"
                                         defaultValue={this.state.sessionScreenName}
                                         onChange={this.handleChange}
+                                        placeholder="User name"
                                     />
+                                    <label htmlFor="sessionScreenName">User name</label>
                                 </div>
-                                <div className="form-group">
-                                    <label htmlFor="session-password">Password</label>
+                                <div className="form-floating mb-3">
                                     <input
                                         id="sessionPassword"
                                         className="form-control"
                                         defaultValue={this.state.sessionPassword}
                                         onChange={this.handleChange}
                                         type="password"
+                                        placeholder="Password"
                                     />
+                                    <label htmlFor="sessionPassword">Password</label>
                                 </div>
                             </div>
                             <button
                                 type="submit"
                                 disabled={!this.validateForm()}
-                                className="btn btn-raised"
+                                className="btn btn-outline-primary"
                                 style={this.sessionLoginBtn}
                             >
                                 {this.state.btnText}

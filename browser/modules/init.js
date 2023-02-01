@@ -279,8 +279,8 @@ module.exports = {
                                 </div>
                                 <div class="modal-body"></div>
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-default js-close-modal" data-dismiss="modal">${__(`Close`)}</button>
-                                    <button type="button" class="btn btn-default js-close-modal-do-not-show" data-dismiss="modal">${__(`Close and do not show in the future`)}</button>
+                                    <button type="button" class="btn btn-secondary js-close-modal" data-bs-dismiss="modal">${__(`Close`)}</button>
+                                    <button type="button" class="btn btn-outline-secondary js-close-modal-do-not-show" data-bs-dismiss="modal">${__(`Close and do not show in the future`)}</button>
                                 </div>
                             </div>
                         </div>

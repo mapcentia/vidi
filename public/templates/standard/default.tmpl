@@ -33,12 +33,7 @@
 <div class="modal fade" id="login-modal" tabindex="-1" role="dialog" aria-labelledby="click-modalLabel">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
-            <div class="modal-header">
-                <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" id="login-modal-body">
-            </div>
+            <div class="modal-body" id="login-modal-body"></div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{Close}}</button>
             </div>
@@ -47,21 +42,21 @@
 </div>
 
 
-<div id="legend-dialog" class="dialog-bottom fade-then-dragging">
-    <div class="modal-header">
-        <button type="button" class="close close-hide" data-module="legend" aria-hidden="true"><i
-                class="material-icons">close</i>
-        </button>
-        <button type="button" class="close expand-more" aria-hidden="true"><i
-                class="material-icons">expand_less</i>
-        </button>
-        <button type="button" class="close expand-less" aria-hidden="true"><i
-                class="material-icons">expand_more</i>
-        </button>
-        <h3 class="modal-title">{{Legend}}</h3>
-    </div>
-    <div class="modal-body"></div>
-</div>
+<!--<div id="legend-dialog" class="dialog-bottom fade-then-dragging">-->
+<!--    <div class="modal-header">-->
+<!--        <button type="button" class="close close-hide" data-module="legend" aria-hidden="true"><i-->
+<!--                class="material-icons">close</i>-->
+<!--        </button>-->
+<!--        <button type="button" class="close expand-more" aria-hidden="true"><i-->
+<!--                class="material-icons">expand_less</i>-->
+<!--        </button>-->
+<!--        <button type="button" class="close expand-less" aria-hidden="true"><i-->
+<!--                class="material-icons">expand_more</i>-->
+<!--        </button>-->
+<!--        <h3 class="modal-title">{{Legend}}</h3>-->
+<!--    </div>-->
+<!--    <div class="modal-body"></div>-->
+<!--</div>-->
 
 
 <div id="vector-layer-table-view-dialog" class="dialog-bottom fade-then-dragging dialog-bottom-wide">
@@ -93,28 +88,28 @@
 
 <nav class="navbar navbar-expand-sm bg-light">
     <div class="container-fluid">
-        <a class="navbar-brand" href="#">{{brandName}}</a>
-
+        <a class="navbar-brand">
+            <span class="d-none d-md-inline">{{brandName}}</span>
+        </a>
         <div class="navbar-nav flex-row gap-1">
             <button id="offcanvasLayerControlBtn"
-                    class="btn btn-light" type="button"
+                    class="btn btn-primary" type="button"
             >
-                Lag
+                <span class="d-none d-md-inline">Menu</span> <i class="bi bi-arrow-bar-right"></i>
             </button>
             <button id="offcanvasEditBtn"
                     class="btn btn-secondary nav-edit-btn edit-attr-btn d-none" disabled type="button"
             >
-                <i class="bi bi-geo-alt"></i> <span class="d-none d-md-inline">Attributter</span>
+                <span class="d-none d-md-inline">Form</span> <i class="bi bi-arrow-bar-right"></i>
             </button>
             <button id="editStopBtn"
                     class="btn btn-danger nav-edit-btn d-none" type="button"
             >
-
-                <i class="bi bi-geo-alt"></i> <span class="d-none d-md-inline">Stop edit</span>
+                <i class="bi bi-slash-circle"></i> <span class="d-none d-md-inline">Stop edit</span>
             </button>
 
         </div>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+        <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
                 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -148,7 +143,7 @@
             <!--            </form>-->
             <div class="navbar-nav me-2">
                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#login-modal">
-                    Login
+                    <i class="bi bi-person"></i> {{Sign in}}
                 </button>
             </div>
         </div>
@@ -166,7 +161,7 @@
 
     <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="mainLayerOffcanvas">
         <div class="offcanvas-header mt-5">
-            <h5 class="offcanvas-title js-module-title" id="mainLayerOffcanvasLabel">Lag</h5>
+            <h5 class="offcanvas-title js-module-title" id="mainLayerOffcanvasLabel"></h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body" style="scrollbar-gutter: stable">

@@ -54,22 +54,10 @@
     <div class="loadingIndicator__bar"></div>
 </div>
 <div id="loadscreen">
-    <div class="center text">
+    <div class="position-absolute bottom-50 start-50 p-2 translate-middle">
         <div id="loadscreentext"></div>
     </div>
-    <div class="center bounce">
-        <div class="bouncywrap">
-            <div class="dotcon dc1">
-                <div class="dot"></div>
-            </div>
-            <div class="dotcon dc2">
-                <div class="dot"></div>
-            </div>
-            <div class="dotcon dc3">
-                <div class="dot"></div>
-            </div>
-        </div>
-    </div>
+    <div class="position-absolute top-50 start-50 translate-middle spinner-grow" role="status"></div>
 </div>
 <div id="main-container"></div>
 <script src="/js/lib/hogan.js/hogan-3.0.2.js"></script>

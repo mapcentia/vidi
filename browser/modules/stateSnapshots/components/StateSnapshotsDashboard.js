@@ -535,7 +535,7 @@ class StateSnapshotsDashboard extends React.Component {
 
         let browserOwnerSnapshots = false;
         if (!this.state.loading) {
-            browserOwnerSnapshots = (<div>
+            browserOwnerSnapshots = (<div className="mb-3">
                 {titles.noLocalItems}
             </div>);
         }

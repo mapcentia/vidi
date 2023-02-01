@@ -40,6 +40,7 @@ module.exports = {
         "Waiting to start": "Venter på at starte",
         "Error or timeout on": "Fejl eller timeout på",
         "Couldn't get the data. Trying again...": "Kunne ikke hente data. Prøver igen...",
+        "Sign in": "Log ind",
 
         // Drawing
         "Cancel drawing": " Afbryd tegning",

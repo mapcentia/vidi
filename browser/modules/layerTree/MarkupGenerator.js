@@ -28,19 +28,21 @@ class MarkupGenerator {
 
     getGroupPanel(base64GroupName, name, addGroupCheckbox = false) {
         return (`<div class="card panel-layertree" id="layer-panel-${base64GroupName}" xmlns="http://www.w3.org/1999/html">
-                <div class="card-body d-flex align-items-center">
-                    <span style="display: ${addGroupCheckbox ? "flex" : "none"}" class="form-check align-items-center" id="group-check-box-${base64GroupName}">
-                        <input class="form-check-input" type="checkbox" data-gc2-group-name="${name}">
-                    </span>
-                    <div class="position-relative flex-fill">
-                        <a class="link-dark stretched-link accordion-toggle js-toggle-layer-panel collapsed" data-bs-toggle="collapse" data-parent="#layers" href="#collapse${base64GroupName}">${name}</a>
+                <div class="card-body p-0">
+                    <div class="d-flex align-items-center p-3">
+                        <span style="display: ${addGroupCheckbox ? "flex" : "none"}" class="form-check align-items-center" id="group-check-box-${base64GroupName}">
+                            <input class="form-check-input" type="checkbox" data-gc2-group-name="${name}">
+                        </span>
+                        <div class="position-relative flex-fill">
+                            <a class="text-uppercase link-dark stretched-link accordion-toggle js-toggle-layer-panel collapsed" data-bs-toggle="collapse" data-parent="#layers" href="#collapse${base64GroupName}">${name}</a>
+                        </div>
+                        <div class="layer-count badge bg-secondary">
+                            <span>0</span> / <span></span>
+                        </div>
+                        <i class="bi-grip-vertical layer-move-vert"></i>
                     </div>
-                    <div class="layer-count badge bg-secondary">
-                        <span>0</span> / <span></span>
-                    </div>
-                    <i class="bi-grip-vertical layer-move-vert"></i>
+                    <ul class="list-group clearfix" id="group-${base64GroupName}" role="tabpanel"></ul>
                 </div>
-            <ul class="list-group" id="group-${base64GroupName}" role="tabpanel"></ul>
         </div>`);
     }
 

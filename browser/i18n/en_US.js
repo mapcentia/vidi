@@ -40,6 +40,7 @@ module.exports = {
         "Waiting to start": "Waiting to start",
         "Error or timeout on": "Error or timeout on",
         "Couldn't get the data. Trying again...": "Couldn't get the data. Trying again...",
+        "Sign in": "Sign in",
 
         // Drawing
         "Cancel drawing": "Cancel drawing",

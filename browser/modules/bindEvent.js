@@ -72,6 +72,13 @@ module.exports = {
             $(".edit-attr-btn").prop("disabled", false)
         })
 
+        document.getElementById('mainLayerOffcanvas').addEventListener('shown.bs.offcanvas', event => {
+            $("#offcanvasLayerControlBtn").prop("disabled", true)
+        })
+        document.getElementById('mainLayerOffcanvas').addEventListener('hidden.bs.offcanvas', event => {
+            $("#offcanvasLayerControlBtn").prop("disabled", false)
+        })
+
         $("#offcanvasLayerControlBtn").on("click", () => mainLayerOffcanvas.show());
         $("#offcanvasEditBtn").on("click", () => offcanvasEdit.show());
 
