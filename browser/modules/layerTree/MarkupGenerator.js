@@ -28,14 +28,14 @@ class MarkupGenerator {
 
     getGroupPanel(base64GroupName, name, addGroupCheckbox = false) {
         return (`<div class="card panel-layertree" id="layer-panel-${base64GroupName}" xmlns="http://www.w3.org/1999/html">
-                <div class="card-body" style="display: flex; align-items: center">
-                    <span style="display: ${addGroupCheckbox ? "inline" : "none"}" class="togglebutton" id="group-check-box-${base64GroupName}">
-                        <label>
-                            <input type="checkbox" data-gc2-group-name="${name}">
-                        </label>
+                <div class="card-body d-flex align-items-center">
+                    <span style="display: ${addGroupCheckbox ? "flex" : "none"}" class="form-check align-items-center" id="group-check-box-${base64GroupName}">
+                        <input class="form-check-input" type="checkbox" data-gc2-group-name="${name}">
                     </span>
-                    <a style="display: inline" class="accordion-toggle js-toggle-layer-panel collapsed" data-bs-toggle="collapse" data-parent="#layers" href="#collapse${base64GroupName}">${name}</a>
-                    <div class="layer-count badge bg-secondary" style="margin-left: auto">
+                    <div class="position-relative flex-fill">
+                        <a class="link-dark stretched-link accordion-toggle js-toggle-layer-panel collapsed" data-bs-toggle="collapse" data-parent="#layers" href="#collapse${base64GroupName}">${name}</a>
+                    </div>
+                    <div class="layer-count badge bg-secondary">
                         <span>0</span> / <span></span>
                     </div>
                     <i class="bi-grip-vertical layer-move-vert"></i>
@@ -45,23 +45,23 @@ class MarkupGenerator {
     }
 
     getToggleOfflineModeSelectorEnabled() {
-        return (`<div class="panel panel-default">
-            <div class="panel-body">
+        return (`
+            <div class="d-flex mb-3 gap-2">
                 ${__('Network status')}
-                <span class="badge js-app-is-pending-badge" style="background-color: #C0C0C0;">
-                    <i class="fa fa-ellipsis-h"></i> ${__('Pending')}
+                <span class="badge text-bg-secondary js-app-is-pending-badge">
+                    <i class="bi bi-three-dots"></i> ${__('Pending')}
                 </span>
-                <span class="badge js-app-is-online-badge hidden" style="background-color: #28a745;">
-                    <i class="fa fa-signal"></i> Online
+                <span class="badge text-bg-success js-app-is-online-badge hidden">
+                    <i class="bi bi-signal"></i> Online
                 </span>
-                <span class="badge js-app-is-offline-badge hidden" style="background-color: #dc3545;">
-                    <i class="fa fa-times"></i> Offline
+                <span class="badge text-bg-danger js-app-is-offline-badge hidden">
+                    Offline
                 </span>
                 <span class="js-set-all-layer-offline-mode-container">
                     ${__('Set all layers to be')}: <a href="javascript:void(0);" class="js-set-all-layer-to-be-online">${__('Online')}</a> | <a href="javascript:void(0);" class="js-set-all-layer-to-be-offline">${__('Offline')}</a>
                 </span>
             </div>
-        </div>`);
+        `);
     }
 
     getToggleOfflineModeSelectorDisabled() {
@@ -75,7 +75,7 @@ class MarkupGenerator {
         return (`<li
         class="layer-item list-group-item list-subgroup-item d-flex flex-column"
         data-gc2-subgroup-id="${name}">
-            <div class="d-flex align-items-center">
+            <div class="d-flex align-items-center gap-1">
                 <span style="display: ${addGroupCheckbox ? "inline" : "none"};" class="togglebutton">
                     <label>
                         <input type="checkbox" data-gc2-subgroup-name="${name}" data-gc2-subgroup-level="${level}">
@@ -98,12 +98,12 @@ class MarkupGenerator {
 
         return (`
         <li class="layer-item list-group-item" data-gc2-layer-key="${layerKeyWithGeom}">
-            <div style="display: flex; align-items: center">
-                <div style="display: flex; width: 100%; align-items: center; flex-wrap: wrap">
+            <div class="d-flex align-items-center">
+                <div class="d-flex w-100 align-items-center flex-wrap gap-1">
                     <!-- switch and title-->
-                    <div class="d-flex align-items-center flex-grow-1">
-                                                                       <div class="form-check form-switch" style="display: flex; align-items: center">
-                                                                       <label style="margin: 0" class="form-check-label">
+                    <div class="d-flex align-items-center flex-grow-1 gap-1">
+                                                                       <div class="form-check form-switch d-flex align-items-center">
+                                                                       <label>
                                                                        <input type="checkbox"
                                                                        ${(layerIsActive ? `checked="checked"` : ``)}
                                                                        ${(disableCheckBox ? `disabled` : ``)}
@@ -111,16 +111,17 @@ class MarkupGenerator {
                                                                        id="${layer.f_table_name}"
                                                                        data-gc2-id="${layer.f_table_schema}.${layer.f_table_name}"
                                                                        data-gc2-layer-type="${layerType}">
+                                                                       ${text}
                                                                        </label>
                                                                        </div>
                                                                        
-                                                                       <div style="display: inline-block;" id="layer-information">
-                                                                       <div style="display: flex; align-items: center; column-gap: 5px;">
-                                                                       ${text}${lockedLayer}
+                                                                       <div id="layer-information">
+                                                                       <div class="d-flex align-items-center gap-1">
+                                                                       ${lockedLayer}
                                                                        <span class="js-tiles-contain-data" style="visibility: ${moduleState.tileContentCache[layerKey] ? "inline" : "hidden"};" data-toggle="tooltip" data-placement="right"
-                                                                       title="${__("Layer is visible")}"><i class="fa fa-eye info-icon" style="color: green;"></i></span>
+                                                                       title="${__("Layer is visible")}"><i class="bi bi-eye info-icon text-success"></i></span>
                                                                        <span class="js-layer-is-disabled" style="visibility: ${disableCheckBox ? "inline" : "hidden"};" data-toggle="tooltip" data-placement="right"
-                                                                       title="${__("Locked")}"><i class="bi bi-lock" style="color: red"></i></span>
+                                                                       title="${__("Locked")}"><i class="bi bi-lock text-danger"></i></span>
                                                                        <span class="js-layer-has-parents info-icon" style="visibility: ${parentLayerKeys.length > 0 ? "inline" : "hidden"};" data-toggle="tooltip" data-placement="right"
                                                                        title="${__("Parents")}: ${parentLayerKeys.length > 0 ? parentLayerKeys.join(", ") : ""}"><i class="bi bi-arrow-up"></i></span>
                                                                        <span class="js-layer-has-children info-icon" style="visibility: ${childLayerKeys.length > 0 ? "inline" : "hidden"};" data-toggle="tooltip" data-placement="right"
@@ -136,10 +137,10 @@ class MarkupGenerator {
                                                                         <div>${layerTypeSelector}</div>
                                                                         ${addButton}
                                                                         <button data-toggle="tooltip" data-placement="left" title="${tooltip}" style="visibility: ${displayInfo};" class="btn btn-light btn-sm info-label" data-gc2-id="${layerKey}"><i class="bi bi-info-square"></i></a></button>
-                                                                        <button data-bs-animation="0" disabled class="btn btn-light btn-sm js-settings-panel-btn" role="button" data-bs-toggle="collapse" id="settings-${layer.f_table_schema}-${layer.f_table_name}-btn" data-bs-target="#settings-${layer.f_table_schema}-${layer.f_table_name}" aria-expanded="false" aria-controls="collapseExample"><i class="bi bi-three-dots-vertical"></i></button>
+                                                                        <button data-bs-animation="0" disabled class="btn btn-light btn-sm js-settings-panel-btn" role="button" data-bs-toggle="collapse" id="settings-${layer.f_table_schema}-${layer.f_table_name}-btn" data-bs-target="#settings-${layer.f_table_schema}-${layer.f_table_name}" aria-expanded="false" aria-controls="collapseExample"><i class="bi bi-three-dots"></i></button>
      
                 </div>
-                <i style="font-size: 26px; margin-left: auto" class="bi-grip-vertical layer-move-vert"></i>
+                <i class="bi-grip-vertical ms-auto layer-move-vert"></i>
             </div>  
             <!-- queue -->
             <div>

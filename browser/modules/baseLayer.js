@@ -109,10 +109,9 @@ module.exports = module.exports = {
         if (typeof window.vidiConfig.dontUseAdvancedBaseLayerSwitcher === "undefined" ||
             (typeof window.vidiConfig.dontUseAdvancedBaseLayerSwitcher === "boolean" && window.vidiConfig.dontUseAdvancedBaseLayerSwitcher === false)) {
             $("#base-layer-list").append(`
-                <div class="togglebutton">
-                    <label>
-                        <input class="js-two-layers-at-once-control" type="checkbox"> ${__(`Display two layers at once`)}
-                    </label>
+                <div class="d-grid mb-2">
+                    <input class="btn-check js-two-layers-at-once-control" id="js-two-layers-at-once-control" type="checkbox">
+                    <label class="btn btn-outline-primary btn-block mb-3" for="js-two-layers-at-once-control">${__(`Display two layers at once`)}</label>
                 </div>`);
         }
 
@@ -253,40 +252,33 @@ module.exports = module.exports = {
 
                 let sideBySideLayerControl = ``;
                 if (twoLayersAtOnceEnabled) {
-                    sideBySideLayerControl = `<div class='radio radio-primary base-layer-item' data-gc2-side-by-side-base-id='${layerId}' style='float: left;'>
-                        <label class='side-by-side-baselayers-label'>
-                            <input type='radio' name='side-by-side-baselayers' value='${layerId}' ${layerId === activeTwoLayersModeLayer ? `checked=""` : ``}>
-                        </label>
-
-
+                    sideBySideLayerControl = `<div class='base-layer-item' data-gc2-side-by-side-base-id='${layerId}' style='float: left;'>
+                            <input type='radio' class="form-check-input" name='side-by-side-baselayers' value='${layerId}' ${layerId === activeTwoLayersModeLayer ? `checked=""` : ``}>
                     </div>`;
                 }
 
                 let displayInfo = (bl.abstract ? `visible` : `hidden`);
                 let tooltip = (bl.abstract ? $(bl.abstract).text() : ``);
-                appendedCode += `<div class="list-group-item js-base-layer-control" style="display: flex; align-items: center;">
-                    <div style="flex-grow: 1;">
-                        <div class='radio radio-primary base-layer-item' data-gc2-base-id='${layerId}' style='float: left;'>
-                            <label class='baselayer-label'>
-                                <input type='radio' name='baselayers' value='${layerId}' ${layerId === activeBaseLayer ? `checked=""` : ``}> 
-                            </label>
+                appendedCode += `<li class="list-group-item js-base-layer-control d-flex align-items-center">
+                    <div class="d-flex align-items-center gap-2 me-auto">
+                        <div class='base-layer-item' data-gc2-base-id='${layerId}'>
+                            <input type='radio' class="form-check-input" name='baselayers' value='${layerId}' ${layerId === activeBaseLayer ? `checked=""` : ``}> 
                         </div>
                         ${sideBySideLayerControl}
                         <div>${layerName}</div>
                     </div>
                     <div>
-                        <a
-                            href="javascript:void(0);"
+                        <button
                             data-toggle="tooltip"
                             data-placement="left"
                             title="${tooltip}"
                             style="visibility: ${displayInfo};"
                             data-baselayer-name="${layerName}"
                             data-baselayer-info="${bl.abstract}"
-                            class="info-label">${__(`Info`)}</a>
+                            class="info-label btn btn-sm btn-light"><i class="bi bi-info-square"></i></button>
                     </div>
-                </div>
-                <div class='list-group-separator'></div>`;
+                </li>`;
+
             }
 
             const disableInputs = () => {
@@ -389,36 +381,13 @@ module.exports = module.exports = {
                     }
 
                     const twoLayersAtOnceModeControl = (`<div class="js-two-layers-at-once-mode-control-container">
-                        <div style="display: flex; padding-top: 10px;">
-                            <div>
-                                <h5>${__(`Display layers`)}:</h5>
-                            </div>
-                            <div style="padding-top: 8px;">
-                                <div class="radio radio-primary" style="float: left; width: 30px;">
-                                    <label class="baselayer-label">
-                                        <input type="radio" name="two-layers-at-once-mode" ${selectedSideBySide} value="${TWO_LAYERS_AT_ONCE_MODES[0]}" >
-                                        <span class="circle"></span>
-                                        <span class="check"></span> 
-                                    </label>
-                                </div>
-                                <div style="float: left;">${__(`Side-by-side`)}</div>
-                            </div>
-                            <div style="padding-top: 8px;">
-                                <div class="radio radio-primary" style="float: left; width: 30px;">
-                                    <label class="baselayer-label">
-                                        <input type="radio" name="two-layers-at-once-mode" ${selectedOverlay} value="${TWO_LAYERS_AT_ONCE_MODES[1]}">
-                                        <span class="circle"></span>
-                                        <span class="check"></span> 
-                                    </label>
-                                </div>
-                                <div style="float: left;">${__(`Overlap`)}</div>
-                            </div>
+                        <div class="btn-group mb-3 d-flex">
+                            <input type="radio" class="btn-check" name="two-layers-at-once-mode" id="two-layers-at-once-mode-1" ${selectedSideBySide} value="${TWO_LAYERS_AT_ONCE_MODES[0]}" >
+                            <label class="btn btn-sm btn-outline-secondary" for="two-layers-at-once-mode-1">${__(`Side-by-side`)}</label>
+                            <input type="radio" class="btn-check" name="two-layers-at-once-mode" id="two-layers-at-once-mode-2" ${selectedOverlay} value="${TWO_LAYERS_AT_ONCE_MODES[1]}">
+                            <label class="btn btn-sm btn-outline-secondary" for="two-layers-at-once-mode-2">${__(`Overlap`)}</label>
                         </div>
-                        <div>
-                            <div style="margin: 10px  0 20px 0">
-                                <div class="js-side-by-side-layer-opacity-slider"></div>
-                            </div>
-                        </div>
+                        <div class="js-side-by-side-layer-opacity-slider mb-3"></div>
                     </div>`);
 
                     const initiateSlider = (initialValue) => {

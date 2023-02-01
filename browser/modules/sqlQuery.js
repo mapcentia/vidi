@@ -62,17 +62,13 @@ require('snackbarjs');
 
 let editToolsHtml = `
         <div class="form-group gc2-edit-tools" data-edit-layer-id="{{_vidi_edit_layer_id}}" data-edit-layer-name="{{_vidi_edit_layer_name}}" data-edit-vector="{{_vidi_edit_vector}}" style="display: {{_vidi_edit_display}};">
-            <div class="btn-group btn-group-justified" style="margin: 10px 0;">
-                <div class="btn-group">
-                    <button class="btn btn-primary btn-xs popup-edit-btn">
-                        <i class="fa fa-pencil-alt" aria-hidden="true"></i>
-                    </button>
-                </div>
-                <div class="btn-group">
-                    <button class="btn btn-danger btn-xs popup-delete-btn">
-                        <i class="fa fa-trash" aria-hidden="true"></i>
-                    </button>
-                </div>
+            <div class="d-flex justify-content-around mb-2">
+                <button class="btn btn-outline-primary btn-sm popup-edit-btn">
+                    <i class="bi bi-pencil" aria-hidden="true"></i>
+                </button>
+                <button class="btn btn-outline-danger btn-sm popup-delete-btn">
+                    <i class="bi bi-trash" aria-hidden="true"></i>
+                </button>
             </div>
         </div>
 `;
@@ -321,7 +317,7 @@ module.exports = {
                         if (firstLoop) { // Only add html once
                             firstLoop = false;
                             let popUpInner = `<div id="modal-info-body">
-                                <ul class="nav nav-tabs" id="info-tab"></ul>
+                                <ul class="nav nav-tabs nav-fill" id="info-tab"></ul>
                                 <div class="tab-content" id="info-pane"></div>
                             </div>
                             <div id="alternative-info-container" class="alternative-info-container-right" style="display:none"></div>`;
@@ -360,17 +356,19 @@ module.exports = {
                         dataShowExport = dataShowColumns = dataShowToggle = dataDetailView = simple ? "false" : "true";
 
                         $(`#${elementPrefix}modal-info-body`).show();
-                        $(`#${elementPrefix}info-tab`).append(`<li><a onclick="setTimeout(()=>{$('#${elementPrefix}modal-info-body table').bootstrapTable('resetView'),100})" id="tab_${storeId}" data-toggle="tab" href="#_${storeId}">${layerTitel}</a></li>`);
+                        $(`#${elementPrefix}info-tab`).append(`<li class="nav-item">
+                                                                    <button type="button" class="nav-link" data-bs-toggle="tab" onclick="setTimeout(()=>{$('#${elementPrefix}modal-info-body table').bootstrapTable('resetView'),100})" id="tab_${storeId}" data-bs-target="#_${storeId}">${layerTitel}</button>
+                                                               </li>`);
                         $(`#${elementPrefix}info-pane`).append(`<div class="tab-pane _sql_query" id="_${storeId}">
-                            <div style="display: ${display}">
-                                <a class="btn btn-sm btn-raised" id="_download_geojson_${storeId}" target="_blank" href="javascript:void(0)">
-                                    <i class="fa fa-download" aria-hidden="true"></i> GeoJson
+                            <div style="display: ${display}" class="d-flex justify-content-around mt-3 mb-3">
+                                <a class="btn btn-sm btn-light" id="_download_geojson_${storeId}" target="_blank" href="javascript:void(0)">
+                                    <i class="bi bi-download" aria-hidden="true"></i> GeoJson
                                 </a> 
-                                <a class="btn btn-sm btn-raised" id="_download_excel_${storeId}" target="_blank" href="javascript:void(0)">
-                                    <i class="fa fa-download" aria-hidden="true"></i> Excel
+                                <a class="btn btn-sm btn-light" id="_download_excel_${storeId}" target="_blank" href="javascript:void(0)">
+                                    <i class="bi bi-download" aria-hidden="true"></i> Excel
                                 </a>
-                                <button class="btn btn-sm btn-raised" id="_create_layer_${storeId}" target="_blank" href="javascript:void(0)">
-                                    <i class="fa fa-plus" aria-hidden="true"></i> ${__(`Create virtual layer`)}
+                                <button class="btn btn-sm btn-light" id="_create_layer_${storeId}" target="_blank" href="javascript:void(0)">
+                                    <i class="bi bi-plus" aria-hidden="true"></i> ${__(`Create virtual layer`)}
                                 </button>
                             </div>
                             ${info}

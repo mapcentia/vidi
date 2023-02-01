@@ -9,31 +9,41 @@ $accordion-icon-active-color: #ffffff;
 $dropdown-link-active-color: #000;
 $dropdown-link-active-bg: white;
 
+
 // 5. Include remainder of required parts
 @import "../node_modules/bootstrap/scss/bootstrap";
 
 // 8. Add additional custom code here
 
 :root {
-  --bs-primary: red;
+}
 
+.modal {
+  --bs-modal-zindex: 999999
 }
 
 .offcanvas {
   --bs-offcanvas-width: 600px;
 }
+
+.offcanvas-body {
+  padding-top: 0;
+}
+
 .navbar {
   z-index: 99999;
 }
 
 
-
+.js-toggle-layer-panel {
+  text-decoration: none;
+}
 
 .accordion {
-  --bs-accordion-active-bg: rgb(0, 73, 152);
+  --bs-accordion-active-bg: var(--bs-primary);
   --bs-accordion-active-color: #ffffff;
-  --bs-accordion-border-radius: 0;
-  --bs-accordion-inner-border-radius: 0;
+  //--bs-accordion-border-radius: 0;
+  //--bs-accordion-inner-border-radius: 0;
   --bs-accordion-btn-focus-box-shadow: 0;
   --bs-accordion-btn-padding-x: 1rem;
   --bs-accordion-btn-padding-y: .7rem;
@@ -47,7 +57,11 @@ $dropdown-link-active-bg: white;
 }
 
 .form-check {
-  margin-bottom: 0;
-  padding-left: 0;
+  //margin-bottom: 0;
+  //padding-left: 0;
+}
+
+#main-tabs {
+  background-color: rgba(var(--bs-primary-rgb), 0.1) !important;
 }
 

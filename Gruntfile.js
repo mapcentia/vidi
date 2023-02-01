@@ -54,7 +54,6 @@ module.exports = function (grunt) {
                     'public/css/build/all.min.css': [
                         // Bootstrap icons
                         'node_modules/bootstrap-icons/font/bootstrap-icons.css',
-                        // Font Awesome
                         'node_modules/@fortawesome/fontawesome-free/css/all.css',
                         // Leaflet
                         'public/js/lib/leaflet/leaflet.css',
@@ -72,9 +71,6 @@ module.exports = function (grunt) {
                         'node_modules/bootstrap-select/dist/css/bootstrap-select.css',
                         'node_modules/bootstrap-table/dist/bootstrap-table.css',
                         'scss/custom.css',
-
-                        'public/js/lib/snackbarjs/snackbar.min.css',
-                        'public/js/lib/bootstrap-colorpicker/css/bootstrap-colorpicker.css',
                         //custom
                         'public/css/styles.min.css'
                     ]
@@ -265,7 +261,6 @@ module.exports = function (grunt) {
 
                         'public/js/lib/typeahead.js/typeahead.jquery.js',
                         'node_modules/bootstrap/dist/js/bootstrap.bundle.js',
-                        'public/js/lib/bootstrap-colorpicker/js/bootstrap-colorpicker.js',
 
                         'node_modules/leaflet.glify/dist/glify-browser.js',
                         'node_modules/bootstrap-table/dist/bootstrap-table.js',

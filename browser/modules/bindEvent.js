@@ -37,7 +37,6 @@ let mainLayerOffcanvas;
 let offcanvasEdit;
 
 
-
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -180,16 +179,13 @@ module.exports = {
                 }
             }
             if (!isStarted) {
-                if (mobile()) {
-                    $('ul[role="tablist"]:last-child').attr('style', 'padding-bottom: 100px');
-                }
                 isStarted = true;
-                if ($(document).width() > 1024 && !window.vidiConfig.activateMainTab) {
-                    $('#search-border').trigger('click');
+                if ($(document).width() > 1024) {
+                    $('#offcanvasLayerControlBtn').trigger('click');
                 }
-                if (window?.vidiConfig?.extensionConfig?.embed?.slideOutLayerTree === true) {
-                    $('#burger-btn').trigger('click');
-                }
+                // if (window?.vidiConfig?.extensionConfig?.embed?.slideOutLayerTree === true) {
+                //     $('#burger-btn').trigger('click');
+                // }
                 openFirtIfNotOpen();
 
             } else {
@@ -303,16 +299,24 @@ module.exports = {
 
         backboneEvents.get().on(`extensions:initialized`, () => {
             if (window.vidiConfig.activateMainTab) {
-                setTimeout(function () {
-                    const e = $('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]');
-                    if (e.length === 1) {
-                        e.trigger('click');
-                    } else {
-                        console.warn(`Unable to locate specified activateMainTab ${window.vidiConfig.activateMainTab}`)
-                    }
-                }, 200);
+                // Activate tabs
+                const triggerTabList = document.querySelectorAll('#main-tabs a')
+                triggerTabList.forEach(triggerEl => {
+                    const tabTrigger = new bootstrap.Tab(triggerEl)
+                    triggerEl.addEventListener('click', event => {
+                        event.preventDefault()
+                        tabTrigger.show()
+                    })
+                })
+                const e = document.querySelector('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]');
+                if (e) {
+                    bootstrap.Tab.getInstance(e).show();
+                    e.click();
+                } else {
+                    console.warn(`Unable to locate specified activateMainTab ${window.vidiConfig.activateMainTab}`)
+                }
             }
-        });
+        })
 
         $(document).arrive('[data-toggle="tooltip"]', function () {
             $(this).tooltip()
@@ -433,7 +437,7 @@ module.exports = {
         $('#mainLayerOffcanvas ul li a').on('click', function () {
             backboneEvents.get().trigger('off:all');
             let moduleTitle = $(this).data('module-title');
-            let e = $('#module-container');
+            let e = $('#mainLayerOffcanvas');
             e.find('.js-module-title').text('');
             if (moduleTitle) {
                 e.find('.js-module-title').text(moduleTitle);
@@ -454,9 +458,9 @@ module.exports = {
                 }
             }, 100);
 
-            let id = ($(this));
-            $('#side-panel ul li').removeClass('active');
-            id.addClass('active');
+            // let id = ($(this));
+            // $('#side-panel ul li').removeClass('active');
+            // id.addClass('active');
         });
 
         $('#click-for-info-slide.slide-left .close').on('click', function () {
@@ -532,7 +536,7 @@ module.exports = {
         map.on('moveend layeradd', moveEndEvent)
     },
     showOffcanvasLayers: () => {
-       mainLayerOffcanvas.show()
+        mainLayerOffcanvas.show()
     },
     hideOffcanvasLayers: () => {
         mainLayerOffcanvas.hide()

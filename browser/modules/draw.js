@@ -80,9 +80,6 @@ module.exports = {
 
         cloud.get().map.addLayer(drawnItems);
         store.layer = drawnItems;
-        $("#draw-colorpicker").colorpicker({
-            container: $("#draw-colorpicker")
-        });
         $("#draw-table").append("<table class='table'></table>");
         (function poll() {
             if (gc2table.isLoaded()) {
@@ -143,6 +140,10 @@ module.exports = {
     },
 
     makeConflictSearchWithAll: () => {
+        if (store.layer.getLayers().length === 0) {
+            alert(__("No drawings in the map"));
+            return;
+        }
         state.resetState(['conflict']).then(() => {
             $('#main-tabs a[href="#conflict-content"]').trigger('click');
             conflictSearch.makeSearch("Fra tegning", null, null, true);

@@ -196,7 +196,6 @@ module.exports = {
         });
         $("#layers").before(`
                                 <div class="input-group mb-3">
-                                    <span class="input-group-text" id="basic-addon1">@</span>
                                     <input placeholder="${__('Layer filter')}" class="form-control" type="text" id="layers-filter" autocomplete="off">
                                     <button id="layers-filter-reset" class="btn btn-outline-secondary" type="button" id="button-addon2">
                                         <i class="bi bi-x-lg"></i>
@@ -2808,7 +2807,7 @@ module.exports = {
         $(parentNode).append(markup);
         $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-id`).append(`
                 ${subgroup.id}
-                <i style="font-size: 26px; margin-left: auto" class="bi-grip-vertical layer-move-vert layer-move-vert-subgroup"></i>
+                <i class="bi-grip-vertical layer-move-vert layer-move-vert-subgroup ms-auto"></i>
         `);
 
         $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-toggle-button`).click((event) => {
