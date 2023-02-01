@@ -148,25 +148,21 @@ var config = require('../../../config/config.js');
 var resultLayer = new L.FeatureGroup()
 var DClayers = [];
 
-//var populateLayers = function() {
-//    DClayers = [];
-//    try {
-//        meta.getMetaData().data.forEach(function(d) {
-//        if (d.tags) {
-//            if (d.tags.includes(config.extensionConfig.documentCreate.metaTag)) {
-//                DClayers.push(d.f_table_schema+'.'+d.f_table_name);
-//            }
-//        }
-//        });
-//        
-//    } catch (error) {
-//        console.info('documentCreate - Kunne ikke finde lag med korrekt tag')   
-//    }
-//}
-/*
-TODO fix formular så den ikke nulstilles hver gang
-*/
-
+var populateLayers = function() {
+    DClayers = [];
+    try {
+        meta.getMetaData().data.forEach(function(d) {
+        if (d.tags) {
+            if (d.tags.includes(config.extensionConfig.documentCreate.metaTag)) {
+                DClayers.push(d.f_table_schema+'.'+d.f_table_name);
+            }
+        }
+        });
+        
+    } catch (error) {
+        console.info('documentCreate - Kunne ikke finde lag med korrekt tag')   
+    }
+}
 
 /**
  * VMR get from DB on adress
@@ -492,7 +488,11 @@ var documentCreateApplyFilter = function (filter) {
     // ensure all filters, layers, and states are active,
     // before attempting to apply filters
 
-    console.log(DClayers.length, _USERSTR.length, firstRunner)
+    if (DClayers.length == 0) {
+        return;
+    }
+
+    console.log('DClayers:', DClayers.length, 'User:', _USERSTR, 'firstRunner:', firstRunner)
     console.log(filter)
     if (DClayers.length > 0 &&
         _USERSTR.length > 0 &&
@@ -746,7 +746,7 @@ var documentCreateFeatureSend = function (tablename,feature) {
  * @private
  */
 var buildServiceSelect = function (id) {
-    if (DClayers.length == 0) {
+    if (DClayers.length > 0) {
         // clear select services
         $('#'+select_id).find('option').remove().end().append('<option value=""></option>').val('')
         
@@ -760,7 +760,7 @@ var buildServiceSelect = function (id) {
                     } else {
                         $('#'+select_id).append('<option value="'+d.f_table_schema+'.'+d.f_table_name+'">'+d.f_table_title+'</option>');
                     }
-                    DClayers.push(d.f_table_schema+'.'+d.f_table_name);
+                    //DClayers.push(d.f_table_schema+'.'+d.f_table_name); // we populate elsewhere
                 };
             }
 
@@ -768,6 +768,8 @@ var buildServiceSelect = function (id) {
 
         // Clean up that first select option.
         $('#'+select_id).find('option').get(0).remove()
+    } else {
+        throw new Error('No layers found with tag: '+config.extensionConfig.documentCreate.metaTag)
     }
     
 };
@@ -778,7 +780,7 @@ var buildServiceSelect = function (id) {
  * @private
  */
 var buildFeatureMeta = function (layer, previousLayer = undefined) {
-
+    console.log(layer, previousLayer)
     //merge information from metadata
     var m = {}
 
@@ -1041,16 +1043,21 @@ var SetGUI_ControlState = function (state_Enum) {
  * @private
  */
 var loadAndInitFilters = function (active_state) {
-    try {   
-        buildServiceSelect(select_id);     
-    } catch (error) {
-        console.info('documentCreate - Kunne ikke bygge ServiceSelect')
-        console.log(error.stack);
+    
+    // If we already ran
+    if (!firstRunner) {
         return;
     }
-    if (firstRunner && _USERSTR.length > 0) {
+
+    // if logged in
+    if (_USERSTR.length > 0) {
+        // populate layers
         firstRunner = false;
+        
         try {
+            populateLayers();
+            buildServiceSelect(select_id);
+
             // If key is set, go there and get stuff!
             if (filterKey) {
                 console.log('filterKey is set, filterKey: ' + filterKey)
@@ -1337,8 +1344,14 @@ module.exports = {
                     me.setState({
                         active: true
                     });
-                    if (_USERSTR.length == 0)
+                    if (_USERSTR.length == 0) {
                         SetGUI_ControlState(GUI_CONTROL_STATE.AUTHENTICATE_SHOW_ALERT);
+                    }
+                    if (window.status === 'all_loaded') { // Vidi trigger til print for total indlæsning af kort
+                        console.log('all_loaded is set, starting for real')
+                        // load with filters
+                        loadAndInitFilters(me.state.active);
+                    }
                 });
                 
                 // Deactivates module
@@ -1354,8 +1367,6 @@ module.exports = {
                 backboneEvents.get().on("allDoneLoading:layers", function () {
                     //console.log("inside allDoneLoading:layers, DClayers.length: " + DClayers.length + " me.state.active: " + me.state.active + " firstRunner: " + firstRunner);
                     //backboneEvents.get().trigger("refresh:meta");
-                    
-                    loadAndInitFilters(me.state.active);
                 });
 
                 console.log('documentCreate - Mounted')
@@ -1431,7 +1442,7 @@ module.exports = {
                                 // notify, no user is logged in
                                 SetGUI_ControlState(GUI_CONTROL_STATE.NO_CONTROLS_VISIBLE + GUI_CONTROL_STATE.AUTHENTICATE_SHOW_ALERT);
                                 editingAllowed = false;
-                               _USERSTR = "";
+                                _USERSTR = "";
                                 clearExistingDocFilters();
                                 $('#documentList-feature-content').html('');
                                 firstRunner = true;
