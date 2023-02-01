@@ -4,22 +4,21 @@
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
+
 const React = require('react');
 import TitleFieldComponent from './../../shared/TitleFieldComponent';
 import LoadingOverlay from './../../shared/LoadingOverlay';
 
-const { v4: uuidv4 } = require('uuid');
+const {v4: uuidv4} = require('uuid');
 const cookie = require('js-cookie');
 const base64url = require('base64url');
+const utils = require('../../utils')
 
-const buttonStyle = {padding: `4px`, margin: `0px`};
 
 const DEFAULT_API_URL = `/api/state-snapshots`;
 const urlparser = require('./../../urlparser');
 const noTracking = urlparser.urlVars["notracking"] === "true";
 
-let jquery = require('jquery');
-require('snackbarjs');
 
 /**
  * State snapshots dashboard
@@ -317,18 +316,20 @@ class StateSnapshotsDashboard extends React.Component {
         });
     }
 
-    copyToClipboard(str) {
-        const el = document.createElement('textarea');
-        el.value = str;
-        document.body.appendChild(el);
-        el.select();
-        document.execCommand('copy');
-        document.body.removeChild(el);
-        jquery.snackbar({
-            content: "<span id=`conflict-progress`>" + __("Copied") + "</span>",
-            htmlAllowed: true,
-            timeout: 1000
-        });
+    copyToClipboard(text) {
+        const type = "text/plain";
+        const blob = new Blob([text], {type});
+        const data = [new ClipboardItem({[type]: blob})];
+
+        navigator.clipboard.write(data).then(
+            () => {
+                utils.showInfoToast(__('Copied'))
+            },
+            () => {
+                /* failure */
+            }
+        );
+
     }
 
     setImageLinkSize(value, id) {
@@ -378,9 +379,10 @@ class StateSnapshotsDashboard extends React.Component {
                 options.push(<option key={`${item.id}_size_key_${size}`} value={size}>{size}</option>);
             });
 
-            return (<select style={{height: `25px`, padding: `0`}} className="form-control" value={value} onChange={(event) => {
-                this.setImageLinkSize(event.target.value, item.id);
-            }}>{options}</select>)
+            return (<select className="form-select" value={value}
+                            onChange={(event) => {
+                                this.setImageLinkSize(event.target.value, item.id);
+                            }}>{options}</select>)
         };
 
         const createSnapshotRecord = (item, index, local = false) => {
@@ -390,9 +392,8 @@ class StateSnapshotsDashboard extends React.Component {
             let importButton = false;
             if (local && this.state.authenticated) {
                 importButton = (
-                    <button type="button" className="btn btn-xs btn-primary" onClick={() => this.seizeSnapshot(item)}
-                            style={buttonStyle}>
-                        <i title={titles.seize} className="material-icons">person_add</i>
+                    <button type="button" className="btn btn-sm btn-light" onClick={() => this.seizeSnapshot(item)}>
+                        <i title={titles.seize} className="bi bi-person-add"></i>
                     </button>);
             }
 
@@ -431,19 +432,18 @@ class StateSnapshotsDashboard extends React.Component {
 
             let token = (item.token ? item.token : false);
 
-            let titleLabel = (<span style={snapshotIdStyle} title={item.id}>{item.id.substring(0, 6)}</span>);
+            let titleLabel = (<h5 className="mb-0" title={item.id}>{item.id.substring(0, 6)}</h5>);
             if (item.title) {
                 titleLabel = (
-                    <span style={{marginRight: `10px`}} title={item.title}>{item.title.substring(0, 24)}</span>);
+                    <h5 className="mb-0" title={item.title}>{item.title.substring(0, 24)}</h5>);
             }
 
             let updateSnapshotControl = (<button
                 type="button"
-                className="btn btn-xs btn-primary"
+                className="btn btn-sm btn-light"
                 onClick={() => this.enableUpdateSnapshotForm(item.id)}
-                title={titles.refresh}
-                style={buttonStyle}>
-                <i className="material-icons">autorenew</i>
+                title={titles.refresh}>
+                <i className="bi bi-arrow-clockwise"></i>
             </button>);
             if (this.state.updatedItemId === item.id) {
                 let type = (local ? 'browserOwned' : 'userOwned')
@@ -460,18 +460,17 @@ class StateSnapshotsDashboard extends React.Component {
 
             let tokenField = false;
             if (token) {
-                tokenField = (<div className="input-group form-group snapshot-copy-token" style={{paddingTop: `8px`}}>
-                    <div style={{display: `flex`, width: `100%`}}>
-                        <a className="input-group-addon" style={{cursor: `pointer`}} onClick={() => {
-                            this.copyToClipboard(token)
-                        }}><i className="material-icons" style={{fontSize: `18px`}}>content_copy</i>{__(`Copy token`)}</a>
-                    </div>
-                </div>);
+                tokenField = (
+                    <button className="btn btn-sm btn-outline-secondary" onClick={() => {
+                        this.copyToClipboard(token)
+                    }}>{__(`Token`)}
+                    </button>
+                );
             }
 
             let playButton = (<button
                 type="button"
-                className="btn btn-xs btn-primary"
+                className="btn btn-sm btn-success"
                 onClick={() => {
                     fetch(
                         `/api/state-snapshots/${vidiConfig.appDatabase}/${item.id}`
@@ -482,58 +481,52 @@ class StateSnapshotsDashboard extends React.Component {
 
                 }}
                 disabled={this.state.stateApplyingIsBlocked}
-                title={titles.apply}
-                style={buttonStyle}>
-                <i className="material-icons">play_arrow</i></button>);
+                title={titles.apply}>
+                <i className="bi bi-play-btn"></i></button>);
 
             let sizeValue = `1920x1080`;
             if (item.id in this.state.imageLinkSizes) sizeValue = this.state.imageLinkSizes[item.id];
 
             let selectSize = generateSizeSelector(item, sizeValue);
             let imageLink = `${window.location.origin}/api/static/${vidiConfig.appDatabase}/${vidiConfig.appSchema}/?state=${item.id}&width=${sizeValue.split(`x`)[0]}&height=${sizeValue.split(`x`)[1]}${configParameter ? `&${configParameter}` : ``}`;
-            return (<div className="panel panel-default" key={index} style={{marginBottom: '8px'}}>
-                <div className="panel-body" style={{padding: '8px'}}>
-                    {this.props.playOnly ? (<div>
-                        {titleLabel}
-                        <span className="label label-default">{dateFormatted}</span>
-                        {playButton}
-                    </div>) : (<div>
-                        {titleLabel}
-                        <span className="label label-default">{dateFormatted}</span>
-                        {playButton}
-                        {updateSnapshotControl}
-                        <button
-                            type="button"
-                            className="btn btn-xs btn-primary"
-                            onClick={() => this.deleteSnapshot(item.id)}
-                            title={titles.remove}
-                            style={buttonStyle}>
-                            <i className="material-icons">delete</i>
-                        </button>
-                        {importButton}
-                    </div>)}
-                    {this.props.playOnly ? false : (
-                        <div style={{display: `flex`}}>
-                            <div className="input-group form-group" style={{paddingTop: `8px`}}>
-                                <div style={{display: `flex`, width: `100%`}}>
-                                    <a className="input-group-addon" style={{cursor: `pointer`}} onClick={() => {
-                                        this.copyToClipboard(permaLink)
-                                    }}><i className="material-icons"
-                                          style={{fontSize: `18px`}}>content_copy</i>{__(`Copy Vidi link`)}</a>
-                                </div>
+            return (<div className="card mb-2" key={index}>
+                <div className="card-body">
+                    {this.props.playOnly ? (
+                        <div className="d-flex align-items-center gap-2">
+                            {titleLabel}
+                            <span className="badge bg-secondary">{dateFormatted}</span>
+                            {playButton}
+                        </div>) : (
+                        <div className="d-flex flex-column gap-3 mb-3">
+                            <div className="d-flex align-items-center gap-2">
+                                {titleLabel}
+                                <span className="badge bg-secondary">{dateFormatted}</span>
                             </div>
+                            <div className="d-flex align-items-center gap-2">
+                                {playButton}
+                                {updateSnapshotControl}
+                                <button
+                                    type="button"
+                                    className="btn btn-sm btn-outline-danger"
+                                    onClick={() => this.deleteSnapshot(item.id)}
+                                    title={titles.remove}>
+                                    <i className="bi bi-trash"></i>
+                                </button>
+                                {importButton}
+                            </div>
+                        </div>
+                    )}
+                    {this.props.playOnly ? false : (
+                        <div className="d-flex align-items-center gap-2">
+                            <button className="btn btn-sm btn-outline-secondary" onClick={() => {
+                                this.copyToClipboard(permaLink)
+                            }}>{__(`Link`)}</button>
                             {tokenField}
-                            <div className="input-group form-group snapshot-copy-png-link"
-                                 style={{width: `100%`, paddingTop: `8px`}}>
-                                <div style={{display: `flex`, width: `100%`}}>
-                                    <div>
-                                        <a className="input-group-addon" style={{cursor: `pointer`}} onClick={() => {
-                                            this.copyToClipboard(imageLink)
-                                        }}><i className="material-icons"
-                                              style={{fontSize: `18px`}}>content_copy</i>{__(`Copy PNG link`)}</a>
-                                    </div>
-                                    <div style={{paddingLeft: `10px`, paddingRight: `10px`}}>{selectSize}</div>
-                                </div>
+                            <div className="input-group input-group-sm" style={{width: "auto"}}>
+                                <button className="btn btn-sm btn-outline-secondary" onClick={() => {
+                                    this.copyToClipboard(imageLink)
+                                }}>{__(`PNG`)}</button>
+                                {selectSize}
                             </div>
                         </div>)}
                 </div>
@@ -542,7 +535,7 @@ class StateSnapshotsDashboard extends React.Component {
 
         let browserOwnerSnapshots = false;
         if (!this.state.loading) {
-            browserOwnerSnapshots = (<div style={{textAlign: `center`}}>
+            browserOwnerSnapshots = (<div>
                 {titles.noLocalItems}
             </div>);
         }
@@ -557,7 +550,7 @@ class StateSnapshotsDashboard extends React.Component {
             });
         }
 
-        let userOwnerSnapshots = (<div style={{textAlign: `center`}}>
+        let userOwnerSnapshots = (<div>
             {titles.noUserItems}
         </div>);
 
@@ -573,28 +566,22 @@ class StateSnapshotsDashboard extends React.Component {
             let createNewSnapshotControl = false;
             if (this.props.readOnly) {
                 if (this.props.showStateSnapshotTypes) {
-                    createNewSnapshotControl = (<div>
-                        <h4>
-                            {titles.userItems}
-                        </h4>
-                    </div>);
+                    createNewSnapshotControl = (
+                        <h4>{titles.userItems}</h4>
+                    );
                 }
             } else {
-                createNewSnapshotControl = (<div>
-                    <h4>
-                        {titles.userItems}
-                        <TitleFieldComponent onAdd={(title) => {
-                            this.createSnapshot(title)
-                        }} type="userOwned"/>
-                    </h4>
+                createNewSnapshotControl = (<div className="mb-3">
+                    <h4>{titles.userItems}</h4>
+                    <TitleFieldComponent onAdd={(title) => {
+                        this.createSnapshot(title)
+                    }} type="userOwned"/>
                 </div>);
             }
 
             userOwnerSnapshotsPanel = (<div className="js-user-owned">
                 {createNewSnapshotControl}
-                <div>
-                    <div>{userOwnerSnapshots}</div>
-                </div>
+                {userOwnerSnapshots}
             </div>);
         }
 
@@ -611,29 +598,23 @@ class StateSnapshotsDashboard extends React.Component {
                 </h4>);
             }
         } else {
-            createNewSnapshotControl = (<h4>
-                {titles.localItems}
-                <TitleFieldComponent onAdd={(title) => {
-                    this.createSnapshot(title, true)
-                }} type="browserOwned"/>
-                <button className="btn btn-xs btn-primary" onClick={this.seizeAllSnapshots}
-                        disabled={importAllIsDisabled} style={buttonStyle}>
-                    <i className="material-icons">person_add</i>
-                </button>
-            </h4>);
+            createNewSnapshotControl = (
+                <div className="mb-3">
+                    <h4>{titles.localItems}</h4>
+                    <TitleFieldComponent onAdd={(title) => {
+                        this.createSnapshot(title, true)
+                    }} type="browserOwned"/>
+                </div>
+            )
         }
 
         return (<div>
             {overlay}
-            <div>
-                <div className="js-browser-owned">
-                    <div className="form-group">{createNewSnapshotControl}</div>
-                    <div>
-                        <div>{browserOwnerSnapshots}</div>
-                    </div>
-                </div>
-                {userOwnerSnapshotsPanel}
+            <div className="js-browser-owned mb">
+                {createNewSnapshotControl}
+                {browserOwnerSnapshots}
             </div>
+            {userOwnerSnapshotsPanel}
         </div>);
     }
 }

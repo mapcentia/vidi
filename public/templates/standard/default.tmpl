@@ -303,8 +303,8 @@
                         <div class="help-btn" onclick="javascript:createAlert($(this), '{{Help text legend}}')">
                             <i class="bi bi-question-circle help-btn"></i></div>
                         <div></div>
-                        <a href="#legend-dialog" id="btn-show-legend-in-map" data-module="legend"
-                           class="btn btn-raised btn-xs map-tool-btn">{{Show legend on top the map}}</a>
+                        <button id="btn-show-legend-in-map" data-module="legend"
+                           class="btn btn btn-outline-primary w-100 mb-3">{{Show legend on top the map}}</button>
                         <div id="legend" class="legend"></div>
                     </div>
                     <div role="tabpanel" class="tab-pane fade" id="draw-content">
@@ -465,7 +465,7 @@
                              onclick="javascript:createAlert($(this), '{{StateSnapshots description}}')">
                             <i class="bi bi-question-circle help-btn"></i></div>
                         <div></div>
-                        <div class="form-group" id="state-snapshots" role="tablist"></div>
+                        <div id="state-snapshots" role="tablist"></div>
                     </div>
                     <div role="tabpanel" class="tab-pane fade" id="print-content">
                         <div class="help-btn" onclick="javascript:createAlert($(this), '{{Help text print}}')">
@@ -633,14 +633,21 @@
 </div>
 
 <div class="toast-container bottom-0 end-0 p-3">
-    <div id="my-toast" class="toast align-items-center text-bg-primary border-0" role="alert" aria-live="assertive"
+    <div id="info-toast" class="toast align-items-center text-bg-primary border-0" role="alert" aria-live="assertive"
          aria-atomic="true">
         <div class="d-flex">
-            <div class="toast-body">
-                Hello, world! This is a toast message.
-            </div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
-                    aria-label="Close"></button>
+            <div class="toast-body" id="info-toast-body"></div>
+        </div>
+    </div>
+</div>
+
+<div class="toast-container position-fixed bottom-0 end-0 p-3 pb-5">
+    <div id="legend-toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <strong class="me-auto">Legend</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body" id="legend-toast-body">
         </div>
     </div>
 </div>

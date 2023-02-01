@@ -260,7 +260,7 @@ module.exports = module.exports = {
                 let displayInfo = (bl.abstract ? `visible` : `hidden`);
                 let tooltip = (bl.abstract ? $(bl.abstract).text() : ``);
                 appendedCode += `<li class="list-group-item js-base-layer-control d-flex align-items-center">
-                    <div class="d-flex align-items-center gap-2 me-auto">
+                    <div class="d-flex align-items-center gap-1 me-auto">
                         <div class='base-layer-item' data-gc2-base-id='${layerId}'>
                             <input type='radio' class="form-check-input" name='baselayers' value='${layerId}' ${layerId === activeBaseLayer ? `checked=""` : ``}> 
                         </div>

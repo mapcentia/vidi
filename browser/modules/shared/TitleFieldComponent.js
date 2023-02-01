@@ -16,46 +16,40 @@ class TitleFieldComponent extends React.Component {
         if (props.type !== `userOwned` && props.type !== `browserOwned`) {
             throw new Error(`Invalid type options`);
         }
-        
+
         this.state = {
             title: (props.value ? props.value : ``)
         }
     }
 
     onChange(event) {
-        this.setState({ title: event.target.value });
+        this.setState({title: event.target.value});
     }
 
     onSave() {
         this.props.onAdd(this.state.title);
-        this.setState({ title: '' });
+        this.setState({title: ''});
     }
 
     handleKeyPress(event) {
         if (event.key === `Enter` && this.state.title) {
             this.props.onAdd(this.state.title);
-            this.setState({ title: '' });
+            this.setState({title: ''});
         }
     }
 
     render() {
-        let buttonStyle = {
-            padding: `4px`,
-            margin: `0px`
-        };
-
         let cancelControl = false;
         if (this.props.onCancel) {
             cancelControl = (<button
                 title={__(`Cancel`)}
-                className="btn btn-xs btn-primary"
-                onClick={this.props.onCancel}
-                style={buttonStyle}>
-                <i className="material-icons">cancel</i>
+                className="btn btn-sm btn-outline-danger"
+                onClick={this.props.onCancel}>
+                <i className="bi bi-x-lg"></i>
             </button>);
         }
 
-        let containerStyle = { width: '50%', display: 'inline-table', paddingLeft: '8px' };
+        let containerStyle = {width: '50%', display: 'inline-table', paddingLeft: '8px'};
         if (`customStyle` in this.props && this.props.customStyle) {
             for (let key in this.props.customStyle) {
                 containerStyle[key] = this.props.customStyle[key];
@@ -67,28 +61,26 @@ class TitleFieldComponent extends React.Component {
             inputStyle.marginBottom = `0px`;
         }
 
-        return (<div className="input-group" style={containerStyle}>
+        return (<div className="d-flex align-items-center gap-2">
             <input
                 id={(this.props.id ? this.props.id : ``)}
                 value={this.state.title}
                 disabled={this.props.disabled}
                 type="text"
-                className="form-control"
+                className="form-control form-control-sm"
                 placeholder={this.props.inputPlaceholder ? this.props.inputPlaceholder : __("New title")}
                 onChange={this.onChange.bind(this)}
                 onKeyPress={this.handleKeyPress.bind(this)}
-                style={inputStyle}/>
-            <span className="input-group-btn" style={{ padding: '6px', verticalAlign: 'top' }}>
-                <button
-                    title={__(`Save`)}
-                    className="btn btn-xs btn-primary"
-                    onClick={this.onSave.bind(this)}
-                    disabled={this.props.disabled || !this.state.title}
-                    style={buttonStyle}>
-                    {this.props.showIcon ? ((this.props.saveIcon ? this.props.saveIcon : (<i className="material-icons">save</i>))) : false} {(this.props.saveButtonText ? ` ` + this.props.saveButtonText : ``)}
-                </button>
-                {cancelControl}
-            </span>
+                />
+            <button
+                title={__(`Save`)}
+                className="btn btn-primary btn-sm"
+                onClick={this.onSave.bind(this)}
+                disabled={this.props.disabled || !this.state.title}>
+                {this.props.showIcon ? ((this.props.saveIcon ? this.props.saveIcon : (
+                    <i className="bi bi-save"></i>))) : false} {(this.props.saveButtonText ? ` ` + this.props.saveButtonText : ``)}
+            </button>
+            {cancelControl}
         </div>);
     }
 }

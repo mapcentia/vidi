@@ -358,6 +358,24 @@ module.exports = {
         //     $('.slide-expanded').hide();
         // });
 
+
+        $('#btn-show-legend-in-map').on("click", () => {
+            $('#legend-toast-body').append($('#legend'));
+            const b = $('#btn-show-legend-in-map');
+            b.prop('disabled', true);
+            b.removeClass('btn-outline-primary');
+            b.addClass('btn-primary')
+            const e = document.getElementById('legend-toast')
+            const t = new bootstrap.Toast(e, {autohide: false});
+            e.addEventListener('hidden.bs.toast', () => {
+                $('#legend-content').append($('#legend'));
+                $('#btn-show-legend-in-map').prop('disabled', false);
+                b.removeClass('btn-primary');
+                b.addClass('btn-outline-primary')
+            })
+            t.show();
+        })
+
         // Bottom dialog
         $('.close-hide').on('click touchstart', function () {
             const id = ($(this)).parent().parent().attr('id');
@@ -367,8 +385,6 @@ module.exports = {
             }
             // If legend when deactivate
             if ($(this).data('module') === 'legend') {
-                $('#legend-content').append($('#legend'));
-                $('#btn-show-legend-in-map').prop('disabled', false);
             }
             $('#' + id).animate({
                 bottom: '-100%'
@@ -410,8 +426,6 @@ module.exports = {
             }
             // If legend when deactivate
             if ($(this).data('module') === 'legend') {
-                $('#legend-dialog .modal-body').append($('#legend'));
-                $('#btn-show-legend-in-map').prop('disabled', true);
             }
             $(id).animate({
                 bottom: '0'

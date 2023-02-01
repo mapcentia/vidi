@@ -160,5 +160,11 @@ module.exports = {
         } else {
             return null;
         }
+    },
+
+    showInfoToast: (text, options = {delay: 1500, autohide: true}) => {
+        document.getElementById('info-toast-body').innerHTML = text;
+        const e = new bootstrap.Toast(document.getElementById('info-toast'), options)
+        e.show();
     }
 };

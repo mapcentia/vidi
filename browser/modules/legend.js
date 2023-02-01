@@ -39,6 +39,7 @@ module.exports = module.exports = {
         return this;
     },
     init: function (layerArr, el) {
+
         return new Promise(function (resolve, reject) {
             let metaDataKeys = meta.getMetaDataKeys(), visibleLayers = _layers.getLayers(";"), checked, layerName,
                 param = ``, layers;
@@ -71,7 +72,7 @@ module.exports = module.exports = {
             $.ajax({
                 url: '/api/legend/' + db + '?' + param,
                 success: function (response) {
-                    var list = $('<ul class="list-group"/>'), li, classUl, title, className;
+                    var list = $('<div class="p-0"/>'), li, classUl, title, className;
                     $.each(response, function (i, v) {
                         if (typeof v.id !== "undefined") {
                             let id = v.id.replace(constants.LAYER.VECTOR + ':', '')
@@ -86,22 +87,22 @@ module.exports = module.exports = {
                                 }
                             }
                             if (showLayer) {
-                                li = $("<li class=''/>");
-                                classUl = $('<ul />');
+                                li = $("<div class='d-flex flex-column ms-2 mb-2'/>");
+                                classUl = $('<div />');
                                 for (u = 0; u < v.classes.length; u = u + 1) {
                                     if (v.classes[u].name !== "" || v.classes[u].name === "_gc2_wms_legend") {
                                         className = (v.classes[u].name !== "_gc2_wms_legend") ? "<span class='legend-text'>" + v.classes[u].name + "</span>" : "";
                                         if (v.classes[u].name === "_gc2_wms_legend") {
-                                            title = "<img class='legend-img' src='data:image/png;base64, " + v.classes[u].img + "' />" + className + "</li>";
+                                            title = "<img class='legend-img' src='data:image/png;base64, " + v.classes[u].img + "' />" + className + "";
                                         } else {
-                                            classUl.append("<li><img class='legend-img' src='data:image/png;base64, " + v.classes[u].img + "' />" + className + "</li>");
+                                            classUl.append("<div class='d-flex align-items-center gap-1'><img class='legend-img' src='data:image/png;base64, " + v.classes[u].img + "' />" + className + "</div>");
                                         }
                                     }
                                 }
                                 let id = v.id.replace(constants.LAYER.VECTOR + ':', '')
                                 let type = v.id.startsWith(constants.LAYER.VECTOR + ':') ? 'v' : 't';
                                 checked = ($.inArray(v.id, visibleLayers ? visibleLayers.split(";") : "") > -1) ? "checked" : "";
-                                list.append($("<li class='list-group-item'><div class='checkbox'><label><input data-gc2-layer-type=" + type + " type='checkbox' data-gc2-id='" + id + "' " + checked + ">" + title + "</label></div></li>"));
+                                list.append($("<div class='form-check'><label class='form-check-label d-flex align-items-center gap-2'><input class='form-check-input' data-gc2-layer-type=" + type + " type='checkbox' data-gc2-id='" + id + "' " + checked + ">" + title + "</label></div>"));
                                 list.append(li.append(classUl));
                             }
 
