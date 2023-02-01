@@ -221,7 +221,9 @@ var getExistingDocs = function (key, fileIdent = false) {
             throw new Error("No existing cases found")
         }
     }
-    $('#documentList-feature-content').append('</tbody></table>')    
+    $('#documentList-feature-content').append('</tbody></table>') 
+    
+    console.log(existingcases, fileIdent, caseFound, layersToReload)
     
     // reload cosmetic layer (if layer ident is found and specified)
     if (fileIdent && caseFound) {
@@ -241,8 +243,12 @@ var getExistingDocs = function (key, fileIdent = false) {
         });
 
         // resoleve all promises
-        Promise.all(Promises).then(function(values) {
-            //console.log(values);
+        Promise.all(Promises)
+        .then(function(values) {
+            console.log(values);
+        })
+        .catch(function(error) {
+            console.log(error);
         });
     }
 
@@ -505,7 +511,7 @@ var documentCreateApplyFilter = function (filter) {
             //Make sure layer is on
             //TODO tænd laget hvis det ikke allerede er tændt! - skal være tændt før man kan ApplyFilter
             layerTree.reloadLayer(layerKey).then(result => {
-                console.log('documentCreate - layer reloaded')
+                //console.log('documentCreate - layer reloaded')
                 //Toggle the filter
                 if (filter[layerKey].columns.length == 0) {
                     // insert fixed dummy filter
@@ -520,11 +526,17 @@ var documentCreateApplyFilter = function (filter) {
                 } else {
                     layerTree.onApplyArbitraryFiltersHandler({ layerKey,filters: filter[layerKey]}, 't');
                 }
-            });           
-            //Reload
-            layerTree.reloadLayer(layerKey).then(result => {
-                console.log('documentCreate - layer reloaded')
-            });
+            })
+            .catch(error => {
+                console.log('documentCreate - layer reload failed')
+            })
+            .finally(() => {
+                // reload layer
+                console.log('documentCreate - layer reload finished')
+                layerTree.reloadLayer(layerKey)
+            })
+            ;
+
         }
     }
 };
