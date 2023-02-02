@@ -476,8 +476,8 @@
                         <div class="help-btn" onclick="javascript:createAlert($(this), '{{Help text print}}')">
                             <i class="bi bi-question-circle help-btn"></i></div>
                         <div></div>
-                        <div class="btn-toolbar bs-component">
-                            <div class="input-group">
+                        <div class="btn-toolbar">
+                            <div class="input-group mb-3">
                                 <button id="start-print-btn" class="btn btn-primary start-print-btn"
                                         disabled>
                                     <span class="spinner-border spinner-border-sm"
@@ -508,20 +508,26 @@
                                 </ul>
                             </div>
                         </div>
-                        <div class="form-check">
-                            <div class="togglebutton">
-                                <input class="form-check-input" id="print-sticky" type="checkbox">
-                                <label for="print-sticky" class="form-check-label">{{Sticky}}</label>
+
+                        <div class="d-flex flex-column gap-3 mb-3">
+                            <div class="form-check">
+                                <div class="togglebutton">
+                                    <input class="form-check-input" id="print-sticky" type="checkbox">
+                                    <label for="print-sticky" class="form-check-label">{{Sticky}}</label>
+                                </div>
+                            </div>
+                            <div class="btn-group d-flex">
+                                <button id="add-print-box-btn" class="btn btn-outline-secondary btn-sm">
+                                    {{Add new box}}
+                                </button>
+                                <button id="remove-print-box-btn" class="btn btn-outline-secondary btn-sm">
+                                    {{Remove last box}}
+                                </button>
                             </div>
                         </div>
-                        <button id="add-print-box-btn" class="btn btn-sm">
-                            {{Add new box}}
-                        </button>
-                        <button id="remove-print-box-btn" class="btn btn-sm">
-                            {{Remove last box}}
-                        </button>
+
                         <form class="d-flex flex-column gap-4" id="print-form" role="form" data-bs-toggle="validator">
-                            <div class="input-group">
+                            <div class="input-group input-group-sm">
                                 <span class="input-group-text">1:</span>
                                 <button type="button"
                                         class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"

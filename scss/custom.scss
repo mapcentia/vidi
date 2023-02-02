@@ -23,11 +23,11 @@ $dropdown-link-active-bg: white;
 }
 
 .offcanvas {
-  --bs-offcanvas-width: 600px;
+  --bs-offcanvas-width: 550px;
 }
 
-.offcanvas-body {
-  padding-top: 0;
+#mainLayerOffcanvas .offcanvas-body {
+  padding: 0;
 }
 
 .navbar {

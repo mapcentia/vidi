@@ -133,13 +133,12 @@ class MarkupGenerator {
                                                                        </div>
                                                                        </div>
                     <!-- tools -->
-                    <div class="d-flex align-items-center"> 
-                                                                        <div class="btn-group" role="group"></div>
-                                                                        </div>
+                    <div class="d-flex align-items-center gap-1"> 
                                                                         <div>${layerTypeSelector}</div>
                                                                         ${addButton}
                                                                         <button data-toggle="tooltip" data-placement="left" title="${tooltip}" style="visibility: ${displayInfo};" class="btn btn-light btn-sm info-label" data-gc2-id="${layerKey}"><i class="bi bi-info-square"></i></a></button>
                                                                         <button data-bs-animation="0" disabled class="btn btn-light btn-sm js-settings-panel-btn" role="button" data-bs-toggle="collapse" id="settings-${layer.f_table_schema}-${layer.f_table_name}-btn" data-bs-target="#settings-${layer.f_table_schema}-${layer.f_table_name}" aria-expanded="false" aria-controls="collapseExample"><i class="bi bi-three-dots"></i></button>
+                                                    </div>
      
                 </div>
                 <i class="bi-grip-vertical ms-auto layer-move-vert"></i>
@@ -239,7 +238,6 @@ class MarkupGenerator {
                                                                                                   <div class="js-layer-settings js-layer-settings-search" style="display: none;"></div>
                                                                                                   <div class="js-layer-settings js-layer-settings-style" style="display: none;"></div>
                                                                                                   <div class="js-layer-settings js-layer-settings-table" id="table_view-${layerKey.replace(".", "_")}" style="display: none;"></div>
-                                                                                                  </div>
         </li>`);
     }
 
