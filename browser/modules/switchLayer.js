@@ -119,6 +119,7 @@ module.exports = module.exports = {
                 backboneEvents.get().trigger("startLoading:layers", vectorLayerId);
 
                 _self.checkLayerControl(vectorLayerId, doNotLegend, setupControls);
+                _self.enableCheckBoxesOnChildren(gc2Id);
                 resolve();
             } else if (failedBefore !== false) {
                 if (failedBefore.reason === `NO_VECTOR_DATA_STORE`) {
@@ -142,6 +143,7 @@ module.exports = module.exports = {
                         _self.init(vectorLayerId, true, false, false, true, {
                             reason: `NO_VECTOR_DATA_STORE`
                         }).then(() => {
+                            _self.enableCheckBoxesOnChildren(gc2Id);
                             resolve();
                         });
                     });
