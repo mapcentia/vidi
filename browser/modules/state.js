@@ -250,7 +250,7 @@ module.exports = {
                      * @param {Array} data Set of input values
                      */
                     const executeSequentially = (data) => {
-                        return createPromise(data.pop()).then(x => data.length == 0 ? x : executeSequentially(data));
+                        return createPromise(data.pop()).then(x => data.length === 0 ? x : executeSequentially(data));
                     };
 
                     const initializeLayersFromURL = () => {
@@ -538,6 +538,7 @@ module.exports = {
                         if (state) {
                             if (state.snapshot.map.layers.length === 0) {
                                 console.log("No active layers in snapshot");
+                                $('#layer-loading-indicator').hide();
                             } else {
                                 console.log("Active layers in snapshot");
                                 activeLayersInSnapshot = true;
