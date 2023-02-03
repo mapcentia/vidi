@@ -2984,10 +2984,9 @@ module.exports = {
                 layer, defaultLayerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo, subgroupId !== false, moduleState, disableCheckBox, parentLayerKeys, childLayerKeys));
 
             // Callback for selecting specific layer type to enable (layer type dropdown)
-            $(layerControlRecord).find('[class^="js-layer-type-selector"]').on('click', (e, data) => {
+            $(layerControlRecord).find('.js-layer-type-selector').on('click', (e, data) => {
                 let type = false;
-                let className = $(e.target).attr(`class`);
-                switch (className.replace(`js-layer-type-selector-`, ``)) {
+                switch ($(e.target).attr('data-layer-type')) {
                     case `tile`:
                         type = LAYER.RASTER_TILE;
                         break;

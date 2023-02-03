@@ -262,6 +262,7 @@ module.exports = {
         "Are you sure you want to delete the feature?": "Are you sure you want to delete the feature?",
         "The page was loaded without service workers enabled, features editing is not available (the page was loaded via plain HTTP or browser does not support service workers)": "The page was loaded without service workers enabled, features editing is not available (the page was loaded via plain HTTP or browser does not support service workers)",
         "Editing of geometry is not possible when number of nodes exceed": "Editing of geometry is not possible when number of nodes exceed",
+        "Submit": "Submit",
 
         // OfflineMap
         "tiles failed to load": "tiles failed to load",

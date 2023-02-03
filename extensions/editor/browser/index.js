@@ -550,7 +550,7 @@ module.exports = {
                         widgets={widgets}
                         onSubmit={onSubmit}>
                         <div className="buttons">
-                            <button type="submit" className="btn btn-info">Submit</button>
+                            <button type="submit" className="btn btn-lg btn-success">{__("Submit")}</button>
                         </div>
                     </Form>
                 </div>
@@ -964,7 +964,7 @@ module.exports = {
                         formData={eventFeatureParsed}
                         onSubmit={onSubmit}>
                         <div className="buttons">
-                            <button type="submit" className="btn btn-info">Submit</button>
+                            <button type="submit" className="btn btn-lg btn-success">{__("Submit")}</button>
                         </div>
                     </Form>
                 </div>

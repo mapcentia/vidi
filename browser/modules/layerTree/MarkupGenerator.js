@@ -103,7 +103,7 @@ class MarkupGenerator {
             <div class="d-flex align-items-center">
                 <div class="d-flex w-100 align-items-center flex-wrap gap-1">
                     <!-- switch and title-->
-                    <div class="d-flex align-items-center flex-grow-1 gap-1">
+                    <div class="d-flex align-items-center flex-grow-1 gap-1 mb-2">
                                                                        <div class="form-check form-switch d-flex align-items-center">
                                                                        <label>
                                                                        <input type="checkbox"
@@ -133,41 +133,41 @@ class MarkupGenerator {
                                                                        </div>
                                                                        </div>
                     <!-- tools -->
-                    <div class="d-flex align-items-center gap-1"> 
+                    <div class="d-flex align-items-center gap-1 mb-2"> 
                                                                         <div>${layerTypeSelector}</div>
                                                                         ${addButton}
                                                                         <button data-toggle="tooltip" data-placement="left" title="${tooltip}" style="visibility: ${displayInfo};" class="btn btn-light btn-sm info-label" data-gc2-id="${layerKey}"><i class="bi bi-info-square"></i></a></button>
-                                                                        <button data-bs-animation="0" disabled class="btn btn-light btn-sm js-settings-panel-btn" role="button" data-bs-toggle="collapse" id="settings-${layer.f_table_schema}-${layer.f_table_name}-btn" data-bs-target="#settings-${layer.f_table_schema}-${layer.f_table_name}" aria-expanded="false" aria-controls="collapseExample"><i class="bi bi-three-dots"></i></button>
                                                     </div>
      
                 </div>
-                <i class="bi-grip-vertical ms-auto layer-move-vert"></i>
+                <div class="d-flex align-items-center align-self-baseline ms-1">
+                    <button data-bs-animation="0" disabled class="btn btn-light btn-sm js-settings-panel-btn" role="button" data-bs-toggle="collapse" id="settings-${layer.f_table_schema}-${layer.f_table_name}-btn" data-bs-target="#settings-${layer.f_table_schema}-${layer.f_table_name}" aria-expanded="false" aria-controls="collapseExample"><i class="bi bi-three-dots"></i></button>
+                    <i class="bi-grip-vertical ms-auto layer-move-vert"></i>
+                </div>
             </div>  
             <!-- queue -->
-            <div>
-                                           <div class="d-flex align-items-center">
-                                           <button type="button" class="hidden btn btn-sm btn-light js-statistics-field js-failed-add" style="${queueFailedButtonStyle}" disabled>
+                                           <div class="d-flex align-items-center gap-1">
+                                           <button type="button" class="hidden btn btn-sm btn-light js-statistics-field js-failed-add mb-2" style="${queueFailedButtonStyle}" disabled>
                                            <i class="bi bi-plus-square"></i> <span class="js-value"></span>
                                            </button>
-                                           <button type="button" class="hidden btn btn-sm btn-light js-statistics-field js-failed-update" style="${queueFailedButtonStyle}" disabled>
+                                           <button type="button" class="hidden btn btn-sm btn-light js-statistics-field js-failed-update mb-2" style="${queueFailedButtonStyle}" disabled>
                                            <i class="bi bi-pencil"></i> <span class="js-value"></span>
                                            </button>
-                                           <button type="button" class="hidden btn btn-sm btn-light js-statistics-field js-failed-delete" style="${queueFailedButtonStyle}" disabled>
+                                           <button type="button" class="hidden btn btn-sm btn-light js-statistics-field js-failed-delete mb-2" style="${queueFailedButtonStyle}" disabled>
                                            <i class="fa bi-dash-square"></i> <span class="js-value"></span>
                                            </button>
-                                           <button type="button" class="hidden btn btn-sm btn-light js-statistics-field js-rejectedByServer-add" style="${queueRejectedByServerButtonStyle}" disabled>
+                                           <button type="button" class="hidden btn btn-sm btn-light js-statistics-field js-rejectedByServer-add mb-2" style="${queueRejectedByServerButtonStyle}" disabled>
                                            <i class="bi bi-plus-square"></i> <span class="js-value"></span>
                                            </button>
-                                           <button type="button" class="hidden btn btn-sm btn-light js-statistics-field js-rejectedByServer-update" style="${queueRejectedByServerButtonStyle}" disabled>
+                                           <button type="button" class="hidden btn btn-sm btn-light js-statistics-field js-rejectedByServer-update mb-2" style="${queueRejectedByServerButtonStyle}" disabled>
                                            <i class="bi bi-pencil"></i> <span class="js-value"></span>
                                            </button>
-                                           <button type="button" class="hidden btn btn-sm btn-light js-statistics-field js-rejectedByServer-delete" style="${queueRejectedByServerButtonStyle}" disabled>
+                                           <button type="button" class="hidden btn btn-sm btn-light js-statistics-field js-rejectedByServer-delete mb-2" style="${queueRejectedByServerButtonStyle}" disabled>
                                            <i class="bi bi-dash-square"></i> <span class="js-value"></span>
                                            </button>
-                                           <button type="button" data-gc2-id="${layerKey}" class="hidden btn btn-sm btn-light js-clear" style="${regularButtonStyle}">
+                                           <button type="button" data-gc2-id="${layerKey}" class="hidden btn btn-sm btn-light js-clear mb-2" style="${regularButtonStyle}">
                                            <i class="bi bi-arrow-counterclockwise"></i>
                                            </button>
-                                           </div>
                                            </div>
             <div class="collapse" id="settings-${layer.f_table_schema}-${layer.f_table_name}" style="transition-duration: 0s">
                                                                                                   <div class="d-flex align-items-center gap-3">
@@ -244,19 +244,19 @@ class MarkupGenerator {
     getLayerTypeSelector(selectorLabel, allowedTypes) {
         let selectors = [];
         if (allowedTypes.indexOf(LAYER.VECTOR) > -1) {
-            selectors.push(`<li><a class="js-layer-type-selector-vector" href="javascript:void(0)">${ICONS[LAYER.VECTOR]} ${__('Vector')}</a></li>`);
+            selectors.push(`<li><a class="js-layer-type-selector dropdown-item" data-layer-type="vector" href="javascript:void(0)">${ICONS[LAYER.VECTOR]} ${__('Vector')}</a></li>`);
         }
 
         if (allowedTypes.indexOf(LAYER.RASTER_TILE) > -1) {
-            selectors.push(`<li><a class="js-layer-type-selector-tile" href="javascript:void(0)">${ICONS[LAYER.RASTER_TILE]} ${__('Raster tile')}</a></li>`);
+            selectors.push(`<li><a class="js-layer-type-selector dropdown-item" data-layer-type="tile" href="javascript:void(0)">${ICONS[LAYER.RASTER_TILE]} ${__('Raster tile')}</a></li>`);
         }
 
         if (allowedTypes.indexOf(LAYER.VECTOR_TILE) > -1) {
-            selectors.push(`<li><a class="js-layer-type-selector-vector-tile" href="javascript:void(0)">${ICONS[LAYER.VECTOR_TILE]} ${__('Vector tile')}</a></li>`);
+            selectors.push(`<li><a class="js-layer-type-selector dropdown-item" data-layer-type="vector-tile" href="javascript:void(0)">${ICONS[LAYER.VECTOR_TILE]} ${__('Vector tile')}</a></li>`);
         }
 
         if (allowedTypes.indexOf(LAYER.WEBGL) > -1) {
-            selectors.push(`<li><a class="js-layer-type-selector-webgl" href="javascript:void(0)">${ICONS[LAYER.WEBGL]} ${__('WebGL')}</a></li>`);
+            selectors.push(`<li><a class="js-layer-type-selector dropdown-item" data-layer-type="webgl" href="javascript:void(0)">${ICONS[LAYER.WEBGL]} ${__('WebGL')}</a></li>`);
         }
 
         return (`<div class="dropdown">

@@ -262,6 +262,7 @@ module.exports = {
         "Are you sure you want to delete the feature?": "Er du sikker på, at du vil slette objektet?",
         "The page was loaded without service workers enabled, features editing is not available (the page was loaded via plain HTTP or browser does not support service workers)": "Siden blev indlæst uden Service Workers aktiveret. Redigering er ikke tilgængelig (siden blev indlæst via almindelig HTTP eller browseren understøtter ikke Service Workers. Brug evt. en moderne browser)",
         "Editing of geometry is not possible when number of nodes exceed": "Ændring af geometri er ikke mulig, når antallet af knækpunkter overstiger",
+        "Submit": "Gem",
 
         // OfflineMap
         "tiles failed to load": "fliser mangler at indlæse",
