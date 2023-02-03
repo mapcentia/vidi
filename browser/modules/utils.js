@@ -166,5 +166,17 @@ module.exports = {
         document.getElementById('info-toast-body').innerHTML = text;
         const e = new bootstrap.Toast(document.getElementById('info-toast'), options)
         e.show();
+    },
+
+    removeDuplicates: (inputArray) => {
+        let temp = {};
+        for (let i = 0; i < inputArray.length; i++) {
+            temp[inputArray[i]] = true;
+        }
+        let result = [];
+        for (let key in temp) {
+            result.push(key);
+        }
+        return result;
     }
 };

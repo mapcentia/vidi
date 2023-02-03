@@ -195,20 +195,6 @@ module.exports = {
                 hash = decodeURIComponent(window.location.hash);
                 hashArr = hash.replace("#", "").split("/");
 
-                const removeDuplicates = (inputArray) => {
-                    var temp = {};
-                    for (var i = 0; i < inputArray.length; i++) {
-                        temp[inputArray[i]] = true;
-                    }
-
-                    var result = [];
-                    for (var key in temp) {
-                        result.push(key);
-                    }
-
-                    return result;
-                };
-
                 const setLayers = (hash = true) => {
                     let layersToActivate = [];
                     let baseLayerId = false;
@@ -221,12 +207,12 @@ module.exports = {
 
                             // Layers to activate
                             if (hashArr[4]) {
-                                layersToActivate = removeDuplicates(hashArr[4].split(","));
+                                layersToActivate = utils.removeDuplicates(hashArr[4].split(","));
                             }
                         }
                     }
                     // This is used if fastInit is not used
-                    layersToActivate = removeDuplicates(layersToActivate.concat(window.vidiConfig.activeLayers));
+                    layersToActivate = utils.removeDuplicates(layersToActivate.concat(window.vidiConfig.activeLayers));
 
                     /**
                      * Creates promise
