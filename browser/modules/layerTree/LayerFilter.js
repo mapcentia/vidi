@@ -638,18 +638,18 @@ class VectorLayerFilter extends React.Component {
                         Download
                     </button>
                     <ul className="dropdown-menu">
-                        <li><a data-format="geojson" className="dropdown-item" href="javascript:void(0)"
+                        <li><a data-format="geojson" className="dropdown-item" href="#"
                                onClick={this.handleDownload.bind(this)}>GeoJSON</a></li>
-                        <li><a data-format="csv" className="dropdown-item" href="javascript:void(0)"
+                        <li><a data-format="csv" className="dropdown-item" href="#"
                                onClick={this.handleDownload.bind(this)}>CSV</a></li>
-                        <li><a data-format="excel" className="dropdown-item" href="javascript:void(0)"
+                        <li><a data-format="excel" className="dropdown-item" href="#"
                                onClick={this.handleDownload.bind(this)}>Excel</a></li>
                         <li>
                             <hr className="dropdown-divider"/>
                         </li>
-                        <li><a data-format="ogr/GPKG" className="dropdown-item" href="javascript:void(0)"
+                        <li><a data-format="ogr/GPKG" className="dropdown-item" href="#"
                                onClick={this.handleDownload.bind(this)}>GeoPackage</a></li>
-                        <li><a data-format="ogr/ESRI Shapefile" className="dropdown-item" href="javascript:void(0)"
+                        <li><a data-format="ogr/ESRI Shapefile" className="dropdown-item" href="#"
                                onClick={this.handleDownload.bind(this)}>ESRI Shapefile</a></li>
                     </ul>
                 </div>
