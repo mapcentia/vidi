@@ -368,7 +368,6 @@ module.exports = {
         let overallFilters = activeFilters.concat(parentFilters);
         const show = overallFilters.length > 0;
         if (show) {
-            console.log("TEST")
             bg.find(`.rounded-pill`).removeClass('d-none');
         } else {
             bg.find(`.rounded-pill`).addClass('d-none');
