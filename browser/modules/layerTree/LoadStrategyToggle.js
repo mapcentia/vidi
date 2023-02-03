@@ -1,6 +1,6 @@
 /*
  * @author     Alexander Shumilov
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2023 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -10,13 +10,13 @@ import PropTypes from 'prop-types';
 class LoadStrategyToggle extends React.Component {
     constructor(props) {
         super(props);
-        this.state = { checked: props.initialValue };
+        this.state = {checked: props.initialValue};
 
         this.handleChange = this.handleChange.bind(this);
     }
 
     handleChange(event) {
-        this.setState({ checked: event.target.checked });
+        this.setState({checked: event.target.checked});
         this.props.onChange({
             layerKey: this.props.layerKey,
             dynamicLoadIsEnabled: event.target.checked
@@ -25,10 +25,9 @@ class LoadStrategyToggle extends React.Component {
 
     render() {
         return (<div>
-            <div className="togglebutton">
-                <label style={{ textIndent: `0px`, paddingLeft: `0px` }}>
-                    <input checked={this.state.checked} onChange={this.handleChange} type="checkbox"/> {__(`Dynamic load`)}
-                </label>
+            <div className="form-check">
+                <input id="load-strategy-switch" className="form-check-input" checked={this.state.checked} onChange={this.handleChange} type="checkbox"/>
+                <label htmlFor="load-strategy-switch" className="form-check-label">{__(`Dynamic load`)}</label>
             </div>
         </div>)
     }

@@ -511,10 +511,11 @@ class VectorLayerFilter extends React.Component {
             };
 
             return (
-                <div className="js-arbitrary-filters gap-1 d-flex flex-column" style={this.state.editorFiltersActive ? {
-                    pointerEvents: "none",
-                    opacity: "0.2"
-                } : {}}>
+                <div className="js-arbitrary-filters gap-1 d-flex flex-column mb-2"
+                     style={this.state.editorFiltersActive ? {
+                         pointerEvents: "none",
+                         opacity: "0.2"
+                     } : {}}>
                     <div className="form-group" style={{display: this.props.isFilterImmutable ? "none" : "inline"}}>
                         {__(`Match`)} {matchSelector} {__(`of the following`)}
                     </div>
@@ -594,14 +595,18 @@ class VectorLayerFilter extends React.Component {
                     marginTop: "25px",
                     display: this.props.isFilterImmutable ? "none" : "inline"
                 }}>
-                    <label className="form-check-label d-flex align-items-center gap-1">
-                        <input className="form-check-input" type="checkbox" checked={this.state.editorFiltersActive}
+                    <div className="form-check">
+                        <input id="filter-editor-switch" className="form-check-input" type="checkbox"
+                               checked={this.state.editorFiltersActive}
                                onChange={this.activateEditor.bind(this)}/>
-                        {__(`Filter editor`)}
-                    </label>
+                        <label htmlFor="filter-editor-switch"
+                               className="form-check-label d-flex align-items-center gap-1">
+                            {__(`Filter editor`)}
+                        </label>
+                    </div>
                     <div style={!this.state.editorFiltersActive ? {pointerEvents: "none", display: "none"} : {}}>
                         <textarea
-                            style={{"width": "100%", " boxSizing": "border-box", "height": "26px"}}
+                            className="form-control w-100 mb-2"
                             onChange={handleChange}
                             name={`editor_filter_` + (this.props.layer.f_table_schema + `.` + this.props.layer.f_table_name)}
                             value={JSON.stringify(
@@ -611,7 +616,8 @@ class VectorLayerFilter extends React.Component {
                         <button style={!this.state.editorFiltersActive ? {
                             pointerEvents: "none",
                             opacity: "0.2"
-                        } : {}} type="button" className="btn btn-sm btn-success" onClick={this.applyEditor.bind(this)}>
+                        } : {}} type="button" className="btn btn-sm btn-outline-success w-100"
+                                onClick={this.applyEditor.bind(this)}>
                             <i className="bi bi-check"></i> {__(`Apply`)}
                         </button>
                     </div>
@@ -620,57 +626,31 @@ class VectorLayerFilter extends React.Component {
         };
 
         const buildResetButton = () => {
-            return (<button className="btn btn-sm btn-danger" onClick={this.handleReset.bind(this)}>
+            return (<button className="btn btn-sm btn-outline-danger" onClick={this.handleReset.bind(this)}>
                 <i className="bi bi-reply"></i> {__(`Reset filter`)}</button>)
         };
 
         const buildFitBoundsButton = () => {
-            return (<button className="btn btn-sm btn-light set-extent-btn"
+            return (<button className="btn btn-sm btn-outline-secondary set-extent-btn w-100"
                             onClick={this.handleFitBounds.bind(this)}>
                 <i className="bi bi-arrows-fullscreen"></i> {__(`Fit bounds to filter`)}</button>)
-        };
-
-        const buildDownloadButton = () => {
-            return (
-                <div className="btn-group" role="group">
-                    <button type="button" className="btn btn-light btn-sm dropdown-toggle" data-bs-toggle="dropdown"
-                            aria-expanded="false">
-                        Download
-                    </button>
-                    <ul className="dropdown-menu">
-                        <li><a data-format="geojson" className="dropdown-item" href="#"
-                               onClick={this.handleDownload.bind(this)}>GeoJSON</a></li>
-                        <li><a data-format="csv" className="dropdown-item" href="#"
-                               onClick={this.handleDownload.bind(this)}>CSV</a></li>
-                        <li><a data-format="excel" className="dropdown-item" href="#"
-                               onClick={this.handleDownload.bind(this)}>Excel</a></li>
-                        <li>
-                            <hr className="dropdown-divider"/>
-                        </li>
-                        <li><a data-format="ogr/GPKG" className="dropdown-item" href="#"
-                               onClick={this.handleDownload.bind(this)}>GeoPackage</a></li>
-                        <li><a data-format="ogr/ESRI Shapefile" className="dropdown-item" href="#"
-                               onClick={this.handleDownload.bind(this)}>ESRI Shapefile</a></li>
-                    </ul>
-                </div>
-            )
         };
 
         let activeFiltersTab;
         let tabControl = false;
         if (Object.keys(this.state.predefinedFilters).length > 0) {
             tabControl = (<div>
-                <div className="btn-group" role="group">
+                <div className="btn-group w-100" role="group">
                     <input type="radio" id="predefined-filter-tab" name="sdsd" className="btn-check"
                            checked={this.state.activeTab === PREDEFINED_TAB}
                            onChange={this.switchActiveTab.bind(this)}/>
-                    <label className="btn btn-outline-primary btn-sm" htmlFor="predefined-filter-tab">
+                    <label className="btn btn-outline-secondary btn-sm" htmlFor="predefined-filter-tab">
                         {__(`Predefined`)}
                     </label>
                     <input type="radio" id="arbitrary-filter-tab" name="sdsd" className="btn-check"
                            checked={this.state.activeTab === ARBITRARY_TAB}
                            onChange={this.switchActiveTab.bind(this)}/>
-                    <label className="btn btn-outline-primary btn-sm" htmlFor="arbitrary-filter-tab">
+                    <label className="btn btn-outline-secondary btn-sm" htmlFor="arbitrary-filter-tab">
                         {__(`Arbitrary`)}
                     </label>
                 </div>
@@ -692,9 +672,6 @@ class VectorLayerFilter extends React.Component {
                 {buildFitBoundsButton()}
                 <div className="filter-functions">
                     {buildWhereClauseField()}
-                    <div className="row">
-                        <div className="col-md-6">{buildDownloadButton()}</div>
-                    </div>
                 </div>
             </div>
         );
@@ -712,7 +689,6 @@ VectorLayerFilter.propTypes = {
     onApplyArbitrary: PropTypes.func.isRequired,
     onDisableArbitrary: PropTypes.func.isRequired,
     onApplyFitBounds: PropTypes.func.isRequired,
-    onApplyDownload: PropTypes.func.isRequired,
     onChangeEditor: PropTypes.func.isRequired,
     onActivateEditor: PropTypes.func.isRequired,
     onApplyEditor: PropTypes.func.isRequired,

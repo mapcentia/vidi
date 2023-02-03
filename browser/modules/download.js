@@ -44,6 +44,8 @@ module.exports = {
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
+            } else {
+                alert("dsd")
             }
             // some error handling should be done here...
         };

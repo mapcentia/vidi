@@ -46,6 +46,7 @@ import {
     point as turfPoint
 } from '@turf/turf'
 import MetaSettingForm from "./MetaSettingForm";
+import Download from './Download';
 
 
 let _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEvents,
@@ -470,7 +471,11 @@ module.exports = {
                     const hideSettingsBtn = () => {
                         $(container).find('.js-settings-panel-btn').prop(`disabled`, true);
                         $(container).find('.collapse').collapse('hide');
-                    }
+                    };
+                    const hideDownload = () => {
+                        $(container).find(`.js-toggle-download`).hide(0);
+                        $(container).find('.js-layer-settings-download').hide(0);
+                    };
 
                     const deactivateAll = () => {
                         $(container).find('.js-toggle-btn').removeClass(`active`);
@@ -504,6 +509,7 @@ module.exports = {
                             $(container).find(`.js-toggle-layer-offline-mode-container`).css(`display`, `inline-block`);
                             $(container).find(`.js-toggle-table`).show(0);
                             $(container).find(`.js-toggle-style`).show(0);
+                            $(container).find(`.js-toggle-download`).show(0);
                         } else {
                             hideAddFeature();
                             hideFilters();
@@ -516,6 +522,7 @@ module.exports = {
                             hideStyleFn();
                             hideSettingsBtn();
                             deactivateAll();
+                            hideDownload();
                         }
                     } else if (desiredSetupType === LAYER.RASTER_TILE || desiredSetupType === LAYER.VECTOR_TILE) {
                         // Opacity and filters should be kept opened after setLayerState()
@@ -534,6 +541,7 @@ module.exports = {
                             $(container).find(`.js-toggle-labels`).show(0);
                             $(container).find(`.js-toggle-filters`).show(0);
                             $(container).find(`.js-toggle-search`).show(0);
+                            $(container).find(`.js-toggle-download`).show(0);
                         } else {
                             hideAddFeature();
                             hideFilters();
@@ -542,6 +550,7 @@ module.exports = {
                             hideSearch();
                             hideSettingsBtn();
                             deactivateAll();
+                            hideDownload();
                         }
 
                         // Hide filters if cached, but not if layer has a valid predefined filter
@@ -888,7 +897,7 @@ module.exports = {
          */
         backboneEvents.get().on(`tileLayerVisibility:layers`, (data) => {
             moduleState.tileContentCache[data.id] = data.dataIsVisible;
-            $(`[data-gc2-layer-key^="${data.id}."]`).find(`.js-tiles-contain-data`).css(`visibility`, (data.dataIsVisible ? `visible` : `hidden`));
+            $(`[data-gc2-layer-key^="${data.id}."]`).find(`.js-tiles-contain-data`).css(`display`, (data.dataIsVisible ? `inline` : `none`));
         });
 
         /**
@@ -2911,12 +2920,12 @@ module.exports = {
             }
 
             let layerIsEditable = false;
-            let displayInfo = layer.f_table_abstract ? `visible` : `hidden`;
+            let displayInfo = layer.f_table_abstract ? `inline` : `none`;
             let disableCheckBox = false;
             let parsedMeta = false;
             let layerKey = layer.f_table_schema + "." + layer.f_table_name;
             let layerKeyWithGeom = layerKey + "." + layer.f_geometry_column;
-            let lockedLayer = (layer.authentication === "Read/write" ? " <i class=\"fa fa-lock gc2-session-lock\" aria-hidden=\"true\"></i>" : "");
+            let lockedLayer = (layer.authentication === "Read/write" ? ` <i class="bi bi-key-fill text-danger gc2-session-lock" aria-hidden="true"></i>` : ``);
             let layerTypeSelector = ``;
             let parentLayerKeys = [];
             let childLayerKeys = [];
@@ -2932,7 +2941,7 @@ module.exports = {
                     }
 
                     if (`meta_desc` in parsedMeta) {
-                        displayInfo = (parsedMeta.meta_desc || layer.f_table_abstract) ? `visible` : `hidden`;
+                        displayInfo = (parsedMeta.meta_desc || layer.f_table_abstract) ? `inline` : `none`;
                     }
 
                     if (`referenced_by` in parsedMeta) {
@@ -3201,7 +3210,7 @@ module.exports = {
                     if (layerKey in moduleState.labelSettings && [true, false].indexOf(moduleState.labelSettings[layerKey]) !== -1) {
                         value = moduleState.labelSettings[layerKey];
                     }
-                    $(layerContainer).find('.js-layer-settings-labels').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
+                    $(layerContainer).find('.js-layer-settings-labels').append(`<div id="${componentContainerId}"></div>`);
                     setTimeout(() => {
                         if (document.getElementById(componentContainerId)) {
                             ReactDOM.render(<LabelSettingToggle
@@ -3300,7 +3309,6 @@ module.exports = {
                                     onApplyArbitrary={_self.onApplyArbitraryFiltersHandler}
                                     onDisableArbitrary={_self.onDisableArbitraryFiltersHandler}
                                     onApplyFitBounds={_self.onApplyFitBoundsFiltersHandler}
-                                    onApplyDownload={_self.onApplyDownloadHandler}
                                     onApplyEditor={_self.onApplyEditorFiltersHandler}
                                     onActivateEditor={_self.onActivateEditorFiltersHandler}
                                     onChangeEditor={_self.onChangeEditorFiltersHandler}
@@ -3330,7 +3338,7 @@ module.exports = {
                         }
 
                         let componentContainerId = `layer-settings-load-strategy-${layerKey}`;
-                        $(layerContainer).find('.js-layer-settings-load-strategy').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
+                        $(layerContainer).find('.js-layer-settings-load-strategy').append(`<div id="${componentContainerId}"></div>`);
                         setTimeout(() => {
                             if (document.getElementById(componentContainerId)) {
                                 ReactDOM.render(<LoadStrategyToggle
@@ -3373,7 +3381,7 @@ module.exports = {
                 // Vector styles
                 const settingsStyle = $(layerContainer).find('.js-layer-settings-style')
                 const componentContainerId = `layer-settings-styles-${layerKey}`;
-                settingsStyle.append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
+                settingsStyle.append(`<div id="${componentContainerId}"></div>`);
 
                 let values = {};
                 if (layerKey in moduleState.vectorStyles) {
@@ -3406,6 +3414,11 @@ module.exports = {
                 $(layerContainer).find(`.js-toggle-search`).click(() => {
                     _self._selectIcon($(layerContainer).find('.js-toggle-search'));
                     $(layerContainer).find('.js-layer-settings-search').toggle();
+                });
+
+                $(layerContainer).find(`.js-toggle-download`).click(() => {
+                    _self._selectIcon($(layerContainer).find('.js-toggle-download'));
+                    $(layerContainer).find('.js-layer-settings-download').toggle();
                 });
 
                 // PostgreSQL search is for all types of layers
@@ -3453,6 +3466,19 @@ module.exports = {
                     `
                 );
 
+                setTimeout(() => {
+                    let componentContainerId = `layer-settings-download-${layerKey.replace('.', '-')}`;
+                    $(layerContainer).find('.js-layer-settings-download').append(`<div id="${componentContainerId}"></div>`);
+                    if (document.getElementById(componentContainerId)) {
+                        ReactDOM.render(<Download
+                                layer={layer}
+                                onApplyDownload={_self.onApplyDownloadHandler}
+                            />,
+                            document.getElementById(componentContainerId));
+                    } else {
+                        console.error(`Unable to find the download container`);
+                    }
+                }, 10);
                 let search = $(layerContainer).find('.js-layer-settings-search').find(`form`).get(0);
                 if (search) {
                     let fieldConf = JSON.parse(layer.fieldconf) || {}, countSearchFields = [];

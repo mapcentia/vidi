@@ -20,7 +20,7 @@ class MarkupGenerator {
     }
 
     getAddButton(layerKeyWithGeom) {
-        return (`<button type="button" data-gc2-key="${layerKeyWithGeom}" style="visibility: hidden;" 
+        return (`<button type="button" data-gc2-key="${layerKeyWithGeom}" style="display: none;" 
             data-toggle="tooltip" data-placement="left" title="Add new feature to layer" data-layer-type="tile" class="btn btn-light btn-sm gc2-add-feature gc2-edit-tools">
             <i class="bi bi-plus-square"></i>
         </button>`);
@@ -103,7 +103,7 @@ class MarkupGenerator {
             <div class="d-flex align-items-center">
                 <div class="d-flex w-100 align-items-center flex-wrap gap-1">
                     <!-- switch and title-->
-                    <div class="d-flex align-items-center flex-grow-1 gap-1 mb-2">
+                    <div class="d-flex align-items-center flex-grow-1 gap-1 mb-2" style="min-height: 31px">
                                                                        <div class="form-check form-switch d-flex align-items-center">
                                                                        <label>
                                                                        <input type="checkbox"
@@ -120,13 +120,13 @@ class MarkupGenerator {
                                                                        <div id="layer-information">
                                                                        <div class="d-flex align-items-center gap-1">
                                                                        ${lockedLayer}
-                                                                       <span class="js-tiles-contain-data" style="visibility: ${moduleState.tileContentCache[layerKey] ? "inline" : "hidden"};" data-toggle="tooltip" data-placement="right"
+                                                                       <span class="js-tiles-contain-data" style="display: ${moduleState.tileContentCache[layerKey] ? "inline" : "none"};" data-toggle="tooltip" data-placement="right"
                                                                        title="${__("Layer is visible")}"><i class="bi bi-eye info-icon text-success"></i></span>
-                                                                       <span class="js-layer-is-disabled" style="visibility: ${disableCheckBox ? "inline" : "hidden"};" data-toggle="tooltip" data-placement="right"
+                                                                       <span class="js-layer-is-disabled" style="display: ${disableCheckBox ? "inline" : "none"};" data-toggle="tooltip" data-placement="right"
                                                                        title="${__("Locked")}"><i class="bi bi-lock text-danger"></i></span>
-                                                                       <span class="js-layer-has-parents info-icon" style="visibility: ${parentLayerKeys.length > 0 ? "inline" : "hidden"};" data-toggle="tooltip" data-placement="right"
+                                                                       <span class="js-layer-has-parents info-icon" style="display: ${parentLayerKeys.length > 0 ? "inline" : "none"};" data-toggle="tooltip" data-placement="right"
                                                                        title="${__("Parents")}: ${parentLayerKeys.length > 0 ? parentLayerKeys.join(", ") : ""}"><i class="bi bi-arrow-up"></i></span>
-                                                                       <span class="js-layer-has-children info-icon" style="visibility: ${childLayerKeys.length > 0 ? "inline" : "hidden"};" data-toggle="tooltip" data-placement="right"
+                                                                       <span class="js-layer-has-children info-icon" style="display: ${childLayerKeys.length > 0 ? "inline" : "none"};" data-toggle="tooltip" data-placement="right"
                                                                        title="${__("Children")}: ${childLayerKeys.length > 0 ? childLayerKeys.join(", ") : ""}"><i class="bi bi-arrow-down"></i></span>
                                                                        <span style="display: none" class="_gc2_layer_sort_id">(${layer.sort_id})</span>
                                                                        </div>
@@ -136,7 +136,7 @@ class MarkupGenerator {
                     <div class="d-flex align-items-center gap-1 mb-2"> 
                                                                         <div>${layerTypeSelector}</div>
                                                                         ${addButton}
-                                                                        <button data-toggle="tooltip" data-placement="left" title="${tooltip}" style="visibility: ${displayInfo};" class="btn btn-light btn-sm info-label" data-gc2-id="${layerKey}"><i class="bi bi-info-square"></i></a></button>
+                                                                        <button data-toggle="tooltip" data-placement="left" title="${tooltip}" style="display: ${displayInfo};" class="btn btn-light btn-sm info-label" data-gc2-id="${layerKey}"><i class="bi bi-info-square"></i></a></button>
                                                     </div>
      
                 </div>
@@ -211,6 +211,11 @@ class MarkupGenerator {
                                                                                                                     </span>
                                                                                                   </button>
                                                                                                   </span>
+                                                                                                  <span id="layer-tools-download">
+                                                                                                  <button href="javascript:void(0);" class="${toolBtnClass} js-toggle-download js-toggle-btn">
+                                                                                                  <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Download`)}" class="bi bi-download"></i>
+                                                                                                  </button>
+                                                                                                  </span>
                                                                                                   </div>
                                                                                                   </div>
                                                                                                   <div class="js-toggle-layer-offline-mode-container" style="display: none;">
@@ -237,6 +242,7 @@ class MarkupGenerator {
                                                                                                   <div class="js-layer-settings js-layer-settings-labels" style="display: none;"></div>
                                                                                                   <div class="js-layer-settings js-layer-settings-search" style="display: none;"></div>
                                                                                                   <div class="js-layer-settings js-layer-settings-style" style="display: none;"></div>
+                                                                                                  <div class="js-layer-settings js-layer-settings-download" style="display: none;"></div>
                                                                                                   <div class="js-layer-settings js-layer-settings-table" id="table_view-${layerKey.replace(".", "_")}" style="display: none;"></div>
         </li>`);
     }
