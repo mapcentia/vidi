@@ -63,7 +63,6 @@ class TitleFieldComponent extends React.Component {
 
         return (<div className="d-flex align-items-center gap-2">
             <input
-                id={(this.props.id ? this.props.id : ``)}
                 value={this.state.title}
                 disabled={this.props.disabled}
                 type="text"
