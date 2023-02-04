@@ -3068,7 +3068,7 @@ module.exports = {
                 html = html ? mustache.render(html, parsedMeta) : "";
 
                 $("#offcanvas-layer-desc-container").html(html);
-                $("#offcanvas-layer-desc h5").html(title || name);
+                $("#offcanvasLayerDesc h5").html(title || name);
                 bindEvent.showOffcanvasInfo()
                 e.stopPropagation();
             });
