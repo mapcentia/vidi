@@ -170,7 +170,7 @@ class MarkupGenerator {
                                            </button>
                                            </div>
             <div class="collapse" id="settings-${layer.f_table_schema}-${layer.f_table_name}" style="transition-duration: 0s">
-                                                                                                  <div class="d-flex align-items-center gap-3">
+                                                                                                  <div class="d-flex align-items-center gap-3 flex-wrap">
                                                                                                   <div class="js-toggles-container" style="display: none;">
                                                                                                   <div style="display: flex; align-items: center;" class="gap-1">
                                                                                                   <span id="layer-tools-search">
