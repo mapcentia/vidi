@@ -10,12 +10,7 @@ import {LAYER_TYPE_DEFAULT} from './layerTree/constants';
 
 require('dom-shims');
 require('arrive');
-const config = require('../../config/config.js');
 const layerTreeUtils = require('./layerTree/utils');
-const LEFT_SLIDE_WIDTHS = config?.leftSlideWidths || [300, 400, 550];
-const BUTTON_WITH = 24;
-const mobile = require('is-mobile');
-const jrespond = require('jrespond'); //TODO Change to Window.matchMedia()
 const APIBridgeSingletone = require('./api-bridge');
 let advancedInfo, cloud, switchLayer, meta, utils;
 let apiBridgeInstance = false;
@@ -35,6 +30,7 @@ let urlVars = urlparser.urlVars;
 
 let mainLayerOffcanvas;
 let offcanvasEdit;
+let offcanvasInfo;
 
 
 /**
@@ -66,6 +62,7 @@ module.exports = {
         try {
             mainLayerOffcanvas = new bootstrap.Offcanvas('#mainLayerOffcanvas');
             offcanvasEdit = new bootstrap.Offcanvas('#offcanvasEdit');
+            offcanvasInfo = new bootstrap.Offcanvas('#offcanvasLayerDesc');
             document.getElementById('offcanvasEdit').addEventListener('shown.bs.offcanvas', event => {
                 $(".edit-attr-btn").prop("disabled", true)
             })
@@ -483,6 +480,12 @@ module.exports = {
     },
     hideOffcanvasEdit: () => {
         offcanvasEdit.hide();
+    },
+    showOffcanvasInfo: () => {
+        offcanvasInfo.show();
+    },
+    hideOffcanvasInfo: () => {
+        offcanvasInfo.hide();
     }
 
 }

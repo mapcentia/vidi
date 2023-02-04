@@ -103,6 +103,7 @@ let moduleState = {
     vectorStyles: {}
 };
 let infoOffCanvas;
+let bindEvent;
 
 /**
  *
@@ -120,6 +121,7 @@ module.exports = {
         backboneEvents = o.backboneEvents;
         extensions = o.extensions;
         utils = o.utils;
+        bindEvent = o.bindEvent;
 
         offlineModeControlsManager = new OfflineModeControlsManager(meta);
 
@@ -3065,18 +3067,9 @@ module.exports = {
 
                 html = html ? mustache.render(html, parsedMeta) : "";
 
-                // Right slide in default.tmpl
-                $("#info-modal.slide-right").css("right", "0");
-                $("#info-modal .modal-title").html(title || name);
-                $("#info-modal .modal-body").html(html + '<div id="info-modal-legend" class="legend"></div>');
-
-                // Left slide in embed.tmpl
-                $("#info-modal-top.slide-left").show();
-                $("#info-modal-top.slide-left").animate({left: "0"}, 200);
-                $("#info-modal-top .modal-title").html(title || name);
-                $("#info-modal-top .modal-body").html(html + '<div id="info-modal-legend" class="legend"></div>');
-
-                legend.init([`${layer.f_table_schema}.${layer.f_table_name}`], "#info-modal-legend");
+                $("#offcanvas-layer-desc-container").html(html);
+                $("#offcanvas-layer-desc h5").html(title || name);
+                bindEvent.showOffcanvasInfo()
                 e.stopPropagation();
             });
 
