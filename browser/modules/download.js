@@ -45,7 +45,7 @@ module.exports = {
                 link.click();
                 document.body.removeChild(link);
             } else {
-                alert("dsd")
+                request.response.text().then(e => alert(JSON.parse(e).message.join("\n")));
             }
             // some error handling should be done here...
         };
