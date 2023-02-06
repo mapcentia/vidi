@@ -146,29 +146,30 @@ class MarkupGenerator {
                 </div>
             </div>  
             <!-- queue -->
-                                           <div class="d-flex align-items-center gap-1">
-                                           <button type="button" class="hidden btn btn-sm btn-light js-statistics-field js-failed-add" style="${queueFailedButtonStyle}" disabled>
+                                           <div class="d-none align-items-center gap-1 js-failed-container">
+                                           <button type="button" class="d-none btn btn-sm btn-light js-statistics-field js-failed-add" style="${queueFailedButtonStyle}" disabled>
                                            <i class="bi bi-plus-square"></i> <span class="js-value"></span>
                                            </button>
-                                           <button type="button" class="hidden btn btn-sm btn-light js-statistics-field js-failed-update" style="${queueFailedButtonStyle}" disabled>
+                                           <button type="button" class="d-none btn btn-sm btn-light js-statistics-field js-failed-update" style="${queueFailedButtonStyle}" disabled>
                                            <i class="bi bi-pencil"></i> <span class="js-value"></span>
                                            </button>
-                                           <button type="button" class="hidden btn btn-sm btn-light js-statistics-field js-failed-delete" style="${queueFailedButtonStyle}" disabled>
+                                           <button type="button" class="d-none btn btn-sm btn-light js-statistics-field js-failed-delete" style="${queueFailedButtonStyle}" disabled>
                                            <i class="fa bi-dash-square"></i> <span class="js-value"></span>
                                            </button>
-                                           <button type="button" class="hidden btn btn-sm btn-light js-statistics-field js-rejectedByServer-add" style="${queueRejectedByServerButtonStyle}" disabled>
+                                           <button type="button" class="d-none btn btn-sm btn-light js-statistics-field js-rejectedByServer-add" style="${queueRejectedByServerButtonStyle}" disabled>
                                            <i class="bi bi-plus-square"></i> <span class="js-value"></span>
                                            </button>
-                                           <button type="button" class="hidden btn btn-sm btn-light js-statistics-field js-rejectedByServer-update" style="${queueRejectedByServerButtonStyle}" disabled>
+                                           <button type="button" class="d-none btn btn-sm btn-light js-statistics-field js-rejectedByServer-update" style="${queueRejectedByServerButtonStyle}" disabled>
                                            <i class="bi bi-pencil"></i> <span class="js-value"></span>
                                            </button>
-                                           <button type="button" class="hidden btn btn-sm btn-light js-statistics-field js-rejectedByServer-delete" style="${queueRejectedByServerButtonStyle}" disabled>
+                                           <button type="button" class="d-none btn btn-sm btn-light js-statistics-field js-rejectedByServer-delete" style="${queueRejectedByServerButtonStyle}" disabled>
                                            <i class="bi bi-dash-square"></i> <span class="js-value"></span>
                                            </button>
-                                           <button type="button" data-gc2-id="${layerKey}" class="hidden btn btn-sm btn-light js-clear" style="${regularButtonStyle}">
+                                           <button type="button" data-gc2-id="${layerKey}" class="d-none btn btn-sm btn-light js-clear" style="${regularButtonStyle}">
                                            <i class="bi bi-arrow-counterclockwise"></i>
                                            </button>
                                            </div>
+            <div class="js-rejectedByServerItems d-none"></div>
             <div class="collapse" id="settings-${layer.f_table_schema}-${layer.f_table_name}" style="transition-duration: 0s">
                                                                                                   <div class="d-flex align-items-center gap-2 flex-wrap">
                                                                                                   <div class="js-toggles-container" style="display: none;">
@@ -235,7 +236,6 @@ class MarkupGenerator {
                                                                                                   </div>
                                                                                                   </div>
                                                                                                   </div>
-                                                                                                  <div class="js-rejectedByServerItems hidden" style="width: 100%; padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>
                                                                                                   <div class="js-layer-settings js-layer-settings-filters" style="display: none;"></div>
                                                                                                   <div class="js-layer-settings js-layer-settings-load-strategy" style="display: none;"></div>
                                                                                                   <div class="js-layer-settings js-layer-settings-opacity" style="display: none;"></div>
