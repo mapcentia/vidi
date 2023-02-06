@@ -468,7 +468,7 @@ module.exports = {
                     };
 
                     const hideAddFeature = () => {
-                        $(container).find('.gc2-add-feature').css(`visibility`, `hidden`);
+                        $(container).find('.gc2-add-feature').css(`display`, `none`);
                     };
                     const hideSettingsBtn = () => {
                         $(container).find('.js-settings-panel-btn').prop(`disabled`, true);
@@ -504,7 +504,7 @@ module.exports = {
                         }
 
                         if (layerIsEnabled) {
-                            $(container).find('.gc2-add-feature').css(`visibility`, `visible`);
+                            $(container).find('.gc2-add-feature').css(`display`, `inline`);
                             $(container).find('.js-settings-panel-btn').prop(`disabled`, false);
                             $(container).find(`.js-toggle-search`).show(0);
                             $(container).find(`.js-toggle-load-strategy`).show(0);
@@ -537,7 +537,7 @@ module.exports = {
 
                         hideOfflineMode();
                         if (layerIsEnabled) {
-                            $(container).find('.gc2-add-feature').css(`visibility`, `visible`);
+                            $(container).find('.gc2-add-feature').css(`display`, `inline`);
                             $(container).find('.js-settings-panel-btn').prop(`disabled`, false);
                             $(container).find(`.js-toggle-opacity`).show(0);
                             $(container).find(`.js-toggle-labels`).show(0);

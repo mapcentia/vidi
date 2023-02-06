@@ -147,7 +147,11 @@ module.exports = {
             console.log(`Editor extension is disabled due to the enabled watsonc`);
             return;
         }
-        $("#editStopBtn").on("click", () => _self.stopEdit());
+        $("#editStopBtn").on("click", () => {
+            if (window.confirm(__("Are you sure you want to stop?"))) {
+                _self.stopEdit();
+            }
+        })
 
         if (vidiConfig.enabledExtensions.indexOf(`embed`) !== -1) {
             embedIsEnabled = true;
@@ -550,7 +554,7 @@ module.exports = {
                         widgets={widgets}
                         onSubmit={onSubmit}>
                         <div className="buttons">
-                            <button type="submit" className="btn btn-lg btn-success">{__("Submit")}</button>
+                            <button type="submit" className="btn btn btn-success mb-2 mt-2 w-100">{__("Submit")}</button>
                         </div>
                     </Form>
                 </div>
@@ -964,7 +968,7 @@ module.exports = {
                         formData={eventFeatureParsed}
                         onSubmit={onSubmit}>
                         <div className="buttons">
-                            <button type="submit" className="btn btn-lg btn-success">{__("Submit")}</button>
+                            <button type="submit" className="btn btn btn-success mb-2 mt-2 w-100">{__("Submit")}</button>
                         </div>
                     </Form>
                 </div>

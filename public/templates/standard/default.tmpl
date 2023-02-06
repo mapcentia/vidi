@@ -15,15 +15,14 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
-                </button>
-                <h4 class="modal-title" id="about-modalLabel">{{About}}</h4>
+                <h1 class="modal-title fs-5" id="about-modalLabel">{{About}}</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{Close}}"></button>
             </div>
             <div class="modal-body">
                 {{{aboutBox}}}
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">{{Close}}</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{Close}}</button>
             </div>
         </div>
     </div>
@@ -33,6 +32,10 @@
 <div class="modal fade" id="login-modal" tabindex="-1" role="dialog" aria-labelledby="click-modalLabel">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="login-modalLabel">{{Sign in}}</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{Close}}"></button>
+            </div>
             <div class="modal-body" id="login-modal-body"></div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{Close}}</button>
@@ -40,24 +43,6 @@
         </div>
     </div>
 </div>
-
-
-<!--<div id="legend-dialog" class="dialog-bottom fade-then-dragging">-->
-<!--    <div class="modal-header">-->
-<!--        <button type="button" class="close close-hide" data-module="legend" aria-hidden="true"><i-->
-<!--                class="material-icons">close</i>-->
-<!--        </button>-->
-<!--        <button type="button" class="close expand-more" aria-hidden="true"><i-->
-<!--                class="material-icons">expand_less</i>-->
-<!--        </button>-->
-<!--        <button type="button" class="close expand-less" aria-hidden="true"><i-->
-<!--                class="material-icons">expand_more</i>-->
-<!--        </button>-->
-<!--        <h3 class="modal-title">{{Legend}}</h3>-->
-<!--    </div>-->
-<!--    <div class="modal-body"></div>-->
-<!--</div>-->
-
 
 <div id="vector-layer-table-view-dialog" class="dialog-bottom fade-then-dragging dialog-bottom-wide">
     <div class="modal-header">
@@ -74,17 +59,6 @@
         <div class="form-group" id="vector-layer-table-view-form"></div>
     </div>
 </div>
-
-<!--<div id="info-modal" class="slide-right">-->
-<!--    <div class="modal-header">-->
-<!--        <button type="button" class="close" aria-hidden="true">×</button>-->
-<!--        <h2 class="modal-title"></h2>-->
-<!--    </div>-->
-<!--    <div id="info-modal-body-wrapper">-->
-<!--        <div class="modal-body" id="info-modal-body"></div>-->
-<!--    </div>-->
-<!--</div>-->
-
 
 <nav class="navbar navbar-expand-sm bg-light">
     <div class="container-fluid">
@@ -117,25 +91,25 @@
 
         <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
             <ul class="navbar-nav me-2">
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                       aria-expanded="false">
-                        Hjælp
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#">Action</a></li>
-                        <li><a class="dropdown-item" href="#">Another action</a></li>
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-                        <li><a class="dropdown-item" href="#">Something else here</a></li>
-                    </ul>
+<!--                <li class="nav-item dropdown">-->
+<!--                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"-->
+<!--                       aria-expanded="false">-->
+<!--                        Hjælp-->
+<!--                    </a>-->
+<!--                    <ul class="dropdown-menu">-->
+<!--                        <li><a class="dropdown-item" href="#">Action</a></li>-->
+<!--                        <li><a class="dropdown-item" href="#">Another action</a></li>-->
+<!--                        <li>-->
+<!--                            <hr class="dropdown-divider">-->
+<!--                        </li>-->
+<!--                        <li><a class="dropdown-item" href="#">Something else here</a></li>-->
+<!--                    </ul>-->
+<!--                </li>-->
+                <li class="nav-item">
+                    <a class="nav-link" id="btn-reset" href="#">Reset</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Reset</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Om</a>
+                    <a class="nav-link" data-bs-toggle="modal" data-bs-target="#about-modal" href="#">{{About}}</a>
                 </li>
             </ul>
             <!--            <form class="d-flex me-2 mb-2 mb-lg-0" role="search">-->
