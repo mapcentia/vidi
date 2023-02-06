@@ -1,6 +1,6 @@
 /*
  * @author     Alexander Shumilov
- * @copyright  2013-2022 MapCentia ApS
+ * @copyright  2013-2023 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -10,8 +10,6 @@ import {LAYER, SYSTEM_FIELD_PREFIX} from '../../../browser/modules/layerTree/con
 import {GEOJSON_PRECISION} from '../../../browser/modules/constants';
 import dayjs from 'dayjs';
 
-const jquery = require('jquery');
-require('snackbarjs');
 
 /**
  *
@@ -19,7 +17,6 @@ require('snackbarjs');
  */
 let APIBridgeSingletone = require('../../../browser/modules/api-bridge');
 
-let PANEL_DOCKING_PARAMETER = 1024;
 
 /**
  *
@@ -202,31 +199,6 @@ module.exports = {
                     _self.delete(getLayerById(id), name, isVectorLayer)
                     e.stopPropagation();
                 }
-            });
-        });
-
-        // Listen to close of attr box
-        $(".editor-attr-dialog__close-hide").on("click", function () {
-            _self.stopEdit();
-            backboneEvents.get().trigger("sqlQuery:clear");
-        });
-
-        $(".editor-attr-dialog__expand-less").on("click", function () {
-            let e = $("#" + EDITOR_CONTAINER_ID);
-            e.animate({
-                bottom: ((e.height() * -1) + 30) + "px"
-            }, 500, function () {
-                $(".editor-attr-dialog__expand-less").hide();
-                $(".editor-attr-dialog__expand-more").show();
-            });
-        });
-
-        $(".editor-attr-dialog__expand-more").on("click", function () {
-            $("#" + EDITOR_CONTAINER_ID).animate({
-                bottom: "0"
-            }, 500, function () {
-                $(".editor-attr-dialog__expand-less").show();
-                $(".editor-attr-dialog__expand-more").hide();
             });
         });
 
@@ -528,12 +500,7 @@ module.exports = {
                         layerTree.reloadLayer("v:" + schemaQualifiedName, true);
                     }
 
-                    $.snackbar({
-                        id: "snackbar-conflict",
-                        content: "Feature  stedfæstet",
-                        htmlAllowed: true,
-                        timeout: 5000
-                    });
+                    utils.showInfoToast(__("Feature added"))
                 };
 
                 apiBridgeInstance.addFeature(featureCollection, db, metaDataKeys[schemaQualifiedName]).then(featureIsSaved).catch(error => {
@@ -796,11 +763,7 @@ module.exports = {
                         editor = e.enableEdit();
                     } else {
                         editor = false;
-                        jquery.snackbar({
-                            content: `<span>${__("Editing of geometry is not possible when number of nodes exceed")} ${MAX_NODE_IN_FEATURE}</span>`,
-                            htmlAllowed: true,
-                            timeout: 6000
-                        })
+                        utils.showInfoToast(__("Editing of geometry is not possible when number of nodes exceed") + " " + MAX_NODE_IN_FEATURE);
                     }
                     break;
             }

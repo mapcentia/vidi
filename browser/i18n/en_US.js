@@ -264,6 +264,7 @@ module.exports = {
         "Editing of geometry is not possible when number of nodes exceed": "Editing of geometry is not possible when number of nodes exceed",
         "Submit": "Submit",
         "Are you sure you want to stop?": "Are you sure you want to stop?",
+        "Feature added": "Feature added",
 
         // OfflineMap
         "tiles failed to load": "tiles failed to load",

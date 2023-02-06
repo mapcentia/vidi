@@ -264,6 +264,7 @@ module.exports = {
         "Editing of geometry is not possible when number of nodes exceed": "Ændring af geometri er ikke mulig, når antallet af knækpunkter overstiger",
         "Submit": "Gem",
         "Are you sure you want to stop?": "Er du sikker på, at du vil stoppe?",
+        "Feature added": "Feature stedfæstet",
 
         // OfflineMap
         "tiles failed to load": "fliser mangler at indlæse",
