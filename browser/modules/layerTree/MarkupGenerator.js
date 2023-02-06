@@ -75,7 +75,7 @@ class MarkupGenerator {
 
     getSubgroupControlRecord(base64SubgroupName, name, level, addGroupCheckbox = false) {
         return (`<li
-        class="layer-item list-group-item list-subgroup-item d-flex flex-column"
+        class="layer-item list-group-item list-subgroup-item d-flex flex-column gap-1"
         data-gc2-subgroup-id="${name}">
             <div class="d-flex align-items-center gap-1">
                 <span style="display: ${addGroupCheckbox ? "inline" : "none"};" class="togglebutton">
@@ -99,11 +99,11 @@ class MarkupGenerator {
         const toolBtnClass = `btn btn-light btn-sm`
 
         return (`
-        <li class="layer-item list-group-item" data-gc2-layer-key="${layerKeyWithGeom}">
+        <li class="layer-item list-group-item d-flex flex-column gap-1" data-gc2-layer-key="${layerKeyWithGeom}">
             <div class="d-flex align-items-center">
                 <div class="d-flex w-100 align-items-center flex-wrap gap-1">
                     <!-- switch and title-->
-                    <div class="d-flex align-items-center flex-grow-1 gap-1 mb-2" style="min-height: 31px">
+                    <div class="d-flex align-items-center flex-grow-1 gap-1" style="min-height: 31px">
                                                                        <div class="form-check form-switch d-flex align-items-center">
                                                                        <label>
                                                                        <input type="checkbox"
@@ -133,7 +133,7 @@ class MarkupGenerator {
                                                                        </div>
                                                                        </div>
                     <!-- tools -->
-                    <div class="d-flex align-items-center gap-1 mb-2"> 
+                    <div class="d-flex align-items-center gap-1"> 
                                                                         <div>${layerTypeSelector}</div>
                                                                         ${addButton}
                                                                         <button data-toggle="tooltip" data-placement="left" title="${tooltip}" style="display: ${displayInfo};" class="btn btn-light btn-sm info-label" data-gc2-id="${layerKey}"><i class="bi bi-info-square"></i></a></button>
@@ -147,30 +147,30 @@ class MarkupGenerator {
             </div>  
             <!-- queue -->
                                            <div class="d-flex align-items-center gap-1">
-                                           <button type="button" class="hidden btn btn-sm btn-light js-statistics-field js-failed-add mb-2" style="${queueFailedButtonStyle}" disabled>
+                                           <button type="button" class="hidden btn btn-sm btn-light js-statistics-field js-failed-add" style="${queueFailedButtonStyle}" disabled>
                                            <i class="bi bi-plus-square"></i> <span class="js-value"></span>
                                            </button>
-                                           <button type="button" class="hidden btn btn-sm btn-light js-statistics-field js-failed-update mb-2" style="${queueFailedButtonStyle}" disabled>
+                                           <button type="button" class="hidden btn btn-sm btn-light js-statistics-field js-failed-update" style="${queueFailedButtonStyle}" disabled>
                                            <i class="bi bi-pencil"></i> <span class="js-value"></span>
                                            </button>
-                                           <button type="button" class="hidden btn btn-sm btn-light js-statistics-field js-failed-delete mb-2" style="${queueFailedButtonStyle}" disabled>
+                                           <button type="button" class="hidden btn btn-sm btn-light js-statistics-field js-failed-delete" style="${queueFailedButtonStyle}" disabled>
                                            <i class="fa bi-dash-square"></i> <span class="js-value"></span>
                                            </button>
-                                           <button type="button" class="hidden btn btn-sm btn-light js-statistics-field js-rejectedByServer-add mb-2" style="${queueRejectedByServerButtonStyle}" disabled>
+                                           <button type="button" class="hidden btn btn-sm btn-light js-statistics-field js-rejectedByServer-add" style="${queueRejectedByServerButtonStyle}" disabled>
                                            <i class="bi bi-plus-square"></i> <span class="js-value"></span>
                                            </button>
-                                           <button type="button" class="hidden btn btn-sm btn-light js-statistics-field js-rejectedByServer-update mb-2" style="${queueRejectedByServerButtonStyle}" disabled>
+                                           <button type="button" class="hidden btn btn-sm btn-light js-statistics-field js-rejectedByServer-update" style="${queueRejectedByServerButtonStyle}" disabled>
                                            <i class="bi bi-pencil"></i> <span class="js-value"></span>
                                            </button>
-                                           <button type="button" class="hidden btn btn-sm btn-light js-statistics-field js-rejectedByServer-delete mb-2" style="${queueRejectedByServerButtonStyle}" disabled>
+                                           <button type="button" class="hidden btn btn-sm btn-light js-statistics-field js-rejectedByServer-delete" style="${queueRejectedByServerButtonStyle}" disabled>
                                            <i class="bi bi-dash-square"></i> <span class="js-value"></span>
                                            </button>
-                                           <button type="button" data-gc2-id="${layerKey}" class="hidden btn btn-sm btn-light js-clear mb-2" style="${regularButtonStyle}">
+                                           <button type="button" data-gc2-id="${layerKey}" class="hidden btn btn-sm btn-light js-clear" style="${regularButtonStyle}">
                                            <i class="bi bi-arrow-counterclockwise"></i>
                                            </button>
                                            </div>
             <div class="collapse" id="settings-${layer.f_table_schema}-${layer.f_table_name}" style="transition-duration: 0s">
-                                                                                                  <div class="d-flex align-items-center gap-3 flex-wrap">
+                                                                                                  <div class="d-flex align-items-center gap-2 flex-wrap">
                                                                                                   <div class="js-toggles-container" style="display: none;">
                                                                                                   <div style="display: flex; align-items: center;" class="gap-1">
                                                                                                   <span id="layer-tools-search">

@@ -5,11 +5,10 @@
  */
 
 
-let jquery = require('jquery');
-require('snackbarjs');
-
 import {MODULE_NAME, LAYER, SQL_QUERY_LIMIT} from './constants';
 import {GROUP_CHILD_TYPE_LAYER, GROUP_CHILD_TYPE_GROUP} from './LayerSorting';
+
+const utils = require('./../utils')
 
 const base64url = require('base64url');
 
@@ -325,30 +324,19 @@ const getPossibleLayerTypes = (layerDescription) => {
  * @returns {void}
  */
 const storeErrorHandler = (store, response) => {
+    debugger
     if (response && response.statusText === `timeout`) {
-        jquery.snackbar({
-            content: `<span>${__("Couldn't get the data. Trying again...")}</span>`,
-            htmlAllowed: true,
-            timeout: 6000
-        });
+        utils.showInfoToast(__("Couldn't get the data. Trying again..."));
         //try again
         store.load();
     } else if (response && response.statusText === `abort`) {
         // If the request was aborted, then it was sanctioned by Vidi, so no need to inform user
     } else if (response && response.responseJSON) {
-        jquery.snackbar({
-            content: `<span>${response.responseJSON.message}</span>`,
-            htmlAllowed: true,
-            timeout: 6000
-        });
         console.error(response.responseJSON.message);
+        utils.showInfoToast(response.responseJSON.message);
     } else {
-        jquery.snackbar({
-            content: `<span>Error occurred</span>`,
-            htmlAllowed: true,
-            timeout: 4000
-        });
         console.error(response);
+        utils.showInfoToast('Error occurred');
     }
 };
 

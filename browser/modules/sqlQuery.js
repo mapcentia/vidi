@@ -15,7 +15,7 @@ const layerTreeUtils = require('./layerTree/utils');
 /**
  * @type {*|exports|module.exports}
  */
-let cloud, backboneEvents, meta, layerTree, advancedInfo, switchLayer;
+let cloud, backboneEvents, meta, layerTree, advancedInfo, switchLayer, utils;
 
 /**
  * @type {*|exports|module.exports}
@@ -27,8 +27,8 @@ let _layers;
  * @type {*|exports|module.exports}
  */
 const urlparser = require('./urlparser');
-
 const download = require('./download');
+
 
 /**
  * @type {string}
@@ -55,10 +55,6 @@ let defaultSelectedStyle = {
 };
 
 let backArrowIsAdded = false;
-
-const jquery = require('jquery');
-require('snackbarjs');
-
 
 let editToolsHtml = `
         <div class="form-group gc2-edit-tools" data-edit-layer-id="{{_vidi_edit_layer_id}}" data-edit-layer-name="{{_vidi_edit_layer_name}}" data-edit-vector="{{_vidi_edit_vector}}" style="display: {{_vidi_edit_display}};">
@@ -146,6 +142,7 @@ module.exports = {
         switchLayer = o.switchLayer;
         backboneEvents = o.backboneEvents;
         _layers = o.layers;
+        utils = o.utils;
         extensions = o.extensions;
 
         _self = this;
@@ -488,11 +485,7 @@ module.exports = {
                         if (!hit) {
                             _self.closeInfoSlidePanel();
                             $(`#${elementPrefix}modal-info-body`).hide();
-                            jquery.snackbar({
-                                content: "<span id=`conflict-progress`>" + __("Didn't find anything") + "</span>",
-                                htmlAllowed: true,
-                                timeout: 2000
-                            });
+                            utils.showInfoToast(__("Didn't find anything"))
                         } else {
                             if (forceOffCanvasInfo) {
                                 _self.openInfoSlidePanel();
@@ -530,11 +523,7 @@ module.exports = {
                 base64: true,
                 styleMap: styleForSelectedFeatures,
                 error: () => {
-                    jquery.snackbar({
-                        content: "<span>" + __("Error or timeout on") + " " + layerTitel + "</span>",
-                        htmlAllowed: true,
-                        timeout: 2000
-                    })
+                    utils.showInfoToast(__("Error or timeout on") + " " + layerTitel);
                 },
                 // Set _vidi_type on all vector layers,
                 // so they can be recreated as query layers

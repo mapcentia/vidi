@@ -1477,12 +1477,7 @@ module.exports = {
      * @return {void}
      */
     maxFeaturesNotification: (layerKey) => {
-        $.snackbar({
-            id: "snackbar-watsonc",
-            content: `<span id="conflict-progress">${__("max_number_of_loaded_features_was_reached_notification")} (${layerKey})</span>`,
-            htmlAllowed: true,
-            timeout: 7000
-        });
+        utils.showInfoToast(__("max_number_of_loaded_features_was_reached_notification") + ' ' + layerKey);
     },
 
     /**
@@ -2168,6 +2163,9 @@ module.exports = {
             setTimeout(() => {
                 $('#vector-feature-info-panel .accordion-button').trigger('click');
             }, 200);
+        }
+        if (count === 0) {
+            utils.showInfoToast(__("Didn't find anything"))
         }
     },
 
