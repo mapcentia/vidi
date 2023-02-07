@@ -821,16 +821,7 @@ module.exports = {
     },
 
     openInfoSlidePanel: function (layerKey = null) {
-        layerTree.getInfoOffCanvas().show()
-        // let e = $("#click-for-info-slide.slide-left");
-        // e.show();
-        // e.animate({left: "0"}, 200);
-        // if (layerKey) {
-        //     let metaDataKeys = meta.getMetaDataKeys();
-        //     let title = typeof metaDataKeys[layerKey].f_table_title !== "undefined" ? metaDataKeys[layerKey].f_table_title : metaDataKeys[layerKey].f_table_name;
-        //     $("#click-for-info-slide .modal-title").html(title);
-        //
-        // }
+        layerTree.getInfoOffCanvas().show();
     },
     closeInfoSlidePanel: function () {
         layerTree.getInfoOffCanvas().hide();
