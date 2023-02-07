@@ -324,7 +324,6 @@ const getPossibleLayerTypes = (layerDescription) => {
  * @returns {void}
  */
 const storeErrorHandler = (store, response) => {
-    debugger
     if (response && response.statusText === `timeout`) {
         utils.showInfoToast(__("Couldn't get the data. Trying again..."));
         //try again
