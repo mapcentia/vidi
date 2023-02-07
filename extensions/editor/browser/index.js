@@ -965,7 +965,7 @@ module.exports = {
      */
     openAttributesDialog: () => {
         $("#offcanvasEditBtn").trigger("click");
-        $(".nav-edit-btn").removeClass("d-none")
+        $("#edit-tool-group").removeClass("d-none")
     },
 
     /**
@@ -1035,7 +1035,7 @@ module.exports = {
     stopEdit: function () {
         backboneEvents.get().trigger('unblock:infoClick');
         cloud.get().map.editTools.stopDrawing();
-        $(".nav-edit-btn").addClass("d-none");
+        $("#edit-tool-group").addClass("d-none");
         bindEvent.hideOffcanvasEdit()
 
         if (editor) {
