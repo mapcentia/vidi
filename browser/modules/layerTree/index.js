@@ -104,6 +104,7 @@ let moduleState = {
 };
 let infoOffCanvas;
 let bindEvent;
+let initialFilterIsApplied = false;
 
 /**
  *
@@ -226,7 +227,8 @@ module.exports = {
 
                     // Wait for layer load event
                     backboneEvents.get().on(`doneLoading:layers`, (loadedLayerName) => {
-                        if (layerTreeUtils.stripPrefix(loadedLayerName) === layerTreeUtils.stripPrefix(layerKey)) {
+                        if (layerTreeUtils.stripPrefix(loadedLayerName) === layerTreeUtils.stripPrefix(layerKey) && !initialFilterIsApplied) {
+                            initialFilterIsApplied = true;
                             for (let key in cloud.get().map._layers) {
                                 let layer = cloud.get().map._layers[key];
                                 if (`id` in layer && layer.id && layerTreeUtils.stripPrefix(layer.id) === layerTreeUtils.stripPrefix(layerKey)) {
@@ -1602,7 +1604,7 @@ module.exports = {
                     let reloadInterval = meta.parseLayerMeta(layerKey)?.reload_interval;
                     let tableElement = meta.parseLayerMeta(layerKey)?.show_table_on_side;
                     // Create side table once
-                    if (tableElement && !$('#' + VECTOR_SIDE_TABLE_EL).length && window.vidiConfig.template === "embed.tmpl") {
+                    if (tableElement) {
                         let styles;
                         let height = null;
                         let tableBodyHeight;
@@ -1947,6 +1949,57 @@ module.exports = {
             let template = sqlQuery.getVectorTemplate(layerKey);
             let tableHeaders = sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + layerKey,
                 JSON.parse(JSON.stringify(layerWithData[0].toGeoJSON(GEOJSON_PRECISION).features)));
+
+            window.operateFormatter = (value, row, index) => {
+                return `
+                    <div class="d-flex justify-content-around">
+                    <a class="btn btn-light btn-sm filter" href="javascript:void(0)" title="Filter">
+                        <i class="bi bi-filter-square text-primary"></i>
+                    </a>
+                    <a class="btn btn-light btn-sm unfilter" href="javascript:void(0)" title="Unfilter">
+                        <i class="bi bi-x-lg text-danger"></i>
+                    </a>
+                    </div>
+                    `;
+            }
+            const filter = (row) => {
+                console.log(row)
+                _self.onApplyArbitraryFiltersHandler({
+                    layerKey,
+                    filters: {
+                        match: "any",
+                        columns: [
+                            {
+                                fieldname: "gid",
+                                expression: "=",
+                                value: row.gid.toString(),
+                                restriction: false
+                            }
+                        ]
+                    }
+                }, LAYER.VECTOR);
+            }
+            const unfilter = () => {
+                _self.onDisableArbitraryFiltersHandler(layerKey)
+                _self.onApplyArbitraryFiltersHandler({
+                    layerKey,
+                    filters: {
+                        match: "any",
+                        columns: []
+                    }
+                }, LAYER.VECTOR)
+            }
+            window.operateEvents = {
+                'click .filter': (e, value, row, index) => filter(row),
+                'click .unfilter': (e, value, row, index) => unfilter()
+            }
+
+            tableHeaders.push({
+                header: "Filter",
+                dataIndex: "filter",
+                formatter: "operateFormatter",
+                events: "operateEvents"
+            })
 
             let styleSelected = (onSelectedStyle[LAYER.VECTOR + ':' + layerKey] ? onSelectedStyle[LAYER.VECTOR + ':' + layerKey] : {
                 weight: 5,
@@ -3837,10 +3890,12 @@ module.exports = {
     setChildLayersThatShouldBeEnabled: function (arr) {
         childLayersThatShouldBeEnabled = arr;
     },
+
     toolTip: function (layer, feature, template, pane) {
         const tooltipHtml = Handlebars.compile(template)(feature.properties);
         layer.bindTooltip(tooltipHtml, {permanent: true, pane}).openTooltip();
     },
+
     mouseOver: function (layer, fieldConf, template) {
         let flag = false, tooltipHtml, tail = $("#tail");
         layer.on('mouseover', function (e) {
@@ -3914,4 +3969,5 @@ module.exports = {
         return infoOffCanvas;
     }
 
-};
+}
+
