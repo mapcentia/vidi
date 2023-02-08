@@ -189,7 +189,8 @@ module.exports = {
             if (!isStarted) {
                 isStarted = true;
                 if ($(document).width() > 1024) {
-                    $('#offcanvasLayerControlBtn').trigger('click');
+                    // $('#offcanvasLayerControlBtn').trigger('click');
+
                 }
                 // if (window?.vidiConfig?.extensionConfig?.embed?.slideOutLayerTree === true) {
                 //     $('#burger-btn').trigger('click');
