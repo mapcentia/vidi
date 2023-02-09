@@ -1103,9 +1103,9 @@ module.exports = {
                                 moduleState.layerTreeOrder = order;
                                 if (moduleState.editingIsEnabled) {
                                     let toggleOfllineOnlineMode = _self._setupToggleOfflineModeControl();
-                                    if (toggleOfllineOnlineMode) {
-                                        $("#layers").append(toggleOfllineOnlineMode);
-                                    }
+                                    // if (toggleOfllineOnlineMode) {
+                                    //     $("#layers").append(toggleOfllineOnlineMode);
+                                    // }
                                 }
 
                                 let groups = [];
