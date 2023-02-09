@@ -49,19 +49,12 @@ class MarkupGenerator {
     getToggleOfflineModeSelectorEnabled() {
         return (`
             <div class="d-flex mb-3 gap-2">
-                ${__('Network status')}
                 <span class="badge text-bg-secondary js-app-is-pending-badge">
                     <i class="bi bi-three-dots"></i> ${__('Pending')}
                 </span>
-                <span class="badge text-bg-success js-app-is-online-badge hidden">
-                    <i class="bi bi-signal"></i> Online
-                </span>
-                <span class="badge text-bg-danger js-app-is-offline-badge hidden">
-                    Offline
-                </span>
-                <span class="js-set-all-layer-offline-mode-container">
-                    ${__('Set all layers to be')}: <a href="javascript:void(0);" class="js-set-all-layer-to-be-online">${__('Online')}</a> | <a href="javascript:void(0);" class="js-set-all-layer-to-be-offline">${__('Offline')}</a>
-                </span>
+                <span class="badge text-bg-success js-app-is-online-badge d-none">
+                    <i class="bi bi-signal"></i>Online</span>
+                <span class="badge text-bg-danger js-app-is-offline-badge d-none">Offline</span>
             </div>
         `);
     }

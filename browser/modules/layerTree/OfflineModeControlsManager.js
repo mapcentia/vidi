@@ -186,12 +186,12 @@ class OfflineModeControlsManager {
         return new Promise((resolve, reject) => {
             if (this._globalApplicationOfflineMode) {
                 $('.js-app-is-pending-badge').remove();
-                $('.js-app-is-online-badge').addClass('hidden');
-                $('.js-app-is-offline-badge').removeClass('hidden');
+                $('.js-app-is-online-badge').addClass('d-none');
+                $('.js-app-is-offline-badge').removeClass('d-none');
             } else {
                 $('.js-app-is-pending-badge').remove();
-                $('.js-app-is-online-badge').removeClass('hidden');
-                $('.js-app-is-offline-badge').addClass('hidden');
+                $('.js-app-is-online-badge').removeClass('d-none');
+                $('.js-app-is-offline-badge').addClass('d-none');
             }
 
             this._getAvailableLayersKeys().then(layerKeys => {

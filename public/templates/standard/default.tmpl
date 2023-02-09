@@ -108,6 +108,14 @@
                 <!--                        <li><a class="dropdown-item" href="#">Something else here</a></li>-->
                 <!--                    </ul>-->
                 <!--                </li>-->
+                <li class="nav-item d-flex align-items-center me-2 mt-3 mt-lg-0">
+                    <span class="badge text-bg-secondary js-app-is-pending-badge">
+                        <i class="bi bi-three-dots"></i>{{Pending}}
+                    </span>
+                    <span class="badge text-bg-success js-app-is-online-badge d-none">
+                    <i class="bi bi-signal"></i>Online</span>
+                    <span class="badge text-bg-danger js-app-is-offline-badge d-none">Offline</span>
+                </li>
                 <li class="nav-item">
                     <a class="nav-link" id="btn-reset" href="#">Reset</a>
                 </li>
