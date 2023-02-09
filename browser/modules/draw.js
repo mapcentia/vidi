@@ -356,7 +356,8 @@ module.exports = {
 
             var po1 = $('.leaflet-draw-section:eq(0)').popover({
                 content: __("Use these tools for creating markers, lines, areas, squares and circles."),
-                placement: "left"
+                placement: "left",
+                customClass: "d-none d-lg-inline"
             });
             po1.popover("show");
             setTimeout(function () {
@@ -365,7 +366,8 @@ module.exports = {
 
             var po2 = $('.leaflet-draw-section:eq(1)').popover({
                 content: __("Use these tools for editing existing drawings."),
-                placement: "left"
+                placement: "left",
+                customClass: "d-none d-lg-inline"
             });
             po2.popover("show");
             setTimeout(function () {
