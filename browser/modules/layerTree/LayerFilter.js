@@ -528,10 +528,10 @@ class VectorLayerFilter extends React.Component {
                         </button>
                         <button className="btn btn-light btn-sm" type="button" disabled={!allRulesAreValid}
                                 onClick={this.onRulesApply.bind(this)}>
-                            <i className="bi bi-check"></i> {__(`Apply`)}
+                            <i className="bi bi-check"></i><span className="d-none d-lg-inline"> {__(`Apply`)}</span>
                         </button>
                         <button className="btn btn-light btn-sm" type="button" onClick={this.onRulesClear.bind(this)}>
-                            <i className="bi bi-eraser"></i> {__(`Disable`)}
+                            <i className="bi bi-eraser"></i><span className="d-none d-lg-inline"> {__(`Disable`)}</span>
                         </button>
                         {buildResetButton()}
                     </div>
@@ -619,7 +619,7 @@ class VectorLayerFilter extends React.Component {
                             opacity: "0.2"
                         } : {}} type="button" className="btn btn-sm btn-outline-success w-100"
                                 onClick={this.applyEditor.bind(this)}>
-                            <i className="bi bi-check"></i> {__(`Apply`)}
+                            <i className="bi bi-check"></i><span className="d-none d-lg-inline"> {__(`Apply`)}</span>
                         </button>
                     </div>
                 </div>
@@ -628,7 +628,7 @@ class VectorLayerFilter extends React.Component {
 
         const buildResetButton = () => {
             return (<button className="btn btn-sm btn-outline-danger" onClick={this.handleReset.bind(this)}>
-                <i className="bi bi-reply"></i> {__(`Reset filter`)}</button>)
+                <i className="bi bi-reply"></i><span className="d-none d-lg-inline"> {__(`Reset`)}</span></button>)
         };
 
         const buildFitBoundsButton = () => {
