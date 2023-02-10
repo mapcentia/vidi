@@ -61,4 +61,10 @@ $dropdown-link-active-bg: white;
   //padding-left: 0;
 }
 
-
+.feature-attribute-editing-form > .buttons {
+  background-color: white;
+  bottom: -20px;
+  position: sticky !important;
+  position: -webkit-sticky !important;
+  z-index: 1000;
+}
