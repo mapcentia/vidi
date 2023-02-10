@@ -559,7 +559,7 @@ module.exports = {
         var popup = L.popup();
 
         popup.setLatLng(event.latlng)
-            .setContent('<p style="width: 200px">' + __("Apply default style settings for this drawing?") + '</p><a href="javascript:void(0)" id="btn-draw-apply-style-cancel" class="btn btn btn-outline-danger btn-sm">' + __("Cancel") + '</a><a href="javascript:void(0)" id="btn-draw-apply-style-ok" class="btn btn btn-outline-success btn-sm">' + __("Ok") + '</a>')
+            .setContent('<p style="width: 200px">' + __("Apply default style settings for this drawing?") + '</p><div class="btn-group w-100"><button type="button" id="btn-draw-apply-style-ok" class="btn btn btn-outline-secondary btn-sm">' + __("Ok") + '</button><button type="button" id="btn-draw-apply-style-cancel" class="btn btn btn-outline-danger btn-sm">' + __("Cancel") + '</button></div>')
             .openOn(cloud.get().map);
 
         $("#btn-draw-apply-style-ok").on("click", function () {
@@ -597,6 +597,8 @@ module.exports = {
             l.setStyle({lineCap: $("#draw-line-cap").val()});
 
             l.setStyle({color: $("#draw-colorpicker-input").val()});
+
+            l.setStyle({fillColor: $("#draw-colorpicker-input").val()});
 
             l.setStyle({weight: $("#draw-line-weight").val()});
 
