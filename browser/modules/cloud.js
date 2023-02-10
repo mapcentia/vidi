@@ -88,6 +88,7 @@ module.exports = {
             followMarkerStyle: {
                 fillColor: '#FFB000'
             },
+            icon: "bi bi-geo-alt"
         }).addTo(map);
 
         L.Edit.Poly = L.Edit.Poly.extend({
@@ -107,6 +108,8 @@ module.exports = {
                 resizeIcon: me.iconMedium
             }
         });
+
+
     },
 
     /**

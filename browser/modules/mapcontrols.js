@@ -13,12 +13,35 @@ const MODULE_NAME = `mapcontrols`;
  */
 let state, cloud, setting, backboneEvents;
 
-let clearMapControl, defaultMapExtentControl;
+let clearMapControl, fullScreenMapControl, defaultMapExtentControl;
 
 let _self = false;
 
 let embedModeIsEnabled = false;
 let utils;
+
+/**
+ * Full screen map control
+ */
+const FullScreenMapControlOptions = {
+    template: (`<a title="${__(`Full screen`)}"
+        id="mapcontrols-full-screen-map"
+        class="leaflet-bar-part leaflet-bar-part-single">
+        <span class="bi bi-fullscreen"></span>
+    </a>`),
+    onclick: (e) => {
+        e.stopPropagation();
+    }
+};
+
+let FullScreenMapControl = L.Control.extend({
+    options: {position: 'topright'},
+    onAdd: () => {
+        let container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom embed-full-screen');
+        $(container).append(FullScreenMapControlOptions.template)[0].onclick = FullScreenMapControlOptions.onclick;
+        return container;
+    }
+});
 
 /**
  * Clear map control
@@ -27,7 +50,7 @@ const ClearMapControlOptions = {
     template: (`<a title="${__(`Clear map`)}"
         id="mapcontrols-clear-map"
         class="leaflet-bar-part leaflet-bar-part-single" style="outline: none;">
-        <span class="fa fa-minus-circle"></span>
+        <span class="bi bi-slash-circle"></span>
     </a>`),
     onclick: (e) => {
         e.stopPropagation();
@@ -44,7 +67,7 @@ let ClearMapControl = L.Control.extend({
     options: {position: 'topright'},
     onAdd: () => {
         let container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom leaflet-clear-map');
-        $(container).attr(`style`, `backgroundColor: white, width: 30px, height: 30px`);
+        // $(container).attr(`style`, `backgroundColor: white, width: 30px, height: 30px`);
         $(container).append(ClearMapControlOptions.template)[0].onclick = ClearMapControlOptions.onclick;
         return container;
     }
@@ -74,7 +97,7 @@ const DefaultMapExtentControlOptions = {
     template: (`<a title="${__(`Default map extent`)}"
         id="mapcontrols-default-map-extent"
         class="leaflet-bar-part leaflet-bar-part-single" style="outline: none;">
-        <span class="fa fa-home"></span>
+        <span class="bi bi-house"></span>
     </a>`),
     onclick: setDefaultZoomCenter
 };
@@ -111,69 +134,57 @@ module.exports = {
             embedModeIsEnabled = true;
         }
 
-        if (embedModeIsEnabled) {
-            let buttonClass = `btn btn-default btn-fab btn-fab-mini map-tool-btn`;
+        fullScreenMapControl = new FullScreenMapControl;
+        cloud.get().map.addControl(fullScreenMapControl);
 
-            let container = `#floating-container-secondary`;
+        $('#mapcontrols-full-screen-map').on('click', function (e) {
+            e.preventDefault();
+            utils.toggleFullScreen();
+        });
+        // Listen for fullscreen changes
+        document.addEventListener('fullscreenchange', function () {
+            const b = $('#mapcontrols-full-screen-map span');
+            if (document.fullscreenElement) {
+                b.addClass('bi-fullscreen-exit');
+                b.removeClass('bi-fullscreen');
+            } else {
+                b.addClass('bi-fullscreen');
+                b.removeClass('bi-fullscreen-exit');
+            }
+        });
 
-            $(container).append($(ClearMapControlOptions.template).attr(`class`, buttonClass).attr(`style`, `padding-top: 6px;`)[0].outerHTML);
-            $(container).find(`#mapcontrols-clear-map`).click(ClearMapControlOptions.onclick);
+        clearMapControl = new ClearMapControl();
+        cloud.get().map.addControl(clearMapControl);
 
-            $(container).append(`<a title="${__(`Previous extent`)}"
-                id="mapcontrols-history-backward"
-                class="${buttonClass}" style="padding-top: 6px; color: lightgray;">
-                <i class="material-icons">arrow_back_ios</i>
-            </a>`);
+        defaultMapExtentControl = new DefaultMapExtentControl();
+        cloud.get().map.addControl(defaultMapExtentControl);
 
-            $(container).append(`<a title="${__(`Next extent`)}"
-                id="mapcontrols-history-forward"
-                class="${buttonClass}" style="padding-top: 6px; color: lightgray;">
-                <i class="material-icons">arrow_forward_ios</i>
-            </a>`);
+        let historyControl = new L.HistoryControl({
+            orientation: 'vertical',
+            backTooltip: __(`Previous extent`),
+            forwardTooltip: __(`Next extent`),
+            forwardImage: "bi bi-caret-right",
+            backImage: "bi bi-caret-left",
+        }).addTo(cloud.get().map);
 
-            $(container).find(`#mapcontrols-clear-map`).click(ClearMapControlOptions.onclick);
+        let rubberbandControl = L.Control.boxzoom({
+            position: 'topright',
+            iconClasses: 'bi bi-bounding-box',
+            title: __(`Click here then draw a square on the map, to zoom in to an area`),
+            enableShiftDrag: true,
+            keepOn: true
+        }).addTo(cloud.get().map);
 
-            $(`#mapcontrols-history-backward`).click(() => {
-                historyControl.goBack();
-            });
+        const zoomIn = document.querySelector(".leaflet-control-zoom-in span");
+        zoomIn.innerHTML = "";
+        zoomIn.classList.add("bi");
+        zoomIn.classList.add("bi-plus");
 
-            $(`#mapcontrols-history-forward`).click(() => {
-                historyControl.goForward();
-            });
+        const zoomOut = document.querySelector(".leaflet-control-zoom-out span");
+        zoomOut.innerHTML = "";
+        zoomOut.classList.add("bi");
+        zoomOut.classList.add("bi-dash");
 
-            cloud.get().map.on('historybackenabled', (location) => {
-                $(`#mapcontrols-history-backward`).attr(`style`, `color: black; padding-top: 6px;`);
-            });
-            cloud.get().map.on('historybackdisabled', (location) => {
-                $(`#mapcontrols-history-backward`).attr(`style`, `color: lightgray; padding-top: 6px;`);
-            });
-            cloud.get().map.on('historyforwardenabled', (location) => {
-                $(`#mapcontrols-history-forward`).attr(`style`, `color: black; padding-top: 6px;`);
-            });
-            cloud.get().map.on('historyforwarddisabled', (location) => {
-                $(`#mapcontrols-history-forward`).attr(`style`, `color: lightgray; padding-top: 6px;`);
-            });
-        } else {
-            clearMapControl = new ClearMapControl();
-            cloud.get().map.addControl(clearMapControl);
-
-            defaultMapExtentControl = new DefaultMapExtentControl();
-            cloud.get().map.addControl(defaultMapExtentControl);
-
-            let historyControl = new L.HistoryControl({
-                orientation: 'vertical',
-                backTooltip: __(`Previous extent`),
-                forwardTooltip: __(`Next extent`)
-            }).addTo(cloud.get().map);
-
-            let rubberbandControl = L.Control.boxzoom({
-                position: 'topright',
-                iconClasses: 'fa fa-object-ungroup',
-                title: __(`Click here then draw a square on the map, to zoom in to an area`),
-                enableShiftDrag: true,
-                keepOn: true
-            }).addTo(cloud.get().map);
-        }
     },
 
     /**

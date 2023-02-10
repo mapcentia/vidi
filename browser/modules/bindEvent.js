@@ -80,7 +80,7 @@ module.exports = {
             $("#offcanvasLayerControlBtn").on("click", () => mainLayerOffcanvas.show());
             $("#offcanvasEditBtn").on("click", () => offcanvasEdit.show());
         } catch (e) {
-            
+
         }
 
         let doneL = false, doneB = false, loadingL = 0, loadingB = 0;
@@ -354,18 +354,6 @@ module.exports = {
             t.show();
         })
 
-        $('.map-tool-btn').on('click', function (e) {
-            e.preventDefault();
-            const id = ($(this)).attr('href');
-            if (id === '#full-screen') {
-                utils.toggleFullScreen();
-            }
-            // If print when activate
-            if ($(this).data('module') === 'print') {
-                backboneEvents.get().trigger(`on:print`);
-            }
-        });
-
         // Hiding all panels with visible modules
         backboneEvents.get().on('hide:all', () => {
             const e = $('.modal-header > button[class="close"]');
@@ -429,15 +417,6 @@ module.exports = {
                 id.addClass('active');
             });
         })
-
-        // Listen for fullscreen changes
-        document.addEventListener('fullscreenchange', function () {
-            if (document.fullscreenElement) {
-                $('#full-screen-btn i').html('fullscreen_exit')
-            } else {
-                $('#full-screen-btn i').html('fullscreen')
-            }
-        });
 
         // Check if active vector layers have max/min zoom values
         let orginallayers = {};

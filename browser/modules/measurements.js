@@ -13,7 +13,7 @@ const drawTools = require(`./drawTools`);
 /**
  * Browser detection
  */
-const { detect } = require('detect-browser');
+const {detect} = require('detect-browser');
 const browser = detect();
 
 /**
@@ -27,7 +27,7 @@ let cloud, state, serializeLayers, backboneEvents, utils;
  */
 let drawnItems = new L.FeatureGroup();
 
-let drawControl, embedDrawControl, measurementControlButton;
+let drawControl, measurementControlButton;
 
 let editing = false;
 
@@ -35,7 +35,6 @@ let drawOn = false;
 
 let _self = false;
 
-let embedModeIsEnabled = false;
 
 /**
  *
@@ -53,11 +52,15 @@ module.exports = {
     },
 
     init: () => {
-        backboneEvents.get().on(`reset:all reset:${MODULE_NAME} off:all` , () => {
+        backboneEvents.get().on(`reset:all reset:${MODULE_NAME} off:all`, () => {
             _self.toggleMeasurements(false, false);
         });
-        backboneEvents.get().on(`on:${MODULE_NAME}`, () => { _self.toggleMeasurements(); });
-        backboneEvents.get().on(`off:${MODULE_NAME}`, () => { _self.toggleMeasurements(false, false); });
+        backboneEvents.get().on(`on:${MODULE_NAME}`, () => {
+            _self.toggleMeasurements();
+        });
+        backboneEvents.get().on(`off:${MODULE_NAME}`, () => {
+            _self.toggleMeasurements(false, false);
+        });
 
         state.listenTo(MODULE_NAME, _self);
         state.listen(MODULE_NAME, `update`);
@@ -65,136 +68,36 @@ module.exports = {
             _self.applyState(initialState)
         });
 
-        // Detect if the embed template is used
-        if ($(`#floating-container-secondary`).length === 1) {
-            embedModeIsEnabled = true;
-        }
+        let MeasurementControl = L.Control.extend({
+            options: {
+                position: 'topright'
+            },
+            onAdd: function (map) {
+                let container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom leaflet-control-measurements');
+                container.title = __(`Measure distance`);
 
-        if (embedModeIsEnabled) {
-            let buttonClass = `btn btn-default btn-fab btn-fab-mini map-tool-btn`;
-            let buttonStyle = `padding-top: 4px;`;
-            let buttonStyleHidden = `padding-top: 4px; display: none;`;
-
-            let container = `#floating-container-secondary`;
-
-            // Expand measurements control
-            $(container).append(`<a href="javascript:void(0)" title="${__("Expand measurements control")}" id="measurements-module-btn" class="${buttonClass}" style="${buttonStyle}">
-                <i class="fa fa-ruler" style="font-size: 20px;"></i>
-            </a>`);
-            $(`#measurements-module-btn`).click((event) => {
-                $(event.currentTarget).hide(0, () => {
-                    $(`#measurements-module-draw-line-btn`).show();
-                    $(`#measurements-module-draw-polygon-btn`).show();
-                    $(`#measurements-module-delete-btn`).show();
-                    $(`#measurements-module-cancel-btn`).show();
-                });
-            });
-
-            // Draw controls
-            $(container).append(`
-            <a href="javascript:void(0)" title="${__("Collapse measurements control")}" id="measurements-module-cancel-btn" class="${buttonClass}" style="${buttonStyleHidden}">
-                <i class="fa fa-ban" style="font-size: 20px;"></i>
-            </a>
-            <a href="javascript:void(0)" title="${__("Measure the distance")}" id="measurements-module-draw-line-btn" class="${buttonClass}" style="${buttonStyleHidden}">
-                <i class="fa fa-project-diagram" style="font-size: 20px;"></i>
-            </a>
-            <a href="javascript:void(0)" title="${__("Measure the area")}" id="measurements-module-draw-polygon-btn" class="${buttonClass}" style="${buttonStyleHidden}">
-                <i class="fa fa-vector-square" style="font-size: 20px;"></i>
-            </a>
-            <a href="javascript:void(0)" title="${__("Delete all measurements")}" id="measurements-module-delete-btn" class="${buttonClass}" style="${buttonStyleHidden}">
-                <i class="fa fa-trash" style="font-size: 20px;"></i>
-            </a>`);
-
-            // Distance measurement
-            $(container).find(`#measurements-module-draw-line-btn`).click(() => {
-                _self.toggleMeasurements(true);
-
-                drawnItems.eachLayer(layer => {
-                    if (layer && layer.feature && layer.feature.properties && layer.feature.properties.type ===`polyline`) {
-                        drawnItems.removeLayer(layer);
-                    }
-                });
-
-                if (embedDrawControl) {
-                    embedDrawControl.disable();
-                }
-
-                embedDrawControl = new L.Draw.Polyline(cloud.get().map);
-                embedDrawControl.enable();
-            });
-
-            // Area measurement
-            $(container).find(`#measurements-module-draw-polygon-btn`).click(() => {
-                _self.toggleMeasurements(true);
-
-                drawnItems.eachLayer(layer => {
-                    if (layer && layer.feature && layer.feature.properties && layer.feature.properties.type ===`polygon`) {
-                        drawnItems.removeLayer(layer);
-                    }
-                });
-
-                if (embedDrawControl) {
-                    embedDrawControl.disable();
-                }
-
-                embedDrawControl = new L.Draw.Polygon(cloud.get().map);
-                embedDrawControl.enable();
-            });
-
-            // Area measurement
-            $(container).find(`#measurements-module-delete-btn`).click(() => {
-                if (drawnItems) {
-                    drawnItems.clearLayers();
-                }
-
-                if (embedDrawControl) {
-                    embedDrawControl.disable();
-                }
-            });
-
-            // Collapse measurements control
-            $(container).find(`#measurements-module-cancel-btn`).click(() => {
-                $(`#measurements-module-draw-line-btn`).hide();
-                $(`#measurements-module-draw-polygon-btn`).hide();
-                $(`#measurements-module-delete-btn`).hide();
-                $(`#measurements-module-cancel-btn`).hide();
-
-                $(`#measurements-module-btn`).show();
-
-                _self.toggleMeasurements(false);
-            });
-        } else {
-            let MeasurementControl = L.Control.extend({
-                options: {
-                    position: 'topright'
-                },
-                onAdd: function (map) {
-                    let container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom leaflet-control-measurements');
-                    container.title = __(`Measure distance`);
-
-                    container = $(container).append(`<a class="leaflet-bar-part leaflet-bar-part-single js-measurements-control" style="outline: none; background-color: white;">
-                        <span class="fa fa-ruler"></span>
+                container = $(container).append(`<a class="leaflet-bar-part leaflet-bar-part-single js-measurements-control" style="outline: none; background-color: white;">
+                        <span class="bi bi-rulers"></span>
                     </a>`)[0];
 
-                    container.onclick = function(){
-                        _self.toggleMeasurements((drawControl ? false : true));
-                    }
+                container.onclick = function () {
+                    _self.toggleMeasurements((drawControl ? false : true));
+                }
 
-                    return container;
+                return container;
+            }
+        });
+
+        measurementControlButton = new MeasurementControl();
+        cloud.get().map.addControl(measurementControlButton);
+
+        setTimeout(() => {
+            $(`.leaflet-control`).each((index, item) => {
+                if ($(item).html() === ``) {
+                    $(item).remove();
                 }
             });
-
-            measurementControlButton = new MeasurementControl();
-            cloud.get().map.addControl(measurementControlButton);
-
-            setTimeout(() => {
-                $(`.leaflet-control`).each((index, item) => {
-                    if ($(item).html() === ``) {
-                        $(item).remove();
-                    }
-                });
-            }, 100);
-        }
+        }, 100);
 
         cloud.get().map.addLayer(drawnItems);
     },
@@ -204,7 +107,7 @@ module.exports = {
             backboneEvents.get().trigger(`off:all`);
             backboneEvents.get().trigger(`hide:all`);
 
-            $('.leaflet-control-custom').find('.js-measurements-control').html('<span class="fa fa-ban"></span>');
+            $('.leaflet-control-custom').find('.js-measurements-control').html('<span class="bi bi-slash-circle"></span>');
             if (triggerEvents) backboneEvents.get().trigger(`${MODULE_NAME}:turnedOn`);
             drawOn = true;
 
@@ -318,15 +221,11 @@ module.exports = {
                 backboneEvents.get().trigger(`${MODULE_NAME}:update`);
             });
         } else {
-            $('.leaflet-control-custom').find('.js-measurements-control').html('<span class="fa fa-ruler"></span>');
+            $('.leaflet-control-custom').find('.js-measurements-control').html('<span class="bi bi-rulers"></span>');
 
             if (triggerEvents) backboneEvents.get().trigger(`${MODULE_NAME}:turnedOff`);
 
             drawOn = false;
-
-            if (embedDrawControl) {
-                embedDrawControl.disable();
-            }
 
             if (drawControl) {
                 $(`.leaflet-control-measurements div`).empty();
@@ -397,10 +296,10 @@ module.exports = {
                     g.showExtremities(m._vidi_extremities.pattern, m._vidi_extremities.size, m._vidi_extremities.where);
                 }
             });
-        } catch(e) {
+        } catch (e) {
             console.error(e.message)
         }
-     },
+    },
 
 
     /**
@@ -413,7 +312,7 @@ module.exports = {
             state = serializeLayers.serializeMeasurementItems(true);
         }
 
-        return { measurements: state };
+        return {measurements: state};
     },
 
     /**

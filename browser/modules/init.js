@@ -343,6 +343,7 @@ module.exports = {
         modules.cloud.init();
         modules.state.setExtent();
 
+
         // Calling mandatory init method
         [`anchor`, `backboneEvents`, `socketId`, `bindEvent`, `baseLayer`, `infoClick`,
             `advancedInfo`, `draw`, `measurements`, `mapcontrols`, `stateSnapshots`, `print`, `layerTree`, `reset`].map(name => {
