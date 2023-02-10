@@ -68,3 +68,12 @@ $dropdown-link-active-bg: white;
   position: -webkit-sticky !important;
   z-index: 1000;
 }
+
+.leaflet-popup-close-button {
+  top: -12px !important;
+  right: -12px !important;
+  color: var(--bs-white) !important;
+  background: var(--bs-primary) !important;
+  border: none !important;
+  box-shadow: 3px -3px 14px -3px  rgba(0,0,0,0.4) !important;
+}

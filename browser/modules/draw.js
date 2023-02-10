@@ -556,10 +556,12 @@ module.exports = {
             return;
         }
 
-        var popup = L.popup();
+        var popup = L.popup({
+            className: "custom-popup"
+        });
 
         popup.setLatLng(event.latlng)
-            .setContent('<p style="width: 200px">' + __("Apply default style settings for this drawing?") + '</p><div class="btn-group w-100"><button type="button" id="btn-draw-apply-style-ok" class="btn btn btn-outline-secondary btn-sm">' + __("Ok") + '</button><button type="button" id="btn-draw-apply-style-cancel" class="btn btn btn-outline-danger btn-sm">' + __("Cancel") + '</button></div>')
+            .setContent('<p style="width: 200px">' + __("Apply default style settings for this drawing?") + '</p><button type="button" id="btn-draw-apply-style-ok" class="btn btn btn-outline-secondary btn-sm w-100">' + __("Ok") + '</button>')
             .openOn(cloud.get().map);
 
         $("#btn-draw-apply-style-ok").on("click", function () {
