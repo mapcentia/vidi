@@ -29,7 +29,6 @@ body {
 .leaflet-control {
   border-radius: 0 !important;
   box-shadow: none !important;
-  //border: 1px solid rgba(0, 0, 0, 0.175) !important;
 }
 
 .leaflet-draw-toolbar, .appended-leaflet-control {
@@ -50,6 +49,10 @@ body {
 }
 
 .leaflet-touch .leaflet-bar a, .leaflet-bar {
+  border-radius: 0 !important;
+}
+
+.leaflet-right .leaflet-draw-actions li:first-child a {
   border-radius: 0 !important;
 }
 
@@ -701,7 +704,6 @@ body {
 }
 
 
-
 .feature-attribute-editing-form .card {
   position: sticky !important;
   top: 0;
@@ -943,4 +945,12 @@ iframe.leaflet-utfgrid-layer {
 
 .get-print-btn {
   display: none;
+}
+
+.leaflet-control-custom .appended-leaflet-control li a {
+  width: 100% !important;
+}
+
+.leaflet-touch .leaflet-right .leaflet-draw-actions {
+  right: 31px !important;
 }

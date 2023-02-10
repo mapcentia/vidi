@@ -70,10 +70,13 @@ $dropdown-link-active-bg: white;
 }
 
 .leaflet-popup-close-button {
-  top: -12px !important;
-  right: -12px !important;
-  color: var(--bs-white) !important;
-  background: var(--bs-primary) !important;
-  border: none !important;
-  box-shadow: 3px -3px 14px -3px  rgba(0,0,0,0.4) !important;
+  top: -11px !important;
+  right: -11px !important;
+  color: var(--bs-black) !important;
+  background: var(--bs-white) !important;
+}
+
+.leaflet-popup-content-wrapper, .leaflet-popup-tip, .leaflet-popup-close-button {
+  border: 1px solid rgba(0, 0, 0, 0.175) !important;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
 }
