@@ -1129,7 +1129,7 @@ module.exports = {
                                     arr = layerSortingInstance.sortGroups(order, notSortedGroupsArray);
                                 }
 
-                                $("#layers").append(`<div id="layers_list" class="vstack gap-2"></div>`);
+                                $("#layers").append(`<div class="layer-list vstack gap-2"></div>`);
 
                                 // Filling up groups and underlying layers (except ungrouped ones)
                                 latestFullTreeStructure = [];
@@ -1145,7 +1145,7 @@ module.exports = {
                                 }
 
                                 _self._setupToggleOfflineModeControlsForLayers().then(() => {
-                                    $(`#layers_list`).sortable({
+                                    $(`.layer-list`).sortable({
                                         axis: 'y',
                                         handle: `.layer-move-vert`,
                                         stop: (event, ui) => {
@@ -2478,7 +2478,7 @@ module.exports = {
         // Only if container doesn't exist
         // ===============================
         if ($("#layer-panel-" + base64GroupName).length === 0) {
-            $("#layers_list").append(markupGeneratorInstance.getGroupPanel(base64GroupName, groupName, window.vidiConfig.showLayerGroupCheckbox));
+            $(".layer-list").append(markupGeneratorInstance.getGroupPanel(base64GroupName, groupName, window.vidiConfig.showLayerGroupCheckbox));
 
             // Append to inner group container
             // ===============================

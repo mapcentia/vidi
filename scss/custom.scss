@@ -69,6 +69,16 @@ $dropdown-link-active-bg: white;
   z-index: 1000;
 }
 
+.layer-item {
+  border-right: 0 !important;
+  border-left: 0 !important;
+  background: none !important;
+}
+
+#layers li:last-child {
+  border-bottom: 0 !important;
+}
+
 .leaflet-popup-close-button {
   top: -11px !important;
   right: -11px !important;
