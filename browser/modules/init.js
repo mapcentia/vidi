@@ -83,7 +83,8 @@ module.exports = {
                 mode: 2,
                 default: 1,
                 active: false
-            }
+            },
+            title: "MapCentia Vidi",
         };
         // Set session from URL
         if (typeof urlVars.session === "string") {
@@ -255,6 +256,7 @@ module.exports = {
      *
      */
     startApp: function () {
+        document.title = window.vidiConfig.title;
         let humanUsedTemplate = !(urlVars.px && urlVars.py), schema;
         if (`tmpl` in urlVars) {
             let supressedModalTemplates = window.vidiConfig.startupModalSupressionTemplates;
