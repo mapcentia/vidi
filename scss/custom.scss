@@ -84,6 +84,9 @@ $dropdown-link-active-bg: white;
   right: -11px !important;
   color: var(--bs-black) !important;
   background: var(--bs-white) !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .leaflet-popup-content-wrapper, .leaflet-popup-tip, .leaflet-popup-close-button {
