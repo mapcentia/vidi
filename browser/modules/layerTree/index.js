@@ -1669,14 +1669,14 @@ module.exports = {
                     if (tooltipTemplate) {
                         _self.toolTip(layer, feature, tooltipTemplate, pane);
                     }
-                    if (!(`fn` in onEachFeature[LAYER.VECTOR + ':' + layerKey]) || !onEachFeature[LAYER.VECTOR + ':' + layerKey].fn || !(`caller` in onEachFeature[LAYER.VECTOR + ':' + layerKey]) || !onEachFeature[LAYER.VECTOR + ':' + layerKey].caller) {
-                        throw new Error(`Invalid onEachFeature structure`);
-                    }
-                    onEachFeature[LAYER.VECTOR + ':' + layerKey].fn(feature, layer);
                     if ((LAYER.VECTOR + ':' + layerKey) in onEachFeature && !window.vidiConfig.crossMultiSelect) {
                         /*
                             Checking for correct onEachFeature structure
                         */
+                        if (!(`fn` in onEachFeature[LAYER.VECTOR + ':' + layerKey]) || !onEachFeature[LAYER.VECTOR + ':' + layerKey].fn || !(`caller` in onEachFeature[LAYER.VECTOR + ':' + layerKey]) || !onEachFeature[LAYER.VECTOR + ':' + layerKey].caller) {
+                            throw new Error(`Invalid onEachFeature structure`);
+                        }
+                        onEachFeature[LAYER.VECTOR + ':' + layerKey].fn(feature, layer);
                         if (onEachFeature[LAYER.VECTOR + ':' + layerKey].caller === `editor`) {
                             // TODO Is this used?
                             /*
