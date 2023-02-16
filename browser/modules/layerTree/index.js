@@ -711,19 +711,8 @@ module.exports = {
             preparedVirtualLayers.push(localLayer);
         });
 
-        let order = false;
-        if (!false) {
-            order = moduleState.layerTreeOrder
-        } else if (typeof latestFullTreeStructure === 'object') {
-            order = latestFullTreeStructure.map(g => {
-                return {
-                    id: g.id, children: g.children.map(l => {
-                        if (l.layer?.f_table_schema)
-                            return {id: l.layer.f_table_schema + '.' + l.layer.f_table_name, type: 'layer'}
-                    })
-                }
-            })
-        }
+        let order = moduleState.layerTreeOrder;
+
         return {
             order,
             arbitraryFilters: moduleState.arbitraryFilters,
@@ -3968,6 +3957,9 @@ module.exports = {
     },
     getInfoOffCanvas: () => {
         return infoOffCanvas;
+    },
+    getLatestFullTreeStructure: () => {
+        return latestFullTreeStructure;
     }
 
 }

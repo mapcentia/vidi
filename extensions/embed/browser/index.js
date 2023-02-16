@@ -1,140 +1,177 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2021 MapCentia ApS
+ * @copyright  2013-2022 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
-
 'use strict';
 
-let measurements;
-let backboneEvents;
-let cloud;
-let setting;
-let print;
-let meta;
-let anchor;
-let legend;
-let metaDataKeys;
-let lc;
-let mapcontrols;
+import React from 'react';
+import {useState, useEffect, useRef} from "react";
+import ReactDOM from 'react-dom';
+import styled from "styled-components";
 
-/**
- *
- * @returns {*}
- */
+
+let backboneEvents;
+let meta;
+let state;
+let layers;
+let layerTree;
+
 module.exports = {
-    set: (o) => {
-        measurements = o.measurements;
+
+    /**
+     *
+     * @param o
+     * @returns {exports}
+     */
+    set: function (o) {
         backboneEvents = o.backboneEvents;
-        cloud = o.cloud;
-        setting = o.setting;
-        print = o.print;
         meta = o.meta;
-        legend = o.legend;
-        anchor = o.anchor;
-        mapcontrols = o.mapcontrols;
+        state = o.state;
+        layers = o.layers;
+        layerTree = o.layerTree;
         return this;
     },
-    init: () => {
-        let map = cloud.get().map;
-        let id = "#legend-dialog";
+
+    /**
+     *
+     */
+    init: function () {
+
         backboneEvents.get().trigger(`on:infoClick`);
-        lc = cloud.getLc();
-        $(id).animate({
-            bottom: ("-233px")
-        }, 500, () => {
-            $(id + " .expand-less").hide();
-            $(id + " .expand-more").show();
+        const imageSize = 36;
+
+
+        const offcanvas = new bootstrap.Offcanvas('#offcanvasLayerControlAlt');
+        const offcanvasEl = document.getElementById('offcanvasLayerControlAlt');
+        const btn = document.querySelector("#offcanvasLayerControlAltBtn");
+        btn.addEventListener("click", () => offcanvas.show());
+        offcanvasEl.addEventListener('hidden.bs.offcanvas', event => {
+            btn.classList.remove("d-none");
         });
+        offcanvasEl.addEventListener('shown.bs.offcanvas', event => {
+            btn.classList.add("d-none");
+        })
 
-        metaDataKeys = meta.getMetaDataKeys();
 
-        $("#burger-btn").on("click", () => {
-            $("#layer-slide.slide-left").animate({
-                left: "0"
-            }, 500)
-            let bp = 2170;
-            let sw = $(window).width();
-            if (sw < bp && sw > 500) {
-                $("#legend-dialog").animate({
-                    left: "30.2%"
-                }, 500)
-            } else if (sw > bp) {
-                $("#legend-dialog").animate({
-                    left: "656px"
-                }, 500)
+        const Label = styled.label`
+          cursor: pointer;
+          display: flex;
+          position: relative;
+          width: ${imageSize}px;
+          height: ${imageSize}px;
+          box-sizing: unset;
+          align-items: center;
+
+          &:before {
+            content: '';
+            width: ${imageSize}px;
+            height: ${imageSize}px;
+            position: absolute;
+            left: 0;
+            box-sizing: border-box;
+            background: url('https://geofyn.github.io/mapcentia_vidi_symbols/flaticon/heart.svg') left center no-repeat;
+            background-size: cover;
+          }
+        `;
+
+        const Input = styled.input`
+          display: none;
+
+          &:checked + label {
+            box-shadow: 0 0 2px 3px rgba(255, 0, 0, .6);
+          }
+        `;
+
+        const Checkbox = styled.div`
+          width: ${imageSize + 3}px;
+          height: ${imageSize + 3}px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        `;
+
+        const createId = () => (+new Date * (Math.random() + 1)).toString(36).substr(2, 5);
+
+        const LayerGroup = (props) => {
+            const id = 'a' + createId();
+            return (
+                <div className="accordion-item">
+                    <h2 className="accordion-header">
+                        <button className="accordion-button" type="button" data-bs-toggle="collapse"
+                                data-bs-target={"#" + id} aria-expanded="true" aria-controls="collapseOne">
+                            {props.title}
+                        </button>
+                    </h2>
+
+                    <div id={id} className="accordion-collapse collapse show">
+                        <div className="accordion-body">
+                            <div className="row row-cols-2 row-cols-md-3 gy-4">
+                                {props.layerContols}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )
+        }
+
+        const LayerControl = (props) => {
+            const [checked, setChecked] = useState(props.checked);
+            const toggleLayer = (e) => {
+                setChecked(!checked);
             }
-        });
+            return (
+                <div className="d-flex align-items-center flex-column">
+                    <Checkbox><Input onChange={toggleLayer} type={"checkbox"}
+                                     checked={checked} data-gc2-id={props.id}
+                                     id={'_ran_' + props.id}
+                    />
+                        <Label htmlFor={'_ran_' + props.id}>
 
-        $("#layer-slide.slide-left .close").on("click", () => {
-            $("#layer-slide.slide-left").animate({
-                left: "-100%"
-            }, 500)
-            $("#legend-dialog").animate({
-                left: "6px"
-            }, 500)
-        });
+                        </Label>
+                    </Checkbox>
+                    <div className="text-center" >{props.title}</div>
+                </div>
 
-        $("#info-modal-top.slide-left .close").on("click", () => {
-            $("#info-modal-top.slide-left").animate({
-                left: "-100%"
-            }, 500)
-        });
+            )
+        }
 
-        $("#zoom-in-btn").on("click", () => {
-            map.zoomIn();
-        });
-
-        $("#zoom-out-btn").on("click", () => {
-            map.zoomOut();
-        });
-
-        $("#zoom-default-btn").on("click", () => {
-            mapcontrols.setDefaultZoomCenter();
-        });
-
-        $("#measurements-module-btn").on("click", () => {
-            measurements.toggleMeasurements(true);
-        });
-
-        $(`#find-me-btn`).click(() => {
-            lc._justClicked = true;
-            lc._userPanned = false;
-            lc._setClasses = (state) => {
-                if (state === 'active') {
-                    $("#find-me-btn i").css("color", "#136AEC")
-                } else if (state === 'following') {
-                    $("#find-me-btn i").css("color", "#FFB000")
-                }
-            }
-            if (lc._active && !lc._event) {
-                // click while requesting
-                lc.stop();
-                $("#find-me-btn i").css("color", "rgba(0,0,0, 0.87)")
-            } else if (lc._active && lc._event !== undefined) {
-                let behavior = lc._map.getBounds().contains(lc._event.latlng) ?
-                    lc.options.clickBehavior.inView : lc.options.clickBehavior.outOfView;
-                switch (behavior) {
-                    case 'setView':
-                        lc.setView();
-                        break;
-                    case 'stop':
-                        lc.stop();
-                        $("#find-me-btn i").css("color", "rgba(0,0,0, 0.87)")
-                        if (lc.options.returnToPrevBounds) {
-                            let f = lc.options.flyTo ? lc._map.flyToBounds : lc._map.fitBounds;
-                            f.bind(lc._map)(lc._prevBounds);
+        backboneEvents.get().on('layerTree:ready', () => {
+            setTimeout(() => {
+                const metaData = meta.getMetaDataKeys();
+                let activeLayers = layerTree.getActiveLayers().map(e => e.split(':').reverse()[0]);
+                const latestFullTreeStructure = layerTree.getLatestFullTreeStructure();
+                let l = latestFullTreeStructure.map(g => {
+                    return {
+                        id: g.id, children: g.children.map(l => {
+                            if (l.layer?.f_table_schema)
+                                return {id: l.layer.f_table_schema + '.' + l.layer.f_table_name, type: 'layer'}
+                        })
+                    }
+                })
+                let groupsComps = []
+                for (let i = 0; i < l.length; i++) {
+                    let layerControls = l[i].children.map((e) => {
+                            const title = metaData[e.id]?.f_table_title && metaData[e.id].f_table_title !== '' ? metaData[e.id].f_table_title : metaData[e.id]?.f_table_name;
+                            return <LayerControl key={e.id} id={e.id}
+                                                 checked={activeLayers.includes(e.id)}
+                                                 title={title}></LayerControl>
                         }
-                        break;
+                    )
+                    groupsComps.push(<LayerGroup key={l[i].id} title={l[i].id}
+                                                 layerContols={layerControls}></LayerGroup>)
                 }
-            } else {
-                if (lc.options.returnToPrevBounds) {
-                    lc._prevBounds = lc._map.getBounds();
+
+                try {
+                    ReactDOM.render(
+                        <div className="accordion">{groupsComps}</div>,
+                        document.getElementById("layer-control")
+                    );
+                } catch (e) {
+                    console.error(e)
                 }
-                lc.start();
-            }
-            lc._updateContainerStyle();
-        });
+            }, 100)
+        })
     }
-};
+}
