@@ -1669,6 +1669,7 @@ module.exports = {
                     if (tooltipTemplate) {
                         _self.toolTip(layer, feature, tooltipTemplate, pane);
                     }
+                    // TODO test with and without crossMultiSelect
                     if ((LAYER.VECTOR + ':' + layerKey) in onEachFeature && !window.vidiConfig.crossMultiSelect) {
                         /*
                             Checking for correct onEachFeature structure
