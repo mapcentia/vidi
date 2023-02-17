@@ -43,16 +43,20 @@ module.exports = {
         const imageSize = 36;
 
 
-        const offcanvas = new bootstrap.Offcanvas('#offcanvasLayerControlAlt');
-        const offcanvasEl = document.getElementById('offcanvasLayerControlAlt');
-        const btn = document.querySelector("#offcanvasLayerControlAltBtn");
-        btn.addEventListener("click", () => offcanvas.show());
-        offcanvasEl.addEventListener('hidden.bs.offcanvas', event => {
-            btn.classList.remove("d-none");
-        });
-        offcanvasEl.addEventListener('shown.bs.offcanvas', event => {
-            btn.classList.add("d-none");
-        })
+        try {
+            const offcanvas = new bootstrap.Offcanvas('#offcanvasLayerControlAlt');
+            const offcanvasEl = document.getElementById('offcanvasLayerControlAlt');
+            const btn = document.querySelector("#offcanvasLayerControlAltBtn");
+            btn.addEventListener("click", () => offcanvas.show());
+            offcanvasEl.addEventListener('hidden.bs.offcanvas', event => {
+                btn.classList.remove("d-none");
+            });
+            offcanvasEl.addEventListener('shown.bs.offcanvas', event => {
+                btn.classList.add("d-none");
+            })
+        } catch (e) {
+           console.info("Embed extension is enabled, but the embed template is not used.")
+        }
 
 
         const Label = styled.label`
