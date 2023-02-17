@@ -70,7 +70,7 @@ module.exports = function (grunt) {
                         // Bootstrap
                         'node_modules/bootstrap-select/dist/css/bootstrap-select.css',
                         'node_modules/bootstrap-table/dist/bootstrap-table.css',
-                        'scss/custom.css',
+                        'scss/main.css',
                         //custom
                         'public/css/styles.min.css'
                     ]
@@ -307,7 +307,7 @@ module.exports = function (grunt) {
                     style: 'expanded'
                 },
                 files: {
-                    'scss/custom.css': 'scss/custom.scss'       // 'destination': 'source'
+                    'scss/main.css': 'scss/main.scss'       // 'destination': 'source'
                 }
             }
         }
