@@ -275,8 +275,8 @@
                         <div class="help-btn" onclick="javascript:createAlert($(this), '{{Help text legend}}')">
                             <i class="bi bi-question-circle help-btn"></i></div>
                         <div></div>
-                        <button id="btn-show-legend-in-map" data-module="legend"
-                                class="btn btn btn-outline-primary w-100 mb-3">{{Show legend on top the map}}</button>
+<!--                        <button id="btn-show-legend-in-map" data-module="legend"-->
+<!--                                class="btn btn btn-outline-primary w-100 mb-3">{{Show legend on top the map}}</button>-->
                         <div id="legend" class="legend"></div>
                     </div>
                     <div role="tabpanel" class="tab-pane fade" id="draw-content">
@@ -597,6 +597,9 @@
     >
         <i class="bi bi-geo-alt"></i> Find faciliteter på kort
     </button>
+    <button id="btn-show-legend-in-map" data-module="legend"
+            style="position: absolute; right: 50px; top: 10px; text-transform: uppercase; display: inline"
+            class="btn btn btn-light">{{Legend}}</button>
 
 </div>
 

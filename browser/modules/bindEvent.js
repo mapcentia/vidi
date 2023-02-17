@@ -151,7 +151,7 @@ module.exports = {
                 if (isChecked) {
                     layerTreeUtils.setupLayerNumberIndicator(base64GroupName, layers.length, layers.length);
                 } else {
-                    $("#layer-panel-" + base64GroupName + " . layer-count span:eq(0)").html(0);
+                    $("#layer-panel-" + base64GroupName + " .layer-count span:eq(0)").html(0);
                 }
             });
         });
@@ -341,15 +341,15 @@ module.exports = {
             $('#legend-toast-body').append($('#legend'));
             const b = $('#btn-show-legend-in-map');
             b.prop('disabled', true);
-            b.removeClass('btn-outline-primary');
-            b.addClass('btn-primary')
+            b.prop( "disabled", true );
+            // b.addClass('btn-primary')
             const e = document.getElementById('legend-toast')
             const t = new bootstrap.Toast(e, {autohide: false});
             e.addEventListener('hidden.bs.toast', () => {
                 $('#legend-content').append($('#legend'));
                 $('#btn-show-legend-in-map').prop('disabled', false);
-                b.removeClass('btn-primary');
-                b.addClass('btn-outline-primary')
+                // b.removeClass('btn-primary');
+                b.prop( "disabled", false);
             })
             t.show();
         })
