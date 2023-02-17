@@ -5,6 +5,9 @@
 @import "../node_modules/bootstrap/scss/functions";
 
 // 2. Include any default variable overrides here
+$accordion-icon-active-color: #ffffff;
+$dropdown-link-active-color: #000;
+$dropdown-link-active-bg: white;
 @import "./custom";
 
 // 5. Include remainder of required parts
