@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2023.2.1] - 2023-21-2
+### Fixed
+- Use "geography" distance when doing feature info on points and lines stored in EPSG:4326. Otherwise the distance will be in degrees and capture anything inside the map extent.
+
 ## [2023.2.0] - 2023-14-2
 ### Added
 - New config option `title` which will set the HTML document title. The title is set dynamically after Vidi has started and therefore the title will be set to the standard text for a moment during start-up.
