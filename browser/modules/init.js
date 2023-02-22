@@ -78,6 +78,7 @@ module.exports = {
                 height: '250px'
             },
             initZoomCenter: null,
+            title: "MapCentia Vidi",
         };
         // Set default for unset props
         for (let prop in defaults) {
@@ -249,6 +250,7 @@ module.exports = {
      *
      */
     startApp: function () {
+        document.title = window.vidiConfig.title;
         let humanUsedTemplate = !(urlVars.px && urlVars.py), schema;
         if (`tmpl` in urlVars) {
             let supressedModalTemplates = window.vidiConfig.startupModalSupressionTemplates;

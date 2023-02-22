@@ -559,6 +559,22 @@ Hvis sat til `true` kan man flytte feature-info pop-up'en på kortet.
 
     "popupDraggable": false
 
+
+.. _configjs_title:
+
+title
+*****************************************************************
+
+Sæt titel på siden (den der vises på browser-fanen).
+
+.. code-block:: json
+
+    "title": "Mit overfede kort"
+
+.. note::
+    Titlen bliver sat dynamisk efter Vidi er startet og derfor vil titlen under opstart et øjeblik være sat til standardteksten.
+
+
 .. rubric:: Fodnoter
 
 .. [#fragment] Et fragment er den del af en URL der kommer efter `#`.
