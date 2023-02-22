@@ -265,6 +265,9 @@ module.exports = {
         "Submit": "Gem",
         "Are you sure you want to stop?": "Er du sikker på, at du vil stoppe?",
         "Feature added": "Feature stedfæstet",
+        "You need to plot a point": "Du skal plotte et punkt",
+        "You need to plot at least two points": "Du skal plotte mindst to punkter",
+        "You need to plot at least three points": "Du skal plotte mindst tre punkter",
 
         // OfflineMap
         "tiles failed to load": "fliser mangler at indlæse",

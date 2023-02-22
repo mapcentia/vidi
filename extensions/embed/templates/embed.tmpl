@@ -50,81 +50,81 @@
     </div>
 </div>
 
-<!--<nav class="navbar navbar-expand-sm bg-light">-->
-<!--    <div class="container-fluid">-->
-<!--        <a class="navbar-brand">-->
-<!--            <span class="d-none d-md-inline">{{brandName}}</span>-->
-<!--        </a>-->
-<!--        <div class="navbar-nav flex-row gap-1">-->
-<!--            <button id="offcanvasLayerControlBtn"-->
-<!--                    class="btn btn-primary text-nowrap" type="button"-->
-<!--            >-->
-<!--                <span class="d-none d-md-inline">Menu</span> <i class="bi bi-arrow-bar-right"></i>-->
-<!--            </button>-->
-<!--            <div class="input-group d-none" id="edit-tool-group">-->
-<!--                <span class="input-group-text"><i class="bi bi-pencil"></i></span>-->
-<!--                <button id="offcanvasEditBtn"-->
-<!--                        class="btn btn-secondary nav-edit-btn edit-attr-btn" disabled type="button"-->
-<!--                >-->
-<!--                    <span class="d-none d-md-inline">Form</span> <i class="bi bi-arrow-bar-right"></i>-->
-<!--                </button>-->
-<!--                <button id="editStopBtn"-->
-<!--                        class="btn btn-danger nav-edit-btn" type="button"-->
-<!--                >-->
-<!--                    <i class="bi bi-slash-circle"></i> <span class="d-none d-md-inline">Stop</span>-->
-<!--                </button>-->
-<!--            </div>-->
+<nav class="navbar navbar-expand-sm bg-light d-none">
+    <div class="container-fluid">
+        <a class="navbar-brand">
+            <span class="d-none d-md-inline">{{brandName}}</span>
+        </a>
+        <div class="navbar-nav flex-row gap-1">
+            <button id="offcanvasLayerControlBtn"
+                    class="btn btn-primary text-nowrap" type="button"
+            >
+                <span class="d-none d-md-inline">Menu</span> <i class="bi bi-arrow-bar-right"></i>
+            </button>
+            <div class="input-group d-none" id="edit-tool-group">
+                <span class="input-group-text"><i class="bi bi-pencil"></i></span>
+                <button id="offcanvasEditBtn"
+                        class="btn btn-secondary nav-edit-btn edit-attr-btn" disabled type="button"
+                >
+                    <span class="d-none d-md-inline">Form</span> <i class="bi bi-arrow-bar-right"></i>
+                </button>
+                <button id="editStopBtn"
+                        class="btn btn-danger nav-edit-btn" type="button"
+                >
+                    <i class="bi bi-slash-circle"></i> <span class="d-none d-md-inline">Stop</span>
+                </button>
+            </div>
 
-<!--        </div>-->
-<!--        <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse"-->
-<!--                data-bs-target="#navbarSupportedContent"-->
-<!--                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">-->
-<!--            <span class="navbar-toggler-icon"></span>-->
-<!--        </button>-->
+        </div>
+        <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-<!--        <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">-->
-<!--            <ul class="navbar-nav me-2">-->
-<!--                &lt;!&ndash;                <li class="nav-item dropdown">&ndash;&gt;-->
-<!--                &lt;!&ndash;                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"&ndash;&gt;-->
-<!--                &lt;!&ndash;                       aria-expanded="false">&ndash;&gt;-->
-<!--                &lt;!&ndash;                        Hjælp&ndash;&gt;-->
-<!--                &lt;!&ndash;                    </a>&ndash;&gt;-->
-<!--                &lt;!&ndash;                    <ul class="dropdown-menu">&ndash;&gt;-->
-<!--                &lt;!&ndash;                        <li><a class="dropdown-item" href="#">Action</a></li>&ndash;&gt;-->
-<!--                &lt;!&ndash;                        <li><a class="dropdown-item" href="#">Another action</a></li>&ndash;&gt;-->
-<!--                &lt;!&ndash;                        <li>&ndash;&gt;-->
-<!--                &lt;!&ndash;                            <hr class="dropdown-divider">&ndash;&gt;-->
-<!--                &lt;!&ndash;                        </li>&ndash;&gt;-->
-<!--                &lt;!&ndash;                        <li><a class="dropdown-item" href="#">Something else here</a></li>&ndash;&gt;-->
-<!--                &lt;!&ndash;                    </ul>&ndash;&gt;-->
-<!--                &lt;!&ndash;                </li>&ndash;&gt;-->
-<!--                <li class="nav-item d-flex align-items-center me-2 mt-3 mt-sm-0">-->
-<!--                    <span class="badge text-bg-secondary js-app-is-pending-badge">-->
-<!--                        <i class="bi bi-three-dots"></i>{{Pending}}-->
-<!--                    </span>-->
-<!--                    <span class="badge text-bg-success js-app-is-online-badge d-none">-->
-<!--                    <i class="bi bi-signal"></i>Online</span>-->
-<!--                    <span class="badge text-bg-danger js-app-is-offline-badge d-none">Offline</span>-->
-<!--                </li>-->
-<!--                <li class="nav-item">-->
-<!--                    <a class="nav-link" id="btn-reset" href="#">Reset</a>-->
-<!--                </li>-->
-<!--                <li class="nav-item">-->
-<!--                    <a class="nav-link" data-bs-toggle="modal" data-bs-target="#about-modal" href="#">{{About}}</a>-->
-<!--                </li>-->
-<!--            </ul>-->
-<!--            &lt;!&ndash;            <form class="d-flex me-2 mb-2 mb-lg-0" role="search">&ndash;&gt;-->
-<!--            &lt;!&ndash;                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">&ndash;&gt;-->
-<!--            &lt;!&ndash;                <button class="btn btn-outline-primary" type="submit">Søg</button>&ndash;&gt;-->
-<!--            &lt;!&ndash;            </form>&ndash;&gt;-->
-<!--            <div class="navbar-nav me-2">-->
-<!--                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#login-modal">-->
-<!--                    <i class="bi bi-person"></i> {{Sign in}}-->
-<!--                </button>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--    </div>-->
-<!--</nav>-->
+        <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
+            <ul class="navbar-nav me-2">
+                <!--                <li class="nav-item dropdown">-->
+                <!--                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"-->
+                <!--                       aria-expanded="false">-->
+                <!--                        Hjælp-->
+                <!--                    </a>-->
+                <!--                    <ul class="dropdown-menu">-->
+                <!--                        <li><a class="dropdown-item" href="#">Action</a></li>-->
+                <!--                        <li><a class="dropdown-item" href="#">Another action</a></li>-->
+                <!--                        <li>-->
+                <!--                            <hr class="dropdown-divider">-->
+                <!--                        </li>-->
+                <!--                        <li><a class="dropdown-item" href="#">Something else here</a></li>-->
+                <!--                    </ul>-->
+                <!--                </li>-->
+                <li class="nav-item d-flex align-items-center me-2 mt-3 mt-sm-0">
+                    <span class="badge text-bg-secondary js-app-is-pending-badge">
+                        <i class="bi bi-three-dots"></i>{{Pending}}
+                    </span>
+                    <span class="badge text-bg-success js-app-is-online-badge d-none">
+                    <i class="bi bi-signal"></i>Online</span>
+                    <span class="badge text-bg-danger js-app-is-offline-badge d-none">Offline</span>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="btn-reset" href="#">Reset</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="modal" data-bs-target="#about-modal" href="#">{{About}}</a>
+                </li>
+            </ul>
+            <!--            <form class="d-flex me-2 mb-2 mb-lg-0" role="search">-->
+            <!--                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">-->
+            <!--                <button class="btn btn-outline-primary" type="submit">Søg</button>-->
+            <!--            </form>-->
+            <div class="navbar-nav me-2">
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#login-modal">
+                    <i class="bi bi-person"></i> {{Sign in}}
+                </button>
+            </div>
+        </div>
+    </div>
+</nav>
 
 <div class="fade-then-dragging">
     <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="offcanvasLayerControlAlt">
@@ -580,12 +580,21 @@
         <div class="offcanvas-body" id="offcanvas-layer-desc-container"></div>
     </div>
 
-    <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="offcanvasEdit">
-        <div class="offcanvas-header mt-5">
-            <h5 class="offcanvas-title">Edit</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-        </div>
-        <div class="offcanvas-body" id="editor-attr-form"></div>
+    <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="offcanvas-edit-start">
+<!--        <div class="offcanvas-header">-->
+<!--            <h5 class="offcanvas-title"></h5>-->
+<!--            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>-->
+<!--        </div>-->
+        <div class="offcanvas-body"></div>
+    </div>
+
+    <div class="offcanvas offcanvas-bottom" data-bs-backdrop="false" tabindex="-1" id="offcanvas-edit-bottom"
+         style="height: 50vh">
+<!--        <div class="offcanvas-header">-->
+<!--            <h5 class="offcanvas-title"></h5>-->
+<!--            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>-->
+<!--        </div>-->
+        <div class="offcanvas-body"></div>
     </div>
 
 </div>
@@ -597,9 +606,9 @@
     >
         <i class="bi bi-geo-alt"></i> Find faciliteter på kort
     </button>
-    <button id="btn-show-legend-in-map" data-module="legend"
-            style="position: absolute; right: 50px; top: 10px; text-transform: uppercase; display: inline"
-            class="btn btn btn-light">{{Legend}}</button>
+<!--    <button id="btn-show-legend-in-map" data-module="legend"-->
+<!--            style="position: absolute; right: 50px; top: 10px; text-transform: uppercase; display: inline"-->
+<!--            class="btn btn btn-light">{{Legend}}</button>-->
 
 </div>
 

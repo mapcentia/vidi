@@ -29,7 +29,6 @@ let firstGroupIsOpened = false;
 let urlVars = urlparser.urlVars;
 
 let mainLayerOffcanvas;
-let offcanvasEdit;
 let offcanvasInfo;
 
 
@@ -61,14 +60,7 @@ module.exports = {
 
         try {
             mainLayerOffcanvas = new bootstrap.Offcanvas('#mainLayerOffcanvas');
-            offcanvasEdit = new bootstrap.Offcanvas('#offcanvasEdit');
             offcanvasInfo = new bootstrap.Offcanvas('#offcanvasLayerDesc');
-            document.getElementById('offcanvasEdit').addEventListener('shown.bs.offcanvas', event => {
-                $(".edit-attr-btn").prop("disabled", true)
-            })
-            document.getElementById('offcanvasEdit').addEventListener('hidden.bs.offcanvas', event => {
-                $(".edit-attr-btn").prop("disabled", false)
-            })
 
             document.getElementById('mainLayerOffcanvas').addEventListener('shown.bs.offcanvas', event => {
                 $("#offcanvasLayerControlBtn").prop("disabled", true)
@@ -78,7 +70,6 @@ module.exports = {
             })
 
             $("#offcanvasLayerControlBtn").on("click", () => mainLayerOffcanvas.show());
-            $("#offcanvasEditBtn").on("click", () => offcanvasEdit.show());
         } catch (e) {
 
         }
@@ -454,12 +445,6 @@ module.exports = {
     },
     hideOffcanvasLayers: () => {
         mainLayerOffcanvas.hide()
-    },
-    showOffcanvasEdit: () => {
-        offcanvasEdit.show();
-    },
-    hideOffcanvasEdit: () => {
-        offcanvasEdit.hide();
     },
     showOffcanvasInfo: () => {
         offcanvasInfo.show();

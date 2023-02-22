@@ -9,7 +9,12 @@
 import {LAYER, SYSTEM_FIELD_PREFIX} from '../../../browser/modules/layerTree/constants';
 import {GEOJSON_PRECISION} from '../../../browser/modules/constants';
 import dayjs from 'dayjs';
-
+import {withTheme} from '@rjsf/core';
+import {Theme} from '@rjsf/bootstrap-4';
+import validator from "@rjsf/validator-ajv8";
+import SelectWidget from "./SelectWidget.jsx";
+import TimeWidget from "./TimeWidget.jsx";
+import {coordAll} from "@turf/turf";
 
 /**
  *
@@ -17,6 +22,7 @@ import dayjs from 'dayjs';
  */
 let APIBridgeSingletone = require('../../../browser/modules/api-bridge');
 
+const config = require('../../../config/config.js');
 
 /**
  *
@@ -28,11 +34,6 @@ let apiBridgeInstance = false;
 
 let multiply = require('geojson-multiply');
 
-import {withTheme} from '@rjsf/core';
-import {Theme} from '@rjsf/bootstrap-4';
-import validator from "@rjsf/validator-ajv8";
-import SelectWidget from "./SelectWidget.jsx";
-import TimeWidget from "./TimeWidget.jsx";
 
 const Theme5 = {
     ...Theme,
@@ -59,8 +60,9 @@ const ImageUploadWidget = require('./ImageUploadWidget');
 const widgets = {'imageupload': ImageUploadWidget, 'time': TimeWidget};
 
 const MODULE_NAME = `editor`;
-const EDITOR_FORM_CONTAINER_ID = 'editor-attr-form';
-const EDITOR_CONTAINER_ID = 'editor-attr-dialog';
+const PLACEMENT = window.screen.width >= 768 ? "start" : "bottom"
+const EDITOR_OFFCANVAS_CONTAINER_ID = `offcanvas-edit-${PLACEMENT}`;
+const EDITOR_FORM_CONTAINER_ID = document.querySelector(`#${EDITOR_OFFCANVAS_CONTAINER_ID} .offcanvas-body`);
 const MAX_NODE_IN_FEATURE = 1000; // If number of nodes exceed this number, when the geometry editor is not enabled.
 const EDIT_STYLE = {
     color: 'blue',
@@ -104,6 +106,8 @@ let _self = false;
 let vectorLayers;
 
 let bindEvent;
+
+let offcanvasEdit;
 
 /**
  *
@@ -155,6 +159,20 @@ module.exports = {
         }
 
         apiBridgeInstance = APIBridgeSingletone();
+
+        try {
+            offcanvasEdit = new bootstrap.Offcanvas(`#${EDITOR_OFFCANVAS_CONTAINER_ID}`);
+            document.getElementById(EDITOR_OFFCANVAS_CONTAINER_ID).addEventListener('shown.bs.offcanvas', event => {
+                $(".edit-attr-btn").prop("disabled", true)
+            })
+            document.getElementById(EDITOR_OFFCANVAS_CONTAINER_ID).addEventListener('hidden.bs.offcanvas', event => {
+                $(".edit-attr-btn").prop("disabled", false)
+            })
+
+            $("#offcanvasEditBtn").on("click", () => offcanvasEdit.show());
+        } catch (e) {
+            console.log(e)
+        }
 
         // Listen to arrival of add-feature buttons
         $(document).arrive('.gc2-add-feature', {
@@ -211,7 +229,18 @@ module.exports = {
             so handlers need to be set up manually.
         */
         _self.setHandlersForVectorLayers();
+        if (config?.extensionConfig?.editor?.addOnStart) {
+            _self.add(config?.extensionConfig?.editor?.addOnStart, true, true);
+        }
     },
+
+    showOffcanvasEdit: () => {
+        offcanvasEdit.show();
+    },
+    hideOffcanvasEdit: () => {
+        offcanvasEdit.hide();
+    },
+
 
     setHandlersForVectorLayers: () => {
         let metaData = meta.getMetaData();
@@ -457,6 +486,19 @@ module.exports = {
              */
             const onSubmit = function (formData) {
                 let featureCollection, geoJson = editor.toGeoJSON(GEOJSON_PRECISION);
+                if ((type === "POINT" || type === "MULTIPOINT") && !editor?.dragging) {
+                    alert(__("You need to plot a point"));
+                    return;
+                }
+                if ((type === "LINESTRING" || type === "MULTILINESTRING") && coordAll(geoJson).length < 2) {
+                    alert(__("You need to plot at least two points"));
+                    return;
+                }
+                if ((type === "POLYGON" || type === "MULTIPOLYGON") && coordAll(geoJson).length < 4) {
+                    console.log(coordAll(geoJson).length)
+                    alert(__("You need to plot at least three points"));
+                    return;
+                }
 
                 // Promote MULTI geom
                 if (type.substring(0, 5) === "MULTI") {
@@ -500,7 +542,12 @@ module.exports = {
                         layerTree.reloadLayer("v:" + schemaQualifiedName, true);
                     }
 
-                    utils.showInfoToast(__("Feature added"))
+                    utils.showInfoToast(__("Feature added"));
+                    if (config?.extensionConfig?.editor?.repeatMode) {
+                        setTimeout(() => {
+                            _self.add(schemaQualifiedName, true, true)
+                        }, 1000);
+                    }
                 };
 
                 apiBridgeInstance.addFeature(featureCollection, db, metaDataKeys[schemaQualifiedName]).then(featureIsSaved).catch(error => {
@@ -510,22 +557,21 @@ module.exports = {
             };
 
             // Slide panel with attributes in and render form component
-            ReactDOM.unmountComponentAtNode(document.getElementById(EDITOR_FORM_CONTAINER_ID));
+            ReactDOM.unmountComponentAtNode(document.querySelector(`#${EDITOR_OFFCANVAS_CONTAINER_ID} .offcanvas-body`));
             ReactDOM.render((
-                <div style={{"padding": "15px"}}>
-                    <Form
-                        validator={validator}
-                        className="feature-attribute-editing-form"
-                        schema={schema} noHtml5Validate
-                        uiSchema={uiSchema}
-                        widgets={widgets}
-                        onSubmit={onSubmit}>
-                        <div className="buttons">
-                            <button type="submit" className="btn btn btn-success mb-2 mt-2 w-100">{__("Submit")}</button>
-                        </div>
-                    </Form>
-                </div>
-            ), document.getElementById(EDITOR_FORM_CONTAINER_ID));
+                <Form
+                    validator={validator}
+                    className="feature-attribute-editing-form"
+                    schema={schema} noHtml5Validate
+                    uiSchema={uiSchema}
+                    widgets={widgets}
+                    onSubmit={onSubmit}>
+                    <div className="buttons">
+                        <button type="submit"
+                                className="btn btn btn-success mb-2 mt-2 w-100">{__("Submit")}</button>
+                    </div>
+                </Form>
+            ), EDITOR_FORM_CONTAINER_ID);
 
             _self.openAttributesDialog();
         };
@@ -910,7 +956,7 @@ module.exports = {
             const uiSchema = formBuildInformation.uiSchema;
 
             cloud.get().map.closePopup();
-            ReactDOM.unmountComponentAtNode(document.getElementById(EDITOR_FORM_CONTAINER_ID));
+            ReactDOM.unmountComponentAtNode(EDITOR_FORM_CONTAINER_ID);
             let eventFeatureParsed = {};
             for (let [key, value] of Object.entries(eventFeatureCopy.properties)) {
                 if (fields[key].type.includes("timestamp with time zone")) {
@@ -921,21 +967,19 @@ module.exports = {
                 eventFeatureParsed[key] = value;
             }
             ReactDOM.render((
-                <div style={{"padding": "15px"}}>
-                    <Form
-                        validator={validator}
-                        className="feature-attribute-editing-form"
-                        schema={schema} noHtml5Validate
-                        widgets={widgets}
-                        uiSchema={uiSchema}
-                        formData={eventFeatureParsed}
-                        onSubmit={onSubmit}>
-                        <div className="buttons">
-                            <button type="submit" className="btn btn btn-success mb-2 mt-2 w-100">{__("Submit")}</button>
-                        </div>
-                    </Form>
-                </div>
-            ), document.getElementById(EDITOR_FORM_CONTAINER_ID));
+                <Form
+                    validator={validator}
+                    className="feature-attribute-editing-form"
+                    schema={schema} noHtml5Validate
+                    widgets={widgets}
+                    uiSchema={uiSchema}
+                    formData={eventFeatureParsed}
+                    onSubmit={onSubmit}>
+                    <div className="buttons">
+                        <button type="submit" className="btn btn btn-success mb-2 mt-2 w-100">{__("Submit")}</button>
+                    </div>
+                </Form>
+            ), EDITOR_FORM_CONTAINER_ID);
             _self.openAttributesDialog();
         };
         let confirmMessage = __(`Application is offline, tiles will not be updated. Proceed?`);
@@ -1036,7 +1080,7 @@ module.exports = {
         backboneEvents.get().trigger('unblock:infoClick');
         cloud.get().map.editTools.stopDrawing();
         $("#edit-tool-group").addClass("d-none");
-        bindEvent.hideOffcanvasEdit()
+        _self.hideOffcanvasEdit()
 
         if (editor) {
             cloud.get().map.removeLayer(editor);

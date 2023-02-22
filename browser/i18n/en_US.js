@@ -265,6 +265,9 @@ module.exports = {
         "Submit": "Submit",
         "Are you sure you want to stop?": "Are you sure you want to stop?",
         "Feature added": "Feature added",
+        "You need to plot a point": "You need to plot a point",
+        "You need to plot at least two points": "You need to plot at least two points",
+        "You need to plot at least three points": "You need to plot at least three points",
 
         // OfflineMap
         "tiles failed to load": "tiles failed to load",
