@@ -222,6 +222,9 @@ module.exports = {
 
         backboneEvents.get().on("ready:meta", function () {
             _self.setHandlersForVectorLayers();
+            if (config?.extensionConfig?.editor?.addOnStart) {
+                _self.add(config?.extensionConfig?.editor?.addOnStart, true, true);
+            }
         });
 
         /*
@@ -229,9 +232,6 @@ module.exports = {
             so handlers need to be set up manually.
         */
         _self.setHandlersForVectorLayers();
-        if (config?.extensionConfig?.editor?.addOnStart) {
-            _self.add(config?.extensionConfig?.editor?.addOnStart, true, true);
-        }
     },
 
     showOffcanvasEdit: () => {
