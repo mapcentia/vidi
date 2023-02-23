@@ -62,9 +62,8 @@ class ImageUploadWidget extends React.Component {
             </div>);
         } else {
             control = (<div>
-                <Dropzone onDrop={this.onDrop.bind(this)}
-                          style={{width: '100%', height: '50px', padding: '5px', border: '1px green dashed'}}>
-                    <p>Drop files here, or click to select files to upload</p>
+                <Dropzone onDrop={this.onDrop.bind(this)} style={{width: '100%', height: '50px', padding: '5px', border: '1px green dashed'}}>
+                    <p>{__("Drop files here, or click to select files to upload")}</p>
                 </Dropzone>
             </div>);
         }

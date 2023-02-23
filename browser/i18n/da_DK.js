@@ -257,7 +257,7 @@ module.exports = {
         // APIBridge
         "Not authorized to perform this action": "Ikke autoriseret til at udføre denne handling.",
 
-        //Editor
+        // Editor
         "Application is offline, tiles will not be updated. Proceed?": "App'en er offline og kortlaget vil ikke blive opdateret. Fortsæt?",
         "Are you sure you want to delete the feature?": "Er du sikker på, at du vil slette objektet?",
         "The page was loaded without service workers enabled, features editing is not available (the page was loaded via plain HTTP or browser does not support service workers)": "Siden blev indlæst uden Service Workers aktiveret. Redigering er ikke tilgængelig (siden blev indlæst via almindelig HTTP eller browseren understøtter ikke Service Workers. Brug evt. en moderne browser)",
@@ -269,6 +269,9 @@ module.exports = {
         "You need to plot at least two points": "Du skal plotte mindst to punkter",
         "You need to plot at least three points": "Du skal plotte mindst tre punkter",
 
+        // Editor - ImageUploadWidget
+        "Drop files here, or click to select files to upload": "Slip filer her, eller klik for at vælge filer, der skal uploades",
+        
         // OfflineMap
         "tiles failed to load": "fliser mangler at indlæse",
         "OfflineMap block description": "Her kan specifikke kortområder opbevares for at blive brugt offline",
