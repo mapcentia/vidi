@@ -644,6 +644,10 @@ module.exports = module.exports = {
                 buffer = buffer + layer._mRadius;
             }
         }
+        // Handle edge case where buffer is 0 and matrikel-geomtri is flawed
+        if (buffer === 0) {
+            buffer = -0.1;
+        }
         primitive = layer.toGeoJSON(GEOJSON_PRECISION);
 
         // Ensure primitive is a feature, when id is set
