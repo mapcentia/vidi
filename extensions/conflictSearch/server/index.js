@@ -111,7 +111,8 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                     if (obj[hit].hits > 0) {
                         let data = [];
                         let name = obj[hit].title || obj[hit].table;
-                        name = name.slice(0, 30); // TODO also strip invalid characters
+                        name = name.slice(0, 30); // Excel sheet name max 31 characters
+                        name = name.replace(/[/\\?*[\]]/g, '_'); // handle sheetname invalid characters \ / ? * [ ]
                         if (names.includes(name)) {
                             name = name.slice(0, -1) + postfixNumber;
                             postfixNumber++;
