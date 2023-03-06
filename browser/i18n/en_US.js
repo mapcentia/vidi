@@ -255,11 +255,14 @@ module.exports = {
         // APIBridge
         "Not authorized to perform this action": "Not authorized to perform this action",
 
-        //Editor
+        // Editor
         "Application is offline, tiles will not be updated. Proceed?": "Application is offline, tiles will not be updated. Proceed?",
         "Are you sure you want to delete the feature?": "Are you sure you want to delete the feature?",
         "The page was loaded without service workers enabled, features editing is not available (the page was loaded via plain HTTP or browser does not support service workers)": "The page was loaded without service workers enabled, features editing is not available (the page was loaded via plain HTTP or browser does not support service workers)",
         "Editing of geometry is not possible when number of nodes exceed": "Editing of geometry is not possible when number of nodes exceed",
+
+        // Editor - ImageUploadWidget
+        "Drop files here, or click to select files to upload": "Drop files here, or click to select files to upload",
 
         // OfflineMap
         "tiles failed to load": "tiles failed to load",
