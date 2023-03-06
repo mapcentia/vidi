@@ -17,7 +17,6 @@ let meta;
 let state;
 let layers;
 let layerTree;
-const config = require('../../../config/config.js');
 
 module.exports = {
 
@@ -43,7 +42,7 @@ module.exports = {
         window.vidiConfig.activateMainTab = "info";
         const imageSize = 36;
 
-        const alt = config?.extensionConfig?.embed?.useAltLayerTree ? "Alt" : "";
+        const alt = window.vidiConfig?.extensionConfig?.embed?.useAltLayerTree ? "Alt" : "";
 
         try {
             const offcanvas = new bootstrap.Offcanvas('#offcanvasLayerControl' + alt);
