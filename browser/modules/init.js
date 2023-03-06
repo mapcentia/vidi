@@ -54,7 +54,7 @@ module.exports = {
             removeDisabledLayersFromLegend: false,
             template: 'default.tmpl',
             enabledPrints: [],
-            activateMainTab: 'info',
+            activateMainTab: 'layer',
             extensionConfig: {},
             singleTiled: true,
             doNotCloseLoadScreen: false,

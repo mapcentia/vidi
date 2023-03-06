@@ -524,7 +524,7 @@ module.exports = {
                         if (state) {
                             if (state.snapshot.map.layers.length === 0) {
                                 console.log("No active layers in snapshot");
-                                $('#layer-loading-indicator').hide();
+                                $('.layer-loading-indicator').hide();
                             } else {
                                 console.log("Active layers in snapshot");
                                 activeLayersInSnapshot = true;

@@ -113,7 +113,7 @@ module.exports = {
 
             // Set load indicator
             $('#layer-filter-container').css('pointer-events', 'none').css('opacity', 0.2);
-            $('#layer-loading-indicator').show();
+            $('.layer-loading-indicator').show();
 
             try {
 
@@ -132,7 +132,7 @@ module.exports = {
                             }
                             response.json().then(data => {
                                 $('#layer-filter-container').css('pointer-events', 'auto').css('opacity', 1.0);
-                                $('#layer-loading-indicator').hide();
+                                $('.layer-loading-indicator').hide();
                                 if (data.data && data.data.length > 0) {
                                     me.addMetaData(data);
                                     ready = true;

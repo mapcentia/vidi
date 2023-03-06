@@ -33,7 +33,7 @@ class MarkupGenerator {
                         <span style="display: ${addGroupCheckbox ? "flex" : "none"}" class="form-check align-items-center" id="group-check-box-${base64GroupName}">
                             <input class="form-check-input" type="checkbox" data-gc2-group-name="${name}">
                         </span>
-                        <div class="position-relative flex-fill">
+                        <div class="position-relative flex-fill layer-group-checkbox-wrapper">
                             <a class="text-uppercase link-dark stretched-link accordion-toggle js-toggle-layer-panel collapsed" data-bs-toggle="collapse" data-parent="#layers" href="#collapse${base64GroupName}">${name}</a>
                         </div>
                         <div class="layer-count badge bg-secondary">

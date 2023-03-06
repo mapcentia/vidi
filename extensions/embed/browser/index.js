@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2022 MapCentia ApS
+ * @copyright  2013-2023 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -17,6 +17,7 @@ let meta;
 let state;
 let layers;
 let layerTree;
+const config = require('../../../config/config.js');
 
 module.exports = {
 
@@ -39,13 +40,14 @@ module.exports = {
      */
     init: function () {
 
-        backboneEvents.get().trigger(`on:infoClick`);
+        window.vidiConfig.activateMainTab = "info";
         const imageSize = 36;
 
+        const alt = config?.extensionConfig?.embed?.useAltLayerTree ? "Alt" : "";
 
         try {
-            const offcanvas = new bootstrap.Offcanvas('#offcanvasLayerControlAlt');
-            const offcanvasEl = document.getElementById('offcanvasLayerControlAlt');
+            const offcanvas = new bootstrap.Offcanvas('#offcanvasLayerControl' + alt);
+            const offcanvasEl = document.getElementById('offcanvasLayerControl' + alt);
             const btn = document.querySelector("#offcanvasLayerControlAltBtn");
             btn.addEventListener("click", () => offcanvas.show());
             offcanvasEl.addEventListener('hidden.bs.offcanvas', event => {
@@ -54,6 +56,9 @@ module.exports = {
             offcanvasEl.addEventListener('shown.bs.offcanvas', event => {
                 btn.classList.add("d-none");
             })
+            if (window?.vidiConfig?.extensionConfig?.embed?.slideOutLayerTree === true) {
+                offcanvas.show();
+            }
         } catch (e) {
            console.info("Embed extension is enabled, but the embed template is not used.")
         }
