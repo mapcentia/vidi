@@ -19,6 +19,7 @@ let _self = false;
 
 let embedModeIsEnabled = false;
 let utils;
+let anchor;
 
 /**
  * Clear map control
@@ -62,7 +63,12 @@ const setDefaultZoomCenter = () => {
         const p = geocloud.transformPoint(hashArr[2], hashArr[3], "EPSG:4326", "EPSG:3857");
         cloud.get().zoomToPoint(p.x, p.y, hashArr[1]);
     } else {
-        cloud.get().zoomToExtent(setting.getExtent());
+        let parameters = anchor.getInitMapParameters();
+        if (parameters) {
+            cloud.get().setView(new L.LatLng(parseFloat(parameters.y), parseFloat(parameters.x)), parameters.zoom);
+        } else {
+            cloud.get().zoomToExtent(setting.getExtent());
+        }
     }
 
 }
@@ -99,6 +105,7 @@ module.exports = {
         setting = o.setting;
         state = o.state;
         utils = o.utils;
+        anchor = o.anchor;
         _self = this;
         return this;
     },
