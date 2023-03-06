@@ -2,9 +2,11 @@
     .leaflet-control-custom, .history-control, .leaflet-control-boxzoom {
         display: inline;
     }
+
     .leaflet-control-measurements, .leaflet-clear-map, .history-control, .leaflet-control-boxzoom {
         display: none;
     }
+
     .leaflet-top {
         top: 0 !important;
     }
@@ -127,12 +129,46 @@
 </nav>
 
 <div class="fade-then-dragging">
+
+    <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="offcanvasLayerControl">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="offcanvasLayerControlLabel">Find faciliteter på kort</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <div class="help-btn" onclick="javascript:createAlert($(this), '{{Help text overlays}}')">
+                <i class="bi bi-question-circle help-btn"></i></div>
+            <div></div>
+            <div style="display: flex" class="layer-loading-indicator w-100 justify-content-center">
+                <div style="width: 150px;" class="d-inline-block">
+                    <div class="text-center">{{Loading data}}</div>
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated w-100"></div>
+                    </div>
+                </div>
+            </div>
+            <div id="layer-filter-container">
+                <div id="layers" role="tablist"></div>
+            </div>
+        </div>
+    </div>
+
     <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="offcanvasLayerControlAlt">
         <div class="offcanvas-header">
             <h5 class="offcanvas-title" id="offcanvasLayerControlLabel">Find faciliteter på kort</h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
-        <div class="offcanvas-body" id="layer-control"></div>
+        <div class="offcanvas-body" id="layer-control">
+            <div style="display: flex" class="layer-loading-indicator w-100 justify-content-center">
+                <div style="width: 150px;" class="d-inline-block">
+                    <div class="text-center">{{Loading data}}</div>
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated w-100"></div>
+                    </div>
+                </div>
+            </div>
+            <div id="layer-control"></div>
+        </div>
     </div>
 
     <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="mainLayerOffcanvas">
@@ -250,20 +286,6 @@
 
                     </div>
                     <div role="tabpanel" class="tab-pane fade" id="layer-content">
-                        <div class="help-btn" onclick="javascript:createAlert($(this), '{{Help text overlays}}')">
-                            <i class="bi bi-question-circle help-btn"></i></div>
-                        <div></div>
-                        <div id="layer-loading-indicator" style="display: flex" class="w-100 justify-content-center">
-                            <div style="width: 150px;" class="d-inline-block">
-                                <div class="text-center">{{Loading data}}</div>
-                                <div class="progress">
-                                    <div class="progress-bar progress-bar-striped progress-bar-animated w-100"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div id="layer-filter-container">
-                            <div id="layers" role="tablist"></div>
-                        </div>
                     </div>
                     <div role="tabpanel" class="tab-pane fade" id="baselayer-content">
                         <div class="help-btn" onclick="javascript:createAlert($(this), '{{Help text baselayers}}')">
@@ -275,8 +297,11 @@
                         <div class="help-btn" onclick="javascript:createAlert($(this), '{{Help text legend}}')">
                             <i class="bi bi-question-circle help-btn"></i></div>
                         <div></div>
-<!--                        <button id="btn-show-legend-in-map" data-module="legend"-->
-<!--                                class="btn btn btn-outline-primary w-100 mb-3">{{Show legend on top the map}}</button>-->
+                        <!--                        <button id="btn-show-legend-in-map" data-module="legend"-->
+                        <!--                                class="btn btn btn-outline-primary w-100 mb-3">{{Show legend
+                                                                                                                  on top
+                                                                                                                  the
+                                                                                                                  map}}</button>-->
                         <div id="legend" class="legend"></div>
                     </div>
                     <div role="tabpanel" class="tab-pane fade" id="draw-content">
@@ -573,19 +598,19 @@
     </div>
 
     <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="offcanvas-edit-start">
-<!--        <div class="offcanvas-header">-->
-<!--            <h5 class="offcanvas-title"></h5>-->
-<!--            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>-->
-<!--        </div>-->
+        <!--        <div class="offcanvas-header">-->
+        <!--            <h5 class="offcanvas-title"></h5>-->
+        <!--            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>-->
+        <!--        </div>-->
         <div class="offcanvas-body"></div>
     </div>
 
     <div class="offcanvas offcanvas-bottom" data-bs-backdrop="false" tabindex="-1" id="offcanvas-edit-bottom"
          style="height: 50vh">
-<!--        <div class="offcanvas-header">-->
-<!--            <h5 class="offcanvas-title"></h5>-->
-<!--            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>-->
-<!--        </div>-->
+        <!--        <div class="offcanvas-header">-->
+        <!--            <h5 class="offcanvas-title"></h5>-->
+        <!--            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>-->
+        <!--        </div>-->
         <div class="offcanvas-body"></div>
     </div>
 
@@ -593,14 +618,14 @@
 
 <div class="fade-then-dragging">
     <button id="offcanvasLayerControlAltBtn"
-            style="position: absolute; left: 10px; top: 10px; text-transform: uppercase; display: inline"
-            class="btn btn-light" type="button"
+            style="left: 10px; top: 10px; display: inline"
+            class="btn btn-light position-absolute text-uppercase" type="button"
     >
         <i class="bi bi-geo-alt"></i> Find faciliteter på kort
     </button>
-<!--    <button id="btn-show-legend-in-map" data-module="legend"-->
-<!--            style="position: absolute; right: 50px; top: 10px; text-transform: uppercase; display: inline"-->
-<!--            class="btn btn btn-light">{{Legend}}</button>-->
+    <!--    <button id="btn-show-legend-in-map" data-module="legend"-->
+    <!--            style="position: absolute; right: 50px; top: 10px; text-transform: uppercase; display: inline"-->
+    <!--            class="btn btn btn-light">{{Legend}}</button>-->
 
 </div>
 
