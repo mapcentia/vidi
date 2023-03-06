@@ -51,7 +51,7 @@ module.exports = {
             <a class="nav-link" data-bs-toggle="tab" data-module-id="${moduleId}" href="#${id}-content" aria-controls role="tab" data-toggle="tab" data-module-title="${name}">${iconRaw}</a>
         </li>`).appendTo("#main-tabs");
         $(`<div role="tabpanel" class="tab-pane fade" id="${id}-content"></div>`).appendTo(".tab-content.main-content");
-        $(`<div class="help-btn"><i class="material-icons help-btn">help_outline</i></div>`).appendTo(el).on("click", function () {
+        $(`<div class="help-btn"><i class="bi bi-question-circle help-btn"></i></div>`).appendTo(el).on("click", function () {
             createAlert($(this), info);
         });
         $(`<div></div>`).appendTo(el);
