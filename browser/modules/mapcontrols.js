@@ -13,13 +13,15 @@ const MODULE_NAME = `mapcontrols`;
  */
 let state, cloud, setting, backboneEvents;
 
-let clearMapControl, fullScreenMapControl, defaultMapExtentControl;
+let clearMapControl, fullScreenMapControl, defaultMapExtentControl, baselayerToggleControl;
 
 let _self = false;
 
 let embedModeIsEnabled = false;
 let utils;
 let anchor;
+let setBaseLayer;
+let toggledBaselayer = 0;
 
 /**
  * Full screen map control
@@ -118,6 +120,33 @@ let DefaultMapExtentControl = L.Control.extend({
 });
 
 /**
+ * Baselayer toggle
+ */
+const BaselayerToggleOptions = {
+    template: (`<a title="${window.vidiConfig.baseLayers[toggledBaselayer === 0 ? 1 : 0].name}}"
+        id="baselayer-toggle"
+        class="leaflet-bar-part leaflet-bar-part-single overflow-hidden">
+        <img src="${window.vidiConfig.baseLayers[toggledBaselayer === 0 ? 1 : 0].thumbnail}">
+    </a>`),
+    onclick: (e) => {
+        e.stopPropagation();
+        e.target.src = window.vidiConfig.baseLayers[toggledBaselayer].thumbnail;
+        e.target.parentElement.title = window.vidiConfig.baseLayers[toggledBaselayer].name;
+        toggledBaselayer = toggledBaselayer === 0 ? 1 : 0
+        setBaseLayer.init(window.vidiConfig.baseLayers[toggledBaselayer].id);
+    }
+};
+
+let BaselayerToggleControl = L.Control.extend({
+    options: {position: 'topright'},
+    onAdd: () => {
+        let container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom embed-full-screen');
+        $(container).append(BaselayerToggleOptions.template)[0].onclick = BaselayerToggleOptions.onclick;
+        return container;
+    }
+});
+
+/**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
  */
@@ -129,6 +158,7 @@ module.exports = {
         state = o.state;
         utils = o.utils;
         anchor = o.anchor;
+        setBaseLayer = o.setBaseLayer;
         _self = this;
         return this;
     },
@@ -165,6 +195,11 @@ module.exports = {
 
         defaultMapExtentControl = new DefaultMapExtentControl();
         cloud.get().map.addControl(defaultMapExtentControl);
+
+        if (window.vidiConfig.template === "embed.tmpl") {
+            baselayerToggleControl = new BaselayerToggleControl();
+            cloud.get().map.addControl(baselayerToggleControl);
+        }
 
         let historyControl = new L.HistoryControl({
             orientation: 'vertical',
