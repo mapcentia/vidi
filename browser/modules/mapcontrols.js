@@ -41,7 +41,9 @@ let FullScreenMapControl = L.Control.extend({
     options: {position: 'topright'},
     onAdd: () => {
         let container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom embed-full-screen');
-        $(container).append(FullScreenMapControlOptions.template)[0].onclick = FullScreenMapControlOptions.onclick;
+        let el = $(container).append(FullScreenMapControlOptions.template)[0];
+        L.DomEvent.disableClickPropagation(el);
+        el.onclick = FullScreenMapControlOptions.onclick;
         return container;
     }
 });
@@ -70,8 +72,9 @@ let ClearMapControl = L.Control.extend({
     options: {position: 'topright'},
     onAdd: () => {
         let container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom leaflet-clear-map');
-        // $(container).attr(`style`, `backgroundColor: white, width: 30px, height: 30px`);
-        $(container).append(ClearMapControlOptions.template)[0].onclick = ClearMapControlOptions.onclick;
+        let el = $(container).append(ClearMapControlOptions.template)[0];
+        L.DomEvent.disableClickPropagation(el);
+        el.onclick = ClearMapControlOptions.onclick;
         return container;
     }
 });
@@ -114,7 +117,9 @@ let DefaultMapExtentControl = L.Control.extend({
     options: {position: 'topright'},
     onAdd: () => {
         let container = L.DomUtil.create('div', '');
-        $(`.leaflet-control-zoom.leaflet-bar`).prepend(DefaultMapExtentControlOptions.template)[0].onclick = DefaultMapExtentControlOptions.onclick;
+        let el = $(`.leaflet-control-zoom.leaflet-bar`).prepend(DefaultMapExtentControlOptions.template)[0];
+        L.DomEvent.disableClickPropagation(el);
+        el.onclick = DefaultMapExtentControlOptions.onclick;
         return container;
     }
 });
@@ -129,7 +134,6 @@ const BaselayerToggleOptions = {
         <img src="${window.vidiConfig.baseLayers[toggledBaselayer === 0 ? 1 : 0].thumbnail}">
     </a>`),
     onclick: (e) => {
-        e.stopPropagation();
         e.target.src = window.vidiConfig.baseLayers[toggledBaselayer].thumbnail;
         e.target.parentElement.title = window.vidiConfig.baseLayers[toggledBaselayer].name;
         toggledBaselayer = toggledBaselayer === 0 ? 1 : 0
@@ -141,10 +145,12 @@ let BaselayerToggleControl = L.Control.extend({
     options: {position: 'topright'},
     onAdd: () => {
         let container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom baselayer-toggle');
-        $(container).append(BaselayerToggleOptions.template)[0].onclick = BaselayerToggleOptions.onclick;
+        let el = $(container).append(BaselayerToggleOptions.template)[0];
+        L.DomEvent.disableClickPropagation(el);
+        el.onclick = BaselayerToggleOptions.onclick;
         return container;
     }
-});
+})
 
 /**
  *

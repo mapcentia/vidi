@@ -88,8 +88,9 @@ module.exports = {
             followMarkerStyle: {
                 fillColor: '#FFB000'
             },
-            icon: "bi bi-geo-alt"
+            icon: "bi bi-geo-alt",
         }).addTo(map);
+        L.DomEvent.disableClickPropagation(lc._link);
 
         L.Edit.Poly = L.Edit.Poly.extend({
             options: {
