@@ -132,7 +132,7 @@
 
     <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="offcanvasLayerControl">
         <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="offcanvasLayerControlLabel">Find faciliteter på kort</h5>
+            <h5 class="offcanvas-title" id="offcanvasLayerControlLabel">Find faciliteter på kort TEST</h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body">
@@ -621,11 +621,11 @@
             style="left: 10px; top: 10px; display: inline"
             class="btn btn-light position-absolute text-uppercase" type="button"
     >
-        <i class="bi bi-geo-alt"></i> Find faciliteter på kort
+        <i class="bi bi-geo-alt"></i> <span class="d-none d-sm-inline">Find faciliteter på kort</span>
     </button>
-    <!--    <button id="btn-show-legend-in-map" data-module="legend"-->
-    <!--            style="position: absolute; right: 50px; top: 10px; text-transform: uppercase; display: inline"-->
-    <!--            class="btn btn btn-light">{{Legend}}</button>-->
+        <button id="btn-show-legend-in-map" data-module="legend"
+                style="position: absolute; right: 50px; top: 10px; text-transform: uppercase; display: inline"
+                class="btn btn btn-light"><i class="bi bi-card-text"></i> <span class="d-none d-sm-inline">{{Legend}}</span></button>
 
 </div>
 
@@ -641,7 +641,7 @@
 <div class="toast-container position-fixed bottom-0 end-0 p-3 pb-5">
     <div id="legend-toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="toast-header">
-            <strong class="me-auto">Legend</strong>
+            <strong class="me-auto">{{Legend}}</strong>
             <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
         <div class="toast-body" id="legend-toast-body">

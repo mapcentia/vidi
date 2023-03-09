@@ -140,7 +140,7 @@ const BaselayerToggleOptions = {
 let BaselayerToggleControl = L.Control.extend({
     options: {position: 'topright'},
     onAdd: () => {
-        let container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom embed-full-screen');
+        let container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom baselayer-toggle');
         $(container).append(BaselayerToggleOptions.template)[0].onclick = BaselayerToggleOptions.onclick;
         return container;
     }
