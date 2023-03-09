@@ -110,14 +110,9 @@ let bindEvent;
 let offcanvasEdit;
 
 const transformErrors = (errors, uiSchema) => {
-    setTimeout(() => {
-        document.querySelector(".feature-attribute-editing-form .alert-danger").innerHTML = __("Errors");
-    }, 0);
     return errors.map((error) => {
-        console.log(error)
         if (error.name === 'required') {
             error.message = __(`Required`);
-            error.stack = `${__('The field')} ${error.property} ${__('is required')}`;
         }
         return error;
     });
@@ -356,13 +351,14 @@ module.exports = {
                     title = fieldConf[key].alias;
                 }
 
-                properties[key] = {title, type: `string`};
+                properties[key] = {title, type: `string`, 'ui:placeholder': 'ddsd'};
 
                 if (fields[key].is_nullable !== true) {
                     required.push(key);
                 }
 
                 if (fields[key]) {
+                    uiSchema[key] = {};
                     switch (fields[key].type) {
                         case `smallint`:
                         case `integer`:
@@ -407,6 +403,7 @@ module.exports = {
                             };
                             break;
                     }
+                    uiSchema[key]["ui:placeholder"] = "test"
                 }
 
                 // Properties have priority over default types
@@ -988,7 +985,8 @@ module.exports = {
                     widgets={widgets}
                     uiSchema={uiSchema}
                     formData={eventFeatureParsed}
-                    onSubmit={onSubmit}>
+                    onSubmit={onSubmit}
+                    transformErrors = {transformErrors}>
                     <div className="buttons">
                         <button type="submit" className="btn btn btn-success mb-2 mt-2 w-100">{__("Submit")}</button>
                     </div>

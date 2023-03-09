@@ -269,8 +269,6 @@ module.exports = {
         "You need to plot at least two points": "Du skal plotte mindst to punkter",
         "You need to plot at least three points": "Du skal plotte mindst tre punkter",
         "Required": "Skal udfyldes",
-        "The field": "Feltet",
-        "is required": "skal udfyldes",
 
         // Editor - ImageUploadWidget
         "Drop files here, or click to select files to upload": "Slip filer her, eller klik for at vælge filer, der skal uploades",

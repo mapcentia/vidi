@@ -269,8 +269,6 @@ module.exports = {
         "You need to plot at least two points": "You need to plot at least two points",
         "You need to plot at least three points": "You need to plot at least three points",
         "Required": "Required",
-        "The field": "The field",
-        "is required": "is required",
 
         // Editor - ImageUploadWidget
         "Drop files here, or click to select files to upload": "Drop files here, or click to select files to upload",
