@@ -127,30 +127,7 @@ let DefaultMapExtentControl = L.Control.extend({
 /**
  * Baselayer toggle
  */
-const BaselayerToggleOptions = {
-    template: (`<a title="${window.vidiConfig.baseLayers[toggledBaselayer === 0 ? 1 : 0].name}}"
-        id="baselayer-toggle"
-        class="leaflet-bar-part leaflet-bar-part-single overflow-hidden">
-        <img src="${window.vidiConfig.baseLayers[toggledBaselayer === 0 ? 1 : 0].thumbnail}">
-    </a>`),
-    onclick: (e) => {
-        e.target.src = window.vidiConfig.baseLayers[toggledBaselayer].thumbnail;
-        e.target.parentElement.title = window.vidiConfig.baseLayers[toggledBaselayer].name;
-        toggledBaselayer = toggledBaselayer === 0 ? 1 : 0
-        setBaseLayer.init(window.vidiConfig.baseLayers[toggledBaselayer].id);
-    }
-};
-
-let BaselayerToggleControl = L.Control.extend({
-    options: {position: 'topright'},
-    onAdd: () => {
-        let container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom baselayer-toggle');
-        let el = $(container).append(BaselayerToggleOptions.template)[0];
-        L.DomEvent.disableClickPropagation(el);
-        el.onclick = BaselayerToggleOptions.onclick;
-        return container;
-    }
-})
+let BaselayerToggleOptions;
 
 /**
  *
@@ -171,6 +148,32 @@ module.exports = {
 
     init: () => {
         state.listenTo(MODULE_NAME, _self);
+
+        BaselayerToggleOptions = {
+
+            template: (`<a title="${window.vidiConfig.baseLayers[toggledBaselayer === 0 ? 1 : 0].name}}"
+        id="baselayer-toggle"
+        class="leaflet-bar-part leaflet-bar-part-single overflow-hidden">
+        <img src="${window.vidiConfig.baseLayers[toggledBaselayer === 0 ? 1 : 0].thumbnail}">
+    </a>`),
+            onclick: (e) => {
+                e.target.src = window.vidiConfig.baseLayers[toggledBaselayer].thumbnail;
+                e.target.parentElement.title = window.vidiConfig.baseLayers[toggledBaselayer].name;
+                toggledBaselayer = toggledBaselayer === 0 ? 1 : 0
+                setBaseLayer.init(window.vidiConfig.baseLayers[toggledBaselayer].id);
+            }
+        };
+
+        let BaselayerToggleControl = L.Control.extend({
+            options: {position: 'topright'},
+            onAdd: () => {
+                let container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom baselayer-toggle');
+                let el = $(container).append(BaselayerToggleOptions.template)[0];
+                L.DomEvent.disableClickPropagation(el);
+                el.onclick = BaselayerToggleOptions.onclick;
+                return container;
+            }
+        })
 
         // Detect if the embed template is used
         if ($(`#floating-container-secondary`).length === 1) {
