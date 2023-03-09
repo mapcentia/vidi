@@ -231,7 +231,16 @@ module.exports = {
         backboneEvents.get().on("ready:meta", function () {
             _self.setHandlersForVectorLayers();
             if (config?.extensionConfig?.editor?.addOnStart) {
-                _self.add(config?.extensionConfig?.editor?.addOnStart, true, true);
+                function poll() {
+                    if (('serviceWorker' in navigator) && navigator?.serviceWorker?.controller) {
+                        _self.add(config?.extensionConfig?.editor?.addOnStart, true, true);
+                    } else {
+                        setTimeout(() => {
+                            poll();
+                        }, 200)
+                    }
+                }
+                poll();
             }
         });
 
@@ -574,7 +583,7 @@ module.exports = {
                     uiSchema={uiSchema}
                     widgets={widgets}
                     onSubmit={onSubmit}
-                    transformErrors = {transformErrors}>
+                    transformErrors={transformErrors}>
                     <div className="buttons">
                         <button type="submit"
                                 className="btn btn btn-success mb-2 mt-2 w-100">{__("Submit")}</button>
@@ -984,7 +993,7 @@ module.exports = {
                     uiSchema={uiSchema}
                     formData={eventFeatureParsed}
                     onSubmit={onSubmit}
-                    transformErrors = {transformErrors}>
+                    transformErrors={transformErrors}>
                     <div className="buttons">
                         <button type="submit" className="btn btn btn-success mb-2 mt-2 w-100">{__("Submit")}</button>
                     </div>
