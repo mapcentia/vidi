@@ -350,9 +350,7 @@ module.exports = {
                 if (fieldConf[key]?.alias) {
                     title = fieldConf[key].alias;
                 }
-
-                properties[key] = {title, type: `string`, 'ui:placeholder': 'ddsd'};
-
+                properties[key] = {title, type: `string`};
                 if (fields[key].is_nullable !== true) {
                     required.push(key);
                 }
@@ -403,7 +401,7 @@ module.exports = {
                             };
                             break;
                     }
-                    uiSchema[key]["ui:placeholder"] = "test"
+                    uiSchema[key]["ui:placeholder"] = fieldConf[key]?.desc;
                 }
 
                 // Properties have priority over default types
