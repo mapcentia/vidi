@@ -109,6 +109,19 @@ let bindEvent;
 
 let offcanvasEdit;
 
+const transformErrors = (errors, uiSchema) => {
+    setTimeout(() => {
+        document.querySelector(".feature-attribute-editing-form .alert-danger").innerHTML = __("Errors");
+    }, 0);
+    return errors.map((error) => {
+        console.log(error)
+        if (error.name === 'required') {
+            error.message = __(`Required`);
+            error.stack = `${__('The field')} ${error.property} ${__('is required')}`;
+        }
+        return error;
+    });
+}
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -565,7 +578,8 @@ module.exports = {
                     schema={schema} noHtml5Validate
                     uiSchema={uiSchema}
                     widgets={widgets}
-                    onSubmit={onSubmit}>
+                    onSubmit={onSubmit}
+                    transformErrors = {transformErrors}>
                     <div className="buttons">
                         <button type="submit"
                                 className="btn btn btn-success mb-2 mt-2 w-100">{__("Submit")}</button>
