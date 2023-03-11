@@ -31,7 +31,23 @@ window.$ = window.jQuery = require('jquery');
 function ಠ_ಠ() {
     require('./i18n/*.js', {glob: true});
 }
+const current = document.addEventListener;
 
+// Dirty hack so Bootstrap doesn't add focusin listners.
+// The focusin will focus the first input element when clicking the map.
+document.addEventListener = function (type, listener) {
+    if(type === "focusin")
+    {
+        //do nothing
+    }
+    else
+    {
+        let args = [];
+        args[0] = type;
+        args[1] = listener;
+        current.apply(this, args);
+    }
+};
 /**
  * Global i18n dict
  */
