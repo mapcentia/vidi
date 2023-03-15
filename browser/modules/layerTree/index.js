@@ -385,11 +385,11 @@ module.exports = {
      *
      * @returns {Array}
      */
-    getActiveLayers: () => {
+    getActiveLayers: (ignoreEnabled = false) => {
         let result = [];
         let activeLayers = switchLayer.getLayersEnabledStatus();
         for (let key in activeLayers) {
-            if (activeLayers[key].enabled) {
+            if (activeLayers[key].enabled || ignoreEnabled) {
                 result.push(activeLayers[key].fullLayerKey);
             }
         }
@@ -2222,16 +2222,16 @@ module.exports = {
      */
     getParentLayerFilters(layerKey) {
         let parentLayers = [];
-        let activeLayers = _self.getActiveLayers();
-        activeLayers.map(activeLayerName => {
-            let layerMeta = meta.getMetaByKey(layerTreeUtils.stripPrefix(activeLayerName), false);
+        let allLayers = _self.getActiveLayers(true);
+        allLayers.map(layerName => {
+            let layerMeta = meta.getMetaByKey(layerTreeUtils.stripPrefix(layerName), false);
             if (layerMeta.children && Array.isArray(layerMeta.children)) {
                 layerMeta.children.map(child => {
                     if (child.rel === layerKey) {
-                        let activeFiltersForParentLayer = _self.getActiveLayerFilters(layerTreeUtils.stripPrefix(activeLayerName));
+                        let activeFiltersForParentLayer = _self.getActiveLayerFilters(layerTreeUtils.stripPrefix(layerName));
                         if (activeFiltersForParentLayer && activeFiltersForParentLayer.length > 0) {
                             activeFiltersForParentLayer.map(filter => {
-                                parentLayers.push(`${child.child_column} IN (SELECT ${child.parent_column} FROM ${layerTreeUtils.stripPrefix(activeLayerName)} WHERE ${filter})`);
+                                parentLayers.push(`${child.child_column} IN (SELECT ${child.parent_column} FROM ${layerTreeUtils.stripPrefix(layerName)} WHERE ${filter})`);
                             });
                         }
                     }
