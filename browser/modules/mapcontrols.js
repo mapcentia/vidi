@@ -149,31 +149,39 @@ module.exports = {
     init: () => {
         state.listenTo(MODULE_NAME, _self);
 
-        BaselayerToggleOptions = {
+        backboneEvents.get().once("allDoneLoading:layers", () => {
+                const currentBaseLayerId = setBaseLayer.getActiveBaseLayer()?.id;
+                const baseLayers = window.vidiConfig.baseLayers;
+                toggledBaselayer = baseLayers.findIndex(x => x.id === currentBaseLayerId);
+                BaselayerToggleOptions = {
 
-            template: (`<a title="${window.vidiConfig.baseLayers[toggledBaselayer === 0 ? 1 : 0].name}}"
-        id="baselayer-toggle"
-        class="leaflet-bar-part leaflet-bar-part-single overflow-hidden">
-        <img src="${window.vidiConfig.baseLayers[toggledBaselayer === 0 ? 1 : 0].thumbnail}">
-    </a>`),
-            onclick: (e) => {
-                e.target.src = window.vidiConfig.baseLayers[toggledBaselayer].thumbnail;
-                e.target.parentElement.title = window.vidiConfig.baseLayers[toggledBaselayer].name;
-                toggledBaselayer = toggledBaselayer === 0 ? 1 : 0
-                setBaseLayer.init(window.vidiConfig.baseLayers[toggledBaselayer].id);
+                    template: (`<a title="${window.vidiConfig.baseLayers[toggledBaselayer === 0 ? 1 : 0].name}}"
+                        id="baselayer-toggle"
+                        class="leaflet-bar-part leaflet-bar-part-single overflow-hidden">
+                        <img src="${window.vidiConfig.baseLayers[toggledBaselayer === 0 ? 1 : 0].thumbnail}"></a>`),
+                    onclick: (e) => {
+                        e.target.src = window.vidiConfig.baseLayers[toggledBaselayer].thumbnail;
+                        e.target.parentElement.title = window.vidiConfig.baseLayers[toggledBaselayer].name;
+                        toggledBaselayer = toggledBaselayer === 0 ? 1 : 0
+                        setBaseLayer.init(window.vidiConfig.baseLayers[toggledBaselayer].id);
+                    }
+                };
+                let BaselayerToggleControl = L.Control.extend({
+                    options: {position: 'topright'},
+                    onAdd: () => {
+                        let container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom baselayer-toggle');
+                        let el = $(container).append(BaselayerToggleOptions.template)[0];
+                        L.DomEvent.disableClickPropagation(el);
+                        el.onclick = BaselayerToggleOptions.onclick;
+                        return container;
+                    }
+                })
+                if (window.vidiConfig.template === "embed.tmpl") {
+                    baselayerToggleControl = new BaselayerToggleControl();
+                    cloud.get().map.addControl(baselayerToggleControl);
+                }
             }
-        };
-
-        let BaselayerToggleControl = L.Control.extend({
-            options: {position: 'topright'},
-            onAdd: () => {
-                let container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom baselayer-toggle');
-                let el = $(container).append(BaselayerToggleOptions.template)[0];
-                L.DomEvent.disableClickPropagation(el);
-                el.onclick = BaselayerToggleOptions.onclick;
-                return container;
-            }
-        })
+        )
 
         // Detect if the embed template is used
         if ($(`#floating-container-secondary`).length === 1) {
@@ -205,10 +213,6 @@ module.exports = {
         defaultMapExtentControl = new DefaultMapExtentControl();
         cloud.get().map.addControl(defaultMapExtentControl);
 
-        if (window.vidiConfig.template === "embed.tmpl") {
-            baselayerToggleControl = new BaselayerToggleControl();
-            cloud.get().map.addControl(baselayerToggleControl);
-        }
 
         let historyControl = new L.HistoryControl({
             orientation: 'vertical',
