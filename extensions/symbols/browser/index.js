@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2022 MapCentia ApS
+ * @copyright  2013-2023 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -11,7 +11,6 @@ import {scrollBehaviourDragImageTranslateOverride} from 'mobile-drag-drop/scroll
 
 
 let utils;
-let exId = "symbols";
 let cloud;
 let markers = {};
 let symbolState = {}
@@ -25,6 +24,7 @@ let creatingFromState = false;
 let filesAreLoaded = false;
 let autoScale = false;
 let locked = false;
+const exId = "symbols";
 const urlparser = require('./../../../browser/modules/urlparser');
 const db = urlparser.db;
 const MODULE_ID = exId;
@@ -49,9 +49,9 @@ const createId = () => (+new Date * (Math.random() + 1)).toString(36).substr(2, 
 const htmlFragments = {
     "outer": `
         <div class="tab-pane" role="tabpanel">
-            <div class="symbols-cover-text" style="position: absolute; top: 50%; left: 50px; display: none; opacity: 0; font-weight: 600; color: #333333">Zoom tættere på</div>
-            <div class="symbols-cover" style="position: relative;">
-                <div class="d-flex flex-wrap" style="display: flex; flex-wrap: wrap"></div>
+            <div class="symbols-cover-text position-absolute" style="top: 50%; left: 50px; display: none; opacity: 0; font-weight: 600; color: #333333">Zoom tættere på</div>
+            <div class="symbols-cover position-relative">
+                <div class="d-flex flex-wrap"></div>
             </div>
             <div class="symbols-desc"></div>
         </div>
@@ -221,10 +221,11 @@ const handleDragEnd = (e) => {
  * @param sc
  * @param zoomLevel
  * @param file
+ * @param group
  */
 const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file, group) => {
     let map = cloud.get().map;
-    let func = ()=>{};
+    let func;
     let classStr = "dm_" + id;
     let rotateHandleStr = "r_" + id;
     let deleteHandleStr = "d_" + id;
@@ -237,7 +238,7 @@ const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file, gro
     outerHtml.addClass(classStr);
     let callback = config?.extensionConfig?.symbols?.symbolOptions?.[file]?.callback;
     if (callback === undefined) {
-        callback = config?.extensionConfig?.symbols?.options?.callback || null;
+        callback = config?.extensionConfig?.symbols?.options?.callback;
     }
     if (callback) {
         try {
@@ -251,13 +252,13 @@ const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file, gro
     let doScale = config?.extensionConfig?.symbols?.symbolOptions?.[file]?.scale
     let doDelete = config?.extensionConfig?.symbols?.symbolOptions?.[file]?.delete
     if (doRotate === undefined) {
-        doRotate = config?.extensionConfig?.symbols?.options?.rotate || true;
+        doRotate = config?.extensionConfig?.symbols?.options?.rotate;
     }
     if (doScale === undefined) {
-        doScale = config?.extensionConfig?.symbols?.options?.scale || true;
+        doScale = config?.extensionConfig?.symbols?.options?.scale;
     }
     if (doDelete === undefined) {
-        doDelete = config?.extensionConfig?.symbols?.options?.delete || true;
+        doDelete = config?.extensionConfig?.symbols?.options?.delete;
     }
 
     if (doRotate) outerHtml.append(`<div class="symbols-handles symbols-rotate ${rotateHandleStr}"></div>`);
@@ -276,8 +277,8 @@ const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file, gro
     symbolState[id].coord = markers[id].getLatLng();
     symbolState[id].file = file;
     symbolState[id].group = group;
-    markers[id].on("moveend", (e) => {
-        symbolState[id].coord = e.target.getLatLng();
+    markers[id].on("moveend", () => {
+        symbolState[id].coord = markers[id].getLatLng();
         idBeingChanged = id;
     })
     symbolState[id].rotation = ro;
@@ -394,10 +395,10 @@ module.exports = {
             // _self.off();
         });
 
-        utils.createMainTab(exId, __("Symbols"), __("Info"), require('./../../../browser/modules/height')().max, "local_florist", false, exId);
+        // utils.createMainTab(exId, __("Symbols"), __("Info"), require('./../../../browser/modules/height')().max, "local_florist", false, exId);
 
         const gui = `
-                    <div class="form-inline">
+                    <!--<div class="form-inline">
                       <div class="form-group">
                             <div class="togglebutton">
                                 <label>
@@ -415,7 +416,7 @@ module.exports = {
                         <div class="form-group">
                             <button class="btn" id="vidi-symbols-store">${__("Save in db")}</button>
                         </div>
-                    </div>
+                    </div>-->
                     <div id="vidi_symbols"></div>
                     `
         $(`#${exId}`).html(gui);
@@ -438,74 +439,69 @@ module.exports = {
         let symbols = {};
         let descs = {};
         let files = config.extensionConfig.symbols.files;
-        let symbolOptions = config?.extensionConfig?.symbols?.symbolOptions;
         let i = 0;
 
-        backboneEvents.get().on(`on:${exId}`, () => {
-            if (!filesAreLoaded) {
-                (function iter() {
-                    $.getJSON("/api/symbols/" + files[i].file, (data) => {
-                        symbols[files[i].title] = data;
-                        descs[files[i].title] = files[i]?.desc;
-                        i++;
-                        if (i === files.length) {
-                            try {
-                                let inner = $(htmlFragments.inner);
-                                let tabs = $(`<ul class="nav nav-tabs mb-3"></ul>`);
-                                let tabPanes = $(`<div class="tab-content"></div>`);
-                                let first = true;
-                                let u = 0;
-                                for (const group in symbols) {
-                                    let outer = $(htmlFragments.outer).clone();
-                                    if (descs[group]) $(outer.find('.symbols-desc')[0]).append(`${descs[group]}`);
-                                    let id = createId();
-                                    for (const id in symbols[group]) {
-                                        if (id && symbols[group].hasOwnProperty(id)) {
-                                            const parser = new DOMParser();
-                                            const doc = parser.parseFromString(symbols[group][id].svg, "image/svg+xml");
-                                            let text = doc.getElementsByTagName("desc")?.[0]?.textContent
-                                            let desc = text || '';
-                                            let svg = $(inner.clone()[0]).append(symbols[group][id].svg);
-                                            svg.attr('data-file', id);
-                                            svg.attr('data-group', group);
-                                            let e = $('<div class="p-1 text-center symbol-text-wrapper">');
-                                            e.append(svg[0], `<div style="font-size: 8pt">${desc}</div>`)
-                                            outer.find('.d-flex').append(e);
-                                        }
+        // backboneEvents.get().on(`on:${exId}`, () => {
+        if (!filesAreLoaded) {
+            (function iter() {
+                $.getJSON("/api/symbols/" + files[i].file, (data) => {
+                    symbols[files[i].title] = data;
+                    descs[files[i].title] = files[i]?.desc;
+                    i++;
+                    if (i === files.length) {
+                        try {
+                            let inner = $(htmlFragments.inner);
+                            let tabs = $(`<ul class="nav nav-pills mb-3"></ul>`);
+                            let tabPanes = $(`<div class="tab-content"></div>`);
+                            let first = true;
+                            let u = 0;
+                            for (const group in symbols) {
+                                let outer = $(htmlFragments.outer).clone();
+                                if (descs[group]) $(outer.find('.symbols-desc')[0]).append(`${descs[group]}`);
+                                let id = createId();
+                                for (const id in symbols[group]) {
+                                    if (id && symbols[group].hasOwnProperty(id)) {
+                                        const parser = new DOMParser();
+                                        const doc = parser.parseFromString(symbols[group][id].svg, "image/svg+xml");
+                                        let text = doc.getElementsByTagName("desc")?.[0]?.textContent
+                                        let desc = text || '';
+                                        let svg = $(inner.clone()[0]).append(symbols[group][id].svg);
+                                        svg.attr('data-file', id);
+                                        svg.attr('data-group', group);
+                                        let e = $('<div class="p-1 text-center symbol-text-wrapper">');
+                                        e.append(svg[0], `<div style="font-size: 8pt">${desc}</div>`)
+                                        outer.find('.d-flex').append(e);
                                     }
-                                    let tab = $(`<li class="nav-item" role="presentation"><a id="symbol-tab-${u}" data-mdb-toggle="pill" class="nav-link ` + (first ? ` active` : ``) + `" href="#_${id}" role="tab" data-toggle="tab">${group}</a></li>`);
-                                    tabs.append(tab)
-                                    tabPanes.append(outer);
-                                    outer.attr('id', '_' + id);
-                                    if (first) {
-                                        outer.addClass('active');
-                                        tab.addClass('active');
-                                        first = false;
-                                    }
-                                    u++;
                                 }
-
-                                let c = $(`#vidi_symbols`);
-                                c.append(tabs);
-                                c.append(tabPanes);
-                                $(".drag-marker").on("dragend", handleDragEnd);
-                                filesAreLoaded = true;
-                            } catch (e) {
-                                console.error(e.message);
+                                let tab = $(`<li class="nav-item" role="presentation"><a id="symbol-tab-${u}" data-bs-toggle="pill" class="nav-link ` + (first ? ` active` : ``) + `" href="#_${id}" role="tab" data-toggle="tab">${group}</a></li>`);
+                                tabs.append(tab)
+                                tabPanes.append(outer);
+                                outer.attr('id', '_' + id);
+                                if (first) {
+                                    outer.addClass('active');
+                                    tab.addClass('active');
+                                    first = false;
+                                }
+                                u++;
                             }
-                        } else {
-                            iter()
-                        }
-                    })
-                }())
-            }
-        });
 
-        $('#vidi-symbols-store').on('click', () => {
-            store().then((e) => {
-                console.log(e)
-            })
-        });
+                            let c = $(`#vidi_symbols`);
+                            c.append(tabs);
+                            c.append(tabPanes);
+                            $(".drag-marker").on("dragend", handleDragEnd);
+                            filesAreLoaded = true;
+                        } catch (e) {
+                            console.error(e.message);
+                        }
+                    } else {
+                        iter()
+                    }
+                })
+            }())
+        }
+        // }
+        // );
+
 
         $(document).on("touchend mouseup", function () {
             for (const id in symbolState) {
@@ -515,14 +511,12 @@ module.exports = {
             }
             map.dragging.enable();
             map.touchZoom.enable();
-            setTimeout(() => {
-                if (idBeingChanged) {
-                    setState();
-                    mouseDown = false;
-                    idBeingChanged = false;
-                }
-            }, 0);
+            if (idBeingChanged) {
+                setState();
+            }
             $(document).off("mousemove touchmove");
+            mouseDown = false;
+            idBeingChanged = false;
         });
 
         map.on("zoomend", () => {
@@ -579,6 +573,7 @@ module.exports = {
      * @returns {Promise<unknown>}
      */
     applyState: (newState) => {
+        return;
         return new Promise((resolve) => {
             _self.resetState();
             if (newState) {
@@ -650,6 +645,7 @@ module.exports = {
 
     createId: () => {
         return createId();
-    }
+    },
 
+    store
 };
