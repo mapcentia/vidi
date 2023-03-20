@@ -277,9 +277,11 @@ const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file, gro
     symbolState[id].coord = markers[id].getLatLng();
     symbolState[id].file = file;
     symbolState[id].group = group;
+    markers[id].on("movestart", () => {
+        idBeingChanged = id;
+    })
     markers[id].on("moveend", () => {
         symbolState[id].coord = markers[id].getLatLng();
-        idBeingChanged = id;
     })
     symbolState[id].rotation = ro;
     symbolState[id].scale = sc;
@@ -391,11 +393,11 @@ module.exports = {
         });
 
         backboneEvents.get().on(`off:all`, () => {
-            // _self.control(false);
-            // _self.off();
+            _self.control(false);
+            _self.off();
         });
 
-        // utils.createMainTab(exId, __("Symbols"), __("Info"), require('./../../../browser/modules/height')().max, "local_florist", false, exId);
+        utils.createMainTab(exId, __("Symbols"), __("Info"), require('./../../../browser/modules/height')().max, "bi bi-flower1", false, exId);
 
         const gui = `
                     <!--<div class="form-inline">
