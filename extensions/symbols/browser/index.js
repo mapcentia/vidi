@@ -573,8 +573,11 @@ module.exports = {
      * @returns {Promise<unknown>}
      */
     applyState: (newState) => {
-        return;
         return new Promise((resolve) => {
+            if (config?.extensionConfig?.symbols?.stateless === true) {
+                resolve();
+                return;
+            }
             _self.resetState();
             if (newState) {
                 _self.recreateSymbolsFromState(newState.symbolState);
