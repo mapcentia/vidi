@@ -74,8 +74,9 @@ const store = (tag) => {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                browserId: window?._browserId,
-                userId: window?._userId,
+                browserId: window?._browserId || null,
+                userId: window?._userId || null,
+                props: window?._props || null,
                 tag,
                 symbolState
             }),
