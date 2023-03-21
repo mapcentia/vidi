@@ -462,6 +462,16 @@ module.exports = {
         "Tsvector": "Tsvector",
         "No searchable fields on layer": "No searchable fields on layer",
         "Method": "Method",
-        "Find me": "Find me"
+        "Find me": "Find me",
+
+        "Symbols": "Symbols",
+
+        // Sign in
+        "User name": "User name",
+        "Password": "Password",
+        "Wrong user name or password": "Wrong user name or password",
+        "Signed in as": "Signed in as",
+        "Not signed in": "Not signed in",
+        "Sign out": "Sign out"
     }
 };

@@ -464,6 +464,15 @@ module.exports = {
         "Method": "Metode",
         "Find me": "Find mig",
 
-        "Symbols": "Symboler"
+        "Symbols": "Symboler",
+
+        // Sign in
+        "User name": "Brugernavn",
+        "Password": "Kodeord",
+        "Wrong user name or password": "Forkert brugernavn eller kodeord",
+        "Signed in as": "Logget ind som",
+        "Not signed in": "Ikke logget ind",
+        "Sign out": "Log ud"
+
     }
 };
