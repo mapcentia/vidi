@@ -156,10 +156,10 @@ module.exports = {
             console.log(`Editor extension is disabled due to the enabled watsonc`);
             return;
         }
+
+
         $("#editStopBtn").on("click", () => {
-            if (window.confirm(__("Are you sure you want to stop?"))) {
-                _self.stopEdit();
-            }
+            _self.stopEditWithConfirm();
         })
 
         if (vidiConfig.enabledExtensions.indexOf(`embed`) !== -1) {
@@ -587,6 +587,8 @@ module.exports = {
                     <div className="buttons">
                         <button type="submit"
                                 className="btn btn btn-success mb-2 mt-2 w-100">{__("Submit")}</button>
+                        <button type="button" onClick={_self.stopEditWithConfirm}
+                                className="btn btn btn-outline-secondary mb-2 mt-2 w-100">{__("Cancel")}</button>
                     </div>
                 </Form>
             ), EDITOR_FORM_CONTAINER_ID);
@@ -996,6 +998,8 @@ module.exports = {
                     transformErrors={transformErrors}>
                     <div className="buttons">
                         <button type="submit" className="btn btn btn-success mb-2 mt-2 w-100">{__("Submit")}</button>
+                        <button type="button" onClick={_self.stopEditWithConfirm}
+                                className="btn btn btn-outline-secondary mb-2 mt-2 w-100">{__("Cancel")}</button>
                     </div>
                 </Form>
             ), EDITOR_FORM_CONTAINER_ID);
@@ -1136,6 +1140,12 @@ module.exports = {
 
         editedFeature = false;
         sqlQuery.resetAll();
+    },
+
+    stopEditWithConfirm: () => {
+        if (window.confirm(__("Are you sure you want to cancel?"))) {
+            _self.stopEdit();
+        }
     },
 
     /**
