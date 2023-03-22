@@ -17,6 +17,13 @@ import MenuItem from "@material-ui/core/MenuItem";
 import FormHelperText from "@material-ui/core/FormHelperText";
 import FormControl from "@material-ui/core/FormControl";
 
+import {
+  buffer as turfBuffer,
+  flatten as turfFlatten,
+  union as turfUnion,
+  featureCollection as turfFeatureCollection,
+} from "@turf/turf";
+
 /**
  *
  * @type {*|exports|module.exports}
@@ -58,6 +65,8 @@ var switchLayer = require("./../../../browser/modules/switchLayer");
  * @type {string}
  */
 var exId = "blueidea";
+var exSnackId = "blueidea-snack";
+var exBufferDistance = 0.1;
 
 /**
  *
@@ -90,20 +99,29 @@ var cloud;
  *
  * @type {L.FeatureGroup}
  */
-var drawnItems = new L.FeatureGroup();
-
-/**
- *
- * @type {L.FeatureGroup}
- */
 var bufferItems = new L.FeatureGroup();
 
 /**
  *
+ * @private
+ */
+var _clearBuffer = function () {
+  bufferItems.clearLayers();
+};
+
+/**
+ *
  * @type {L.FeatureGroup}
  */
+var queryMatrs = new L.FeatureGroup();
 
-var dataItems = new L.FeatureGroup();
+/**
+ *
+ * @private
+ */
+var _clearMatrs = function () {
+  queryMatrs.clearLayers();
+};
 
 /**
  *
@@ -141,6 +159,8 @@ module.exports = {
      * Native Leaflet object
      */
     mapObj = cloud.get().map;
+    mapObj.addLayer(bufferItems);
+    mapObj.addLayer(queryMatrs);
 
     /**
      *
@@ -177,6 +197,10 @@ module.exports = {
       "Select point on map": {
         da_DK: "Udpeg punkt",
         en_US: "Select point on map",
+      },
+      "Found parcels": {
+        da_DK: "Fundne matrikler",
+        en_US: "Found parcels",
       },
     };
 
@@ -401,8 +425,197 @@ module.exports = {
     );
   },
 
-  queryAddress: function (text, callBack, id = null, fromDrawing = false) {
-    console.log(text, callBack, id, fromDrawing);
+  /**
+   * This function disolves the geometry, and prepares it for querying
+   */
+  geometryDisolver: function (geojson) {
+    // we need to wrap the geometry in a featurecollection, so we can use turf
+    let collection = {
+      type: "FeatureCollection",
+      features: [],
+    };
+
+    // loop through all features, buffer them, and add them to the collection
+    for (let i = 0; i < geojson.features.length; i++) {
+      let feature = geojson.features[i];
+
+      // If the type is not set, force it to be a Feature
+      if (!feature.type) {
+        feature.type = "Feature";
+      }
+
+      try {
+        // If the feature as a radius property, use that as the buffer distance (points and markers)
+        let buffered;
+        if (
+          feature.properties.distance &&
+          feature.geometry.type == "Point" &&
+          feature.properties.type == "circle"
+        ) {
+          try {
+            let parsedRadii = feature.properties.distance.split(" ")[0];
+            buffered = turfBuffer(feature, parsedRadii, {
+              units: "meters",
+            });
+          } catch (error) {
+            console.log(error, feature);
+          }
+        } else {
+          buffered = turfBuffer(feature, exBufferDistance, {
+            units: "meters",
+          });
+        }
+
+        collection.features.push(buffered);
+      } catch (error) {
+        console.log(error, feature);
+      }
+    }
+
+    // create a union of all the buffered features
+    try {
+      let polygons = collection.features;
+      let union = polygons.reduce((a, b) => turfUnion(a, b), polygons[0]); // turf v7 will support union on featurecollection, v6 does not.
+      collection = turfFlatten(union);
+    } catch (error) {
+      console.log(error, polygons);
+    }
+
+    // return geometry for querying
+    return collection;
+  },
+
+  /**
+   * This function is what starts the process of finding relevant addresses
+   * @param {*} geojson
+   */
+
+  queryAddress: function (geojson) {
+    console.log(geojson);
+
+    //clear last geometries
+    _clearBuffer();
+    _clearMatrs();
+
+    try {
+      // Disolve geometry
+      let geom = this.geometryDisolver(geojson);
+
+      // show buffers on map
+      this.addBufferToMap(geom);
+
+      // Let user know we are starting
+      this.createSnack(__("Waiting to start"));
+
+      // For each flattened element, start a query for matrikels intersected
+      let promises = [];
+      for (let i = 0; i < geom.features.length; i++) {
+        let feature = geom.features[i];
+        promises.push(this.findMatriklerInPolygon(feature));
+      }
+
+      // When all queries are done, we can show the results
+      Promise.all(promises).then((results) => {
+        // Merge all results into one array
+        try {
+          let merged = this.mergeMatrikler(results);
+          this.addMatrsToMap(merged);
+        } catch (error) {
+          console.log(error);
+        }
+        this.updateSnack(__("Found parcels"));
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  },
+  mergeMatrikler: function (results) {
+    let merged = {};
+    for (let i = 0; i < results.length; i++) {
+      // Guard against empty results, and results that are not featureCollections
+      if (
+        results[i] &&
+        results[i].type == "FeatureCollection" &&
+        results[i].features.length > 0
+      ) {
+        for (let j = 0; j < results[i].features.length; j++) {
+          let feature = results[i].features[j];
+          merged[feature.properties.featureid] = feature;
+        }
+      }
+    }
+    let newCollection = turfFeatureCollection(Object.values(merged));
+    return newCollection;
+  },
+  addBufferToMap: function (geojson) {
+    try {
+      var l = L.geoJson(geojson, {
+        color: "#ff7800",
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.1,
+        dashArray: "5,3",
+      }).addTo(bufferItems);
+    } catch (error) {
+      console.log(error, geojson);
+    }
+  },
+  addMatrsToMap: function (geojson) {
+    try {
+      var l = L.geoJson(geojson, {
+        color: "#000000",
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.2,
+        dashArray: "5,3",
+      }).addTo(queryMatrs);
+    } catch (error) {
+      console.log(error, geojson);
+    }
+  },
+  createSnack: function (text) {
+    $.snackbar({
+      id: exSnackId,
+      content: "<span id='blueidea-progress'>" + text + "</span>",
+      htmlAllowed: true,
+      timeout: 1000000,
+    });
+  },
+  updateSnack: function (text) {
+    $(exSnackId).html(text);
+  },
+
+  /**
+   * async function to query matrikel inside a single buffer
+   * @param {*} feature
+   */
+  findMatriklerInPolygon: function (feature) {
+    return new Promise((resolve, reject) => {
+      // Create a query
+      let query = {
+        srid: 4326,
+        polygon: JSON.stringify(feature.geometry.coordinates),
+        format: "geojson",
+        struktur: "flad",
+      };
+
+      // Send the query to the server
+      $.ajax({
+        url: "https://api.dataforsyningen.dk/jordstykker",
+        type: "GET",
+        data: query,
+        success: function (data) {
+          resolve(data);
+        },
+        error: function (data) {
+          reject(data);
+        },
+      });
+    });
+  },
+
+  showResults: function (results) {
+    console.log(results);
   },
   setCallBack: function (fn) {
     this.callBack = fn;

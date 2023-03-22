@@ -124,10 +124,10 @@ module.exports = {
         });
 
         $("#_draw_make_blueidea_with_selected").on("click", () => {
-          _self.makeBlueIdeaSearchWithSelected();
+          _self.makeBlueIdeaWithSelected();
         });
         $("#_draw_make_blueidea_with_all").on("click", () => {
-          _self.makeBlueIdeaSearchWithAll();
+          _self.makeBlueIdeaWithAll();
         });
 
         table.object.on("selected_" + table.uid, (e) => {
@@ -172,32 +172,38 @@ module.exports = {
     });
   },
 
-  makeBlueIdeaSearchWithAll: () => {
-    // Switch on Conflict
-    $('#main-tabs a[href="#conflict-content"]').trigger("click");
-    conflictSearch.makeSearch("Fra tegning", null, null, true);
-  },
-  makeBlueIdeaSearchWithSelected: () => {
-    // Switch on Conflict
-    $('#main-tabs a[href="#blueidea-content"]').trigger("click");
-    blueIdea.queryAddress("Fra tegning", null, selectedDrawing, true);
-  },
-
-  makeBlueIdeaSearchWithSelected: () => {
+  // BlueIdea integration
+  makeBlueIdeaWithSelected: () => {
     if (!selectedDrawing) {
       alert("Vælg en tegning");
       return;
     }
+    // get geojson from selected drawing
+    var geojson = {
+      type: "FeatureCollection",
+      features: [
+        drawnItems.getLayer(selectedDrawing).toGeoJSON(GEOJSON_PRECISION),
+      ],
+    };
     state.resetState(["blueidea"]).then(() => {
       $('#main-tabs a[href="#blueidea-content"]').trigger("click");
-      blueIdea.queryAddress("Fra tegning", null, selectedDrawing, true);
+      blueIdea.queryAddress(geojson);
     });
   },
+  makeBlueIdeaWithAll: () => {
+    // get geojson from all drawings
+    var geojson = {
+      type: "FeatureCollection",
+      features: [],
+    };
+    // for each layer in drawnItems, get geojson
+    drawnItems.eachLayer(function (layer) {
+      geojson.features.push(layer.toGeoJSON(GEOJSON_PRECISION));
+    });
 
-  makeBlueIdeaSearchWithAll: () => {
     state.resetState(["blueidea"]).then(() => {
       $('#main-tabs a[href="#blueidea-content"]').trigger("click");
-      blueIdea.queryAddress("Fra tegning", null, null, true);
+      blueIdea.queryAddress(geojson);
     });
   },
 
