@@ -108,6 +108,7 @@ module.exports = {
                             me.setState({auth: true});
                             $(".gc2-session-lock").show();
                             $(".gc2-session-unlock").hide();
+                            $(".gc2-session-btn-text").html(data.screen_name)
                             userName = data.screen_name;
                             parent.update();
                         },
@@ -131,6 +132,7 @@ module.exports = {
                             me.setState({auth: false});
                             $(".gc2-session-lock").hide();
                             $(".gc2-session-unlock").show();
+                            $(".gc2-session-btn-text").html(__("Sign in"))
                             userName = null;
                             parent.update();
                         },
@@ -159,6 +161,7 @@ module.exports = {
                             $(".gc2-session-lock").show();
                             $(".gc2-session-unlock").hide();
                             userName = data.status.screen_name;
+                            $(".gc2-session-btn-text").html(userName);
                             // True if auto login happens. When reload meta
                             if (data?.screen_name && data?.status?.authenticated) {
                                 // Wait for layer tree to be built before reloading
