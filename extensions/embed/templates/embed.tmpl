@@ -7,9 +7,6 @@
         display: none;
     }
 
-    .leaflet-top {
-        top: 0 !important;
-    }
 </style>
 <!-- map -->
 <div id="pane">
@@ -37,8 +34,8 @@
 </div>
 
 <!-- Login Modal -->
-<div class="modal fade" id="login-modal" tabindex="-1" role="dialog" aria-labelledby="click-modalLabel">
-    <div class="modal-dialog" role="document">
+<div class="modal" id="login-modal" tabindex="-1" role="dialog" aria-labelledby="click-modalLabel">
+    <div class="modal-dialog modal-fullscreen" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h1 class="modal-title fs-5" id="login-modalLabel">{{Sign in}}</h1>
@@ -52,83 +49,30 @@
     </div>
 </div>
 
-<nav class="navbar navbar-expand-sm bg-light d-none">
+<nav class="navbar navbar-collapse" style="z-index: 1">
     <div class="container-fluid">
         <a class="navbar-brand">
             <span class="d-none d-md-inline">{{brandName}}</span>
         </a>
-        <div class="navbar-nav flex-row gap-1">
-            <button id="offcanvasLayerControlBtn"
-                    class="btn btn-primary text-nowrap" type="button"
+        <div class="navbar-nav flex-row gap-1 flex-grow-1">
+            <button id="offcanvasLayerControlAltBtn"
+                    class="btn btn-light text-uppercase me-auto" type="button"
             >
-                <span class="d-none d-md-inline">Menu</span> <i class="bi bi-arrow-bar-right"></i>
+                <i class="bi bi-geo-alt"></i> <span class="d-none d-sm-inline">Find faciliteter på kort</span>
             </button>
-            <div class="input-group d-none" id="edit-tool-group">
-                <span class="input-group-text"><i class="bi bi-pencil"></i></span>
-                <button id="offcanvasEditBtn"
-                        class="btn btn-secondary nav-edit-btn edit-attr-btn" disabled type="button"
-                >
-                    <span class="d-none d-md-inline">Form</span> <i class="bi bi-arrow-bar-right"></i>
-                </button>
-                <button id="editStopBtn"
-                        class="btn btn-danger nav-edit-btn" type="button"
-                >
-                    <i class="bi bi-slash-circle"></i> <span class="d-none d-md-inline">Stop</span>
-                </button>
-            </div>
 
+            <button id="btn-show-legend-in-map" data-module="legend"
+                    class="btn btn btn-light me-2"><i class="bi bi-card-text"></i> <span class="d-none d-sm-inline">{{Legend}}</span>
+            </button>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#login-modal">
+                <i class="bi bi-person"></i><span class="gc2-session-btn-text"> {{Sign in}}</span>
+            </button>
         </div>
-        <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse"
-                data-bs-target="#navbarSupportedContent"
-                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
 
-        <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
-            <ul class="navbar-nav me-2">
-                <!--                <li class="nav-item dropdown">-->
-                <!--                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"-->
-                <!--                       aria-expanded="false">-->
-                <!--                        Hjælp-->
-                <!--                    </a>-->
-                <!--                    <ul class="dropdown-menu">-->
-                <!--                        <li><a class="dropdown-item" href="#">Action</a></li>-->
-                <!--                        <li><a class="dropdown-item" href="#">Another action</a></li>-->
-                <!--                        <li>-->
-                <!--                            <hr class="dropdown-divider">-->
-                <!--                        </li>-->
-                <!--                        <li><a class="dropdown-item" href="#">Something else here</a></li>-->
-                <!--                    </ul>-->
-                <!--                </li>-->
-                <li class="nav-item d-flex align-items-center me-2 mt-3 mt-sm-0">
-                    <span class="badge text-bg-secondary js-app-is-pending-badge">
-                        <i class="bi bi-three-dots"></i>{{Pending}}
-                    </span>
-                    <span class="badge text-bg-success js-app-is-online-badge d-none">
-                    <i class="bi bi-signal"></i>Online</span>
-                    <span class="badge text-bg-danger js-app-is-offline-badge d-none">Offline</span>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" id="btn-reset" href="#">Reset</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" data-bs-toggle="modal" data-bs-target="#about-modal" href="#">{{About}}</a>
-                </li>
-            </ul>
-            <!--            <form class="d-flex me-2 mb-2 mb-lg-0" role="search">-->
-            <!--                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">-->
-            <!--                <button class="btn btn-outline-primary" type="submit">Søg</button>-->
-            <!--            </form>-->
-            <div class="navbar-nav me-2">
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#login-modal">
-                    <i class="bi bi-person"></i> {{Sign in}}
-                </button>
-            </div>
-        </div>
     </div>
 </nav>
 
-<div class="fade-then-dragging">
+<div class="ifade-then-dragging">
 
     <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="offcanvasLayerControl">
         <div class="offcanvas-header">
@@ -172,7 +116,7 @@
     </div>
 
     <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="mainLayerOffcanvas">
-        <div class="offcanvas-header mt-5">
+        <div class="offcanvas-header">
             <h5 class="offcanvas-title js-module-title" id="mainLayerOffcanvasLabel"></h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
@@ -582,7 +526,7 @@
     </div>
 
     <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="offcanvasInfo">
-        <div class="offcanvas-header mt-5">
+        <div class="offcanvas-header">
             <h5 class="offcanvas-title">Info</h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
@@ -590,7 +534,7 @@
     </div>
 
     <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="offcanvasLayerDesc">
-        <div class="offcanvas-header mt-5">
+        <div class="offcanvas-header">
             <h5 class="offcanvas-title">Info</h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
@@ -616,19 +560,6 @@
 
 </div>
 
-<div class="fade-then-dragging">
-    <button id="offcanvasLayerControlAltBtn"
-            style="left: 10px; top: 10px; display: inline"
-            class="btn btn-light position-absolute text-uppercase" type="button"
-    >
-        <i class="bi bi-geo-alt"></i> <span class="d-none d-sm-inline">Find faciliteter på kort</span>
-    </button>
-        <button id="btn-show-legend-in-map" data-module="legend"
-                style="position: absolute; right: 50px; top: 10px; text-transform: uppercase; display: inline"
-                class="btn btn btn-light"><i class="bi bi-card-text"></i> <span class="d-none d-sm-inline">{{Legend}}</span></button>
-
-</div>
-
 <div class="toast-container bottom-0 end-0 p-3">
     <div id="info-toast" class="toast align-items-center text-bg-primary border-0" role="alert" aria-live="assertive"
          aria-atomic="true">
@@ -648,3 +579,10 @@
         </div>
     </div>
 </div>
+
+<!-- must be here pr else won't form display -->
+<button id="offcanvasEditBtn"
+        class="btn btn-secondary nav-edit-btn edit-attr-btn d-none" disabled type="button"
+>
+    <span class="d-none d-md-inline">Form</span> <i class="bi bi-arrow-bar-right"></i>
+</button>

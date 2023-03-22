@@ -50,10 +50,10 @@ module.exports = {
             const btn = document.querySelector("#offcanvasLayerControlAltBtn");
             btn.addEventListener("click", () => offcanvas.show());
             offcanvasEl.addEventListener('hidden.bs.offcanvas', event => {
-                btn.classList.remove("d-none");
+                btn.classList.remove("invisible");
             });
             offcanvasEl.addEventListener('shown.bs.offcanvas', event => {
-                btn.classList.add("d-none");
+                btn.classList.add("invisible");
             })
             if (window?.vidiConfig?.extensionConfig?.embed?.slideOutLayerTree === true) {
                 offcanvas.show();
