@@ -263,7 +263,7 @@ module.exports = {
         "The page was loaded without service workers enabled, features editing is not available (the page was loaded via plain HTTP or browser does not support service workers)": "The page was loaded without service workers enabled, features editing is not available (the page was loaded via plain HTTP or browser does not support service workers)",
         "Editing of geometry is not possible when number of nodes exceed": "Editing of geometry is not possible when number of nodes exceed",
         "Submit": "Submit",
-        "Are you sure you want to stop?": "Are you sure you want to stop?",
+        "Are you sure you want to cancel?": "Are you sure you want to cancel?",
         "Feature added": "Feature added",
         "You need to plot a point": "You need to plot a point",
         "You need to plot at least two points": "You need to plot at least two points",
