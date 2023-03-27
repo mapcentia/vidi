@@ -66,7 +66,7 @@ var switchLayer = require("./../../../browser/modules/switchLayer");
  */
 var exId = "blueidea";
 var exSnackId = "blueidea-snack";
-var exBufferDistance = 0.1;
+var exBufferDistance = 1;
 
 /**
  *
@@ -121,6 +121,11 @@ var queryMatrs = new L.FeatureGroup();
  */
 var _clearMatrs = function () {
   queryMatrs.clearLayers();
+};
+
+var _clearAll = function () {
+  _clearBuffer();
+  _clearMatrs();
 };
 
 /**
@@ -201,6 +206,18 @@ module.exports = {
       "Found parcels": {
         da_DK: "Fundne matrikler",
         en_US: "Found parcels",
+      },
+      "Found addresses": {
+        da_DK: "Fundne adresser",
+        en_US: "Found addresses",
+      },
+      "Error in seach": {
+        da_DK: "Fejl i søgning",
+        en_US: "Error in seach",
+      },
+      "Draw area": {
+        da_DK: "Tegn områder",
+        en_US: "Draw area",
       },
     };
 
@@ -347,6 +364,18 @@ module.exports = {
               <div role="tabpanel">
                 <div className="form-group">
                   <div style={{ alignSelf: "center" }}>
+                  <Button
+                      onClick={() => $('#main-tabs a[href="#draw-content"]').trigger("click")}
+                      size="large"
+                      variant="contained"
+                      style={{
+                        marginRight: "auto",
+                        marginLeft: "auto",
+                        display: "block",
+                      }}
+                    >
+                      {__("Draw area")}
+                    </Button>
                     <Button
                       onClick={() => this.selectPoint()}
                       color="primary"
@@ -486,8 +515,9 @@ module.exports = {
   },
 
   /**
-   * This function is what starts the process of finding relevant addresses
+   * This function is what starts the process of finding relevant addresses, returns array with kvhx
    * @param {*} geojson
+   * @returns array with kvhx
    */
 
   queryAddress: function (geojson) {
@@ -514,19 +544,47 @@ module.exports = {
         promises.push(this.findMatriklerInPolygon(feature));
       }
 
-      // When all queries are done, we can show the results
-      Promise.all(promises).then((results) => {
-        // Merge all results into one array
-        try {
-          let merged = this.mergeMatrikler(results);
-          this.addMatrsToMap(merged);
-        } catch (error) {
+      // When all queries are done, we can find the relevant addresses
+      Promise.all(promises)
+        .then((results) => {
+          // Merge all results into one array
+          try {
+            let merged = this.mergeMatrikler(results);
+            this.addMatrsToMap(merged);
+            this.createSnack(__("Found parcels"));
+
+            return merged;
+          } catch (error) {
+            console.log(error);
+          }
+        })
+        .then((matrikler) => {
+          // For each matrikel, find the relevant addresses
+          let promises2 = [];
+          for (let i = 0; i < matrikler.features.length; i++) {
+            let feature = matrikler.features[i];
+            promises2.push(this.findAddressesInMatrikel(feature));
+          }
+
+          Promise.all(promises2).then((results) => {
+            let adresser = this.mergeAdresser(results);
+            console.log(adresser);
+            this.createSnack(__("Found addresses"));
+
+            // Return number to UI
+            return adresser;
+          });
+        })
+        .catch((error) => {
           console.log(error);
-        }
-        this.updateSnack(__("Found parcels"));
-      });
+          this.createSnack(__("Error in seach") + ": " + error);
+          _clearAll();
+          return [];
+        });
     } catch (error) {
       console.log(error);
+      this.createSnack(error);
+      return [];
     }
   },
   mergeMatrikler: function (results) {
@@ -547,6 +605,28 @@ module.exports = {
     let newCollection = turfFeatureCollection(Object.values(merged));
     return newCollection;
   },
+  mergeAdresser: function (results) {
+    try {
+      // Merge all results into one array, keeping only kvhx
+      let merged = [];
+      for (let i = 0; i < results.length; i++) {
+        // for each adresse in list, check if it is a kvhx, and add it to the merged list
+        for (let j = 0; j < results[i].length; j++) {
+          let feature = results[i][j];
+          if (feature.kvhx) {
+            merged.push(feature.kvhx);
+          }
+        }
+      }
+      // make use the merged list is unique
+      merged = [...new Set(merged)];
+      return merged;
+    } catch (error) {
+      console.log(error);
+      return [];
+    }
+  },
+
   addBufferToMap: function (geojson) {
     try {
       var l = L.geoJson(geojson, {
@@ -560,6 +640,7 @@ module.exports = {
       console.log(error, geojson);
     }
   },
+
   addMatrsToMap: function (geojson) {
     try {
       var l = L.geoJson(geojson, {
@@ -573,6 +654,7 @@ module.exports = {
       console.log(error, geojson);
     }
   },
+
   createSnack: function (text) {
     $.snackbar({
       id: exSnackId,
@@ -581,8 +663,10 @@ module.exports = {
       timeout: 1000000,
     });
   },
+
   updateSnack: function (text) {
-    $(exSnackId).html(text);
+    $(exSnackId).snackbar("show");
+    $("blueidea-progress").html(text);
   },
 
   /**
@@ -602,6 +686,34 @@ module.exports = {
       // Send the query to the server
       $.ajax({
         url: "https://api.dataforsyningen.dk/jordstykker",
+        type: "GET",
+        data: query,
+        success: function (data) {
+          resolve(data);
+        },
+        error: function (data) {
+          reject(data);
+        },
+      });
+    });
+  },
+
+  /**
+   * async function to query addresses inside a single parcel
+   * @param {*} feature
+   */
+  findAddressesInMatrikel: function (feature) {
+    return new Promise((resolve, reject) => {
+      // Create a query
+      let query = {
+        ejerlavkode: feature.properties.ejerlavkode,
+        matrikelnr: feature.properties.matrikelnr,
+        struktur: "flad",
+      };
+
+      // Send the query to the server
+      $.ajax({
+        url: "https://api.dataforsyningen.dk/adresser",
         type: "GET",
         data: query,
         success: function (data) {

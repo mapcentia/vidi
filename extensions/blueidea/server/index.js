@@ -8,6 +8,7 @@ var config = require('../../../config/config.js');
 var he = require('he');
 var fetch = require('node-fetch');
 var bi = require('../../../config/gp/config.blueidea');
+const { post } = require('request');
 
 
 /**
@@ -43,45 +44,38 @@ var userString = function (req) {
 /**
  * Endpoint for populating foresp. in current schema 
  */
-router.post('/api/extension/getForespoergselOption', function (req, response) {
-    response.setHeader('Content-Type', 'application/json');
+router.post('/api/extension/:userid/LookupAddressesPhoneCount', function (req, response) {
 
-    //console.table(req.body)
-    let b = req.body
-    //console.table(req.session)
-    let s = req.session
-
-    // If user is not currently inside a session, hit 'em with a nice 401
-    if (!req.session.hasOwnProperty("gc2SessionId")) {
-        response.status(401).json({
-            error: "Du skal være logget ind for at benytte løsningen."
-        })
+    // Guard against missing user
+    if (!hasUserSetup(req.params.userid)) {
+        response.status(401).send('User not found')
         return
     }
-
-    // Go ahead with the logic
-    let q = "SELECT forespnummer, bemaerkning, svar_uploadtime, statuskey FROM " + s.screenName + '.' + TABLEPREFIX + "graveforespoergsel where svar_uploadtime > now() - INTERVAL '30 days' ORDER by forespnummer DESC"
     
-    
+    response.setHeader('Content-Type', 'application/json');
 
-    try {
-        SQLAPI(q, req)
-            .then(r => {
-                //console.log(r)
-                let returnArray = []
-                r.features.forEach(f => {
-                    //console.log(f)
-                    returnArray.push(f.properties)
-                })
-                response.status(200).json(returnArray)
-            })
-            .catch(r => {
-                response.status(500).json(r)
-            })
-    } catch (error) {
-        //console.log(error)
-        response.status(500).json(error)
+    headers = {
+        "Authorization": loginToBlueIdea,
     }
+
+    return new Promise(function (resolve, reject) {
+        //console.log(q.substring(0, 60))
+        fetch(url, options)
+            .then(r => r.json())
+            .then(data => {
+                // if message is present, is error
+                if (data.hasOwnProperty('message')) {
+                    console.log(data)
+                    reject(data)
+                } else {
+                    resolve(data)
+                }
+            })
+            .catch(error => {
+                console.log(error)
+                reject(error)
+            })
+    });
 
 });
 
@@ -126,5 +120,37 @@ function SQLAPI(q, req) {
             })
     });
 };
+
+//Guard for non-existing user
+function hasUserSetup(uuid) {
+    // check if uuid in in config, and if user object has username and password
+    if (bi.users.hasOwnProperty(uuid) && bi.users[uuid].hasOwnProperty('username') && bi.users[uuid].hasOwnProperty('password')) {
+        return true
+    } else {
+        return false
+    }
+}
+
+// Login to Blueidea to get token
+function loginToBlueIdea(username, password) {
+    return new Promise(function (resolve, reject) {
+        var url = bi.hostname + 'User/Login'
+        var body = { "email": username, "password": password }
+        post(url, body, options)
+            .then(r => {
+                data = r.json()
+                // Guard against bad status codes
+                if (r.status != 200) {
+                    console.log(r)
+                    reject(data)
+                }
+                resolve(data.accessToken)
+            })
+            .catch(error => {
+                console.log(error)
+                reject(error)
+            })
+    });
+}
 
 module.exports = router;
