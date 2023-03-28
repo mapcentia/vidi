@@ -96,6 +96,7 @@ router.get("/api/extension/blueidea/:userid", function (req, response) {
   // Get user from config
   var user = bi.users[req.params.userid];
 
+  console.log(user);
   // return user object without username and password
   response.status(200).json({
     lukkeliste: user.lukkeliste,

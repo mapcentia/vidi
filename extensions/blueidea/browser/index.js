@@ -351,8 +351,6 @@ module.exports = {
           console.log("Starting blueidea");
           me.setState({
             active: true,
-            results_adresser: [],
-            results_matrikler: [],
           });
         });
 
@@ -362,6 +360,7 @@ module.exports = {
           _clearAll();
           me.setState({
             active: false,
+            user_lukkeliste: false,
           });
         });
 
@@ -371,7 +370,7 @@ module.exports = {
           fetch("/api/session/status")
             .then((r) => r.json())
             .then((obj) => {
-              me.setState({
+              return me.setState({
                 authed: obj.status.authenticated,
               });
             })
@@ -383,7 +382,7 @@ module.exports = {
                 me.setState({
                   user_lukkeliste: false,
                   user_id: null,
-                  user_projectid: null,
+                  user_lukkeliste: false,
                 });
               }
             })
@@ -392,10 +391,11 @@ module.exports = {
               me.setState({
                 authed: false,
                 user_id: null,
+                user_lukkeliste: false,
               });
             })
             .finally(() => {
-              // If logged in, show buttons in draw module
+              // If logged in, and user_id is not null, show buttons
               if (me.state.authed && me.state.user_id) {
                 $("#_draw_make_blueidea_with_selected").show();
                 $("#_draw_make_blueidea_with_all").show();
@@ -734,11 +734,25 @@ module.exports = {
                   Der blev fundet {s.results_adresser.length} adresser i
                   området.
                 </div>
+                <div
+                  style={{ alignSelf: "center" }}
+                  hidden={!s.user_lukkeliste}
+                >
+                  <h4>{__("Show results")}</h4>
+                  Dette skal kun vises hvis lukkeliste er true!
+                </div>
+                <div
+                  style={{ alignSelf: "center" }}
+                  hidden={!s.user_lukkeliste}
+                >
+                  <h4>{__("Show results")}</h4>
+                  Reserveret til lukkeliste-ting
+                </div>
               </div>
             </div>
           );
         } else {
-          // Not Logged in
+          // Not Logged in - or not configured
           return (
             <div role="tabpanel">
               <div className="form-group">
