@@ -95,30 +95,12 @@ var snack = function (msg) {
 var draw;
 var cloud;
 
-/**
- *
- * @type {L.FeatureGroup}
- */
 var bufferItems = new L.FeatureGroup();
+var queryMatrs = new L.FeatureGroup();
 
-/**
- *
- * @private
- */
 var _clearBuffer = function () {
   bufferItems.clearLayers();
 };
-
-/**
- *
- * @type {L.FeatureGroup}
- */
-var queryMatrs = new L.FeatureGroup();
-
-/**
- *
- * @private
- */
 var _clearMatrs = function () {
   queryMatrs.clearLayers();
 };
@@ -126,6 +108,9 @@ var _clearMatrs = function () {
 var _clearAll = function () {
   _clearBuffer();
   _clearMatrs();
+
+  RESULTSTATE.matrikler = [];
+  RESULTSTATE.adresser = [];
 };
 
 /**
@@ -186,21 +171,22 @@ module.exports = {
         da_DK: "infoDK",
         en_US: "infoUS",
       },
-
       "Plugin Tooltip": {
         da_DK: "BlueIdea",
         en_US: "BlueIdea",
       },
       MissingLogin: {
-        da_DK: "NB: Du skal være logget ind for at kunne bruge funktionen",
-        en_US: "Please log in to use this function",
+        da_DK:
+          "NB: Du skal være logget ind for at kunne bruge funktionen, og din konfiguration skal indeholde et brugerid.",
+        en_US:
+          "Please log in and set a user id in the configuration file to use this function",
       },
       Login: {
         da_DK: "Log ind",
         en_US: "Log in",
       },
       "Select point on map": {
-        da_DK: "Udpeg punkt",
+        da_DK: "Udpeg punkt på ledningsnet",
         en_US: "Select point on map",
       },
       "Found parcels": {
@@ -218,6 +204,14 @@ module.exports = {
       "Draw area": {
         da_DK: "Tegn områder",
         en_US: "Draw area",
+      },
+      Select: {
+        da_DK: "Udpeg",
+        en_US: "Select",
+      },
+      Results: {
+        da_DK: "Resultater",
+        en_US: "Results",
       },
     };
 
@@ -276,6 +270,11 @@ module.exports = {
           done: false,
           loading: false,
           authed: false,
+          result_adresser: [],
+          result_matrikler: [],
+          user_id: null,
+          user_profileid: null,
+          user_lukkeliste: false,
         };
       }
 
@@ -310,20 +309,34 @@ module.exports = {
           console.log("Auth changed!");
           fetch("/api/session/status")
             .then((r) => r.json())
-            .then((obj) =>
+            .then((obj) => {
               me.setState({
                 authed: obj.status.authenticated,
-              })
-            )
+              });
+            })
+            .then(() => {
+              // if logged in, get user
+              if (me.state.authed) {
+                return this.getUser();
+              } else {
+                me.setState({
+                  user_id: null,
+                  user_profileid: null,
+                  user_lukkeliste: false,
+                });
+              }
+            })
             .catch((e) => {
               console.log("Error in session:authChange", e);
               me.setState({
                 authed: false,
+                user_id: null,
               });
             })
             .finally(() => {
-              // If logged in, show buttons in draw
-              if (me.state.authed) {
+              console.log(me.state);
+              // If logged in, show buttons in draw module
+              if (me.state.authed && me.state.user_id) {
                 $("#_draw_make_blueidea_with_selected").show();
                 $("#_draw_make_blueidea_with_all").show();
               } else {
@@ -334,8 +347,34 @@ module.exports = {
         });
       }
 
+      getUser = () => {
+        // If user is set in extensionconfig, set it in state and get information from backend
+        if (config.extensionConfig.blueidea.userid) {
+          return fetch(
+            "/api/extension/blueidea/" + config.extensionConfig.blueidea.userid
+          )
+            .then((r) => r.json())
+            .then((obj) => {
+              this.setState({
+                user_profileid: obj.profileid,
+                user_lukkeliste: obj.lukkeliste,
+                user_id: config.extensionConfig.blueidea.userid,
+              });
+            })
+            .catch((e) => {
+              console.log("Error in getUser", e);
+            });
+        } else {
+          return;
+        }
+      };
+
       clickLogin() {
         document.getElementById("session").click();
+      }
+
+      clickDraw() {
+        $('#main-tabs a[href="#draw-content"]').trigger("click");
       }
 
       /**
@@ -347,32 +386,26 @@ module.exports = {
         //console.log(s)
 
         // If not logged in, show login button
-        if (s.authed) {
+        if (s.authed && s.user_id) {
           // Logged in
-          if (s.loading) {
-            // If Loading, show progress
-            return (
-              <div role="tabpanel">
-                <div className="form-group">
-                  <div>LOADING</div>
-                </div>
-              </div>
-            );
-          } else {
-            // Just Browsing
-            return (
-              <div role="tabpanel">
-                <div className="form-group">
-                  <div style={{ alignSelf: "center" }}>
-                  <Button
-                      onClick={() => $('#main-tabs a[href="#draw-content"]').trigger("click")}
+          return (
+            <div role="tabpanel">
+              <div className="form-group">
+                <div style={{ alignSelf: "center" }}>
+                  <h3>{__("Select")}</h3>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      width: "100%",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Button
+                      onClick={() => this.clickDraw()}
                       size="large"
                       variant="contained"
-                      style={{
-                        marginRight: "auto",
-                        marginLeft: "auto",
-                        display: "block",
-                      }}
+                      style={{ margin: "10px" }}
                     >
                       {__("Draw area")}
                     </Button>
@@ -381,19 +414,23 @@ module.exports = {
                       color="primary"
                       size="large"
                       variant="contained"
-                      style={{
-                        marginRight: "auto",
-                        marginLeft: "auto",
-                        display: "block",
-                      }}
+                      style={{ margin: "10px" }}
+                      disabled={!this.state.user_lukkeliste}
                     >
                       {__("Select point on map")}
                     </Button>
                   </div>
                 </div>
+                <div style={{ alignSelf: "center" }}>
+                  <h3>{__("Results")}</h3>
+                  <div>
+                    Der blev fundet {this.state.result_adresser.length} adresser
+                    i området.
+                  </div>
+                </div>
               </div>
-            );
-          }
+            </div>
+          );
         } else {
           // Not Logged in
           return (
@@ -519,13 +556,11 @@ module.exports = {
    * @param {*} geojson
    * @returns array with kvhx
    */
-
   queryAddress: function (geojson) {
-    console.log(geojson);
+    console.debug(geojson);
 
     //clear last geometries
-    _clearBuffer();
-    _clearMatrs();
+    _clearAll();
 
     try {
       // Disolve geometry
@@ -587,6 +622,7 @@ module.exports = {
       return [];
     }
   },
+
   mergeMatrikler: function (results) {
     let merged = {};
     for (let i = 0; i < results.length; i++) {
@@ -603,8 +639,14 @@ module.exports = {
       }
     }
     let newCollection = turfFeatureCollection(Object.values(merged));
+
+    // Save the result to the global state
+    me.setState({
+      result_matrikler: newCollection,
+    });
     return newCollection;
   },
+
   mergeAdresser: function (results) {
     try {
       // Merge all results into one array, keeping only kvhx
@@ -620,6 +662,12 @@ module.exports = {
       }
       // make use the merged list is unique
       merged = [...new Set(merged)];
+
+      // Populate the UI with the number of addresses found
+      me.setState({
+        result_adresser: merged,
+      });
+
       return merged;
     } catch (error) {
       console.log(error);
