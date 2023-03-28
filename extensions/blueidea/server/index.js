@@ -9,6 +9,7 @@ var he = require("he");
 var fetch = require("node-fetch");
 var bi = require("../../../config/gp/config.blueidea");
 const { post } = require("request");
+const { reject } = require("underscore");
 
 /**
  *
@@ -96,13 +97,58 @@ router.get("/api/extension/blueidea/:userid", function (req, response) {
   // Get user from config
   var user = bi.users[req.params.userid];
 
-  console.log(user);
-  // return user object without username and password
-  response.status(200).json({
+  returnobj = {
     lukkeliste: user.lukkeliste,
     profileid: user.profileid,
-  });
+  };
+
+  console.log(returnobj);
+  // return user object without username and password
+  response.status(200).json(returnobj);
 });
+
+router.get(
+  "/api/extension/blueidea/:userid/GetSmSTemplates/",
+  function (req, response) {
+    // Guard against missing parameters or user
+    if (
+      !req.params.hasOwnProperty("userid") ||
+      !hasUserSetup(req.params.userid)
+    ) {
+      response.status(401).send("Missing parameters");
+      return;
+    }
+
+    //Get user from config
+    var user = bi.users[req.params.userid];
+
+    //guard against missing profileid
+    if (!user.hasOwnProperty("profileid")) {
+      response.status(401).send("Missing profileid in configuration");
+      return;
+    }
+
+    loginToBlueIdea(req.params.userid).then((token) => {
+      var options = {
+        uri: bi.hostname + "/Template/GetSmsTemplates/",
+        headers: {
+          Authorization: "Bearer " + token,
+          Accept: "application/json",
+        },
+        data: {
+          profileId: user.profileid,
+        },
+      };
+      request.get(options, function (error, res, body) {
+        if (error) {
+          console.log(error);
+        } else {
+          response.status(200).json(JSON.parse(body));
+        }
+      });
+    });
+  }
+);
 
 // Use SQLAPI
 function SQLAPI(q, req) {
@@ -161,24 +207,29 @@ function hasUserSetup(uuid) {
 }
 
 // Login to Blueidea to get token
-function loginToBlueIdea(username, password) {
+function loginToBlueIdea(uuid) {
+  // guard against missing user
+  if (!hasUserSetup(uuid)) {
+    reject("User not found");
+  }
+  var user = bi.users[uuid];
+  var options = {
+    uri: bi.hostname + "User/Login",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({ email: user.username, password: user.password }),
+  };
+
   return new Promise(function (resolve, reject) {
-    var url = bi.hostname + "User/Login";
-    var body = { email: username, password: password };
-    post(url, body, options)
-      .then((r) => {
-        data = r.json();
-        // Guard against bad status codes
-        if (r.status != 200) {
-          console.log(r);
-          reject(data);
-        }
-        resolve(data.accessToken);
-      })
-      .catch((error) => {
-        console.log(error);
+    request.post(options, function (error, res, body) {
+      if (error) {
         reject(error);
-      });
+      } else {
+        resolve(JSON.parse(body).accessToken);
+      }
+    });
   });
 }
 

@@ -270,6 +270,10 @@ module.exports = {
         da_DK: "Venter på at starte",
         en_US: "Waiting to start",
       },
+      "Go to blueidea": {
+        da_DK: "Opret, og gå til blueidea",
+        en_US: "Create and go to blueidea",
+      },
     };
 
     /**
@@ -399,6 +403,7 @@ module.exports = {
               if (me.state.authed && me.state.user_id) {
                 $("#_draw_make_blueidea_with_selected").show();
                 $("#_draw_make_blueidea_with_all").show();
+                this.getProjects();
               } else {
                 $("#_draw_make_blueidea_with_selected").hide();
                 $("#_draw_make_blueidea_with_all").hide();
@@ -407,6 +412,33 @@ module.exports = {
         });
       }
 
+      getProjects() {
+        let me = this;
+
+        // guard against no projectid in state
+        if (!me.state.user_projectid) {
+          return;
+        }
+
+        fetch(
+          "/api/extension/blueidea/" +
+            config.extensionConfig.blueidea.userid +
+            "/GetSmSTemplates"
+        )
+          .then((r) => r.json())
+          .then((obj) => {
+            console.log("Got projects", obj);
+          })
+          .catch((e) => {
+            console.log("Error in getProjects", e);
+          });
+      }
+
+      /**
+       * Get user from backend
+       * @returns {Promise<void>}
+       * @private
+       */
       getUser() {
         let me = this;
         // If user is set in extensionconfig, set it in state and get information from backend
@@ -417,9 +449,9 @@ module.exports = {
             .then((r) => r.json())
             .then((obj) => {
               me.setState({
-                user_lukkeliste: obj.lukkeliste,
+                user_lukkeliste: obj.lukkeliste || false,
                 user_id: config.extensionConfig.blueidea.userid,
-                user_projectid: obj.projectid,
+                user_projectid: obj.projectid || null,
               });
             })
             .catch((e) => {
@@ -687,6 +719,18 @@ module.exports = {
       }
 
       /**
+       * Determines if the plugin is ready to send data to blueidea
+       */
+      readyToSend = () => {
+        // if adresse array is not empty, return true
+        if (this.state.results_adresser.length > 0) {
+          return true;
+        } else {
+          return false;
+        }
+      };
+
+      /**
        * Renders component
        */
       render() {
@@ -729,18 +773,45 @@ module.exports = {
                     </Button>
                   </div>
                 </div>
+
                 <div style={{ alignSelf: "center" }}>
                   <h4>{__("Show results")}</h4>
                   Der blev fundet {s.results_adresser.length} adresser i
                   området.
                 </div>
+
                 <div
-                  style={{ alignSelf: "center" }}
-                  hidden={!s.user_lukkeliste}
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    width: "100%",
+                    justifyContent: "center",
+                  }}
+                  hidden={s.user_projectid}
                 >
-                  <h4>{__("Show results")}</h4>
-                  Dette skal kun vises hvis lukkeliste er true!
+                  LALAAL
                 </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    width: "100%",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Button
+                    onClick={() => this.sendToBlueIdea()}
+                    color="primary"
+                    size="large"
+                    variant="contained"
+                    style={{ margin: "10px" }}
+                    disabled={!this.readyToSend()}
+                  >
+                    {__("Go to blueidea")}
+                  </Button>
+                </div>
+
                 <div
                   style={{ alignSelf: "center" }}
                   hidden={!s.user_lukkeliste}
