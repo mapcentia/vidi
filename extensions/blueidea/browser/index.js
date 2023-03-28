@@ -66,7 +66,8 @@ var switchLayer = require("./../../../browser/modules/switchLayer");
  */
 var exId = "blueidea";
 var exSnackId = "blueidea-snack";
-var exBufferDistance = 1;
+var exResultsId = "blueidea-results";
+var exBufferDistance = 0.1;
 
 /**
  *
@@ -108,9 +109,63 @@ var _clearMatrs = function () {
 var _clearAll = function () {
   _clearBuffer();
   _clearMatrs();
+};
 
-  RESULTSTATE.matrikler = [];
-  RESULTSTATE.adresser = [];
+/**
+ * async function to query matrikel inside a single buffer
+ * @param {*} feature
+ */
+const findMatriklerInPolygon = function (feature) {
+  return new Promise((resolve, reject) => {
+    // Create a query
+    let query = {
+      srid: 4326,
+      polygon: JSON.stringify(feature.geometry.coordinates),
+      format: "geojson",
+      struktur: "flad",
+    };
+
+    // Send the query to the server
+    $.ajax({
+      url: "https://api.dataforsyningen.dk/jordstykker",
+      type: "GET",
+      data: query,
+      success: function (data) {
+        resolve(data);
+      },
+      error: function (data) {
+        reject(data);
+      },
+    });
+  });
+};
+
+/**
+ * async function to query addresses inside a single parcel
+ * @param {*} feature
+ */
+const findAddressesInMatrikel = function (feature) {
+  return new Promise((resolve, reject) => {
+    // Create a query
+    let query = {
+      ejerlavkode: feature.properties.ejerlavkode,
+      matrikelnr: feature.properties.matrikelnr,
+      struktur: "flad",
+    };
+
+    // Send the query to the server
+    $.ajax({
+      url: "https://api.dataforsyningen.dk/adresser",
+      type: "GET",
+      data: query,
+      success: function (data) {
+        resolve(data);
+      },
+      error: function (data) {
+        reject(data);
+      },
+    });
+  });
 };
 
 /**
@@ -142,8 +197,6 @@ module.exports = {
     var parentThis = this;
 
     // Set up draw module for blueIdea
-    draw.setBlueIdea(this);
-
     /**
      *
      * Native Leaflet object
@@ -190,12 +243,12 @@ module.exports = {
         en_US: "Select point on map",
       },
       "Found parcels": {
-        da_DK: "Fundne matrikler",
-        en_US: "Found parcels",
+        da_DK: "Fundne matrikler i område",
+        en_US: "Found parcels in area",
       },
       "Found addresses": {
-        da_DK: "Fundne adresser",
-        en_US: "Found addresses",
+        da_DK: "Fundet adresser i matrikler",
+        en_US: "Found addresses in parcels",
       },
       "Error in seach": {
         da_DK: "Fejl i søgning",
@@ -205,13 +258,17 @@ module.exports = {
         da_DK: "Tegn områder",
         en_US: "Draw area",
       },
-      Select: {
+      "Select area": {
         da_DK: "Udpeg",
         en_US: "Select",
       },
-      Results: {
+      "Show results": {
         da_DK: "Resultater",
         en_US: "Results",
+      },
+      "Waiting to start": {
+        da_DK: "Venter på at starte",
+        en_US: "Waiting to start",
       },
     };
 
@@ -223,8 +280,8 @@ module.exports = {
      */
     var __ = function (txt) {
       // Hack for locale not found?!
-      //console.log(window._vidiLocale)
-      //console.log(txt)
+      //console.log(window._vidiLocale);
+      //console.log(txt);
 
       if (dict[txt][window._vidiLocale]) {
         return dict[txt][window._vidiLocale];
@@ -270,11 +327,11 @@ module.exports = {
           done: false,
           loading: false,
           authed: false,
-          result_adresser: [],
-          result_matrikler: [],
-          user_id: null,
-          user_profileid: null,
+          results_adresser: [],
+          results_matrikler: [],
           user_lukkeliste: false,
+          user_id: null,
+          user_projectid: null,
         };
       }
 
@@ -283,6 +340,7 @@ module.exports = {
        */
       componentDidMount() {
         let me = this;
+        draw.setBlueIdea(me);
 
         // Stop listening to any events, deactivate controls, but
         // keep effects of the module until they are deleted manually or reset:all is emitted
@@ -293,12 +351,15 @@ module.exports = {
           console.log("Starting blueidea");
           me.setState({
             active: true,
+            results_adresser: [],
+            results_matrikler: [],
           });
         });
 
         // Deactivates module
         backboneEvents.get().on(`off:${exId} off:all reset:all`, () => {
           console.log("Stopping blueidea");
+          _clearAll();
           me.setState({
             active: false,
           });
@@ -320,9 +381,9 @@ module.exports = {
                 return this.getUser();
               } else {
                 me.setState({
-                  user_id: null,
-                  user_profileid: null,
                   user_lukkeliste: false,
+                  user_id: null,
+                  user_projectid: null,
                 });
               }
             })
@@ -334,7 +395,6 @@ module.exports = {
               });
             })
             .finally(() => {
-              console.log(me.state);
               // If logged in, show buttons in draw module
               if (me.state.authed && me.state.user_id) {
                 $("#_draw_make_blueidea_with_selected").show();
@@ -347,7 +407,8 @@ module.exports = {
         });
       }
 
-      getUser = () => {
+      getUser() {
+        let me = this;
         // If user is set in extensionconfig, set it in state and get information from backend
         if (config.extensionConfig.blueidea.userid) {
           return fetch(
@@ -355,10 +416,10 @@ module.exports = {
           )
             .then((r) => r.json())
             .then((obj) => {
-              this.setState({
-                user_profileid: obj.profileid,
+              me.setState({
                 user_lukkeliste: obj.lukkeliste,
                 user_id: config.extensionConfig.blueidea.userid,
+                user_projectid: obj.projectid,
               });
             })
             .catch((e) => {
@@ -367,13 +428,261 @@ module.exports = {
         } else {
           return;
         }
-      };
+      }
 
+      /**
+       * This function is what starts the process of finding relevant addresses, returns array with kvhx
+       * @param {*} geojson
+       * @returns array with kvhx
+       */
+      queryAddress(geojson) {
+        let me = this;
+        console.debug(geojson);
+
+        //clear last geometries + results
+        _clearAll();
+
+        try {
+          // Disolve geometry
+          let geom = this.geometryDisolver(geojson);
+
+          // show buffers on map
+          this.addBufferToMap(geom);
+
+          // Let user know we are starting
+          this.createSnack(__("Waiting to start"));
+
+          // For each flattened element, start a query for matrikels intersected
+          let promises = [];
+          for (let i = 0; i < geom.features.length; i++) {
+            let feature = geom.features[i];
+            promises.push(findMatriklerInPolygon(feature));
+          }
+
+          // When all queries are done, we can find the relevant addresses
+          Promise.all(promises)
+            .then((results) => {
+              // Merge all results into one array
+              try {
+                let merged = this.mergeMatrikler(results);
+                this.addMatrsToMap(merged);
+                this.createSnack(__("Found parcels"));
+
+                return merged;
+              } catch (error) {
+                console.log(error);
+              }
+            })
+            .then((matrikler) => {
+              // For each matrikel, find the relevant addresses
+              let promises2 = [];
+              for (let i = 0; i < matrikler.features.length; i++) {
+                let feature = matrikler.features[i];
+                promises2.push(findAddressesInMatrikel(feature));
+              }
+
+              Promise.all(promises2).then((results) => {
+                let adresser = this.mergeAdresser(results);
+                this.createSnack(__("Found addresses"));
+
+                // Set results
+                me.setState({
+                  results_adresser: adresser,
+                  results_matrikler: matrikler,
+                });
+              });
+            })
+            .catch((error) => {
+              console.log(error);
+              this.createSnack(__("Error in seach") + ": " + error);
+              _clearAll();
+              return [];
+            });
+        } catch (error) {
+          console.log(error);
+          this.createSnack(error);
+          return [];
+        }
+      }
+
+      /**
+       * This function disolves the geometry, and prepares it for querying
+       */
+      geometryDisolver(geojson) {
+        // we need to wrap the geometry in a featurecollection, so we can use turf
+        let collection = {
+          type: "FeatureCollection",
+          features: [],
+        };
+
+        // loop through all features, buffer them, and add them to the collection
+        for (let i = 0; i < geojson.features.length; i++) {
+          let feature = geojson.features[i];
+
+          // If the type is not set, force it to be a Feature
+          if (!feature.type) {
+            feature.type = "Feature";
+          }
+
+          try {
+            // If the feature as a radius property, use that as the buffer distance (points and markers)
+            let buffered;
+            if (
+              feature.properties.distance &&
+              feature.geometry.type == "Point" &&
+              feature.properties.type == "circle"
+            ) {
+              try {
+                let parsedRadii = feature.properties.distance.split(" ")[0];
+                buffered = turfBuffer(feature, parsedRadii, {
+                  units: "meters",
+                });
+              } catch (error) {
+                console.log(error, feature);
+              }
+            } else {
+              buffered = turfBuffer(feature, exBufferDistance, {
+                units: "meters",
+              });
+            }
+
+            collection.features.push(buffered);
+          } catch (error) {
+            console.log(error, feature);
+          }
+        }
+
+        // create a union of all the buffered features
+        try {
+          let polygons = collection.features;
+          let union = polygons.reduce((a, b) => turfUnion(a, b), polygons[0]); // turf v7 will support union on featurecollection, v6 does not.
+          collection = turfFlatten(union);
+        } catch (error) {
+          console.log(error, polygons);
+        }
+
+        // return geometry for querying
+        return collection;
+      }
+
+      /**
+       * Merges all matrikler into one featurecollection
+       * @param {*} results
+       */
+      mergeMatrikler(results) {
+        let me = this;
+        let merged = {};
+        for (let i = 0; i < results.length; i++) {
+          // Guard against empty results, and results that are not featureCollections
+          if (
+            results[i] &&
+            results[i].type == "FeatureCollection" &&
+            results[i].features.length > 0
+          ) {
+            for (let j = 0; j < results[i].features.length; j++) {
+              let feature = results[i].features[j];
+              merged[feature.properties.featureid] = feature;
+            }
+          }
+        }
+        let newCollection = turfFeatureCollection(Object.values(merged));
+        return newCollection;
+      }
+
+      /**
+       * Merges all adresser into one array
+       * @param {*} results
+       */
+      mergeAdresser(results) {
+        let me = this;
+        try {
+          // Merge all results into one array, keeping only kvhx
+          let merged = [];
+          for (let i = 0; i < results.length; i++) {
+            // for each adresse in list, check if it is a kvhx, and add it to the merged list
+            for (let j = 0; j < results[i].length; j++) {
+              let feature = results[i][j];
+              if (feature.kvhx) {
+                merged.push(feature.kvhx);
+              }
+            }
+          }
+          // make use the merged list is unique
+          merged = [...new Set(merged)];
+          return merged;
+        } catch (error) {
+          console.log(error);
+          return [];
+        }
+      }
+      /**
+       * Styles and adds the buffer to the map (from the geometryDisolver)
+       */
+      addBufferToMap(geojson) {
+        try {
+          var l = L.geoJson(geojson, {
+            color: "#ff7800",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.1,
+            dashArray: "5,3",
+          }).addTo(bufferItems);
+        } catch (error) {
+          console.log(error, geojson);
+        }
+      }
+
+      /**
+       * Styles and adds the matrikler to the map
+       */
+      addMatrsToMap(geojson) {
+        try {
+          var l = L.geoJson(geojson, {
+            color: "#000000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.2,
+            dashArray: "5,3",
+          }).addTo(queryMatrs);
+        } catch (error) {
+          console.log(error, geojson);
+        }
+      }
+
+      /**
+       * Creates a new snackbar
+       * @param {*} text
+       */
+      createSnack(text) {
+        $.snackbar({
+          id: exSnackId,
+          content: "<span id='blueidea-progress'>" + text + "</span>",
+          htmlAllowed: true,
+          timeout: 1000000,
+        });
+      }
+
+      /**
+       * Updates the snackbar
+       * @param {*} text
+       */
+      updateSnack(text) {
+        $(exSnackId).snackbar("show");
+        $("blueidea-progress").html(text);
+      }
+
+      /**
+       * Simulates a click on the login button
+       */
       clickLogin() {
         document.getElementById("session").click();
       }
 
+      /**
+       * Sends user to draw tab
+       */
       clickDraw() {
+        _clearAll();
         $('#main-tabs a[href="#draw-content"]').trigger("click");
       }
 
@@ -383,7 +692,6 @@ module.exports = {
       render() {
         const _self = this;
         const s = _self.state;
-        //console.log(s)
 
         // If not logged in, show login button
         if (s.authed && s.user_id) {
@@ -392,7 +700,7 @@ module.exports = {
             <div role="tabpanel">
               <div className="form-group">
                 <div style={{ alignSelf: "center" }}>
-                  <h3>{__("Select")}</h3>
+                  <h4>{__("Select area")}</h4>
                   <div
                     style={{
                       display: "flex",
@@ -415,18 +723,16 @@ module.exports = {
                       size="large"
                       variant="contained"
                       style={{ margin: "10px" }}
-                      disabled={!this.state.user_lukkeliste}
+                      disabled={!s.user_lukkeliste}
                     >
                       {__("Select point on map")}
                     </Button>
                   </div>
                 </div>
                 <div style={{ alignSelf: "center" }}>
-                  <h3>{__("Results")}</h3>
-                  <div>
-                    Der blev fundet {this.state.result_adresser.length} adresser
-                    i området.
-                  </div>
+                  <h4>{__("Show results")}</h4>
+                  Der blev fundet {s.results_adresser.length} adresser i
+                  området.
                 </div>
               </div>
             </div>
@@ -491,292 +797,6 @@ module.exports = {
     );
   },
 
-  /**
-   * This function disolves the geometry, and prepares it for querying
-   */
-  geometryDisolver: function (geojson) {
-    // we need to wrap the geometry in a featurecollection, so we can use turf
-    let collection = {
-      type: "FeatureCollection",
-      features: [],
-    };
-
-    // loop through all features, buffer them, and add them to the collection
-    for (let i = 0; i < geojson.features.length; i++) {
-      let feature = geojson.features[i];
-
-      // If the type is not set, force it to be a Feature
-      if (!feature.type) {
-        feature.type = "Feature";
-      }
-
-      try {
-        // If the feature as a radius property, use that as the buffer distance (points and markers)
-        let buffered;
-        if (
-          feature.properties.distance &&
-          feature.geometry.type == "Point" &&
-          feature.properties.type == "circle"
-        ) {
-          try {
-            let parsedRadii = feature.properties.distance.split(" ")[0];
-            buffered = turfBuffer(feature, parsedRadii, {
-              units: "meters",
-            });
-          } catch (error) {
-            console.log(error, feature);
-          }
-        } else {
-          buffered = turfBuffer(feature, exBufferDistance, {
-            units: "meters",
-          });
-        }
-
-        collection.features.push(buffered);
-      } catch (error) {
-        console.log(error, feature);
-      }
-    }
-
-    // create a union of all the buffered features
-    try {
-      let polygons = collection.features;
-      let union = polygons.reduce((a, b) => turfUnion(a, b), polygons[0]); // turf v7 will support union on featurecollection, v6 does not.
-      collection = turfFlatten(union);
-    } catch (error) {
-      console.log(error, polygons);
-    }
-
-    // return geometry for querying
-    return collection;
-  },
-
-  /**
-   * This function is what starts the process of finding relevant addresses, returns array with kvhx
-   * @param {*} geojson
-   * @returns array with kvhx
-   */
-  queryAddress: function (geojson) {
-    console.debug(geojson);
-
-    //clear last geometries
-    _clearAll();
-
-    try {
-      // Disolve geometry
-      let geom = this.geometryDisolver(geojson);
-
-      // show buffers on map
-      this.addBufferToMap(geom);
-
-      // Let user know we are starting
-      this.createSnack(__("Waiting to start"));
-
-      // For each flattened element, start a query for matrikels intersected
-      let promises = [];
-      for (let i = 0; i < geom.features.length; i++) {
-        let feature = geom.features[i];
-        promises.push(this.findMatriklerInPolygon(feature));
-      }
-
-      // When all queries are done, we can find the relevant addresses
-      Promise.all(promises)
-        .then((results) => {
-          // Merge all results into one array
-          try {
-            let merged = this.mergeMatrikler(results);
-            this.addMatrsToMap(merged);
-            this.createSnack(__("Found parcels"));
-
-            return merged;
-          } catch (error) {
-            console.log(error);
-          }
-        })
-        .then((matrikler) => {
-          // For each matrikel, find the relevant addresses
-          let promises2 = [];
-          for (let i = 0; i < matrikler.features.length; i++) {
-            let feature = matrikler.features[i];
-            promises2.push(this.findAddressesInMatrikel(feature));
-          }
-
-          Promise.all(promises2).then((results) => {
-            let adresser = this.mergeAdresser(results);
-            console.log(adresser);
-            this.createSnack(__("Found addresses"));
-
-            // Return number to UI
-            return adresser;
-          });
-        })
-        .catch((error) => {
-          console.log(error);
-          this.createSnack(__("Error in seach") + ": " + error);
-          _clearAll();
-          return [];
-        });
-    } catch (error) {
-      console.log(error);
-      this.createSnack(error);
-      return [];
-    }
-  },
-
-  mergeMatrikler: function (results) {
-    let merged = {};
-    for (let i = 0; i < results.length; i++) {
-      // Guard against empty results, and results that are not featureCollections
-      if (
-        results[i] &&
-        results[i].type == "FeatureCollection" &&
-        results[i].features.length > 0
-      ) {
-        for (let j = 0; j < results[i].features.length; j++) {
-          let feature = results[i].features[j];
-          merged[feature.properties.featureid] = feature;
-        }
-      }
-    }
-    let newCollection = turfFeatureCollection(Object.values(merged));
-
-    // Save the result to the global state
-    me.setState({
-      result_matrikler: newCollection,
-    });
-    return newCollection;
-  },
-
-  mergeAdresser: function (results) {
-    try {
-      // Merge all results into one array, keeping only kvhx
-      let merged = [];
-      for (let i = 0; i < results.length; i++) {
-        // for each adresse in list, check if it is a kvhx, and add it to the merged list
-        for (let j = 0; j < results[i].length; j++) {
-          let feature = results[i][j];
-          if (feature.kvhx) {
-            merged.push(feature.kvhx);
-          }
-        }
-      }
-      // make use the merged list is unique
-      merged = [...new Set(merged)];
-
-      // Populate the UI with the number of addresses found
-      me.setState({
-        result_adresser: merged,
-      });
-
-      return merged;
-    } catch (error) {
-      console.log(error);
-      return [];
-    }
-  },
-
-  addBufferToMap: function (geojson) {
-    try {
-      var l = L.geoJson(geojson, {
-        color: "#ff7800",
-        weight: 1,
-        opacity: 1,
-        fillOpacity: 0.1,
-        dashArray: "5,3",
-      }).addTo(bufferItems);
-    } catch (error) {
-      console.log(error, geojson);
-    }
-  },
-
-  addMatrsToMap: function (geojson) {
-    try {
-      var l = L.geoJson(geojson, {
-        color: "#000000",
-        weight: 1,
-        opacity: 1,
-        fillOpacity: 0.2,
-        dashArray: "5,3",
-      }).addTo(queryMatrs);
-    } catch (error) {
-      console.log(error, geojson);
-    }
-  },
-
-  createSnack: function (text) {
-    $.snackbar({
-      id: exSnackId,
-      content: "<span id='blueidea-progress'>" + text + "</span>",
-      htmlAllowed: true,
-      timeout: 1000000,
-    });
-  },
-
-  updateSnack: function (text) {
-    $(exSnackId).snackbar("show");
-    $("blueidea-progress").html(text);
-  },
-
-  /**
-   * async function to query matrikel inside a single buffer
-   * @param {*} feature
-   */
-  findMatriklerInPolygon: function (feature) {
-    return new Promise((resolve, reject) => {
-      // Create a query
-      let query = {
-        srid: 4326,
-        polygon: JSON.stringify(feature.geometry.coordinates),
-        format: "geojson",
-        struktur: "flad",
-      };
-
-      // Send the query to the server
-      $.ajax({
-        url: "https://api.dataforsyningen.dk/jordstykker",
-        type: "GET",
-        data: query,
-        success: function (data) {
-          resolve(data);
-        },
-        error: function (data) {
-          reject(data);
-        },
-      });
-    });
-  },
-
-  /**
-   * async function to query addresses inside a single parcel
-   * @param {*} feature
-   */
-  findAddressesInMatrikel: function (feature) {
-    return new Promise((resolve, reject) => {
-      // Create a query
-      let query = {
-        ejerlavkode: feature.properties.ejerlavkode,
-        matrikelnr: feature.properties.matrikelnr,
-        struktur: "flad",
-      };
-
-      // Send the query to the server
-      $.ajax({
-        url: "https://api.dataforsyningen.dk/adresser",
-        type: "GET",
-        data: query,
-        success: function (data) {
-          resolve(data);
-        },
-        error: function (data) {
-          reject(data);
-        },
-      });
-    });
-  },
-
-  showResults: function (results) {
-    console.log(results);
-  },
   setCallBack: function (fn) {
     this.callBack = fn;
   },
