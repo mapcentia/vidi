@@ -33,9 +33,10 @@ const MILISECSDAY = 86400000;
 
 var userString = function (req) {
   var userstr = "";
-  if (req.session.subUser)
+  if (req.session.subUser) {
     var userstr = req.session.gc2UserName + "@" + req.session.parentDb;
-  else {
+    userstr = req.session.gc2UserName + "@test_" + req.session.parentDb; // test overrride
+  }  else {
     var userstr = req.session.gc2UserName;
   }
   return userstr;
@@ -48,28 +49,59 @@ router.get("/api/extension/blueidea/:userid", function (req, response) {
     return;
   }
 
+  // guard against missing session (not logged in to GC2)
+  if (!req.session.hasOwnProperty("gc2SessionId")) {
+    response
+      .status(401)
+      .send("No active session - please login in the vidi application");
+    return;
+  }
+
   response.setHeader("Content-Type", "application/json");
 
   // Get user from config
   var user = bi.users[req.params.userid];
 
   returnobj = {
-    lukkeliste: user.lukkeliste ? user.lukkeliste : false,
     profileid: user.profileid ? user.profileid : null,
+    lukkeliste: user.lukkeliste ? user.lukkeliste : false,
+    ventil_layer: user.ventil_layer ? user.ventil_layer : null,
+    ventil_layer_key: user.ventil_layer_key ? user.ventil_layer_key : null,
+    udpeg_layer: user.udpeg_layer ? user.udpeg_layer : null,
   };
 
-  console.log(returnobj);
-  // return user object without username and password
-  response.status(200).json(returnobj);
+  // Check if the database is correctly setup, and the session is allowed to access it
+  let validate = [
+    SQLAPI("select * from lukkeliste.beregn_ventiler limit 1", req),
+    SQLAPI("select * from lukkeliste.beregn_afskaaretmatrikler limit 1", req),
+  ]
+  Promise.all(validate).then((res) => {
+    returnobj.db = true
+  }).catch((err) => {
+    returnobj.db = false
+  })
+  .finally(() => {
+    response.status(200).json(returnobj);
+  })
 });
 
-router.get("/api/extension/blueidea/:userid/GetSmSTemplates/",  function (req, response) {
+router.get(
+  "/api/extension/blueidea/:userid/GetSmSTemplates/",
+  function (req, response) {
     // Guard against missing parameters or user
     if (
       !req.params.hasOwnProperty("userid") ||
       !hasUserSetup(req.params.userid)
     ) {
       response.status(401).send("Missing parameters");
+      return;
+    }
+
+    // guard against missing session (not logged in to GC2)
+    if (!req.session.hasOwnProperty("gc2SessionId")) {
+      response
+        .status(401)
+        .send("No active session - please login in the vidi application");
       return;
     }
 
@@ -105,49 +137,59 @@ router.get("/api/extension/blueidea/:userid/GetSmSTemplates/",  function (req, r
   }
 );
 
-router.post("/api/extension/blueidea/:userid/CreateMessage", function (req, response) {
-  // guard against missing user
-  if (!hasUserSetup(req.params.userid)) {
-    response.status(401).send("User not found");
-    return;
-  }
+router.post(
+  "/api/extension/blueidea/:userid/CreateMessage",
+  function (req, response) {
+    // guard against missing user
+    if (!hasUserSetup(req.params.userid)) {
+      response.status(401).send("User not found");
+      return;
+    }
 
-  // body must contain an array called addresses, with objects that only contain a kvhx attribute
-  if (!req.body.hasOwnProperty("addresses")) {
-    response.status(401).send("Missing addresses");
-    return;
-  }
-  
-  var body = req.body;
+    // guard against missing session (not logged in to GC2)
+    if (!req.session.hasOwnProperty("gc2SessionId")) {
+      response
+        .status(401)
+        .send("No active session - please login in the vidi application");
+      return;
+    }
 
-  // If debug is set, add testMode to body
-  if (bi.debug) {
-    body.testMode = true;
-  }
+    // body must contain an array called addresses, with objects that only contain a kvhx attribute
+    if (!req.body.hasOwnProperty("addresses")) {
+      response.status(401).send("Missing addresses");
+      return;
+    }
 
-  // We only use known addresses, so toggle this
-  body.sendToSpecificAddresses = true;
+    var body = req.body;
 
-  loginToBlueIdea(req.params.userid).then((token) => {
-    var options = {
-      uri: bi.hostname + "/Message/Create",
-      headers: {
-        Authorization: "Bearer " + token,
-        Accept: "application/json",
-      },
-      json: body,
-    };
-    request.post(options, function (error, res, body) {
-      console.debug(res.toJSON());
-      if (error) {
-        response.status(500).json(error);
-      } else {
-        response.status(200).json({"smsGroupId": body});
-      }
+    // If debug is set, add testMode to body
+    if (bi.debug) {
+      body.testMode = true;
+    }
+
+    // We only use known addresses, so toggle this
+    body.sendToSpecificAddresses = true;
+
+    loginToBlueIdea(req.params.userid).then((token) => {
+      var options = {
+        uri: bi.hostname + "/Message/Create",
+        headers: {
+          Authorization: "Bearer " + token,
+          Accept: "application/json",
+        },
+        json: body,
+      };
+      request.post(options, function (error, res, body) {
+        console.debug(res.toJSON());
+        if (error) {
+          response.status(500).json(error);
+        } else {
+          response.status(200).json({ smsGroupId: body });
+        }
+      });
     });
-  });
-});
-
+  }
+);
 
 // Use SQLAPI
 function SQLAPI(q, req) {
@@ -158,6 +200,7 @@ function SQLAPI(q, req) {
     q: q,
   });
   var url = GC2_HOST + "/api/v2/sql/" + userstr;
+  console.log(url)
   var options = {
     method: "POST",
     headers: {

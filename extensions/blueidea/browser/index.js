@@ -22,6 +22,7 @@ import {
   flatten as turfFlatten,
   union as turfUnion,
   featureCollection as turfFeatureCollection,
+  applyFilter,
 } from "@turf/turf";
 
 /**
@@ -111,6 +112,16 @@ var _clearAll = function () {
   _clearMatrs();
 };
 
+const resetObj = {
+  authed: false,
+  user_id: null,
+  user_lukkeliste: false,
+  user_db: false,
+  user_ventil_layer: null,
+  user_udpeg_layer: null,
+  user_ventil_layer_key: null,
+};
+
 /**
  * async function to query matrikel inside a single buffer
  * @param {*} feature
@@ -184,6 +195,9 @@ module.exports = {
     utils = o.utils;
     meta = o.meta;
     draw = o.draw;
+    layerTree = o.layerTree;
+    switchLayer = o.switchLayer;
+    layers = o.layers;
     socketId = o.socketId;
     transformPoint = o.transformPoint;
     backboneEvents = o.backboneEvents;
@@ -274,6 +288,10 @@ module.exports = {
         da_DK: "Opret, og gå til blueidea",
         en_US: "Create and go to blueidea",
       },
+      "Valve list": {
+        da_DK: "Lukkeliste",
+        en_US: "Valve list",
+      },
     };
 
     /**
@@ -335,7 +353,11 @@ module.exports = {
           results_matrikler: [],
           user_lukkeliste: false,
           user_id: null,
-          user_projectid: null,
+          user_profileid: null,
+          user_db: false,
+          user_ventil_layer: null,
+          user_ventil_layer_key: null,
+          user_udpeg_layer: null,
         };
       }
 
@@ -356,6 +378,14 @@ module.exports = {
           me.setState({
             active: true,
           });
+
+          // if logged in, get user
+          if (me.state.authed) {
+            return this.getUser();
+          } else {
+            me.setState(resetObj);
+          }
+
         });
 
         // Deactivates module
@@ -383,27 +413,20 @@ module.exports = {
               if (me.state.authed) {
                 return this.getUser();
               } else {
-                me.setState({
-                  user_lukkeliste: false,
-                  user_id: null,
-                  user_lukkeliste: false,
-                });
+                me.setState(resetObj);
               }
             })
             .catch((e) => {
               console.log("Error in session:authChange", e);
-              me.setState({
-                authed: false,
-                user_id: null,
-                user_lukkeliste: false,
-              });
+              me.setState(resetObj);
             })
             .finally(() => {
               // If logged in, and user_id is not null, show buttons
               if (me.state.authed && me.state.user_id) {
                 $("#_draw_make_blueidea_with_selected").show();
                 $("#_draw_make_blueidea_with_all").show();
-                this.getProjects();
+                // TODO: Disabled for now, but lists templates
+                //this.getTemplates();
               } else {
                 $("#_draw_make_blueidea_with_selected").hide();
                 $("#_draw_make_blueidea_with_all").hide();
@@ -412,11 +435,16 @@ module.exports = {
         });
       }
 
-      getProjects() {
+      /**
+       * Get templates from backend
+       * @returns {Promise<void>}
+       * @private
+       */
+      getTemplates() {
         let me = this;
 
         // guard against no projectid in state
-        if (!me.state.user_projectid) {
+        if (!me.state.user_profileid) {
           return;
         }
 
@@ -427,10 +455,10 @@ module.exports = {
         )
           .then((r) => r.json())
           .then((obj) => {
-            console.log("Got projects", obj);
+            console.log("Got templates", obj);
           })
           .catch((e) => {
-            console.log("Error in getProjects", e);
+            console.log("Error in getTemplates", e);
           });
       }
 
@@ -445,14 +473,20 @@ module.exports = {
         if (config.extensionConfig.blueidea.userid) {
           return new Promise(function (resolve, reject) {
             $.ajax({
-              url: "/api/extension/blueidea/" + config.extensionConfig.blueidea.userid,
+              url:
+                "/api/extension/blueidea/" +
+                config.extensionConfig.blueidea.userid,
               type: "GET",
               success: function (data) {
                 console.log("Got user", data);
                 me.setState({
                   user_lukkeliste: data.lukkeliste || false,
                   user_id: config.extensionConfig.blueidea.userid,
-                  user_projectid: data.projectid || null,
+                  user_profileid: data.profileid || null,
+                  user_db: data.db || false,
+                  user_udpeg_layer: data.udpeg_layer || null,
+                  user_ventil_layer: data.ventil_layer || null,
+                  user_ventil_layer_key: data.ventil_layer_key || null,
                 });
                 resolve(data);
               },
@@ -727,36 +761,103 @@ module.exports = {
        * This function builds relevant data for the blueidea API
        * @returns SmsGroupId for redirecting to the correct page
        */
-      sendToBlueIdea= () => {
+      sendToBlueIdea = () => {
         let body = {
           profileId: this.state.profileId || null,
+        };
+
+        // take the curent list of addresses and create an array of objects containing the kvhx
+        let adresser = this.state.results_adresser.map((kvhx) => {
+          return { kvhx: kvhx };
+        });
+        body.addresses = adresser;
+
+        $.ajax({
+          url:
+            "/api/extension/blueidea/" +
+            config.extensionConfig.blueidea.userid +
+            "/CreateMessage",
+          type: "POST",
+          data: JSON.stringify(body),
+          contentType: "application/json",
+          dataType: "json",
+          success: function (data) {
+            if (data.smsGroupId) {
+              window.open(
+                "https://dk.sms-service.dk/message-wizard/write-message?smsGroupId=" +
+                  data.smsGroupId,
+                "_blank"
+              ); // open in new tab
+            }
+          },
+          error: function (error) {
+            console.log(error);
+          },
+        });
       };
 
-      // take the curent list of addresses and create an array of objects containing the kvhx
-      let adresser = this.state.results_adresser.map((kvhx) => {
-        return { kvhx: kvhx };
-      });
-      body.addresses = adresser;
+      /**
+       * This function queries database for related matrikler and ventiler
+       * @returns uuid string representing the query
+       */
+      selectPointLukkeliste = () => {
+        let me = this;
+        let point = null;
 
-      $.ajax({
-        url: "/api/extension/blueidea/" + config.extensionConfig.blueidea.userid + "/CreateMessage",
-        type: "POST",
-        data: JSON.stringify(body),
-        contentType: "application/json",
-        dataType: "json",
-        success: function (data) {
-          console.log('Got:', data);
-          if (data.smsGroupId) {
-            window.open("https://dk.sms-service.dk/message-wizard/write-message?smsGroupId=" + data.smsGroupId, "_blank"); // open in new tab
-          }
-        },
-        error: function (error) {
-          console.log(error);
+        console.log(me.state);
+
+        // if udpeg_layer is set, make sure it is turned on
+        if (me.state.user_udpeg_layer) {
+          switchLayer.init(me.state.user_udpeg_layer, true);
         }
-      });
+
+        // change the cursor to crosshair and wait for a click
+        utils.cursorStyle().crosshair();
+
+        cloud.get().on("click", function (e) {
+          // get the clicked point
+          point = e.latlng;
+          utils.cursorStyle().pointer();
+
+          // TODO: Send the point to backend
+          
+        });
+      };
 
 
-    }
+      clearVentilFilter = () => {
+        var filter = buildVentilFilter();
+         
+        applyVentilFilter(filter);
+      };
+
+      buildVentilFilter = (key = undefined) => {
+        let me = this;
+        var filter = {};
+
+        var tablename = me.state.ventil_layer.split(".")[1];
+        if (!key) {
+          // If no key is set, create the "clear" filter
+          filter[me.state.ventil_layer] = {
+            match: "any",
+            columns: [],
+          };
+        } else {
+          filter[me.state.user_ventil_layer] = {
+            match: "any",
+            columns: [
+              {
+                fieldname: me.state.user_ventil_layer_key,
+                expression: "=",
+                value: String(key),
+                restriction: false,
+              },
+            ],
+          };
+        }
+
+        return filter;
+      };
 
       /**
        * Determines if the plugin is ready to send data to blueidea
@@ -764,6 +865,17 @@ module.exports = {
       readyToSend = () => {
         // if adresse array is not empty, return true
         if (this.state.results_adresser.length > 0) {
+          return true;
+        } else {
+          return false;
+        }
+      };
+
+      /**
+       * Determines if lukkeliste is allowed
+       */
+      allowLukkeliste = () => {
+        if (this.state.user_lukkeliste && this.state.user_db) {
           return true;
         } else {
           return false;
@@ -802,12 +914,12 @@ module.exports = {
                       {__("Draw area")}
                     </Button>
                     <Button
-                      onClick={() => this.selectPoint()}
+                      onClick={() => this.selectPointLukkeliste()}
                       color="primary"
                       size="large"
                       variant="contained"
                       style={{ margin: "10px" }}
-                      disabled={!s.user_lukkeliste}
+                      disabled={!this.allowLukkeliste()}
                     >
                       {__("Select point on map")}
                     </Button>
@@ -844,7 +956,7 @@ module.exports = {
                   style={{ alignSelf: "center" }}
                   hidden={!s.user_lukkeliste}
                 >
-                  <h4>{__("Show results")}</h4>
+                  <h4>{__("Valve list")}</h4>
                   Reserveret til lukkeliste-ting
                 </div>
               </div>
