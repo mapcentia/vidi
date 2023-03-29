@@ -146,6 +146,7 @@
     "moment": "^2.29.4",
     "mustache": "^2.3.0",
     "mutationobserver-shim": "^0.3.7",
+    "node-fetch": "^2.6.9",
     "pdf-merge": "^1.2.0",
     "pg-escape": "^0.2.0",
     "plotly.js": "^1.57.1",
