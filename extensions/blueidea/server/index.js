@@ -41,50 +41,6 @@ var userString = function (req) {
   return userstr;
 };
 
-/**
- * Endpoint for populating foresp. in current schema
- */
-router.post(
-  "/api/extension/blueidea/LookupAddressesPhoneCount",
-  function (req, response) {
-    // Header must contain userid
-    if (!req.headers.hasOwnProperty("userid")) {
-      response.status(401).send("Missing userid");
-      return;
-    }
-
-    // Guard against missing user
-    if (!hasUserSetup(req.params.userid)) {
-      response.status(401).send("User not found");
-      return;
-    }
-
-    response.setHeader("Content-Type", "application/json");
-    headers = {
-      Authorization: loginToBlueIdea,
-    };
-
-    return new Promise(function (resolve, reject) {
-      //console.log(q.substring(0, 60))
-      fetch(url, options)
-        .then((r) => r.json())
-        .then((data) => {
-          // if message is present, is error
-          if (data.hasOwnProperty("message")) {
-            console.log(data);
-            reject(data);
-          } else {
-            resolve(data);
-          }
-        })
-        .catch((error) => {
-          console.log(error);
-          reject(error);
-        });
-    });
-  }
-);
-
 router.get("/api/extension/blueidea/:userid", function (req, response) {
   // Guard against missing user
   if (!hasUserSetup(req.params.userid)) {
@@ -98,8 +54,8 @@ router.get("/api/extension/blueidea/:userid", function (req, response) {
   var user = bi.users[req.params.userid];
 
   returnobj = {
-    lukkeliste: user.lukkeliste,
-    profileid: user.profileid,
+    lukkeliste: user.lukkeliste ? user.lukkeliste : false,
+    profileid: user.profileid ? user.profileid : null,
   };
 
   console.log(returnobj);
@@ -107,9 +63,7 @@ router.get("/api/extension/blueidea/:userid", function (req, response) {
   response.status(200).json(returnobj);
 });
 
-router.get(
-  "/api/extension/blueidea/:userid/GetSmSTemplates/",
-  function (req, response) {
+router.get("/api/extension/blueidea/:userid/GetSmSTemplates/",  function (req, response) {
     // Guard against missing parameters or user
     if (
       !req.params.hasOwnProperty("userid") ||
@@ -140,8 +94,9 @@ router.get(
         },
       };
       request.get(options, function (error, res, body) {
+        console.debug(res.toJSON());
         if (error) {
-          console.log(error);
+          response.status(500).json(error);
         } else {
           response.status(200).json(JSON.parse(body));
         }
@@ -149,6 +104,50 @@ router.get(
     });
   }
 );
+
+router.post("/api/extension/blueidea/:userid/CreateMessage", function (req, response) {
+  // guard against missing user
+  if (!hasUserSetup(req.params.userid)) {
+    response.status(401).send("User not found");
+    return;
+  }
+
+  // body must contain an array called addresses, with objects that only contain a kvhx attribute
+  if (!req.body.hasOwnProperty("addresses")) {
+    response.status(401).send("Missing addresses");
+    return;
+  }
+  
+  var body = req.body;
+
+  // If debug is set, add testMode to body
+  if (bi.debug) {
+    body.testMode = true;
+  }
+
+  // We only use known addresses, so toggle this
+  body.sendToSpecificAddresses = true;
+
+  loginToBlueIdea(req.params.userid).then((token) => {
+    var options = {
+      uri: bi.hostname + "/Message/Create",
+      headers: {
+        Authorization: "Bearer " + token,
+        Accept: "application/json",
+      },
+      json: body,
+    };
+    request.post(options, function (error, res, body) {
+      console.debug(res.toJSON());
+      if (error) {
+        response.status(500).json(error);
+      } else {
+        response.status(200).json({"smsGroupId": body});
+      }
+    });
+  });
+});
+
 
 // Use SQLAPI
 function SQLAPI(q, req) {

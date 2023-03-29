@@ -443,20 +443,25 @@ module.exports = {
         let me = this;
         // If user is set in extensionconfig, set it in state and get information from backend
         if (config.extensionConfig.blueidea.userid) {
-          return fetch(
-            "/api/extension/blueidea/" + config.extensionConfig.blueidea.userid
-          )
-            .then((r) => r.json())
-            .then((obj) => {
-              me.setState({
-                user_lukkeliste: obj.lukkeliste || false,
-                user_id: config.extensionConfig.blueidea.userid,
-                user_projectid: obj.projectid || null,
-              });
-            })
-            .catch((e) => {
-              console.log("Error in getUser", e);
+          return new Promise(function (resolve, reject) {
+            $.ajax({
+              url: "/api/extension/blueidea/" + config.extensionConfig.blueidea.userid,
+              type: "GET",
+              success: function (data) {
+                console.log("Got user", data);
+                me.setState({
+                  user_lukkeliste: data.lukkeliste || false,
+                  user_id: config.extensionConfig.blueidea.userid,
+                  user_projectid: data.projectid || null,
+                });
+                resolve(data);
+              },
+              error: function (e) {
+                console.log("Error in getUser", e);
+                reject(e);
+              },
             });
+          });
         } else {
           return;
         }
@@ -719,6 +724,41 @@ module.exports = {
       }
 
       /**
+       * This function builds relevant data for the blueidea API
+       * @returns SmsGroupId for redirecting to the correct page
+       */
+      sendToBlueIdea= () => {
+        let body = {
+          profileId: this.state.profileId || null,
+      };
+
+      // take the curent list of addresses and create an array of objects containing the kvhx
+      let adresser = this.state.results_adresser.map((kvhx) => {
+        return { kvhx: kvhx };
+      });
+      body.addresses = adresser;
+
+      $.ajax({
+        url: "/api/extension/blueidea/" + config.extensionConfig.blueidea.userid + "/CreateMessage",
+        type: "POST",
+        data: JSON.stringify(body),
+        contentType: "application/json",
+        dataType: "json",
+        success: function (data) {
+          console.log('Got:', data);
+          if (data.smsGroupId) {
+            window.open("https://dk.sms-service.dk/message-wizard/write-message?smsGroupId=" + data.smsGroupId, "_blank"); // open in new tab
+          }
+        },
+        error: function (error) {
+          console.log(error);
+        }
+      });
+
+
+    }
+
+      /**
        * Determines if the plugin is ready to send data to blueidea
        */
       readyToSend = () => {
@@ -778,18 +818,6 @@ module.exports = {
                   <h4>{__("Show results")}</h4>
                   Der blev fundet {s.results_adresser.length} adresser i
                   området.
-                </div>
-
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    width: "100%",
-                    justifyContent: "center",
-                  }}
-                  hidden={s.user_projectid}
-                >
-                  LALAAL
                 </div>
 
                 <div
