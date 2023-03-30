@@ -75,7 +75,8 @@ module.exports = {
                 height: '250px'
             },
             initZoomCenter: null,
-            forceOffCanvasInfo: false
+            forceOffCanvasInfo: false,
+            showOffcanvas: false
         };
         // Set default for unset props
         for (let prop in defaults) {

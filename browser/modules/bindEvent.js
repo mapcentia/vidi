@@ -70,6 +70,9 @@ module.exports = {
             })
 
             $("#offcanvasLayerControlBtn").on("click", () => mainLayerOffcanvas.show());
+            if (window.vidiConfig.showOffcanvas === true) {
+                mainLayerOffcanvas.show();
+            }
         } catch (e) {
 
         }
