@@ -23,6 +23,7 @@ import {coordAll} from "@turf/turf";
 let APIBridgeSingletone = require('../../../browser/modules/api-bridge');
 
 const config = require('../../../config/config.js');
+const drawTooltip = config?.extensionConfig?.editor?.tooltip;
 
 /**
  *
@@ -157,6 +158,18 @@ module.exports = {
             return;
         }
 
+        if (drawTooltip) {
+            $("body").append(`<div id="editor-tooltip" style="position: fixed; float: left; display: none">${drawTooltip}</div>`);
+            $(document).on('mousemove', function (e) {
+                $('#editor-tooltip').css({
+                    left: e.pageX + 20,
+                    top: e.pageY
+                });
+            });
+            cloud.get().map.on("editable:drawing:clicked", function () {
+                $("#editor-tooltip").hide();
+            });
+        }
 
         $("#editStopBtn").on("click", () => {
             _self.stopEditWithConfirm();
@@ -240,6 +253,7 @@ module.exports = {
                         }, 200)
                     }
                 }
+
                 poll();
             }
         });
@@ -452,6 +466,8 @@ module.exports = {
             alert("Ongoing edit. Please stop editing before starting a new one");
             return;
         }
+
+
         isVectorLayer = isVector;
         _self.stopEdit();
         editedFeature = false;
@@ -477,6 +493,10 @@ module.exports = {
             serviceWorkerCheck();
 
             me.stopEdit();
+
+            if (drawTooltip) {
+                $("#editor-tooltip").show();
+            }
 
             backboneEvents.get().trigger('block:infoClick');
             // Create schema for attribute form
@@ -1100,6 +1120,9 @@ module.exports = {
      * Stop editing and clean up
      */
     stopEdit: function () {
+        if (drawTooltip) {
+            $("#editor-tooltip").hide();
+        }
         backboneEvents.get().trigger('unblock:infoClick');
         cloud.get().map.editTools.stopDrawing();
         $("#edit-tool-group").addClass("d-none");

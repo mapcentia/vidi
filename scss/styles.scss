@@ -89,3 +89,7 @@
 .card.border-danger {
   display: none;
 }
+
+.feature-attribute-editing-form .list-group {
+  --bs-list-group-bg: transparent;
+}
