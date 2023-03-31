@@ -31,18 +31,12 @@ const DAYSSINCE = 25569;
 // milisecs pr. day
 const MILISECSDAY = 86400000;
 
-var userString = function (req) {
-  var userstr = "";
-  if (req.session.subUser) {
-    var userstr = req.session.gc2UserName + "@" + req.session.parentDb;
-    userstr = req.session.gc2UserName + "@test_" + req.session.parentDb; // test overrride
-  }  else {
-    var userstr = req.session.gc2UserName;
-  }
-  return userstr;
-};
-
-router.get("/api/extension/blueidea/:userid", function (req, response) {
+/**
+ * This function handles basic checks for each request
+ * @param req
+ * @param response
+ */
+function guard(req, response) {
   // Guard against missing user
   if (!hasUserSetup(req.params.userid)) {
     response.status(401).send("User not found");
@@ -57,7 +51,22 @@ router.get("/api/extension/blueidea/:userid", function (req, response) {
     return;
   }
 
-  response.setHeader("Content-Type", "application/json");
+  // else do nothing
+  return;
+}
+
+var userString = function (req) {
+  var userstr = "";
+  if (req.session.subUser) {
+    var userstr = req.session.gc2UserName + "@" + req.session.parentDb;
+  } else {
+    var userstr = req.session.gc2UserName;
+  }
+  return userstr;
+};
+
+router.get("/api/extension/blueidea/:userid", function (req, response) {
+  guard(req, response);
 
   // Get user from config
   var user = bi.users[req.params.userid];
@@ -74,36 +83,23 @@ router.get("/api/extension/blueidea/:userid", function (req, response) {
   let validate = [
     SQLAPI("select * from lukkeliste.beregn_ventiler limit 1", req),
     SQLAPI("select * from lukkeliste.beregn_afskaaretmatrikler limit 1", req),
-  ]
-  Promise.all(validate).then((res) => {
-    returnobj.db = true
-  }).catch((err) => {
-    returnobj.db = false
-  })
-  .finally(() => {
-    response.status(200).json(returnobj);
-  })
+  ];
+  Promise.all(validate)
+    .then((res) => {
+      returnobj.db = true;
+    })
+    .catch((err) => {
+      returnobj.db = false;
+    })
+    .finally(() => {
+      response.status(200).json(returnobj);
+    });
 });
 
 router.get(
   "/api/extension/blueidea/:userid/GetSmSTemplates/",
   function (req, response) {
-    // Guard against missing parameters or user
-    if (
-      !req.params.hasOwnProperty("userid") ||
-      !hasUserSetup(req.params.userid)
-    ) {
-      response.status(401).send("Missing parameters");
-      return;
-    }
-
-    // guard against missing session (not logged in to GC2)
-    if (!req.session.hasOwnProperty("gc2SessionId")) {
-      response
-        .status(401)
-        .send("No active session - please login in the vidi application");
-      return;
-    }
+    guard(req, response);
 
     //Get user from config
     var user = bi.users[req.params.userid];
@@ -140,19 +136,7 @@ router.get(
 router.post(
   "/api/extension/blueidea/:userid/CreateMessage",
   function (req, response) {
-    // guard against missing user
-    if (!hasUserSetup(req.params.userid)) {
-      response.status(401).send("User not found");
-      return;
-    }
-
-    // guard against missing session (not logged in to GC2)
-    if (!req.session.hasOwnProperty("gc2SessionId")) {
-      response
-        .status(401)
-        .send("No active session - please login in the vidi application");
-      return;
-    }
+    guard(req, response);
 
     // body must contain an array called addresses, with objects that only contain a kvhx attribute
     if (!req.body.hasOwnProperty("addresses")) {
@@ -191,16 +175,86 @@ router.post(
   }
 );
 
+router.post(
+  "/api/extension/lukkeliste/:userid/query",
+  function (req, response) {
+    guard(req, response);
+
+    // guard against missing lat and lng in body
+    if (!req.body.hasOwnProperty("lat") || !req.body.hasOwnProperty("lng")) {
+      response.status(401).send("Missing lat or lng");
+      return;
+    }
+
+    // remove timeout
+    req.setTimeout(0);
+
+    // create the string we need to query the database
+    q = `SELECT lukkeliste.fnc_dan_lukkeliste(ST_Transform(ST_GeomFromEWKT('SRID=4326;Point(${req.body.lng} ${req.body.lat})'),25832)::geometry, false)`;
+
+    SQLAPI(q, req)
+      .then((uuid) => {
+        let beregnuuid = uuid.features[0].properties.fnc_dan_lukkeliste
+        let promises = [];
+
+        console.log(q,' -> ', beregnuuid)
+
+        // if ventil_layer is set, query the database for the ventiler
+        if (bi.users[req.params.userid].ventil_layer) {
+          promises.push(
+            SQLAPI(`SELECT * from lukkeliste.beregn_ventiler where beregnuuid = '${beregnuuid}'`, req, { format: "geojson", srs: 4326})
+          );
+        } else {
+          // we need a promise to return, to keep ordering, so we create a dummy promise
+          promises.push(
+            new Promise((resolve, reject) => {
+              resolve(null);
+            })
+          );
+        }
+
+
+        // get matrikler
+        promises.push(
+          SQLAPI(`SELECT * from lukkeliste.beregn_afskaaretmatrikler where beregnuuid = '${beregnuuid}'`, req, { format: "geojson", srs: 4326})
+        );
+
+        // when promises are complete, return the result
+        Promise.all(promises).then((res) => {
+
+          // if matrikler is over 500, count it as an error
+          if (res[1].features.length > 500) {
+            res[0] = { error: "Der er fundet mere end 500 matrikler ("+ res[1].features.length +"), der skal lukkes. Kontakt venligst en af vores medarbejdere."}
+          }
+
+          response.status(200).json({
+            ventiler: res[0],
+            matrikler: res[1],
+          });
+        });
+      })
+      .catch((err) => {
+        console.error(err);
+        response.status(500).json(err);
+      });
+  }
+);
+
 // Use SQLAPI
-function SQLAPI(q, req) {
-  console.log(GC2_HOST);
+function SQLAPI(q, req, options = null) {
   var userstr = userString(req);
-  var postData = JSON.stringify({
+  var postData = {
     key: req.session.gc2ApiKey,
     q: q,
-  });
+  };
+
+  // if options is set, merge with postData
+  if (options) {
+    postData = Object.assign({}, postData, options);
+  }
+
   var url = GC2_HOST + "/api/v2/sql/" + userstr;
-  console.log(url)
+  postData = JSON.stringify(postData);
   var options = {
     method: "POST",
     headers: {
@@ -210,7 +264,6 @@ function SQLAPI(q, req) {
     },
     body: postData,
   };
-  //console.log(q)
 
   // Return new promise
   return new Promise(function (resolve, reject) {

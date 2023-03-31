@@ -187,7 +187,7 @@ module.exports = {
     };
     state.resetState(["blueidea"]).then(() => {
       $('#main-tabs a[href="#blueidea-content"]').trigger("click");
-      blueIdea.queryAddress(geojson);
+      blueIdea.queryAddresses(geojson);
     });
   },
   makeBlueIdeaWithAll: () => {
@@ -203,7 +203,7 @@ module.exports = {
 
     state.resetState(["blueidea"]).then(() => {
       $('#main-tabs a[href="#blueidea-content"]').trigger("click");
-      blueIdea.queryAddress(geojson);
+      blueIdea.queryAddresses(geojson);
     });
   },
 

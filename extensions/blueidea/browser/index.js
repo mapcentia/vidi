@@ -99,6 +99,7 @@ var cloud;
 
 var bufferItems = new L.FeatureGroup();
 var queryMatrs = new L.FeatureGroup();
+var queryVentils = new L.FeatureGroup();
 
 var _clearBuffer = function () {
   bufferItems.clearLayers();
@@ -106,11 +107,17 @@ var _clearBuffer = function () {
 var _clearMatrs = function () {
   queryMatrs.clearLayers();
 };
+var _clearVentil = function () {
+  queryVentils.clearLayers();
+};
 
 var _clearAll = function () {
   _clearBuffer();
   _clearMatrs();
+  _clearVentil();
 };
+
+const MAXFEATURES = 500;
 
 const resetObj = {
   authed: false,
@@ -218,6 +225,7 @@ module.exports = {
     mapObj = cloud.get().map;
     mapObj.addLayer(bufferItems);
     mapObj.addLayer(queryMatrs);
+    mapObj.addLayer(queryVentils);
 
     /**
      *
@@ -292,6 +300,10 @@ module.exports = {
         da_DK: "Lukkeliste",
         en_US: "Valve list",
       },
+      "Too many features selected": {
+        da_DK: "For mange steder at lede efter adresser!",
+        en_US: "Too many places to look for addresses!",
+      },
     };
 
     /**
@@ -336,6 +348,8 @@ module.exports = {
           .catch((e) => reject(e));
       });
     };
+
+    var blocked = true;
 
     /**
      *
@@ -385,13 +399,13 @@ module.exports = {
           } else {
             me.setState(resetObj);
           }
-
         });
 
         // Deactivates module
         backboneEvents.get().on(`off:${exId} off:all reset:all`, () => {
           console.log("Stopping blueidea");
           _clearAll();
+          blocked = true;
           me.setState({
             active: false,
             user_lukkeliste: false,
@@ -502,16 +516,56 @@ module.exports = {
       }
 
       /**
+       * This function queries database for related matrikler and ventiler
+       * @returns uuid string representing the query
+       */
+      queryPointLukkeliste = (point) => {
+        let me = this;
+
+        return new Promise(function (resolve, reject) {
+          $.ajax({
+            url: "/api/extension/lukkeliste/" + me.state.user_id + "/query",
+            type: "POST",
+            data: JSON.stringify(point),
+            contentType: "application/json",
+            success: function (data) {
+              resolve(data);
+            },
+            error: function (e) {
+              reject(e);
+            },
+          });
+        });
+      };
+
+      /**
        * This function is what starts the process of finding relevant addresses, returns array with kvhx
        * @param {*} geojson
        * @returns array with kvhx
        */
-      queryAddress(geojson) {
+      queryAddresses(geojson) {
         let me = this;
-        console.debug(geojson);
+        console.debug("queryAddresses: ", geojson);
+
+        // if no features in featurecollection, return
+        if (!geojson.features.length) {
+          return;
+        }
+
+        // if more than 500 features, return
+        if (geojson.features.length > MAXFEATURES) {
+          me.createSnack(__("Too many features selected"));
+          return;
+        }
 
         //clear last geometries + results
         _clearAll();
+
+        me.setState({
+          results_adresser: [],
+          results_matrikler: [],
+          results_ventiler: [],
+        });
 
         try {
           // Disolve geometry
@@ -561,18 +615,20 @@ module.exports = {
                   results_adresser: adresser,
                   results_matrikler: matrikler,
                 });
+
+                return;
               });
             })
             .catch((error) => {
               console.log(error);
               this.createSnack(__("Error in seach") + ": " + error);
               _clearAll();
-              return [];
+              return;
             });
         } catch (error) {
           console.log(error);
           this.createSnack(error);
-          return [];
+          return;
         }
       }
 
@@ -797,64 +853,144 @@ module.exports = {
       };
 
       /**
-       * This function queries database for related matrikler and ventiler
-       * @returns uuid string representing the query
+       * This function turns on a layer, if it is not already on the map, and refreshes the map if there is a filter set.
+       */
+      turnOnLayer = (layer, filter = null) => {
+        // guard against empty layer
+        if (!layer) {
+          return;
+        }
+
+        let isOn = () => {
+          // if layer is in layerTree.getActiveLayers() return true
+          let activeLayers = layerTree.getActiveLayers();
+          for (let i = 0; i < activeLayers.length; i++) {
+            if (activeLayers[i].id == layer.id) {
+              return true;
+            }
+          }
+          return false;
+        };
+
+        // if the layer is not on the map, anf the filter is empty, turn it on
+        if (!isOn()) {
+          switchLayer.init(layer, true);
+        }
+
+        console.log(layer,filter)
+
+        // if the filter is not empty, apply it, and refresh the layer
+        if (filter) {
+          layerTree.onApplyArbitraryFiltersHandler(filter, false);
+          layerTree.reloadLayerOnFiltersChange(layer);
+        }
+      };
+
+      /**
+       * This function selects a point in the map
+       * @returns Point
        */
       selectPointLukkeliste = () => {
         let me = this;
         let point = null;
+        blocked = false;
+        _clearAll();
 
-        console.log(me.state);
+        me.setState({
+          results_adresser: [],
+          results_matrikler: [],
+        });
 
         // if udpeg_layer is set, make sure it is turned on
         if (me.state.user_udpeg_layer) {
-          switchLayer.init(me.state.user_udpeg_layer, true);
+          me.turnOnLayer(me.state.user_udpeg_layer);
         }
 
         // change the cursor to crosshair and wait for a click
         utils.cursorStyle().crosshair();
 
         cloud.get().on("click", function (e) {
+          // if the click is blocked, return
+          if (blocked) {
+            return;
+          }
+
           // get the clicked point
           point = e.latlng;
-          utils.cursorStyle().pointer();
+          utils.cursorStyle().reset();
+          blocked = true;
 
-          // TODO: Send the point to backend
-          
+          // send the point to the server
+          me.queryPointLukkeliste(point)
+            .then((data) => {
+              // if the server returns a result, show it
+              if (data) {
+                console.log(data);
+
+                // if the results contains a list of matrikler, run them through the queryAdresser function
+                if (data.matrikler) {
+                  me.queryAddresses(data.matrikler)
+                }
+
+                if (data.ventiler) {
+                  me.setState({
+                    results_ventiler: data.ventiler,
+                  });
+                  //// create a list of keys from the property "ventilid"
+                  //let keys = data.ventiler.features.map((ventil) => {
+                  //  return ventil.ventilid;
+                  //});
+                  //// if the user has set a ventil layer, turn it on and apply the filter
+                  //if (me.state.ventil_layer && keys.length > 0) {
+                  //  me.turnOnLayer(
+                  //    me.state.ventil_layer,
+                  //    me.buildVentilFilter(keys)
+                  //  );
+                  //}
+                }
+              }
+            })
+            .catch((error) => {
+              console.log(error);
+            });
         });
       };
 
-
       clearVentilFilter = () => {
-        var filter = buildVentilFilter();
-         
-        applyVentilFilter(filter);
+        me.turnOnLayer(me.state.ventil_layer, me.buildVentilFilter());
       };
 
-      buildVentilFilter = (key = undefined) => {
+      buildVentilFilter = (keys = undefined) => {
         let me = this;
         var filter = {};
 
-        var tablename = me.state.ventil_layer.split(".")[1];
-        if (!key) {
+        if (!keys) {
           // If no key is set, create the "clear" filter
           filter[me.state.ventil_layer] = {
             match: "any",
             columns: [],
           };
         } else {
-          filter[me.state.user_ventil_layer] = {
+          let columns = [];
+
+          //for each key in keys, create a filter and add to columns
+          keys.forEach((key) => {
+            columns.push({
+              fieldname: me.state.ventil_layer_key,
+              expression: "=",
+              value: String(key),
+              restriction: false,
+            });
+          });
+
+          // create the filter
+          filter[me.state.ventil_layer] = {
             match: "any",
-            columns: [
-              {
-                fieldname: me.state.user_ventil_layer_key,
-                expression: "=",
-                value: String(key),
-                restriction: false,
-              },
-            ],
+            columns: columns,
           };
         }
+
+        console.log(filter);
 
         return filter;
       };
