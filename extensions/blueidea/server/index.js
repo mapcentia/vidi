@@ -31,6 +31,9 @@ const DAYSSINCE = 25569;
 // milisecs pr. day
 const MILISECSDAY = 86400000;
 
+var MAXFEATURES = 500;
+MAXFEATURES = bi.maxfeatures;
+
 /**
  * This function handles basic checks for each request
  * @param req
@@ -122,7 +125,7 @@ router.get(
         },
       };
       request.get(options, function (error, res, body) {
-        console.debug(res.toJSON());
+        // console.debug(res.toJSON());
         if (error) {
           response.status(500).json(error);
         } else {
@@ -201,9 +204,14 @@ router.post(
 
         // if ventil_layer is set, query the database for the ventiler
         if (bi.users[req.params.userid].ventil_layer) {
-          promises.push(
-            SQLAPI(`SELECT * from lukkeliste.beregn_ventiler where beregnuuid = '${beregnuuid}'`, req, { format: "geojson", srs: 4326})
-          );
+          let q = `SELECT * from lukkeliste.beregn_ventiler where beregnuuid = '${beregnuuid}'`
+
+          q = `SELECT v.*, bv.forbundet from lukkeliste.vw_beregn_ventiler bv 
+          join ${bi.users[req.params.userid].ventil_layer} v on bv.ventilgid = v.${bi.users[req.params.userid].ventil_layer_key}
+          where bv.beregnuuid = '${beregnuuid}'`
+
+          promises.push(SQLAPI(q, req, { format: "geojson", srs: 4326}));
+
         } else {
           // we need a promise to return, to keep ordering, so we create a dummy promise
           promises.push(
@@ -223,8 +231,8 @@ router.post(
         Promise.all(promises).then((res) => {
 
           // if matrikler is over 500, count it as an error
-          if (res[1].features.length > 500) {
-            res[0] = { error: "Der er fundet mere end 500 matrikler ("+ res[1].features.length +"), der skal lukkes. Kontakt venligst en af vores medarbejdere."}
+          if (res[1].features.length > MAXFEATURES) {
+            res[0] = { error: `Der er fundet mere end ${MAXFEATURES} matrikler (${res[1].features.length}), der skal lukkes. Kontakt venligst en af vores medarbejdere.`}
           }
 
           response.status(200).json({

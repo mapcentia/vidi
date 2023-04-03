@@ -314,8 +314,8 @@ module.exports = {
      */
     var __ = function (txt) {
       // Hack for locale not found?!
-      //console.log(window._vidiLocale);
-      //console.log(txt);
+      //console.debug(window._vidiLocale);
+      //console.debug(txt);
 
       if (dict[txt][window._vidiLocale]) {
         return dict[txt][window._vidiLocale];
@@ -388,7 +388,7 @@ module.exports = {
 
         // Activates module
         backboneEvents.get().on(`on:${exId}`, () => {
-          console.log("Starting blueidea");
+          console.debug("Starting blueidea");
           me.setState({
             active: true,
           });
@@ -403,7 +403,7 @@ module.exports = {
 
         // Deactivates module
         backboneEvents.get().on(`off:${exId} off:all reset:all`, () => {
-          console.log("Stopping blueidea");
+          console.debug("Stopping blueidea");
           _clearAll();
           blocked = true;
           me.setState({
@@ -414,7 +414,7 @@ module.exports = {
 
         // On auth change, handle Auth state
         backboneEvents.get().on(`session:authChange`, () => {
-          console.log("Auth changed!");
+          console.debug("Auth changed!");
           fetch("/api/session/status")
             .then((r) => r.json())
             .then((obj) => {
@@ -431,7 +431,7 @@ module.exports = {
               }
             })
             .catch((e) => {
-              console.log("Error in session:authChange", e);
+              console.debug("Error in session:authChange", e);
               me.setState(resetObj);
             })
             .finally(() => {
@@ -469,10 +469,10 @@ module.exports = {
         )
           .then((r) => r.json())
           .then((obj) => {
-            console.log("Got templates", obj);
+            console.debug("Got templates", obj);
           })
           .catch((e) => {
-            console.log("Error in getTemplates", e);
+            console.debug("Error in getTemplates", e);
           });
       }
 
@@ -492,7 +492,7 @@ module.exports = {
                 config.extensionConfig.blueidea.userid,
               type: "GET",
               success: function (data) {
-                console.log("Got user", data);
+                console.debug("Got user", data);
                 me.setState({
                   user_lukkeliste: data.lukkeliste || false,
                   user_id: config.extensionConfig.blueidea.userid,
@@ -505,7 +505,7 @@ module.exports = {
                 resolve(data);
               },
               error: function (e) {
-                console.log("Error in getUser", e);
+                console.debug("Error in getUser", e);
                 reject(e);
               },
             });
@@ -595,7 +595,7 @@ module.exports = {
 
                 return merged;
               } catch (error) {
-                console.log(error);
+                console.debug(error);
               }
             })
             .then((matrikler) => {
@@ -620,13 +620,13 @@ module.exports = {
               });
             })
             .catch((error) => {
-              console.log(error);
+              console.debug(error);
               this.createSnack(__("Error in seach") + ": " + error);
               _clearAll();
               return;
             });
         } catch (error) {
-          console.log(error);
+          console.debug(error);
           this.createSnack(error);
           return;
         }
@@ -665,7 +665,7 @@ module.exports = {
                   units: "meters",
                 });
               } catch (error) {
-                console.log(error, feature);
+                console.debug(error, feature);
               }
             } else {
               buffered = turfBuffer(feature, exBufferDistance, {
@@ -675,7 +675,7 @@ module.exports = {
 
             collection.features.push(buffered);
           } catch (error) {
-            console.log(error, feature);
+            console.debug(error, feature);
           }
         }
 
@@ -685,7 +685,7 @@ module.exports = {
           let union = polygons.reduce((a, b) => turfUnion(a, b), polygons[0]); // turf v7 will support union on featurecollection, v6 does not.
           collection = turfFlatten(union);
         } catch (error) {
-          console.log(error, polygons);
+          console.debug(error, polygons);
         }
 
         // return geometry for querying
@@ -738,7 +738,7 @@ module.exports = {
           merged = [...new Set(merged)];
           return merged;
         } catch (error) {
-          console.log(error);
+          console.debug(error);
           return [];
         }
       }
@@ -747,7 +747,7 @@ module.exports = {
        */
       addBufferToMap(geojson) {
         try {
-          var l = L.geoJson(geojson, {
+          var l = L.geoJSON(geojson, {
             color: "#ff7800",
             weight: 1,
             opacity: 1,
@@ -755,7 +755,7 @@ module.exports = {
             dashArray: "5,3",
           }).addTo(bufferItems);
         } catch (error) {
-          console.log(error, geojson);
+          console.debug(error, geojson);
         }
       }
 
@@ -764,7 +764,7 @@ module.exports = {
        */
       addMatrsToMap(geojson) {
         try {
-          var l = L.geoJson(geojson, {
+          var l = L.geoJSON(geojson, {
             color: "#000000",
             weight: 1,
             opacity: 1,
@@ -772,10 +772,48 @@ module.exports = {
             dashArray: "5,3",
           }).addTo(queryMatrs);
         } catch (error) {
-          console.log(error, geojson);
+          console.debug(error, geojson);
         }
       }
 
+      /**
+       * Styles and adds ventiler to the map
+       */
+      addVentilerToMap(geojson) {
+        try {
+          var l = L.geoJSON(geojson, {
+            pointToLayer: function (feature, latlng) {
+              console.debug(feature.properties, latlng);
+
+              // if the feature has a forbundet property, use a different icon
+              if (feature.properties.forbundet) {
+                console.debug(feature.properties, latlng);
+                return L.circleMarker(latlng, {
+                  radius: 5,
+                  fillColor: "#00ff00",
+                  color: "#000",
+                  weight: 1,
+                  opacity: 1,
+                  fillOpacity: 0.8,
+                });
+              }
+
+              // else, use the default icon
+              return L.circleMarker(latlng, {
+                radius: 8,
+                fillColor: '#ff7800',
+                color: '#000',
+                weight: 1,
+                opacity: 1,
+                fillOpacity: 0.8
+              });
+            },
+          }).addTo(queryVentils);
+        } catch (error) {
+          console.debug(error, geojson);
+        }
+      }
+      
       /**
        * Creates a new snackbar
        * @param {*} text
@@ -847,7 +885,7 @@ module.exports = {
             }
           },
           error: function (error) {
-            console.log(error);
+            console.debug(error);
           },
         });
       };
@@ -877,7 +915,7 @@ module.exports = {
           switchLayer.init(layer, true);
         }
 
-        console.log(layer,filter)
+        console.debug(layer, filter);
 
         // if the filter is not empty, apply it, and refresh the layer
         if (filter) {
@@ -925,34 +963,24 @@ module.exports = {
             .then((data) => {
               // if the server returns a result, show it
               if (data) {
-                console.log(data);
+                console.debug(data);
 
                 // if the results contains a list of matrikler, run them through the queryAdresser function
                 if (data.matrikler) {
-                  me.queryAddresses(data.matrikler)
+                  me.queryAddresses(data.matrikler);
                 }
 
                 if (data.ventiler) {
+                  me.addVentilerToMap(data.ventiler);
                   me.setState({
                     results_ventiler: data.ventiler,
-                  });
-                  //// create a list of keys from the property "ventilid"
-                  //let keys = data.ventiler.features.map((ventil) => {
-                  //  return ventil.ventilid;
-                  //});
-                  //// if the user has set a ventil layer, turn it on and apply the filter
-                  //if (me.state.ventil_layer && keys.length > 0) {
-                  //  me.turnOnLayer(
-                  //    me.state.ventil_layer,
-                  //    me.buildVentilFilter(keys)
-                  //  );
-                  //}
+                  })
                 }
               }
             })
             .catch((error) => {
-              console.log(error);
-            });
+              console.debug(error);
+            })
         });
       };
 
@@ -990,7 +1018,7 @@ module.exports = {
           };
         }
 
-        console.log(filter);
+        console.debug(filter);
 
         return filter;
       };
@@ -1098,35 +1126,35 @@ module.exports = {
               </div>
             </div>
           );
-        } else {
-          // Not Logged in - or not configured
-          return (
-            <div role="tabpanel">
-              <div className="form-group">
-                <div
-                  id="blueidea-feature-login"
-                  className="alert alert-info"
-                  role="alert"
-                >
-                  {__("MissingLogin")}
-                </div>
-                <Button
-                  onClick={() => this.clickLogin()}
-                  color="primary"
-                  size="large"
-                  variant="contained"
-                  style={{
-                    marginRight: "auto",
-                    marginLeft: "auto",
-                    display: "block",
-                  }}
-                >
-                  {__("Login")}
-                </Button>
-              </div>
-            </div>
-          );
         }
+
+        // Not Logged in - or not configured
+        return (
+          <div role="tabpanel">
+            <div className="form-group">
+              <div
+                id="blueidea-feature-login"
+                className="alert alert-info"
+                role="alert"
+              >
+                {__("MissingLogin")}
+              </div>
+              <Button
+                onClick={() => this.clickLogin()}
+                color="primary"
+                size="large"
+                variant="contained"
+                style={{
+                  marginRight: "auto",
+                  marginLeft: "auto",
+                  display: "block",
+                }}
+              >
+                {__("Login")}
+              </Button>
+            </div>
+          </div>
+        );
       }
     }
 
