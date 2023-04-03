@@ -2,11 +2,9 @@
     .leaflet-control-custom, .history-control, .leaflet-control-boxzoom {
         display: inline;
     }
-
-    .leaflet-control-measurements, .leaflet-clear-map, .history-control, .leaflet-control-boxzoom {
+    .layer-filter {
         display: none;
     }
-
 </style>
 <!-- map -->
 <div id="pane">
@@ -49,71 +47,65 @@
     </div>
 </div>
 
-<nav class="navbar navbar-collapse" style="z-index: 1">
+<nav class="navbar navbar-expand-sm bg-transparent" style="z-index: auto">
     <div class="container-fluid">
         <a class="navbar-brand">
             <span class="d-none d-md-inline">{{brandName}}</span>
         </a>
-        <div class="navbar-nav flex-row gap-1 flex-grow-1">
-            <button id="offcanvasLayerControlAltBtn"
-                    class="btn btn-light text-uppercase me-auto" type="button"
+        <div class="navbar-nav flex-row gap-1">
+            <button id="offcanvasLayerControlBtn"
+                    class="btn btn-primary text-nowrap" type="button"
             >
-                <i class="bi bi-geo-alt"></i> <span class="d-none d-sm-inline">Find faciliteter på kort</span>
+                <span class="d-none d-md-inline">Menu</span> <i class="bi bi-arrow-bar-right"></i>
             </button>
+            <div class="input-group d-none" id="edit-tool-group">
+                <span class="input-group-text"><i class="bi bi-pencil"></i></span>
+                <button id="offcanvasEditBtn"
+                        class="btn btn-secondary nav-edit-btn edit-attr-btn" disabled type="button"
+                >
+                    <span class="d-none d-md-inline">Form</span> <i class="bi bi-arrow-bar-right"></i>
+                </button>
+                <button id="editStopBtn"
+                        class="btn btn-danger nav-edit-btn" type="button"
+                >
+                    <i class="bi bi-slash-circle"></i> <span class="d-none d-md-inline">{{Cancel}}</span>
+                </button>
+            </div>
 
-            <button id="btn-show-legend-in-map" data-module="legend"
-                    class="btn btn btn-light me-2"><i class="bi bi-card-text"></i> <span class="d-none d-sm-inline">{{Legend}}</span>
-            </button>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#login-modal">
-                <i class="bi bi-person"></i><span class="gc2-session-btn-text"> {{Sign in}}</span>
-            </button>
         </div>
+        <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
+        <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
+            <ul class="navbar-nav me-2">
+                <li class="nav-item d-flex align-items-center me-2 mt-3 mt-sm-0">
+                    <span class="badge text-bg-secondary js-app-is-pending-badge">
+                        <i class="bi bi-three-dots"></i>{{Pending}}
+                    </span>
+                    <span class="badge text-bg-success js-app-is-online-badge d-none">
+                    <i class="bi bi-signal"></i>Online</span>
+                    <span class="badge text-bg-danger js-app-is-offline-badge d-none">Offline</span>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="btn-reset" href="#">Reset</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="modal" data-bs-target="#about-modal" href="#">{{About}}</a>
+                </li>
+            </ul>
+            <div class="navbar-nav">
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#login-modal">
+                    <i class="bi bi-person"></i><span class="gc2-session-btn-text"> {{Sign in}}</span>
+                </button>
+            </div>
+        </div>
     </div>
 </nav>
 
-<div class="ifade-then-dragging">
-
-    <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="offcanvasLayerControl">
-        <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="offcanvasLayerControlLabel">Find faciliteter på kort TEST</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-        </div>
-        <div class="offcanvas-body">
-            <div class="help-btn" onclick="javascript:createAlert($(this), '{{Help text overlays}}')">
-                <i class="bi bi-question-circle help-btn"></i></div>
-            <div></div>
-            <div style="display: flex" class="layer-loading-indicator w-100 justify-content-center">
-                <div style="width: 150px;" class="d-inline-block">
-                    <div class="text-center">{{Loading data}}</div>
-                    <div class="progress">
-                        <div class="progress-bar progress-bar-striped progress-bar-animated w-100"></div>
-                    </div>
-                </div>
-            </div>
-            <div id="layer-filter-container">
-                <div id="layers" role="tablist"></div>
-            </div>
-        </div>
-    </div>
-
-    <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="offcanvasLayerControlAlt">
-        <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="offcanvasLayerControlLabel">Find faciliteter på kort</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-        </div>
-        <div class="offcanvas-body">
-            <div style="display: flex" class="layer-loading-indicator w-100 justify-content-center">
-                <div style="width: 150px;" class="d-inline-block">
-                    <div class="text-center">{{Loading data}}</div>
-                    <div class="progress">
-                        <div class="progress-bar progress-bar-striped progress-bar-animated w-100"></div>
-                    </div>
-                </div>
-            </div>
-            <div id="layer-control"></div>
-        </div>
-    </div>
+<div class="fade-then-dragging">
 
     <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="mainLayerOffcanvas">
         <div class="offcanvas-header">
@@ -123,410 +115,27 @@
         <div class="offcanvas-body" style="scrollbar-gutter: stable">
             <div class="d-flex align-items-start flex-row-reverse">
                 <!-- Nav tabs -->
-                <ul class="nav flex-column nav-pills sticky-top" role="tablist" id="main-tabs">
-                    <li role="presentation" class="nav-item">
-                        <a class="nav-link" data-bs-toggle="tab" data-module-id="layerTree" href="#layer-content"
-                           data-module-title="{{Layers}}" aria-controls="" role="tab" data-toggle="tab">
-                            <i data-container="body" data-toggle="tooltip" data-placement="left"
-                               title="{{Layers}}" class="bi bi-layers"></i>
-                        </a>
-                    </li>
-
-                    <li role="presentation" class="nav-item">
+                <ul class="nav flex-column nav-pills sticky-top d-none" role="tablist" id="main-tabs">
+                    <li role="presentation" class="nav-item d-none">
                         <a class="nav-link" data-bs-toggle="tab" data-module-id="infoClick" href="#info-content"
                            data-module-title="{{Info}}" aria-controls="info-content" role="tab" data-toggle="tab">
                             <i data-container="body" data-toggle="tooltip" data-placement="left"
                                title="{{Info}}" class="bi bi-info-square"></i>
                         </a>
                     </li>
-
-                    <li role="presentation" class="nav-item">
-                        <a class="nav-link" data-bs-toggle="tab" href="#search-content" aria-controls="search-content"
-                           data-module-title="{{Search}}" role="tab" data-toggle="tab">
-                            <i data-container="body" data-toggle="tooltip" data-placement="left"
-                               title="{{Search}}" class="bi bi-search"></i>
-                        </a>
-                    </li>
-
-                    <li role="presentation" class="nav-item">
-                        <a class="nav-link" data-bs-toggle="tab" data-module-id="baseLayer" href="#baselayer-content"
-                           data-module-title="{{Baselayers}}" aria-controls="" role="tab" data-toggle="tab">
-                            <i data-container="body" data-toggle="tooltip" data-placement="left"
-                               title="{{Baselayers}}" class="bi bi-map"></i>
-                        </a>
-                    </li>
-
-                    <li role="presentation">
-                        <a class="nav-link" data-bs-toggle="tab" data-module-id="legend" href="#legend-content"
-                           aria-controls=""
-                           data-module-title="{{Legend}}" role="tab" data-toggle="tab">
-                            <i data-container="body" data-toggle="tooltip" data-placement="left"
-                               title="{{Legend}}" class="bi bi-card-text"></i>
-                        </a>
-                    </li>
-
-                    <li role="presentation">
-                        <a class="nav-link" data-bs-toggle="tab" data-module-id="draw" href="#draw-content"
-                           aria-controls=""
-                           data-module-title="{{Draw}}" role="tab" data-toggle="tab">
-                            <i data-container="body" data-toggle="tooltip" data-placement="left"
-                               title="{{Draw}}" class="bi bi-pencil"></i>
-                        </a>
-                    </li>
-
-                    <li role="presentation">
-                        <a class="nav-link" data-bs-toggle="tab" data-module-id="stateSnapshots"
-                           href="#state-snapshots-content"
-                           aria-controls=""
-                           data-module-title="{{State snapshots}}" role="tab" data-toggle="tab">
-                            <i data-container="body" data-toggle="tooltip" data-placement="left"
-                               title="{{State snapshots}}" class="bi bi-folder"></i>
-                        </a>
-                    </li>
-
-                    <li role="presentation">
-                        <a class="nav-link" data-bs-toggle="tab" data-module-id="print" href="#print-content"
-                           aria-controls=""
-                           data-module-title="{{Print}}" role="tab" data-toggle="tab">
-                            <i data-container="body" data-toggle="tooltip" data-placement="left"
-                               title="{{Print}}" class="bi bi-file-pdf"></i>
-                        </a>
-                    </li>
-
-                    <hr>
                 </ul>
                 <!-- Tab panes -->
                 <div class="tab-content main-content w-100">
-                    <div role="tabpanel" class="tab-pane fade" id="search-content">
-                        <div class="help-btn" onclick="javascript:createAlert($(this), '{{Search places}}')">
-                            <i class="bi bi-question-circle help-btn"></i></div>
-                        <div></div>
-                        <div id="place-search">
-                            <div class="places d-flex">
-                                <input id="custom-search" class="custom-search typeahead form-control" type="text"
-                                       placeholder="{{Address}}">
-                                <i class="bi bi-x-lg text-dark" id="searchclear"></i>
-                            </div>
-                        </div>
-                    </div>
                     <div role="tabpanel" class="tab-pane fade" id="info-content">
-                        <div class="help-btn" onclick="javascript:createAlert($(this), '{{Info text}}')">
-                            <i class="bi bi-question-circle help-btn"></i></div>
-                        <div></div>
-                        <div class="d-grid gap-2">
-                            <input class="btn-check" id="advanced-info-btn" type="checkbox">
-                            <label class="btn btn-outline-primary btn-block mb-3"
-                                   for="advanced-info-btn">{{Activate advanced query}}</label>
-                        </div>
-                        <div id="buffer" style="display: none" class="mb-3">
-                            <div class="input-group mb-3">
-                                <span class="input-group-text" id="basic-addon1">Buffer</span>
-                                <input type="text" id="buffer-value" class="form-control">
-                            </div>
-                            <div id="buffer-slider"></div>
-                        </div>
-                        <div id="info-box"></div>
-                        <table id="dtable" data-show-toggle="true"></table>
-
-                    </div>
-                    <div role="tabpanel" class="tab-pane fade" id="layer-content">
-                    </div>
-                    <div role="tabpanel" class="tab-pane fade" id="baselayer-content">
-                        <div class="help-btn" onclick="javascript:createAlert($(this), '{{Help text baselayers}}')">
-                            <i class="bi bi-question-circle help-btn"></i></div>
-                        <div></div>
-                        <ul class="list-group" id="base-layer-list"></ul>
-                    </div>
-                    <div role="tabpanel" class="tab-pane fade" id="legend-content">
-                        <div class="help-btn" onclick="javascript:createAlert($(this), '{{Help text legend}}')">
-                            <i class="bi bi-question-circle help-btn"></i></div>
-                        <div></div>
-                        <!--                        <button id="btn-show-legend-in-map" data-module="legend"-->
-                        <!--                                class="btn btn btn-outline-primary w-100 mb-3">{{Show legend
-                                                                                                                  on top
-                                                                                                                  the
-                                                                                                                  map}}</button>-->
-                        <div id="legend" class="legend"></div>
-                    </div>
-                    <div role="tabpanel" class="tab-pane fade" id="draw-content">
-                        <div class="help-btn" onclick="javascript:createAlert($(this), '{{Help text draw}}')">
-                            <i class="bi bi-question-circle help-btn"></i>
-                        </div>
-                        <div></div>
-                        <div class="accordion mb-3">
-                            <div class="accordion-item">
-                                <h2 class="accordion-header">
-                                    <button type="button" class="accordion-button collapsed" data-bs-toggle="collapse"
-                                            data-bs-target="#draw-collapse">
-                                        {{Line style}}
-                                    </button>
-                                </h2>
-                                <div id="draw-collapse" class="accordion-collapse collapse">
-                                    <div class="accordion-body">
-                                        <div class="row row-cols-2 gy-3">
-                                            <!--                                                <div class="col">-->
-                                            <!--                                                    <h4>{{{Settings for
-                                                                                                                    all
-                                                                                                                    new
-                                                                                                                    drawings}}}</h4>-->
-                                            <!--                                                </div>-->
-
-                                            <div class="col">
-                                                <label for="draw-colorpicker-input"
-                                                       class="">{{Color}}</label>
-
-                                                <div id="draw-colorpicker"
-                                                     class="input-group">
-                                                    <input id="draw-colorpicker-input" name="draw-colorpicker-input"
-                                                           type="color" value="#ff0000"
-                                                           class="form-control form-control-sm form-control-color"/>
-                                                </div>
-                                            </div>
-
-                                            <div class="col">
-                                                <label for="draw-line-type"
-                                                       class="">{{Type}}</label>
-
-                                                <select id="draw-line-type" name="draw-line-type"
-                                                        class="form-select form-select-sm">
-                                                    <option value="none">{{Solid}}</option>
-                                                    <option value="7, 7">{{Dashed, short}}</option>
-                                                    <option value="12, 7">{{Dashed, medium}}</option>
-                                                    <option value="17, 7">{{Dashed, long}}</option>
-                                                </select>
-                                            </div>
-
-                                            <div class="col">
-                                                <label for="draw-line-weight"
-                                                       class="">{{Weight}}</label>
-
-                                                <select id="draw-line-weight" name="draw-line-weight"
-                                                        class="form-select form-select-sm">
-                                                    <option value="2">{{X-thin}}</option>
-                                                    <option value="3">{{Thin}}</option>
-                                                    <option value="4" selected>{{Medium}}</option>
-                                                    <option value="5">{{Thick}}</option>
-                                                    <option value="6">{{X-Thick}}</option>
-                                                </select>
-                                            </div>
-
-                                            <div class="col">
-                                                <label for="draw-line-cap"
-                                                       class="">{{Cap}}</label>
-                                                <select id="draw-line-cap" name="draw-line-cap"
-                                                        class="form-select form-select-sm">
-                                                    <option value="butt">{{Butt}}</option>
-                                                    <option value="round">{{Round}}</option>
-                                                </select>
-                                            </div>
-
-                                            <div class="col">
-                                                <div class="form-check">
-                                                    <input class="form-check-input" id="draw-measure"
-                                                           name="draw-measure"
-                                                           type="checkbox">
-                                                    <label for="draw-measure"
-                                                           class="form-check-label">{{Measure}}</label>
-                                                </div>
-                                            </div>
-                                            <!--                                                                <div class="col">-->
-                                            <!--                                                                <div><h4>{{{Settings
-                                                    for new lines only}}}</h4>-->
-                                            <!--                                                                </div>-->
-                                            <!--                                                                </div>-->
-
-                                            <div class="col">
-                                                <label for="draw-line-extremity"
-                                                       class="">{{Extremities}}</label>
-                                                <select id="draw-line-extremity" name="draw-line-extremity"
-                                                        class="form-select form-select-sm">
-                                                    <option value="none">{{None}}</option>
-                                                    <option value="arrowM">{{Arrow}}</option>
-                                                    <option value="stopM">{{Stop}}</option>
-                                                    <option value="squareM">{{Square}}</option>
-                                                    <option value="dotM">{{Dot}}</option>
-                                                </select>
-                                            </div>
-
-                                            <div class="col">
-                                                <label for="draw-line-extremity-size"
-                                                       class="">{{Extremity size}}</label>
-                                                <select id="draw-line-extremity-size"
-                                                        name="draw-line-extremity-size"
-                                                        class="form-select form-select-sm"
-                                                        disabled>
-                                                    <option value="2">{{X-Small}}</option>
-                                                    <option value="3">{{Small}}</option>
-                                                    <option value="4" selected>{{Medium}}</option>
-                                                    <option value="5">{{Large}}</option>
-                                                    <option value="6">{{X-Large}}</option>
-                                                </select>
-                                            </div>
-
-                                            <div class="col">
-                                                <label for="draw-line-extremity-where"
-                                                       class="">{{Extremity ends}}</label>
-                                                <select id="draw-line-extremity-where"
-                                                        name="draw-line-extremity-where"
-                                                        class="form-select form-select-sm"
-                                                        disabled>
-                                                    <option value="1">{{End}}</option>
-                                                    <option value="2">{{Start}}</option>
-                                                    <option value="3">{{Both}}</option>
-                                                </select>
-                                            </div>
-
-                                            <div class="col">
-                                                <div class="form-check">
-                                                    <label for="draw-line-total-dist"
-                                                           class="form-check-label">{{Total distance}}</label>
-                                                    <input class="form-check-input" id="draw-line-total-dist"
-                                                           name="draw-line-total-dist"
-                                                           type="checkbox" disabled>
-                                                </div>
-                                            </div>
-
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="d-flex justify-content-around mb-3">
-                            <button class="btn btn-sm btn-light" id="_draw_download_geojson"
-                                    href="javascript:void(0)">
-                                <i class="bi bi-download" aria-hidden="true"></i> GeoJson
-                            </button>
-                            <button class="btn btn-sm btn-light" style="display: none"
-                                    id="_draw_make_conflict_with_selected"
-                                    target="_blank" href="javascript:void(0)">
-                                <i class="bi bi-download" aria-hidden="true"></i> {{Conflict with selected}}
-                            </button>
-                            <button class="btn btn-sm btn-light" style="display: none" id="_draw_make_conflict_with_all"
-                                    target="_blank" href="javascript:void(0)">
-                                <i class="bi bi-download" aria-hidden="true"></i> {{Conflict with all}}
-                            </button>
-                        </div>
-                        <div id="draw-table"></div>
-
-                    </div>
-                    <div role="tabpanel" class="tab-pane fade" id="state-snapshots-content">
-                        <div class="help-btn"
-                             onclick="javascript:createAlert($(this), '{{StateSnapshots description}}')">
-                            <i class="bi bi-question-circle help-btn"></i></div>
-                        <div></div>
-                        <div id="state-snapshots" role="tablist"></div>
-                    </div>
-                    <div role="tabpanel" class="tab-pane fade" id="print-content">
-                        <div class="help-btn" onclick="javascript:createAlert($(this), '{{Help text print}}')">
-                            <i class="bi bi-question-circle help-btn"></i></div>
-                        <div></div>
-                        <div class="btn-toolbar">
-                            <div class="input-group mb-3">
-                                <button id="start-print-btn" class="btn btn-primary start-print-btn"
-                                        disabled>
-                                    <span class="spinner-border spinner-border-sm"
-                                          role="status" aria-hidden="true" style="display: none">
-                                    </span>
-                                    {{Make}}
-                                </button>
-
-                                <select class="form-select" id="start-print-png-btn">
-                                    <option selected value="pdf">PDF</option>
-                                    <option value="png">PNG</option>
-                                </select>
-                                <a target="_blank" href="javascript:void(0)"
-                                   class="btn btn-primary get-print-btn"
-                                   id="open-pdf">{{Open}}</a>
-                                <a href="javascript:void(0)"
-                                   class="btn btn-primary dropdown-toggle get-print-btn"
-                                   data-bs-toggle="dropdown"
-                                   id="open-pdf-toggle"
-                                ></a>
-                                <ul class="dropdown-menu get-print-btn">
-                                    <li><a class="dropdown-item" href="javascript:void(0)"
-                                           id="download-pdf">{{Download}}</a></li>
-                                    <li>
-                                        <a class="dropdown-item" target="_blank" href="javascript:void(0)"
-                                           id="open-html">{{Open HTML page}}</a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <div class="d-flex flex-column gap-3 mb-3">
-                            <div class="form-check">
-                                <div class="togglebutton">
-                                    <input class="form-check-input" id="print-sticky" type="checkbox">
-                                    <label for="print-sticky" class="form-check-label">{{Sticky}}</label>
-                                </div>
-                            </div>
-                            <div class="btn-group d-flex">
-                                <button id="add-print-box-btn" class="btn btn-outline-secondary btn-sm">
-                                    {{Add new box}}
-                                </button>
-                                <button id="remove-print-box-btn" class="btn btn-outline-secondary btn-sm">
-                                    {{Remove last box}}
-                                </button>
-                            </div>
-                        </div>
-
-                        <form class="d-flex flex-column gap-4" id="print-form" role="form" data-bs-toggle="validator">
-                            <div class="input-group input-group-sm">
-                                <span class="input-group-text">1:</span>
-                                <button type="button"
-                                        class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
-                                        data-bs-toggle="dropdown"
-                                        aria-expanded="false">
-                                    <span class="visually-hidden">Toggle Dropdown</span>
-                                </button>
-                                <ul id="ul-scale" class="dropdown-menu"></ul>
-                                <input type="number" min="200" id="select-scale" class="form-control">
-                            </div>
-
-                            <div id="print-tmpl" class="btn-group" style="display: none"></div>
-
-                            <div class="btn-group" id="print-size"></div>
-
-                            <div class="btn-group" id="print-orientation"></div>
-
-                            <div>
-                                <label for="print-title">{{Title}}</label>
-                                <input type="text" class="form-control" id="print-title" disabled>
-                            </div>
-                            <div>
-                                <label for="print-comment">{{Comment}}</label>
-                                <textarea class="form-control" rows="3" id="print-comment"
-                                          disabled></textarea>
-                            </div>
-
-                            <div class="form-check">
-                                <input class="form-check-input" id="add-legend-btn" type="checkbox" checked
-                                       disabled>
-                                <label for="add-legend-btn" class="form-check-label">{{Show legend on print}}</label>
-                            </div>
-                        </form>
+                        <div id="layers" role="tablist"></div>
                     </div>
                 </div>
-
-                <!--                    <ul role="tablist">-->
-                <!--                        <hr>-->
-                <!--                        <li><a href="#" id="btn-reset"><i class="material-icons">replay</i>{{Reset}}</a></li>-->
-                <!--                        <li><a href="#" data-toggle="modal" data-target="#about-modal"><i class="material-icons">question_answer</i>{{About}}-->
-                <!--                        </a></li>-->
-                <!--                        <li>-->
-                <!--                            <a id="session" href="#" data-toggle="modal" data-target="#login-modal" style="display: none">-->
-                <!--                                <i class="material-icons gc2-session-lock" aria-hidden="true" style="display: none">lock</i>-->
-                <!--                                <i class="material-icons gc2-session-unlock" aria-hidden="true">lock_open</i>-->
-                <!--                                <span class="module-title">Log in</span>-->
-                <!--                            </a>-->
-                <!--                        </li>-->
-                <!--                    </ul>-->
             </div>
         </div>
     </div>
 
     <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="offcanvasInfo">
-        <div class="offcanvas-header">
+        <div class="offcanvas-header mt-5">
             <h5 class="offcanvas-title">Info</h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
@@ -534,7 +143,7 @@
     </div>
 
     <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="offcanvasLayerDesc">
-        <div class="offcanvas-header">
+        <div class="offcanvas-header mt-5">
             <h5 class="offcanvas-title">Info</h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
@@ -542,19 +151,18 @@
     </div>
 
     <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="offcanvas-edit-start">
-        <!--        <div class="offcanvas-header">-->
-        <!--            <h5 class="offcanvas-title"></h5>-->
-        <!--            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>-->
-        <!--        </div>-->
+        <div class="offcanvas-header mt-5">
+            <h5 class="offcanvas-title">Edit</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
         <div class="offcanvas-body"></div>
     </div>
 
     <div class="offcanvas offcanvas-bottom" data-bs-backdrop="false" tabindex="-1" id="offcanvas-edit-bottom"
          style="height: 50vh">
-        <!--        <div class="offcanvas-header">-->
-        <!--            <h5 class="offcanvas-title"></h5>-->
-        <!--            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>-->
-        <!--        </div>-->
+        <div class="offcanvas-header">
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
         <div class="offcanvas-body"></div>
     </div>
 
@@ -579,10 +187,3 @@
         </div>
     </div>
 </div>
-
-<!-- must be here pr else won't form display -->
-<button id="offcanvasEditBtn"
-        class="btn btn-secondary nav-edit-btn edit-attr-btn d-none" disabled type="button"
->
-    <span class="d-none d-md-inline">Form</span> <i class="bi bi-arrow-bar-right"></i>
-</button>

@@ -199,7 +199,7 @@ module.exports = {
             })
         });
         $("#layers").before(`
-                                <div class="input-group mb-3">
+                                <div class="input-group mb-3 layer-filter">
                                     <input placeholder="${__('Layer filter')}" class="form-control" type="text" id="layers-filter" autocomplete="off">
                                     <button id="layers-filter-reset" class="btn btn-outline-secondary" type="button" id="button-addon2">
                                         <i class="bi bi-x-lg"></i>

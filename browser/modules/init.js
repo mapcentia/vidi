@@ -76,7 +76,8 @@ module.exports = {
             },
             initZoomCenter: null,
             forceOffCanvasInfo: false,
-            showOffcanvas: false
+            showOffcanvas: false,
+            expandFirstInLayerTree: false,
         };
         // Set default for unset props
         for (let prop in defaults) {

@@ -44,25 +44,6 @@ module.exports = {
 
         const alt = window.vidiConfig?.extensionConfig?.embed?.useAltLayerTree ? "Alt" : "";
 
-        try {
-            const offcanvas = new bootstrap.Offcanvas('#offcanvasLayerControl' + alt);
-            const offcanvasEl = document.getElementById('offcanvasLayerControl' + alt);
-            const btn = document.querySelector("#offcanvasLayerControlAltBtn");
-            btn.addEventListener("click", () => offcanvas.show());
-            offcanvasEl.addEventListener('hidden.bs.offcanvas', event => {
-                btn.classList.remove("invisible");
-            });
-            offcanvasEl.addEventListener('shown.bs.offcanvas', event => {
-                btn.classList.add("invisible");
-            })
-            if (window?.vidiConfig?.extensionConfig?.embed?.slideOutLayerTree === true) {
-                offcanvas.show();
-            }
-        } catch (e) {
-           console.info("Embed extension is enabled, but the embed template is not used.")
-        }
-
-
         const Label = styled.label`
           cursor: pointer;
           display: flex;
@@ -139,7 +120,7 @@ module.exports = {
 
                         </Label>
                     </Checkbox>
-                    <div className="text-center" >{props.title}</div>
+                    <div className="text-center">{props.title}</div>
                 </div>
 
             )
@@ -171,13 +152,15 @@ module.exports = {
                                                  layerContols={layerControls}></LayerGroup>)
                 }
 
-                try {
-                    ReactDOM.render(
-                        <div className="accordion">{groupsComps}</div>,
-                        document.getElementById("layer-control")
-                    );
-                } catch (e) {
-                    console.error(e)
+                if (alt) {
+                    try {
+                        ReactDOM.render(
+                            <div className="accordion">{groupsComps}</div>,
+                            document.getElementById("layers")
+                        );
+                    } catch (e) {
+                        console.error(e)
+                    }
                 }
             }, 100)
         })

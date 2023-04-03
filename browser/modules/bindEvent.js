@@ -175,9 +175,9 @@ module.exports = {
 
         backboneEvents.get().on("allDoneLoading:layers", function () {
             const openFirtIfNotOpen = () => {
-                let e = $('.js-toggle-layer-panel:first');
-                if (window?.vidiConfig?.extensionConfig?.embed?.expandFirstInLayerTree === true && e.hasClass('collapsed')) {
-                    e.trigger('click');
+                let e = document.querySelector('.js-toggle-layer-panel');
+                if (window.vidiConfig.expandFirstInLayerTree === true && e?.classList?.contains("collapsed")) {
+                    e.click();
                 }
             }
             if (!isStarted) {
