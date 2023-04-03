@@ -1923,6 +1923,9 @@ module.exports = {
         },
         {
             "geosag": ["index"]
+        },
+        {
+            "blueidea": ["index"]
         }/*,
             {
                 "MapGOMenu": ["index", "reportRender", "infoClick", "controller"]
@@ -1943,7 +1946,11 @@ module.exports = {
         },
         {
             "geosag": ["index"]
-        }/*,
+        },
+        {
+            "blueidea": ["index"]
+        }
+        /*,
             {
                 "MapGOMenu": ["index"]
             }*/
