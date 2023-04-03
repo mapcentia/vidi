@@ -34,6 +34,8 @@ module.exports = {
         let React = require('react');
         let ReactDOM = require('react-dom');
 
+        document.querySelector(".sign-in-btn").classList.remove("d-none");
+
         if (typeof urlVars.session === "string") {
             const MAXAGE = (config.sessionMaxAge || 86400) / 86400; // In days
             // Try to remove existing cookie
