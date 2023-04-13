@@ -679,14 +679,15 @@ module.exports = {
           }
         }
 
+        // DISABLED: Disolve geometry - disabled because DAWA call doesnt support that many coordinates in each call
         // create a union of all the buffered features
-        try {
-          let polygons = collection.features;
-          let union = polygons.reduce((a, b) => turfUnion(a, b), polygons[0]); // turf v7 will support union on featurecollection, v6 does not.
-          collection = turfFlatten(union);
-        } catch (error) {
-          console.debug(error, polygons);
-        }
+        //try {
+        //  let polygons = collection.features;
+        //  let union = polygons.reduce((a, b) => turfUnion(a, b), polygons[0]); // turf v7 will support union on featurecollection, v6 does not.
+        //  collection = turfFlatten(union);
+        //} catch (error) {
+        //  console.debug(error, polygons);
+        //}
 
         // return geometry for querying
         return collection;
@@ -801,11 +802,11 @@ module.exports = {
               // else, use the default icon
               return L.circleMarker(latlng, {
                 radius: 8,
-                fillColor: '#ff7800',
-                color: '#000',
+                fillColor: "#ff7800",
+                color: "#000",
                 weight: 1,
                 opacity: 1,
-                fillOpacity: 0.8
+                fillOpacity: 0.8,
               });
             },
           }).addTo(queryVentils);
@@ -813,7 +814,7 @@ module.exports = {
           console.debug(error, geojson);
         }
       }
-      
+
       /**
        * Creates a new snackbar
        * @param {*} text
@@ -974,13 +975,13 @@ module.exports = {
                   me.addVentilerToMap(data.ventiler);
                   me.setState({
                     results_ventiler: data.ventiler,
-                  })
+                  });
                 }
               }
             })
             .catch((error) => {
               console.debug(error);
-            })
+            });
         });
       };
 
