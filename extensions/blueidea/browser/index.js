@@ -790,7 +790,7 @@ module.exports = {
               if (feature.properties.forbundet) {
                 console.debug(feature.properties, latlng);
                 return L.circleMarker(latlng, {
-                  radius: 5,
+                  radius: 8,
                   fillColor: "#00ff00",
                   color: "#000",
                   weight: 1,
@@ -801,7 +801,7 @@ module.exports = {
 
               // else, use the default icon
               return L.circleMarker(latlng, {
-                radius: 8,
+                radius: 5,
                 fillColor: "#ff7800",
                 color: "#000",
                 weight: 1,
