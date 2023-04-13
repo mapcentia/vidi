@@ -78,6 +78,8 @@ var mapObj;
 //var gc2host = 'http://localhost:3000'
 var config = require("../../../config/config.js");
 
+const download = require("../../../browser/modules/download");
+
 require("snackbarjs");
 /**
  * Displays a snack!
@@ -304,6 +306,10 @@ module.exports = {
         da_DK: "For mange steder at lede efter adresser!",
         en_US: "Too many places to look for addresses!",
       },
+      "Download addresses": {
+        da_DK: "Download adresser",
+        en_US: "Download addresses",
+      },
     };
 
     /**
@@ -363,7 +369,7 @@ module.exports = {
           done: false,
           loading: false,
           authed: false,
-          results_adresser: [],
+          results_adresser: {},
           results_matrikler: [],
           user_lukkeliste: false,
           user_id: null,
@@ -562,7 +568,7 @@ module.exports = {
         _clearAll();
 
         me.setState({
-          results_adresser: [],
+          results_adresser: {},
           results_matrikler: [],
           results_ventiler: [],
         });
@@ -700,21 +706,26 @@ module.exports = {
       mergeMatrikler(results) {
         let me = this;
         let merged = {};
-        for (let i = 0; i < results.length; i++) {
-          // Guard against empty results, and results that are not featureCollections
-          if (
-            results[i] &&
-            results[i].type == "FeatureCollection" &&
-            results[i].features.length > 0
-          ) {
-            for (let j = 0; j < results[i].features.length; j++) {
-              let feature = results[i].features[j];
-              merged[feature.properties.featureid] = feature;
+
+        try {
+          for (let i = 0; i < results.length; i++) {
+            // Guard against empty results, and results that are not featureCollections
+            if (
+              results[i] &&
+              results[i].type == "FeatureCollection" &&
+              results[i].features.length > 0
+            ) {
+              for (let j = 0; j < results[i].features.length; j++) {
+                let feature = results[i].features[j];
+                merged[feature.properties.featureid] = feature;
+              }
             }
           }
+          let newCollection = turfFeatureCollection(Object.values(merged));
+          return newCollection;
+        } catch (error) {
+          console.debug(error);
         }
-        let newCollection = turfFeatureCollection(Object.values(merged));
-        return newCollection;
       }
 
       /**
@@ -723,23 +734,25 @@ module.exports = {
        */
       mergeAdresser(results) {
         let me = this;
+
+        console.log(results);
+
         try {
           // Merge all results into one array, keeping only kvhx
-          let merged = [];
+          let merged = {};
           for (let i = 0; i < results.length; i++) {
             // for each adresse in list, check if it is a kvhx, and add it to the merged list
             for (let j = 0; j < results[i].length; j++) {
               let feature = results[i][j];
               if (feature.kvhx) {
-                merged.push(feature.kvhx);
+                merged[feature.kvhx] = feature;
               }
             }
           }
-          // make use the merged list is unique
-          merged = [...new Set(merged)];
+
           return merged;
         } catch (error) {
-          console.debug(error);
+          console.log(error);
           return [];
         }
       }
@@ -862,7 +875,8 @@ module.exports = {
         };
 
         // take the curent list of addresses and create an array of objects containing the kvhx
-        let adresser = this.state.results_adresser.map((kvhx) => {
+        let keys = Object.keys(this.state.results_adresser);
+        let adresser = keys.map((kvhx) => {
           return { kvhx: kvhx };
         });
         body.addresses = adresser;
@@ -936,7 +950,7 @@ module.exports = {
         _clearAll();
 
         me.setState({
-          results_adresser: [],
+          results_adresser: {},
           results_matrikler: [],
         });
 
@@ -1048,6 +1062,27 @@ module.exports = {
       };
 
       /**
+       * downloads a csv file with the results from adresser
+       * @param {*} results
+       */
+      downloadAdresser = (results) => {
+        let me = this;
+        let csvRows = [];
+
+        console.debug(me.state);
+
+        // from the results, create a
+
+        // create the CSV file and download it
+        const blob = new Blob([csvRows], { type: "text/csv" });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.setAttribute("href", url);
+        a.setAttribute("download", "adresser.csv");
+        a.click();
+      };
+
+      /**
        * Renders component
        */
       render() {
@@ -1105,6 +1140,15 @@ module.exports = {
                     justifyContent: "center",
                   }}
                 >
+                  <Button
+                    onClick={() => this.downloadAdresser()}
+                    size="large"
+                    variant="contained"
+                    style={{ margin: "10px" }}
+                  >
+                    {__("Download addresses")}
+                  </Button>
+
                   <Button
                     onClick={() => this.sendToBlueIdea()}
                     color="primary"
