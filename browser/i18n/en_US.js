@@ -245,6 +245,7 @@ module.exports = {
         "Side-by-side": "Side-by-side",
         "Overlap": "Overlap",
         "Display layers": "Display layers as",
+        "The selected map has no content in the current map extent": "The selected map has no content in the current map extent",
 
         // Map controls
         "Map controls": "Map controls",

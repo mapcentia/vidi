@@ -108,7 +108,7 @@ module.exports = module.exports = {
                 }
                 console.log(outside)
                 if (outside) {
-                    utils.showInfoToast(__("Current baselayer is not within map extent"), {delay: 150000000})
+                    utils.showInfoToast(__("The selected map has no content in the current map extent"), {delay: 150000000})
                 } else {
                     utils.hideInfoToast();
                 }

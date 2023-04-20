@@ -245,6 +245,7 @@ module.exports = {
         "Side-by-side": "Swipe",
         "Overlap": "Overlap",
         "Display layers": "Vis baggrundskort som",
+        "The selected map has no content in the current map extent": "Det valgte kort har intet indhold i det aktuelle kortudsnit",
 
         // Map controls
         "Map controls": "Kort knapper",
