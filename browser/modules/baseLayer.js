@@ -10,6 +10,10 @@ const MODULE_NAME = `baseLayer`;
 
 import {LAYER} from './layerTree/constants';
 import layerTreeUtils from './layerTree/utils';
+import {
+    polygon,
+    booleanIntersects
+} from '@turf/turf'
 
 /**
  * @type {*|exports|module.exports}
@@ -43,6 +47,7 @@ const OVERLAY_OPACITY_RANGE = [10, 90];
 let currentTwoLayersAtOnceMode = TWO_LAYERS_AT_ONCE_MODES[0];
 
 let bindEvent;
+let bounds;
 
 /**
  * Checks if the module state has correct structure
@@ -90,7 +95,27 @@ module.exports = module.exports = {
     init: () => {
         state.listenTo('baseLayer', _self);
 
-        var schemas = urlparser.schema.split(",");
+        cloud.get().map.on('moveend baselayerchange', () => {
+            if (bounds) {
+                const b = cloud.get().map.getBounds();
+                let b2;
+                let outside = false;
+                try {
+                    b2 = polygon([[[b.getWest(), b.getSouth()], [b.getWest(), b.getNorth()], [b.getEast(), b.getNorth()], [b.getEast(), b.getSouth()], [b.getWest(), b.getSouth()]]]);
+                    outside = !booleanIntersects(bounds, b2);
+                } catch (e) {
+                    console.log(e)
+                }
+                console.log(outside)
+                if (outside) {
+                    utils.showInfoToast(__("Current baselayer is not within map extent"), {delay: 150000000})
+                } else {
+                    utils.hideInfoToast();
+                }
+            } else {
+                utils.hideInfoToast();
+            }
+        })
 
         if (typeof window.setBaseLayers !== 'object') {
             window.setBaseLayers = [
@@ -246,7 +271,7 @@ module.exports = module.exports = {
                     layerName = bl.name;
                 } else if (typeof window.setBaseLayers[i].restrictTo === "undefined"
                     || window.setBaseLayers[i].restrictTo.filter((n) => {
-                        return schemas.indexOf(n) != -1;
+                        return schemas.indexOf(n) !== -1;
                     }).length > 0) {
                     baseLayers.push(window.setBaseLayers[i].id);
                     layerId = window.setBaseLayers[i].id;
@@ -603,5 +628,13 @@ module.exports = module.exports = {
         }
 
         return result;
+    },
+
+    setBunds: function (arr) {
+        if (arr) {
+            bounds = polygon(arr);
+        } else {
+            bounds = null;
+        }
     }
 };

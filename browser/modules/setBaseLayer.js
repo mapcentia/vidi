@@ -49,6 +49,15 @@ module.exports = module.exports = {
         return this;
     },
     init: function (str) {
+        $.each(window.setBaseLayers, function (i, v) {
+                if (v.id === str) {
+                    if (v?.bounds?.length > 0) {
+                        baseLayer.setBunds(v.bounds);
+                    } else {
+                        baseLayer.setBunds(null);
+                    }
+                }
+        })
         let result = new Promise((resolve, reject) => {
             var u, l;
             layers.removeHidden();
