@@ -38,12 +38,10 @@ module.exports = {
      *
      */
     init: function () {
-
-        window.vidiConfig.activateMainTab = "info";
+        backboneEvents.get().trigger('off:all');
+        backboneEvents.get().trigger('on:infoClick');
         const imageSize = 36;
-
         const alt = window.vidiConfig?.extensionConfig?.embed?.useAltLayerTree ? "Alt" : "";
-
         const Label = styled.label`
           cursor: pointer;
           display: flex;

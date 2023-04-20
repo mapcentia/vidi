@@ -109,29 +109,10 @@
 
     <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="mainLayerOffcanvas">
         <div class="offcanvas-header mt-5">
-            <h5 class="offcanvas-title js-module-title" id="mainLayerOffcanvasLabel"></h5>
+            <h5 class="offcanvas-title">Lag</h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
-        <div class="offcanvas-body" style="scrollbar-gutter: stable">
-            <div class="d-flex align-items-start flex-row-reverse">
-                <!-- Nav tabs -->
-                <ul class="nav flex-column nav-pills sticky-top d-none" role="tablist" id="main-tabs">
-                    <li role="presentation" class="nav-item d-none">
-                        <a class="nav-link" data-bs-toggle="tab" data-module-id="infoClick" href="#info-content"
-                           data-module-title="{{Info}}" aria-controls="info-content" role="tab" data-toggle="tab">
-                            <i data-container="body" data-toggle="tooltip" data-placement="left"
-                               title="{{Info}}" class="bi bi-info-square"></i>
-                        </a>
-                    </li>
-                </ul>
-                <!-- Tab panes -->
-                <div class="tab-content main-content w-100">
-                    <div role="tabpanel" class="tab-pane fade" id="info-content">
-                        <div id="layers" role="tablist"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <div class="offcanvas-body pe-3 ps-3 pb-3" id="layers"></div>
     </div>
 
     <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="offcanvasInfo">
