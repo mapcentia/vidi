@@ -79,7 +79,8 @@ router.get("/api/extension/blueidea/:userid", function (req, response) {
     lukkeliste: user.lukkeliste ? user.lukkeliste : false,
     ventil_layer: user.ventil_layer ? user.ventil_layer : null,
     ventil_layer_key: user.ventil_layer_key ? user.ventil_layer_key : null,
-    udpeg_layer: user.udpeg_layer ? user.udpeg_layer : null
+    udpeg_layer: user.udpeg_layer ? user.udpeg_layer : null,
+    ventil_export: user.ventil_export ? user.ventil_export : null,
   };
 
   // Check if the database is correctly setup, and the session is allowed to access it

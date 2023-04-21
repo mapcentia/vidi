@@ -129,6 +129,7 @@ const resetObj = {
   user_ventil_layer: null,
   user_udpeg_layer: null,
   user_ventil_layer_key: null,
+  user_ventil_export: null,
 };
 
 /**
@@ -310,6 +311,10 @@ module.exports = {
         da_DK: "Download adresser",
         en_US: "Download addresses",
       },
+      "Download valves": {
+        da_DK: "Download ventil-liste",
+        en_US: "Download valve list",
+      },
     };
 
     /**
@@ -371,6 +376,7 @@ module.exports = {
           authed: false,
           results_adresser: {},
           results_matrikler: [],
+          results_ventiler: [],
           user_lukkeliste: false,
           user_id: null,
           user_profileid: null,
@@ -378,6 +384,7 @@ module.exports = {
           user_ventil_layer: null,
           user_ventil_layer_key: null,
           user_udpeg_layer: null,
+          user_ventil_export: null,
         };
       }
 
@@ -507,6 +514,7 @@ module.exports = {
                   user_udpeg_layer: data.udpeg_layer || null,
                   user_ventil_layer: data.ventil_layer || null,
                   user_ventil_layer_key: data.ventil_layer_key || null,
+                  user_ventil_export: data.ventil_export || null,
                 });
                 resolve(data);
               },
@@ -795,11 +803,11 @@ module.exports = {
         try {
           var l = L.geoJSON(geojson, {
             pointToLayer: function (feature, latlng) {
-              console.debug(feature.properties, latlng);
+              // console.debug(feature.properties, latlng);
 
               // if the feature has a forbundet property, use a different icon
               if (feature.properties.forbundet) {
-                console.debug(feature.properties, latlng);
+                // console.debug(feature.properties, latlng);
                 return L.circleMarker(latlng, {
                   radius: 8,
                   fillColor: "#00ff00",
@@ -984,9 +992,10 @@ module.exports = {
                 }
 
                 if (data.ventiler) {
+                  console.debug("Got ventiler:", data.ventiler);
                   me.addVentilerToMap(data.ventiler);
                   me.setState({
-                    results_ventiler: data.ventiler,
+                    results_ventiler: data.ventiler.features,
                   });
                 }
               }
@@ -1060,6 +1069,25 @@ module.exports = {
       };
 
       /**
+       * Determines if ventiler can be downloaded
+       */
+      allowVentilDownload = () => {
+        let me = this;
+
+        console.log("allow:", this.state);
+
+        if (
+          this.state.results_ventiler.length > 0 &&
+          this.allowLukkeliste() &&
+          this.state.user_ventil_export
+        ) {
+          return true;
+        } else {
+          return false;
+        }
+      };
+
+      /**
        * This function converts an array to a csv string
        * @param {*} data
        * @returns
@@ -1123,6 +1151,40 @@ module.exports = {
 
         let rows = me.arrayToCsv(csvRows);
         this.downloadBlob(rows, "adresser.csv", "text/csv;charset=utf-8;");
+      };
+
+      /**
+       * downloads a csv file with the results from ventiler
+       */
+      downloadVentiler = () => {
+        let me = this;
+        console.log(me.state);
+
+        // Use keys as headers
+        let csvRows = [];
+        csvRows.push(Object.keys(me.state.user_ventil_export));
+
+        console.log(csvRows)
+
+        // for each feature in results_ventiler, append to csvRows with the values from the user_ventil_export
+        for (let index in me.state.results_ventiler) {
+          let feature = me.state.results_ventiler[index].properties;
+
+          // create a row, using the values from the user_ventil_export
+          let columns = Object.values(me.state.user_ventil_export);
+          let row = [];
+
+          // Add values to row
+          for (let c in columns) {
+            row.push(feature[columns[c]]);
+          }
+          // Add row to file
+          csvRows.push(row);
+        }
+
+        console.debug(csvRows);
+        let rows = me.arrayToCsv(csvRows);
+        this.downloadBlob(rows, "ventiler.csv", "text/csv;charset=utf-8;");
       };
 
       /**
@@ -1210,7 +1272,24 @@ module.exports = {
                   hidden={!s.user_lukkeliste}
                 >
                   <h4>{__("Valve list")}</h4>
-                  Reserveret til lukkeliste-ting
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      width: "100%",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Button
+                      onClick={() => this.downloadVentiler()}
+                      size="large"
+                      variant="contained"
+                      style={{ margin: "10px" }}
+                      disabled={!this.allowVentilDownload()}
+                    >
+                      {__("Download valves")}
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
