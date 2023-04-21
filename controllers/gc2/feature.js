@@ -26,6 +26,7 @@ router.all('/api/feature/:db/:layer/:param', function (req, response) {
         json: body,
         headers: {
             'Cookie': "XDEBUG_SESSION=XDEBUG_SESSION;PHPSESSID=" + req.session.gc2SessionId,
+            'GC2-API-KEY': req.session.gc2ApiKey
         }
     };
     request(options, function (err, res, body) {
