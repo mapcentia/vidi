@@ -593,6 +593,7 @@ module.exports = {
           // When all queries are done, we can find the relevant addresses
           Promise.all(promises)
             .then((results) => {
+              console.debug("Got matrikler", results);
               // Merge all results into one array
               try {
                 let merged = this.mergeMatrikler(results);
@@ -616,6 +617,7 @@ module.exports = {
                 let adresser = this.mergeAdresser(results);
                 this.createSnack(__("Found addresses"));
 
+                console.debug("Got addresses", adresser);
                 // Set results
                 me.setState({
                   results_adresser: adresser,
@@ -734,9 +736,6 @@ module.exports = {
        */
       mergeAdresser(results) {
         let me = this;
-
-        console.log(results);
-
         try {
           // Merge all results into one array, keeping only kvhx
           let merged = {};
@@ -749,7 +748,6 @@ module.exports = {
               }
             }
           }
-
           return merged;
         } catch (error) {
           console.log(error);
@@ -1043,7 +1041,7 @@ module.exports = {
        */
       readyToSend = () => {
         // if adresse array is not empty, return true
-        if (this.state.results_adresser.length > 0) {
+        if (Object.keys(this.state.results_adresser).length > 0) {
           return true;
         } else {
           return false;
@@ -1062,24 +1060,69 @@ module.exports = {
       };
 
       /**
-       * downloads a csv file with the results from adresser
-       * @param {*} results
+       * This function converts an array to a csv string
+       * @param {*} data
+       * @returns
        */
-      downloadAdresser = (results) => {
+      arrayToCsv(data) {
+        return data
+          .map(
+            (row) =>
+              row
+                .map(String) // convert every value to String
+                .map((v) => v.replaceAll('"', '""')) // escape double colons
+                .map((v) => `"${v}"`) // quote it
+                .join(",") // comma-separated
+          )
+          .join("\r\n"); // rows starting on new lines
+      }
+
+      /**
+       * Downloads blob to file
+       */
+      downloadBlob = (content, filename, contentType) => {
+        // Create a blob
+        var blob = new Blob([content], { type: contentType });
+        var url = URL.createObjectURL(blob);
+
+        // Create a link to download it
+        var pom = document.createElement("a");
+        pom.href = url;
+        pom.setAttribute("download", filename);
+        pom.click();
+      };
+
+      /**
+       * downloads a csv file with the results from adresser
+       * @param {*} object kvhx af key/value pairs
+       */
+      downloadAdresser = () => {
         let me = this;
-        let csvRows = [];
+        let csvRows = [
+          ["kvhx", "Vejnavn", "Husnummer", "Etage", "Dør", "Postnummer", "By"],
+        ];
 
-        console.debug(me.state);
+        // from the results, append to cvsRows
+        for (let key in Object.keys(me.state.results_adresser)) {
+          let feat =
+            me.state.results_adresser[
+              Object.keys(me.state.results_adresser)[key]
+            ];
+          console.log(feat);
+          let row = [
+            feat.kvhx,
+            feat.vejnavn,
+            feat.husnr,
+            feat.etage,
+            feat.dør,
+            feat.postnr,
+            feat.postnrnavn,
+          ];
+          csvRows.push(row);
+        }
 
-        // from the results, create a
-
-        // create the CSV file and download it
-        const blob = new Blob([csvRows], { type: "text/csv" });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.setAttribute("href", url);
-        a.setAttribute("download", "adresser.csv");
-        a.click();
+        let rows = me.arrayToCsv(csvRows);
+        this.downloadBlob(rows, "adresser.csv", "text/csv;charset=utf-8;");
       };
 
       /**
@@ -1128,8 +1171,8 @@ module.exports = {
 
                 <div style={{ alignSelf: "center" }}>
                   <h4>{__("Show results")}</h4>
-                  Der blev fundet {s.results_adresser.length} adresser i
-                  området.
+                  Der blev fundet {Object.keys(s.results_adresser).length}{" "}
+                  adresser i området.
                 </div>
 
                 <div
@@ -1145,6 +1188,7 @@ module.exports = {
                     size="large"
                     variant="contained"
                     style={{ margin: "10px" }}
+                    disabled={!this.readyToSend()}
                   >
                     {__("Download addresses")}
                   </Button>

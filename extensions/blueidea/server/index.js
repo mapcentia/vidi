@@ -67,7 +67,7 @@ var userString = function (req) {
   }
   return userstr;
 };
-
+// Get current user and setup
 router.get("/api/extension/blueidea/:userid", function (req, response) {
   guard(req, response);
 
@@ -79,7 +79,7 @@ router.get("/api/extension/blueidea/:userid", function (req, response) {
     lukkeliste: user.lukkeliste ? user.lukkeliste : false,
     ventil_layer: user.ventil_layer ? user.ventil_layer : null,
     ventil_layer_key: user.ventil_layer_key ? user.ventil_layer_key : null,
-    udpeg_layer: user.udpeg_layer ? user.udpeg_layer : null,
+    udpeg_layer: user.udpeg_layer ? user.udpeg_layer : null
   };
 
   // Check if the database is correctly setup, and the session is allowed to access it
@@ -99,6 +99,7 @@ router.get("/api/extension/blueidea/:userid", function (req, response) {
     });
 });
 
+// Get the list of sms templates
 router.get(
   "/api/extension/blueidea/:userid/GetSmSTemplates/",
   function (req, response) {
@@ -136,6 +137,7 @@ router.get(
   }
 );
 
+// Create message in BlueIdeas system, and return the smsGroupId
 router.post(
   "/api/extension/blueidea/:userid/CreateMessage",
   function (req, response) {
@@ -178,6 +180,7 @@ router.post(
   }
 );
 
+// Query lukkeliste-plugin in database
 router.post(
   "/api/extension/lukkeliste/:userid/query",
   function (req, response) {
@@ -248,6 +251,8 @@ router.post(
   }
 );
 
+
+
 // Use SQLAPI
 function SQLAPI(q, req, options = null) {
   var userstr = userString(req);
@@ -281,7 +286,7 @@ function SQLAPI(q, req, options = null) {
       .then((data) => {
         // if message is present, is error
         if (data.hasOwnProperty("message")) {
-          console.log(data);
+          //console.log(data);
           reject(data);
         } else {
           //console.log('Success: '+ data.success+' - Q: '+q.substring(0,60))
@@ -295,7 +300,7 @@ function SQLAPI(q, req, options = null) {
   });
 }
 
-//Guard for non-existing user
+// Check if user has setup username and password
 function hasUserSetup(uuid) {
   // check if uuid in in config, and if user object has username and password
   if (
