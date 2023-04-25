@@ -47,7 +47,7 @@
     </div>
 </div>
 
-<nav class="navbar navbar-expand-sm bg-light">
+<nav class="navbar navbar-expand-sm bg-light" style="--bs-bg-opacity: .8;">
     <div class="container-fluid">
         <a class="navbar-brand">
             <span class="d-none d-md-inline">{{brandName}}</span>
@@ -80,6 +80,13 @@
         </button>
 
         <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
+            <form class="d-flex mt-3 mt-sm-0 me-2" role="search">
+                <div class="places">
+                    <input class="form-control me-2 custom-search typeahead" id="custom-search" type="text"
+                           placeholder="Search" aria-label="Search">
+                    <i class="bi bi-x-lg text-dark" id="searchclear"></i>
+                </div>
+            </form>
             <ul class="navbar-nav me-2">
                 <li class="nav-item d-flex align-items-center me-2 mt-3 mt-sm-0">
                     <span class="badge text-bg-secondary js-app-is-pending-badge">
