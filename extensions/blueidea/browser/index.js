@@ -78,6 +78,8 @@ var mapObj;
 //var gc2host = 'http://localhost:3000'
 var config = require("../../../config/config.js");
 
+const download = require("../../../browser/modules/download");
+
 require("snackbarjs");
 /**
  * Displays a snack!
@@ -127,6 +129,7 @@ const resetObj = {
   user_ventil_layer: null,
   user_udpeg_layer: null,
   user_ventil_layer_key: null,
+  user_ventil_export: null,
 };
 
 /**
@@ -304,6 +307,14 @@ module.exports = {
         da_DK: "For mange steder at lede efter adresser!",
         en_US: "Too many places to look for addresses!",
       },
+      "Download addresses": {
+        da_DK: "Download adresser",
+        en_US: "Download addresses",
+      },
+      "Download valves": {
+        da_DK: "Download ventil-liste",
+        en_US: "Download valve list",
+      },
     };
 
     /**
@@ -363,8 +374,9 @@ module.exports = {
           done: false,
           loading: false,
           authed: false,
-          results_adresser: [],
+          results_adresser: {},
           results_matrikler: [],
+          results_ventiler: [],
           user_lukkeliste: false,
           user_id: null,
           user_profileid: null,
@@ -372,6 +384,7 @@ module.exports = {
           user_ventil_layer: null,
           user_ventil_layer_key: null,
           user_udpeg_layer: null,
+          user_ventil_export: null,
         };
       }
 
@@ -501,6 +514,7 @@ module.exports = {
                   user_udpeg_layer: data.udpeg_layer || null,
                   user_ventil_layer: data.ventil_layer || null,
                   user_ventil_layer_key: data.ventil_layer_key || null,
+                  user_ventil_export: data.ventil_export || null,
                 });
                 resolve(data);
               },
@@ -562,7 +576,7 @@ module.exports = {
         _clearAll();
 
         me.setState({
-          results_adresser: [],
+          results_adresser: {},
           results_matrikler: [],
           results_ventiler: [],
         });
@@ -587,6 +601,7 @@ module.exports = {
           // When all queries are done, we can find the relevant addresses
           Promise.all(promises)
             .then((results) => {
+              console.debug("Got matrikler", results);
               // Merge all results into one array
               try {
                 let merged = this.mergeMatrikler(results);
@@ -610,6 +625,7 @@ module.exports = {
                 let adresser = this.mergeAdresser(results);
                 this.createSnack(__("Found addresses"));
 
+                console.debug("Got addresses", adresser);
                 // Set results
                 me.setState({
                   results_adresser: adresser,
@@ -700,21 +716,26 @@ module.exports = {
       mergeMatrikler(results) {
         let me = this;
         let merged = {};
-        for (let i = 0; i < results.length; i++) {
-          // Guard against empty results, and results that are not featureCollections
-          if (
-            results[i] &&
-            results[i].type == "FeatureCollection" &&
-            results[i].features.length > 0
-          ) {
-            for (let j = 0; j < results[i].features.length; j++) {
-              let feature = results[i].features[j];
-              merged[feature.properties.featureid] = feature;
+
+        try {
+          for (let i = 0; i < results.length; i++) {
+            // Guard against empty results, and results that are not featureCollections
+            if (
+              results[i] &&
+              results[i].type == "FeatureCollection" &&
+              results[i].features.length > 0
+            ) {
+              for (let j = 0; j < results[i].features.length; j++) {
+                let feature = results[i].features[j];
+                merged[feature.properties.featureid] = feature;
+              }
             }
           }
+          let newCollection = turfFeatureCollection(Object.values(merged));
+          return newCollection;
+        } catch (error) {
+          console.debug(error);
         }
-        let newCollection = turfFeatureCollection(Object.values(merged));
-        return newCollection;
       }
 
       /**
@@ -725,21 +746,19 @@ module.exports = {
         let me = this;
         try {
           // Merge all results into one array, keeping only kvhx
-          let merged = [];
+          let merged = {};
           for (let i = 0; i < results.length; i++) {
             // for each adresse in list, check if it is a kvhx, and add it to the merged list
             for (let j = 0; j < results[i].length; j++) {
               let feature = results[i][j];
               if (feature.kvhx) {
-                merged.push(feature.kvhx);
+                merged[feature.kvhx] = feature;
               }
             }
           }
-          // make use the merged list is unique
-          merged = [...new Set(merged)];
           return merged;
         } catch (error) {
-          console.debug(error);
+          console.log(error);
           return [];
         }
       }
@@ -784,13 +803,13 @@ module.exports = {
         try {
           var l = L.geoJSON(geojson, {
             pointToLayer: function (feature, latlng) {
-              console.debug(feature.properties, latlng);
+              // console.debug(feature.properties, latlng);
 
               // if the feature has a forbundet property, use a different icon
               if (feature.properties.forbundet) {
-                console.debug(feature.properties, latlng);
+                // console.debug(feature.properties, latlng);
                 return L.circleMarker(latlng, {
-                  radius: 5,
+                  radius: 8,
                   fillColor: "#00ff00",
                   color: "#000",
                   weight: 1,
@@ -801,7 +820,7 @@ module.exports = {
 
               // else, use the default icon
               return L.circleMarker(latlng, {
-                radius: 8,
+                radius: 5,
                 fillColor: "#ff7800",
                 color: "#000",
                 weight: 1,
@@ -862,7 +881,8 @@ module.exports = {
         };
 
         // take the curent list of addresses and create an array of objects containing the kvhx
-        let adresser = this.state.results_adresser.map((kvhx) => {
+        let keys = Object.keys(this.state.results_adresser);
+        let adresser = keys.map((kvhx) => {
           return { kvhx: kvhx };
         });
         body.addresses = adresser;
@@ -936,7 +956,7 @@ module.exports = {
         _clearAll();
 
         me.setState({
-          results_adresser: [],
+          results_adresser: {},
           results_matrikler: [],
         });
 
@@ -972,9 +992,10 @@ module.exports = {
                 }
 
                 if (data.ventiler) {
+                  console.debug("Got ventiler:", data.ventiler);
                   me.addVentilerToMap(data.ventiler);
                   me.setState({
-                    results_ventiler: data.ventiler,
+                    results_ventiler: data.ventiler.features,
                   });
                 }
               }
@@ -1029,7 +1050,7 @@ module.exports = {
        */
       readyToSend = () => {
         // if adresse array is not empty, return true
-        if (this.state.results_adresser.length > 0) {
+        if (Object.keys(this.state.results_adresser).length > 0) {
           return true;
         } else {
           return false;
@@ -1045,6 +1066,125 @@ module.exports = {
         } else {
           return false;
         }
+      };
+
+      /**
+       * Determines if ventiler can be downloaded
+       */
+      allowVentilDownload = () => {
+        let me = this;
+
+        if (
+          this.state.results_ventiler.length > 0 &&
+          this.allowLukkeliste() &&
+          this.state.user_ventil_export
+        ) {
+          return true;
+        } else {
+          return false;
+        }
+      };
+
+      /**
+       * This function converts an array to a csv string
+       * @param {*} data
+       * @returns
+       */
+      arrayToCsv(data) {
+        return data
+          .map(
+            (row) =>
+              row
+                .map(String) // convert every value to String
+                .map((v) => v.replaceAll('"', '""')) // escape double colons
+                .map((v) => `"${v}"`) // quote it
+                .join(",") // comma-separated
+          )
+          .join("\r\n"); // rows starting on new lines
+      }
+
+      /**
+       * Downloads blob to file, using ANSI encoding
+       */
+      downloadBlob = (content, filename, contentType) => {
+        // Create a blob, append the BOM and charset
+        var blob = new Blob(
+          [
+            new Uint8Array([0xef, 0xbb, 0xbf]), // UTF-8 BOM
+            content,
+          ],
+          { type: contentType + ";charset=UTF-8" }
+        );
+        var url = URL.createObjectURL(blob);
+
+        // Create a link to download it
+        var pom = document.createElement("a");
+        pom.href = url;
+        pom.setAttribute("download", filename);
+        pom.click();
+      };
+
+      /**
+       * downloads a csv file with the results from adresser
+       * @param {*} object kvhx af key/value pairs
+       */
+      downloadAdresser = () => {
+        let me = this;
+        let csvRows = [
+          ["kvhx", "Vejnavn", "Husnummer", "Etage", "Dør", "Postnummer", "By"],
+        ];
+
+        // from the results, append to cvsRows
+        for (let key in Object.keys(me.state.results_adresser)) {
+          let feat =
+            me.state.results_adresser[
+              Object.keys(me.state.results_adresser)[key]
+            ];
+          // console.log(feat);
+          let row = [
+            feat.kvhx,
+            feat.vejnavn,
+            feat.husnr,
+            feat.etage,
+            feat.dør,
+            feat.postnr,
+            feat.postnrnavn,
+          ];
+          csvRows.push(row);
+        }
+
+        let rows = me.arrayToCsv(csvRows);
+        this.downloadBlob(rows, "adresser.csv", "text/csv;");
+      };
+
+      /**
+       * downloads a csv file with the results from ventiler
+       */
+      downloadVentiler = () => {
+        let me = this;
+
+        // Use keys as headers
+        let csvRows = [];
+        csvRows.push(Object.keys(me.state.user_ventil_export.structure));
+
+        // for each feature in results_ventiler, append to csvRows with the values from the user_ventil_export
+        for (let index in me.state.results_ventiler) {
+          let feature = me.state.results_ventiler[index].properties;
+
+          // create a row, using the values from the user_ventil_export
+          let columns = Object.values(me.state.user_ventil_export.structure);
+          let row = [];
+
+          // Add values to row
+          for (let c in columns) {
+            row.push(feature[columns[c]]);
+          }
+          // Add row to file
+          csvRows.push(row);
+        }
+
+        let rows = me.arrayToCsv(csvRows);
+        this.downloadBlob(rows, "ventiler.csv", "text/csv;");
       };
 
       /**
@@ -1093,8 +1233,8 @@ module.exports = {
 
                 <div style={{ alignSelf: "center" }}>
                   <h4>{__("Show results")}</h4>
-                  Der blev fundet {s.results_adresser.length} adresser i
-                  området.
+                  Der blev fundet {Object.keys(s.results_adresser).length}{" "}
+                  adresser i området.
                 </div>
 
                 <div
@@ -1105,6 +1245,16 @@ module.exports = {
                     justifyContent: "center",
                   }}
                 >
+                  <Button
+                    onClick={() => this.downloadAdresser()}
+                    size="large"
+                    variant="contained"
+                    style={{ margin: "10px" }}
+                    disabled={!this.readyToSend()}
+                  >
+                    {__("Download addresses")}
+                  </Button>
+
                   <Button
                     onClick={() => this.sendToBlueIdea()}
                     color="primary"
@@ -1122,7 +1272,24 @@ module.exports = {
                   hidden={!s.user_lukkeliste}
                 >
                   <h4>{__("Valve list")}</h4>
-                  Reserveret til lukkeliste-ting
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      width: "100%",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Button
+                      onClick={() => this.downloadVentiler()}
+                      size="large"
+                      variant="contained"
+                      style={{ margin: "10px" }}
+                      disabled={!this.allowVentilDownload()}
+                    >
+                      {__("Download valves")}
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>

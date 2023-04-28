@@ -67,7 +67,7 @@ var userString = function (req) {
   }
   return userstr;
 };
-
+// Get current user and setup
 router.get("/api/extension/blueidea/:userid", function (req, response) {
   guard(req, response);
 
@@ -80,6 +80,7 @@ router.get("/api/extension/blueidea/:userid", function (req, response) {
     ventil_layer: user.ventil_layer ? user.ventil_layer : null,
     ventil_layer_key: user.ventil_layer_key ? user.ventil_layer_key : null,
     udpeg_layer: user.udpeg_layer ? user.udpeg_layer : null,
+    ventil_export: user.ventil_export ? user.ventil_export : null,
   };
 
   // Check if the database is correctly setup, and the session is allowed to access it
@@ -99,6 +100,7 @@ router.get("/api/extension/blueidea/:userid", function (req, response) {
     });
 });
 
+// Get the list of sms templates
 router.get(
   "/api/extension/blueidea/:userid/GetSmSTemplates/",
   function (req, response) {
@@ -136,6 +138,7 @@ router.get(
   }
 );
 
+// Create message in BlueIdeas system, and return the smsGroupId
 router.post(
   "/api/extension/blueidea/:userid/CreateMessage",
   function (req, response) {
@@ -178,6 +181,7 @@ router.post(
   }
 );
 
+// Query lukkeliste-plugin in database
 router.post(
   "/api/extension/lukkeliste/:userid/query",
   function (req, response) {
@@ -197,21 +201,24 @@ router.post(
 
     SQLAPI(q, req)
       .then((uuid) => {
-        let beregnuuid = uuid.features[0].properties.fnc_dan_lukkeliste
+        let beregnuuid = uuid.features[0].properties.fnc_dan_lukkeliste;
         let promises = [];
 
-        console.log(q,' -> ', beregnuuid)
+        console.log(q, " -> ", beregnuuid);
 
         // if ventil_layer is set, query the database for the ventiler
         if (bi.users[req.params.userid].ventil_layer) {
-          let q = `SELECT * from lukkeliste.beregn_ventiler where beregnuuid = '${beregnuuid}'`
+          let q = `SELECT * from lukkeliste.beregn_ventiler where beregnuuid = '${beregnuuid}'`;
 
           q = `SELECT v.*, bv.forbundet from lukkeliste.vw_beregn_ventiler bv 
-          join ${bi.users[req.params.userid].ventil_layer} v on bv.ventilgid = v.${bi.users[req.params.userid].ventil_layer_key}
-          where bv.beregnuuid = '${beregnuuid}'`
+          join ${
+            bi.users[req.params.userid].ventil_layer
+          } v on bv.ventilgid = v.${
+            bi.users[req.params.userid].ventil_layer_key
+          }
+          where bv.beregnuuid = '${beregnuuid}'`;
 
-          promises.push(SQLAPI(q, req, { format: "geojson", srs: 4326}));
-
+          promises.push(SQLAPI(q, req, { format: "geojson", srs: 4326 }));
         } else {
           // we need a promise to return, to keep ordering, so we create a dummy promise
           promises.push(
@@ -221,18 +228,22 @@ router.post(
           );
         }
 
-
         // get matrikler
         promises.push(
-          SQLAPI(`SELECT * from lukkeliste.beregn_afskaaretmatrikler where beregnuuid = '${beregnuuid}'`, req, { format: "geojson", srs: 4326})
+          SQLAPI(
+            `SELECT * from lukkeliste.beregn_afskaaretmatrikler where beregnuuid = '${beregnuuid}'`,
+            req,
+            { format: "geojson", srs: 4326 }
+          )
         );
 
         // when promises are complete, return the result
         Promise.all(promises).then((res) => {
-
           // if matrikler is over 500, count it as an error
           if (res[1].features.length > MAXFEATURES) {
-            res[0] = { error: `Der er fundet mere end ${MAXFEATURES} matrikler (${res[1].features.length}), der skal lukkes. Kontakt venligst en af vores medarbejdere.`}
+            res[0] = {
+              error: `Der er fundet mere end ${MAXFEATURES} matrikler (${res[1].features.length}), der skal lukkes. Kontakt venligst en af vores medarbejdere.`,
+            };
           }
 
           response.status(200).json({
@@ -281,7 +292,7 @@ function SQLAPI(q, req, options = null) {
       .then((data) => {
         // if message is present, is error
         if (data.hasOwnProperty("message")) {
-          console.log(data);
+          //console.log(data);
           reject(data);
         } else {
           //console.log('Success: '+ data.success+' - Q: '+q.substring(0,60))
@@ -295,7 +306,7 @@ function SQLAPI(q, req, options = null) {
   });
 }
 
-//Guard for non-existing user
+// Check if user has setup username and password
 function hasUserSetup(uuid) {
   // check if uuid in in config, and if user object has username and password
   if (
