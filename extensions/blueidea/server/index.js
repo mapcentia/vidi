@@ -201,21 +201,24 @@ router.post(
 
     SQLAPI(q, req)
       .then((uuid) => {
-        let beregnuuid = uuid.features[0].properties.fnc_dan_lukkeliste
+        let beregnuuid = uuid.features[0].properties.fnc_dan_lukkeliste;
         let promises = [];
 
-        console.log(q,' -> ', beregnuuid)
+        console.log(q, " -> ", beregnuuid);
 
         // if ventil_layer is set, query the database for the ventiler
         if (bi.users[req.params.userid].ventil_layer) {
-          let q = `SELECT * from lukkeliste.beregn_ventiler where beregnuuid = '${beregnuuid}'`
+          let q = `SELECT * from lukkeliste.beregn_ventiler where beregnuuid = '${beregnuuid}'`;
 
           q = `SELECT v.*, bv.forbundet from lukkeliste.vw_beregn_ventiler bv 
-          join ${bi.users[req.params.userid].ventil_layer} v on bv.ventilgid = v.${bi.users[req.params.userid].ventil_layer_key}
-          where bv.beregnuuid = '${beregnuuid}'`
+          join ${
+            bi.users[req.params.userid].ventil_layer
+          } v on bv.ventilgid = v.${
+            bi.users[req.params.userid].ventil_layer_key
+          }
+          where bv.beregnuuid = '${beregnuuid}'`;
 
-          promises.push(SQLAPI(q, req, { format: "geojson", srs: 4326}));
-
+          promises.push(SQLAPI(q, req, { format: "geojson", srs: 4326 }));
         } else {
           // we need a promise to return, to keep ordering, so we create a dummy promise
           promises.push(
@@ -225,18 +228,22 @@ router.post(
           );
         }
 
-
         // get matrikler
         promises.push(
-          SQLAPI(`SELECT * from lukkeliste.beregn_afskaaretmatrikler where beregnuuid = '${beregnuuid}'`, req, { format: "geojson", srs: 4326})
+          SQLAPI(
+            `SELECT * from lukkeliste.beregn_afskaaretmatrikler where beregnuuid = '${beregnuuid}'`,
+            req,
+            { format: "geojson", srs: 4326 }
+          )
         );
 
         // when promises are complete, return the result
         Promise.all(promises).then((res) => {
-
           // if matrikler is over 500, count it as an error
           if (res[1].features.length > MAXFEATURES) {
-            res[0] = { error: `Der er fundet mere end ${MAXFEATURES} matrikler (${res[1].features.length}), der skal lukkes. Kontakt venligst en af vores medarbejdere.`}
+            res[0] = {
+              error: `Der er fundet mere end ${MAXFEATURES} matrikler (${res[1].features.length}), der skal lukkes. Kontakt venligst en af vores medarbejdere.`,
+            };
           }
 
           response.status(200).json({
@@ -251,8 +258,6 @@ router.post(
       });
   }
 );
-
-
 
 // Use SQLAPI
 function SQLAPI(q, req, options = null) {

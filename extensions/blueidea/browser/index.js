@@ -1074,8 +1074,6 @@ module.exports = {
       allowVentilDownload = () => {
         let me = this;
 
-        console.log("allow:", this.state);
-
         if (
           this.state.results_ventiler.length > 0 &&
           this.allowLukkeliste() &&
@@ -1106,11 +1104,17 @@ module.exports = {
       }
 
       /**
-       * Downloads blob to file
+       * Downloads blob to file, using ANSI encoding
        */
       downloadBlob = (content, filename, contentType) => {
-        // Create a blob
-        var blob = new Blob([content], { type: contentType });
+        // Create a blob, append the BOM and charset
+        var blob = new Blob(
+          [
+            new Uint8Array([0xef, 0xbb, 0xbf]), // UTF-8 BOM
+            content,
+          ],
+          { type: contentType + ";charset=UTF-8" }
+        );
         var url = URL.createObjectURL(blob);
 
         // Create a link to download it
@@ -1136,7 +1140,7 @@ module.exports = {
             me.state.results_adresser[
               Object.keys(me.state.results_adresser)[key]
             ];
-          console.log(feat);
+          // console.log(feat);
           let row = [
             feat.kvhx,
             feat.vejnavn,
@@ -1150,7 +1154,7 @@ module.exports = {
         }
 
         let rows = me.arrayToCsv(csvRows);
-        this.downloadBlob(rows, "adresser.csv", "text/csv;charset=utf-8;");
+        this.downloadBlob(rows, "adresser.csv", "text/csv;");
       };
 
       /**
@@ -1158,20 +1162,17 @@ module.exports = {
        */
       downloadVentiler = () => {
         let me = this;
-        console.log(me.state);
 
         // Use keys as headers
         let csvRows = [];
-        csvRows.push(Object.keys(me.state.user_ventil_export));
-
-        console.log(csvRows)
+        csvRows.push(Object.keys(me.state.user_ventil_export.structure));
 
         // for each feature in results_ventiler, append to csvRows with the values from the user_ventil_export
         for (let index in me.state.results_ventiler) {
           let feature = me.state.results_ventiler[index].properties;
 
           // create a row, using the values from the user_ventil_export
-          let columns = Object.values(me.state.user_ventil_export);
+          let columns = Object.values(me.state.user_ventil_export.structure);
           let row = [];
 
           // Add values to row
@@ -1182,9 +1183,8 @@ module.exports = {
           csvRows.push(row);
         }
 
-        console.debug(csvRows);
         let rows = me.arrayToCsv(csvRows);
-        this.downloadBlob(rows, "ventiler.csv", "text/csv;charset=utf-8;");
+        this.downloadBlob(rows, "ventiler.csv", "text/csv;");
       };
 
       /**
