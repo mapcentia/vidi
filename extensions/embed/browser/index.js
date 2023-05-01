@@ -41,7 +41,7 @@ module.exports = {
         backboneEvents.get().trigger('off:all');
         backboneEvents.get().trigger('on:infoClick');
         const imageSize = 36;
-        const alt = window.vidiConfig?.extensionConfig?.embed?.useAltLayerTree ? "Alt" : "";
+        const alt = window.vidiConfig?.extensionConfig?.embed?.useAltLayerTree;
         const Label = styled.label`
           cursor: pointer;
           display: flex;
@@ -79,6 +79,11 @@ module.exports = {
           justify-content: center;
         `;
 
+        const Text = styled.div`
+          min-width: 90px;
+          font-size: 0.8em;
+        `;
+
         const createId = () => (+new Date * (Math.random() + 1)).toString(36).substr(2, 5);
 
         const LayerGroup = (props) => {
@@ -86,7 +91,7 @@ module.exports = {
             return (
                 <div className="accordion-item">
                     <h2 className="accordion-header">
-                        <button className="accordion-button" type="button" data-bs-toggle="collapse"
+                        <button className="accordion-button text-uppercase" type="button" data-bs-toggle="collapse"
                                 data-bs-target={"#" + id} aria-expanded="true" aria-controls="collapseOne">
                             {props.title}
                         </button>
@@ -109,19 +114,22 @@ module.exports = {
                 setChecked(!checked);
             }
             return (
-                <div className="d-flex align-items-center flex-column">
+                <div className="d-flex align-items-center">
                     <Checkbox><Input onChange={toggleLayer} type={"checkbox"}
                                      checked={checked} data-gc2-id={props.id}
                                      id={'_ran_' + props.id}
                     />
                         <Label htmlFor={'_ran_' + props.id} url={props.url}>
-
+                            <Text className="ms-5">{props.title}</Text>
                         </Label>
                     </Checkbox>
-                    <div className="text-center">{props.title}</div>
                 </div>
 
             )
+        }
+
+        if (alt) {
+            document.getElementById("layers").classList.add("d-none");
         }
 
         backboneEvents.get().on('layerTree:ready', () => {
@@ -156,6 +164,7 @@ module.exports = {
                             <div className="accordion">{groupsComps}</div>,
                             document.getElementById("layers")
                         );
+                        document.getElementById("layers").classList.remove("d-none");
                     } catch (e) {
                         console.error(e)
                     }

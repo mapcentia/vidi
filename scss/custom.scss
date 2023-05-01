@@ -1,0 +1,18 @@
+$primary: rgb(0, 73, 152);
+$font-family-base: 'Montserrat', sans-serif;
+.leaflet-container {
+  font-family: 'Montserrat', sans-serif !important;
+}
+
+.online-indicator span,
+.layer-filter,
+.leaflet-control-boxzoom,
+.leaflet-clear-map,
+.leaflet-control-measurements,
+.history-control {
+  display: none !important;
+}
+
+.legend-img {
+  max-width: 40px;
+}

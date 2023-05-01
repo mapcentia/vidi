@@ -1,11 +1,3 @@
-<style>
-    .leaflet-control-custom, .history-control, .leaflet-control-boxzoom {
-        display: inline;
-    }
-    .layer-filter {
-        display: none;
-    }
-</style>
 <!-- map -->
 <div id="pane">
     <div id="container">
@@ -14,15 +6,17 @@
 </div>
 
 <!-- About Modal -->
-<div class="modal fade" id="about-modal" tabindex="-1" role="dialog" aria-labelledby="about-modalLabel">
-    <div class="modal-dialog" role="document">
+<div class="modal" id="about-modal" tabindex="-1" role="dialog" aria-labelledby="about-modalLabel">
+    <div class="modal-dialog modal-fullscreen" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h1 class="modal-title fs-5" id="about-modalLabel">{{About}}</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{Close}}"></button>
             </div>
             <div class="modal-body">
-                {{{aboutBox}}}
+                <div class="container">
+                    {{{aboutBox}}}
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{Close}}</button>
@@ -47,7 +41,7 @@
     </div>
 </div>
 
-<nav class="navbar navbar-expand-sm bg-light" style="--bs-bg-opacity: .8;">
+<nav class="navbar navbar-expand-sm bg-transparent fade-then-dragging">
     <div class="container-fluid">
         <a class="navbar-brand">
             <span class="d-none d-md-inline">{{brandName}}</span>
@@ -88,7 +82,11 @@
                 </div>
             </form>
             <ul class="navbar-nav me-2">
-                <li class="nav-item d-flex align-items-center me-2 mt-3 mt-sm-0">
+                <li>
+                    <button id="btn-show-legend-in-map" data-module="legend"
+                            class="btn btn btn-light">{{Legend}}</button>
+                </li>
+                <li class="nav-item d-flex align-items-center me-2 mt-3 mt-sm-0 online-indicator">
                     <span class="badge text-bg-secondary js-app-is-pending-badge">
                         <i class="bi bi-three-dots"></i>{{Pending}}
                     </span>
@@ -114,9 +112,10 @@
 
 <div class="fade-then-dragging">
 
-    <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="mainLayerOffcanvas">
-        <div class="offcanvas-header mt-5">
-            <h5 class="offcanvas-title">Lag</h5>
+    <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="mainLayerOffcanvas"
+         style="z-index: 999998">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title">Menu</h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body pe-3 ps-3 pb-3" id="layers"></div>
@@ -171,7 +170,7 @@
             <strong class="me-auto">{{Legend}}</strong>
             <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
-        <div class="toast-body" id="legend-toast-body">
+        <div class="toast-body" id="legend">
         </div>
     </div>
 </div>
