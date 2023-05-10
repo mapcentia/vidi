@@ -2191,9 +2191,9 @@ module.exports = {
                             .on('remove', () => {
                                 if (`editor` in extensions) {
                                     editor = extensions.editor.index;
-                                }
-                                if (!editor?.getEditedFeature()) {
-                                    sqlQuery.resetAll();
+                                    if (!editor.getEditedFeature()) {
+                                        sqlQuery.resetAll();
+                                    }
                                 }
                                 _self.resetAllVectorLayerStyles();
                             });
