@@ -46,13 +46,13 @@
         <a class="navbar-brand">
             <span class="d-none d-md-inline">{{brandName}}</span>
         </a>
-        <div class="navbar-nav flex-row gap-1">
+        <div class="navbar-nav flex-row gap-1 flex-grow-1">
             <button id="offcanvasLayerControlBtn"
                     class="btn btn-primary text-nowrap" type="button"
             >
                 <span class="d-none d-md-inline">Menu</span> <i class="bi bi-arrow-bar-right"></i>
             </button>
-            <div class="input-group d-none" id="edit-tool-group">
+            <div class="input-group d-none justify-content-end me-2" id="edit-tool-group">
                 <span class="input-group-text"><i class="bi bi-pencil"></i></span>
                 <button id="offcanvasEditBtn"
                         class="btn btn-secondary nav-edit-btn edit-attr-btn" disabled type="button"
@@ -73,7 +73,7 @@
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
+        <div class="collapse navbar-collapse justify-content-end flex-grow-0" id="navbarSupportedContent">
             <form class="d-flex mt-3 mt-sm-0" role="search">
                 <div class="places">
                     <input class="form-control me-2 custom-search typeahead" id="custom-search" type="text"
@@ -81,18 +81,10 @@
                     <i class="bi bi-x-lg text-dark" id="searchclear"></i>
                 </div>
             </form>
-            <ul class="navbar-nav ms-2 navbar-tool-btn">
+            <ul class="navbar-nav ms-sm-2 mt-sm-0 ms-0 mt-3 navbar-tool-btn">
                 <li>
                     <button id="btn-show-legend-in-map" data-module="legend"
                             class="btn btn btn-light">{{Legend}}</button>
-                </li>
-                <li class="nav-item d-flex align-items-center me-2 mt-3 mt-sm-0 online-indicator">
-                    <span class="badge text-bg-secondary js-app-is-pending-badge">
-                        <i class="bi bi-three-dots"></i>{{Pending}}
-                    </span>
-                    <span class="badge text-bg-success js-app-is-online-badge d-none">
-                    <i class="bi bi-signal"></i>Online</span>
-                    <span class="badge text-bg-danger js-app-is-offline-badge d-none">Offline</span>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" id="btn-reset" href="#">Reset</a>
@@ -113,32 +105,38 @@
 <div class="fade-then-dragging">
 
     <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="mainLayerOffcanvas"
-         style="z-index: 999998">
+         style="z-index: 999990">
         <div class="offcanvas-header">
             <h5 class="offcanvas-title">Menu</h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
-        <div class="offcanvas-body pe-3 ps-3 pb-3" id="layers"></div>
-    </div>
-
-    <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="offcanvasInfo">
-        <div class="offcanvas-header mt-5">
-            <h5 class="offcanvas-title">Info</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        <div class="pe-2 ps-2">
+            <div class="offcanvas-body" id="layers"></div>
         </div>
-        <div class="offcanvas-body" id="offcanvas-info-container"></div>
     </div>
 
-    <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="offcanvasLayerDesc">
-        <div class="offcanvas-header mt-5">
+
+    <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="offcanvasLayerDesc"
+         style="z-index: 999991">
+        <div class="offcanvas-header">
             <h5 class="offcanvas-title">Info</h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body" id="offcanvas-layer-desc-container"></div>
     </div>
 
-    <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="offcanvas-edit-start">
-        <div class="offcanvas-header mt-5">
+    <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="offcanvasInfo"
+         style="z-index: 999992">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title">Info</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body" id="offcanvas-info-container"></div>
+    </div>
+
+    <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="offcanvas-edit-start"
+         style="z-index: 999993">
+        <div class="offcanvas-header">
             <h5 class="offcanvas-title">Edit</h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
