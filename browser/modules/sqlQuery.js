@@ -204,6 +204,9 @@ module.exports = {
                 layers.splice(i, 1);
             }
         }
+        if (layers.length === 0 && callBack) {
+            callBack();
+        }
 
         backboneEvents.get().trigger("start:sqlQuery");
 

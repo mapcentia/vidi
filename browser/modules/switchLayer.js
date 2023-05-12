@@ -60,6 +60,10 @@ module.exports = module.exports = {
                 }
             }
         });
+
+        // Expose init in global scope
+        vidiApi.switchLayer = _self.init;
+
         return this;
     },
 
