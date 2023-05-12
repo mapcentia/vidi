@@ -81,6 +81,7 @@ router.get("/api/extension/blueidea/:userid", function (req, response) {
     ventil_layer_key: user.ventil_layer_key ? user.ventil_layer_key : null,
     udpeg_layer: user.udpeg_layer ? user.udpeg_layer : null,
     ventil_export: user.ventil_export ? user.ventil_export : null,
+    debug: user.debug ? user.debug : false
   };
 
   // Check if the database is correctly setup, and the session is allowed to access it
@@ -153,7 +154,7 @@ router.post(
     var body = req.body;
 
     // If debug is set, add testMode to body
-    if (bi.debug) {
+    if (bi.users[req.params.userid].debug) {
       body.testMode = true;
     }
 
@@ -170,7 +171,7 @@ router.post(
         json: body,
       };
       request.post(options, function (error, res, body) {
-        console.debug(res.toJSON());
+        //console.debug(res.toJSON());
         if (error) {
           response.status(500).json(error);
         } else {
