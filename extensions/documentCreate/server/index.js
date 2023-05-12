@@ -171,13 +171,20 @@ router.post(
           );
         } else {
           // adressesagen findes ikke, den skal oprettes først.
-          // getparentcase på esrnr for at finde mappen
+          // getparentcase på bfenr
           // opret adressesag husk post caseid tilbage til gc2
           // getnodeid på henvendelsesmappen
           // opret henvendelsessagen herunder.
-          var getParentCaseDnPromise = getParentCaseDn(
-            req.body.features[0].properties.esrnr
+          var getParentCaseDnPromise = getParentCaseDnESR(
+            req.body.features[0].properties.esrnr,
           );
+
+
+          //When they want to change to BFE use this instead
+          //var getParentCaseDnPromise = getParentCaseDnBFE(
+          //  req.body.features[0].properties.bfenr,
+          //);
+
 
           getParentCaseDnPromise.then(
             function (result) {
@@ -279,7 +286,8 @@ router.post(
                         }
                       );
                     } else {
-                      response.status(500).send("Fejl i Docunote " + err);
+                      response.status(500).send("Fejl i Docunote, ingen caseId");
+                      console.log(resultpostdn);
                     }
                   },
                   function (err) {
@@ -332,6 +340,7 @@ function GetParentFolder(
   enhadrguid,
   adgadrguid
 ) {
+  console.log('GetParentFolder:',ejdCaseId, parentId, parenttype, dnTitle, esrnr, enhadrguid, adgadrguid);
   return new Promise(function (resolve, reject) {
     var getParentPromise = getFoldersDn(parentId, parenttype);
 
@@ -665,7 +674,7 @@ function oisAddressFormatter(adrString) {
     .concat(" [" + adrSplit[1].trim() + "]");
 }
 
-function getParentCaseDn(esrnr) {
+function getParentCaseDnESR(esrnr) {
   var dnoptions = {
     url:
       "https://docunoteapi.vmr.dk/api/v1/Cases/synchronizeSource/10/synchronizeId/" +
@@ -677,6 +686,40 @@ function getParentCaseDn(esrnr) {
       userName: USERNAME,
     },
   };
+
+  console.log(dnoptions.url)
+
+  return new Promise(function (resolve, reject) {
+    request.get(dnoptions, function (err, res, body) {
+      if (!err) {
+        //console.log(body)
+        //postToGC2(req)
+        //return body.parentid;
+        resolve(JSON.parse(body));
+      } else {
+        console.log(err);
+        reject(err);
+      }
+    });
+  });
+}
+
+  
+function getParentCaseDnBFE(bfenr) {
+  var dnoptions = {
+    url:
+      "https://docunoteapi.vmr.dk/api/v1/Cases/synchronizeSource/10/synchronizeId/" +
+      bfenr + '-BFE',
+    method: "GET",
+    headers: {
+      applicationKey: APPKEY,
+      userKey: USERKEY,
+      userName: USERNAME,
+    },
+  };
+
+  console.log(dnoptions.url)
+
   return new Promise(function (resolve, reject) {
     request.get(dnoptions, function (err, res, body) {
       if (!err) {
@@ -787,7 +830,7 @@ function postCompanyToDn(compbody) {
         //chunks = Buffer.concat(chunks).toString;
         //response.send(jsfile);
 
-        console.log(JSON.parse(jsfile));
+        //console.log(JSON.parse(jsfile));
         if ("errorCode" in JSON.parse(jsfile)) {
           //reject(JSON.parse(jsfile))
           reject(JSON.parse(jsfile));

@@ -709,17 +709,16 @@ var onSearchLoad = function () {
   resultLayer.clearLayers();
   resultLayer.addLayer(this.layer);
 
-  //this er retur-obj fra DAR evt løft værdi ud i skjult felt adgang is
-  //console.log(this)
+  //this er retur-obj fra GC2.io, så der skal laves opslag til DAWA
   console.log(this.geoJSON.features[0].properties.id);
   filterKey = $("#documentCreate-custom-search").val();
-  //find esrnr + adresseid
+  //find esr, adresseid og mere fra DAWA
   getEjdNr(this.geoJSON.features[0].properties.id);
 
-  config.extensionConfig.documentCreate.tables[0].defaults.adgangsadresseid =
-    this.geoJSON.features[0].properties.id;
-  config.extensionConfig.documentCreate.tables[1].defaults.adgangsadresseid =
-    this.geoJSON.features[0].properties.id;
+  // Debug - for each table, print contents of defaults
+  //for (let l in config.extensionConfig.documentCreate.tables) {
+  //  console.log(config.extensionConfig.documentCreate.tables[l].defaults);
+  //}
 
   //move to marker
   cloud
@@ -748,30 +747,27 @@ var onSearchLoad = function () {
 // kristrupvej 1, https://dawa.aws.dk/adgangsadresser/0a3f5094-b7b0-32b8-e044-0003ba298018
 
 var getEjdNr = function (adgangsadresseid) {
-  var esr;
-  var adresseid;
+  var esr, bfenr;
   $.ajax({
-    url: "https://dawa.aws.dk/adresser?adgangsadresseid=" + adgangsadresseid,
+    url: "https://dawa.aws.dk/adgangsadresser/" + adgangsadresseid,
     type: "get",
     async: false,
     success: function (data, status) {
-      //console.log(data)
-      if (data[0].adgangsadresse == null) {
+      //console.log(data);
+      if (data.id == null) {
         //nothing.. return null
         return null;
       } else {
         //danner esr ejendomsnummer
-        var str = data[0].adgangsadresse.esrejendomsnr;
-        var komkode = data[0].adgangsadresse.kommune.kode.replace(/^0+/, "");
+        var komkode = data.kommune.kode.replace(/^0+/, "");
         esr =
-          new Array(7 - data[0].adgangsadresse.esrejendomsnr.length + 1).join(
+          new Array(7 - data.esrejendomsnr.length + 1).join(
             "0"
-          ) + data[0].adgangsadresse.esrejendomsnr;
+          ) + data.esrejendomsnr;
         esr = komkode.concat(esr);
-        adresseid = data[0].id;
 
-        var adresse = $.ajax({
-          url: "https://dawa.aws.dk/datavask/adresser?betegnelse=" + filterKey,
+        var bfe = $.ajax({
+          url: data.jordstykke.href,
           type: "get",
           async: false,
           success: function (data, status) {
@@ -779,21 +775,22 @@ var getEjdNr = function (adgangsadresseid) {
               //nothing.. return null
               return null;
             } else {
-              //danner esr ejendomsnummer
-              var adresse = data.resultater[0].adresse.id;
-              return adresse;
+              var bfe = data.bfenummer;
+              return bfe;
             }
           },
         });
-        if (adresse.responseJSON.resultater.kategori != "C") {
-          adresseid = adresse.responseJSON.resultater[0].adresse.id;
+
+        bfenr = bfe.responseJSON.bfenummer.toString();
+
+        // Move information out into config
+        for (let l in config.extensionConfig.documentCreate.tables) {
+          config.extensionConfig.documentCreate.tables[l].defaults.esrnr = esr;
+          config.extensionConfig.documentCreate.tables[l].defaults.adgangsadresseid =
+            adgangsadresseid;
+          config.extensionConfig.documentCreate.tables[l].defaults.bfenr =
+            bfenr;
         }
-        config.extensionConfig.documentCreate.tables[0].defaults.esrnr = esr;
-        config.extensionConfig.documentCreate.tables[1].defaults.esrnr = esr;
-        config.extensionConfig.documentCreate.tables[0].defaults.adresseid =
-          adresseid;
-        config.extensionConfig.documentCreate.tables[1].defaults.adresseid =
-          adresseid;
 
         return 1;
       }
@@ -1147,11 +1144,13 @@ var FeatureFormFactory = function (order) {
     // Build the UI elements
     ////////////////////////////////////////
     //Hide element if hidden is set
+
     if (col.hidden !== -1) {
       var formobj = '<div class="form-group collapse">';
     } else {
       var formobj = '<div class="form-group">';
     }
+
     //create label for input, colName fallback
     //console.log(col)
     var alias;
