@@ -86,7 +86,14 @@ module.exports = {
                 enableHighAccuracy: true
             },
             followMarkerStyle: {
-                fillColor: '#FFB000'
+                fillColor: '#EF9600'
+            },
+            markerStyle: {
+                fillColor:   '#004998',
+            },
+            /** Compass */
+            compassStyle: {
+                fillColor:   '#004998',
             },
             icon: "bi bi-geo-alt",
         }).addTo(map);
