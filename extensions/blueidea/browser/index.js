@@ -401,7 +401,7 @@ module.exports = {
 
         // Activates module
         backboneEvents.get().on(`on:${exId}`, () => {
-          console.debug("Starting blueidea");
+          //console.debug("Starting blueidea");
           me.setState({
             active: true,
           });
@@ -416,7 +416,7 @@ module.exports = {
 
         // Deactivates module
         backboneEvents.get().on(`off:${exId} off:all reset:all`, () => {
-          console.debug("Stopping blueidea");
+          //console.debug("Stopping blueidea");
           _clearAll();
           blocked = true;
           me.setState({
@@ -427,7 +427,7 @@ module.exports = {
 
         // On auth change, handle Auth state
         backboneEvents.get().on(`session:authChange`, () => {
-          console.debug("Auth changed!");
+          //console.debug("Auth changed!");
           fetch("/api/session/status")
             .then((r) => r.json())
             .then((obj) => {
@@ -444,7 +444,7 @@ module.exports = {
               }
             })
             .catch((e) => {
-              console.debug("Error in session:authChange", e);
+              //console.debug("Error in session:authChange", e);
               me.setState(resetObj);
             })
             .finally(() => {
@@ -482,10 +482,10 @@ module.exports = {
         )
           .then((r) => r.json())
           .then((obj) => {
-            console.debug("Got templates", obj);
+            //console.debug("Got templates", obj);
           })
           .catch((e) => {
-            console.debug("Error in getTemplates", e);
+            //console.debug("Error in getTemplates", e);
           });
       }
 
@@ -505,7 +505,7 @@ module.exports = {
                 config.extensionConfig.blueidea.userid,
               type: "GET",
               success: function (data) {
-                console.debug("Got user", data);
+                //console.debug("Got user", data);
                 me.setState({
                   user_lukkeliste: data.lukkeliste || false,
                   user_id: config.extensionConfig.blueidea.userid,
@@ -519,7 +519,7 @@ module.exports = {
                 resolve(data);
               },
               error: function (e) {
-                console.debug("Error in getUser", e);
+                //console.debug("Error in getUser", e);
                 reject(e);
               },
             });
@@ -559,7 +559,7 @@ module.exports = {
        */
       queryAddresses(geojson) {
         let me = this;
-        console.debug("queryAddresses: ", geojson);
+        //console.debug("queryAddresses: ", geojson);
 
         // if no features in featurecollection, return
         if (!geojson.features.length) {
@@ -601,7 +601,7 @@ module.exports = {
           // When all queries are done, we can find the relevant addresses
           Promise.all(promises)
             .then((results) => {
-              console.debug("Got matrikler", results);
+              //console.debug("Got matrikler", results);
               // Merge all results into one array
               try {
                 let merged = this.mergeMatrikler(results);
@@ -610,7 +610,7 @@ module.exports = {
 
                 return merged;
               } catch (error) {
-                console.debug(error);
+                //console.debug(error);
               }
             })
             .then((matrikler) => {
@@ -625,7 +625,7 @@ module.exports = {
                 let adresser = this.mergeAdresser(results);
                 this.createSnack(__("Found addresses"));
 
-                console.debug("Got addresses", adresser);
+                //console.debug("Got addresses", adresser);
                 // Set results
                 me.setState({
                   results_adresser: adresser,
@@ -636,13 +636,13 @@ module.exports = {
               });
             })
             .catch((error) => {
-              console.debug(error);
+              //console.debug(error);
               this.createSnack(__("Error in seach") + ": " + error);
               _clearAll();
               return;
             });
         } catch (error) {
-          console.debug(error);
+          //console.debug(error);
           this.createSnack(error);
           return;
         }
@@ -681,7 +681,7 @@ module.exports = {
                   units: "meters",
                 });
               } catch (error) {
-                console.debug(error, feature);
+                //console.debug(error, feature);
               }
             } else {
               buffered = turfBuffer(feature, exBufferDistance, {
@@ -691,7 +691,7 @@ module.exports = {
 
             collection.features.push(buffered);
           } catch (error) {
-            console.debug(error, feature);
+            //console.debug(error, feature);
           }
         }
 
@@ -702,7 +702,7 @@ module.exports = {
         //  let union = polygons.reduce((a, b) => turfUnion(a, b), polygons[0]); // turf v7 will support union on featurecollection, v6 does not.
         //  collection = turfFlatten(union);
         //} catch (error) {
-        //  console.debug(error, polygons);
+        //  //console.debug(error, polygons);
         //}
 
         // return geometry for querying
@@ -734,7 +734,7 @@ module.exports = {
           let newCollection = turfFeatureCollection(Object.values(merged));
           return newCollection;
         } catch (error) {
-          console.debug(error);
+          //console.debug(error);
         }
       }
 
@@ -775,7 +775,7 @@ module.exports = {
             dashArray: "5,3",
           }).addTo(bufferItems);
         } catch (error) {
-          console.debug(error, geojson);
+          //console.debug(error, geojson);
         }
       }
 
@@ -792,7 +792,7 @@ module.exports = {
             dashArray: "5,3",
           }).addTo(queryMatrs);
         } catch (error) {
-          console.debug(error, geojson);
+          //console.debug(error, geojson);
         }
       }
 
@@ -803,11 +803,11 @@ module.exports = {
         try {
           var l = L.geoJSON(geojson, {
             pointToLayer: function (feature, latlng) {
-              // console.debug(feature.properties, latlng);
+              // //console.debug(feature.properties, latlng);
 
               // if the feature has a forbundet property, use a different icon
               if (feature.properties.forbundet) {
-                // console.debug(feature.properties, latlng);
+                // //console.debug(feature.properties, latlng);
                 return L.circleMarker(latlng, {
                   radius: 8,
                   fillColor: "#00ff00",
@@ -830,7 +830,7 @@ module.exports = {
             },
           }).addTo(queryVentils);
         } catch (error) {
-          console.debug(error, geojson);
+          //console.debug(error, geojson);
         }
       }
 
@@ -906,7 +906,7 @@ module.exports = {
             }
           },
           error: function (error) {
-            console.debug(error);
+            //console.debug(error);
           },
         });
       };
@@ -936,7 +936,7 @@ module.exports = {
           switchLayer.init(layer, true);
         }
 
-        console.debug(layer, filter);
+        //console.debug(layer, filter);
 
         // if the filter is not empty, apply it, and refresh the layer
         if (filter) {
@@ -984,7 +984,7 @@ module.exports = {
             .then((data) => {
               // if the server returns a result, show it
               if (data) {
-                console.debug(data);
+                //console.debug(data);
 
                 // if the results contains a list of matrikler, run them through the queryAdresser function
                 if (data.matrikler) {
@@ -992,7 +992,7 @@ module.exports = {
                 }
 
                 if (data.ventiler) {
-                  console.debug("Got ventiler:", data.ventiler);
+                  //console.debug("Got ventiler:", data.ventiler);
                   me.addVentilerToMap(data.ventiler);
                   me.setState({
                     results_ventiler: data.ventiler.features,
@@ -1001,7 +1001,7 @@ module.exports = {
               }
             })
             .catch((error) => {
-              console.debug(error);
+              //console.debug(error);
             });
         });
       };
@@ -1040,7 +1040,7 @@ module.exports = {
           };
         }
 
-        console.debug(filter);
+        //console.debug(filter);
 
         return filter;
       };
