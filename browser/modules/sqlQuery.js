@@ -442,8 +442,18 @@ module.exports = {
                         _table.loadDataInTable(false, true);
 
                         if (typeof parsedMeta.info_function !== "undefined" && parsedMeta.info_function !== "") {
+                            let func;
                             try {
-                                let func = Function('"use strict";return (' + parsedMeta.info_function + ')')();
+                                try {
+                                    func = Function('"use strict";return (' + parsedMeta.info_function + ')')();
+                                } catch (e) {
+                                    const f = `
+                                        function(feature, layer, layerKey, sqlQuery, store, map) {
+                                            ${parsedMeta.info_function}
+                                        }
+                                        `;
+                                    func = Function('"use strict";return (' + f + ')')();
+                                }
                                 func(this.layer.toGeoJSON(GEOJSON_PRECISION).features[0], this.layer, keyWithoutGeom, _self, this, cloud.get().map);
                             } catch (e) {
                                 console.info("Error in click function for: " + _key_);
