@@ -126,6 +126,11 @@ module.exports = {
 
         offlineModeControlsManager = new OfflineModeControlsManager(meta);
 
+        // expose api
+        api.filter = (l,f) => {
+            _self.onApplyArbitraryFiltersHandler({"layerKey": l,"filters": f})
+        }
+
         return this;
     },
 

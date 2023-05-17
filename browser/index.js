@@ -61,7 +61,7 @@ window.vidiConfig = require('../config/config.js');
 /**
  * Th global Vidi API
  */
-window.vidiApi = {};
+window.api = {};
 
 window.Promise = require('es6-promise').Promise;
 

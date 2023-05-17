@@ -62,7 +62,12 @@ module.exports = module.exports = {
         });
 
         // Expose init in global scope
-        vidiApi.switchLayer = _self.init;
+        api.turnOn = (l) => {
+            const status = _self.getLayersEnabledStatus();
+            if (!status?.[l] || !status[l].enabled) {
+                _self.init(l, true);
+            }
+        }
 
         return this;
     },
