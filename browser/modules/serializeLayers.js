@@ -384,6 +384,9 @@ var _encoders = {
                     featureGeoJson = {_latlng: feature._latlng};
                     featureGeoJson.type = "Marker";
                     featureGeoJson.feature = feature.feature;
+                    if (feature?._vidi_awesomemarkers) {
+                        featureGeoJson._vidi_awesomemarkers = feature._vidi_awesomemarkers;
+                    }
                 } else {
                     featureGeoJson = feature.toGeoJSON(GEOJSON_PRECISION);
                     featureGeoJson.geometry.coordinates = _projectCoords(SRS, featureGeoJson.geometry.coordinates);

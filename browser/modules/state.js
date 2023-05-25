@@ -404,7 +404,13 @@ module.exports = {
                                             l.addLayer(g);
                                         }
                                         if (m.type === "Marker") {
-                                            g = L.marker(m._latlng, m.style);
+                                            if (m?._vidi_awesomemarkers) {
+                                                g = L.marker(m._latlng, {
+                                                    icon: L.AwesomeMarkers.icon(m._vidi_awesomemarkers)
+                                                })
+                                            } else {
+                                                g = L.marker(m._latlng, m.style);
+                                            }
                                             g.feature = m.feature;
                                             l.addLayer(g);
                                         }

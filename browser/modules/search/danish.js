@@ -203,7 +203,11 @@ module.exports = {
 
         // Define GC2 SQL store
         // ====================
-
+        const iconOptions = {
+            icon: 'home',
+            markerColor: '#C31919',
+            prefix: 'fa'
+        }
         let getPlaceStore = () => {
             return new geocloud.sqlStore({
                 jsonp: false,
@@ -214,13 +218,14 @@ module.exports = {
                 // Make Awesome Markers
                 pointToLayer: function (feature, latlng) {
                     return L.marker(latlng, {
-                        icon: L.AwesomeMarkers.icon({
-                                icon: 'home',
-                                markerColor: '#C31919',
-                                prefix: 'fa'
-                            }
+                        icon: L.AwesomeMarkers.icon(iconOptions
                         )
                     });
+                },
+                onEachFeature: function (feature, layer) {
+                    layer._vidi_type = "query_draw";
+                    layer._vidi_marker = true;
+                    layer._vidi_awesomemarkers = iconOptions;
                 },
                 styleMap: {
                     weight: 3,
