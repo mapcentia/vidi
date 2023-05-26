@@ -129,6 +129,7 @@ module.exports = {
         // expose api
         api.filter = (l, f) => {
             _self.onApplyArbitraryFiltersHandler({"layerKey": l, "filters": f});
+            filterComp[l].setState({"arbitraryFilters": f});
         }
 
         return this;
@@ -3654,7 +3655,6 @@ module.exports = {
     onApplyArbitraryFiltersHandler: ({layerKey, filters}, forcedReloadLayerType = false) => {
         validateFilters(filters);
         moduleState.arbitraryFilters[layerKey] = filters;
-        filterComp[layerKey].setState({"arbitraryFilters": filters});
         _self.reloadLayerOnFiltersChange(layerKey, forcedReloadLayerType);
     },
 
