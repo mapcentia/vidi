@@ -159,17 +159,23 @@ module.exports = {
                 }
 
                 if (alt) {
+                    const altNode = document.getElementById("layersAlt");
                     try {
                         ReactDOM.render(
                             <div className="accordion">{groupsComps}</div>,
-                            document.getElementById("layers")
+                            altNode
                         );
-                        document.getElementById("layers").classList.remove("d-none");
                     } catch (e) {
                         console.error(e)
                     }
+                    backboneEvents.get().on("layerTree:ready", () => {
+                        ReactDOM.render(
+                            <div className="accordion">{groupsComps}</div>,
+                            altNode
+                        );
+                    })
                 }
-            }, 100)
+            }, 0)
         })
     }
 }
