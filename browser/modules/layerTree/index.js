@@ -3339,7 +3339,6 @@ module.exports = {
                     } else {
                         if (_self.getActiveLayerFilters(layerKey)?.length > 0) {
                             localFitBoundsActiveOnLayer = true;
-                            console.log(_self.getActiveLayerFilters(layerKey))
                         } else {
                             localFitBoundsActiveOnLayer = false;
                         }
@@ -3793,7 +3792,7 @@ module.exports = {
                     backboneEvents.get().once("doneLoading:layers", function (e) {
                         if (layerTreeUtils.stripPrefix(e) === layerTreeUtils.stripPrefix(layerKey)) {
                             // Check if child layer should be reloaded.
-                            if (_self.getChildLayersThatShouldBeEnabled().includes(localLayerKey)) {
+                            if (_self.getChildLayersThatShouldBeEnabled().includes(layerTreeUtils.stripPrefix(localLayerKey))) {
                                 reloadLayer();
                             }
                         }
