@@ -9,7 +9,7 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get -y update --allow-releaseinfo-change
 RUN apt-get -y install wget curl vim git supervisor postgresql-client default-jre gnupg2 locales libssl-dev libxss-dev pdftk bzip2 chromium ruby-full rubygems
 
-RUN curl -sL https://deb.nodesource.com/setup_14.x -o nodesource_setup.sh &&\
+RUN curl -sL https://deb.nodesource.com/setup_18.x -o nodesource_setup.sh &&\
     bash nodesource_setup.sh &&\
     apt-get install -y nodejs
 
