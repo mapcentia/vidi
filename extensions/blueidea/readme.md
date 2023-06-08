@@ -15,7 +15,17 @@ Flowet er som følger:
 
 ## Opsætning
 
-Der er flere dele i opsætningen af denne extension. Da den både skal håndtere credentials og databaseafhængigheder, er det vigtigt at følge nedenstående punkter.
+Der er flere dele i opsætningen af denne extension. Da den både skal håndtere credentials og databaseafhængigheder, er det vigtigt at følge nedenstående punkter. Modulet kan opsættes i følgende konfigurationer:
+
+- Kun BlueIdea
+  - lukkeliste er `false`
+  - blueidea er `true`, samt username + password
+- Kun Lukkeliste
+  - lukkeliste er `true`, samt `ventil_layer`, `ventil_layer_key` og `udpeg_layer`
+  - blueidea er `false`
+- BlueIdea og Lukkeliste
+  - lukkeliste er `true`, samt `ventil_layer`, `ventil_layer_key` og `udpeg_layer`
+  - blueidea er `true`, samt username + password
 
 ### Vidi
 
@@ -33,6 +43,7 @@ module.exports = {
       password: "supersecret",
       profileid: 3793,
       lukkeliste: true,
+      blueidea: true,
       ventil_layer: "ledningsplan_fjv.ventil",
       ventil_layer_key: "ventilid",
       udpeg_layer: "ledningsplan_fjv.vw_centerlinje",
@@ -41,21 +52,22 @@ module.exports = {
 };
 ```
 
-| Property | Type    | Description                                       |
-| -------- | ------- | ------------------------------------------------- |
-| debug    | boolean | styrer om beskeder i blueidea sættes som testmode |
-| hostname | string  | blueidea hostname                                 |
-| users    | object  | bruger konfiguration, se herunder                 |
+| Property | Type   | Description                       |
+| -------- | ------ | --------------------------------- |
+| hostname | string | blueidea hostname                 |
+| users    | object | bruger konfiguration, se herunder |
 
-| Property         | Type    | Description                                                    |
-| ---------------- | ------- | -------------------------------------------------------------- |
-| username         | string  | blueidea brugernavn                                            |
-| password         | string  | blueidea adgangskode                                           |
-| lukkeliste       | boolean | om brugeren skal have adgang til lukkeliste-værktøjerne        |
-| profileid        | int     | blueidea profil id                                             |
-| ventil_layer     | string  | navnet på layeret hvor ventil-lukkeliste skal findes           |
-| ventil_layer_key | string  | navnet på kolonnen som skal filtreres på                       |
-| udpeg_layer      | string  | navnet på lag som skal tændes når man vil udpegde i lukkeliste |
+| Property         | Type    | Default | Description                                                    |
+| ---------------- | ------- | ------- | -------------------------------------------------------------- |
+| debug            | boolean |         | styrer om beskeder i blueidea sættes som testmode              |
+| username         | string  |         | blueidea brugernavn                                            |
+| password         | string  |         | blueidea adgangskode                                           |
+| blueidea         | boolean | `True`  | om brugeren skal have adgang til blueidea-værktøjerne          |
+| lukkeliste       | boolean | `False` | om brugeren skal have adgang til lukkeliste-værktøjerne        |
+| profileid        | int     |         | blueidea profil id                                             |
+| ventil_layer     | string  |         | navnet på layeret hvor ventil-lukkeliste skal findes           |
+| ventil_layer_key | string  |         | navnet på kolonnen som skal filtreres på                       |
+| udpeg_layer      | string  |         | navnet på lag som skal tændes når man vil udpegde i lukkeliste |
 
 Der skal ligeledes laves en opsætning af extension i kørselsmiljøet. Se nedenfor.
 
@@ -77,4 +89,9 @@ Det noteres at `userid` er en reference til en bruger i `users` konfigurationen.
 
 ### GC2
 
-Den bruger der tænkes at bruge lukkeliste-værktøjerne skal have en rolle med læse- og skriveadgang til tabellerne `lukkeliste.beregn_ventiler` og `lukkeliste.beregn_afskaaretmatrikler`.
+Den bruger der tænkes at bruge lukkeliste-værktøjerne skal have en rolle med læse- og skriveadgang til tabellerne:
+
+- `lukkeliste.beregn_ventiler`
+- `lukkeliste.beregn_afskaaretmatrikler`
+- `lukkeliste.beregn_afskaaretnet`
+- `lukkeliste.beregnlog`

@@ -102,6 +102,8 @@ var cloud;
 var bufferItems = new L.FeatureGroup();
 var queryMatrs = new L.FeatureGroup();
 var queryVentils = new L.FeatureGroup();
+var selectedPoint = new L.FeatureGroup();
+var seletedLedninger = new L.FeatureGroup();
 
 var _clearBuffer = function () {
   bufferItems.clearLayers();
@@ -112,11 +114,19 @@ var _clearMatrs = function () {
 var _clearVentil = function () {
   queryVentils.clearLayers();
 };
+var _clearSelectedPoint = function () {
+  selectedPoint.clearLayers();
+};
+var _clearSeletedLedninger = function () {
+  seletedLedninger.clearLayers();
+};
 
 var _clearAll = function () {
   _clearBuffer();
   _clearMatrs();
   _clearVentil();
+  _clearSelectedPoint();
+  _clearSeletedLedninger();
 };
 
 const MAXFEATURES = 500;
@@ -125,11 +135,65 @@ const resetObj = {
   authed: false,
   user_id: null,
   user_lukkeliste: false,
+  user_blueidea: false,
   user_db: false,
   user_ventil_layer: null,
   user_udpeg_layer: null,
   user_ventil_layer_key: null,
   user_ventil_export: null,
+};
+
+// This element contains the styling for the module
+var styleObject = {
+  ventil_forbundet: {
+    radius: 8,
+    fillColor: "#00ff00",
+    color: "#000",
+    weight: 1,
+    opacity: 1,
+    fillOpacity: 0.8,
+  },
+  ventil: {
+    radius: 5,
+    fillColor: "#ff7800",
+    color: "#000",
+    weight: 1,
+    opacity: 1,
+    fillOpacity: 0.8,
+  },
+  selectedLedning: {
+    color: "#AA4A44",
+    weight: 8,
+  },
+  selectedPoint: {
+    html: `
+  <svg
+  width="24"
+  height="24"
+  xmlns="http://www.w3.org/2000/svg" 
+  fill-rule="evenodd"
+  clip-rule="evenodd">
+  <path d="M12 11.293l10.293-10.293.707.707-10.293 10.293 10.293 10.293-.707.707-10.293-10.293-10.293 10.293-.707-.707 10.293-10.293-10.293-10.293.707-.707 10.293 10.293z"/>
+  </svg>
+  `,
+    className: "",
+    iconSize: [24, 24], // size of the icon
+    //iconAnchor: [-10, -10], // point of the icon which will correspond to marker's location
+  },
+  matrikel: {
+    color: "#000000",
+    weight: 1,
+    opacity: 1,
+    fillOpacity: 0.2,
+    dashArray: "5,3",
+  },
+  buffer: {
+    color: "#ff7800",
+    weight: 1,
+    opacity: 1,
+    fillOpacity: 0.1,
+    dashArray: "5,3",
+  },
 };
 
 /**
@@ -229,6 +293,8 @@ module.exports = {
     mapObj.addLayer(bufferItems);
     mapObj.addLayer(queryMatrs);
     mapObj.addLayer(queryVentils);
+    mapObj.addLayer(selectedPoint);
+    mapObj.addLayer(seletedLedninger);
 
     /**
      *
@@ -246,12 +312,14 @@ module.exports = {
      */
     var dict = {
       Info: {
-        da_DK: "infoDK",
-        en_US: "infoUS",
+        da_DK:
+          "BlueIdea / Lukkeliste er et modul der hjælper med at finde relevante adresser til en lukning. Du kan tegne et område på kortet, og få en liste over adresser i området. Du kan også udpege et punkt på ledningsnettet, og få en liste af adresser der er forbundet til det punkt. Listerne med adresser kan derefter bruges til at sende beskeder ud med BlueIdea (Kræver aftale med BlueIdea).",
+        en_US:
+          "BlueIdea / Valve list is a module that helps to find relevant addressess for a valve closure. You can draw an area on the map, and get a list of addresses in the area. You can also select a point on the network, and get a list of addresses connected to that point. The lists of addresses can then be used to send messages with BlueIdea (Requires agreement with BlueIdea).",
       },
       "Plugin Tooltip": {
-        da_DK: "BlueIdea",
-        en_US: "BlueIdea",
+        da_DK: "BlueIdea / Lukkeliste",
+        en_US: "BlueIdea / Valve list",
       },
       MissingLogin: {
         da_DK:
@@ -315,6 +383,10 @@ module.exports = {
         da_DK: "Download ventil-liste",
         en_US: "Download valve list",
       },
+      NotAllowedBlueIdea: {
+        da_DK: "Du har ikke adgang til BlueIdea",
+        en_US: "You are not allowed to use BlueIdea",
+      },
     };
 
     /**
@@ -377,7 +449,8 @@ module.exports = {
           results_adresser: {},
           results_matrikler: [],
           results_ventiler: [],
-          user_lukkeliste: false,
+          user_lukkeliste: null,
+          user_blueidea: null,
           user_id: null,
           user_profileid: null,
           user_db: false,
@@ -450,11 +523,18 @@ module.exports = {
             .finally(() => {
               // If logged in, and user_id is not null, show buttons
               if (me.state.authed && me.state.user_id) {
-                $("#_draw_make_blueidea_with_selected").show();
-                $("#_draw_make_blueidea_with_all").show();
+                // If user has blueidea, show buttons
+                if (me.state.user_blueidea == true) {
+                  $("#_draw_make_blueidea_with_selected").show();
+                  $("#_draw_make_blueidea_with_all").show();
+                } else {
+                  $("#_draw_make_blueidea_with_selected").hide();
+                  $("#_draw_make_blueidea_with_all").hide();
+                }
                 // TODO: Disabled for now, but lists templates
                 //this.getTemplates();
               } else {
+                // If not logged in, hide buttons
                 $("#_draw_make_blueidea_with_selected").hide();
                 $("#_draw_make_blueidea_with_all").hide();
               }
@@ -505,9 +585,10 @@ module.exports = {
                 config.extensionConfig.blueidea.userid,
               type: "GET",
               success: function (data) {
-                //console.debug("Got user", data);
+                console.log("Got user", data);
                 me.setState({
-                  user_lukkeliste: data.lukkeliste || false,
+                  user_lukkeliste: data.lukkeliste,
+                  user_blueidea: data.blueidea,
                   user_id: config.extensionConfig.blueidea.userid,
                   user_profileid: data.profileid || null,
                   user_db: data.db || false,
@@ -610,7 +691,7 @@ module.exports = {
 
                 return merged;
               } catch (error) {
-                //console.debug(error);
+                console.warn(error);
               }
             })
             .then((matrikler) => {
@@ -642,7 +723,7 @@ module.exports = {
               return;
             });
         } catch (error) {
-          //console.debug(error);
+          console.warn(error);
           this.createSnack(error);
           return;
         }
@@ -681,7 +762,7 @@ module.exports = {
                   units: "meters",
                 });
               } catch (error) {
-                //console.debug(error, feature);
+                console.warn(error, feature);
               }
             } else {
               buffered = turfBuffer(feature, exBufferDistance, {
@@ -691,7 +772,7 @@ module.exports = {
 
             collection.features.push(buffered);
           } catch (error) {
-            //console.debug(error, feature);
+            console.warn(error, feature);
           }
         }
 
@@ -726,6 +807,23 @@ module.exports = {
               results[i].features.length > 0
             ) {
               for (let j = 0; j < results[i].features.length; j++) {
+                // If the matrikel is a litra - starts with 7000, ignore it in the list
+                if (
+                  results[i].features[j].properties.matrikelnr.startsWith(
+                    "7000"
+                  )
+                ) {
+                  continue;
+                }
+
+                // If the matikel has a registreretarel that is equal to vejareal, ignore it in the list
+                if (
+                  results[i].features[j].properties.registreretareal ==
+                  results[i].features[j].properties.vejareal
+                ) {
+                  continue;
+                }
+
                 let feature = results[i].features[j];
                 merged[feature.properties.featureid] = feature;
               }
@@ -734,7 +832,7 @@ module.exports = {
           let newCollection = turfFeatureCollection(Object.values(merged));
           return newCollection;
         } catch (error) {
-          //console.debug(error);
+          console.warn(error);
         }
       }
 
@@ -758,7 +856,7 @@ module.exports = {
           }
           return merged;
         } catch (error) {
-          console.log(error);
+          console.warn(error);
           return [];
         }
       }
@@ -767,15 +865,9 @@ module.exports = {
        */
       addBufferToMap(geojson) {
         try {
-          var l = L.geoJSON(geojson, {
-            color: "#ff7800",
-            weight: 1,
-            opacity: 1,
-            fillOpacity: 0.1,
-            dashArray: "5,3",
-          }).addTo(bufferItems);
+          var l = L.geoJSON(geojson, styleObject.buffer).addTo(bufferItems);
         } catch (error) {
-          //console.debug(error, geojson);
+          console.warn(error, geojson);
         }
       }
 
@@ -784,15 +876,9 @@ module.exports = {
        */
       addMatrsToMap(geojson) {
         try {
-          var l = L.geoJSON(geojson, {
-            color: "#000000",
-            weight: 1,
-            opacity: 1,
-            fillOpacity: 0.2,
-            dashArray: "5,3",
-          }).addTo(queryMatrs);
+          var l = L.geoJSON(geojson, styleObject.matrikel).addTo(queryMatrs);
         } catch (error) {
-          //console.debug(error, geojson);
+          console.warn(error, geojson);
         }
       }
 
@@ -808,29 +894,44 @@ module.exports = {
               // if the feature has a forbundet property, use a different icon
               if (feature.properties.forbundet) {
                 // //console.debug(feature.properties, latlng);
-                return L.circleMarker(latlng, {
-                  radius: 8,
-                  fillColor: "#00ff00",
-                  color: "#000",
-                  weight: 1,
-                  opacity: 1,
-                  fillOpacity: 0.8,
-                });
+                return L.circleMarker(latlng, styleObject.ventil_forbundet);
               }
 
               // else, use the default icon
-              return L.circleMarker(latlng, {
-                radius: 5,
-                fillColor: "#ff7800",
-                color: "#000",
-                weight: 1,
-                opacity: 1,
-                fillOpacity: 0.8,
-              });
+              return L.circleMarker(latlng, styleObject.ventil);
             },
           }).addTo(queryVentils);
         } catch (error) {
-          //console.debug(error, geojson);
+          console.warn(error, geojson);
+        }
+      }
+
+      /**
+       * Styles and adds ledninger to the map
+       */
+      addSelectedLedningerToMap(geojson) {
+        try {
+          var l = L.geoJSON(geojson, styleObject.selectedLedning).addTo(
+            seletedLedninger
+          );
+        } catch (error) {
+          console.warn(error, geojson);
+        }
+      }
+
+      /**
+       * Styles and adds the selected point to the map
+       */
+      addSelectedPointToMap(geojson) {
+        try {
+          var myIcon = new L.DivIcon(styleObject.selectedPoint);
+          var l = L.geoJSON(geojson, {
+            pointToLayer: function (feature, latlng) {
+              return new L.Marker(latlng, { icon: myIcon });
+            },
+          }).addTo(selectedPoint);
+        } catch (error) {
+          console.warn(error, geojson);
         }
       }
 
@@ -879,6 +980,13 @@ module.exports = {
         let body = {
           profileId: this.state.profileId || null,
         };
+
+        // if blueidea is false, return
+        if (!this.state.user_blueidea) {
+          // show error in snackbar
+          this.createSnack(__("NotAllowedBlueIdea"));
+          return;
+        }
 
         // take the curent list of addresses and create an array of objects containing the kvhx
         let keys = Object.keys(this.state.results_adresser);
@@ -984,11 +1092,28 @@ module.exports = {
             .then((data) => {
               // if the server returns a result, show it
               if (data) {
-                //console.debug(data);
+                console.debug(data);
 
                 // if the results contains a list of matrikler, run them through the queryAdresser function
                 if (data.matrikler) {
-                  me.queryAddresses(data.matrikler);
+                  // only if blueidea is allowed
+                  if (me.allowBlueIdea()) {
+                    me.queryAddresses(data.matrikler);
+                  }
+                }
+
+                if (data.ledninger) {
+                  //console.debug("Got ledninger:", data.ledninger);
+                  me.addSelectedLedningerToMap(data.ledninger);
+                  me.setState({
+                    results_ledninger: data.ledninger.features,
+                  });
+                }
+
+                // Add the clicked point to the map
+                if (data.log) {
+                  //console.debug("Got log:", data.log);
+                  me.addSelectedPointToMap(data.log);
                 }
 
                 if (data.ventiler) {
@@ -1001,7 +1126,7 @@ module.exports = {
               }
             })
             .catch((error) => {
-              //console.debug(error);
+              console.warn(error);
             });
         });
       };
@@ -1046,7 +1171,8 @@ module.exports = {
       };
 
       /**
-       * Determines if the plugin is ready to send data to blueidea
+       * Determines if the plugin is ready after getting results
+       * @returns boolean
        */
       readyToSend = () => {
         // if adresse array is not empty, return true
@@ -1058,10 +1184,36 @@ module.exports = {
       };
 
       /**
+       * Determines if the result is ready to be sent to blueidea
+       * @returns boolean
+       */
+      readyToBlueIdea = () => {
+        // if readyToSend is true, and blueidea is true, return true
+        if (this.readyToSend() && this.allowBlueIdea()) {
+          return true;
+        } else {
+          return false;
+        }
+      };
+
+      /**
        * Determines if lukkeliste is allowed
+       * @returns boolean
        */
       allowLukkeliste = () => {
-        if (this.state.user_lukkeliste && this.state.user_db) {
+        if (this.state.user_lukkeliste == true && this.state.user_db == true) {
+          return true;
+        } else {
+          return false;
+        }
+      };
+
+      /**
+       * Determines if blueidea is allowed
+       * @returns boolean
+       */
+      allowBlueIdea = () => {
+        if (this.state.user_blueidea == true) {
           return true;
         } else {
           return false;
@@ -1070,6 +1222,7 @@ module.exports = {
 
       /**
        * Determines if ventiler can be downloaded
+       * @returns boolean
        */
       allowVentilDownload = () => {
         let me = this;
@@ -1163,16 +1316,18 @@ module.exports = {
       downloadVentiler = () => {
         let me = this;
 
+        console.log(me.state.results_ventiler, me.state.user_ventil_export);
+
         // Use keys as headers
         let csvRows = [];
-        csvRows.push(Object.keys(me.state.user_ventil_export.structure));
+        csvRows.push(Object.keys(me.state.user_ventil_export));
 
         // for each feature in results_ventiler, append to csvRows with the values from the user_ventil_export
         for (let index in me.state.results_ventiler) {
           let feature = me.state.results_ventiler[index].properties;
 
           // create a row, using the values from the user_ventil_export
-          let columns = Object.values(me.state.user_ventil_export.structure);
+          let columns = Object.values(me.state.user_ventil_export);
           let row = [];
 
           // Add values to row
@@ -1215,6 +1370,7 @@ module.exports = {
                       size="large"
                       variant="contained"
                       style={{ margin: "10px" }}
+                      disabled={!this.allowBlueIdea()}
                     >
                       {__("Draw area")}
                     </Button>
@@ -1261,7 +1417,7 @@ module.exports = {
                     size="large"
                     variant="contained"
                     style={{ margin: "10px" }}
-                    disabled={!this.readyToSend()}
+                    disabled={!this.readyToBlueIdea()}
                   >
                     {__("Go to blueidea")}
                   </Button>
@@ -1331,7 +1487,7 @@ module.exports = {
       __("Plugin Tooltip"),
       __("Info"),
       require("./../../../browser/modules/height")().max,
-      "smartphone",
+      "timeline",
       false,
       exId
     );
