@@ -17,6 +17,12 @@
                 var width = targetDiv.getAttribute("data-vidi-width") || "100%";
                 var height = targetDiv.getAttribute("data-vidi-height") || "100%";
                 var tmpl = targetDiv.getAttribute("data-vidi-tmpl") || "embed.tmpl";
+                var useSchema = targetDiv.getAttribute("data-vidi-use-schema") === "true";
+                var useConfig = targetDiv.getAttribute("data-vidi-use-config") === "true";
+                var noTracking = targetDiv.getAttribute("data-vidi-no-tracking") || "false";
+                var configHost = targetDiv.getAttribute("data-vidi-host") || null;
+                var frameName = targetDiv.getAttribute("data-vidi-frame-name") || null;
+
                 var search = targetDiv.getAttribute("data-vidi-search") || "";
                 var history = targetDiv.getAttribute("data-vidi-history") || "";
                 var legend = targetDiv.getAttribute("data-vidi-legend") || "";
@@ -25,11 +31,13 @@
                 var fullscreen = targetDiv.getAttribute("data-vidi-fullscreen") || "";
                 var about = targetDiv.getAttribute("data-vidi-about") || "";
                 var location = targetDiv.getAttribute("data-vidi-location") || "";
-                var useSchema = targetDiv.getAttribute("data-vidi-use-schema") === "true";
-                var useConfig = targetDiv.getAttribute("data-vidi-use-config") === "true";
-                var noTracking = targetDiv.getAttribute("data-vidi-no-tracking") || "false";
-                var configHost = targetDiv.getAttribute("data-vidi-host") || null;
-                var frameName = targetDiv.getAttribute("data-vidi-frame-name") || null;
+
+                var reset = targetDiv.getAttribute("data-vidi-reset") || "none";
+                var measurement = targetDiv.getAttribute("data-vidi-measurement") || "none";
+                var clear = targetDiv.getAttribute("data-vidi-clear") || "none";
+                var boxzoom = targetDiv.getAttribute("data-vidi-boxzoom") || "none";
+                var signin = targetDiv.getAttribute("data-vidi-signin") || "";
+
                 try {
                     var obj = JSON.parse(atob(token));
                 } catch (e) {
@@ -37,7 +45,7 @@
                 }
                 var host = (configHost || obj.host) + ""; // Port ?
                 // If host is http, then make it protocol relative, so tokens created on http still works when embedded on https sites.
-                host = host.replace("http:", "");
+                // host = host.replace("http:", "");
                 var id = obj.id;
                 var database = obj.database;
                 var schema = obj.schema !== undefined && useSchema ? obj.schema + "/" : "";
@@ -51,6 +59,11 @@
                     "&ful=" + fullscreen +
                     "&abo=" + about +
                     "&loc=" + location +
+                    "&res=" + reset +
+                    "&mea=" + measurement +
+                    "&cle=" + clear +
+                    "&box=" + boxzoom +
+                    "&sig=" + signin +
                     (frameName ? "&readyCallback=" + frameName : "") + "&notracking=" + noTracking +
                     "&dps=1";
                 var iframe = document.createElement("iframe");

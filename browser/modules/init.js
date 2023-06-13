@@ -201,30 +201,19 @@ module.exports = {
         gc2i18n.dict.aboutBox = window.vidiConfig.aboutBox;
 
         // Start of embed settings for display of buttons
-        if (urlVars.sea) {
-            gc2i18n.dict._displaySearch = urlVars.sea || "inline";
-        }
-        if (urlVars.his) {
-            gc2i18n.dict._displayHistory = urlVars.his || "inline";
-        }
-        if (urlVars.leg) {
-            gc2i18n.dict._displayLegend = urlVars.leg || "inline";
-        }
-        if (urlVars.lay) {
-            gc2i18n.dict._displayLayer = urlVars.lay || "inline";
-        }
-        if (urlVars.bac) {
-            gc2i18n.dict._displayBackground = urlVars.bac || "inline";
-        }
-        if (urlVars.ful) {
-            gc2i18n.dict._displayFullscreen = urlVars.ful || "inline";
-        }
-        if (urlVars.abo) {
-            gc2i18n.dict._displayAbout = urlVars.abo || "inline";
-        }
-        if (urlVars.loc) {
-            gc2i18n.dict._displayLocation = urlVars.loc || "inline";
-        }
+        gc2i18n.dict._displaySearch = urlVars?.sea || "inline";
+        gc2i18n.dict._displayHistory = urlVars?.his || "inline";
+        gc2i18n.dict._displayLegend = urlVars?.leg || "inline";
+        gc2i18n.dict._displayLayer = urlVars?.lay || "inline";
+        gc2i18n.dict._displayBackground = urlVars?.bac || "inline";
+        gc2i18n.dict._displayFullscreen = urlVars?.ful || "inline";
+        gc2i18n.dict._displayAbout = urlVars?.abo || "inline";
+        gc2i18n.dict._displayLocation = urlVars?.loc || "inline";
+        gc2i18n.dict._displayReset = urlVars?.res || "inline";
+        gc2i18n.dict._displayMeasurement = urlVars?.mea || "inline";
+        gc2i18n.dict._displayClear = urlVars?.cle || "inline";
+        gc2i18n.dict._displayBox = urlVars?.box || "inline";
+        gc2i18n.dict._displaySignin = urlVars?.sig || "inline";
 
         // Render the page
         // ===============

@@ -1,4 +1,45 @@
 <style>
+    .history-control {
+        display: {{_displayHistory}} !important;
+    }
+    .leaflet-control-locate {
+        display: {{_displayLocation}} !important;
+    }
+    #offcanvasLayerControlBtn {
+        display: {{_displayLayer}} !important;
+    }
+    .place-search {
+        display: {{_displaySearch}} !important;
+    }
+    .legend-btn {
+        display: {{_displayLegend}} !important;
+    }
+    .baselayer-toggle {
+        display: {{_displayLegend}} !important;
+    }
+    .full-screen-btn {
+        display: {{_displayFullscreen}} !important;
+    }
+    .about-btn {
+        display: {{_displayAbout}} !important;
+    }
+    .reset-btn {
+        display: {{_displayReset}} !important;
+    }
+    .leaflet-control-measurements {
+        display: {{_displayMeasurement}} !important;
+    }
+    .leaflet-clear-map {
+        display: {{_displayClear}} !important;
+    }
+    .leaflet-control-boxzoom {
+        display: {{_displayBox}} !important;
+    }
+    .sign-in-btn {
+        display: {{_displaySignin}} !important;
+    }
+</style>
+<style>
     .leaflet-control-custom, .history-control, .leaflet-control-boxzoom {
         display: inline;
     }
@@ -86,10 +127,10 @@
                     <i class="bi bi-signal"></i>Online</span>
                     <span class="badge text-bg-danger js-app-is-offline-badge d-none">Offline</span>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item reset-btn">
                     <a class="nav-link" id="btn-reset" href="#">Reset</a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item about-btn">
                     <a class="nav-link" data-bs-toggle="modal" data-bs-target="#about-modal" href="#">{{About}}</a>
                 </li>
             </ul>

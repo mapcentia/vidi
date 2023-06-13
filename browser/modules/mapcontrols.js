@@ -40,7 +40,7 @@ const FullScreenMapControlOptions = {
 let FullScreenMapControl = L.Control.extend({
     options: {position: 'topright'},
     onAdd: () => {
-        let container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom embed-full-screen');
+        let container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom full-screen-btn');
         let el = $(container).append(FullScreenMapControlOptions.template)[0];
         L.DomEvent.disableClickPropagation(el);
         el.onclick = FullScreenMapControlOptions.onclick;

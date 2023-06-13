@@ -61,10 +61,12 @@ Der en række data attributer, som skal/kan sættes:
  * Navn på det indsatte kort. Dette er nødvendig hvis :ref:`embed_api` skal anvendes.
 * **data-vidi-no-tracking (valgfri)**
  * Kan sættes til "true" for at undgå at Vidi's tracking cookie bliver sat. Cookien anvendes bl.a til anonyme projekter og print, hvilket der typisk ikke er behov for på indlejrede kort.
-Følgende attributer styrer hvilke funktioner, der skal være synlige. Standard er, at alle funktioner er synlige, men kan sættes til "none" hvis funktionen skal skjules:
+Følgende attributer styrer hvilke funktioner, der skal være synlige.
+
+Følgende funktioner er synlige, men kan sættes til "none" hvis funktionerne skal skjules:
 
 * **data-vidi-search (valgfri)**
- * Ssøgeboksen.
+ * Søgeboksen.
 * **data-vidi-history (valgfri)**
  * Forrige/næste udsnit knapperne.
 * **data-vidi-legend (valgfri)**
@@ -79,6 +81,20 @@ Følgende attributer styrer hvilke funktioner, der skal være synlige. Standard 
  * Om-knappen.
 * **data-vidi-location (valgfri)**
  * Find-mig-knappen.
+* **data-vidi-signin (valgfri)**
+ * Login-knappen.
+
+Følgende funktioner er skjulte, men kan sættes til "inline" hvis funktionerne skal være synlige:
+
+* **data-vidi-measurement (valgfri)**
+ * Måleværktøjet.
+* **data-vidi-boxzoom (valgfri)**
+ * "Elastik"-zoom-knappen.
+* **data-vidi-reset (valgfri)**
+ * Reset-knappen.
+* **data-vidi-clear (valgfri)**
+ * Ryd-kort-knappen.
+
 
 
 .. _embed_api:
