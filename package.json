@@ -171,6 +171,7 @@
     "regenerator-runtime": "^0.13.9",
     "request": "^2.88.2",
     "require-globify": "^1.4.1",
+    "sass": "^1.62.1",
     "save": "^2.4.0",
     "semver": "^7.3.8",
     "session-file-store": "^1.4.0",
