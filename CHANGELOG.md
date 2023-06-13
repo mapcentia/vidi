@@ -10,7 +10,7 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ## [2023.2.1] - 2023-21-2
 ### Fixed
-- Use "geography" distance when doing feature info on points and lines. Otherwise the distance will be degrees and capture anything inside the map extent.
+- Use "geography" distance when doing feature info on points and lines. Otherwise, the distance will be degrees and capture anything inside the map extent.
 
 ## [2023.2.0] - 2023-14-2
 ### Added
@@ -45,7 +45,7 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ## [2022.11.1] - 2022-16-11
 ### Changed
-- Reworked editor tools in popups. Now a central listner in the Editor module will invoke editing. Vector and raster now use the same markup definition for the editor tools.
+- Reworked editor tools in popups. Now a central listener in the Editor module will invoke editing. Vector and raster now use the same markup definition for the editor tools.
 - Editing can now be invoked from the accordion popup.
 - The editor geometry for raster is now blue.
 - The same marker is now used for both editing and adding points.
@@ -54,7 +54,7 @@ and this project adheres to [CalVer](https://calver.org/).
 ## [2022.11.0] - 2022-8-11
 ### Added
 - The url parameter `dps=1` will prevent browser state from being pushed to history. This parameter will be set by embed.js, so the browser history will not be pushed to the parent frame. Snapshot links will also have this parameter set.
-- A new faster init process is implemented which cuts about 50% of startup time for Vidi. This new init process will automatic be invoked unless a URL achor is used - when the old process will be invoked. 
+- A new faster init process is implemented which cuts about 50% of startup time for Vidi. This new init process will automatically be invoked unless a URL anchor is used - when the old process will be invoked. 
 
 ### Changed
 - When using `crossMultiSelect` the geometry for the open accordion panel will now get the 'selected' style.
