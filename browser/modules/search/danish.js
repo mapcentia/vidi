@@ -201,6 +201,10 @@ module.exports = {
             el = "custom-search";
         }
 
+        if ($("#" + el).data("vidi-address-only")) {
+            onlyAddress = true;
+        }
+
         // Define GC2 SQL store
         // ====================
         const iconOptions = {
