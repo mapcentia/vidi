@@ -176,7 +176,7 @@ module.exports = {
                         return container;
                     }
                 })
-                if (window.vidiConfig.template === "embed.tmpl") {
+                if (window.vidiConfig.template !== "default.tmpl") {
                     baselayerToggleControl = new BaselayerToggleControl();
                     cloud.get().map.addControl(baselayerToggleControl);
                 }
