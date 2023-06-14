@@ -394,8 +394,8 @@ module.exports = {
         });
 
         backboneEvents.get().on(`off:all`, () => {
-            _self.control(false);
-            _self.off();
+            // _self.control(false);
+            // _self.off();
         });
 
         utils.createMainTab(exId, __("Symbols"), __("Info"), require('./../../../browser/modules/height')().max, "bi bi-flower1", false, exId);
