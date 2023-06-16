@@ -978,7 +978,7 @@ module.exports = {
        */
       sendToBlueIdea = () => {
         let body = {
-          profileId: this.state.profileId || null,
+          profileId: this.state.user_profileid || null,
         };
 
         // if blueidea is false, return
