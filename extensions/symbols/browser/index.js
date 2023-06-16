@@ -306,7 +306,7 @@ const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file, gro
         delete symbolState[e.target.id];
         setState();
         try {
-            func(file, symbolState, "delete");
+            func(file, group, symbolState, "delete");
         } catch (e) {
             console.error("Error in callback for " + file, e.message)
         }
@@ -337,7 +337,7 @@ const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file, gro
     if (callback) {
         try {
             let func = Function('"use strict";return (' + callback + ')')();
-            func(file, symbolState, "create");
+            func(file, group, symbolState, "create");
         } catch (e) {
             console.error("Error in callback for " + file, e.message)
         }
