@@ -79,7 +79,7 @@ let start = function (dataToAuthorizeWith, req, response, status) {
         req.session.parentDb = data.parentdb;
         req.session.properties = data.properties;
 
-        console.log("Session started.","Has autologin:",autoLogin,autoLoginMaxAge);
+        console.log("Session started.","User:",data.screen_name,"Database:",data.parentdb,"Has autologin:",autoLogin,autoLoginMaxAge);
 
         let resBody = {
             success: true,
