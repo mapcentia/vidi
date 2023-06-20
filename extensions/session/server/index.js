@@ -92,7 +92,8 @@ let start = function (dataToAuthorizeWith, req, response, status) {
             properties: data.properties
         };
 
-        if (autoLogin) {
+        // IF autologin is enabled, and autoLoginMaxAge is not NaN
+        if (autoLogin && !isNaN(autoLoginMaxAge)) {
             resBody.password = dataToAuthorizeWith.password;
             resBody.schema = dataToAuthorizeWith.schema;
             response.cookie('autoconnect.gc2', JSON.stringify(resBody), {
