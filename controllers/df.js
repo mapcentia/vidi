@@ -35,6 +35,6 @@ const get = (url, res) => {
         method: 'GET',
         uri: url
     };
-    request(options).on('error', (e) => console.error(e)).pipe(res);
+    request(options).on('error', (e) => console.error(url,e)).pipe(res);
 }
 module.exports = router;

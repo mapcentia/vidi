@@ -79,7 +79,7 @@ let start = function (dataToAuthorizeWith, req, response, status) {
         req.session.parentDb = data.parentdb;
         req.session.properties = data.properties;
 
-        console.log("Session started");
+        console.log("Session started.","Has autologin:",autoLogin,autoLoginMaxAge);
 
         let resBody = {
             success: true,
@@ -140,7 +140,7 @@ router.get('/api/session/status', function (req, response) {
         autoLogin = req.query.autoLogin === "true" ? true: false;
     
     if (typeof  req.query.autoLoginMaxAge  !== "undefined")
-        autoLoginMaxAge = typeof parseInt(req.query.autoLoginMaxAge) === "number" ? parseInt(req.query.autoLoginMaxAge) : 0 ; // Eller hvad nu default skal være
+        autoLoginMaxAge = typeof parseInt(req.query.autoLoginMaxAge) === "number" ? parseInt(req.query.autoLoginMaxAge) : 2629800000; // Eller hvad nu default skal være. (1 måned)
 
     if (autoLogin && autoLoginCookie && !req.session.gc2SessionId) {
         let creds = JSON.parse(autoLoginCookie);
