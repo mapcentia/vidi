@@ -122,7 +122,7 @@ class MarkupGenerator {
                             <span class="js-tiles-contain-data" style="visibility: ${moduleState.tileContentCache[layerKey] ? "inline" : "hidden"};" data-toggle="tooltip" data-placement="right"
                                 title="${__("Layer is visible")}"><i class="fa fa-eye info-icon" style="color: green;"></i></span>
                             <span class="js-tiles-has-filter" style="visibility: ${hasFilter ? "inline" : "hidden"};" data-toggle="tooltip" data-placement="right"
-                                title="${__("Layer has filter")}"><i class="material-icons">filter_list</i></span>
+                                title="${__("Layer has filter")}"><i class="material-icons" style="color: green;font-size: 1.2em;margin-top: 5px;">filter_list</i></span>
                             <span class="js-layer-is-disabled" style="visibility: ${disableCheckBox ? "inline" : "hidden"};" data-toggle="tooltip" data-placement="right"
                                 title="${__("Locked")}"><span class="material-icons" style="font-size: 13px; color: red">lock</span></span>
                             <span class="js-layer-has-parents info-icon" style="visibility: ${parentLayerKeys.length > 0 ? "inline" : "hidden"};" data-toggle="tooltip" data-placement="right"
