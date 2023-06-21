@@ -91,7 +91,6 @@ module.exports = {
         "Conflict with selected": "Conflict with selected",
         "Conflict with all": "Conflict with all",
         "Prints completed": "Prints completed",
-
         "Print": "Print",
         "Search places": "Search places",
         "Activate advanced query": "Activate advanced query",
@@ -179,7 +178,7 @@ module.exports = {
         "Ok": "Ok",
         "Apply default style settings for this drawing?": "Apply default style settings for this drawing?",
 
-        "Not a valid scale. Must be over 200.": "Not a valid scale. Must be over 200.",
+        "Not a valid scale. Must be over 100.": "Not a valid scale. Must be over 100.",
 
         "Languages": "Languages",
 

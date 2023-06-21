@@ -188,7 +188,6 @@ module.exports = {
         if (window.vidiConfig.popupDraggable) {
             draggableEnabled = true;
         }
-
         qStoreShadow = qstore;
 
         this.reset(qstore);
@@ -846,9 +845,23 @@ module.exports = {
     makeDraggable: (popup) => {
         const map = cloud.get().map
         const draggable = new L.Draggable(popup._container, popup._wrapper);
-        // change cursor class
-        $(".leaflet-popup-content-wrapper").css('cursor', 'move');
-        draggable.on('dragstart', function (e) {
+
+        // Set cursor to move on the outer wrapper
+        $(popup._wrapper).css('cursor', 'move')
+        // maintain auto-cursor on the inner content
+        $(popup._contentNode).css('cursor', 'auto')
+        $(popup._contentNode).css('pointer-events', 'all')
+
+        // disable draggable on mouse down inside the popup
+        $(popup._contentNode).on('mousedown', function (e) {
+            draggable.disable();
+        });
+        // once mouse is released, re-enable drag
+        $(popup._contentNode).on('mouseup', function (e) {
+            draggable.enable();
+        });
+
+        draggable.on('dragstart', function (e) {    
             //on first drag, remove the pop-up tip
             $(".leaflet-popup-tip-container").hide();
         });
@@ -866,4 +879,6 @@ module.exports = {
     getQstore: () => {
         return qStoreShadow;
     }
+
+    
 };

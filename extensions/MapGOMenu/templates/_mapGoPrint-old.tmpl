@@ -1,0 +1,45 @@
+<!-- override standard styles -->
+<style>
+    body {
+        background-color: white;
+    }
+
+    .leaflet-control-graphicscale {
+        box-shadow: none;
+        -webkit-box-shadow: none;
+        white-space: nowrap;
+    }
+
+    #legend, #header {
+        -webkit-box-shadow: 0 1px 6px 0 rgba(0, 0, 0, 0.12), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
+        box-shadow: 0 1px 6px 0 rgba(0, 0, 0, 0.12), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
+    }
+
+    .top-div {
+        left: 30px;
+        position: relative;
+    }
+</style>
+<!--
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css"/>
+-->
+<div style="max-width: 670px">
+    <div id="date-time" class="top-div" style="top:20px">{{printDataTime}}</div>
+    <div class="top-div" style="top:30px">Mængdeberegning:test <span id="mapGo-text"></span></div>
+    <!-- map -->
+    <div id="pane1" class="top-div" style="width: {{printWidth}}; height: {{printHeight}}; top:40px; display: block; overflow: hidden; border: 0px solid black">
+        <div id="container1" style="position: relative; width: 200%; height: 200%; left:-50%; top:-50%; display: inline-block">
+            <div id="map"></div>
+        </div>
+        <div id="scalebar" style="position: absolute; bottom: 20px; right: -70px;"></div>
+        <div id="scale" style="position: absolute; bottom: 5px; right: 10px; font-size: 0.8em;"></div>
+    </div>
+    <!-- Report -->
+    <div id="report" class="top-div" style="page-break-inside:avoid;margin-top: 60px">
+        <table class="table">
+            <caption>Summerede elementer</caption>
+        </table>
+        <div id="without"></div>
+    </div>
+</div>
+

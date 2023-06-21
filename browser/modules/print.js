@@ -113,15 +113,26 @@ module.exports = {
         backboneEvents.get().on("end:print", function (response) {
             console.log("Response", response)
             $("#get-print-fieldset").prop("disabled", false);
+            let pathstring = ''
             if (response.format === "pdf") {
                 $("#download-pdf, #open-pdf").attr("href", "/tmp/print/pdf/" + response.key + ".pdf");
+                pathstring = "/tmp/print/pdf/" + response.key + ".pdf"
             } else if (response.format === "png") {
                 $("#download-pdf, #open-pdf").attr("href", "/tmp/print/png/" + response.key + ".png");
+                pathstring = "/tmp/print/png/" + response.key + ".png"
             } else {
                 $("#download-pdf, #open-pdf").attr("href", "/tmp/print/png/" + response.key + ".zip");
+                pathstring = "/tmp/print/png/" + response.key + ".zip"
             }
             $("#download-pdf").attr("download", response.key);
             $("#open-html").attr("href", response.url);
+            
+            // Set value for mail
+            let mailSubject = 'Print fra Vidi'
+            let mailBody = 'Jeg vil gerne dele et plot med dig.%0D%0ADu kan hente plottet her:%0D%0A'
+            let mailHref = 'mailto:'+'?Subject='+ mailSubject + '&body=' + mailBody + encodeURIComponent("https://" + urlparser.urlObj.host + pathstring)
+            $("#send-pdf").attr("href", mailHref);
+
             $("#start-print-btn").button('reset');
             $(".dropdown-toggle.start-print-btn").prop("disabled", false);
             // GeoEnviron
@@ -463,10 +474,14 @@ module.exports = {
 
         var layerQueryDraw = [], layerQueryResult = [], layerQueryBuffer = [], layerPrint = [], e, parr,
             configFile = null;
-        if (scale && (isNaN(scale) || scale < 200)) {
-            alert(__("Not a valid scale. Must be over 200."));
-            return false;
-        }
+
+        // We really want to print in 100. so thats OK!
+        // TODO: check in config for applicable scales - RGB
+        // if (scale && (isNaN(scale) || scale < 200)) {
+        //     alert(__("Not a valid scale. Must be over 200."));
+        //     return false;
+        // }
+        
         backboneEvents.get().trigger("start:print");
         try {
             recEdit.editing.disable();

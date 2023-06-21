@@ -14,6 +14,14 @@ const shared = require('./gc2/shared');
 const request = require('request');
 const PDFMerge = require('pdf-merge');
 const AdmZip = require('adm-zip');
+const config = require('../config/config.js') 
+let printTimeout = ''
+
+if (typeof config.print.timeout !== "undefined") {
+    printTimeout = typeof config.print.timeout !== "undefined" ? config.print.timeout : 60000;
+} else {
+    printTimeout = 60000;
+}
 
 
 /**
@@ -142,9 +150,9 @@ function print(key, q, req, response, outputPng = false, frame = 0, count, retur
                     setTimeout(() => {
                         if (headless.isBorrowedResource(browser)) {
                             headless.destroy(browser);
-                            console.log("Destroying browser after 60 secs");
+                            console.log("Destroying browser after " + printTimeout + " ms");
                         }
-                    }, 60000);
+                    }, printTimeout);
                     if (!outputPng) {
                         browser.newPage().then(async (page) => {
                             await page.emulateMedia('screen');

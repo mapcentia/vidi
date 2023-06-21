@@ -79,7 +79,7 @@ let start = function (dataToAuthorizeWith, req, response, status) {
         req.session.parentDb = data.parentdb;
         req.session.properties = data.properties;
 
-        console.log("Session started");
+        console.log("Session started.","User:",data.screen_name,"Database:",data.parentdb,"Has autologin:",autoLogin,autoLoginMaxAge);
 
         let resBody = {
             success: true,
@@ -92,7 +92,8 @@ let start = function (dataToAuthorizeWith, req, response, status) {
             properties: data.properties
         };
 
-        if (autoLogin) {
+        // IF autologin is enabled, and autoLoginMaxAge is not NaN
+        if (autoLogin && !isNaN(autoLoginMaxAge)) {
             resBody.password = dataToAuthorizeWith.password;
             resBody.schema = dataToAuthorizeWith.schema;
             response.cookie('autoconnect.gc2', JSON.stringify(resBody), {
@@ -127,7 +128,21 @@ router.get('/api/session/stop', function (req, response) {
 });
 
 router.get('/api/session/status', function (req, response) {
+    // console.log(req.url, req.cookies)
     let autoLoginCookie = req.cookies['autoconnect.gc2'];
+    /*
+    if (autoLogin == false && req.query.autoLogin)
+        autoLogin = req.query.autoLogin;
+    
+    if (req.query.autoLoginMaxAge)
+        autoLoginMaxAge = req.query.autoLoginMaxAge;
+    */
+    if (autoLogin === false && typeof req.query.autoLogin !== "undefined")
+        autoLogin = req.query.autoLogin === "true" ? true: false;
+    
+    if (typeof  req.query.autoLoginMaxAge  !== "undefined")
+        autoLoginMaxAge = typeof parseInt(req.query.autoLoginMaxAge) === "number" ? parseInt(req.query.autoLoginMaxAge) : 2629800000; // Eller hvad nu default skal være. (1 måned)
+
     if (autoLogin && autoLoginCookie && !req.session.gc2SessionId) {
         let creds = JSON.parse(autoLoginCookie);
         let credsForGc2 = {

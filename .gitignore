@@ -100,8 +100,8 @@ public/js/templates.js
 
 # Created by .ignore support plugin (hsz.mobi)
 
-config/config.js
-config/_variables.less
+# config/config.js
+# config/_variables.less
 
 /public/css/build/all.min.css
 /public/js/bundle.js
@@ -114,6 +114,20 @@ config/_variables.less
 /public/css/extensions/all.min.css
 /public/css/styles.css
 /public/css/styles.min.css
+/public/version.json
 
 # Environment variables
 .env
+
+# Related to extensions & secrets
+/config/gp/
+
+# Remove built css stuff
+public/js/lib/bootstrap-material-design/dist/css/bootstrap-material-design.css
+public/js/lib/bootstrap-material-design/dist/css/bootstrap-material-design.css.map
+public/js/lib/bootstrap-material-design/dist/css/bootstrap-material-design.min.css
+public/js/lib/bootstrap-material-design/dist/css/bootstrap-material-design.min.css.map
+public/js/lib/bootstrap-material-design/dist/css/ripples.css
+public/js/lib/bootstrap-material-design/dist/css/ripples.css.map
+public/js/lib/bootstrap-material-design/less/_variables.less
+public/css/styles.css
