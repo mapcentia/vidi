@@ -82,6 +82,7 @@ module.exports = {
         "polyline": "polyline",
         "circle": "circle",
         "marker": "marker",
+        "select-zip-shape":"Select zipped shape file here",
 
         // Report
         "Get as PDF": "Get as PDF",

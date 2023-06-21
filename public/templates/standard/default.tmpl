@@ -422,6 +422,14 @@
                                 <button class="btn btn-sm btn-raised" id="_draw_download_geojson" target="_blank" href="javascript:void(0)">
                                     <i class="fa fa-download" aria-hidden="true"></i> GeoJson
                                 </button>
+                                
+                                <button id="_draw_upload_shape_btn" class="btn btn-sm btn-raised" for="_draw_upload_shape_file"  title="Upload shape zip file" style="display:inline" target="_blank" href="javascript:void(0)">
+                                    <i class="fa fa-upload" aria-hidden="true"></i><p style="margin-right:10px;display:inline;"> Shape</p>
+                                    <input id="_draw_upload_shape_file"  style="display:none;" type="file"  accept-language  accept="zip,application/octet-stream,application/zip,application/x-zip,application/x-zip-compressed" >                                
+                                </button>
+                               
+                                <label id="_draw_upload_shape_error" style="font-size:12px;"></label> 
+                                
                                 <button class="btn btn-sm btn-raised" style="display: none" id="_draw_make_conflict_with_selected" target="_blank" href="javascript:void(0)">
                                     <i class="fa fa-download" aria-hidden="true"></i> {{Conflict with selected}}
                                 </button>

@@ -82,6 +82,7 @@ module.exports = {
         "polyline": "linje",
         "circle": "cirkel",
         "marker": "markør",
+        "select-zip-shape":"Vælg zippet shape fil her",
 
         // Report
         "Get as PDF": "Hent som PDF",

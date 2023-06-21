@@ -29,6 +29,42 @@ const getDistance = e => {
 };
 
 /**
+ * Get readable distance of feature
+ * @param e
+ * @returns {string}
+ * @private
+ */
+const getFeatureDistance = feature => {
+    let tempLatLng = null;
+    let totalDistance = 0.00000;
+    let coords = feature.geometry.coordinates;
+    $.each(coords, function (i, latlng) {
+        let current = L.latLng(latlng[0], latlng[1]);
+        if (tempLatLng == null) {
+            tempLatLng = current;
+            return;
+        }
+        totalDistance += tempLatLng.distanceTo(current);
+        tempLatLng = current;
+    });
+    return L.GeometryUtil.readableDistance(totalDistance, true);
+};
+
+/**
+ * Get readable area of feature
+ * @param e
+ * @returns {string}
+ * @private
+ */
+const getFeatureArea = feature => {
+    let latLngs = [];
+    for (const latLng of feature.geometry.coordinates[0])
+        latLngs.push(L.latLng(latLng[0], latLng[1]));
+    
+    return L.GeometryUtil.readableArea(L.GeometryUtil.geodesicArea(latLngs), true);
+};
+
+/**
  * Get readable area of layer
  * @param e
  * @returns {string}
@@ -42,4 +78,4 @@ const getAreaOfCircle = e => {
     return L.GeometryUtil.readableArea(Math.pow(e.getRadius(), 2) * Math.PI, true);
 };
 
-module.exports = { getDistance, getArea, getAreaOfCircle };
+module.exports = { getDistance, getFeatureDistance, getArea, getFeatureArea, getAreaOfCircle };
