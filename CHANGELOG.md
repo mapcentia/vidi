@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [Unreleased]
+### Added
+- Added a button to `draw` module for uploading zip-file containing one or more Shp-files. The functionality recreates the geometries as elements drawn by the user, and are printable and supported in conflictsearch.
+
 ## [2023.6.0] - 2023-20-6
 ### Fixed
 - Bug: The GC2 Open tools meta setting didn't work after tools were moved into at collapsable element.
