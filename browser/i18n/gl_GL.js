@@ -104,7 +104,6 @@ module.exports = {
         "Area": "Nunaminertaq",
         "Distance/Radius": "Ungasissuseq/tukimut takissuseq",
         "Type": "Iluseq",
-        "select-zip-shape":"Nakorsinnaavoq .zip fil attaveq",
 
     }
 };
