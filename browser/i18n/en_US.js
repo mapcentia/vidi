@@ -98,7 +98,7 @@ module.exports = {
         "Help text overlays": "Turn overlay maps on and off. Visible overlays becomes queryable.",
         "Help text baselayers": "Choose base layer.",
         "Help text legend": "Legend for visible overlay maps.",
-        "Help text draw": "Draw your own map. Use markers, lines, areas, squares and circles. You can edit and change color on already drawn features.",
+        "Help text draw": "Draw your own map. Use markers, lines, areas, squares and circles. You can edit and change color on already drawn features.<br />It is possible to upload a zip-file containing one or more shp-files. Files are exptected to located in EPSG:25832.",
         "Help text print": "Make scaled PDF map. Tweak the orange square in the map to set view extent and scale.",
         "Activate drawing tools": "Activate drawing tools",
         "Activate print tools": "Activate print tools",
