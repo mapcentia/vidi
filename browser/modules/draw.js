@@ -8,6 +8,7 @@
 
 const MODULE_NAME = `draw`;
 import { GEOJSON_PRECISION } from "./constants";
+import shp from "shpjs";
 const drawTools = require(`./drawTools`);
 const fileSaver = require(`file-saver`);
 let cloud, utils, state, serializeLayers;
@@ -41,6 +42,27 @@ module.exports = {
   init: () => {
     $("#_draw_download_geojson").click(function () {
       _self.download();
+    });
+
+    $("#_draw_upload_shape_file").on('change', async function (e) {
+      try {
+        $("#_draw_upload_shape_error").text('');
+        if (e.target.files && e.target.files.length > 0) {
+          let file = e.target.files[0];
+          if (!file.name.toLowerCase().endsWith(".zip")) {
+            $("#_draw_upload_shape_error").text('Must be a .zip file');
+            return;
+          }
+          $("#_draw_upload_shape_error").text(file.name);
+          _self.handleZipFile(file);
+        }
+      } catch (e) {
+        $("#_draw_upload_shape_error").text('Error on upload. Not a zip file');
+      }
+    });
+
+    $("#_draw_upload_shape_btn").on('click', function (e) {
+      document.getElementById('_draw_upload_shape_file').click();
     });
 
     backboneEvents.get().on(`reset:all`, () => {
@@ -170,6 +192,98 @@ module.exports = {
       $('#main-tabs a[href="#conflict-content"]').trigger("click");
       conflictSearch.makeSearch("Fra tegning", null, null, true);
     });
+  },
+
+  // Upload Shapefile
+  handleZipFile: (file) => {
+    try {
+        const reader = new FileReader();
+        reader.onload = function () {
+            if (reader.readyState != 2 || reader.error) {
+                return;
+            } else {
+                _self.convertToLayer(reader.result);
+            }
+        }
+        reader.readAsArrayBuffer(file);
+    } catch (err) {
+        $("#_draw_upload_shape_error").text('Error on upload');
+    }
+  },
+  handleFileInput: (files) => {
+      try {
+          const reader = new FileReader();
+          for (const element of files) {
+              const file = element
+              reader.onload = function (e) {
+                  const buffer = e.target.result;
+                  // Behandle bufferen her, f.eks. lagre den eller utføre andre operasjoner
+                  console.log(buffer);
+              };
+
+              reader.readAsArrayBuffer(file);
+          }
+      } catch (err) {
+          console.log(err);
+          $("#_draw_upload_shape_error").text(err.message);
+      }
+  },
+  countObjects: (geojson) => {
+    if (!geojson) return 0;
+    if (Array.isArray(geojson)) {
+        let result = 0;
+        for (const item of geojson) {
+            result += item.features.length;
+        }
+        return result;
+    }
+    return geojson.features.length;
+  },
+  setGeometryProperties: (geoJson) => {
+
+    for (const feature of geoJson.features) {
+
+        if (feature.geometry.type === 'LineString') {
+            feature.properties.type = 'polyline';
+            feature.properties.distance = drawTools.getFeatureDistance(feature);
+        }
+
+        else if (feature.geometry.type === 'Polygon') {
+            feature.properties.type = 'polygon';
+            feature.properties.area = drawTools.getFeatureArea(feature)
+        }
+        else
+            feature.properties.type = 'marker';
+    }
+  },
+
+  convertToLayer: (buffer) => {
+      shp(buffer).then(function (geojson) {
+          const count = _self.countObjects(geojson);
+          if (count === 0)
+              return;
+          const maxCount = 200;
+          if (count > maxCount) {
+              const errTxt = "File contains " + count + " objects. A maximum of " + maxCount + " allowed.";
+              $("#_draw_upload_shape_error").text(errTxt);
+              alert(errTxt);
+              return;
+          }
+          if (Array.isArray(geojson)) {
+              for (const element of geojson) {
+                  const redrawObject = [];
+                  _self.setGeometryProperties(element);
+                  redrawObject.push({ "geojson": element });
+                  _self.recreateDrawnings(redrawObject, false);
+              }
+          } else {
+              const redrawObject = [];
+              _self.setGeometryProperties(geojson);
+              redrawObject.push({ "geojson": geojson });
+              _self.recreateDrawnings(redrawObject, false);
+          }
+
+      })
   },
 
   // BlueIdea integration

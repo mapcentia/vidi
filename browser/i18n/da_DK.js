@@ -83,6 +83,7 @@ module.exports = {
     "Clear all drawings.": "Slet alle tegninger.",
     "No drawings in the map": "Ingen tegninger i kortet",
     "Click map to place circle marker": "Klik for at placere markør",
+    "select-zip-shape":"Vælg zippet shape fil her",
 
     polygon: "polygon",
     rectangle: "rektangel",
@@ -105,14 +106,14 @@ module.exports = {
     "Search places": "Søg på steder",
     "Activate advanced query": "Aktivér avanceret forespørgsel",
     "Help text overlays":
-      "Slå overlejringslag til og fra. Viste lag vil være spørgbare.",
+    "Slå overlejringslag til og fra. Viste lag vil være spørgbare.",
     "Help text baselayers":
-      "Vælg baggrundskort. Det er muligt at sammenligne to baggrundskort. Her kan man vælge om de to baggrundskort skal vises ved siden af hinanden eller om de skal lægges ovenpå hinanden. Ved førstnævnte kan man \\'swipe\\' mellem de to kort og ved sidstnævnte kan man ændre det øverste korts gennemsigtighed.",
+    "Vælg baggrundskort. Det er muligt at sammenligne to baggrundskort. Her kan man vælge om de to baggrundskort skal vises ved siden af hinanden eller om de skal lægges ovenpå hinanden. Ved førstnævnte kan man \\'swipe\\' mellem de to kort og ved sidstnævnte kan man ændre det øverste korts gennemsigtighed.",
     "Help text legend": "Signatur for tændte overlejringskort",
     "Help text draw":
-      "Tegn dit eget kort. Brug markører, linjer, flader, firkanter og cirkler. Under \\'Standard stilart for tegninger\\' kan du sætte farve, linjetyper, pilehoveder mm. Alle nye tegninger får disse indstillinger. Klik på en allerede tegnet figur for at tilføje standardindstillingerne.",
+    "Tegn dit eget kort. Brug markører, linjer, flader, firkanter og cirkler. Under \\'Standard stilart for tegninger\\' kan du sætte farve, linjetyper, pilehoveder mm. Alle nye tegninger får disse indstillinger. Klik på en allerede tegnet figur for at tilføje standardindstillingerne.<br />Det er muligt at uploade en zip-fil indeholdende én eller flere shp-filer. Der forventes at filernes koordinatsystem er EPSG:25832.",
     "Help text print":
-      "Lav skaleret PDF kort. Juster den orange firkant i kortet for at sætte udsnittets omfang og skala.",
+    "Lav skaleret PDF kort. Juster den orange firkant i kortet for at sætte udsnittets omfang og skala.",
     "Activate drawing tools": "Aktivér tegneværktøjer",
     "Activate print tools": "Aktivér printværktøjer",
     "Make PDF": "Lav PDF",
@@ -157,7 +158,7 @@ module.exports = {
     "Loading data": "Henter data",
     Reset: "Nulstil",
     "Do you really want to reset the map?":
-      "Er du sikker på, at du vil nulstille kortet?",
+    "Er du sikker på, at du vil nulstille kortet?",
 
     "Line style": "Sæt indstillinger for stilarter",
     "Settings for all new drawings": "Stilarter <small>alle geometrier</small>",
