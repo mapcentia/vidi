@@ -281,21 +281,50 @@ module.exports = {
 
     // APIBridge
     "Not authorized to perform this action":
-      "Ikke autoriseret til at udføre denne handling.",
+    "Ikke autoriseret til at udføre denne handling.",
 
     // Editor
-    "Application is offline, tiles will not be updated. Proceed?":
-      "App'en er offline og kortlaget vil ikke blive opdateret. Fortsæt?",
-    "Are you sure you want to delete the feature?":
-      "Er du sikker på, at du vil slette objektet?",
-    "The page was loaded without service workers enabled, features editing is not available (the page was loaded via plain HTTP or browser does not support service workers)":
-      "Siden blev indlæst uden Service Workers aktiveret. Redigering er ikke tilgængelig (siden blev indlæst via almindelig HTTP eller browseren understøtter ikke Service Workers. Brug evt. en moderne browser)",
-    "Editing of geometry is not possible when number of nodes exceed":
-      "Ændring af geometri er ikke mulig, når antallet af knækpunkter overstiger",
+    "Application is offline, tiles will not be updated. Proceed?": "App'en er offline og kortlaget vil ikke blive opdateret. Fortsæt?",
+    "Are you sure you want to delete the feature?": "Er du sikker på, at du vil slette objektet?",
+    "The page was loaded without service workers enabled, features editing is not available (the page was loaded via plain HTTP or browser does not support service workers)": "Siden blev indlæst uden Service Workers aktiveret. Redigering er ikke tilgængelig (siden blev indlæst via almindelig HTTP eller browseren understøtter ikke Service Workers. Brug evt. en moderne browser)",
+    "Editing of geometry is not possible when number of nodes exceed": "Ændring af geometri er ikke mulig, når antallet af knækpunkter overstiger",
 
     // Editor - ImageUploadWidget
-    "Drop files here, or click to select files to upload":
-      "Slip filer her, eller klik for at vælge filer, der skal uploades",
+    "Drop files here, or click to select files to upload": "Slip filer her, eller klik for at vælge filer, der skal uploades",
+    
+    // OfflineMap
+    "tiles failed to load": "fliser mangler at indlæse",
+    "OfflineMap block description": "Her kan specifikke kortområder opbevares for at blive brugt offline",
+    "OfflineMap instructions": "Udvalgte områder af ethvert baggrundkort kan gemmes, så det kan bruges i offline-tilstand. Hvis lagerpladsen for din browser overskrides, kan du slette allerede gemte baggrundkort for at frigiv plads.",
+    "Extent": "kortområde",
+    "Stored map areas": "Gemte kortområder",
+    "Store another": "Gem et andet område",
+    "Please use the secured version of page (HTTPS enabled)": "Please use the secured version of page (HTTPS enabled)",
+    "Show extent": "Vis kortområde",
+    "Hide extent": "Gem kortområde",
+    "Delete map area?": "Slet kortområde?",
+    "Refresh map area?": "Opdater kortområde?",
+    "No map areas have been stored yet": "Ingen kortområder er gemt endnu",
+    "Saved tiles will be used in...": "Gemte fliser vil blive brugt i...",
+    "Processing tiles": "Processerer kort-fliser ",
+    "Please reload the page": "Genindlæs venligst siden",
+    "Checking the cache status": "Tjekker cache status",
+    "of": "af",
+    "Date": "Dato",
+    "Done": "Færdig",
+    "Delete": "Slet",
+    "Refresh": "Opdater",
+    "Actions": "Handlinger",
+    "Store": "Gem",
+    "Available space": "Ledig plads",
+    "Available space can not be detected": "Ingen ledig plads",
+    "Offline map": "Offline kort",
+    "Clear": "Ryd",
+    "Zoom": "Zoom",
+    "Define": "Udvælg område",
+    "Redefine": "Udvælg område igen",
+    "Show on map": "Vis på kort",
+    "Store map area": "Gem kortområde",
 
     // OfflineMap
     "tiles failed to load": "fliser mangler at indlæse",

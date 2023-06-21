@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2023.6.0] - 2023-20-6
+### Fixed
+- Bug: The GC2 Open tools meta setting didn't work after tools were moved into at collapsable element.
+
+## [2023.3.0] - 2023-6-3
+### Fixed
+- Regression bug: Zoom to default extent when using a state didn't zoom to state extent but to config extent.
+
 ## [2023.2.1] - 2023-21-2
 ### Fixed
 - Use "geography" distance when doing feature info on points and lines stored in EPSG:4326. Otherwise the distance will be in degrees and capture anything inside the map extent.
