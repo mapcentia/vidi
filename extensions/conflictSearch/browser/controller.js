@@ -139,8 +139,17 @@ module.exports = {
                 $(this).button('loading');
                 print.control(printC, scales, "_conflictPrint", "A4", "p", "inline");
 
+                
                 if (reportType === "1") {
-                    print.print(endPrintEventName, conflictSearch.getResult()).then(res => {
+                    // Report is Kompakt
+                    let results = conflictSearch.getResult();
+
+                    console.log(results);
+
+                    print.print(endPrintEventName, results).then(res => {
+
+                        console.log(res);
+
                         print.cleanUp(true);
                         $("#conflict-get-print-fieldset").prop("disabled", false);
                         $("#conflict-download-pdf, #conflict-open-pdf").prop("href", "/tmp/print/pdf/" + res.key + ".pdf");
@@ -149,6 +158,8 @@ module.exports = {
                         $("#conflict-set-print-area-btn").prop("disabled", false);
                     });
                 } else {
+
+                    // Report is lang/komplet
                     let results = conflictSearch.getResult();
                     let positiveHits = JSON.parse(JSON.stringify(results));
                     for (const property in results.hits) {

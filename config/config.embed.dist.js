@@ -25,7 +25,7 @@ module.exports = {
     // ==========================================
 
     "gc2": {
-        "host": "https://gc2.mapcentia.com"
+        "host": "https://mapgogc2.geopartner.com"
     },
 
 
@@ -139,11 +139,13 @@ module.exports = {
             {"session": ["index"]},
             {"editor": ["index"]},
             {"embed": ["index"]},
+            {"documentCreate":["index.js"]}
         ],
         "server": [
             /*{conflictSearch: ["index"]},*/
             /*{layerSearch: ["index", "indexInEs"]},*/
-            {"session": ["index"]}
+            {"session": ["index"]},
+            {"documentCreate":["index.js"]}
         ]
     },
 
@@ -163,7 +165,7 @@ module.exports = {
     // Can be used by adding ?config=vidi.json to the Vidi URL'en
     //=============================================================================
 
-    "configUrl": "https://mapcentia.github.io",
+    "configUrl": "https://github.com/geopartner/webgis/mapcentia.github.io/blob/master/",
 
 
     // ==========================================================
@@ -216,7 +218,8 @@ module.exports = {
         "session",
         "editor",
         "embed",
-        "offlineMap"
+        "offlineMap",
+        "documentCreate"
     ],
 
 

@@ -68,6 +68,8 @@ module.exports = {
         "Get as PDF": "PDF-inngorlugu aajuk",
         "Conflicts": "Aporaaffiit",
         "No Conflicts": "Aporaaffeqanngilaq",
+        "Conflict with selected": "Konflikt med valgte",
+        "Conflict with all": "Konflikt med alle",
         "Print": "Naqiteruk",
         "Search places": "Sumiiffiit ujakkit",
         "Activate advanced query": "Annertusisamik ujaasineq aallartiguk",

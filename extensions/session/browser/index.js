@@ -13,6 +13,19 @@ let sessionInstance = false;
 let userName = null;
 let isStatusChecked = false;
 let exId = `login-modal-body`;
+var autoLogin = false; // Auto login is insecure and sets cookie with login creds.
+var autoLoginMaxAge = null;
+
+if (window.config?.autoLoginPossible === true) {
+    if (window.config?.extensionConfig?.session) {
+        if (window.config?.extensionConfig?.session?.autoLogin) {
+            autoLogin = window.config.extensionConfig.session.autoLogin;
+        }
+        if (window.config?.extensionConfig?.session?.autoLoginMaxAge) {
+            autoLoginMaxAge = window.config.extensionConfig.session.autoLoginMaxAge;
+        }
+    }
+}
 const config = require('./../../../config/config.js');
 const urlparser = require('./../../../browser/modules/urlparser');
 const urlVars = urlparser.urlVars;
@@ -42,6 +55,7 @@ module.exports = {
         }
 
         // Check if signed in
+        // sign in if autoLogin is set to true
         //===================
         class Status extends React.Component {
             render() {
@@ -151,13 +165,16 @@ module.exports = {
 
             componentDidMount() {
                 let me = this;
+                // console.log(window.config.extensionConfig)
+                // console.log(autoLogin, autoLoginMaxAge)
 
                 $.ajax({
                     dataType: 'json',
                     url: "/api/session/status",
                     type: "GET",
+                    data: "autoLogin=" + autoLogin + "&autoLoginMaxAge=" + autoLoginMaxAge,
                     success: function (data) {
-                        if (data.status.authenticated) {
+                        if (data.status.authenticated) {                            
                             backboneEvents.get().trigger(`session:authChange`, true);
                             me.setState({sessionScreenName: data.status.screen_name});
                             me.setState({statusText: `Signed in as ${data.status.screen_name} (${data.status.email})`});

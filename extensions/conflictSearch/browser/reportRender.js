@@ -20,6 +20,8 @@ module.exports = {
         let table = $("#report table"), tr, dataTable, dataThead, dataTr, u, m, without = [], groups = [];
         $("#conflict-text").html(e.text);
 
+        // console.log('reportRender event', e)
+
         $.each(e.hits, function (i, v) {
             v.meta.layergroup = v.meta.layergroup != null ? v.meta.layergroup : "Ungrouped";
             groups.push(v.meta.layergroup);

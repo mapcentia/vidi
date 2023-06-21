@@ -1,0 +1,30 @@
+{
+  "brandName": "LER 2.0",
+  "baseLayers": [
+    {
+      "id": "osm",
+      "name": "Open Street Maps"
+    }
+  ],
+  "enabledPrints": [
+    "vandvaerk2"
+  ],
+  "enabledExtensions": [
+    "session",
+    "graveAssistent"
+  ],
+  "searchConfig": {
+    "komkode": [
+      "846"
+    ]
+  },
+  "activateMainTab": "graveAssistent",
+  "enabledSearch": "danish",
+  "extensionConfig": {
+    "session": {
+      "autoLogin": true,
+      "autoLoginMaxAge": 630720000000
+    }
+  }
+}
+  

@@ -37,6 +37,9 @@ let _self = false;
 
 let embedModeIsEnabled = false;
 
+let measurementKmDecimals = 2;
+let measurementMDecimals = 1;
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -231,6 +234,14 @@ module.exports = {
                 }
             });
 
+            if (window.vidiConfig.measurementMDecimals) {
+                measurementMDecimals = window.vidiConfig.measurementMDecimals;
+            }
+
+            if (window.vidiConfig.measurementKmDecimals) {
+                measurementKmDecimals = window.vidiConfig.measurementKmDecimals;
+            }
+
             drawControl.setDrawingOptions({
                 polygon: {
                     icon: cloud.iconSmall
@@ -239,8 +250,8 @@ module.exports = {
                     icon: cloud.iconSmall,
                     metric: true,
                     precision: {
-                        m: 1,
-                        km: 2
+                        m: measurementMDecimals,
+                        km: measurementKmDecimals
                     },
                 }
             });
