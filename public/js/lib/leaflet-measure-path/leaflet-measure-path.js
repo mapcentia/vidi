@@ -117,32 +117,31 @@
         }
     }
 
-    var formatArea = function(a) {
-        var unit,
-            sqfeet;
-
+    let formatArea = function(area) {
         if (this._measurementOptions.imperial) {
-            if (a > 404.685642) {
-                a = a / 4046.85642;
+            let unit;
+            if (area > 404.685642) {
+                area = area / 4046.85642;
                 unit = 'ac';
             } else {
-                a = a / 0.09290304;
+                area = area / 0.09290304;
                 unit = 'ft²';
             }
-        } else {
-            if (a > 100000) {
-                a = a / 100000;
-                unit = 'km²';
-            } else {
-                unit = 'm²';
-            }
+            return (area < 100 ) ?
+            area.toFixed(1) + ' ' + unit:
+            Math.round(area) + ' ' + unit;
+        } 
+        area = Math.round(area); 
+        if (area < 10000) {
+           return (area + ' m²');
         }
-
-        if (a < 100) {
-            return a.toFixed(1) + ' ' + unit;
-        } else {
-            return Math.round(a) + ' ' + unit;
+        let ha = (Math.round(area / 10000 * 1000) / 1000);
+        
+        if (area >= 10000 && area < 1000000) {
+            return ha + ' ha';
         }
+        let km2 = (Math.round(area / 1000000 * 1000) / 1000);
+        return (km2 + ' km² (' + ha + ' ha)');
     }
 
     var RADIUS = 6378137;
@@ -256,8 +255,8 @@
             this.updateMeasurements();
         }),
 
-        formatDistance: formatDistance,
-        formatArea: formatArea,
+         formatDistance: formatDistance,
+         formatArea: formatArea,
 
         updateMeasurements: function() {
             if (!this._measurementLayer) return;
@@ -313,9 +312,10 @@
 
             if (isPolygon && options.showArea && latLngs.length > 2) {
                 formatter = options.formatArea || L.bind(this.formatArea, this);
-                var area = ringArea(latLngs);
+                let area = this.ringArea(latLngs);
+                let resultArea= this.formatArea(area);
                 L.marker.measurement(this.getBounds().getCenter(),
-                    formatter(area), options.lang.totalArea, 0, options)
+                resultArea, options.lang.totalArea, 0, options)
                     .addTo(this._measurementLayer);
             }
         },

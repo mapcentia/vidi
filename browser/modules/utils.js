@@ -24,7 +24,7 @@ module.exports = {
             result = (ha + ' ha');
         } else if (areaInSquareMeters >= 1000000) {
             // Display square kilometers and hectars
-            result = (km2 + ' km2 (' + ha + ' ha)');
+            result = (km2 + ' km² (' + ha + ' ha)');
         }
 
         return result;
