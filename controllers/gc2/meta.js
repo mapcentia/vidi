@@ -17,7 +17,7 @@ router.get('/api/meta/:db/:schema', function (req, response) {
     const addedSchemata = typeof config.addedSchemata !== "undefined" ? "," + config.addedSchemata : "";
     let url, options;
     let headers = {
-        Cookie: "PHPSESSID=" + req.session.gc2SessionId
+        Cookie: "PHPSESSID=" + req?.session?.gc2SessionId
     }
     if (app.get('env') === 'test') {
         headers.Cookie += "; XDEBUG_SESSION=XDEBUG_SESSION;";

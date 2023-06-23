@@ -61,7 +61,7 @@ let start = function (dataToAuthorizeWith, req, response, status) {
             return;
         }
 
-        if (req.session.gc2SessionId) {
+        if (req?.session?.gc2SessionId) {
             response.status(200).send({
                 success: true,
                 message: "Already logged in"
@@ -147,11 +147,11 @@ router.get('/api/session/status', function (req, response) {
         response.status(200).send({
             success: true,
             status: {
-                authenticated: !!req.session.gc2SessionId,
-                screen_name: req.session.gc2UserName,
-                email: req.session.gc2Email,
-                subuser: req.session.subUser,
-                properties: req.session.properties
+                authenticated: !!req?.session?.gc2SessionId,
+                screen_name: req?.session?.gc2UserName,
+                email: req?.session?.gc2Email,
+                subuser: req?.session?.subUser,
+                properties: req?.session?.properties
             }
         });
     }
