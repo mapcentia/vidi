@@ -117,7 +117,7 @@
         }
     }
 
-    let formatArea = function(area) {
+    var formatArea = function(area) {
         if (this._measurementOptions.imperial) {
             let unit;
             if (area > 404.685642) {
@@ -127,9 +127,10 @@
                 area = area / 0.09290304;
                 unit = 'ft²';
             }
-            return (area < 100 ) ?
-            area.toFixed(1) + ' ' + unit:
-            Math.round(area) + ' ' + unit;
+            if (area < 100 ) {
+              return area.toFixed(1) + ' ' + unit;
+            }
+            return Math.round(area) + ' ' + unit;
         } 
         area = Math.round(area); 
         if (area < 10000) {
@@ -312,10 +313,9 @@
 
             if (isPolygon && options.showArea && latLngs.length > 2) {
                 formatter = options.formatArea || L.bind(this.formatArea, this);
-                let area = this.ringArea(latLngs);
-                let resultArea= this.formatArea(area);
+                let area = ringArea(latLngs);
                 L.marker.measurement(this.getBounds().getCenter(),
-                resultArea, options.lang.totalArea, 0, options)
+                formatter(area), options.lang.totalArea, 0, options)
                     .addTo(this._measurementLayer);
             }
         },
