@@ -12,22 +12,20 @@ module.exports = {
     },
     init: function () {
     },
-    formatArea: (areaInSquareMeters) => {
-        let result = Math.round(areaInSquareMeters);
-        let ha = (Math.round(areaInSquareMeters / 10000 * 1000) / 1000);
-        let km2 = (Math.round(areaInSquareMeters / 1000000 * 1000) / 1000);
-        if (areaInSquareMeters < 10000) {
-            // Display square meters
-            result = (Math.round(areaInSquareMeters) + ' m2');
-        } else if (areaInSquareMeters >= 10000 && areaInSquareMeters < 1000000) {
-            // Display hectars
-            result = (ha + ' ha');
-        } else if (areaInSquareMeters >= 1000000) {
-            // Display square kilometers and hectars
-            result = (km2 + ' km² (' + ha + ' ha)');
+    formatArea: (a) => {
+        let unit= '';
+        if (a > 100000) {
+          a = a / 100000;
+          unit = 'km²';
+        } else {
+          unit = 'm²';
         }
-
-        return result;
+        if (a < 100) {
+                return a.toFixed(1) + ' ' + unit;
+          } else {
+                return Math.round(a) + ' ' + unit;
+          }
+        }
     },
     /**
      * @todo Remove deprecated "height" parameter

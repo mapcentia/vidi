@@ -117,32 +117,32 @@
         }
     }
 
-    var formatArea = function(area) {
+    var formatArea = function(a) {
+        var unit,
+            sqfeet;
+
         if (this._measurementOptions.imperial) {
-            let unit;
-            if (area > 404.685642) {
-                area = area / 4046.85642;
+            if (a > 404.685642) {
+                a = a / 4046.85642;
                 unit = 'ac';
             } else {
-                area = area / 0.09290304;
+                a = a / 0.09290304;
                 unit = 'ft²';
             }
-            if (area < 100 ) {
-              return area.toFixed(1) + ' ' + unit;
+        } else {
+            if (a > 100000) {
+                a = a / 100000;
+                unit = 'km²';
+            } else {
+                unit = 'm²';
             }
-            return Math.round(area) + ' ' + unit;
-        } 
-        area = Math.round(area); 
-        if (area < 10000) {
-           return (area + ' m²');
         }
-        let ha = (Math.round(area / 10000 * 1000) / 1000);
-        
-        if (area >= 10000 && area < 1000000) {
-            return ha + ' ha';
+
+        if (a < 100) {
+            return a.toFixed(1) + ' ' + unit;
+        } else {
+            return Math.round(a) + ' ' + unit;
         }
-        let km2 = (Math.round(area / 1000000 * 1000) / 1000);
-        return (km2 + ' km² (' + ha + ' ha)');
     }
 
     var RADIUS = 6378137;
