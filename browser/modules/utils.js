@@ -13,18 +13,18 @@ module.exports = {
     init: function () {
     },
     formatArea: (a) => {
-        let unit= '';
-        if (a > 100000) {
-          a = a / 100000;
+        let unit= 'm²';
+        const bigArea= 100000;
+
+        if (a > bigArea) {
+          a = a / bigArea;
           unit = 'km²';
-        } else {
-          unit = 'm²';
-        }
+        } 
+
         if (a < 100) {
-                return a.toFixed(1) + ' ' + unit;
-          } else {
-                return Math.round(a) + ' ' + unit;
-          }
+          return a.toFixed(1) + ' ' + unit;
+        } else {
+          return Math.round(a) + ' ' + unit;
         }
     },
     /**
