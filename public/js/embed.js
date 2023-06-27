@@ -37,6 +37,7 @@
                 var clear = targetDiv.getAttribute("data-vidi-clear") || "none";
                 var boxzoom = targetDiv.getAttribute("data-vidi-boxzoom") || "none";
                 var signin = targetDiv.getAttribute("data-vidi-signin") || "";
+                var burger = targetDiv.getAttribute("data-vidi-burger") || "";
 
                 try {
                     var obj = JSON.parse(atob(token));
@@ -64,6 +65,7 @@
                     "&cle=" + clear +
                     "&box=" + boxzoom +
                     "&sig=" + signin +
+                    "&bur=" + burger +
                     (frameName ? "&readyCallback=" + frameName : "") + "&notracking=" + noTracking +
                     "&dps=1";
                 var iframe = document.createElement("iframe");

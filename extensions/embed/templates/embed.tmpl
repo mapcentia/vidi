@@ -2,41 +2,58 @@
     .history-control {
         display: {{_displayHistory}} !important;
     }
+
     .leaflet-control-locate {
         display: {{_displayLocation}} !important;
     }
+
     #offcanvasLayerControlBtn {
         display: {{_displayLayer}} !important;
     }
+
     .place-search {
         display: {{_displaySearch}} !important;
     }
+
     .legend-btn {
         display: {{_displayLegend}} !important;
     }
+
     .baselayer-toggle {
         display: {{_displayBackground}} !important;
     }
+
     .full-screen-btn {
         display: {{_displayFullscreen}} !important;
     }
+
     .about-btn {
         display: {{_displayAbout}} !important;
     }
+
     .reset-btn {
         display: {{_displayReset}} !important;
     }
+
     .leaflet-control-measurements {
         display: {{_displayMeasurement}} !important;
     }
+
     .leaflet-clear-map {
         display: {{_displayClear}} !important;
     }
+
     .leaflet-control-boxzoom {
         display: {{_displayBox}} !important;
     }
+
     .sign-in-btn {
         display: {{_displaySignin}} !important;
+    }
+
+    .navbar-toggler {
+        display: {{_displayBurger}} !important;
+
     }
 </style>
 <!-- map -->
@@ -135,7 +152,8 @@
                 </li>
             </ul>
             <div class="navbar-nav">
-                <button class="btn btn-primary sign-in-btn d-none ms-2" data-bs-toggle="modal" data-bs-target="#login-modal">
+                <button class="btn btn-primary sign-in-btn d-none ms-2" data-bs-toggle="modal"
+                        data-bs-target="#login-modal">
                     <i class="bi bi-person"></i><span class="gc2-session-btn-text"> {{Sign in}}</span>
                 </button>
             </div>
@@ -151,12 +169,12 @@
             <h5 class="offcanvas-title">Menu</h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
-            <div class="offcanvas-body">
-                <div class="pe-2 ps-2">
-                    <div id="layers"></div>
-                    <div id="layersAlt"></div>
-                </div>
+        <div class="offcanvas-body">
+            <div class="pe-2 ps-2">
+                <div id="layers"></div>
+                <div id="layersAlt"></div>
             </div>
+        </div>
     </div>
 
 
