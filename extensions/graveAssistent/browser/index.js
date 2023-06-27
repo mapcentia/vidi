@@ -238,7 +238,11 @@ module.exports = {
                  * @param {*} obj 
                  */
                 var flattenObject = function (obj) {
-                    //console.log(obj)
+                    // guard against null, undefined, other non-objects
+                    if (typeof obj !== 'object' || !obj) {
+                        return false; // check the obj argument somehow
+                    }
+
                     let flattened = {}
 
                     Object.keys(obj).forEach((key) => {
@@ -354,6 +358,11 @@ module.exports = {
                 }
 
                 var handleGeometry = function (obj) {
+                    // Guard against null, undefined, other non-objects
+                    if (typeof obj !== 'object' || !obj) {
+                        return null; // check the obj argument somehow
+                    }
+
                     //console.table(obj)
                     let geomObj = {}
                     let flat = flattenObject(obj)
@@ -371,6 +380,8 @@ module.exports = {
                         geomObj.type = "MultiPolygon"
                     } else if ('Polygon' in obj) {
                         geomObj.type = "MultiPolygon"
+                    } else if ('MultiCurve' in obj) {
+                        geomObj.type = "MultiLineString"
                     } else {
                         // Matched nothing, kill 
                         console.log('killed:', obj)
@@ -388,7 +399,7 @@ module.exports = {
                     }
                     if (flat.hasOwnProperty('posList')) {
                         if (flat.type == 'MultiPolygon') {
-                            console.log(flat)
+                            //console.log(flat)
                             geomObj.coordinates = flat.posList.split(' ').map(Number).chunk(dim)
                             let rings = [geomObj.coordinates]
                             let multis = [rings]
@@ -414,7 +425,7 @@ module.exports = {
                         if (flat.type == 'MultiPoint') {
                             geomObj.coordinates = flat.value.split(' ').map(Number).chunk(dim)
                         } else if (flat.type == 'MultiPolygon') {
-                            console.log(flat)
+                            //console.log(flat)
                             geomObj.coordinates = flat.value.split(' ').map(Number).chunk(dim)
                             let rings = [geomObj.coordinates]
                             let multis = [rings]
@@ -467,6 +478,7 @@ module.exports = {
                         } else if (cons[i]["Kontaktprofil"]) {
                             profil.push(rename(Object.values(cons[i])[0], 'svar_'))
                         } else {
+                            // Handle as data
                             data.push(Object.values(cons[i])[0])
                         }
                     }
@@ -514,8 +526,16 @@ module.exports = {
                             try {
                                 data.forEach(function (item) {
 
+                                    // TODO: support "Informationsressource"
                                     // Skip "ler:Informationsressource"
                                     if (item.objectType == "ler:Informationsressource"){
+                                        console.log(item)
+                                        return;
+                                    }
+
+                                    // TODO: support annotation and linearDimension
+                                    // Skip "dim:LinearDimension", "ann:TextAnnotation"
+                                    if (item.objectType == "dim:LinearDimension" || item.objectType == "ann:TextAnnotation"){
                                         console.log(item)
                                         return;
                                     }
@@ -559,7 +579,14 @@ module.exports = {
     
                                         if (typeof value == 'object') {
                                             //console.log(value);
-                                            obj[key] = value.value + ' ' + value.attr.uom
+
+                                            // if value.attr exists, check if it has uom, if so, add it to value.value
+                                            if (value.hasOwnProperty('attr')) {
+                                                //console.log(value.attr)
+                                                if (value.attr.hasOwnProperty('uom')) {
+                                                    obj[key] = value.value + ' ' + value.attr.uom
+                                                }
+                                            }
                                             //console.log(obj[key])
                                         }
                                     }
