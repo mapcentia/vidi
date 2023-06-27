@@ -606,6 +606,7 @@ module.exports = {
                                     let arr = JSON.parse(parsedMeta.default_open_tools);
                                     arr.forEach((i) => {
                                         setTimeout(() => {
+                                            $(container).find('.collapse').collapse('show')
                                             if ($(container).find(`.js-toggle-${i}`).is(':visible')) {
                                                 if (i !== "table") {
                                                     $(container).find(`.js-layer-settings-${i}`).show(0);
