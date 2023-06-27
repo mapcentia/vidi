@@ -1990,12 +1990,14 @@ module.exports = {
                 'click .unfilter': (e, value, row, index) => unfilter()
             }
 
+/*
             tableHeaders.push({
                 header: "Filter",
                 dataIndex: "filter",
                 formatter: "operateFormatter",
                 events: "operateEvents"
             })
+*/
 
             let styleSelected = (onSelectedStyle[LAYER.VECTOR + ':' + layerKey] ? onSelectedStyle[LAYER.VECTOR + ':' + layerKey] : {
                 weight: 5,
