@@ -214,7 +214,7 @@ module.exports = {
         gc2i18n.dict._displayClear = urlVars?.cle || "inline";
         gc2i18n.dict._displayBox = urlVars?.box || "inline";
         gc2i18n.dict._displaySignin = urlVars?.sig || "inline";
-        gc2i18n.dict._displayBurger = urlVars?.bur || "inline";
+        gc2i18n.dict._displayBurger = urlVars?.bur || "initial";
 
         // Render the page
         // ===============
