@@ -93,3 +93,7 @@
 .feature-attribute-editing-form .list-group {
   --bs-list-group-bg: transparent;
 }
+
+#legend-toast-body {
+  max-height: calc(100vh - 150px);
+}
