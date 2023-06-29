@@ -184,13 +184,15 @@ module.exports = {
         try {
             offcanvasEdit = new bootstrap.Offcanvas(`#${EDITOR_OFFCANVAS_CONTAINER_ID}`);
             document.getElementById(EDITOR_OFFCANVAS_CONTAINER_ID).addEventListener('shown.bs.offcanvas', event => {
-                $(".edit-attr-btn").prop("disabled", true)
+                document.querySelector(".edit-attr-btn .bi-arrow-bar-left").classList.remove("d-none");
+                document.querySelector(".edit-attr-btn .bi-arrow-bar-right").classList.add("d-none");
             })
             document.getElementById(EDITOR_OFFCANVAS_CONTAINER_ID).addEventListener('hidden.bs.offcanvas', event => {
-                $(".edit-attr-btn").prop("disabled", false)
+                document.querySelector(".edit-attr-btn .bi-arrow-bar-right").classList.remove("d-none");
+                document.querySelector(".edit-attr-btn .bi-arrow-bar-left").classList.add("d-none");
             })
 
-            $("#offcanvasEditBtn").on("click", () => offcanvasEdit.show());
+            document.getElementById("offcanvasEditBtn").addEventListener("click", () => offcanvasEdit.toggle());
         } catch (e) {
             console.log(e)
         }

@@ -104,18 +104,18 @@
         <a class="navbar-brand">
             <span class="d-none d-md-inline">{{brandName}}</span>
         </a>
-        <div class="navbar-nav flex-row gap-1 flex-grow-1">
+        <div class="navbar-nav flex-row gap-1 flex-grow-1 me-2">
             <button id="offcanvasLayerControlBtn"
                     class="btn btn-primary text-nowrap pe-auto" type="button"
             >
-                <span class="d-none d-md-inline">Menu</span> <i class="bi bi-arrow-bar-right"></i>
+                <span class="d-none d-md-inline">Menu</span> <i class="bi bi-arrow-bar-right"></i><i class="bi bi-arrow-bar-left d-none"></i>
             </button>
             <div class="input-group d-none justify-content-end me-2 pe-auto" id="edit-tool-group">
                 <span class="input-group-text"><i class="bi bi-pencil"></i></span>
                 <button id="offcanvasEditBtn"
-                        class="btn btn-secondary nav-edit-btn edit-attr-btn" disabled type="button"
+                        class="btn btn-secondary nav-edit-btn edit-attr-btn" type="button"
                 >
-                    <span class="d-none d-md-inline">Form</span> <i class="bi bi-arrow-bar-right"></i>
+                    <span class="d-none d-md-inline">Form</span> <i class="bi bi-arrow-bar-right"></i><i class="bi bi-arrow-bar-left d-none"></i>
                 </button>
                 <button id="editStopBtn"
                         class="btn btn-danger nav-edit-btn" type="button"
@@ -139,10 +139,10 @@
                     <i class="bi bi-x-lg text-dark" id="searchclear"></i>
                 </div>
             </form>
-            <ul class="navbar-nav ms-sm-2 mt-sm-0 ms-0 mt-3 navbar-tool-btn">
+            <ul class="navbar-nav ms-sm-2 mt-sm-0 ms-0 mt-3 navbar-tool-btn gap-2">
                 <li class="legend-btn" style="display: {{_displayLegend}}">
                     <button id="btn-show-legend-in-map" data-module="legend"
-                            class="btn btn btn-light">{{Legend}}</button>
+                            class="btn btn btn-outline-secondary">{{Legend}}</button>
                 </li>
                 <li class="nav-item reset-btn">
                     <a class="nav-link" id="btn-reset" href="#">Reset</a>
@@ -152,9 +152,9 @@
                 </li>
             </ul>
             <div class="navbar-nav">
-                <button class="btn btn-primary sign-in-btn d-none ms-2" data-bs-toggle="modal"
+                <button class="btn btn-primary sign-in-btn d-none ms-2 text-nowrap" data-bs-toggle="modal"
                         data-bs-target="#login-modal">
-                    <i class="bi bi-person"></i><span class="gc2-session-btn-text"> {{Sign in}}</span>
+                    <i class="bi bi-person"></i><span class="gc2-session-btn-text text-nowrap"> {{Sign in}}</span>
                 </button>
             </div>
         </div>

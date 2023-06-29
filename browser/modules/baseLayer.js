@@ -139,7 +139,7 @@ module.exports = module.exports = {
             $("#base-layer-list").append(`
                 <div class="d-grid mb-2">
                     <input class="btn-check js-two-layers-at-once-control" id="js-two-layers-at-once-control" type="checkbox">
-                    <label class="btn btn-outline-primary btn-block mb-3" for="js-two-layers-at-once-control">${__(`Display two layers at once`)}</label>
+                    <label class="btn btn-outline-secondary btn-block mb-3" for="js-two-layers-at-once-control">${__(`Display two layers at once`)}</label>
                 </div>`);
         }
 

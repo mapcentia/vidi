@@ -61,15 +61,15 @@ module.exports = {
         try {
             mainLayerOffcanvas = new bootstrap.Offcanvas('#mainLayerOffcanvas');
             offcanvasInfo = new bootstrap.Offcanvas('#offcanvasLayerDesc');
-
             document.getElementById('mainLayerOffcanvas').addEventListener('shown.bs.offcanvas', event => {
-                $("#offcanvasLayerControlBtn").prop("disabled", true)
+                document.querySelector("#offcanvasLayerControlBtn .bi-arrow-bar-left").classList.remove("d-none");
+                document.querySelector("#offcanvasLayerControlBtn .bi-arrow-bar-right").classList.add("d-none");
             })
             document.getElementById('mainLayerOffcanvas').addEventListener('hidden.bs.offcanvas', event => {
-                $("#offcanvasLayerControlBtn").prop("disabled", false)
+                document.querySelector("#offcanvasLayerControlBtn .bi-arrow-bar-right").classList.remove("d-none");
+                document.querySelector("#offcanvasLayerControlBtn .bi-arrow-bar-left").classList.add("d-none");
             })
-
-            $("#offcanvasLayerControlBtn").on("click", () => mainLayerOffcanvas.show());
+            $("#offcanvasLayerControlBtn").on("click", () => { mainLayerOffcanvas.toggle()});
             if (window.vidiConfig.showOffcanvas === true) {
                 mainLayerOffcanvas.show();
             }
@@ -324,21 +324,25 @@ module.exports = {
             });
         });
 
-        $('#btn-show-legend-in-map').on("click", () => {
+        const legendToast = document.getElementById('legend-toast');
+        const legendBtn = document.getElementById("btn-show-legend-in-map");
+        legendToast.addEventListener('hidden.bs.toast', () => {
+            $('#legend-content').append($('#legend'));
+            legendBtn.classList.remove("btn-secondary");
+            legendBtn.classList.add("btn-outline-secondary");
+        })
+        legendToast.addEventListener('shown.bs.toast', () => {
             $('#legend-toast-body').append($('#legend'));
-            const b = $('#btn-show-legend-in-map');
-            b.prop('disabled', true);
-            b.prop( "disabled", true );
-            // b.addClass('btn-primary')
-            const e = document.getElementById('legend-toast')
-            const t = new bootstrap.Toast(e, {autohide: false});
-            e.addEventListener('hidden.bs.toast', () => {
-                $('#legend-content').append($('#legend'));
-                $('#btn-show-legend-in-map').prop('disabled', false);
-                // b.removeClass('btn-primary');
-                b.prop( "disabled", false);
-            })
-            t.show();
+            legendBtn.classList.add("btn-secondary");
+            legendBtn.classList.remove("btn-outline-secondary");
+        })
+        legendBtn.addEventListener("click", (el) => {
+            const t = new bootstrap.Toast(legendToast, {autohide: false});
+            if (t.isShown()) {
+                t.hide();
+            } else {
+                t.show();
+            }
         })
 
         // Hiding all panels with visible modules
