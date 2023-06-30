@@ -82,7 +82,7 @@
   overflow: auto;
 }
 
-.baselayer-toggle img{
+.baselayer-toggle img {
   max-width: 32px !important;
 }
 
@@ -96,4 +96,8 @@
 
 #legend-toast-body {
   max-height: calc(100vh - 150px);
+}
+
+.main-navbar {
+  box-shadow: 0 0 0 1px rgb(0, 0, 0, 0.1);
 }
