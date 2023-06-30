@@ -326,17 +326,17 @@ module.exports = {
 
         const legendToast = document.getElementById('legend-toast');
         const legendBtn = document.getElementById("btn-show-legend-in-map");
-        legendToast.addEventListener('hidden.bs.toast', () => {
+        legendToast?.addEventListener('hidden.bs.toast', () => {
             $('#legend-content').append($('#legend'));
             legendBtn.classList.remove("btn-secondary");
             legendBtn.classList.add("btn-outline-secondary");
         })
-        legendToast.addEventListener('shown.bs.toast', () => {
+        legendToast?.addEventListener('shown.bs.toast', () => {
             $('#legend-toast-body').append($('#legend'));
             legendBtn.classList.add("btn-secondary");
             legendBtn.classList.remove("btn-outline-secondary");
         })
-        legendBtn.addEventListener("click", (el) => {
+        legendBtn?.addEventListener("click", (el) => {
             const t = new bootstrap.Toast(legendToast, {autohide: false});
             if (t.isShown()) {
                 t.hide();

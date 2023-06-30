@@ -508,7 +508,8 @@ module.exports = module.exports = {
             // Always trig tileLayerVisibility with false
             backboneEvents.get().trigger("tileLayerVisibility:layers", {
                 id: gc2Id,
-                dataIsVisible: false
+                dataIsVisible: false,
+                shouldLegendReact: false
             });
 
             if (enable) {

@@ -16,13 +16,12 @@ import {
     LOG,
     MAP_RESOLUTIONS,
     MODULE_NAME,
+    SELECTED_ICON_SCALE,
+    SELECTED_STYLE,
     SUB_GROUP_DIVIDER,
     SYSTEM_FIELD_PREFIX,
-    VIRTUAL_LAYERS_SCHEMA,
     VECTOR_SIDE_TABLE_EL,
-    SELECTED_STYLE,
-    VECTOR_STYLE,
-    SELECTED_ICON_SCALE
+    VIRTUAL_LAYERS_SCHEMA
 } from './constants';
 import dayjs from 'dayjs';
 import mustache from 'mustache';
@@ -894,10 +893,25 @@ module.exports = {
 
         /**
          * Listening to event that indicates if viewport tiles of specific layer contain any data
+         * Legend for layer will be hidden if it doesn't contain data.
          */
         backboneEvents.get().on(`tileLayerVisibility:layers`, (data) => {
             moduleState.tileContentCache[data.id] = data.dataIsVisible;
             $(`[data-gc2-layer-key^="${data.id}."]`).find(`.js-tiles-contain-data`).css(`display`, (data.dataIsVisible ? `inline` : `none`));
+            if (data.shouldLegendReact) {
+                const poll = (d) => {
+                    let clone = JSON.parse(JSON.stringify(d));
+                    const s = `#legend [data-gc2-id^="${clone.id}"]`;
+                    let e = document.querySelector(s);
+                    if (e) {
+                        const p = e.parentElement.parentElement.parentElement;
+                        p.style.setProperty(`display`, (clone.dataIsVisible ? `inline` : `none`));
+                    } else {
+                        setTimeout(() => poll(clone), 100)
+                    }
+                };
+                poll.bind(this, data)();
+            }
         });
 
         /**
@@ -1171,8 +1185,12 @@ module.exports = {
                                                         if (!dt) layersAreActivatedPromises.push(switchLayer.init(layerName, true, true));
                                                     });
 
+                                                    // Init legend after a state is invoked but not if print
+                                                    // because the print process will end with a legend init.
                                                     Promise.all(layersAreActivatedPromises).then(() => {
-                                                        legend.init();
+                                                        if (!urlparser.urlVars.k) {
+                                                            legend.init();
+                                                        }
                                                     });
                                                 }
 
@@ -1991,14 +2009,14 @@ module.exports = {
                 'click .unfilter': (e, value, row, index) => unfilter()
             }
 
-/*
-            tableHeaders.push({
-                header: "Filter",
-                dataIndex: "filter",
-                formatter: "operateFormatter",
-                events: "operateEvents"
-            })
-*/
+            /*
+                        tableHeaders.push({
+                            header: "Filter",
+                            dataIndex: "filter",
+                            formatter: "operateFormatter",
+                            events: "operateEvents"
+                        })
+            */
 
             let styleSelected = (onSelectedStyle[LAYER.VECTOR + ':' + layerKey] ? onSelectedStyle[LAYER.VECTOR + ':' + layerKey] : {
                 weight: 5,

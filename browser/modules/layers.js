@@ -350,7 +350,8 @@ module.exports = {
                             }
                             backboneEvents.get().trigger("tileLayerVisibility:layers", {
                                 id: e.target.id,
-                                dataIsVisible: canvasHasData
+                                dataIsVisible: canvasHasData,
+                                shouldLegendReact: true
                             });
 
                             me.decrementCountLoading(layer);

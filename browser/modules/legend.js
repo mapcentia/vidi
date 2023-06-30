@@ -102,8 +102,10 @@ module.exports = module.exports = {
                                 let id = v.id.replace(constants.LAYER.VECTOR + ':', '')
                                 let type = v.id.startsWith(constants.LAYER.VECTOR + ':') ? 'v' : 't';
                                 checked = ($.inArray(v.id, visibleLayers ? visibleLayers.split(";") : "") > -1) ? "checked" : "";
-                                list.append($("<div class='form-check'><label class='form-check-label d-flex align-items-center gap-2'><input class='form-check-input' data-gc2-layer-type=" + type + " type='checkbox' data-gc2-id='" + id + "' " + checked + ">" + title + "</label></div>"));
-                                list.append(li.append(classUl));
+                                const div = $('<div />');
+                                div.append($("<div class='form-check'><label class='form-check-label d-flex align-items-center gap-2'><input class='form-check-input' data-gc2-layer-type=" + type + " type='checkbox' data-gc2-id='" + id + "' " + checked + ">" + title + "</label></div>"));
+                                div.append(li.append(classUl));
+                                list.append(div);
                             }
 
                         }
