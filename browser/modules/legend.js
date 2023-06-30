@@ -104,15 +104,7 @@ module.exports = module.exports = {
                                 checked = ($.inArray(v.id, visibleLayers ? visibleLayers.split(";") : "") > -1) ? "checked" : "";
 
                                 // Get the current display of element, so it can be set again after re-render of legend
-                                const s = `#legend [data-gc2-id^="${id}"]`;
-                                let e = document.querySelector(s);
-                                let display;
-                                if (e) {
-                                    const p = e.parentElement.parentElement.parentElement;
-                                    display = p.style.display;
-                                } else {
-                                    display = type === "t" ? "none" : "inline";
-                                }
+                                const display = window.moduleState?.tileContentCache?.[id] ? "inline" : type === "t" ? "none" : "inline";
                                 const div = $('<div />');
                                 div.css("display", display);
                                 div.append($("<div class='form-check'><label class='form-check-label d-flex align-items-center gap-2'><input class='form-check-input' data-gc2-layer-type=" + type + " type='checkbox' data-gc2-id='" + id + "' " + checked + ">" + title + "</label></div>"));
