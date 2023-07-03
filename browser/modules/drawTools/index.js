@@ -50,19 +50,6 @@ const getFeatureDistance = feature => {
     return L.GeometryUtil.readableDistance(totalDistance, true);
 };
 
-/**
- * Get readable area of feature
- * @param e
- * @returns {string}
- * @private
- */
-const getFeatureArea = feature => {
-    let latLngs = [];
-    for (const latLng of feature.geometry.coordinates[0])
-        latLngs.push(L.latLng(latLng[0], latLng[1]));
-
-    return L.GeometryUtil.readableArea(L.GeometryUtil.geodesicArea(latLngs), true);
-};
 
 /**
  * Get readable area of layer

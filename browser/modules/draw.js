@@ -245,12 +245,10 @@ module.exports = {
 
         if (feature.geometry.type === 'LineString') {
             feature.properties.type = 'polyline';
-            feature.properties.distance = drawTools.getFeatureDistance(feature);
         }
 
         else if (feature.geometry.type === 'Polygon') {
             feature.properties.type = 'polygon';
-            feature.properties.area = drawTools.getFeatureArea(feature)
         }
         else
             feature.properties.type = 'marker';
