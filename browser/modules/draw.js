@@ -262,7 +262,6 @@ module.exports = {
                         l._tooltip.setContent(html)
                         $(`#${id}`).on("keyup", (e) => {
                             l._vidi_marker_text = e.target.value.trim().length ? e.target.value : EMPTY_TOOLTIP;
-                            console.log(l._vidi_marker_text)
                         })
                     }
                 })
