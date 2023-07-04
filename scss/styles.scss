@@ -101,3 +101,7 @@
 .main-navbar {
   box-shadow: 0 0 0 1px rgb(0, 0, 0, 0.1);
 }
+
+.leaflet-tooltip p {
+  margin-bottom: 0 !important;
+}

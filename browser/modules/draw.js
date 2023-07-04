@@ -10,6 +10,7 @@ const MODULE_NAME = `draw`;
 import {GEOJSON_PRECISION} from './constants';
 const drawTools = require(`./drawTools`);
 const fileSaver = require(`file-saver`);
+const marked = require('marked');
 let cloud, utils, state, serializeLayers;
 let drawOn = false;
 let drawnItems = new L.FeatureGroup();
@@ -25,6 +26,8 @@ let _self = false;
 let conflictSearch;
 let selectedDrawing;
 let overRideOnCheck = false;
+const createId = () => (+new Date * (Math.random() + 1)).toString(36).substr(2, 5);
+const EMPTY_TOOLTIP = "-";
 
 module.exports = {
     set: function (o) {
@@ -252,10 +255,26 @@ module.exports = {
 
             // Bind events
             cloud.get().map.on('draw:editstart', function () {
+                drawnItems.eachLayer((l) => {
+                    if (l?._tooltip) {
+                        const id = createId();
+                        const html = `<textarea rows="2" class="form-control pe-auto" style="width: 150px" id="${id}">${l._vidi_marker_text}</textarea>`;
+                        l._tooltip.setContent(html)
+                        $(`#${id}`).on("keyup", (e) => {
+                            l._vidi_marker_text = e.target.value.trim().length ? e.target.value : EMPTY_TOOLTIP;
+                            console.log(l._vidi_marker_text)
+                        })
+                    }
+                })
                 editing = true;
             });
 
             cloud.get().map.on('draw:editstop', function () {
+                drawnItems.eachLayer((l) => {
+                    if (l?._tooltip) {
+                        l._tooltip.setContent(marked(l._vidi_marker_text));
+                    }
+                })
                 editing = false;
                 backboneEvents.get().trigger(`${MODULE_NAME}:update`);
             });
@@ -279,15 +298,11 @@ module.exports = {
 
                 if (type === 'circlemarker') {
                     drawLayer._vidi_marker = true;
-
-                    var text = prompt(__("Enter a text for the marker or cancel to add without text"), "");
-                    if (text !== null) {
-                        drawLayer.bindTooltip(text, {permanent: true}).on("click", () => {
-                        }).openTooltip();
-                        drawLayer._vidi_marker_text = text;
-                    } else {
-                        drawLayer._vidi_marker_text = null;
-                    }
+                    let text = prompt(__("Enter a text for the marker or cancel to add without text"), "");
+                    text = text.trim().length ? text : EMPTY_TOOLTIP
+                    drawLayer.bindTooltip(text, {permanent: true}).on("click", () => {
+                    }).openTooltip();
+                    drawLayer._vidi_marker_text = text;
                 }
 
                 drawnItems.addLayer(drawLayer);
@@ -491,7 +506,7 @@ module.exports = {
 
                     // Add label
                     if (m._vidi_marker_text) {
-                        g.bindTooltip(m._vidi_marker_text, {permanent: true}).on("click", () => {
+                        g.bindTooltip(marked(m._vidi_marker_text), {permanent: true}).on("click", () => {
                         }).openTooltip();
                     }
 
