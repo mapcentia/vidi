@@ -299,7 +299,7 @@ module.exports = {
                     drawLayer._vidi_marker = true;
                     let text = prompt(__("Enter a text for the marker or cancel to add without text"), "");
                     text = text.trim().length ? text : EMPTY_TOOLTIP
-                    drawLayer.bindTooltip(text, {permanent: true}).on("click", () => {
+                    drawLayer.bindTooltip(marked(text), {permanent: true}).on("click", () => {
                     }).openTooltip();
                     drawLayer._vidi_marker_text = text;
                 }
