@@ -237,7 +237,7 @@ module.exports = {
         "Fit bounds to filter": "Sæt udsnit",
         "Labels": "Labels",
         "Show labels": "Vis labels",
-        "Layer filter": "Lagfilter",
+        "Filter": "Filter",
 
         // Base layers
         "Side-by-side mode": "Dobbelt baggrundskort",

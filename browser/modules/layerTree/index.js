@@ -205,7 +205,7 @@ module.exports = {
         });
         $("#layers").before(`
                                 <div class="input-group mb-3 layer-filter">
-                                    <input placeholder="${__('Layer filter')}" class="form-control" type="text" id="layers-filter" autocomplete="off">
+                                    <input placeholder="${__('Filter')}" class="form-control" type="text" id="layers-filter" autocomplete="off">
                                     <button id="layers-filter-reset" class="btn btn-outline-secondary" type="button" id="button-addon2">
                                         <i class="bi bi-x-lg"></i>
                                         <div id="layers-filter-busy" style="display: none" class="spinner-border spinner-border-sm text-primary" role="status"></div>

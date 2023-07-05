@@ -38,6 +38,8 @@ class Download extends React.Component {
                            onClick={this.handleDownload.bind(this)}>GeoPackage</a></li>
                     <li><a data-format="ogr/ESRI Shapefile" className="dropdown-item" href="#"
                            onClick={this.handleDownload.bind(this)}>ESRI Shapefile</a></li>
+                    {/*<li><a data-format="ogr/DXF" className="dropdown-item" href="#"*/}
+                    {/*       onClick={this.handleDownload.bind(this)}>AutoCAD DXF</a></li>*/}
                 </ul>
             </div>
         )
