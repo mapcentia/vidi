@@ -525,7 +525,7 @@ class VectorLayerFilter extends React.Component {
                                 style={{display: this.props.isFilterImmutable ? "none" : "inline"}}>
                             <i className="bi bi-plus"></i>
                         </button>
-                        <button className="btn btn-light btn-sm" type="button" disabled={!allRulesAreValid}
+                        <button className="btn btn-outline-success btn-sm" type="button" disabled={!allRulesAreValid}
                                 onClick={this.onRulesApply.bind(this)}>
                             <i className="bi bi-check"></i><span className="d-none d-lg-inline"> {__(`Apply`)}</span>
                         </button>
