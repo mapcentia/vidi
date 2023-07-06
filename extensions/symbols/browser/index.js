@@ -51,7 +51,7 @@ const htmlFragments = {
         <div class="tab-pane" role="tabpanel">
             <div class="symbols-cover-text position-absolute" style="top: 50%; left: 50px; display: none; opacity: 0; font-weight: 600; color: #333333">Zoom tættere på</div>
             <div class="symbols-cover position-relative">
-                <div class="d-flex flex-wrap"></div>
+                <div class="d-flex flex-wrap gap-4"></div>
             </div>
             <div class="symbols-desc"></div>
         </div>
@@ -262,12 +262,18 @@ const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file, gro
         doDelete = config?.extensionConfig?.symbols?.options?.delete;
     }
 
-    if (doRotate) outerHtml.append(`<div class="symbols-handles symbols-rotate ${rotateHandleStr}"></div>`);
-    if (doScale) outerHtml.append(`<div class="symbols-handles symbols-scale ${scaleHandleStr}"></div>`);
-    if (doDelete) outerHtml.append(`<div class="symbols-handles symbols-delete ${deleteHandleStr}" id="${id}"></div>`);
+    if (doRotate || doRotate === undefined) {
+        outerHtml.append(`<div class="symbols-handles symbols-rotate ${rotateHandleStr}"></div>`);
+    }
+    if (doScale || doScale === undefined) {
+        outerHtml.append(`<div class="symbols-handles symbols-scale ${scaleHandleStr}"></div>`);
+    }
+    if (doDelete || doDelete === undefined) {
+        outerHtml.append(`<div class="symbols-handles symbols-delete ${deleteHandleStr}" id="${id}"></div>`);
+    }
     let icon = L.divIcon({
         className: "drag-symbole",
-        // iconSize: new L.Point(72, 72),
+        iconSize: new L.Point(72, 72),
         iconAnchor: [26, 26],
         html: `${outerHtml[0].outerHTML}`
     });
