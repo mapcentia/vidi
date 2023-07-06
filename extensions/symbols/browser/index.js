@@ -273,8 +273,8 @@ const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file, gro
     }
     let icon = L.divIcon({
         className: "drag-symbole",
-        iconSize: new L.Point(72, 72),
-        iconAnchor: [26, 26],
+        iconSize: new L.Point(50, 50),
+        iconAnchor: [25, 25],
         html: `${outerHtml[0].outerHTML}`
     });
     markers[id] = L.marker(coord, {icon: icon, draggable: true}).addTo(map);
@@ -407,25 +407,20 @@ module.exports = {
         utils.createMainTab(exId, __("Symbols"), __("Info"), require('./../../../browser/modules/height')().max, "bi bi-flower1", false, exId);
 
         const gui = `
-                    <!--<div class="form-inline">
-                      <div class="form-group">
-                            <div class="togglebutton">
-                                <label>
-                                    <input id="vidi-symbols-lock" type="checkbox">${__("Lock")}
+                      <div class="d-flex gap-4 align-items-center mb-4">
+                            <div class="form-check form-switch">
+                                <label >
+                                    <input id="vidi-symbols-lock" class="form-check-input" type="checkbox">${__("Lock")}
                                 </label>
                             </div>
-                        </div>
-                        <div class="form-group">
-                            <div class="togglebutton">
-                                <label>
-                                    <input id="vidi-symbols-autoscale" type="checkbox">${__("Auto scale")}
+                            <div class="form-check form-switch">
+                                <label class="form-check-label">
+                                    <input id="vidi-symbols-autoscale" class="form-check-input" type="checkbox">${__("Auto scale")}
                                 </label>
                             </div>
-                        </div>
-                        <div class="form-group">
-                            <button class="btn" id="vidi-symbols-store">${__("Save in db")}</button>
-                        </div>
-                    </div>-->
+                            <button class="btn btn-primary d-none" id="vidi-symbols-store">${__("Save in db")}</button>
+                    </div>
+                    
                     <div id="vidi_symbols"></div>
                     `
         $(`#${exId}`).html(gui);
