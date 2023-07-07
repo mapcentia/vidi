@@ -78,6 +78,7 @@ For at tegne elementer, gøres følgende:
     * Klik for at placere
     * Indtast notat
 
+
 Ændre elementer
 -----------------------------------------------------------------
 
@@ -86,7 +87,7 @@ Når værktøjet aktiveres er det muligt at ændre knudepunkter mm. for de tegne
 .. figure:: ../../../_media/draw-edit.png
     :width: 400px
     :align: center
-    :name: draw-edit
+    :name: draw-edit2
     :figclass: align-center
 
     Ændre elementerne ved at klikke og trække knudepunkterne (Hvide kasser)
@@ -103,6 +104,30 @@ Udvælg et mål der skal fjernes.
 Klik for ``Gem`` for at gemme, ``Fortryd`` for at annulere alle ændringer.
 
 .. warning:: Klikker man på ``Slet alle`` kan handlingen ikke fortrydes
+
+Upload og download
+=================================================================
+
+Med funktionen **GEOJSON** downloades alt tegnet til en geojson fil på den lokale maskine
+
+Med funktionen **SHAPE** kan en shape fil uploades, så det bliver en del af tegnelaget.
+Der kan uploades punkter, linjer og flader pakket som en zip-fil. Ved import vises objekter i kortet, med standard (blå) og i listen under 
+
+.. figure:: ../../../_media/shape.png
+    :width: 600px
+    :align: center
+    :name: draw-edit3
+    :figclass: align-center
+
+Ved markering af ét objekt kan man anvende konfliktsøgning med den importerede geometri. 
+Alternativt kan man vælge konfliktsøgning med alle importerede geometrier.
+
+**Forudsætninger:**
+Der er lavet en afgrænsning for at beskytte løsningen mod store shapefiler. Der håndteres derfor kun filer, indeholdende op til 200 objekter.
+
+Importerer man en fil med flere objekter, vil de ikke blive importeret og brugeren vil blive promptet med en meddelelse herom.
+Dette er en almindelig beskyttelse af webløsninger, for at man ikke risikerer at importere et landsdækkende matrikelkort og herved beslaste WebGIS løsningen så den bliver uanvendelig.
+
 
 Stilart
 =================================================================

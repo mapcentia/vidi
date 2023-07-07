@@ -39,10 +39,14 @@ module.exports = {
     },
 
     init: () => {
+        $("#_draw_zoom_btn").on('click', ()=> {
+          _self.zoomToLayer();
+        });
 
         $("#_draw_download_geojson").click(function () {
             _self.download();
         });
+
         $("#_draw_upload_shape_file").on('change', async function (e) {
             try {
                 $("#_draw_upload_shape_error").text('');
@@ -151,7 +155,13 @@ module.exports = {
             }
         }());
     },
-
+    zoomToLayer : () => {
+      const items=  _self.getDrawItems();
+      if (!items) 
+        return;
+      const bounds= items.getBounds();
+      cloud.get().map.fitBounds(bounds,true);
+    },	
     handleZipFile: (file) => {
         try {
             const reader = new FileReader();
@@ -208,7 +218,6 @@ module.exports = {
                 
             else if (feature.geometry.type === 'Polygon') {
                 feature.properties.type = 'polygon';
-                feature.properties.area = drawTools.getFeatureArea(feature)
             }
             else
                 feature.properties.type = 'marker';

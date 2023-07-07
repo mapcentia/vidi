@@ -114,6 +114,6 @@ config/_variables.less
 /public/css/extensions/all.min.css
 /public/css/styles.css
 /public/css/styles.min.css
-
+docs/html
 # Environment variables
 .env
