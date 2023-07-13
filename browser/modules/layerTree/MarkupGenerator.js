@@ -94,7 +94,7 @@ class MarkupGenerator {
         </li>`);
     }
 
-    getLayerControlRecord(layerKeyWithGeom, layerKey, layerIsActive, layer, layerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo, isSubLayer, moduleState, disableCheckBox, parentLayerKeys, childLayerKeys) {
+    getLayerControlRecord(layerKeyWithGeom, layerKey, layerIsActive, layer, layerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo, isSubLayer, moduleState, disableCheckBox, parentLayerKeys, childLayerKeys, hasFilter) {
         let queueFailedButtonStyle = regularButtonStyle + ` background-color: orange; padding-left: 4px; padding-right: 4px;`;
         let queueRejectedByServerButtonStyle = regularButtonStyle + ` background-color: red; padding-left: 4px; padding-right: 4px;`;
         let tooltip = layer.f_table_abstract || ``;
@@ -119,6 +119,8 @@ class MarkupGenerator {
                     <div style="display: inline-block;" id="layer-information">
                         <div style="display: flex; align-items: center; column-gap: 5px;">
                             ${text}${lockedLayer}
+                            <span class="js-tiles-has-filter info-icon" style="visibility: ${hasFilter ? "inline" : "hidden"};" data-toggle="tooltip" data-placement="right"
+                                title="${__("Layer has filter")}"><span class="material-icons" style="color: green;font-size: 13px;">filter_list</span></span>
                             <span class="js-tiles-contain-data" style="visibility: ${moduleState.tileContentCache[layerKey] ? "inline" : "hidden"};" data-toggle="tooltip" data-placement="right"
                                 title="${__("Layer is visible")}"><i class="fa fa-eye info-icon" style="color: green;"></i></span>
                             <span class="js-layer-is-disabled" style="visibility: ${disableCheckBox ? "inline" : "hidden"};" data-toggle="tooltip" data-placement="right"
