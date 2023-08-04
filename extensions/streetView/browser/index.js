@@ -202,8 +202,7 @@ module.exports = {
                     let event = new geocloud.clickEvent(e, cloud);
                     if (clicktimer) {
                         clearTimeout(clicktimer);
-                    }
-                    else {
+                    } else {
                         if (me.state.active === false) {
                             return;
                         }
@@ -246,46 +245,35 @@ module.exports = {
                 return (
                     <div role="tabpanel">
                         <div className="form-group">
-                            <h3>{__("Choose service")}</h3>
-                            <div className="radio">
-                                <label>
-                                    <input type="radio" id="streetview-service-google" name="streetview-service"
+                            <div className="d-flex flex-column gap-4">
+                                <span className="btn-group">
+                                    <input className="btn-check" type="radio" id="streetview-service-google"
+                                           name="streetview-service"
                                            value="google" checked={this.state.selectedOption === 'google'}
                                            onChange={this.onChange}/>
-                                    Google Street View
-                                </label>
-                            </div>
+                                    <label className="btn btn-sm btn-outline-secondary"
+                                           htmlFor="streetview-service-google">Google Street View</label>
 
-                            <div className="radio">
-                                <label>
-                                    <input type="radio" id="streetview-service-mapillary"
+                                    <input className="btn-check" type="radio" id="streetview-service-mapillary"
                                            name="streetview-service" value="mapillary"
                                            checked={this.state.selectedOption === 'mapillary'}
                                            onChange={this.onChange}/>
-                                    Mapillary
-                                </label>
-                            </div>
+                                    <label className="btn btn-sm btn-outline-secondary"
+                                           htmlFor="streetview-service-mapillary">Mapillary</label>
 
-                            <div className="radio">
-                                <label>
-                                    <input type="radio" id="streetview-service-skraafoto"
+                                    <input className="btn-check" type="radio" id="streetview-service-skraafoto"
                                            name="streetview-service" value="skraafoto"
                                            checked={this.state.selectedOption === 'skraafoto'}
                                            onChange={this.onChange}/>
-                                    Skråfoto
-                                </label>
-                            </div>
+                                    <label className="btn btn-sm btn-outline-secondary" htmlFor="streetview-service-skraafoto">Skråfoto</label>
 
-                            <div className="radio">
-                                <label>
-                                    <input type="radio" id="streetview-service-cowi"
+                                    <input className="btn-check" type="radio" id="streetview-service-cowi"
                                            name="streetview-service" value="cowi"
                                            checked={this.state.selectedOption === 'cowi'}
                                            onChange={this.onChange}/>
-                                    COWI Gadefoto
-                                </label>
+                                    <label className="btn btn-sm btn-outline-secondary" htmlFor="streetview-service-cowi">COWI Gadefoto</label>
+                                </span>
                             </div>
-
                         </div>
                     </div>
                 );
