@@ -984,20 +984,6 @@ let dom = `
                 <div id="conflict-buffer-slider"></div>
             </div>
         </div>
-        <span class="btn-group">
-                <input class="btn-check" type="radio" name="conflict-report-type" id="conflict-report-type-1" value="1" checked>
-            <label for="conflict-report-type-1" class="btn btn-sm btn-outline-secondary">
-                Kompakt
-            </label>
-                <input class="btn-check" type="radio" name="conflict-report-type" id="conflict-report-type-2" value="2">
-            <label for="conflict-report-type-2" class="btn btn-sm btn-outline-secondary">
-                Lang, kun hits
-            </label>
-                <input class="btn-check" type="radio" name="conflict-report-type" id="conflict-report-type-3" value="3">
-            <label for="conflict-report-type-3" class="btn btn-sm btn-outline-secondary">
-                Lang, alle
-            </label>
-        </span>
     </div>
     <div id="conflict-main-tabs-container" style="display: none">
         <ul class="nav nav-pills nav-fill" role="tablist" id="conflict-main-tabs">
@@ -1010,7 +996,21 @@ let dom = `
             <div role="tabpanel" class="tab-pane active" id="conflict-result-content">
                 <div id="conflict-result" class="d-flex flex-column gap-4">
                     <div class="d-flex flex-column gap-4">
-                        <span id="conflict-result-origin" class="mt-4"></span>
+                        <span id="conflict-result-origin" class="mt-2"></span>
+                        <span class="btn-group">
+                            <input class="btn-check" type="radio" name="conflict-report-type" id="conflict-report-type-1" value="1" checked>
+                            <label for="conflict-report-type-1" class="btn btn-sm btn-outline-secondary">
+                                Kompakt
+                            </label>
+                            <input class="btn-check" type="radio" name="conflict-report-type" id="conflict-report-type-2" value="2">
+                            <label for="conflict-report-type-2" class="btn btn-sm btn-outline-secondary">
+                                Lang, kun hits
+                            </label>
+                            <input class="btn-check" type="radio" name="conflict-report-type" id="conflict-report-type-3" value="3">
+                            <label for="conflict-report-type-3" class="btn btn-sm btn-outline-secondary">
+                                Lang, alle
+                            </label>
+                        </span>
                         <div class="d-flex gap-2 justify-content-start">
                             <button disabled class="btn btn-sm btn-outline-success start-print-btn" id="conflict-print-btn">
                                 <span class="spinner-border spinner-border-sm"
@@ -1085,7 +1085,7 @@ let dom = `
             </div>
             </div>
             <div role="tabpanel" class="tab-pane" id="conflict-log-content">
-                <textarea style="width: 100%" rows="8" id="conflict-console"></textarea>
+                <textarea class="mt-2 w-100 form-control" rows="8" id="conflict-console"></textarea>
             </div>
         </div>
     </div>

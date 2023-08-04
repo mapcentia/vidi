@@ -194,7 +194,7 @@ module.exports = {
                             .then((data) => {
                                 $("#conflict-get-print-fieldset").prop("disabled", false);
                                 $("#conflict-download-pdf, #conflict-open-pdf").prop("href", "/tmp/print/pdf/" + data.key + ".pdf");
-                                $("#conflict-print-btn").button('reset');
+                                $("#conflict-print-btn").find("span").hide()
                                 backboneEvents.get().trigger("end:conflictSearchPrint", data);
                                 setTimeout(function () {
                                     utils.hideInfoToast(conflictSearch.TOAST_ID);
