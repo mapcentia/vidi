@@ -146,7 +146,9 @@ var _result = {};
 import {
     buffer as turfBuffer
 } from '@turf/turf'
+
 const wicket = require('wicket');
+const TOAST_ID = "conflict-toast";
 
 /**
  *
@@ -316,6 +318,16 @@ module.exports = module.exports = {
         // Create a new tab in the main tab bar
         utils.createMainTab("conflict", "Konfliktsøgning", "Lav en konfliktsøgning ned igennem alle lag. Der kan søges med en adresse/matrikelnr., en tegning eller et objekt fra et lag. Det sidste gøres ved at klikke på et objekt i et tændt lag og derefter på \'Søg med dette objekt\'", require('./../../../browser/modules/height')().max, "bi-check2-square", false, "conflictSearch");
         $("#conflict").append(dom);
+        $("body").append(`
+            <div class="toast-container bottom-0 end-0 p-3 me-5">
+            <div id="${TOAST_ID}" class="toast align-items-center text-bg-primary border-0" role="alert" aria-live="assertive"
+                 aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body" id="conflict-toast-body"></div>
+                </div>
+            </div>
+            </div>
+        `)
 
         // DOM created
 
@@ -643,12 +655,7 @@ module.exports = module.exports = {
             }).addTo(bufferItems);
             l._layers[Object.keys(l._layers)[0]]._vidi_type = "query_buffer";
 
-            $.snackbar({
-                id: "snackbar-conflict",
-                content: "<span id='conflict-progress'>" + __("Waiting to start") + "....</span>",
-                htmlAllowed: true,
-                timeout: 1000000
-            });
+            utils.showInfoToast("<span id='conflict-progress'>" + __("Waiting to start") + "....</span>", {autohide: false}, TOAST_ID);
 
             var schemata = [];
             var schemataStr = urlparser.schema;
@@ -672,7 +679,7 @@ module.exports = module.exports = {
                     scriptCharset: "utf-8",
                     success: _self.handleResult,
                     error: function () {
-                        $("#snackbar-conflict").snackbar("hide");
+                        utils.hideInfoToast(TOAST_ID);
                     }
                 })
             })
@@ -772,7 +779,7 @@ module.exports = module.exports = {
         let hitsCount = 0, noHitsCount = 0, errorCount = 0, resultOrigin, groups = [];
         _result = response;
         setTimeout(function () {
-            $("#snackbar-conflict").snackbar("hide");
+            utils.hideInfoToast(TOAST_ID);
         }, 200);
         $("#spinner span").hide();
         $("#result-origin").html(response.text);
@@ -783,7 +790,7 @@ module.exports = module.exports = {
             $('#conflict-result-content a[href="#hits-content"]').tab('show');
         }
         $('#conflict-open-pdf').attr("href", "/html?id=" + response.file)
-        $("#conflict-download-pdf").prop("download", `Søgning foretaget med ${response.text} d. ${response.dateTime}`);
+        $("#conflict-download-pdf").prop("download", `Søgning foretaget med ${response.text} d. ${response.dateTime}.pdf`);
 
         if ('bufferItems' in response) {
             this.recreateDrawings(JSON.parse(response.bufferItems), bufferItems);
@@ -808,7 +815,7 @@ module.exports = module.exports = {
                     let metaData = v.meta;
                     if (metaData.layergroup === groups[i]) {
                         count++;
-                        row = "<tr><td>" + v.title + "</td><td>" + v.hits + "</td><td><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + v.table + "' " + ($.inArray(v.table, visibleLayers) > -1 ? "checked" : "") + "></label></div></td></tr>";
+                        row = "<tr><td>" + v.title + "</td><td>" + v.hits + "</td><td><div class='form-check form-switch text-end'><label class='form-check-label'><input class='form-check-input' type='checkbox' data-gc2-id='" + v.table + "' " + ($.inArray(v.table, visibleLayers) > -1 ? "checked" : "") + "></label></div></td></tr>";
                         hitsTable.append(row);
                     }
                 }
@@ -831,12 +838,12 @@ module.exports = module.exports = {
                         if (metaData.meta_url) {
                             title = "<a target='_blank' href='" + metaData.meta_url + "'>" + title + "</a>";
                         }
-                        row = "<tr><td>" + title + "</td><td>" + v.hits + "</td><td><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + table + "' " + ($.inArray(i, visibleLayers) > -1 ? "checked" : "") + "></label></div></td></tr>";
+                        row = "<tr><td>" + title + "</td><td>" + v.hits + "</td><td><div class='form-check form-switch text-end'><label class='form-check-label'><input class='form-check-input' type='checkbox' data-gc2-id='" + table + "' " + ($.inArray(i, visibleLayers) > -1 ? "checked" : "") + "></label></div></td></tr>";
                         if (v.hits > 0) {
                             count++;
                             hitsCount++;
                             table1 = $("<table class='table table-data'/>");
-                            hitsData.append("<h5>" + title + " (" + v.hits + ")<div class='checkbox' style='float: right; margin-top: 25px'><label><input type='checkbox' data-gc2-id='" + table + "' " + ($.inArray(i, visibleLayers) > -1 ? "checked" : "") + "></label></div></h5>");
+                            hitsData.append("<h5>" + title + " (" + v.hits + ")<div class='form-check form-switch text-end float-end'><label class='form-check-label'><input class='form-check-input' type='checkbox' data-gc2-id='" + table + "' " + ($.inArray(i, visibleLayers) > -1 ? "checked" : "") + "></label></div></h5>");
                             let conflictForLayer = metaData.meta !== null ? JSON.parse(metaData.meta) : null;
                             if (conflictForLayer !== null && 'short_conflict_meta_desc' in conflictForLayer) {
                                 hitsData.append("<p style='margin: 0'>" + conflictForLayer.short_conflict_meta_desc + "</p>");
@@ -878,7 +885,7 @@ module.exports = module.exports = {
                                         }
                                     });
                                     td.append(table2);
-                                    tr.append("<td style='width: 60px'><button type='button' class='btn btn-default btn-xs zoom-to-feature' data-gc2-sf-table='" + v.table + "' data-gc2-sf-key='" + key + "' data-gc2-sf-fid='" + fid + "'>#" + (u + 1) + " <i class='fa fa-search'></i></button></td>");
+                                    tr.append("<td style='width: 60px'><button type='button' class='btn btn-light btn-sm zoom-to-feature' data-gc2-sf-table='" + v.table + "' data-gc2-sf-key='" + key + "' data-gc2-sf-fid='" + fid + "'>#" + (u + 1) + " <i class='bi bi-search'></i></button></td>");
                                     tr.append(td);
                                     table1.append(tr);
                                 });
@@ -960,74 +967,82 @@ module.exports = module.exports = {
     },
     getFromVarsIsDone: function () {
         return fromVarsIsDone;
-    }
+    },
+    TOAST_ID
 };
 
 let dom = `
 <div role="tabpanel">
-    <div id="conflict-buffer" style="display: none">
-        <div>
-            <label for="conflict-buffer-value" class="control-label">Buffer</label>
-            <input id="conflict-buffer-value" class="form-control">
-            <div id="conflict-buffer-slider" style="margin-bottom: 20px"></div>
+    <div class="d-flex flex-column gap-4 mb-4">
+        <div id="conflict-places" class="places" style="display: none">
+            <input id="${id}" class="${id} typeahead form-control" type="text" placeholder="Adresse eller matrikelnr.">
         </div>
-    </div>
-    <div id="conflict-places" class="places" style="margin-bottom: 20px; display: none">
-        <input id="${id}" class="${id} typeahead" type="text" placeholder="Adresse eller matrikelnr.">
+        <div id="conflict-buffer" style="display: none">
+            <div>
+                <label for="conflict-buffer-value" class="control-label">Buffer</label>
+                <input id="conflict-buffer-value" class="form-control">
+                <div id="conflict-buffer-slider"></div>
+            </div>
+        </div>
+        <span class="btn-group">
+                <input class="btn-check" type="radio" name="conflict-report-type" id="conflict-report-type-1" value="1" checked>
+            <label for="conflict-report-type-1" class="btn btn-sm btn-outline-secondary">
+                Kompakt
+            </label>
+                <input class="btn-check" type="radio" name="conflict-report-type" id="conflict-report-type-2" value="2">
+            <label for="conflict-report-type-2" class="btn btn-sm btn-outline-secondary">
+                Lang, kun hits
+            </label>
+                <input class="btn-check" type="radio" name="conflict-report-type" id="conflict-report-type-3" value="3">
+            <label for="conflict-report-type-3" class="btn btn-sm btn-outline-secondary">
+                Lang, alle
+            </label>
+        </span>
     </div>
     <div id="conflict-main-tabs-container" style="display: none">
-        <ul class="nav nav-tabs" role="tablist" id="conflict-main-tabs">
-            <li role="presentation" class="active"><a href="#conflict-result-content" aria-controls="" role="tab" data-toggle="tab">Resultat</a></li>
-            <li role="presentation"><a href="#conflict-info-content" aria-controls="" role="tab" data-toggle="tab">Info</a></li>
-            <li role="presentation"><a href="#conflict-log-content" aria-controls="" role="tab" data-toggle="tab">Log</a></li>
+        <ul class="nav nav-pills nav-fill" role="tablist" id="conflict-main-tabs">
+            <li role="presentation" class="active nav-item"><a class="nav-link" href="#conflict-result-content" aria-controls="" role="tab" data-bs-toggle="tab">Resultat</a></li>
+            <li role="presentation" class="nav-item"><a class="nav-link" href="#conflict-info-content" aria-controls="" role="tab" data-bs-toggle="tab">Info</a></li>
+            <li role="presentation" class="nav-item"><a class="nav-link" href="#conflict-log-content" aria-controls="" role="tab" data-bs-toggle="tab">Log</a></li>
         </ul>
         <!-- Tab panes -->
         <div class="tab-content" style="display: none">
             <div role="tabpanel" class="tab-pane active" id="conflict-result-content">
-                <div id="conflict-result">
-                    <div><span id="conflict-result-origin"></span></div>
-                    <div><a href="" target="_blank" class="btn btn-sm btn-raised" id="conflict-excel-btn">Excel</a></div>
-                    <div class="btn-toolbar bs-component" style="margin: 0;">
-                        <div class="btn-group">
-                            <button disabled class="btn btn-sm btn-raised" id="conflict-print-btn" data-loading-text="<i class='fa fa-cog fa-spin fa-lg'></i> PDF rapport"><i class='fa fa-cog fa-lg'></i> Print rapport</button>
-                        </div>
-                        <div class="btn-group">
-                            <button disabled class="btn btn-sm btn-raised" id="conflict-set-print-area-btn"><i class='fas fa-expand'></i></button>
-                        </div>
-                        <fieldset disabled id="conflict-get-print-fieldset">
-                            <div class="btn-group">
-                                <a target="_blank" href="javascript:void(0)" class="btn btn-sm btn-primary btn-raised" id="conflict-open-pdf">Åben PDF</a>
-                                <a href="bootstrap-elements.html" class="btn btn-sm btn-primary btn-raised dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></a>
-                                <ul class="dropdown-menu">
-                                    <li><a href="javascript:void(0)" id="conflict-download-pdf">Download PDF</a></li>
-                                </ul>
-                            </div>
-                        </fieldset>
-                        <div>
-                            <span class="radio radio-primary">
-                                <label>
-                                    <input type="radio" name="conflict-report-type" value="1" checked>
-                                    Kompakt
-                                </label>
-                                <label>
-                                    <input type="radio" name="conflict-report-type" value="2">
-                                    Lang, kun hits
-                                </label>
-                                <label>
-                                    <input type="radio" name="conflict-report-type" value="3">
-                                    Lang, alle
-                                </label>
-                            </span>
+                <div id="conflict-result" class="d-flex flex-column gap-4">
+                    <div class="d-flex flex-column gap-4">
+                        <span id="conflict-result-origin" class="mt-4"></span>
+                        <div class="d-flex gap-2 justify-content-start">
+                            <button disabled class="btn btn-sm btn-outline-success start-print-btn" id="conflict-print-btn">
+                                <span class="spinner-border spinner-border-sm"
+                                          role="status" aria-hidden="true" style="display: none">
+                                </span> Print rapport
+                            </button>
+                            <button disabled class="btn btn-sm btn-light" id="conflict-set-print-area-btn"><i class='bi bi-fullscreen'></i></button>
+                            <fieldset disabled id="conflict-get-print-fieldset">
+                                <div class="input-group">
+                                    <a target="_blank" href="javascript:void(0)" class="btn btn-sm btn-outline-success" id="conflict-open-pdf">Åben PDF</a>
+                                    <a href="javascript:void(0)"
+                                       class="btn btn-outline-success btn-sm dropdown-toggle"
+                                       data-bs-toggle="dropdown"
+                                       id="conflict-open-pdf"
+                                    ></a>
+                                    <ul class="dropdown-menu get-print-btn">
+                                        <li><a class="dropdown-item" href="javascript:void(0)"
+                                               id="conflict-download-pdf">Download</a></li>
+                                    </ul>
+                                </div>
+                            </fieldset>
+                            <a href="" target="_blank" class="btn btn-sm btn-outline-secondary" id="conflict-excel-btn">Excel</a>
                         </div>
                     </div>
 
                     <div role="tabpanel">
                         <!-- Nav tabs -->
-                        <ul class="nav nav-tabs" role="tablist">
-                            <li role="presentation" class="active"><a href="#hits-content" aria-controls="hits-content" role="tab" data-toggle="tab">Med konflikter<span></span></a></li>
-                            <li role="presentation"><a href="#hits-data-content" aria-controls="hits-data-content" role="tab" data-toggle="tab">Data fra konflikter<span></span></a></li>
-                            <li role="presentation"><a href="#nohits-content" aria-controls="nohits-content" role="tab" data-toggle="tab">Uden konflikter<span></span></a></li>
-                            <li role="presentation"><a href="#error-content" aria-controls="error-content" role="tab" data-toggle="tab">Fejl<span></span></a></li>
+                        <ul class="nav nav-pills nav-fill" role="tablist">
+                            <li role="presentation" class="active nav-item"><a class="nav-link" href="#hits-content" aria-controls="hits-content" role="tab" data-bs-toggle="tab">Med konflikter<span></span></a></li>
+                            <li role="presentation" class="nav-item"><a class="nav-link" href="#hits-data-content" aria-controls="hits-data-content" role="tab" data-bs-toggle="tab">Data fra konflikter<span></span></a></li>
+                            <li role="presentation" class="nav-item"><a class="nav-link" href="#nohits-content" aria-controls="nohits-content" role="tab" data-bs-toggle="tab">Uden konflikter<span></span></a></li>
+                            <li role="presentation" class="nav-item"><a class="nav-link" href="#error-content" aria-controls="error-content" role="tab" data-bs-toggle="tab">Fejl<span></span></a></li>
                         </ul>
                         <div class="tab-content">
                             <div role="tabpanel" class="tab-pane active conflict-result-content" id="hits-content">
@@ -1059,12 +1074,15 @@ let dom = `
                 </div>
             </div>
             <div role="tabpanel" class="tab-pane" id="conflict-info-content">
-                <div id="conflict-info-box">
-                    <div id="conflict-modal-info-body">
-                        <ul class="nav nav-tabs" id="conflict-info-tab"></ul>
-                        <div class="tab-content" id="conflict-info-pane"></div>
-                    </div>
-                </div><button class="btn btn-default btn-xs" id="conflict-search-with-feature">Søg med valgte</button>
+            <div class="d-grid gap-2 mt-2 mb-2">
+                <button style="display: none" class="btn btn-outline-secondary btn-block" id="conflict-search-with-feature">Søg med valgte</button>
+            </div>
+            <div id="conflict-info-box">
+                <div id="conflict-modal-info-body">
+                    <ul class="nav nav-tabs" id="conflict-info-tab"></ul>
+                    <div class="tab-content" id="conflict-info-pane"></div>
+                </div>
+            </div>
             </div>
             <div role="tabpanel" class="tab-pane" id="conflict-log-content">
                 <textarea style="width: 100%" rows="8" id="conflict-console"></textarea>

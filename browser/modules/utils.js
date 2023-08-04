@@ -162,19 +162,19 @@ module.exports = {
         }
     },
 
-    showInfoToast: (text, options = {delay: 1500, autohide: true}) => {
+    showInfoToast: (text, options = {delay: 1500, autohide: true}, elementId = "info-toast") => {
         try {
-            document.getElementById('info-toast-body').innerHTML = text;
-            const e = new bootstrap.Toast(document.getElementById('info-toast'), options);
+            document.querySelector(`#${elementId} .toast-body`).innerHTML = text;
+            const e = new bootstrap.Toast(document.getElementById(elementId), options);
             e.show();
         } catch (e) {
            console.log("Info toast could not be shown");
         }
     },
 
-    hideInfoToast: () => {
+    hideInfoToast: (elementId = "info-toast") => {
        try {
-           const e = new bootstrap.Toast(document.getElementById('info-toast'));
+           const e = new bootstrap.Toast(document.getElementById(elementId));
            e.hide();
        } catch (e) {
            console.log("Info toast could not be hidden");

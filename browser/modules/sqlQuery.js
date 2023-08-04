@@ -350,7 +350,7 @@ module.exports = {
                             }
                         }
 
-                        let display = simple ? "none" : "inline";
+                        let display = simple ? "none" : "flex";
                         let dataShowExport, dataShowColumns, dataShowToggle, dataDetailView;
                         let info = infoText ? `<div>${infoText}</div>` : "";
                         dataShowExport = dataShowColumns = dataShowToggle = dataDetailView = simple ? "false" : "true";
@@ -360,7 +360,7 @@ module.exports = {
                                                                     <button type="button" class="nav-link" data-bs-toggle="tab" onclick="setTimeout(()=>{$('#${elementPrefix}modal-info-body table').bootstrapTable('resetView'),100})" id="tab_${storeId}" data-bs-target="#_${storeId}">${layerTitel}</button>
                                                                </li>`);
                         $(`#${elementPrefix}info-pane`).append(`<div class="tab-pane _sql_query" id="_${storeId}">
-                            <div style="display: ${display}" class="d-flex justify-content-around mt-3 mb-3">
+                            <div style="display: ${display}" class="justify-content-around mt-3 mb-3">
                                 <a class="btn btn-sm btn-light" id="_download_geojson_${storeId}" target="_blank" href="javascript:void(0)">
                                     <i class="bi bi-download" aria-hidden="true"></i> GeoJson
                                 </a> 

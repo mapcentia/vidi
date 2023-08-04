@@ -307,7 +307,9 @@ module.exports = {
                 const e = document.querySelector('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]');
                 if (e) {
                     bootstrap.Tab.getInstance(e).show();
-                    e.click();
+                    setTimeout(()=>{
+                        e.click();
+                    }, 100)
                 } else {
                     console.warn(`Unable to locate specified activateMainTab ${window.vidiConfig.activateMainTab}`)
                 }

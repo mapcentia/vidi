@@ -36,7 +36,7 @@ router.post('/api/extension/conflictSearch', function (req, response) {
         uri: url,
         encoding: 'utf8',
         headers: {
-            Cookie: "PHPSESSID=" + req.session.gc2SessionId + ";" // GC2's Meta API is session based
+            Cookie: "PHPSESSID=" + req?.session?.gc2SessionId + ";" // GC2's Meta API is session based
         }
     };
     request.get(options, function (err, res, body) {

@@ -53,13 +53,16 @@ module.exports = {
                 clearTimeout(clicktimer);
             } else {
                 clicktimer = setTimeout(function (e) {
+                    const coords = event.getCoordinate();
+                    let btn = $("#conflict-search-with-feature");
+                    let wkt;
+                    btn.hide();
                     clicktimer = undefined;
-                    var coords = event.getCoordinate(), wkt;
                     wkt = "POINT(" + coords.x + " " + coords.y + ")";
                     sqlQuery.init(qstore, wkt, "3857", null, null, [coords.lat, coords.lng], false, false, false, () => {
                     }, (id, layer) => {
                         conflictSearch.addDrawing(layer);
-                        let btn = $("#conflict-search-with-feature");
+                        btn.show();
                         btn.unbind();
                         btn.click(() => {
                             conflictSearch.clearDrawing(true);
