@@ -14,8 +14,8 @@ router.all('/api/feature/:db/:layer/:param', function (req, response) {
     let userName;
 
     // Check if user is a sub user
-    if (req.session.screenName && req.session.subUser) {
-        userName = req.session.screenName + "@" + db;
+    if (req?.session?.screenName && req.session?.subUser) {
+        userName = req?.session?.screenName + "@" + db;
     } else {
         userName = db;
     }
@@ -25,8 +25,8 @@ router.all('/api/feature/:db/:layer/:param', function (req, response) {
         uri: config.host + uri,
         json: body,
         headers: {
-            'Cookie': "XDEBUG_SESSION=XDEBUG_SESSION;PHPSESSID=" + req.session.gc2SessionId,
-            'GC2-API-KEY': req.session.gc2ApiKey
+            'Cookie': "XDEBUG_SESSION=XDEBUG_SESSION;PHPSESSID=" + req?.session?.gc2SessionId,
+            'GC2-API-KEY': req?.session?.gc2ApiKey
         }
     };
     request(options, function (err, res, body) {
