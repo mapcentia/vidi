@@ -477,13 +477,6 @@ body {
   width: 200px;
 }
 
-#searchclear {
-  position: absolute;
-  cursor: pointer;
-  top: 8px;
-  right: 8px;
-}
-
 .places {
   width: 100%;
   position: relative;
@@ -940,8 +933,14 @@ iframe.leaflet-utfgrid-layer {
 }
 
 .twitter-typeahead {
-  width: 100%;
+  width: calc(~'100% - 42px');
+  border-color: #6c757d;
 }
+.twitter-typeahead input {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
 
 .get-print-btn {
   display: none;

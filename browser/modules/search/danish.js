@@ -76,7 +76,7 @@ module.exports = {
      * @param caller
      * @returns {function(): geocloud.sqlStore}
      */
-    init: function (onLoad, el, onlyAddress, getProperty, caller) {
+    init: function (onLoad, el = ".custom-search", onlyAddress, getProperty, caller) {
         var type1, type2, type3, type4, gids = {}, searchString, dslM, shouldA = [], shouldM = [], dsl1, dsl2,
             komKode = window.vidiConfig.searchConfig.komkode, placeStores = {}, maxZoom, searchTxt,
             esrSearchActive = typeof (window.vidiConfig.searchConfig.esrSearchActive) !== "undefined" ? window.vidiConfig.searchConfig.esrSearchActive : false,
@@ -89,18 +89,18 @@ module.exports = {
         let placeholder = window.vidiConfig?.searchConfig?.placeholderText;
         if (placeholder) {
             searchTxt = placeholder;
-            $("#custom-search, #conflict-custom-search").attr("placeholder",
+            $(".custom-search").attr("placeholder",
                 searchTxt
             );
         } else {
             searchTxt = "Adresse, matr. nr.";
             if (sfeSearchActive) {
-                $("#custom-search").attr("placeholder",
+                $(".custom-search").attr("placeholder",
                     searchTxt
                     + (esrSearchActive ? ", ESR nr. " : "")
                     + " eller SFE nr.");
             } else if (esrSearchActive) {
-                $("#custom-search").attr("placeholder",
+                $(".custom-search").attr("placeholder",
                     searchTxt + " eller ESR nr.");
             }
         }
@@ -145,7 +145,7 @@ module.exports = {
             for (const property in placeStores) {
                 placeStores[property].reset();
             }
-            $("#custom-search").val("");
+            $(".typeahead").val("");
         });
 
 
@@ -198,10 +198,10 @@ module.exports = {
         // =========================
 
         if (!el) {
-            el = "custom-search";
+            el = ".custom-search";
         }
 
-        if ($("#" + el).data("vidi-address-only")) {
+        if ($(el).data("vidi-address-only")) {
             onlyAddress = true;
         }
 
@@ -1195,10 +1195,10 @@ module.exports = {
         } else {
             fromVarsIsDone = true;
         }
-        $("#" + el).typeahead({
+        $(el).typeahead({
             highlight: false
         }, ...standardSearches);
-        $('#' + el).bind('typeahead:selected', function (obj, datum, name) {
+        $(el).bind('typeahead:selected', function (obj, datum, name) {
             if ((type1 === "adresse" && name === "adresse") || (type2 === "jordstykke" && name === "matrikel")
                 || (type3 === "esr_nr" && name === "esr_ejdnr") || (type4 === "sfe_nr" && name === "sfe_ejdnr")
                 || extraSearchesNames.indexOf(name) !== -1
@@ -1269,7 +1269,7 @@ module.exports = {
                 }
             } else {
                 setTimeout(function () {
-                    $("#" + el).val(datum.value + " ").trigger("paste").trigger("input");
+                    $(el).val(datum.value + " ").trigger("paste").trigger("input");
                 }, 100)
             }
         });

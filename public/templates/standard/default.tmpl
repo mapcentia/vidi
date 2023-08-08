@@ -241,9 +241,13 @@
                         <div></div>
                         <div id="place-search">
                             <div class="places d-flex">
-                                <input id="custom-search" class="custom-search typeahead form-control" type="text"
-                                       placeholder="{{Address}}">
-                                <i class="bi bi-x-lg text-dark" id="searchclear"></i>
+                                <div class="input-group mb-3">
+                                    <input class="custom-search typeahead form-control" type="text"
+                                           placeholder="{{Address}}">
+                                    <button class="btn btn-outline-secondary searchclear" type="button">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>

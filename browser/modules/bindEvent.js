@@ -169,8 +169,13 @@ module.exports = {
             });
         });
 
-        $('#searchclear').on('click', function () {
+        $('.searchclear').on('click', function () {
             backboneEvents.get().trigger('clear:search');
+        });
+        $(document).arrive('.searchclear', function () {
+            $(this).on('click', function () {
+                backboneEvents.get().trigger('clear:search');
+            });
         });
 
         backboneEvents.get().on("allDoneLoading:layers", function () {

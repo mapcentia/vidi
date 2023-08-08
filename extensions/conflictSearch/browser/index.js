@@ -330,7 +330,9 @@ module.exports = module.exports = {
         `)
 
         // DOM created
-
+        $('#searchclear2').on('click', function () {
+            backboneEvents.get().trigger('clear:search');
+        });
         // Init search with custom callback
         getPlaceStore = search.init(function () {
             _clearDrawItems();
@@ -338,8 +340,8 @@ module.exports = module.exports = {
             this.layer._layers[Object.keys(this.layer._layers)[0]]._vidi_type = "query_draw"; // Tag it, so it serialized
             drawnItems.addLayer(this.layer._layers[Object.keys(this.layer._layers)[0]]);
             cloud.zoomToExtentOfgeoJsonStore(this, 17);
-            me.makeSearch($("#conflict-custom-search").val());
-        }, id, false, getProperty);
+            me.makeSearch($(".custom-search-conflict")[1].value);
+        }, ".custom-search-conflict", false, getProperty);
 
 
         sliderEl = $('#conflict-buffer-slider');
@@ -975,7 +977,12 @@ let dom = `
 <div role="tabpanel">
     <div class="d-flex flex-column gap-4 mb-4">
         <div id="conflict-places" class="places" style="display: none">
-            <input id="${id}" class="${id} typeahead form-control" type="text" placeholder="Adresse eller matrikelnr.">
+            <div class="input-group mb-3">
+                <input class="typeahead form-control custom-search-conflict" type="text" placeholder="Adresse eller matrikelnr.">
+                <button class="btn btn-outline-secondary searchclear" type="button">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
         </div>
         <div id="conflict-buffer" style="display: none">
             <div>

@@ -132,13 +132,17 @@
         </button>
 
         <div class="collapse navbar-collapse justify-content-end flex-grow-0 pe-auto mt-2 mt-sm-0" id="navbarSupportedContent">
-            <form class="mt-3 mt-sm-0 place-search" role="search">
+            <div class="mt-3 mt-sm-0 place-search" role="search">
                 <div class="places">
-                    <input class="form-control me-2 custom-search typeahead" id="custom-search" type="text"
-                           placeholder="{{Address}}" aria-label="Search">
-                    <i class="bi bi-x-lg text-dark" id="searchclear"></i>
+                    <div class="input-group">
+                        <input class="custom-search typeahead form-control" type="text"
+                               placeholder="{{Address}}">
+                        <button class="btn btn-secondary searchclear" type="button">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
                 </div>
-            </form>
+            </div>
             <ul class="navbar-nav ms-sm-2 mt-sm-0 ms-0 mt-3 navbar-tool-btn gap-2">
                 <li class="legend-btn" style="display: {{_displayLegend}}">
                     <button id="btn-show-legend-in-map" data-module="legend"
@@ -170,7 +174,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body">
-            <div class="pe-2 ps-2">
+            <div class="p-2 ">
                 <div id="layers"></div>
                 <div id="layersAlt"></div>
             </div>
