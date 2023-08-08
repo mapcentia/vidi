@@ -116,10 +116,23 @@ module.exports = {
                                     let feature = turfFeature(featureForChecking.feature.geometry);
                                     try {
                                         if (turfIntersects(clickFeature, feature) && overlay.id) {
+                                            const layerId = overlay.id.split(":")[1];
+                                            try {
+                                                const zoom = mapObj.getZoom();
+                                                const parsedMeta = JSON.parse(meta.getMetaByKey(layerId).meta);
+                                                const minZoom = parseInt(parsedMeta.vector_min_zoom);
+                                                const maxZoom = parseInt(parsedMeta.vector_max_zoom);
+                                                if (minZoom > zoom || maxZoom < zoom) {
+                                                    console.log(layerId + " is out of min/max zoom")
+                                                    continue;
+                                                }
+                                            } catch (e) {
+                                                console.error(e)
+                                            }
                                             intersectingFeatures.push({
                                                 feature: featureForChecking.feature,
                                                 layer: featureForChecking,
-                                                layerKey: overlay.id.split(":")[1],
+                                                layerKey: layerId,
                                                 vector: true
                                             })
                                         }
@@ -159,7 +172,7 @@ module.exports = {
                                 }, 200)
                             }, null, [coord3857[0], coord3857[1]]);
                         } else
-                        layerTree.displayAttributesPopup(intersectingFeatures, e);
+                            layerTree.displayAttributesPopup(intersectingFeatures, e);
                     }
                 }, 250);
             }
