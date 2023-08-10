@@ -1,6 +1,6 @@
 /*
  * @author     Alexander Shumilov
- * @copyright  2013-2021 MapCentia ApS
+ * @copyright  2013-2023 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -159,6 +159,7 @@ module.exports = {
         // If map is clicked, when clear all selections
         cloud.get().map.on('preclick', () => {
             _self.resetAllVectorLayerStyles();
+            _self.getInfoOffCanvas().hide();
             sqlQuery.resetAll();
             // If no queryable tile layers are active then close the off canvas.
             const l = _self.getActiveLayers().filter(e => {
@@ -2258,7 +2259,7 @@ module.exports = {
             }, 200);
         }
         if (count === 0) {
-            utils.showInfoToast(__("Didn't find anything"))
+            utils.showInfoToast(__("Didn't find anything"));
         }
     },
 
