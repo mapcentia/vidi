@@ -82,6 +82,13 @@ router.post(
     //console.log(req.body.features)
     //console.log(req.body.db)
 
+    console.log(req.session);
+
+    // Guard against no session
+    if (!req.session) {
+      return response.status(500).send("Fejl i session, prøv igen. " + err);
+    }
+
     // check if addresscase is already created
     const qrystr =
       "SELECT adrfileid, parenttype, dnadrid FROM " +
@@ -90,7 +97,7 @@ router.post(
       req.body.features[0].properties.adgangsadresseid +
       "'";
 
-    //    const qrystr = 'INSERT INTO vmr.adressesager (adrfileid, adresseguid) VALUES (108896,\'0a3f50c1-0523-32b8-e044-0003ba298018\')'
+    //const qrystr = 'INSERT INTO vmr.adressesager (adrfileid, adresseguid) VALUES (108896,\'0a3f50c1-0523-32b8-e044-0003ba298018\')'
     var getExistinAdrCaseGc2Promise = ReqToGC2(
       req.session,
       qrystr,
@@ -105,7 +112,9 @@ router.post(
         //console.log(resultExistingAdrCase)
         //console.log(resultExistingAdrCase.features)
 
-        if (resultExistingAdrCase.features.length) {
+        // check if addresscase is already created
+        if (resultExistingAdrCase.features && resultExistingAdrCase.features.length > 0) {
+          console.log('Adressesag eksisterer allerede, bruger eksisterende.')
           // adressesagen er oprettet i DN så skal der bare oprettes henvendelsessager under denne
           //
           // body json for Case
@@ -170,6 +179,7 @@ router.post(
             }
           );
         } else {
+          console.log('Adressesag eksisterer ikke, opretter ny.')
           // adressesagen findes ikke, den skal oprettes først.
           // getparentcase på bfenr
           // opret adressesag husk post caseid tilbage til gc2
@@ -308,6 +318,7 @@ router.post(
             }
           );
         }
+
       },
       function (err) {
         response.status(500).send(err);
@@ -1006,12 +1017,9 @@ function ReqToGC2(session, requrl, db) {
         console.log(err);
         reject(err);
       } else {
-        //console.log(resp)
-        if (JSON.parse(body).features && JSON.parse(body).features.length) {
-          resolve(JSON.parse(body));
-        } else {
-          resolve(JSON.parse(body));
-        }
+        var result = JSON.parse(body);
+        // console.log(result);
+        resolve(result);
       }
     });
   });
