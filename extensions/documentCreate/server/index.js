@@ -90,10 +90,12 @@ router.post(
     }
 
     // If there is a session, log who
-    console.log('Username',req.session.gc2UserName,'ParentDB:',req.session.parentDb,'Expires:', req.session.cookie._expires);
+    console.log('documentCreateSendFeature:', 'Username',req.session.gc2UserName,'ParentDB:',req.session.parentDb,'Expires:', req.session.cookie._expires);
+
+    console.log(req.session)
 
     // Guard against session with wrong parentdb (vmr)
-    if (req.session.parentdb != 'vmr') {
+    if (req.session.parentDb != 'vmr') {
       return response.status(500).send( session_error_message );
     }
 
