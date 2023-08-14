@@ -82,12 +82,21 @@ router.post(
     //console.log(req.body.features)
     //console.log(req.body.db)
 
-    console.log(req.session);
+    var session_error_message = "Fejl i session, prøv at logge ind igen.";
 
     // Guard against no session
     if (!req.session) {
-      return response.status(500).send("Fejl i session, prøv igen. " + err);
+      return response.status(500).send( session_error_message );
     }
+
+    // If there is a session, log who
+    console.log('Username',req.session.gc2UserName,'ParentDB:',req.session.parentDb,'Expires:', req.session.cookie._expires);
+
+    // Guard against session with wrong parentdb (vmr)
+    if (req.session.parentdb != 'vmr') {
+      return response.status(500).send( session_error_message );
+    }
+
 
     // check if addresscase is already created
     const qrystr =
