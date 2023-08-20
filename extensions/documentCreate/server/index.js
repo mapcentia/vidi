@@ -196,15 +196,17 @@ router.post(
           // opret adressesag husk post caseid tilbage til gc2
           // getnodeid på henvendelsesmappen
           // opret henvendelsessagen herunder.
-          var getParentCaseDnPromise = getParentCaseDnESR(
-            req.body.features[0].properties.esrnr,
-          );
-
-
-          //When they want to change to BFE use this instead
-          //var getParentCaseDnPromise = getParentCaseDnBFE(
-          //  req.body.features[0].properties.bfenr,
+          
+          // Deprecated case from ESR - has now moved to BFE-structure
+          //var getParentCaseDnPromise = getParentCaseDnESR(
+          //  req.body.features[0].properties.esrnr,
           //);
+
+
+          // When they want to change to BFE use this instead
+          var getParentCaseDnPromise = getParentCaseDnBFE(
+            req.body.features[0].properties.bfenr,
+          );
 
 
           getParentCaseDnPromise.then(
