@@ -109,3 +109,12 @@
 .leaflet-container {
   font-family: $font-family-base !important;
 }
+
+.leaflet-control-simpleMapScreenshoter {
+  border: 1px solid rgba(0, 0, 0, .175) !important;
+}
+
+.leaflet-control-simpleMapScreenshoter a {
+  border: none !important;
+  background-image: none !important;
+}

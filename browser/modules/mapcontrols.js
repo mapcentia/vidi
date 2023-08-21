@@ -213,8 +213,29 @@ module.exports = {
         defaultMapExtentControl = new DefaultMapExtentControl();
         cloud.get().map.addControl(defaultMapExtentControl);
 
+        const simpleMapScreenshoter = L.simpleMapScreenshoter(
+            {
+                position: 'topright',
+                screenName: "Screenshot",
+            }
+        ).addTo(cloud.get().map);
+        // cloud.get().map.on("simpleMapScreenshoter.click", () => {
+        //     document.querySelector(".leaflet-control-simpleMapScreenshoter a").innerHTML = "<span class='spinner-border spinner-border-sm align-middle'></span>";
+        // });
+        // cloud.get().map.on("simpleMapScreenshoter.done", () => {
+        //     resetPrintBtn();
+        // });
+        cloud.get().map.on("simpleMapScreenshoter.error", () => {
+            alert("Something went wrong");
+            resetPrintBtn();
+        });
 
-        let historyControl = new L.HistoryControl({
+        const printBtnEl =document.querySelector(".leaflet-control-simpleMapScreenshoter a");
+        printBtnEl.title = __("Create a screenshot of the map. The screenshot is downloaded as a PNG file");
+        const resetPrintBtn = () => printBtnEl.innerHTML = "<span class='bi bi-camera'></span>";
+        resetPrintBtn();
+
+        new L.HistoryControl({
             orientation: 'vertical',
             backTooltip: __(`Previous extent`),
             forwardTooltip: __(`Next extent`),
@@ -222,7 +243,7 @@ module.exports = {
             backImage: "bi bi-caret-left",
         }).addTo(cloud.get().map);
 
-        let rubberbandControl = L.Control.boxzoom({
+        L.Control.boxzoom({
             position: 'topright',
             iconClasses: 'bi bi-bounding-box',
             title: __(`Click here then draw a square on the map, to zoom in to an area`),

@@ -254,6 +254,7 @@ module.exports = {
         "Previous extent": "Forrige udsnit",
         "Next extent": "Næste udsnit",
         "Click here then draw a square on the map, to zoom in to an area": "Klik her og træk derefter en firkant på kortet for at zoome til et område",
+        "Create a screenshot of the map. The screenshot is downloaded as a PNG file": "Lav et screenshot af kortet. Screenshot'et bliver downloaded som en PNG fil",
 
         // APIBridge
         "Not authorized to perform this action": "Ikke autoriseret til at udføre denne handling.",

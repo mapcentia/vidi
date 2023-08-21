@@ -94,6 +94,8 @@ Følgende funktioner er skjulte, men kan sættes til "inline" hvis funktionerne 
  * Reset-knappen.
 * **data-vidi-clear (valgfri)**
  * Ryd-kort-knappen.
+* **data-vidi-screenshot (valgfri)**
+ * Screenshot-knappen.
 
 
 

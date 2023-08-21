@@ -55,11 +55,25 @@
         display: {{_displayBurger}};
 
     }
+    .leaflet-control-simpleMapScreenshoter {
+        display: {{_displayScreenshot}};
+    }
 </style>
 <!-- map -->
 <div id="pane">
     <div id="container">
-        <div id="map"></div>
+        <div id="map">
+            <div class="toast-container position-fixed bottom-0 end-0 p-3 pb-5 me-sm-5">
+                <div id="legend-toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="toast-header">
+                        <strong class="me-auto">{{Legend}}</strong>
+                        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                    <div class="toast-body overflow-auto" id="legend-toast-body" >
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -228,16 +242,7 @@
     </div>
 </div>
 
-<div class="toast-container position-fixed bottom-0 end-0 p-3 pb-5 me-sm-5">
-    <div id="legend-toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-header">
-            <strong class="me-auto">{{Legend}}</strong>
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body overflow-auto" id="legend-toast-body" >
-        </div>
-    </div>
-</div>
+
 <div id="legend-content" class="d-none">
     <div id="legend" class="legend"></div>
 </div>

@@ -243,6 +243,7 @@ module.exports = function (grunt) {
                         'public/js/lib/Leaflet.markercluster/leaflet.markercluster.js',
                         'public/js/lib/Leaflet.extra-markers/leaflet.extra-markers.js',
                         'public/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.js',
+                        'public/js/lib/leaflet-simple-map-screenshoter/dist/leaflet-simple-map-screenshoter.js',
 
                         'public/js/lib/jquery.canvasResize.js/jquery.canvasResize.js',
                         'public/js/lib/jquery.canvasResize.js/jquery.exif.js',
