@@ -30,11 +30,6 @@ const db = urlparser.db;
 const MODULE_ID = exId;
 const config = require('../../../config/config.js');
 
-/**
- *
- * @type {*|exports|HTMLElement}
- */
-const symbolWrapper = $(`<div class="symbols-lib drag-marker" draggable="true"></div>`);
 
 /**
  *
@@ -165,6 +160,7 @@ const scale = (e, img, id, classStr) => {
  * @param e
  */
 const handleDragEnd = (e) => {
+    const shadowRoot = e.target.querySelector("svg-container").shadowRoot;
     const targetElements = document.elementsFromPoint(e.clientX, e.clientY);
     // Don't do anything if symbols is dropped on container
     for (let i = 0; i < targetElements.length; i++) {
@@ -178,7 +174,6 @@ const handleDragEnd = (e) => {
         return;
     }
     let map = cloud.get().map;
-    let innerHtml = $(e.target).clone().html();
     let id = createId();
     let coord = map.mouseEventToLatLng(e);
     let file = $(e.target).attr("data-file");
@@ -210,7 +205,7 @@ const handleDragEnd = (e) => {
             }
         }
     }
-    createSymbol(innerHtml, id, coord, 0, 1, map.getZoom(), file, group);
+    createSymbol(shadowRoot.innerHTML, id, coord, 0, 1, map.getZoom(), file, group);
 }
 
 /**
@@ -231,12 +226,7 @@ const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file, gro
     let rotateHandleStr = "r_" + id;
     let deleteHandleStr = "d_" + id;
     let scaleHandleStr = "s_" + id;
-    let outerHtml = $(symbolWrapper).clone().html(innerHtml);
-    outerHtml.removeClass("symbols-lib");
-    outerHtml.removeClass("col");
-    outerHtml.addClass("symbols-map");
-    outerHtml.attr("draggable", "false")
-    outerHtml.addClass(classStr);
+    let html = `<div class="drag-marker symbols-map ${classStr}" draggable="false">`;
     let callback = config?.extensionConfig?.symbols?.symbolOptions?.[file]?.callback;
     if (callback === undefined) {
         callback = config?.extensionConfig?.symbols?.options?.callback;
@@ -248,7 +238,6 @@ const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file, gro
             console.error("Error in callback for " + file, e.message)
         }
     }
-
     let doRotate = config?.extensionConfig?.symbols?.symbolOptions?.[file]?.rotate
     let doScale = config?.extensionConfig?.symbols?.symbolOptions?.[file]?.scale
     let doDelete = config?.extensionConfig?.symbols?.symbolOptions?.[file]?.delete
@@ -263,19 +252,21 @@ const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file, gro
     }
 
     if (doRotate || doRotate === undefined) {
-        outerHtml.append(`<div class="symbols-handles symbols-rotate ${rotateHandleStr}"></div>`);
+        html += `<div class="symbols-handles symbols-rotate ${rotateHandleStr}"></div>`;
     }
     if (doScale || doScale === undefined) {
-        outerHtml.append(`<div class="symbols-handles symbols-scale ${scaleHandleStr}"></div>`);
+        html += `<div class="symbols-handles symbols-scale ${scaleHandleStr}"></div>`;
     }
     if (doDelete || doDelete === undefined) {
-        outerHtml.append(`<div class="symbols-handles symbols-delete ${deleteHandleStr}" id="${id}"></div>`);
+        html += `<div class="symbols-handles symbols-delete ${deleteHandleStr}" id="${id}"></div>`;
     }
+    html += `<svg-container>${innerHtml}</svg-container>`;
+    html += `</div>`;
     let icon = L.divIcon({
         className: "drag-symbole",
         iconSize: new L.Point(50, 50),
         iconAnchor: [25, 25],
-        html: `${outerHtml[0].outerHTML}`
+        html: html
     });
     markers[id] = L.marker(coord, {icon: icon, draggable: true}).addTo(map);
     symbolState[id] = {};
@@ -350,6 +341,17 @@ const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file, gro
     }
 }
 
+/**
+ * Custom shadow DOM element for encapsulating SVG
+ */
+class SVGContainer extends HTMLElement {
+    constructor() {
+        super();
+        const shadowRoot = this.attachShadow({mode: 'open'});
+        shadowRoot.append(...this.childNodes);
+    }
+}
+customElements.define('svg-container', SVGContainer);
 
 module.exports = {
 
@@ -469,7 +471,7 @@ module.exports = {
                                         const doc = parser.parseFromString(symbols[group][id].svg, "image/svg+xml");
                                         let text = doc.getElementsByTagName("desc")?.[0]?.textContent
                                         let desc = text || '';
-                                        let svg = $(inner.clone()[0]).append(symbols[group][id].svg);
+                                        let svg = $(inner.clone()[0]).append(`<svg-container>${symbols[group][id].svg}</svg-container>`);
                                         svg.attr('data-file', id);
                                         svg.attr('data-group', group);
                                         let e = $('<div class="p-1 text-center symbol-text-wrapper">');
