@@ -160,7 +160,7 @@ const scale = (e, img, id, classStr) => {
  * @param e
  */
 const handleDragEnd = (e) => {
-    const shadowRoot = e.target.querySelector("svg-container").shadowRoot;
+    const svg = e.target.querySelector("svg-container").shadowRoot.innerHTML;
     const targetElements = document.elementsFromPoint(e.clientX, e.clientY);
     // Don't do anything if symbols is dropped on container
     for (let i = 0; i < targetElements.length; i++) {
@@ -205,7 +205,7 @@ const handleDragEnd = (e) => {
             }
         }
     }
-    createSymbol(shadowRoot.innerHTML, id, coord, 0, 1, map.getZoom(), file, group);
+    createSymbol(svg, id, coord, 0, 1, map.getZoom(), file, group);
 }
 
 /**
