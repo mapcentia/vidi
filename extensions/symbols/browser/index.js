@@ -160,7 +160,8 @@ const scale = (e, img, id, classStr) => {
  * @param e
  */
 const handleDragEnd = (e) => {
-    const svg = e.target.querySelector("svg-container").shadowRoot.innerHTML;
+    // const svg = e.target.querySelector("svg-container").shadowRoot.innerHTML;
+    const svg = e.target.querySelector("svg-container").innerHTML;
     const targetElements = document.elementsFromPoint(e.clientX, e.clientY);
     // Don't do anything if symbols is dropped on container
     for (let i = 0; i < targetElements.length; i++) {
@@ -351,7 +352,9 @@ class SVGContainer extends HTMLElement {
         shadowRoot.append(...this.childNodes);
     }
 }
-customElements.define('svg-container', SVGContainer);
+//customElements.define('svg-container', SVGContainer);
+customElements.define("svg-container", ()=>{}, { extends: "div" });
+
 
 module.exports = {
 

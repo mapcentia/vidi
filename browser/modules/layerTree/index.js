@@ -3177,10 +3177,10 @@ module.exports = {
             setTimeout(() => {
                 const settingsCollapsible = document.getElementById(`settings-${layer.f_table_schema}-${layer.f_table_name}`);
                 const btn = document.getElementById(`settings-${layer.f_table_schema}-${layer.f_table_name}-btn`);
-                settingsCollapsible.addEventListener('shown.bs.collapse', event => {
+                settingsCollapsible?.addEventListener('shown.bs.collapse', event => {
                     btn.classList.add('active');
                 })
-                settingsCollapsible.addEventListener('hidden.bs.collapse', event => {
+                settingsCollapsible?.addEventListener('hidden.bs.collapse', event => {
                     btn.classList.remove('active');
                 })
             }, 100)
