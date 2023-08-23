@@ -64,7 +64,7 @@
 
 <!-- About Modal -->
 <div class="modal fade" id="about-modal" tabindex="-1" role="dialog" aria-labelledby="about-modalLabel">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-fullscreen" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h1 class="modal-title fs-5" id="about-modalLabel">{{About}}</h1>
@@ -130,7 +130,7 @@
         </button>
 
         <div class="collapse navbar-collapse justify-content-end flex-grow-0 mt-2 mt-sm-0" id="navbarSupportedContent">
-            <ul class="navbar-nav me-2 gap-2">
+            <ul class="navbar-nav gap-2">
                 <li class="nav-item d-flex align-items-center ms-2 me-2 mt-3 mt-sm-0">
                     <span class="badge text-bg-secondary js-app-is-pending-badge">
                         <i class="bi bi-three-dots"></i>{{Pending}}
@@ -139,18 +139,22 @@
                     <i class="bi bi-signal"></i>Online</span>
                     <span class="badge text-bg-danger js-app-is-offline-badge d-none">Offline</span>
                 </li>
-                <li class="nav-item reset-btn">
-                    <a class="nav-link" id="btn-reset" href="#">{{Reset}}</a>
-                </li>
                 <li class="nav-item about-btn">
-                    <a class="nav-link" data-bs-toggle="modal" data-bs-target="#about-modal" href="#">{{About}}</a>
+                    <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#about-modal">
+                        <i class="bi bi-info-circle"></i> {{About}}</span>
+                    </button>
+                </li>
+                <li class="nav-item reset-btn">
+                    <button class="btn  btn-outline-secondary" id="btn-reset">
+                        <i class="bi bi-x-circle"></i> {{Reset}}</span>
+                    </button>
+                </li>
+                <li class="nav-item sign-in-btn d-none">
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#login-modal">
+                        <i class="bi bi-person"></i><span class="gc2-session-btn-text"> {{Sign in}}</span>
+                    </button>
                 </li>
             </ul>
-            <div class="navbar-nav">
-                <button class="btn btn-primary sign-in-btn d-none" data-bs-toggle="modal" data-bs-target="#login-modal">
-                    <i class="bi bi-person"></i><span class="gc2-session-btn-text"> {{Sign in}}</span>
-                </button>
-            </div>
         </div>
     </div>
 </nav>

@@ -55,9 +55,15 @@
         display: {{_displayBurger}};
 
     }
+
     .leaflet-control-simpleMapScreenshoter {
         display: {{_displayScreenshot}};
     }
+
+    .btn-outline-secondary {
+        --bs-btn-bg: rgba(255, 255, 255, 0.7) !important;
+    }
+
 </style>
 <!-- map -->
 <div id="pane">
@@ -69,7 +75,7 @@
                         <strong class="me-auto">{{Legend}}</strong>
                         <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
                     </div>
-                    <div class="toast-body overflow-auto" id="legend-toast-body" >
+                    <div class="toast-body overflow-auto" id="legend-toast-body">
                     </div>
                 </div>
             </div>
@@ -122,14 +128,16 @@
             <button id="offcanvasLayerControlBtn"
                     class="btn btn-primary text-nowrap pe-auto" type="button"
             >
-                <i class="bi bi-list d-md-none"></i><span class="d-none d-md-inline">Menu</span> <i class="bi bi-arrow-bar-right"></i><i class="bi bi-arrow-bar-left d-none"></i>
+                <i class="bi bi-list d-md-none"></i><span class="d-none d-md-inline">Menu</span> <i
+                    class="bi bi-arrow-bar-right"></i><i class="bi bi-arrow-bar-left d-none"></i>
             </button>
             <div class="input-group d-none justify-content-end me-2 pe-auto" id="edit-tool-group">
                 <span class="input-group-text"><i class="bi bi-pencil"></i></span>
                 <button id="offcanvasEditBtn"
                         class="btn btn-secondary nav-edit-btn edit-attr-btn" type="button"
                 >
-                    <span class="d-none d-md-inline">Form</span> <i class="bi bi-arrow-bar-right"></i><i class="bi bi-arrow-bar-left d-none"></i>
+                    <span class="d-none d-md-inline">Form</span> <i class="bi bi-arrow-bar-right"></i><i
+                        class="bi bi-arrow-bar-left d-none"></i>
                 </button>
                 <button id="editStopBtn"
                         class="btn btn-danger nav-edit-btn" type="button"
@@ -145,7 +153,8 @@
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <div class="collapse navbar-collapse justify-content-end flex-grow-0 pe-auto mt-2 mt-sm-0" id="navbarSupportedContent">
+        <div class="collapse navbar-collapse justify-content-end flex-grow-0 pe-auto mt-2 mt-sm-0"
+             id="navbarSupportedContent">
             <div class="mt-3 mt-sm-0 place-search" role="search">
                 <div class="places">
                     <div class="input-group">
@@ -160,21 +169,27 @@
             <ul class="navbar-nav ms-sm-2 mt-sm-0 ms-0 mt-3 navbar-tool-btn gap-2">
                 <li class="legend-btn" style="display: {{_displayLegend}}">
                     <button id="btn-show-legend-in-map" data-module="legend"
-                            class="btn btn btn-outline-secondary">{{Legend}}</button>
-                </li>
-                <li class="nav-item reset-btn">
-                    <a class="nav-link" id="btn-reset" href="#">{{Reset}}</a>
+                            class="btn btn btn-outline-secondary">
+                        <i class="bi bi-card-text"></i> {{Legend}}</span>
+                    </button>
                 </li>
                 <li class="nav-item about-btn">
-                    <a class="nav-link" data-bs-toggle="modal" data-bs-target="#about-modal" href="#">{{About}}</a>
+                    <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#about-modal">
+                        <i class="bi bi-info-circle"></i> {{About}}</span>
+                    </button>
+                </li>
+                <li class="nav-item reset-btn">
+                    <button class="btn btn-outline-secondary" id="btn-reset">
+                        <i class="bi bi-x-circle"></i> {{Reset}}</span>
+                    </button>
+                </li>
+                <li class="nav-item sign-in-btn d-none">
+                    <button class="btn btn-primary" data-bs-toggle="modal"
+                            data-bs-target="#login-modal">
+                        <i class="bi bi-person"></i><span class="gc2-session-btn-text"> {{Sign in}}</span>
+                    </button>
                 </li>
             </ul>
-            <div class="navbar-nav">
-                <button class="btn btn-primary sign-in-btn d-none ms-2 text-nowrap" data-bs-toggle="modal"
-                        data-bs-target="#login-modal">
-                    <i class="bi bi-person"></i><span class="gc2-session-btn-text text-nowrap"> {{Sign in}}</span>
-                </button>
-            </div>
         </div>
     </div>
 </nav>
@@ -237,7 +252,7 @@
     <div id="info-toast" class="toast align-items-center text-bg-primary border-0" role="alert" aria-live="assertive"
          aria-atomic="true">
         <div class="d-flex">
-            <div class="toast-body" id="info-toast-body" ></div>
+            <div class="toast-body" id="info-toast-body"></div>
         </div>
     </div>
 </div>
