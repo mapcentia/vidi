@@ -222,7 +222,7 @@ router.post(
                 parentid,
                 parenttype,
                 dnTitle,
-                req.body.features[0].properties.esrnr,
+                req.body.features[0].properties.bfenr,
                 req.body.features[0].properties.adresseid,
                 req.body.features[0].properties.adgangsadresseid
               );
@@ -360,11 +360,11 @@ function GetParentFolder(
   parentId,
   parenttype,
   dnTitle,
-  esrnr,
+  bfenr,
   enhadrguid,
   adgadrguid
 ) {
-  console.log('GetParentFolder:',ejdCaseId, parentId, parenttype, dnTitle, esrnr, enhadrguid, adgadrguid);
+  console.log('GetParentFolder:',ejdCaseId, parentId, parenttype, dnTitle, bfenr, enhadrguid, adgadrguid);
   return new Promise(function (resolve, reject) {
     var getParentPromise = getFoldersDn(parentId, parenttype);
 
@@ -439,7 +439,7 @@ function GetParentFolder(
             createcontactpromise.then(function (adressbody) {
               var createaddresspromise = postCompanyToDn(adressbody);
               createaddresspromise.then(function (company) {
-                addPartsToCase(esrnr, adgadrguid, values.caseId);
+                addPartsToCase(bfenr, adgadrguid, values.caseId);
                 result.adresseid = company.companyId;
                 resolve(result);
               });
@@ -525,9 +525,9 @@ function getCaseParts(caseid) {
   return partjson;
 }
 
-function addPartsToCase(esrnr, adrguid, caseId) {
-  // get ids for esrnr and adrguid
-  var getEsrIdPromise = getPartId(esrnr);
+function addPartsToCase(bfenr, adrguid, caseId) {
+  // get ids for bfenr and adrguid
+  var getEsrIdPromise = getPartId(bfenr + '-BFE');
   var getAdrIdPromise = getPartId(adrguid);
 
   //   Promise.all([getEsrIdPromise,getAdrIdPromise]).then(function(values) {
