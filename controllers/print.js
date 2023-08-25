@@ -149,6 +149,7 @@ function print(key, q, req, response, outputPng = false, frame = 0, count, retur
                         browser.newPage().then(async (page) => {
                             await page.emulateMedia('screen');
                             page.on('console', msg => {
+                                console.log(msg.text());
                                 if (msg.text().indexOf(`Vidi is now loaded`) !== -1) {
                                     if (!check) {
                                         check = true;
