@@ -379,17 +379,29 @@ module.exports = {
                         };
                         if (typeof parsedMeta.select_function !== "undefined" && parsedMeta.select_function !== "") {
                             try {
-                                s = Function('"use strict";return (' + parsedMeta.select_function + ')')();
+                                try{
+                                    s = Function('"use strict";return (' + parsedMeta.select_function + ')')();
+                                } catch (e) {
+                                    const f = `
+                                        function(id, layer, key, sqlQuery) {
+                                            ${parsedMeta.select_function}
+                                        }
+                                        `;
+                                    s = Function('"use strict";return (' + f + ')')();
+                                }
                             } catch (e) {
                                 console.info("Error in select function for: " + _key_);
                                 console.error(e.message);
                             }
                         }
-                        // Set select_function if featureInfoTableOnMap = true
                         if (featureInfoTableOnMap || forceOffCanvasInfo) {
                             selectCallBack = function (id, layer, key, sqlQuery) {
                                 $("#modal-info-body").hide();
                                 $("#alternative-info-container").show();
+                                s(id, layer, key, sqlQuery);
+                            };
+                        } else {
+                            selectCallBack = function (id, layer, key, sqlQuery) {
                                 s(id, layer, key, sqlQuery);
                             };
                         }

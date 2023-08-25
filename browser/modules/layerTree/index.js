@@ -2041,6 +2041,25 @@ module.exports = {
 
             let parsedMeta = _self.parseLayerMeta(meta.getMetaByKey(layerKey, false));
 
+            let selectCallBack = () => {};
+            if (typeof parsedMeta.select_function !== "undefined" && parsedMeta.select_function !== "") {
+                try {
+                    try {
+                        selectCallBack = Function('"use strict";return (' + parsedMeta.select_function + ')')();
+                    } catch (e) {
+                        const f = `
+                            function(id, layer, key, sqlQuery) {
+                                ${parsedMeta.select_function}
+                            }
+                            `;
+                        selectCallBack = Function('"use strict";return (' + f + ')')();
+                    }
+                } catch (e) {
+                    console.info("Error in select function for: " + key);
+                    console.error(e.message);
+                }
+            }
+
             let localTable = gc2table.init({
                 el: tableContainerId + ` table`,
                 ns: tableContainerId,
@@ -2060,7 +2079,9 @@ module.exports = {
                 template: template,
                 styleSelected,
                 setZoom: parsedMeta?.zoom_on_table_click ? parsedMeta.zoom_on_table_click : false,
-                maxZoom: parsedMeta?.max_zoom_level_table_click && parsedMeta.max_zoom_level_table_click !== "" ? parsedMeta.max_zoom_level_table_click : 17
+                maxZoom: parsedMeta?.max_zoom_level_table_click && parsedMeta.max_zoom_level_table_click !== "" ? parsedMeta.max_zoom_level_table_click : 17,
+                onSelect: selectCallBack,
+                caller: _self
             });
 
             localTable.loadDataInTable(true, forceDataLoad);
@@ -2187,7 +2208,16 @@ module.exports = {
             };
             if (typeof parsedMeta.select_function !== "undefined" && parsedMeta.select_function !== "") {
                 try {
-                    selectCallBack = Function('"use strict";return (' + parsedMeta.select_function + ')')();
+                    try {
+                        selectCallBack = Function('"use strict";return (' + parsedMeta.select_function + ')')();
+                    } catch (e) {
+                        const f = `
+                            function(id, layer, key, sqlQuery) {
+                                ${parsedMeta.select_function}
+                            }
+                            `;
+                        selectCallBack = Function('"use strict";return (' + f + ')')();
+                    }
                 } catch (e) {
                     console.info("Error in select function for: " + key);
                     console.error(e.message);
