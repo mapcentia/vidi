@@ -60,7 +60,7 @@ En JavaScript funktion som kaldes når feature-info foretages. En række argumen
 
 .. code-block:: javascript
 
-    function(feature, layer){
+    function(feature, layer, layerKey, sqlQuery, store, map){
         alert(feature.properties.regionnavn)
     }
 
@@ -70,7 +70,7 @@ En JavaScript funktion, som kaldes når der vælges en række i feature-listen. 
 
 .. code-block:: javascript
 
-    function(id, layer){
+    function(id, layer, key, sqlQuery){
         alert(layer.feature.properties.regionnavn)
     }
 
