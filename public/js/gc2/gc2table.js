@@ -149,7 +149,11 @@ var gc2table = (function () {
                 console.warn("Can't set style on marker")
             }
 
-            onSelect(id, layer, key, store);
+            try {
+                onSelect(id, layer, key, store);
+            } catch (e) {
+                console.info("Error in select function for: " + store.id, e.message);
+            }
 
             if (openPopUp) {
                 let str = "<table>", renderedText;

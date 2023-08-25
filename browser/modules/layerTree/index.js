@@ -2041,22 +2041,18 @@ module.exports = {
 
             let parsedMeta = _self.parseLayerMeta(meta.getMetaByKey(layerKey, false));
 
-            let selectCallBack = () => {};
+            let selectCallBack = () => {
+            };
             if (typeof parsedMeta.select_function !== "undefined" && parsedMeta.select_function !== "") {
                 try {
-                    try {
-                        selectCallBack = Function('"use strict";return (' + parsedMeta.select_function + ')')();
-                    } catch (e) {
-                        const f = `
+                    selectCallBack = Function('"use strict";return (' + parsedMeta.select_function + ')')();
+                } catch (e) {
+                    const f = `
                             function(id, layer, key, sqlQuery) {
                                 ${parsedMeta.select_function}
                             }
                             `;
-                        selectCallBack = Function('"use strict";return (' + f + ')')();
-                    }
-                } catch (e) {
-                    console.info("Error in select function for: " + key);
-                    console.error(e.message);
+                    selectCallBack = Function('"use strict";return (' + f + ')')();
                 }
             }
 
@@ -2151,7 +2147,7 @@ module.exports = {
                     }
                     func(feature, layer, layerKey, sqlQuery, moduleState.vectorStores[LAYER.VECTOR + ':' + layerKey], cloud.get().map);
                 } catch (e) {
-                    console.info("Error in click function for: " + layerKey, e);
+                    console.info("Error in click function for: " + layerKey, e.message);
                 }
             }
 
@@ -2208,19 +2204,14 @@ module.exports = {
             };
             if (typeof parsedMeta.select_function !== "undefined" && parsedMeta.select_function !== "") {
                 try {
-                    try {
-                        selectCallBack = Function('"use strict";return (' + parsedMeta.select_function + ')')();
-                    } catch (e) {
-                        const f = `
+                    selectCallBack = Function('"use strict";return (' + parsedMeta.select_function + ')')();
+                } catch (e) {
+                    const f = `
                             function(id, layer, key, sqlQuery) {
                                 ${parsedMeta.select_function}
                             }
                             `;
-                        selectCallBack = Function('"use strict";return (' + f + ')')();
-                    }
-                } catch (e) {
-                    console.info("Error in select function for: " + key);
-                    console.error(e.message);
+                    selectCallBack = Function('"use strict";return (' + f + ')')();
                 }
             }
             let func = selectCallBack.bind(this, null, layer, layerKey, _self);

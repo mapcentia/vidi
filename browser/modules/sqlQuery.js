@@ -379,30 +379,33 @@ module.exports = {
                         };
                         if (typeof parsedMeta.select_function !== "undefined" && parsedMeta.select_function !== "") {
                             try {
-                                try{
-                                    s = Function('"use strict";return (' + parsedMeta.select_function + ')')();
-                                } catch (e) {
-                                    const f = `
+                                s = Function('"use strict";return (' + parsedMeta.select_function + ')')();
+                            } catch (e) {
+                                const f = `
                                         function(id, layer, key, sqlQuery) {
                                             ${parsedMeta.select_function}
                                         }
                                         `;
-                                    s = Function('"use strict";return (' + f + ')')();
-                                }
-                            } catch (e) {
-                                console.info("Error in select function for: " + _key_);
-                                console.error(e.message);
+                                s = Function('"use strict";return (' + f + ')')();
                             }
                         }
                         if (featureInfoTableOnMap || forceOffCanvasInfo) {
                             selectCallBack = function (id, layer, key, sqlQuery) {
                                 $("#modal-info-body").hide();
                                 $("#alternative-info-container").show();
-                                s(id, layer, key, sqlQuery);
+                                try {
+                                    s(id, layer, key, sqlQuery);
+                                } catch (e) {
+                                    console.info("Error in select function for: " + _key_, e.message);
+                                }
                             };
                         } else {
                             selectCallBack = function (id, layer, key, sqlQuery) {
-                                s(id, layer, key, sqlQuery);
+                                try {
+                                    s(id, layer, key, sqlQuery);
+                                } catch (e) {
+                                    console.info("Error in select function for: " + _key_, e.message);
+                                }
                             };
                         }
 
@@ -468,8 +471,7 @@ module.exports = {
                                 }
                                 func(this.layer.toGeoJSON(GEOJSON_PRECISION).features[0], this.layer, keyWithoutGeom, _self, this, cloud.get().map);
                             } catch (e) {
-                                console.info("Error in click function for: " + _key_);
-                                console.error(e.message);
+                                console.info("Error in click function for: " + _key_, e.message);
                             }
                         }
 
