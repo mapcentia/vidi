@@ -143,9 +143,7 @@ var debounce = require('lodash/debounce');
 
 var _result = {};
 
-import {
-    buffer as turfBuffer
-} from '@turf/turf'
+import {buffer as turfBuffer, dissolve as turDissolve} from '@turf/turf'
 
 const wicket = require('wicket');
 const TOAST_ID = "conflict-toast";
@@ -616,15 +614,15 @@ module.exports = module.exports = {
                     // We use a buffer to recreate a circle from the GeoJSON point
                     if (typeof l._mRadius !== "undefined") {
                         let buffer = l._mRadius;
-                        let primitive = l.toGeoJSON(GEOJSON_PRECISION);
-                        primitive.type = "Feature"; // Must be there
-                        collection.geometries.push(turfBuffer(primitive, buffer, {units: 'meters'}))
+                        let primitive = l.toGeoJSON(GEOJSON_PRECISION).geometry;
+                        const bufferPolygon = turfBuffer(primitive, buffer, {units: 'meters'}).geometry;
+                        collection.geometries.push(bufferPolygon)
                     } else {
-                        collection.geometries.push(l.toGeoJSON(GEOJSON_PRECISION).geometry)
+                        let primitive = l.toGeoJSON(GEOJSON_PRECISION).geometry;
+                        collection.geometries.push(primitive);
                     }
                 })
-                let newLayer = L.geoJSON(collection);
-                layer = newLayer;
+                layer = L.geoJSON(collection);
             }
         } else if (id) {
             layer = drawnItems._layers[id];
@@ -647,7 +645,12 @@ module.exports = module.exports = {
             primitive = primitive.features[0];
         }
         if (primitive) {
-            const geom = turfBuffer(primitive, buffer, {units: 'meters'});
+            let geom;
+            if (primitive.geometry.type === 'GeometryCollection') {
+                geom = turDissolve(turfBuffer(primitive.geometry, buffer, {units: 'meters'})).features[0];
+            } else {
+                geom = turfBuffer(primitive.geometry, buffer, {units: 'meters'});
+            }
             var l = L.geoJson(geom, {
                 "color": "#ff7800",
                 "weight": 1,
@@ -670,7 +673,6 @@ module.exports = module.exports = {
                 }
                 schemataStr = schemata.join(",");
             }
-
             preProcessor({
                 // "projWktWithBuffer": projWktWithBuffer
             }).then(function () {
@@ -994,7 +996,7 @@ let dom = `
     </div>
     <div id="conflict-main-tabs-container" style="display: none">
         <ul class="nav nav-pills nav-fill" role="tablist" id="conflict-main-tabs">
-            <li role="presentation" class="active nav-item"><a class="nav-link" href="#conflict-result-content" aria-controls="" role="tab" data-bs-toggle="tab">Resultat</a></li>
+            <li role="presentation" class="nav-item"><a class="nav-link active" href="#conflict-result-content" aria-controls="" role="tab" data-bs-toggle="tab">Resultat</a></li>
             <li role="presentation" class="nav-item"><a class="nav-link" href="#conflict-info-content" aria-controls="" role="tab" data-bs-toggle="tab">Info</a></li>
             <li role="presentation" class="nav-item"><a class="nav-link" href="#conflict-log-content" aria-controls="" role="tab" data-bs-toggle="tab">Log</a></li>
         </ul>

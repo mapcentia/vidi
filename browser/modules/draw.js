@@ -8,6 +8,7 @@
 
 const MODULE_NAME = `draw`;
 import {GEOJSON_PRECISION} from './constants';
+
 const drawTools = require(`./drawTools`);
 const fileSaver = require(`file-saver`);
 const marked = require('marked');
@@ -131,14 +132,26 @@ module.exports = {
         }());
     },
 
+    showConflictSearch: () => {
+        const e = document.querySelector('#main-tabs a[href="#conflict-content"]');
+        if (e) {
+            bootstrap.Tab.getInstance(e).show();
+            e.click();
+        } else {
+            console.warn(`Unable to locate #conflict-content`)
+        }
+
+    },
     makeConflictSearchWithSelected: () => {
         if (!selectedDrawing) {
             alert("Vælg en tegning")
             return;
         }
         state.resetState(['conflict']).then(() => {
-            $('#main-tabs a[href="#conflict-content"]').trigger('click');
-            conflictSearch.makeSearch("Fra tegning", null, selectedDrawing, true);
+            _self.showConflictSearch();
+            setTimeout(() =>
+                conflictSearch.makeSearch("Fra tegning", null, selectedDrawing, true), 200
+            )
         });
     },
 
@@ -148,8 +161,9 @@ module.exports = {
             return;
         }
         state.resetState(['conflict']).then(() => {
-            $('#main-tabs a[href="#conflict-content"]').trigger('click');
-            conflictSearch.makeSearch("Fra tegning", null, null, true);
+            _self.showConflictSearch();
+            setTimeout(() =>
+                conflictSearch.makeSearch("Fra tegning", null, null, true), 200);
         });
     },
 
