@@ -389,20 +389,23 @@ module.exports = {
                                 s = Function('"use strict";return (' + f + ')')();
                             }
                         }
+                        let selectCallBack2;
                         if (featureInfoTableOnMap || forceOffCanvasInfo) {
-                            selectCallBack = function (id, layer, key, sqlQuery) {
+                            selectCallBack2 = function (id, layer, key, sqlQuery) {
                                 $("#modal-info-body").hide();
                                 $("#alternative-info-container").show();
                                 try {
                                     s(id, layer, key, sqlQuery);
+                                    selectCallBack(id, layer, key, sqlQuery);
                                 } catch (e) {
                                     console.info("Error in select function for: " + _key_, e.message);
                                 }
                             };
                         } else {
-                            selectCallBack = function (id, layer, key, sqlQuery) {
+                            selectCallBack2 = function (id, layer, key, sqlQuery) {
                                 try {
                                     s(id, layer, key, sqlQuery);
+                                    selectCallBack(id, layer, key, sqlQuery);
                                 } catch (e) {
                                     console.info("Error in select function for: " + _key_, e.message);
                                 }
@@ -433,7 +436,7 @@ module.exports = {
                             pkey: pkey,
                             // renderInfoIn: '#offcanvas-info-container',
                             renderInfoIn: featureInfoTableOnMap || forceOffCanvasInfo ? '#alternative-info-container' : null,
-                            onSelect: selectCallBack,
+                            onSelect: selectCallBack2,
                             key: keyWithoutGeom,
                             caller: _self,
                             styleSelected: styleForSelectedFeatures,
