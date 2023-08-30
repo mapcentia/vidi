@@ -629,7 +629,6 @@ module.exports = module.exports = {
         } else {
             for (var prop in drawnItems._layers) {
                 layer = drawnItems._layers[prop];
-                break;
             }
         }
         if (typeof layer === "undefined") {
