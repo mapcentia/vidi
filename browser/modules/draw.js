@@ -269,20 +269,18 @@ module.exports = {
               alert(errTxt);
               return;
           }
+          const redrawObject = [];
           if (Array.isArray(geojson)) {
               for (const element of geojson) {
-                  const redrawObject = [];
                   _self.setGeometryProperties(element);
-                  redrawObject.push({ "geojson": element });
-                  _self.recreateDrawnings(redrawObject, false);
+                  redrawObject.push({ 'geojson': element, '_vidi_type': 'draw', 'type': 'Vector' });
               }
           } else {
-              const redrawObject = [];
               _self.setGeometryProperties(geojson);
-              redrawObject.push({ "geojson": geojson });
-              _self.recreateDrawnings(redrawObject, false);
+              redrawObject.push({ 'geojson': geojson,'_vidi_type': 'draw', 'type': 'Vector' });
           }
-
+          _self.recreateDrawnings(redrawObject, true);
+          backboneEvents.get().trigger(`${MODULE_NAME}:update`);
       })
   },
 
@@ -632,7 +630,7 @@ module.exports = {
           var g = json._layers[Object.keys(json._layers)[0]];
 
           // Adding vidi-specific properties
-          g._vidi_type = m._vidi_type;
+          g._vidi_type = m._vidi_type ? m._vidi_type :'draw';
 
           l.addLayer(g);
         }
