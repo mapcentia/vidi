@@ -357,10 +357,17 @@ function SQLAPI(q, req, options = null) {
 function hasUserSetup(uuid) {
   // check if uuid in in config, and if user object has username and password
   if (
-    bi.users.hasOwnProperty(uuid) &&
-    bi.users[uuid].hasOwnProperty("username") &&
-    bi.users[uuid].hasOwnProperty("password")
+    bi.users.hasOwnProperty(uuid) 
   ) {
+    // if blueidea is set, and is true, check for username and password
+    if (bi.users[uuid].hasOwnProperty("blueidea") && bi.users[uuid].blueidea) {
+      if (
+        !bi.users[uuid].hasOwnProperty("username") ||
+        !bi.users[uuid].hasOwnProperty("password")
+      ) {
+        return false;
+      }
+    }
     return true;
   } else {
     return false;
