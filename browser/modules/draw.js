@@ -269,6 +269,7 @@ module.exports = {
               alert(errTxt);
               return;
           }
+          // shape-state -> 
           const redrawObject = [];
           if (Array.isArray(geojson)) {
               for (const element of geojson) {
@@ -280,7 +281,7 @@ module.exports = {
               redrawObject.push({ 'geojson': geojson,'_vidi_type': 'draw', 'type': 'Vector' });
           }
           _self.recreateDrawnings(redrawObject, true);
-          backboneEvents.get().trigger(`${MODULE_NAME}:update`);
+          // <-shape-state
       })
   },
 
@@ -629,7 +630,7 @@ module.exports = {
 
           var g = json._layers[Object.keys(json._layers)[0]];
 
-          // Adding vidi-specific properties
+          // Adding vidi-specific properties. shape-state
           g._vidi_type = m._vidi_type ? m._vidi_type :'draw';
 
           l.addLayer(g);
