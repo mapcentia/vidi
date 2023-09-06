@@ -255,6 +255,7 @@ module.exports = {
         "Next extent": "Next extent",
         "Click here then draw a square on the map, to zoom in to an area": "Click here then draw a square on the map, to zoom in to an area",
         "Create a screenshot of the map. The screenshot is downloaded as a PNG file": "Create a screenshot of the map. The screenshot is downloaded as a PNG file",
+        "Screenshot is ready": "Screenshot is ready",
 
         // APIBridge
         "Not authorized to perform this action": "Not authorized to perform this action",

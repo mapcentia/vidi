@@ -216,16 +216,14 @@ module.exports = {
         const simpleMapScreenshoter = L.simpleMapScreenshoter(
             {
                 position: 'topright',
-                screenName: "Screenshot",
+                screenName: 'Screenshot',
+                hideElementsWithSelectors: ['.leaflet-top.leaflet-right'],
             }
         ).addTo(cloud.get().map);
-        // cloud.get().map.on("simpleMapScreenshoter.click", () => {
-        //     document.querySelector(".leaflet-control-simpleMapScreenshoter a").innerHTML = "<span class='spinner-border spinner-border-sm align-middle'></span>";
-        // });
-        // cloud.get().map.on("simpleMapScreenshoter.done", () => {
-        //     resetPrintBtn();
-        // });
-        cloud.get().map.on("simpleMapScreenshoter.error", () => {
+        cloud.get().map.on("simpleMapScreenshoter.done", () => {
+            utils.showInfoToast(__("Screenshot is ready") ,{delay: 2000})
+        });
+        cloud.get().map.on('simpleMapScreenshoter.error', () => {
             alert("Something went wrong");
             resetPrintBtn();
         });
