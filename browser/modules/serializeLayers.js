@@ -395,6 +395,7 @@ var _encoders = {
 
                 featureGeoJson.style = style;
                 featureGeoJson._vidi_type = feature._vidi_type;
+                featureGeoJson._vidi_id = feature._vidi_id;
                 if (feature._vidi_type === "draw" || feature._vidi_type === "measurements") {
                     featureGeoJson._vidi_extremities = feature._extremities || feature.feature._vidi_extremities;
                 }

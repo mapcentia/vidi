@@ -124,7 +124,7 @@ module.exports = {
                     _self.makeConflictSearchWithAll();
                 })
                 table.object.on("selected_" + table.uid, (e) => {
-                    selectedDrawing = e;
+                    selectedDrawing = drawnItems._layers[e]._vidi_id;
                 })
             } else {
                 setTimeout(poll, 30);
@@ -342,6 +342,7 @@ module.exports = {
                 }
 
                 drawLayer._vidi_type = "draw";
+                drawLayer._vidi_id = createId();
 
                 drawLayer.feature = {
                     properties: {
@@ -483,6 +484,7 @@ module.exports = {
 
                     // Adding vidi-specific properties
                     g._vidi_type = m._vidi_type;
+                    g._vidi_id = m._vidi_id;
 
                     l.addLayer(g);
                 }
@@ -495,6 +497,7 @@ module.exports = {
 
                     // Adding vidi-specific properties
                     g._vidi_type = m._vidi_type;
+                    g._vidi_id = m._vidi_id;
 
                     l.addLayer(g);
                 }
@@ -507,6 +510,7 @@ module.exports = {
 
                     // Adding vidi-specific properties
                     g._vidi_type = m._vidi_type;
+                    g._vidi_id = m._vidi_id;
 
                     l.addLayer(g);
                 }
@@ -526,6 +530,7 @@ module.exports = {
                     // Adding vidi-specific properties
                     g._vidi_marker = true;
                     g._vidi_type = m._vidi_type;
+                    g._vidi_id = m._vidi_id;
                     g._vidi_marker_text = m._vidi_marker_text;
 
                     l.addLayer(g);
@@ -546,6 +551,7 @@ module.exports = {
                     // Adding vidi-specific properties
                     g._vidi_marker = true;
                     g._vidi_type = m._vidi_type;
+                    g._vidi_id = m._vidi_id;
                     g._vidi_marker_text = null;
 
                     l.addLayer(g);

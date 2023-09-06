@@ -65,6 +65,11 @@ module.exports = {
                         btn.show();
                         btn.unbind();
                         btn.click(() => {
+                            // Remove before added layer id any
+                            const d =conflictSearch.getDrawItems();
+                            if (d.getLayers().length > 1) {
+                                d.removeLayer(d.getLayers()[0]);
+                            }
                             conflictSearch.clearDrawing(true);
                             conflictSearch.makeSearch(fromObjectText, () => {
                             }, id);

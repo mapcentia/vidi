@@ -69,6 +69,8 @@ module.exports = {
                     stateFromDb = null;
                 }, 0);
                 conflictSearch.setValueForSlider(stateFromDb.bufferValue);
+                conflictSearch.setIsCurrentFromDrawing(stateFromDb.isCurrentFromDrawing);
+                conflictSearch.setCurrentFromDrawingId(stateFromDb.currentFromDrawingId);
                 conflictSearch.handleResult(stateFromDb);
                 reportType = stateFromDb.reportType;
                 $("input[name='conflict-report-type'][value='" + reportType + "']").prop("checked", true);
@@ -76,11 +78,17 @@ module.exports = {
             }
             state.getModuleState(MODULE_ID).then(initialState => {
                 if (initialState) {
-                    conflictSearch.setValueForSlider(initialState.bufferValue);
-                    if (typeof urlparser.urlVars?.var_landsejerlavskode === "undefined" || conflictSearch.getFromVarsIsDone()) {
-                        conflictSearch.handleResult(initialState);
+                    try {
+                        conflictSearch.setValueForSlider(initialState.bufferValue);
+                        conflictSearch.setIsCurrentFromDrawing(initialState.isCurrentFromDrawing);
+                        conflictSearch.setCurrentFromDrawingId(initialState.currentFromDrawingId);
+                        if (typeof urlparser.urlVars?.var_landsejerlavskode === "undefined" || conflictSearch.getFromVarsIsDone()) {
+                            conflictSearch.handleResult(initialState);
+                        }
+                        reportType = initialState.reportType || "1";
+                    } catch (e) {
+                       console.error(e)
                     }
-                    reportType = initialState.reportType || "1";
                 }
                 $("input[name='conflict-report-type'][value='" + reportType + "']").prop("checked", true);
             });

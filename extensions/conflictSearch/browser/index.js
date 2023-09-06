@@ -143,10 +143,13 @@ var debounce = require('lodash/debounce');
 
 var _result = {};
 
-import {buffer as turfBuffer, dissolve as turDissolve} from '@turf/turf'
+import {buffer as turfBuffer, dissolve as turDissolve, multiPolygon as turfMultiPolygon} from '@turf/turf'
 
 const wicket = require('wicket');
 const TOAST_ID = "conflict-toast";
+
+let isCurrentFromDrawing = false;
+let currentFromDrawingId = null;
 
 /**
  *
@@ -354,10 +357,14 @@ module.exports = module.exports = {
         slider.on('input change', debounce(function (values) {
             bufferValue.value = parseFloat(values.target.value);
             currentBufferValue = bufferValue.value;
-            if (typeof bufferItems._layers[Object.keys(bufferItems._layers)[0]] !== "undefined" && typeof bufferItems._layers[Object.keys(bufferItems._layers)[0]]._leaflet_id !== "undefined") {
+            if (isCurrentFromDrawing) {
                 bufferItems.clearLayers();
-                me.makeSearch()
+                me.makeSearch("HEJ", null, id = currentFromDrawingId, true)
+            } else if (typeof bufferItems?._layers?.[Object.keys(bufferItems._layers)[0]]?._leaflet_id !== "undefined") {
+                bufferItems.clearLayers();
+                me.makeSearch("1")
             }
+
         }, 300));
         // When the input changes, set the slider value
         if (bufferValue) {
@@ -575,6 +582,8 @@ module.exports = module.exports = {
      * @param fromDrawing
      */
     makeSearch: function (text, callBack, id = null, fromDrawing = false) {
+        isCurrentFromDrawing = fromDrawing;
+        currentFromDrawingId = id;
         var primitive, coord,
             layer, buffer = parseFloat($("#conflict-buffer-value").val()), bufferValue = buffer,
             hitsTable = $("#hits-content tbody"),
@@ -603,7 +612,11 @@ module.exports = module.exports = {
         if (fromDrawing) {
             layer = draw.getStore().layer;
             if (id) {
-                layer = layer._layers[id];
+                layer.eachLayer(l => {
+                    if (l._vidi_id === id) {
+                        layer = l;
+                    }
+                })
             } else {
                 let collection = {
                     "type": "GeometryCollection",
@@ -624,8 +637,6 @@ module.exports = module.exports = {
                 })
                 layer = L.geoJSON(collection);
             }
-        } else if (id) {
-            layer = drawnItems._layers[id];
         } else {
             for (var prop in drawnItems._layers) {
                 layer = drawnItems._layers[prop];
@@ -646,11 +657,12 @@ module.exports = module.exports = {
         if (primitive) {
             let geom;
             if (primitive.geometry.type === 'GeometryCollection') {
-                geom = turDissolve(turfBuffer(primitive.geometry, buffer, {units: 'meters'})).features[0];
+                // We dissolve the buffer and turn the GeometryCollection into a MultiPolygon
+                geom = turfMultiPolygon(turDissolve(turfBuffer(primitive.geometry, buffer, {units: 'meters'})).features.map((e) => e.geometry.coordinates));
             } else {
                 geom = turfBuffer(primitive.geometry, buffer, {units: 'meters'});
             }
-            var l = L.geoJson(geom, {
+            let l = L.geoJson(geom, {
                 "color": "#ff7800",
                 "weight": 1,
                 "opacity": 1,
@@ -678,7 +690,7 @@ module.exports = module.exports = {
                 xhr = $.ajax({
                     method: "POST",
                     url: "/api/extension/conflictSearch",
-                    data: "db=" + db + "&schema=" + (searchLoadedLayers ? schemataStr : "") + (searchStr !== "" ? "," + searchStr : "") + "&socketId=" + socketId.get() + "&layers=" + visibleLayers.join(",") + "&buffer=" + bufferValue + "&text=" + currentFromText + "&wkt=" + new wicket.Wkt().read(JSON.stringify(geom.geometry)).write(),
+                    data: "db=" + db + "&schema=" + (searchLoadedLayers ? schemataStr : "") + (searchStr !== "" ? "," + searchStr : "") + "&socketId=" + socketId.get() + "&layers=" + visibleLayers.join(",") + "&buffer=" + bufferValue + "&text=" + currentFromText + "&wkt=" + new wicket.Wkt().read(JSON.stringify(geom)).write(),
                     scriptCharset: "utf-8",
                     success: _self.handleResult,
                     error: function () {
@@ -952,6 +964,8 @@ module.exports = module.exports = {
         _result.drawnItems = drawnItems;
         _result.bufferItems = bufferItems;
         _result.bufferValue = parseFloat(currentBufferValue);
+        _result.isCurrentFromDrawing = isCurrentFromDrawing
+        _result.currentFromDrawingId = currentFromDrawingId
         return _result;
     },
     setPreProcessor: function (fn) {
@@ -963,15 +977,24 @@ module.exports = module.exports = {
     getBufferItems: function () {
         return bufferItems;
     },
+    getDrawItems: function () {
+        return drawnItems;
+    },
     setValueForSlider: function (v) {
         let slider = sliderEl.find('.js-info-buffer-slider');
         slider.val(v);
-        bufferValue.value = v;
+        bufferValue.value = currentBufferValue = v;
     },
     getFromVarsIsDone: function () {
         return fromVarsIsDone;
     },
-    TOAST_ID
+    setIsCurrentFromDrawing: (i) => {
+        isCurrentFromDrawing = i;
+    },
+    setCurrentFromDrawingId: (i) => {
+        currentFromDrawingId = i;
+    },
+    TOAST_ID,
 };
 
 let dom = `
