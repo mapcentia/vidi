@@ -177,13 +177,16 @@ router.post('/api/extension/downloadForespoergsel', function (req, response) {
     let layers = ['lines', 'points', 'polygons', 'graveforespoergsel']
 
     // Define how to get features - might dump, idk
-    layers.forEach(t => {
-        //let q = 'SELECT *, ST_AsText(the_geom) as the_geom_wkt FROM '+ s.screenName+'.'+TABLEPREFIX+t+' where forespnummer = '+ b.forespNummer
+    // Only do this if format is geojson
+    if (b.format == 'geojson') {
+        layers.forEach(t => {
+            //let q = 'SELECT *, ST_AsText(the_geom) as the_geom_wkt FROM '+ s.screenName+'.'+TABLEPREFIX+t+' where forespnummer = '+ b.forespNummer
 
-        // Dump to simples from DB
-        let q = 'SELECT *, ST_AsText((ST_Dump(' + s.screenName + '.' + TABLEPREFIX + t + '.the_geom)).geom) as the_geom_wkt FROM ' + s.screenName + '.' + TABLEPREFIX + t + ' where forespnummer = ' + b.forespNummer
-        getChain.push(SQLAPI(q, req))
-    })
+            // Dump to simples from DB
+            let q = 'SELECT *, ST_AsText((ST_Dump(' + s.screenName + '.' + TABLEPREFIX + t + '.the_geom)).geom) as the_geom_wkt FROM ' + s.screenName + '.' + TABLEPREFIX + t + ' where forespnummer = ' + b.forespNummer
+            getChain.push(SQLAPI(q, req))
+        })
+    }
 
     // Send data in formats
     try {
@@ -216,8 +219,7 @@ router.post('/api/extension/downloadForespoergsel', function (req, response) {
                     features: returnArray
                 } //this is base output. with null's
                 //let fn = 'Ledningspakke_'+String(b.forespNummer)+'_'+b.format+'.'
-                let fn = 'Graveassistent_Ledningspakke_' + String(b.forespNummer) + '.'
-
+            
                 // Handle formats, must all end in a Buffer
                 var base64, payload
 
@@ -227,6 +229,13 @@ router.post('/api/extension/downloadForespoergsel', function (req, response) {
 
                 let translate = []
 
+                let foresp = String(b.forespNummer)
+                let apikey = req.session.gc2ApiKey
+                let userstring = userString(req)
+
+
+                let fn = 'Graveassistent_Ledningspakke_' + String(b.forespNummer) + '.'
+
                 switch (b.format) {
                     case 'geojson':
                         // Pass straight through
@@ -234,11 +243,11 @@ router.post('/api/extension/downloadForespoergsel', function (req, response) {
                         break;
                     case 'shp':
                         // Run geolambda
-                        translate.push(GEOLAMBDA(String(b.forespNummer), 'ESRI Shapefile', base64))
+                        translate.push(GEOLAMBDA(foresp, 'ESRI Shapefile', apikey, userstring, foresp))
                         break;
                     case 'dxf':
                         // Run geolambda
-                        translate.push(GEOLAMBDA(String(b.forespNummer), 'DXF', base64))
+                        translate.push(GEOLAMBDA(foresp, 'DXF', apikey, userstring, foresp))
                         break;
 
                     default:
@@ -763,7 +772,7 @@ function DONOTHING(contentType, ext, base64) {
 }
 
 // Use GEOLAMBDA
-function GEOLAMBDA(layername, format, data64) {
+function GEOLAMBDA(layername, format, apikey, userstring, foresp) {
     // hit geolambda function
     var url = 'https://lskze93j56.execute-api.eu-central-1.amazonaws.com/v1/geolambda'
     var key = '9OMEn0zKMn6oznXcuO8lE5ALP6sRgtbv3dTg6ZUz'
@@ -771,11 +780,13 @@ function GEOLAMBDA(layername, format, data64) {
     var postData = {
         'parameters': {
             'source_epsg': 7416, //params?
-            'target_epsg': 7416, //params?
+            'target_epsg': 25832, //params?
             'target_format': format,
             'target_layername': layername
         },
-        'data64': data64
+        'key': apikey,
+        'user': userstring,
+        'foresp': foresp
     }
     postData = JSON.stringify(postData)
 
