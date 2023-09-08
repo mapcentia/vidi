@@ -434,7 +434,7 @@ function GetParentFolder(
             var createcontactpromise = createAddressPart(
               dnTitle,
               adgadrguid,
-              esrnr
+              bfenr
             );
             createcontactpromise.then(function (adressbody) {
               var createaddresspromise = postCompanyToDn(adressbody);
@@ -448,7 +448,7 @@ function GetParentFolder(
           function (error) {
             //console.log(error)
             if (
-              error.message ==
+              error.Message ==
               "Duplicate SynchronizeSource SynchronizeIdentifier pair"
             ) {
               var getcasepromise = ReqToDn(
@@ -482,20 +482,21 @@ function createAddressPart(dnTitle, adrguid, ejdnr) {
         displayName: dnTitle,
         urlAddress:
           "https://webois.lifa.dk/ois/default.aspx?Komnr=" +
-          ejdnr.substring(0, 3) +
+          parseInt(values.kommune.kode,10) + // trim leading zeros from komkode
           "&ejdnr=" +
-          ejdnr.substring(3, 10),
+          values.esrejendomsnr,
         customData: {
           row: null,
           oisvejkode: values.vejstykke.kode,
           oisejendomsnr: values.esrejendomsnr,
-          oiskommunenr: ejdnr.substring(0, 3),
+          oiskommunenr: values.kommune.kode,
           oismatrikelnummer: values.matrikelnr,
           oisejerlav:
             values.jordstykke.ejerlav.navn +
             " (" +
             values.jordstykke.ejerlav.kode +
             ")",
+          oisbfenr:ejdnr,
         },
         account: "",
         emails: [],
@@ -910,7 +911,7 @@ function postCaseToDn(casebody) {
           //response.send(jsfile);
 
           //console.log(JSON.parse(jsfile))
-          if ("errorCode" in JSON.parse(jsfile)) {
+          if ("ErrorCode" in JSON.parse(jsfile)) {
             reject(JSON.parse(jsfile));
             //resolve(JSON.parse(jsfile));
           } else {
@@ -994,7 +995,10 @@ function ReqToDn(requrl) {
       if (err) {
         reject(err);
       } else {
-        resolve(JSON.parse(body));
+        if (body==""){
+          reject("Empty response");
+        }
+        resolve(JSON.parse(body)); // handle when body is empty
       }
     });
   });
