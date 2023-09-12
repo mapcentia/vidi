@@ -1815,10 +1815,10 @@ module.exports = {
                                 let overlay = mapObj._layers[l];
                                 if (overlay._layers) {
                                     for (let f in overlay._layers) {
-                                        let featureForChecking = overlay._layers[f];
-                                        if (!featureForChecking?.feature?.geometry) {
+                                        if (!overlay._layers[f]?.feature?.geometry || overlay?.id?.startsWith('HL:')) {
                                             continue;
                                         }
+                                        let featureForChecking = overlay._layers[f];
                                         let feature = turfFeature(featureForChecking.feature.geometry);
                                         try {
                                             if (turfIntersects(clickFeature, feature) && overlay.id) {
