@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2023 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -150,7 +150,8 @@ geocloud = (function () {
         clustering: false,
         minZoom: null,
         maxZoom: null,
-        pane: 'overlayPane'
+        pane: 'overlayPane',
+        hl: null
     };
 
     // Base class for stores
@@ -178,10 +179,18 @@ geocloud = (function () {
                 bubblingMouseEvents: false,
                 pane: this.defaults.pane
             });
+            this.geoJsonLayerHL = L.geoJson(null, {
+                style: this.defaults.hl,
+                interactive: false,
+                bubblingMouseEvents: false,
+                pane: this.defaults.pane
+            });
+            // debugger
             this.onLoad = this.defaults.onLoad;
             this.loading = this.defaults.loading;
             if (!this.defaults.clustering) {
                 this.layer = this.geoJsonLayer;
+                this.layerHL = this.geoJsonLayerHL;
             } else {
                 this.layer = L.markerClusterGroup({
                     maxClusterRadius: 100,
@@ -196,7 +205,10 @@ geocloud = (function () {
             this.layer.id = this.defaults.name;
             this.layer.minZoom = this.defaults.minZoom;
             this.layer.maxZoom = this.defaults.maxZoom;
+            this.layerHL.minZoom = this.defaults.minZoom;
+            this.layerHL.maxZoom = this.defaults.maxZoom;
             this.key = this.defaults.key;
+            this.layerHL.id = 'HL:' + this.defaults.name;
         };
         this.geoJSON = null;
         this.featureStore = null;
@@ -258,6 +270,8 @@ geocloud = (function () {
         this.custom_data = this.defaults.custom_data;
         this.maxFeaturesLimit = this.defaults.maxFeaturesLimit;
         this.onMaxFeaturesLimitReached = this.defaults.onMaxFeaturesLimitReached;
+
+        this.hl = this.defaults.hl;
         this.featuresLimitReached = false;
 
         this.buffered_bbox = false;
@@ -354,6 +368,9 @@ geocloud = (function () {
 
                             if (!me.clustering) {
                                 // In this case me.layer is L.geoJson
+                                if (me.hl) {
+                                    me.layerHL.addData(clone);
+                                }
                                 me.layer.addData(clone);
                             } else {
                                 // In this case me.layer is L.markerClusterGroup

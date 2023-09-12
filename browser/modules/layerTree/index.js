@@ -1591,6 +1591,13 @@ module.exports = {
             fieldConf = {};
         }
         const pane = layer.f_table_schema + '-' + layer.f_table_name;
+        let hl = null;
+        try {
+            hl = meta.parseLayerMeta(layerKey)?.line_highlight_style ? JSON.parse(meta.parseLayerMeta(layerKey).line_highlight_style) : null
+        } catch (e) {
+            hl = null;
+           console.error(`Error in highlight style for ${layerKey}`, e.message);
+        }
         if (typeof moduleState.vectorStores[trackingLayerKey] !== "object" || recreateStores) {
             moduleState.vectorStores[trackingLayerKey] = new geocloud.sqlStore({
                 map: cloud.get().map,
@@ -1615,6 +1622,7 @@ module.exports = {
                 styleMap: styles[trackingLayerKey],
                 sql,
                 clustering: layerTreeUtils.getIfClustering(meta.parseLayerMeta(layerKey)),
+                hl,
                 onLoad: (l) => {
                     let reloadInterval = meta.parseLayerMeta(layerKey)?.reload_interval;
                     let tableElement = meta.parseLayerMeta(layerKey)?.show_table_on_side;

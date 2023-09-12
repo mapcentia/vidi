@@ -424,7 +424,7 @@ module.exports = {
             for (let key in layers) {
                 if (layers.hasOwnProperty(key)) {
                     const layer = layers[key];
-                    if (layer?.id?.startsWith("v:")) {
+                    if (layer?.id?.startsWith("v:") || layer?.id?.startsWith("HL:")) {
                         orginallayers[layer.id] = jQuery.extend(true, {}, layer._layers);
                         if (typeof layer?.minZoom === 'number' || typeof layer?.maxZoom === 'number') {
                             if (map.getZoom() < layer.minZoom || map.getZoom() >= layer.maxZoom) {

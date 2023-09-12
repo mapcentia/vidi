@@ -119,16 +119,20 @@ module.exports = module.exports = {
                     layerTree.createStore(layerMeta);
                     vectorDataStores = layerTree.getStores();
                 }
-
-                cloud.get().layerControl.addOverlay(vectorDataStores[vectorLayerId].layer, vectorLayerId);
-                let existingLayer = cloud.get().getLayersByName(vectorLayerId);
-                cloud.get().map.addLayer(existingLayer);
-                vectorDataStores[vectorLayerId].load();
-
-                backboneEvents.get().trigger("startLoading:layers", vectorLayerId);
-
-                _self.checkLayerControl(vectorLayerId, doNotLegend, setupControls);
-                _self.enableCheckBoxesOnChildren(gc2Id);
+                try {
+                    cloud.get().layerControl.addOverlay(vectorDataStores[vectorLayerId].layerHL, 'HL:' + vectorLayerId);
+                    cloud.get().layerControl.addOverlay(vectorDataStores[vectorLayerId].layer, vectorLayerId);
+                    let existingLayer = cloud.get().getLayersByName(vectorLayerId);
+                    let existingLayerHL = cloud.get().getLayersByName('HL:' + vectorLayerId);
+                    cloud.get().map.addLayer(existingLayer);
+                    cloud.get().map.addLayer(existingLayerHL);
+                    vectorDataStores[vectorLayerId].load();
+                    backboneEvents.get().trigger("startLoading:layers", vectorLayerId);
+                    _self.checkLayerControl(vectorLayerId, doNotLegend, setupControls);
+                    _self.enableCheckBoxesOnChildren(gc2Id);
+                } catch (e) {
+                    console.error(e)
+                }
                 resolve();
             } else if (failedBefore !== false) {
                 if (failedBefore.reason === `NO_VECTOR_DATA_STORE`) {
@@ -492,11 +496,13 @@ module.exports = module.exports = {
 
             let rasterTileLayer = cloud.get().getLayersByName(gc2Id, false);
             let vectorLayer = cloud.get().getLayersByName(vectorLayerId, false);
+            let vectorLayerHL = cloud.get().getLayersByName('HL:' + vectorLayerId, false);
             let vectorTileLayer = cloud.get().getLayersByName(vectorTileLayerId, false);
             let webGLLayer = cloud.get().getLayersByName(webGLLayerId, false);
 
             if (rasterTileLayer) cloud.get().map.removeLayer(rasterTileLayer);
             if (vectorLayer) cloud.get().map.removeLayer(vectorLayer);
+            if (vectorLayerHL) cloud.get().map.removeLayer(vectorLayerHL);
             if (vectorTileLayer) cloud.get().map.removeLayer(vectorTileLayer);
             if (webGLLayer) cloud.get().map.removeLayer(webGLLayer);
 
