@@ -472,7 +472,7 @@ module.exports = {
                                         `;
                                     func = Function('"use strict";return (' + f + ')')();
                                 }
-                                func(this.layer.toGeoJSON(GEOJSON_PRECISION).features[0], this.layer, keyWithoutGeom, _self, this, cloud.get().map);
+                                func(this.layer.toGeoJSON(GEOJSON_PRECISION).features[0], null, keyWithoutGeom, _self, this, cloud.get().map);
                             } catch (e) {
                                 console.info("Error in click function for: " + _key_, e.message);
                             }

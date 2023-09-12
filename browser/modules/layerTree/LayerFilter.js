@@ -204,6 +204,7 @@ class VectorLayerFilter extends React.Component {
     }
 
     isValid(value, type) {
+        value = value + "";
         let valueIsValid = false;
         if (NUMBER_TYPES.indexOf(type) === -1) {
             valueIsValid = true;
