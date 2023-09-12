@@ -79,14 +79,14 @@ En JavaScript funktion, som kaldes når der vælges en række i feature-listen. 
 .. code-block:: javascript
 
     function(id, layer, key, sqlQuery){
-        alert(layer.feature.properties.regionnavn)
+        alert(feature.properties.regionnavn)
         api.filter("dagi.region", {
              "match": "any",
              "columns": [
                    {
                      "fieldname": "navn",
                      "expression": "=",
-                     "value": layer.feature.properties.regionnavn,
+                     "value": feature.properties.regionnavn,
                      "restriction": false
                    }
              ]
@@ -97,14 +97,14 @@ Man kan nøjes med at skrive selve funktionens "body" og undlade `function` og l
 
 .. code-block:: javascript
 
-    alert(layer.feature.properties.regionnavn)
+    alert(feature.properties.regionnavn)
     api.filter("dagi.region", {
          "match": "any",
          "columns": [
                {
                  "fieldname": "navn",
                  "expression": "=",
-                 "value": layer.feature.properties.regionnavn,
+                 "value": feature.properties.regionnavn,
                  "restriction": false
                }
          ]
