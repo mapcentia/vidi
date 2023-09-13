@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+#
+
 ## [2023.3.0] - 2023-6-3
 ### Fixed
 - Regression bug: Zoom to default extent when using a state didn't zoom to state extent but to config extent.
