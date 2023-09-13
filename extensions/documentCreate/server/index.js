@@ -995,10 +995,11 @@ function ReqToDn(requrl) {
       if (err) {
         reject(err);
       } else {
-        if (body==""){
-          reject("Empty response");
+        // handle when body is empty 
+        if (typeof body === "string" && body.trim().length === 0){
+          body = "{}";
         }
-        resolve(JSON.parse(body)); // handle when body is empty
+        resolve(JSON.parse(body)); 
       }
     });
   });
