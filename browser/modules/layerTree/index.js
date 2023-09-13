@@ -164,8 +164,13 @@ module.exports = {
             // If no queryable tile layers are active then close the off canvas.
             const l = _self.getActiveLayers().filter(e => {
                 if (e.split(':').length === 1) {
-                    const m = meta.getMetaByKey(e)
-                    if (m?.not_querable !== true) {
+                    try {
+                        const m = meta.getMetaByKey(e)
+                        if (m?.not_querable !== true) {
+                            return true;
+                        }
+                    } catch (e) {
+                        console.error(e.message)
                         return true;
                     }
                 }
