@@ -423,7 +423,6 @@ module.exports = {
                                     <input id="vidi-symbols-autoscale" class="form-check-input" type="checkbox">${__("Auto scale")}
                                 </label>
                             </div>
-                            <button class="btn btn-primary d-none" id="vidi-symbols-store">${__("Save in db")}</button>
                     </div>
                     
                     <div id="vidi_symbols"></div>
