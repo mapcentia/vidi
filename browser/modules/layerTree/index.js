@@ -158,25 +158,29 @@ module.exports = {
         });
         // If map is clicked, when clear all selections
         cloud.get().map.on('preclick', () => {
-            _self.resetAllVectorLayerStyles();
-            _self.getInfoOffCanvas().hide();
-            sqlQuery.resetAll();
-            // If no queryable tile layers are active then close the off canvas.
-            const l = _self.getActiveLayers().filter(e => {
-                if (e.split(':').length === 1) {
-                    try {
-                        const m = meta.getMetaByKey(e)
-                        if (m?.not_querable !== true) {
+            try {
+                _self.resetAllVectorLayerStyles();
+                _self.getInfoOffCanvas().hide();
+                sqlQuery.resetAll();
+                // If no queryable tile layers are active then close the off canvas.
+                const l = _self.getActiveLayers().filter(e => {
+                    if (e.split(':').length === 1) {
+                        try {
+                            const m = meta.getMetaByKey(e)
+                            if (m?.not_querable !== true) {
+                                return true;
+                            }
+                        } catch (e) {
+                            console.error(e.message)
                             return true;
                         }
-                    } catch (e) {
-                        console.error(e.message)
-                        return true;
                     }
+                })
+                if (l.length === 0) {
+                    // sqlQuery.closeInfoSlidePanel();
                 }
-            })
-            if (l.length === 0) {
-                // sqlQuery.closeInfoSlidePanel();
+            } catch (e) {
+                
             }
         })
         if (window.vidiConfig.enabledExtensions.indexOf(`editor`) !== -1) moduleState.editingIsEnabled = true;

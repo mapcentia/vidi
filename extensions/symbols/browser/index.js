@@ -412,7 +412,7 @@ module.exports = {
         utils.createMainTab(exId, __("Symbols"), __("Info"), require('./../../../browser/modules/height')().max, "bi bi-flower1", false, exId);
 
         const gui = `
-                      <div class="d-flex gap-4 align-items-center mb-4">
+                      <div class="symbol-tools d-flex gap-4 align-items-center mb-4">
                             <div class="form-check form-switch">
                                 <label >
                                     <input id="vidi-symbols-lock" class="form-check-input" type="checkbox">${__("Lock")}
