@@ -19,10 +19,11 @@ import {
     BooleanControl,
     DateControl,
     DatetimeControl,
-    TimeControl,
     NumberControl,
-    StringControl
+    StringControl,
+    TimeControl
 } from './controls';
+import mustache from 'mustache';
 
 /**
  * Layer filter component
@@ -578,13 +579,7 @@ class VectorLayerFilter extends React.Component {
          */
         const buildWhereClauseField = () => {
             const handleChange = (event) => {
-                let parsedValue;
-                try {
-                    parsedValue = JSON.parse(event.target.value);
-                } catch (e) {
-                    parsedValue = null;
-                    return;
-                }
+                let parsedValue = [event.target.value];
                 this.setState({"editorFilters": parsedValue});
                 this.props.onChangeEditor({
                     layerKey: (this.props.layer.f_table_schema + `.` + this.props.layer.f_table_name),
@@ -610,9 +605,9 @@ class VectorLayerFilter extends React.Component {
                             className="form-control w-100 mb-2"
                             onChange={handleChange}
                             name={`editor_filter_` + (this.props.layer.f_table_schema + `.` + this.props.layer.f_table_name)}
-                            value={JSON.stringify(
-                                this.state.editorFilters
-                            )}
+                            value={
+                                this.state.editorFilters[0]
+                            }
                         />
                         <button style={!this.state.editorFiltersActive ? {
                             pointerEvents: "none",
@@ -665,6 +660,15 @@ class VectorLayerFilter extends React.Component {
         } else {
             activeFiltersTab = buildArbitraryTab();
         }
+        let html, jsx;
+        let filterHtmlTemplate = this.props.layerMeta?.filter_html_template;
+        if (filterHtmlTemplate) {
+            const dict = {filters: this.state.editorFilters[0]};
+            html = mustache.render(filterHtmlTemplate, dict);
+            if (html) {
+                jsx = ( <div dangerouslySetInnerHTML={{__html: html}}></div>)
+            }
+        }
 
         return (
             <div className="d-flex flex-column gap-1">
@@ -674,6 +678,7 @@ class VectorLayerFilter extends React.Component {
                 <div className="filter-functions">
                     {buildWhereClauseField()}
                 </div>
+                {jsx}
             </div>
         );
     }
