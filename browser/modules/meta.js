@@ -139,7 +139,6 @@ module.exports = {
                                 me.addMetaData(response);
                                 ready = true;
                                 let endTime = new Date().getTime();
-                                console.info('/api/meta/' + db + '/' + schemataStr)
                                 console.info("Meta loaded in " + (endTime - startTime) + " ms");
                                 console.info("Cache info:", response.cache.hit)
                                 // if show the cache info

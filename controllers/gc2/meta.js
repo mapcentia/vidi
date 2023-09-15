@@ -28,6 +28,12 @@ router.get('/api/meta/:db/:schema', function (req, response) {
         encoding: 'utf8',
         headers
     };
+
+    console.log("Getting Meta")
+    console.log(url)
+    console.log(headers)
+
+
     request.get(options,
         function (err, res, body) {
             if (err) {
@@ -39,6 +45,7 @@ router.get('/api/meta/:db/:schema', function (req, response) {
 
                 return;
             }
+            console.log(JSON.parse(body).auth, JSON.parse(body).cache)
             response.send(JSON.parse(body));
         })
 });
