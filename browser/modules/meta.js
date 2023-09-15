@@ -127,6 +127,7 @@ module.exports = {
                  * @returns {void}
                  */
                 const loadMeta = (schemataStr) => {
+                    let startTime = new Date().getTime();
                     $.ajax({
                         url: '/api/meta/' + db + '/' + schemataStr,
                         scriptCharset: "utf-8",
@@ -134,8 +135,15 @@ module.exports = {
                             $('#layer-filter-container').css('pointer-events', 'auto').css('opacity', 1.0);
                             $('#layer-loading-indicator').hide();
                             if (response.data && response.data.length > 0) {
+                                
                                 me.addMetaData(response);
                                 ready = true;
+                                let endTime = new Date().getTime();
+                                console.info('/api/meta/' + db + '/' + schemataStr)
+                                console.info("Meta loaded in " + (endTime - startTime) + " ms");
+                                console.info("Cache info:", response.cache.hit)
+                                // if show the cache info
+
                                 resolve(schemataStr);
                             } else {
                                 reject();
