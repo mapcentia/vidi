@@ -79,6 +79,13 @@ module.exports = {
             showOffcanvas: false,
             expandFirstInLayerTree: false,
         };
+        // Set session from URL
+        if (typeof urlVars.session === "string") {
+            const MAXAGE = (config.sessionMaxAge || 86400) / 86400; // In days
+            // Try to remove existing cookie
+            document.cookie = 'connect.gc2=; Max-Age=0; path=/; domain=' + location.host;
+            cookie.set("connect.gc2", urlVars.session, {expires: MAXAGE});
+        }
         // Set default for unset props
         for (let prop in defaults) {
             window.vidiConfig[prop] = typeof window.vidiConfig[prop] !== 'undefined' ? window.vidiConfig[prop] : defaults[prop];

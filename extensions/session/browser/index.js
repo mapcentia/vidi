@@ -36,13 +36,6 @@ module.exports = {
 
         document.querySelector(".sign-in-btn")?.classList.remove("d-none");
 
-        if (typeof urlVars.session === "string") {
-            const MAXAGE = (config.sessionMaxAge || 86400) / 86400; // In days
-            // Try to remove existing cookie
-            document.cookie = 'connect.gc2=; Max-Age=0; path=/; domain=' + location.host;
-            cookie.set("connect.gc2", urlVars.session, {expires: MAXAGE});
-        }
-
         // Check if signed in
         //===================
         class Status extends React.Component {
