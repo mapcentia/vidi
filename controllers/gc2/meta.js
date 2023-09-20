@@ -42,10 +42,10 @@ router.get('/api/meta/:db/:schema', function (req, response) {
                 return;
             }
             // TODO: REMOVE THIS LOG
-            console.log("[Meta]:", url)
-            console.log("[Meta] Logged in:",JSON.parse(body).auth)
-            console.log("[Meta] Cached till:",JSON.parse(body).cache.hit.date)
-            console.log("[Meta] Time:",JSON.parse(body)._execution_time)
+            console.log("[Meta] URL:", url)
+            console.log("[Meta] User logged in:",JSON.parse(body).auth)
+            console.log("[Meta] Cached at:",JSON.parse(body).cache.hit.date)
+            console.log("[Meta] Exec. Time:",JSON.parse(body)._execution_time)
 
             response.send(JSON.parse(body));
         })
