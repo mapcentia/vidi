@@ -29,11 +29,7 @@ router.get('/api/meta/:db/:schema', function (req, response) {
         headers
     };
 
-    console.log("Getting Meta")
-    console.log(url)
-    console.log(headers)
-
-
+    
     request.get(options,
         function (err, res, body) {
             if (err) {
@@ -45,7 +41,12 @@ router.get('/api/meta/:db/:schema', function (req, response) {
 
                 return;
             }
-            console.log(JSON.parse(body).auth, JSON.parse(body).cache)
+            // TODO: REMOVE THIS LOG
+            console.log("[Meta]:", url)
+            console.log("[Meta] Logged in:",JSON.parse(body).auth)
+            console.log("[Meta] Cached till:",JSON.parse(body).cache.hit.date)
+            console.log("[Meta] Time:",JSON.parse(body)._execution_time)
+
             response.send(JSON.parse(body));
         })
 });
