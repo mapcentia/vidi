@@ -95,7 +95,7 @@
     "bootstrap": "^5.2.3",
     "bootstrap-icons": "^1.10.2",
     "bootstrap-select": "^1.13.17",
-    "bootstrap-table": "^1.21.2",
+    "bootstrap-table": "^1.22.1",
     "browserify": "^16.5.1",
     "browserify-fs": "^1.0.0",
     "bulk-require": "^1.0.0",
