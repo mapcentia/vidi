@@ -419,7 +419,11 @@ module.exports = {
                         count.hits = count.hits + Object.keys(layerObj.layer._layers).length;
                         const ns = "#_" + storeId;
                         // HACK We need to explicit set the width of the table container, or else it's calculated wrong becouse of the use of flex boxed
-                        document.querySelector(ns).style.width = document.querySelector("#info-tab").offsetWidth + "px";
+                        try {
+                            document.querySelector(ns).style.width = document.querySelector("#info-tab").offsetWidth + "px";
+                        } catch (e) {
+                            
+                        }
                         let _table = gc2table.init({
                             el: ns + " table",
                             ns,
