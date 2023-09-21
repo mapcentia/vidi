@@ -519,7 +519,7 @@ class VectorLayerFilter extends React.Component {
                          opacity: "0.2"
                      } : {}}>
                     <div className="form-group" style={{display: this.props.isFilterImmutable ? "none" : "inline"}}>
-                        {__(`Match`)} {matchSelector} {__(`of the following`)}
+                        {__(`Match the following using operator`)} : {matchSelector}
                     </div>
                     <div className="d-flex flex-column gap-1">{filterControls}</div>
                     <div className="d-flex gap-1">
