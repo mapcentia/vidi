@@ -417,9 +417,12 @@ module.exports = {
 
                         hit = true;
                         count.hits = count.hits + Object.keys(layerObj.layer._layers).length;
+                        const ns = "#_" + storeId;
+                        // HACK We need to explicit set the width of the table container, or else it's calculated wrong becouse of the use of flex boxed
+                        document.querySelector(ns).style.width = document.querySelector("#info-tab").offsetWidth + "px";
                         let _table = gc2table.init({
-                            el: "#_" + storeId + " table",
-                            ns: "#_" + storeId,
+                            el: ns + " table",
+                            ns,
                             geocloud2: cloud.get(),
                             store: layerObj,
                             cm: cm,
@@ -478,9 +481,6 @@ module.exports = {
                             }
                         }
 
-
-                        // Add fancy material raised style to buttons
-                        $(".bootstrap-table .btn-default").addClass("btn-raised");
                         // Stop the click on detail icon from bubbling up the DOM tree
                         $(".detail-icon").click(function (event) {
                             event.stopPropagation();
