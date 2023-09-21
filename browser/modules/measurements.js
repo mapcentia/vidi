@@ -246,6 +246,7 @@ module.exports = {
         l.hideMeasurements();
 
         l.showMeasurements({
+            showTotalPolylineLength: true,
             formatArea: utils.formatArea
         });
 
@@ -291,6 +292,7 @@ module.exports = {
                 let g = json._layers[Object.keys(json._layers)[0]];
                 g._vidi_type = m._vidi_type;
                 drawnItems.addLayer(g);
+                m._vidi_measurementOptions.formatArea = utils.formatArea;
                 g.showMeasurements(m._vidi_measurementOptions);
                 if (m._vidi_extremities) {
                     g.showExtremities(m._vidi_extremities.pattern, m._vidi_extremities.size, m._vidi_extremities.where);

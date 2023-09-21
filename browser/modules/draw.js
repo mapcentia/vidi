@@ -560,6 +560,7 @@ module.exports = {
 
                     // Add measure
                     if (m._vidi_measurementLayer) {
+                        m._vidi_measurementOptions.formatArea = utils.formatArea;
                         g.showMeasurements(m._vidi_measurementOptions);
                     }
 
