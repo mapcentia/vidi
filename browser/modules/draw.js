@@ -84,7 +84,7 @@ module.exports = {
 
         cloud.get().map.addLayer(drawnItems);
         store.layer = drawnItems;
-        $("#draw-table").append("<table class='table'></table>");
+        $("#draw-table").append("<table class='table table-sm'></table>");
         (function poll() {
             if (gc2table.isLoaded()) {
                 table = gc2table.init({
