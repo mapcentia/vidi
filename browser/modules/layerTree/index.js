@@ -2296,9 +2296,9 @@ module.exports = {
                 $('#vector-feature-info-panel .accordion-button').trigger('click');
             }, 200);
         }
-        if (count === 0) {
-            utils.showInfoToast(__("Didn't find anything"));
-        }
+        // if (count === 0) {
+        //     utils.showInfoToast(__("Didn't find anything"));
+        // }
     },
 
     /**
