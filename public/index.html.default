@@ -106,5 +106,6 @@
 <script>
     window.MapCentia = new Vidi().init.init();
 </script>
+<script src="https://status.geopartner.dk/embed/script.js"></script>
 </body>
 </html>
