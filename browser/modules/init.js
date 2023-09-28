@@ -223,6 +223,8 @@ module.exports = {
         gc2i18n.dict._displaySignin = urlVars?.sig ? urlVars.sig : !window.vidiConfig?.enabledExtensions.includes("session") ? "none" : "inline";
         gc2i18n.dict._displayBurger = urlVars?.bur || "initial";
         gc2i18n.dict._displayScreenshot = urlVars?.scr || "inline";
+        gc2i18n.dict._displayBrand = urlVars?.bra || "inline";
+        gc2i18n.dict._displayToggler = urlVars?.tog || "inline";
 
         // Render the page
         // ===============

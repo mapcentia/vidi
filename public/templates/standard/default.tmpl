@@ -98,8 +98,8 @@
 
 <nav class="navbar navbar-expand-sm bg-light main-navbar">
     <div class="container-fluid">
-        <a class="navbar-brand">
-            <span class="d-none d-md-inline">{{brandName}}</span>
+        <a class="navbar-brand d-none d-md-inline">
+            <span>{{brandName}}</span>
         </a>
         <div class="navbar-nav flex-row gap-1 flex-grow-1 me-2">
             <button id="offcanvasLayerControlBtn"
@@ -129,32 +129,41 @@
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <div class="collapse navbar-collapse justify-content-end flex-grow-0 mt-2 mt-sm-0" id="navbarSupportedContent">
-            <ul class="navbar-nav gap-2">
-                <li class="nav-item d-flex align-items-center ms-2 me-2 mt-3 mt-sm-0">
-                    <span class="badge text-bg-secondary js-app-is-pending-badge">
-                        <i class="bi bi-three-dots"></i>{{Pending}}
-                    </span>
-                    <span class="badge text-bg-success js-app-is-online-badge d-none">
-                    <i class="bi bi-signal"></i>Online</span>
-                    <span class="badge text-bg-danger js-app-is-offline-badge d-none">Offline</span>
-                </li>
-                <li class="nav-item about-btn">
-                    <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#about-modal">
-                        <i class="bi bi-info-circle"></i> {{About}}</span>
-                    </button>
-                </li>
-                <li class="nav-item reset-btn">
-                    <button class="btn  btn-outline-secondary" id="btn-reset">
-                        <i class="bi bi-x-circle"></i> {{Reset}}</span>
-                    </button>
-                </li>
-                <li class="nav-item sign-in-btn d-none">
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#login-modal">
-                        <i class="bi bi-person"></i><span class="gc2-session-btn-text"> {{Sign in}}</span>
-                    </button>
-                </li>
-            </ul>
+        <div class="collapse navbar-collapse justify-content-end flex-grow-0 pe-auto mt-2 mt-sm-0 gap-2"
+             id="navbarSupportedContent">
+            <div class="mt-3 mt-sm-0 place-search" role="search">
+                <div class="places">
+                    <div class="input-group">
+                        <input class="custom-search typeahead form-control" type="text"
+                               placeholder="{{Address}}">
+                        <button class="btn btn-secondary searchclear" type="button">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="legend-btn" style="display: {{_displayLegend}}">
+                <button id="btn-show-legend-in-map" data-module="legend"
+                        class="btn btn btn-outline-secondary">
+                    <i class="bi bi-card-text"></i> <span class="d-none d-lg-inline">{{Legend}}</span>
+                </button>
+            </div>
+            <div class="nav-item about-btn">
+                <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#about-modal">
+                    <i class="bi bi-info-circle"></i> <span class="d-none d-lg-inline">{{About}}</span>
+                </button>
+            </div>
+            <div class="nav-item reset-btn">
+                <button class="btn btn-outline-secondary" id="btn-reset">
+                    <i class="bi bi-x-circle"></i> <span class="d-none d-lg-inline">{{Reset}}</span>
+                </button>
+            </div>
+            <div class="nav-item sign-in-btn d-none">
+                <button class="btn btn-primary" data-bs-toggle="modal"
+                        data-bs-target="#login-modal">
+                    <i class="bi bi-person"></i><span class="gc2-session-btn-text d-none d-lg-inline"> {{Sign in}}</span>
+                </button>
+            </div>
         </div>
     </div>
 </nav>
