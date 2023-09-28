@@ -60,9 +60,17 @@ En JavaScript funktion som kaldes når feature-info foretages. En række argumen
 
 .. code-block:: javascript
 
-    function(feature, layer){
+    function(feature, layer, layerKey, sqlQuery, store, map){
         alert(feature.properties.regionnavn)
+        api.turnOn("public.region")
     }
+
+Man kan nøjes med at skrive selve funktionens "body" og undlade `function` og listen af argumenterne. I såfald kan argumenterne tilgås med de navne, som angivet ovenfor:
+
+.. code-block:: javascript
+
+    alert(feature.properties.regionnavn)
+    api.turnOn("public.region")
 
 **Select function**
 
@@ -70,9 +78,37 @@ En JavaScript funktion, som kaldes når der vælges en række i feature-listen. 
 
 .. code-block:: javascript
 
-    function(id, layer){
-        alert(layer.feature.properties.regionnavn)
+    function(id, layer, key, sqlQuery){
+        alert(feature.properties.regionnavn)
+        api.filter("dagi.region", {
+             "match": "any",
+             "columns": [
+                   {
+                     "fieldname": "navn",
+                     "expression": "=",
+                     "value": feature.properties.regionnavn,
+                     "restriction": false
+                   }
+             ]
+        })
     }
+
+Man kan nøjes med at skrive selve funktionens "body" og undlade `function` og listen af argumenterne. I såfald kan argumenterne tilgås med de navne, som angivet ovenfor:
+
+.. code-block:: javascript
+
+    alert(feature.properties.regionnavn)
+    api.filter("dagi.region", {
+         "match": "any",
+         "columns": [
+               {
+                 "fieldname": "navn",
+                 "expression": "=",
+                 "value": feature.properties.regionnavn,
+                 "restriction": false
+               }
+         ]
+    })
 
 **Accordion summery prefix**
 
