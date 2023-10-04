@@ -110,7 +110,7 @@
     "express-session": "^1.17.1",
     "fetch": "^1.1.0",
     "file-saver": "^2.0.2",
-    "formidable": "^2.0.1",
+    "formidable": "^2.1.1",
     "generic-pool": "^3.7.1",
     "geojson-multiply": "^1.0.3",
     "grunt": "^1.5.3",
