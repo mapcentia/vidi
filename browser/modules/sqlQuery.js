@@ -420,7 +420,7 @@ module.exports = {
                         const ns = "#_" + storeId;
                         // HACK We need to explicit set the width of the table container, or else it's calculated wrong becouse of the use of flex boxed
                         try {
-                            document.querySelector(ns).style.width = document.querySelector("#info-tab").offsetWidth + "px";
+                            document.querySelector(ns).style.width = "100%";
                         } catch (e) {
                             
                         }
