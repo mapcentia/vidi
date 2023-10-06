@@ -2356,8 +2356,6 @@ module.exports = {
     // GC2 has the following pre-defined base layers
     //
     // osm
-    // stamenToner
-    // stamenTonerLite
     // googleStreets
     // googleHybrid
     // googleSatellite
@@ -2687,26 +2685,6 @@ module.exports = {
                 "maxZoom": 21,
                 "maxNativeZoom": 19,
                 "attribution": "&copy; Open Street Map"
-            }
-        },
-        {
-            "id": "stamenToner",
-            "name": "Stamen Toner",
-            "abstract": "<p>Kortet hentes fra Stamen Toner.</p><br>",
-            "config": {
-                "maxZoom": 21,
-                "maxNativeZoom": 19,
-                "attribution": "&copy; Stamen Toner"
-            }
-        },
-        {
-            "id": "stamenTonerLite",
-            "name": "Stamen Toner Light",
-            "abstract": "<p>Kortet hentes fra Stamen Toner.</p><br>",
-            "config": {
-                "maxZoom": 21,
-                "maxNativeZoom": 19,
-                "attribution": "&copy; Stamen Toner"
             }
         },
         {

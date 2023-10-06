@@ -92,8 +92,7 @@ module.exports = module.exports = {
         if (typeof window.setBaseLayers !== 'object') {
             window.setBaseLayers = [
                 {"id": "mapQuestOSM", "name": "MapQuset OSM"},
-                {"id": "osm", "name": "OSM"},
-                {"id": "stamenToner", "name": "Stamen toner"}
+                {"id": "osm", "name": "OSM"}
             ];
         }
 

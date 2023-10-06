@@ -213,8 +213,6 @@ Opsætning af tilgængelige base layers kan ske på fire forskellige metoder:
 
     "baseLayers": [
         {"id": "osm", "name": "Open Street Map"},
-        {"id": "stamenToner", "name": "Stamen Toner"},
-        {"id": "stamenTonerLite", "name": "Stamen Toner Light"},
         {"id": "bingRoad", "name": "Bing Road"},
         {"id": "bingAerial", "name": "Bing Aerial"},
         {"id": "hereNormalDay", "name": "HERE Normal Day"},

@@ -272,8 +272,6 @@ module.exports = {
     // GC2 has the following pre-defined base layers
     //
     // osm
-    // stamenToner
-    // stamenTonerLite
     // googleStreets
     // googleHybrid
     // googleSatellite
@@ -299,8 +297,6 @@ module.exports = {
 
         // Pre-defined base layers
         {"id": "osm", "name": "Open Street Map"},
-
-        {"id": "stamenTonerLite", "name": "Stamen Toner Light"},
 
         // Base layer from GC2
         {
