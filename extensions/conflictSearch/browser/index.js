@@ -1110,7 +1110,7 @@ let dom = `
             </div>
             <div id="conflict-info-box">
                 <div id="conflict-modal-info-body">
-                    <ul class="nav nav-tabs" id="conflict-info-tab"></ul>
+                    <ul class="nav nav-pills mb-2" id="conflict-info-tab"></ul>
                     <div class="tab-content" id="conflict-info-pane"></div>
                 </div>
             </div>

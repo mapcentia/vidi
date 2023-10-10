@@ -259,10 +259,9 @@ module.exports = {
             // Back arrow to template if featureInfoTableOnMap is true
             if ((featureInfoTableOnMap || forceOffCanvasInfo) && !backArrowIsAdded) {
                 defaultTemplateWithBackBtn = `
-                                <div class='show-when-multiple-hits' style='cursor: pointer;'>
-                                    <span class='material-icons' style=''>keyboard_arrow_left </span>
-                                    <span style="top: -7px;position: relative;">${__("Back")}</span>
-                                </div>` + defaultTemplate;
+                                <button class='btn btn-sm btn-outline-secondary mb-2 show-when-multiple-hits'>
+                                    <i class='bi bi-arrow-left'></i> ${__("Back")}
+                                </button>` + defaultTemplate;
                 $(document).arrive('.show-when-multiple-hits', function (e, data) {
                     $(this).on('click', function (e) {
                         $("#modal-info-body").show();
@@ -317,7 +316,7 @@ module.exports = {
                         if (firstLoop) { // Only add html once
                             firstLoop = false;
                             let popUpInner = `<div id="modal-info-body">
-                                <ul class="nav nav-tabs nav-fill" id="info-tab"></ul>
+                                <ul class="nav nav-pills mb-2" id="info-tab"></ul>
                                 <div class="tab-content" id="info-pane"></div>
                             </div>
                             <div id="alternative-info-container" class="alternative-info-container-right" style="display:none"></div>`;
@@ -420,9 +419,10 @@ module.exports = {
                         const ns = "#_" + storeId;
                         // HACK We need to explicit set the width of the table container, or else it's calculated wrong becouse of the use of flex boxed
                         try {
-                            document.querySelector(ns).style.width = "100%";
+                            const e = featureInfoTableOnMap || forceOffCanvasInfo ? '#alternative-info-container' : '.main-content';
+                            document.querySelector(ns).style.width = (document.querySelector(`${e}`).offsetWidth - 12) + "px";
                         } catch (e) {
-                            
+                           console.error(e.message)
                         }
                         let _table = gc2table.init({
                             el: ns + " table",
@@ -441,7 +441,6 @@ module.exports = {
                             locale: window._vidiLocale.replace("_", "-"),
                             template: template,
                             pkey: pkey,
-                            // renderInfoIn: '#offcanvas-info-container',
                             renderInfoIn: featureInfoTableOnMap || forceOffCanvasInfo ? '#alternative-info-container' : null,
                             onSelect: selectCallBack2,
                             key: keyWithoutGeom,
