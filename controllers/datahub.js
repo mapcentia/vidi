@@ -38,6 +38,11 @@ const queryDatahub = async (sql, options = null) => {
 
   // We something that looks very much like DAWA, so we remove the GC2 wrapper
   let data = {
+    _mem: json.peak_memory_usage,
+    _time: json._execution_time,
+    _success: json.success,
+    _message: json.message,
+    _rows: json.features.length,
     crs: {
       type: "name",
       properties: {
@@ -46,10 +51,6 @@ const queryDatahub = async (sql, options = null) => {
     },
     type: "FeatureCollection",
     features: json.features,
-    _mem: json.peak_memory_usage,
-    _time: json._execution_time,
-    _success: json.success,
-    _message: json.message,
   };
 
   return data;
@@ -83,13 +84,16 @@ router.get("/api/datahub/jordstykker", async (req, res, next) => {
   var sql = "SELECT";
 
   // Define the fields to return
-  sql += " matrikelnummer as matrikelnr";
+  sql += " lokalid as featureid";
+  sql += ", matrikelnummer as matrikelnr";
   sql += ", ejerlavskode as ejerlavkode";
   sql += ", ejerlavsnavn";
   sql += ", sognekode";
   sql += ", sognenavn";
   sql += ", kommunekode";
   sql += ", kommunenavn";
+  sql += ", registreretareal";
+  sql += ", vejareal";
   sql += ", regionskode";
   sql += ", the_geom";
 
