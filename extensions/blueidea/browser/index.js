@@ -212,7 +212,7 @@ const findMatriklerInPolygon = function (feature) {
 
     // Send the query to the server
     $.ajax({
-      url: "https://api.dataforsyningen.dk/jordstykker",
+      url: "/api/datahub/jordstykker",
       type: "GET",
       data: query,
       success: function (data) {
@@ -360,8 +360,8 @@ module.exports = {
         en_US: "Results",
       },
       "Waiting to start": {
-        da_DK: "Venter på at starte",
-        en_US: "Waiting to start",
+        da_DK: "Henter jordstykker",
+        en_US: "Fetching parcels",
       },
       "Go to blueidea": {
         da_DK: "Opret, og gå til blueidea",
@@ -717,9 +717,15 @@ module.exports = {
               });
             })
             .catch((error) => {
-              //console.debug(error);
-              this.createSnack(__("Error in seach") + ": " + error);
-              _clearAll();
+              console.debug(error);
+
+              // If error has a message, display it
+              if (error.message) {
+                this.createSnack(__("Error in seach") + ": " + error);
+              } else {
+                console.error(error);
+                _clearAll();
+              }
               return;
             });
         } catch (error) {
