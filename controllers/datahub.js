@@ -19,6 +19,7 @@ const queryDatahub = async (sql, options = null) => {
   var postData = {
     key: DATAHUB.key,
     q: sql,
+    srs: "4326",
   };
 
   var url = DATAHUB.host + "/api/v2/sql/" + userstr;
@@ -33,7 +34,25 @@ const queryDatahub = async (sql, options = null) => {
     body: postData,
   };
   const response = await fetch(url, options);
-  return await response.json();
+  let json = await response.json();
+
+  // We something that looks very much like DAWA, so we remove the GC2 wrapper
+  let data = {
+    crs: {
+      type: "name",
+      properties: {
+        name: "EPSG:4326",
+      },
+    },
+    type: "FeatureCollection",
+    features: json.features,
+    _mem: json.peak_memory_usage,
+    _time: json._execution_time,
+    _success: json.success,
+    _message: json.message,
+  };
+
+  return data;
 };
 
 function coordsToGeom(coords, srid) {
@@ -41,12 +60,18 @@ function coordsToGeom(coords, srid) {
   // It is used to convert the coordinates from the query string to a postgis geometry object
   // the array looks like: [[x1,y1],[x2,y2],[x3,y3],[x4,y4],[x1,y1]]
 
-  var geom = "ST_GeomFromText('POLYGON((";
-  for (var i = 0; i < coords.length; i++) {
-    geom += coords[i][0] + " " + coords[i][1] + ",";
+  var geom = "ST_Transform(ST_GeomFromText('POLYGON((";
+  var poly = coords[0];
+
+  // For each pair of coordinates, add them to the geometry string
+  for (var i = 0; i < poly.length; i++) {
+    geom += poly[i][0] + " " + poly[i][1] + ",";
   }
+  // remove the last comma
   geom = geom.slice(0, -1);
-  geom += "))', " + srid + ")";
+
+  // close the polygon
+  geom += "))', " + srid + "), 25832)";
   return geom;
 }
 
@@ -55,23 +80,38 @@ router.get("/api/datahub/jordstykker", async (req, res, next) => {
 
   // build the query
 
-  var sql = "SELECT * ";
-  sql += "FROM matrikel_datahub.jordstykker ";
+  var sql = "SELECT";
+
+  // Define the fields to return
+  sql += " matrikelnummer as matrikelnr";
+  sql += ", ejerlavskode as ejerlavkode";
+  sql += ", ejerlavsnavn";
+  sql += ", sognekode";
+  sql += ", sognenavn";
+  sql += ", kommunekode";
+  sql += ", kommunenavn";
+  sql += ", regionskode";
+  sql += ", the_geom";
+
+  sql += " FROM matrikel_datahub.vw_jordstykke";
 
   // if polygon and srid is given in query, use it as instersection filter
   if (req.query.polygon && req.query.srid) {
     var coords = JSON.parse(req.query.polygon);
     var srid = req.query.srid;
-    sql += "WHERE ST_Intersects(geom, " + coordsToGeom(coords, srid) + ") ";
+
+    sql +=
+      " WHERE ST_Intersects(the_geom, " + coordsToGeom(coords, srid) + ") ";
   }
-
-  sql += "limit 10";
-
-  console.log(sql);
 
   // Return the result of the query from datahub
   try {
     const result = await queryDatahub(sql);
+
+    // if no result, or result.success is false, return error
+    if (!result || !result._success) {
+      return res.status(500).json({ error: result._message });
+    }
     res.json(result);
   } catch (error) {
     console.log(error);
