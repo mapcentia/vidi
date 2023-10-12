@@ -7,6 +7,7 @@
 const express = require("express");
 const request = require("request");
 const router = express.Router();
+const fetch = require("node-fetch");
 
 DATAHUB = {
   host: "https://datahub.geopartner.dk",
