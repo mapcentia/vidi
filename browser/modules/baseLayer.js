@@ -298,7 +298,7 @@ module.exports = module.exports = {
                     <div>
                         <button
                             data-toggle="tooltip"
-                            data-placement="left"
+                            data-bs-placement="right"
                             title="${tooltip}"
                             style="visibility: ${displayInfo};"
                             data-baselayer-name="${layerName}"

@@ -40,7 +40,7 @@ module.exports = {
             iconRaw = icon;
         } else {
             icon = icon || "help";
-            iconRaw = `<i data-container="body" data-toggle="tooltip" data-placement="left" title="${name}" class="bi ${icon}"></i>`;
+            iconRaw = `<i data-container="body" data-toggle="tooltip" data-bs-placement="left" title="${name}" class="bi ${icon}"></i>`;
         }
 
         if (moduleId === false) {
