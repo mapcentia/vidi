@@ -2190,7 +2190,8 @@ module.exports = {
         },
         {
             "blueidea": ["index"]
-        }/*,
+        }
+        /*,
             {
                 "MapGOMenu": ["index", "reportRender", "infoClick", "controller"]
             }*/
