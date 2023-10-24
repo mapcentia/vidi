@@ -39,7 +39,7 @@ const getFeatureDistance = feature => {
     let totalDistance = 0.00000;
     let coords = feature.geometry.coordinates;
     $.each(coords, function (i, latlng) {
-        let current = L.latLng(latlng[0], latlng[1]);
+        let current = L.latLng(latlng[1], latlng[0]);
         if (tempLatLng == null) {
             tempLatLng = current;
             return;
@@ -59,7 +59,7 @@ const getFeatureDistance = feature => {
 const getFeatureArea = feature => {
     let latLngs = [];
     for (const latLng of feature.geometry.coordinates[0])
-        latLngs.push(L.latLng(latLng[0], latLng[1]));
+        latLngs.push(L.latLng(latLng[1], latLng[0]));
 
     return L.GeometryUtil.readableArea(L.GeometryUtil.geodesicArea(latLngs), true);
 };

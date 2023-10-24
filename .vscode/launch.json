@@ -9,16 +9,15 @@
             "type": "node",
             "request": "launch",
             "name": "build and run",
-            "program": "${workspaceFolder}/index.js",
+            "program": "${workspaceFolder}/src",
             "preLaunchTask": "build"
         },
         {
             "type": "chrome",
             "request": "launch",
-            "name": "Chrome",
-            "url": "http://localhost:3000/app/intranote/vmr",
-            "webRoot": "${workspaceRoot}",
-            "disableNetworkCache": true
+            "name":"chrome local host",
+            "url":"http://localhost:3000/app/vandvaerker/public/",
+            "webRoot": "${workspaceFolder}/src"
         }
     ]
 }
