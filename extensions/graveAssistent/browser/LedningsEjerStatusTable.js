@@ -48,6 +48,8 @@ const statusIcon = function(statusText) {
             return <WarningIcon style={{ color: '#808080'}}/>
         case 'Ledningsoplysninger udleveret':
             return  <CheckCircleIcon style={{ color: '#7FFF00'}} />
+        case 'Ingen ledninger i graveområde':
+            return  <CheckCircleIcon style={{ color: '#808080'}} />
         case 'Ikke leveret':
             return <CancelIcon style={{ color: '#ff3700'}} />
         default:
@@ -90,23 +92,23 @@ class LedningsEjerStatusTable extends React.Component {
         } else {
             return (
                 <div>
-                    <Table>
+                    <Table style={{ width: "auto", tableLayout: "auto" }}>
                         <TableHead>
                             <TableRow>
-                                <TableCell style={{ fontSize: FS }}>Status</TableCell>
-                                <TableCell style={{ fontSize: FS }}>Område</TableCell>
-                                <TableCell style={{ fontSize: FS }}>Status</TableCell>
-                                <TableCell style={{ fontSize: FS }}>Ejer</TableCell>
+                                <TableCell align="center" style={{ padding: "4px 4px 4px 4px", fontSize: FS }}>Status</TableCell>
+                                <TableCell align="center" style={{ padding: "4px 4px 4px 4px", fontSize: FS }}>Område</TableCell>
+                                <TableCell align="center" style={{ padding: "4px 4px 4px 4px", fontSize: FS }}>Status</TableCell>
+                                <TableCell align="center" style={{ padding: "4px 4px 4px 4px", fontSize: FS }}>Ejer</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
                     {this.props.statusliste.map(ejer =>{ 
                         return (
                         <TableRow key={'graveAssistent-feature-ledningsejerliste-status-'+ejer.CVR+ejer.indberetningsnr}>
-                            <TableCell align="center" style={{ fontSize: FS }}>{statusIcon(ejer.status)}</TableCell>
-                            <TableCell align="right" style={{ fontSize: FS }}>{ejer.indberetningsnr}</TableCell>
-                            <TableCell align="left" style={{ fontSize: FS }}>{ejer.status}</TableCell>
-                            <TableCell align="left" style={{ fontSize: FS }} >{shorter(ejer.navn)}</TableCell>
+                            <TableCell align="center" style={{ padding: "4px 4px 4px 4px", fontSize: FS }}>{statusIcon(ejer.status)}</TableCell>
+                            <TableCell align="right" style={{ padding: "4px 4px 4px 4px", fontSize: FS }}>{ejer.indberetningsnr}</TableCell>
+                            <TableCell align="left" style={{ padding: "4px 4px 4px 4px", fontSize: FS }}>{ejer.status}</TableCell>
+                            <TableCell align="left" style={{ padding: "4px 4px 4px 4px", fontSize: FS }} >{shorter(ejer.navn)}</TableCell>
                         </TableRow>)
                     })}
                         </TableBody>

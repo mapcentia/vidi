@@ -590,18 +590,32 @@ module.exports = {
                                         }
     
                                         if (typeof value == 'object') {
-                                            //console.log(value);
+                                            //console.log(key, value);
 
-                                            // if value.attr exists, check if it has uom, if so, add it to value.value
+                                            // if value.attr exists
                                             if (value.hasOwnProperty('attr')) {
-                                                //console.log(value.attr)
-                                                if (value.attr.hasOwnProperty('uom')) {
+
+                                                // If value.attr has nil, and nil is true, set value to null
+                                                if (value.attr.hasOwnProperty('nil')) {
+                                                    // If nilReason is set, use that instead
+                                                    if (value.attr.hasOwnProperty('nilReason')) {
+                                                        obj[key] = value.attr.nilReason
+                                                    } else {
+                                                        // skip
+                                                        obj[key] = 'tomt felt'
+                                                    }
+                                                } 
+                                                else if (value.attr.hasOwnProperty('uom')) {
+                                                    // If value.attr has uom, append to value
                                                     obj[key] = value.value + ' ' + value.attr.uom
-                                                } else {
+                                                } 
+                                                else {
+                                                    // fall back to value
                                                     obj[key] = value.value
+
                                                 }
                                             }
-                                            //console.log(obj[key])
+                                            console.log(key, obj[key])
                                         }
                                     }
     
