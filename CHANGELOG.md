@@ -9,7 +9,21 @@ and this project adheres to [CalVer](https://calver.org/).
 ### Added
 - Filter Icon added in layer tree next to the eye icon. Indicates the present of a filter on the current layer 
 - The "Sign out" in the Session dialog,  deletes the autoconnect.gc2 cookie. 
-
+- Graveassistent:
+  - Added support for "empty" packages.
+  - Added support for schema override in config.json. Makes it possible to use the same graveassistent across the same database.
+  
+    Enable schema override in config.json. Set privileges for the layers accordingly, and add to schemata:
+    ```json
+    {
+      "schemata": ["schema to use"],
+      "extensionConfig": {
+        "graveAssistent": {
+          "schema": "schema to use"
+        }
+      }
+    }
+    ```
 
 ## [2023.6.0] - 2023-20-6
 ### Fixed

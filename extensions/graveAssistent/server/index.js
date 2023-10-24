@@ -176,6 +176,12 @@ router.post('/api/extension/downloadForespoergsel', function (req, response) {
     let getChain = []
     let layers = ['lines', 'points', 'polygons', 'graveforespoergsel']
 
+    let schema = s.screenName
+    // If schema is set in body, use that
+    if (b.hasOwnProperty('schema')) {
+        schema = b.schema
+    }
+
     // Define how to get features - might dump, idk
     // Only do this if format is geojson
     if (b.format == 'geojson') {
@@ -183,7 +189,7 @@ router.post('/api/extension/downloadForespoergsel', function (req, response) {
             //let q = 'SELECT *, ST_AsText(the_geom) as the_geom_wkt FROM '+ s.screenName+'.'+TABLEPREFIX+t+' where forespnummer = '+ b.forespNummer
 
             // Dump to simples from DB
-            let q = 'SELECT *, ST_AsText((ST_Dump(' + s.screenName + '.' + TABLEPREFIX + t + '.the_geom)).geom) as the_geom_wkt FROM ' + s.screenName + '.' + TABLEPREFIX + t + ' where forespnummer = ' + b.forespNummer
+            let q = 'SELECT *, ST_AsText((ST_Dump(' + schema + '.' + TABLEPREFIX + t + '.the_geom)).geom) as the_geom_wkt FROM ' + schema + '.' + TABLEPREFIX + t + ' where forespnummer = ' + b.forespNummer
             getChain.push(SQLAPI(q, req))
         })
     }
@@ -232,6 +238,7 @@ router.post('/api/extension/downloadForespoergsel', function (req, response) {
                 let foresp = String(b.forespNummer)
                 let apikey = req.session.gc2ApiKey
                 let userstring = userString(req)
+                let schema = req.body.schema
 
 
                 let fn = 'Graveassistent_Ledningspakke_' + String(b.forespNummer) + '.'
@@ -243,11 +250,11 @@ router.post('/api/extension/downloadForespoergsel', function (req, response) {
                         break;
                     case 'shp':
                         // Run geolambda
-                        translate.push(GEOLAMBDA(foresp, 'ESRI Shapefile', apikey, userstring, foresp))
+                        translate.push(GEOLAMBDA(foresp, 'ESRI Shapefile', apikey, userstring, foresp, schema))
                         break;
                     case 'dxf':
                         // Run geolambda
-                        translate.push(GEOLAMBDA(foresp, 'DXF', apikey, userstring, foresp))
+                        translate.push(GEOLAMBDA(foresp, 'DXF', apikey, userstring, foresp, schema))
                         break;
 
                     default:
@@ -306,7 +313,13 @@ router.post('/api/extension/getForespoergselOption', function (req, response) {
     }
 
     // Go ahead with the logic
-    let q = "SELECT forespnummer, bemaerkning, svar_uploadtime, statuskey FROM " + s.screenName + '.' + TABLEPREFIX + "graveforespoergsel where svar_uploadtime > now() - INTERVAL '30 days' ORDER by forespnummer DESC"
+    let schema = s.screenName
+    // If schema is set in body, use that
+    if (b.hasOwnProperty('schema')) {
+        schema = b.schema
+    }
+
+    let q = "SELECT forespnummer, bemaerkning, svar_uploadtime, statuskey FROM " + schema + '.' + TABLEPREFIX + "graveforespoergsel where svar_uploadtime > now() - INTERVAL '30 days' ORDER by forespnummer DESC"
     
     
 
@@ -360,6 +373,13 @@ router.post('/api/extension/getForespoergsel', function (req, response) {
 
     let chain = []
     let buffer = 50
+
+    let schema = s.screenName
+    // If schema is set in body, use that
+    if (b.hasOwnProperty('schema')) {
+        schema = b.schema
+    }
+
     // Go ahead with the logic
     let q = 'Select l.svar_gyldigtil, g.forespnummer,g.bemaerkning,g.svar_uploadtime,g.graveperiode_fra,g.graveperiode_til,\
                     ST_XMax(ST_Extent(ST_Transform(ST_Expand(g.the_geom,' + buffer + '),4326))) xmax,\
@@ -367,14 +387,12 @@ router.post('/api/extension/getForespoergsel', function (req, response) {
                     ST_YMax(ST_Extent(ST_Transform(ST_Expand(g.the_geom,' + buffer + '),4326))) ymax,\
                     ST_YMin(ST_Extent(ST_Transform(ST_Expand(g.the_geom,' + buffer + '),4326))) ymin,\
                     g.the_geom, g.statuskey,\
-                    (SELECT count(gid) from ' + s.screenName + '.' + TABLEPREFIX + 'lines where fareklasse = \'meget farlig\' and forespnummer = ' + b.forespNummer + ' ) l_mf,\
-                    (SELECT count(gid) from ' + s.screenName + '.' + TABLEPREFIX + 'lines where fareklasse = \'farlig\' and forespnummer = ' + b.forespNummer + ' ) l_f\
-                    from ' + s.screenName + '.' + TABLEPREFIX + 'graveforespoergsel g\
-                    join ' + s.screenName + '.' + TABLEPREFIX + 'lines l on g.forespnummer = l.forespnummer\
+                    (SELECT count(gid) from ' + schema + '.' + TABLEPREFIX + 'lines where fareklasse = \'meget farlig\' and forespnummer = ' + b.forespNummer + ' ) l_mf,\
+                    (SELECT count(gid) from ' + schema + '.' + TABLEPREFIX + 'lines where fareklasse = \'farlig\' and forespnummer = ' + b.forespNummer + ' ) l_f\
+                    from ' + schema + '.' + TABLEPREFIX + 'graveforespoergsel g\
+                    left join ' + schema + '.' + TABLEPREFIX + 'lines l on g.forespnummer = l.forespnummer\
                     where g.forespnummer = ' + b.forespNummer + '\
                     GROUP BY g.forespnummer, l.svar_gyldigtil, g.bemaerkning,g.svar_uploadtime,g.graveperiode_fra,g.graveperiode_til, g.the_geom, g.statuskey'
-
-
 
     chain.push(SQLAPI(q, req))
 
@@ -428,9 +446,15 @@ router.post('/api/extension/getStatus', function (req, response) {
     }
 
     let chain = []
+    let schema = s.screenName
+    // If schema is set in body, use that
+    if (b.hasOwnProperty('schema')) {
+        schema = b.schema
+    }
+
     // Go ahead with the logic
     let q = "Select * \
-                from " + s.screenName + "." + TABLEPREFIX + "status\
+                from " + schema + "." + TABLEPREFIX + "status\
                 where statuskey = '" + b.statusKey + "'\
                 ORDER BY cvr"
 
@@ -509,6 +533,12 @@ router.post('/api/extension/upsertForespoergsel', function (req, response) {
     //console.log('Got: ' + b.forespNummer + '. statusKey: ' + b.statusKey + '. Lines: ' + lines.length + ', Polygons: ' + polys.length + ', Points: ' + pts.length)
     let uploadTime = toISOLocal(new Date())
 
+    let schema = s.screenName
+    // If schema is set in body, use that
+    if (b.hasOwnProperty('schema')) {
+        schema = b.schema
+    }
+
     try {
         lines = {
             type: 'FeatureCollection',
@@ -528,16 +558,16 @@ router.post('/api/extension/upsertForespoergsel', function (req, response) {
         }
 
         clean = [
-            SQLAPI('delete from ' + s.screenName + '.' + TABLEPREFIX + 'graveforespoergsel WHERE forespnummer = ' + b.forespNummer + " AND svar_uploadtime < '" + uploadTime + "'", req),
-            SQLAPI('delete from ' + s.screenName + '.' + TABLEPREFIX + 'lines WHERE forespnummer = ' + b.forespNummer + " AND svar_uploadtime < '" + uploadTime + "'", req),
-            SQLAPI('delete from ' + s.screenName + '.' + TABLEPREFIX + 'points WHERE forespnummer = ' + b.forespNummer + " AND svar_uploadtime < '" + uploadTime + "'", req),
-            SQLAPI('delete from ' + s.screenName + '.' + TABLEPREFIX + 'polygons WHERE forespnummer = ' + b.forespNummer + " AND svar_uploadtime < '" + uploadTime + "'", req)
+            SQLAPI('delete from ' + schema + '.' + TABLEPREFIX + 'graveforespoergsel WHERE forespnummer = ' + b.forespNummer + " AND svar_uploadtime < '" + uploadTime + "'", req),
+            SQLAPI('delete from ' + schema + '.' + TABLEPREFIX + 'lines WHERE forespnummer = ' + b.forespNummer + " AND svar_uploadtime < '" + uploadTime + "'", req),
+            SQLAPI('delete from ' + schema + '.' + TABLEPREFIX + 'points WHERE forespnummer = ' + b.forespNummer + " AND svar_uploadtime < '" + uploadTime + "'", req),
+            SQLAPI('delete from ' + schema + '.' + TABLEPREFIX + 'polygons WHERE forespnummer = ' + b.forespNummer + " AND svar_uploadtime < '" + uploadTime + "'", req)
         ]
         post = []
 
         // Add forespoergsel
         //chain.push(FeatureAPI(req, fors, TABLEPREFIX + 'graveforespoergsel', '25832'))
-        post.push(SQLAPI(buildSQLArray(fors.features, s.screenName + '.' + TABLEPREFIX + 'graveforespoergsel', 'the_geom', '25832', uploadTime, b.statusKey), req))
+        post.push(SQLAPI(buildSQLArray(fors.features, schema + '.' + TABLEPREFIX + 'graveforespoergsel', 'the_geom', '25832', uploadTime, b.statusKey), req))
 
         // Add layers that exist, add chunks
         var CHUNKSIZE = 50
@@ -547,21 +577,21 @@ router.post('/api/extension/upsertForespoergsel', function (req, response) {
             if (lines.features.length > 0) {
                 chunks = lines.features.chunk(CHUNKSIZE)
                 chunks.forEach(g => {
-                    post.push(SQLAPI(buildSQLArray(g, s.screenName + '.' + TABLEPREFIX + 'lines', 'the_geom', '7416', uploadTime, b.statusKey), req))
+                    post.push(SQLAPI(buildSQLArray(g, schema + '.' + TABLEPREFIX + 'lines', 'the_geom', '7416', uploadTime, b.statusKey), req))
                 })
                 //chain.push(FeatureAPI(req, lines, TABLEPREFIX + 'lines', '7416'))
             }
             if (pts.features.length > 0) {
                 chunks = pts.features.chunk(CHUNKSIZE)
                 chunks.forEach(g => {
-                    post.push(SQLAPI(buildSQLArray(g, s.screenName + '.' + TABLEPREFIX + 'points', 'the_geom', '7416', uploadTime, b.statusKey), req))
+                    post.push(SQLAPI(buildSQLArray(g, schema + '.' + TABLEPREFIX + 'points', 'the_geom', '7416', uploadTime, b.statusKey), req))
                 })
                 //chain.push(FeatureAPI(req, pts, TABLEPREFIX + 'points', '7416'))
             }
             if (polys.features.length > 0) {
                 chunks = polys.features.chunk(CHUNKSIZE)
                 chunks.forEach(g => {
-                    post.push(SQLAPI(buildSQLArray(g, s.screenName + '.' + TABLEPREFIX + 'polygons', 'the_geom', '7416', uploadTime, b.statusKey), req))
+                    post.push(SQLAPI(buildSQLArray(g, schema + '.' + TABLEPREFIX + 'polygons', 'the_geom', '7416', uploadTime, b.statusKey), req))
                 })
                 //chain.push(FeatureAPI(req, polys, TABLEPREFIX + 'polygons', '7416'))
             }
@@ -625,6 +655,12 @@ router.post('/api/extension/upsertStatus', function (req, response) {
     //    return
     //}
 
+    let schema = s.screenName
+    // If schema is set in body, use that
+    if (b.hasOwnProperty('schema')) {
+        schema = b.schema
+    }
+
     try {
         // Build featurecollection
         var ejere = b.Ledningsejerliste
@@ -650,7 +686,7 @@ router.post('/api/extension/upsertStatus', function (req, response) {
         try {
             chunks = f.chunk(CHUNKSIZE)
             chunks.forEach(g => {
-                post.push(SQLAPI(buildSQLArray(g, s.screenName + '.' + TABLEPREFIX + 'status', 'the_geom', '7416', uploadTime, b.statusKey), req))
+                post.push(SQLAPI(buildSQLArray(g, schema + '.' + TABLEPREFIX + 'status', 'the_geom', '7416', uploadTime, b.statusKey), req))
             })
             //chain.push(FeatureAPI(req, lines, TABLEPREFIX + 'lines', '7416'))
         } catch (error) {
@@ -772,7 +808,7 @@ function DONOTHING(contentType, ext, base64) {
 }
 
 // Use GEOLAMBDA
-function GEOLAMBDA(layername, format, apikey, userstring, foresp) {
+function GEOLAMBDA(layername, format, apikey, userstring, foresp, schema) {
     // hit geolambda function
     var url = 'https://lskze93j56.execute-api.eu-central-1.amazonaws.com/v1/geolambda'
     var key = '9OMEn0zKMn6oznXcuO8lE5ALP6sRgtbv3dTg6ZUz'
@@ -786,7 +822,8 @@ function GEOLAMBDA(layername, format, apikey, userstring, foresp) {
         },
         'key': apikey,
         'user': userstring,
-        'foresp': foresp
+        'foresp': foresp,
+        'schema': schema
     }
     postData = JSON.stringify(postData)
 

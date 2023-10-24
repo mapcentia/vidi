@@ -86,7 +86,7 @@ class LedningsDownload extends React.Component {
         let options = {
             headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
             method: 'POST',
-            body: JSON.stringify({forespNummer: _self.props.forespnummer, format: _self.state.format})
+            body: JSON.stringify({forespNummer: _self.props.forespnummer, format: _self.state.format, schema: _self.props.schema})
         }
         let url = _self.props.endpoint
 

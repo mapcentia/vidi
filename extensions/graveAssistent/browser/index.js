@@ -23,6 +23,18 @@ import MenuItem from '@material-ui/core/MenuItem';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
 
+// Get information from config.json
+
+var schema_override = null;
+
+if (window.config?.extensionConfig?.graveAssistent) {
+    if (window.config?.extensionConfig?.graveAssistent?.schema) {
+        schema_override = window.config.extensionConfig.graveAssistent.schema;
+    }
+}
+
+console.log('Schema override:', schema_override)
+
 
 /**
  *
@@ -585,6 +597,8 @@ module.exports = {
                                                 //console.log(value.attr)
                                                 if (value.attr.hasOwnProperty('uom')) {
                                                     obj[key] = value.value + ' ' + value.attr.uom
+                                                } else {
+                                                    obj[key] = value.value
                                                 }
                                             }
                                             //console.log(obj[key])
@@ -605,28 +619,28 @@ module.exports = {
                                     }
     
                                     returnObj.data.push(lc(obj))
-                                    //TODO: gather up
                                 })
                             } catch (error) {
                                 console.log(error)
                                 reject(error)
                             }
                         } else {
-                            reject('Ledningspakken har ikke noget indhold. Dette kan ske hvis ingen ledningsejere har svaret endnu')
+                            // We no longer reject packages with no data, because empty packages are valid
+                            // reject('Ledningspakken har ikke noget indhold. Dette kan ske hvis ingen ledningsejere har svaret endnu')
                         }
 
 
                         console.log('Fandt elementer: '.concat(packageinfo.length, ' UtilityPackageInfo, ', owner.length, ' UtilityOwner, ', profil.length, ' Kontaktprofil, ', data.length, ' data'))
-                        //console.log(returnObj)
-
+                        console.log(returnObj)
 
                         resolve(returnObj)
                     });
 
                 }
 
-                var pushForespoergsel = function (obj, statusKey) {
+                var pushForespoergsel = function (obj, statusKey, schema_override) {
                     obj['statusKey'] = statusKey
+                    obj['schema'] = schema_override
                     let opts = {
                         headers: {
                             'Accept': 'application/json',
@@ -699,10 +713,11 @@ module.exports = {
                     });
                 }
 
-                var pushStatus = function (obj, statusKey) {
+                var pushStatus = function (obj, statusKey, schema_override) {
                     let postData = {
                         Ledningsejerliste: obj,
-                        statusKey: statusKey
+                        statusKey: statusKey,
+                        schema: schema_override
                     }
                     let opts = {
                         headers: {
@@ -882,12 +897,10 @@ module.exports = {
                                     authed: obj.status.authenticated
                                 }, () => {
                                     // Get foresp. if we really logged in.
-                                    // TODO: check we're in the right schema!
-                                    // TODO: turn on all 'dem layers
 
                                     if (me.state.authed) {
                                         me.populateDClayers()
-                                        me.populateForespoergselOption() //
+                                        me.populateForespoergselOption(schema_override) //
                                     }
                                 }))
                                 .catch(e => me.setState({
@@ -905,6 +918,11 @@ module.exports = {
                     }
 
                     isTooOld(timestamp){
+                        // If timestamp is null, return false
+                        if (timestamp == null){
+                            return false
+                        }
+                        console.log(timestamp, new Date())
                         if (new Date(timestamp) < new Date()) {
                             return true
                         } else {
@@ -928,8 +946,6 @@ module.exports = {
                     onDrop(files) {
                         const _self = this;
 
-                        //TODO: Handle more?
-
                         var r = new FileReader();
                         r.readAsDataURL(files[0])
                         r.onloadend = function() {
@@ -949,7 +965,7 @@ module.exports = {
                             svarUploadTime: '',
                             ejerliste: [],
                         }, () => {
-                            _self.populateForespoergselOption() // On back click, populate select with new foresp
+                            _self.populateForespoergselOption(schema_override) // On back click, populate select with new foresp
                             // move to last location and clear filters
                             cloud.get().map.fitBounds(_self.state.lastBounds)
                             clearFilters()
@@ -962,7 +978,7 @@ module.exports = {
                             foresp: String(event.target.value),
                             lastBounds: cloud.get().map.getBounds()
                         })
-                        _self.getForespoergsel(String(event.target.value))
+                        _self.getForespoergsel(String(event.target.value), schema_override)
                         _self.setState({
                             done: true
                         })
@@ -1025,8 +1041,8 @@ module.exports = {
                                 var [status, consolidated] = files
 
                                 return [Promise.all([
-                                    pushStatus(status, statusKey),
-                                    pushForespoergsel(consolidated, statusKey)
+                                    pushStatus(status, statusKey, schema_override),
+                                    pushForespoergsel(consolidated, statusKey, schema_override)
                                 ]),consolidated.forespNummer]
                             }).then(function(files) {
                                 //console.log(files)
@@ -1038,7 +1054,7 @@ module.exports = {
                                     done: true,
                                     foresp: String(files[1])
                                 })
-                                _self.getForespoergsel(String(files[1]))
+                                _self.getForespoergsel(String(files[1]), schema_override)
                             })
                             .catch(e => {
                                 console.log(e)
@@ -1075,16 +1091,21 @@ module.exports = {
 
                     /**
                      * Populate the forsp-select with foresp currently saved in schema
+                     * @param {*} schema - if set, use override with this schema
                      */
-                    populateForespoergselOption() {
+                    populateForespoergselOption(schema = null) {
                         var _self = this;
                         let opts = {
                             headers: {
                                 'Accept': 'application/json',
                                 'Content-Type': 'application/json'
                             },
+                            body: JSON.stringify({
+                                schema: schema
+                            }),
                             method: 'POST',
                         }
+
                         // Do async job
                         fetch('/api/extension/getForespoergselOption', opts)
                             .then(r => r.json())
@@ -1097,7 +1118,12 @@ module.exports = {
                             .catch(e => console.log(e))
                     }
 
-                    getStatus(statuskey) {
+                    /**
+                     * 
+                     * @param {*} statuskey 
+                     * @param {*} schema - if set, use override with this schema
+                     */
+                    getStatus(statuskey, schema = null) {
                         var _self = this
                         let opts = {
                             headers: {
@@ -1106,9 +1132,11 @@ module.exports = {
                             },
                             method: 'POST',
                             body: JSON.stringify({
-                                statusKey: statuskey
+                                statusKey: statuskey,
+                                schema: schema
                             })
                         }
+
                         // Do async job
                         fetch('/api/extension/getStatus', opts)
                             .then(r => r.json())
@@ -1126,9 +1154,10 @@ module.exports = {
 
                     /**
                      * Reads extents and status of saved foresp
-                     * @param {*} forespNummer 
+                     * @param {*} forespNummer
+                     * @param {*} schema - if set, use override with this schema
                      */
-                    getForespoergsel(forespNummer) {
+                    getForespoergsel(forespNummer, schema = null) {
                         var _self = this;
                         let opts = {
                             headers: {
@@ -1137,7 +1166,8 @@ module.exports = {
                             },
                             method: 'POST',
                             body: JSON.stringify({
-                                forespNummer: forespNummer
+                                forespNummer: forespNummer,
+                                schema: schema
                             })
                         }
                         // Do async job
@@ -1153,13 +1183,13 @@ module.exports = {
                                     _self.onBackClickHandler()
                                 }
 
-                                // TODO: implement warning if MF/F exists!
+                                // implement warning if MF/F exists!
                                 let f = d[0].properties;
                                 let bounds = [[f.ymin, f.xmin],[f.ymax, f.xmax]];
                                 cloud.get().map.fitBounds(bounds)
                                 
                                 // Apply filter
-                                _self.getStatus(f.statuskey)
+                                _self.getStatus(f.statuskey, schema_override)
                                 applyFilter(buildFilter(f.forespnummer))
 
 
@@ -1253,7 +1283,7 @@ module.exports = {
                                                     <Button size = "large" color = "default" variant = "contained" style = {margin} onClick = {_self.onBackClickHandler.bind(this)}>
                                                         <ArrowBackIcon fontSize = "small" />{__("backbutton")}
                                                     </Button>
-                                                    <LedningsDownload style = {margin} size = "large" color = "default" variant = "contained" endpoint = "/api/extension/downloadForespoergsel" forespnummer = {s.foresp}/>
+                                                    <LedningsDownload style = {margin} size = "large" color = "default" variant = "contained" endpoint = "/api/extension/downloadForespoergsel" forespnummer = {s.foresp} schema={schema_override} />
                                                 </div >
                                                 <div id = "graveAssistent-feature-ledningsejerliste" >
                                                     {s.overskredetDato && <div style={baddest}>Denne ledningspakke er ikke længere gyldig!</div>}
