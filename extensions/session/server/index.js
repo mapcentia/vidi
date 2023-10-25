@@ -141,16 +141,18 @@ router.get('/api/session/stop', function (req, response) {
 
 router.get('/api/session/status', function (req, response) {
 
+
     let autoLoginCookie = req.cookies[autoConnectCookie];
     
-    if (autoLogin === false && req.query.autoLogin) {
+    if (req.query.autoLogin) {
+        // set autoLogin to false if it is anything but "true"
         autoLogin = req.query.autoLogin === "true" ? true : false;
     }
     if (req.query.autoLoginMaxAge) {
         autoLoginMaxAge = typeof parseInt(req.query.autoLoginMaxAge) === "number" ? parseInt(req.query.autoLoginMaxAge) : 2629800000; // Eller hvad nu default skal være. (1 måned)
     }
-    //hvis autoLogin ikke længere er true og der findes en autoconnect.gc2. Slet coockie
-    if (!autoLogin  && autoLoginCookie) {
+    //hvis autoLogin er false, slet autologin-cookie
+    if (!autoLogin) {
         try{
           response.cookie(autoConnectCookie, '', { maxAge: -1 })
           response.clearCookie(autoConnectCookie)
