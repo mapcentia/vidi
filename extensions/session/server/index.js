@@ -102,6 +102,11 @@ let start = function (dataToAuthorizeWith, req, response, status) {
             properties: data.properties
         };
 
+        // If autoLoginMaxAge is NaN, or less than 1000, default it to 1 month
+        if (isNaN(autoLoginMaxAge) || autoLoginMaxAge < 1000) {
+            autoLoginMaxAge = 2629800000;
+        }
+
         // IF autologin is enabled, and autoLoginMaxAge is not NaN
         if (autoLogin && !isNaN(autoLoginMaxAge)) {
             resBody.password = dataToAuthorizeWith.password;
