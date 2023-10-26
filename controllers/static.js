@@ -90,7 +90,7 @@ const returnPNGForStateSnapshot = (localRequest, localResponse) => {
                                         localResponse.status(500);
                                         localResponse.send(error);
                                     });
-                                }, delay);
+                                }, 5000);
                             }
                         });
 
@@ -102,8 +102,8 @@ const returnPNGForStateSnapshot = (localRequest, localResponse) => {
                     });
                 }).catch(error => {
                     headless.destroy(browser);
-                    response.status(500);
-                    response.send(error);
+                    localResponse.status(500);
+                    localResponse.send(error);
                 });
             }).catch(error => {
                 console.log("Can't get a browser right now: ", error.message);
