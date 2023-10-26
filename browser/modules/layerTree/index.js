@@ -180,7 +180,7 @@ module.exports = {
                     // sqlQuery.closeInfoSlidePanel();
                 }
             } catch (e) {
-                
+
             }
         })
         if (window.vidiConfig.enabledExtensions.indexOf(`editor`) !== -1) moduleState.editingIsEnabled = true;
@@ -248,9 +248,7 @@ module.exports = {
                                 let layer = cloud.get().map._layers[key];
                                 if (`id` in layer && layer.id && layerTreeUtils.stripPrefix(layer.id) === layerTreeUtils.stripPrefix(layerKey)) {
                                     cloud.get().map.fitBounds(layer.getBounds(), {maxZoom: 16});
-                                    setTimeout(() => {
-                                        console.log(`Query filter parameter was applied`);
-                                    }, 1000);
+                                    console.log(`Query filter parameter was applied`);
                                 }
                             }
                         }
@@ -1605,7 +1603,7 @@ module.exports = {
             hl = meta.parseLayerMeta(layerKey)?.line_highlight_style ? JSON.parse(meta.parseLayerMeta(layerKey).line_highlight_style) : null
         } catch (e) {
             hl = null;
-           console.error(`Error in highlight style for ${layerKey}`, e.message);
+            console.error(`Error in highlight style for ${layerKey}`, e.message);
         }
         if (typeof moduleState.vectorStores[trackingLayerKey] !== "object" || recreateStores) {
             moduleState.vectorStores[trackingLayerKey] = new geocloud.sqlStore({
@@ -3727,7 +3725,10 @@ module.exports = {
     onApplyArbitraryFiltersHandler: ({layerKey, filters}, forcedReloadLayerType = false) => {
         validateFilters(filters);
         moduleState.arbitraryFilters[layerKey] = filters;
-        _self.reloadLayerOnFiltersChange(layerKey, forcedReloadLayerType);
+        // Wait a bit for filter state
+        setTimeout(() =>
+                _self.reloadLayerOnFiltersChange(layerKey, forcedReloadLayerType),
+            100);
     },
 
     onDisableArbitraryFiltersHandler: (layerKey) => {
