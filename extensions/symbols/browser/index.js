@@ -463,7 +463,10 @@ module.exports = {
                                         if (id && symbols[group].hasOwnProperty(id)) {
                                             const parser = new DOMParser();
                                             const doc = parser.parseFromString(symbols[group][id].svg, "image/svg+xml");
-                                            let text = doc.getElementsByTagName("desc")?.[0]?.textContent
+                                            // Gets desc from inside the svg-file, if any
+                                            //let text = doc.getElementsByTagName("desc")?.[0]?.textContent
+                                            // Instead, gets desc from svg-file.
+                                            let text = symbols[group][id]?.desc;
                                             let desc = text || '';
                                             let svg = $(inner.clone()[0]).append(symbols[group][id].svg);
                                             svg.attr('data-file', id);

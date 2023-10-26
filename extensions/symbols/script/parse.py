@@ -22,10 +22,17 @@ for file in only_files:
                 pass
                 # print(e)
         output_xml = ''.join([line.strip() for line in doc.toxml().splitlines()])
-        symbols[file] = {"svg": output_xml}
+        # Add content of file to dict, add desc key with name of file without extension
+        symbols[file] = {
+            "svg": output_xml,
+            "desc": file.split(".")[0]
+            }
         doc.unlink()
     except:
         pass
 
-print(json.dumps(symbols))
+# Save to file
+with open(sys.argv[2] + '.json', 'w') as outfile:
+    json.dump(symbols, outfile, indent=4, sort_keys=True)
+#print(json.dumps(symbols))
 exit(0)
