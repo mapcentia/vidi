@@ -209,9 +209,10 @@ module.exports = {
         "Cancel feature changes": "Afvis ændringer",
         "This browser does not support Service Workers, some features may be unavailable": "Denne browser understøtter ikke Service Workers, nogle funktioner kan være utilgængelige.",
         "Match": "Match",
-        "Match the following using operator": "Match følgende ved brug af operator",
+        "Match the following using operator": "Match følgende. Operator",
         "any": "OR",
         "all": "AND",
+        "not": "NOT",
         "Select": "Vælg",
         "Opacity": "Gennemsigtighed",
         "Filters": "Filtre",
@@ -238,6 +239,7 @@ module.exports = {
         "Labels": "Labels",
         "Show labels": "Vis labels",
         "Filter": "Filter",
+        "New block": "Ny blok",
 
         // Base layers
         "Side-by-side mode": "Dobbelt baggrundskort",

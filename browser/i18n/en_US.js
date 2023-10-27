@@ -212,6 +212,7 @@ module.exports = {
         "Match the following using operator": "Match the following using operator",
         "any": "OR",
         "all": "AND",
+        "not": "NOT",
         "Select": "Select",
         "Opacity": "Opacity",
         "Filters": "Filters",
@@ -238,6 +239,7 @@ module.exports = {
         "Labels": "Labels",
         "Show labels": "Show labels",
         "Layer filter": "Layer filter",
+        "New block": "New block",
 
         // Base layers
         "Side-by-side mode": "Side-by-side mode",

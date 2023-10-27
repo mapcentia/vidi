@@ -2402,86 +2402,112 @@ module.exports = {
                     }
                 }
             }
+            const proccess = (column) => {
+                let block;
+                if (column.fieldname && column.value) {
+                    for (let key in layerDescription.fields) {
+                        if (key === column.fieldname) {
+                            switch (layerDescription.fields[key].type) {
+                                case `boolean`:
+                                    if (EXPRESSIONS_FOR_BOOLEANS.indexOf(column.expression) === -1) {
+                                        throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layerDescription.fields[key].type} type)`);
+                                    }
 
-            // Processing arbitrary filters
-            let arbitraryConditions = [];
-            if (moduleState.arbitraryFilters && layerKey in moduleState.arbitraryFilters) {
-                moduleState.arbitraryFilters[layerKey].columns.map((column, index) => {
-                    if (column.fieldname && column.value) {
-                        for (let key in layerDescription.fields) {
-                            if (key === column.fieldname) {
-                                switch (layerDescription.fields[key].type) {
-                                    case `boolean`:
-                                        if (EXPRESSIONS_FOR_BOOLEANS.indexOf(column.expression) === -1) {
-                                            throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layerDescription.fields[key].type} type)`);
-                                        }
+                                    let value = `NULL`;
+                                    if (column.value === `true`) value = `TRUE`;
+                                    if (column.value === `false`) value = `FALSE`;
 
-                                        let value = `NULL`;
-                                        if (column.value === `true`) value = `TRUE`;
-                                        if (column.value === `false`) value = `FALSE`;
+                                    block = `${column.fieldname} ${column.expression} ${value}`;
+                                    break;
+                                case `date`:
+                                case `timestamp with time zone`:
+                                case `timestamp without time zone`:
+                                case `time with time zone`:
+                                case `time without time zone`:
+                                    if (EXPRESSIONS_FOR_DATES.indexOf(column.expression) === -1) {
+                                        throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layerDescription.fields[key].type} type)`);
+                                    }
 
-                                        arbitraryConditions.push(`${column.fieldname} ${column.expression} ${value}`);
-                                        break;
-                                    case `date`:
-                                    case `timestamp with time zone`:
-                                    case `timestamp without time zone`:
-                                    case `time with time zone`:
-                                    case `time without time zone`:
-                                        if (EXPRESSIONS_FOR_DATES.indexOf(column.expression) === -1) {
-                                            throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layerDescription.fields[key].type} type)`);
-                                        }
+                                    block = `${column.fieldname} ${column.expression} '${column.value}'`;
+                                    break;
+                                case `text`:
+                                case `string`:
+                                case `character`:
+                                case `uuid`:
+                                case `character varying`:
+                                    if (EXPRESSIONS_FOR_STRINGS.indexOf(column.expression) === -1) {
+                                        throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layerDescription.fields[key].type} type)`);
+                                    }
 
-                                        arbitraryConditions.push(`${column.fieldname} ${column.expression} '${column.value}'`);
-                                        break;
-                                    case `text`:
-                                    case `string`:
-                                    case `character`:
-                                    case `uuid`:
-                                    case `character varying`:
-                                        if (EXPRESSIONS_FOR_STRINGS.indexOf(column.expression) === -1) {
-                                            throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layerDescription.fields[key].type} type)`);
-                                        }
+                                    if (column.expression === 'like') {
+                                        block = `${column.fieldname} ILIKE '%${column.value}%'`;
+                                    } else {
+                                        block = `${column.fieldname} ${column.expression} '${column.value}'`;
+                                    }
 
-                                        if (column.expression === 'like') {
-                                            arbitraryConditions.push(`${column.fieldname} ILIKE '%${column.value}%'`);
-                                        } else {
-                                            arbitraryConditions.push(`${column.fieldname} ${column.expression} '${column.value}'`);
-                                        }
+                                    break;
+                                case `smallint`:
+                                case `integer`:
+                                case `bigint`:
+                                case `decimal`:
+                                case `numeric`:
+                                case `real`:
+                                case `double precision`:
+                                    if (EXPRESSIONS_FOR_NUMBERS.indexOf(column.expression) === -1) {
+                                        throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layerDescription.fields[key].type} type)`);
+                                    }
 
-                                        break;
-                                    case `smallint`:
-                                    case `integer`:
-                                    case `bigint`:
-                                    case `decimal`:
-                                    case `numeric`:
-                                    case `real`:
-                                    case `double precision`:
-                                        if (EXPRESSIONS_FOR_NUMBERS.indexOf(column.expression) === -1) {
-                                            throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layerDescription.fields[key].type} type)`);
-                                        }
-
-                                        arbitraryConditions.push(`${column.fieldname} ${column.expression} ${column.value}`);
-                                        break;
-                                    default:
-                                        console.error(`Unable to process filter with type '${layerDescription.fields[key].type}'`);
-                                }
+                                    block = `${column.fieldname} ${column.expression} ${column.value}`;
+                                    break;
+                                default:
+                                    console.error(`Unable to process filter with type '${layerDescription.fields[key].type}'`);
                             }
                         }
                     }
-                });
-            }
-
-            if (arbitraryConditions.length > 0) {
-                let additionalConditions = ``;
-                if (moduleState.arbitraryFilters[layerKey].match === `any`) {
-                    additionalConditions = arbitraryConditions.join(` OR `);
-                } else if (moduleState.arbitraryFilters[layerKey].match === `all`) {
-                    additionalConditions = arbitraryConditions.join(` AND `);
-                } else {
-                    throw new Error(`Invalid match type value`);
                 }
+                return block;
+            }
+            // Processing arbitrary filters
+            let arbitraryConditions = "";
+            const loop = (column, match) => {
+                const op = match === "all" ? "AND" : "OR";
+                if (column.sub) {
+                    arbitraryConditions += "(";
+                    column.sub.columns.forEach(c => {
+                        loop(c, column.sub.match);
+                    })
+                    arbitraryConditions += ")" + " " + op + " ";
+                } else {
+                    let c = proccess(column);
+                    if (c) {
+                        arbitraryConditions += c + " " + op + " ";
+                    }
+                }
+                arbitraryConditions = arbitraryConditions.replace("()", "");
 
-                appliedFilters[tableName].push(`(${additionalConditions})`);
+            }
+            if (moduleState.arbitraryFilters && layerKey in moduleState.arbitraryFilters) {
+                moduleState.arbitraryFilters[layerKey].columns.forEach(column => {
+                    loop(column, moduleState.arbitraryFilters[layerKey].match)
+                })
+            }
+            // Clean up
+            (function clean() {
+                const tmp = arbitraryConditions.replace(" ()", "")
+                    .replace(/ OR\s+\)| AND\s+\)/g, ")")
+                    .replace(/\b(OR)\s+\1\b/g, "OR")
+                    .replace(/\b(AND)\s+\1\b/g, "AND")
+                    .replace(/AND\s+$|OR\s+$/g, "").trim();
+                if (tmp !== arbitraryConditions) {
+                    arbitraryConditions = tmp;
+                    clean();
+                } else {
+                    arbitraryConditions = tmp;
+                }
+            }())
+
+            if (arbitraryConditions && arbitraryConditions.length !== 0) {
+                appliedFilters[tableName].push(arbitraryConditions);
             }
         }
 
