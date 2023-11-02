@@ -981,9 +981,11 @@ module.exports = module.exports = {
         return drawnItems;
     },
     setValueForSlider: function (v) {
-        let slider = sliderEl.find('.js-info-buffer-slider');
-        slider.val(v);
-        bufferValue.value = currentBufferValue = v;
+        if (v) {
+            let slider = sliderEl.find('.js-info-buffer-slider');
+            slider.val(v);
+            bufferValue.value = currentBufferValue = v;
+        }
     },
     getFromVarsIsDone: function () {
         return fromVarsIsDone;
