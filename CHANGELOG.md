@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2023.11.0] - 2023-2-11
+### Fixed
+- Bug in ConflictSearch when stateless mode is enabled. 
+
 ## [2023.6.0] - 2023-20-6
 ### Fixed
 - Bug: The GC2 Open tools meta setting didn't work after tools were moved into at collapsable element.
