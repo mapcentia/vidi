@@ -58,7 +58,7 @@ const returnPNGForStateSnapshot = (localRequest, localResponse) => {
 
                             if (localRequest.query.filter) { // Print as soon Vidi is loaded
                                 go = true;
-                                delay = 1000; // wait a bit longer because zooming has to finish
+                                delay = 5000; // wait a bit longer because zooming has to finish
                             }
 
                             if (
