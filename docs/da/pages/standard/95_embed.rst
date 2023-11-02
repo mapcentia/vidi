@@ -84,6 +84,8 @@ Følgende attributer styrer hvilke funktioner, der skal være synlige. Standard 
  * Login-knappen.
 * **data-vidi-brand (valgfri)**
  * Brandnavn.
+* **data-vidi-toggle (valgfri)**
+ * Meny toggle knappen, som vises på smalle skærme.
 
 Følgende attributter er skjulte som standard, men kan sættes til "inline", hvis funktionen skal være synlig:
 
@@ -97,6 +99,7 @@ Følgende attributter er skjulte som standard, men kan sættes til "inline", hvi
  * Nulstil-knappen.
 * **data-vidi-clear (valgfri)**
  * Ryd-alt-knappen.
+
 
 
 .. _embed_api:
