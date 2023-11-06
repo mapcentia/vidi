@@ -3757,7 +3757,9 @@ module.exports = {
     onApplyArbitraryFiltersHandler: ({layerKey, filters}, forcedReloadLayerType = false) => {
         validateFilters(filters);
         moduleState.arbitraryFilters[layerKey] = filters;
-        _self.reloadLayerOnFiltersChange(layerKey, forcedReloadLayerType);
+        setTimeout(() =>
+                _self.reloadLayerOnFiltersChange(layerKey, forcedReloadLayerType),
+            100);
     },
 
     onDisableArbitraryFiltersHandler: (layerKey) => {
