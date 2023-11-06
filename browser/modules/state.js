@@ -153,6 +153,30 @@ module.exports = {
      */
     init: function () {
         _self = this;
+        /**
+         * Creates promise
+         *
+         * @param {String} data Input data for underlying function
+         *
+         * @return {Function}
+         */
+        const createPromise = (data) => {
+            return new Promise(resolve => {
+                switchLayer.init(data, true, true).then(() => {
+                    backboneEvents.get().trigger(`layerTree:activeLayersChange`);
+                    resolve()
+                });
+            })
+        };
+
+        /**
+         * Executes promises one after another
+         *
+         * @param {Array} data Set of input values
+         */
+        const executeSequentially = (data) => {
+            return createPromise(data.pop()).then(x => data.length === 0 ? x : executeSequentially(data));
+        };
         return new Promise((initResolve, initReject) => {
             try {
 
@@ -214,31 +238,6 @@ module.exports = {
                     // This is used if fastInit is not used
                     layersToActivate = utils.removeDuplicates(layersToActivate.concat(window.vidiConfig.activeLayers));
 
-                    /**
-                     * Creates promise
-                     *
-                     * @param {String} data Input data for underlying function
-                     *
-                     * @return {Function}
-                     */
-                    const createPromise = (data) => {
-                        return new Promise(resolve => {
-                            switchLayer.init(data, true, true).then(() => {
-                                backboneEvents.get().trigger(`layerTree:activeLayersChange`);
-                                resolve()
-                            });
-                        })
-                    };
-
-                    /**
-                     * Executes promises one after another
-                     *
-                     * @param {Array} data Set of input values
-                     */
-                    const executeSequentially = (data) => {
-                        return createPromise(data.pop()).then(x => data.length === 0 ? x : executeSequentially(data));
-                    };
-
                     const initializeLayersFromURL = () => {
                         if (layersToActivate.length === 0) {
                             initResolve();
@@ -268,6 +267,7 @@ module.exports = {
                         if (hashArr[0]) {
                             setLayers();
                         } else {
+                            let layersToActivate = [];
                             // Set base layer to the first added one
                             setBaseLayer.init(baseLayer.getAvailableBaseLayers()[0].id);
 
@@ -279,7 +279,19 @@ module.exports = {
                                     cloud.get().zoomToExtent();
                                 }
                             }
-                            initResolve();
+                            // If initialFilter is set, when Fast Init is disabled. We need to activate layers from config.activeLayers
+                            if (!urlVars.state && urlVars.initialFilter) {
+                                layersToActivate = utils.removeDuplicates(window.vidiConfig.activeLayers);
+                                if (layersToActivate.length === 0) {
+                                    initResolve();
+                                } else {
+                                    executeSequentially(layersToActivate).then(() => {
+                                        initResolve();
+                                    });
+                                }
+                            } else {
+                                initResolve();
+                            }
                         }
                     } else {
                         var parr, v, l, t, GeoJsonAdded = false;
