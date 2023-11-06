@@ -439,8 +439,8 @@ module.exports = {
          */
 
 
-        if (urlVars.state || urlparser.hash.length === 0) {
-            console.log("Using fast init")
+        if (urlVars.state || urlparser.hash.length === 0 && (!urlVars.initialFilter)) {
+            console.log("Enable fast init")
             $("#loadscreen").fadeOut(200);
             initExtensions();
             modules.state.init().then(() => {
@@ -499,6 +499,7 @@ module.exports = {
                 console.error(error)
             })
         } else {
+            console.log("Disable fast init")
             modules.meta.init().then((schemataStr) => {
                 return modules.setting.init(schemataStr);
             }).catch((error) => {

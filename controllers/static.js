@@ -90,7 +90,7 @@ const returnPNGForStateSnapshot = (localRequest, localResponse) => {
                                         localResponse.status(500);
                                         localResponse.send(error);
                                     });
-                                }, 5000);
+                                }, delay);
                             }
                         });
 
