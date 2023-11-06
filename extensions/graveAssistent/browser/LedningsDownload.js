@@ -75,10 +75,9 @@ class LedningsDownload extends React.Component {
     handleDownload = () => {
         const _self = this
 
-        const clickHandler = () => {
+        const clickHandler = (file) => {
             setTimeout(() => {
-              URL.revokeObjectURL(file);
-              this.removeEventListener('click', clickHandler);
+              window.URL.revokeObjectURL(file);
             }, 150);
           };
 
@@ -107,8 +106,9 @@ class LedningsDownload extends React.Component {
                 let a = document.createElement('a');
                 a.href = file;
                 a.setAttribute('download', d.filename);
-                a.addEventListener('click', clickHandler, false);
+                a.addEventListener('click', clickHandler(file), false);
                 a.click();
+                a.removeEventListener('click', clickHandler);
                 _self.setState({loading:false})
             })
             .then(_self.setState({open:false,format: ''}))

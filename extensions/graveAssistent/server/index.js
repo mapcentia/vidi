@@ -178,7 +178,7 @@ router.post('/api/extension/downloadForespoergsel', function (req, response) {
 
     let schema = s.screenName
     // If schema is set in body, use that
-    if (b.hasOwnProperty('schema')) {
+    if (b.hasOwnProperty('schema') && b.schema != null && b.schema != undefined) {
         schema = b.schema
     }
 
@@ -315,7 +315,7 @@ router.post('/api/extension/getForespoergselOption', function (req, response) {
     // Go ahead with the logic
     let schema = s.screenName
     // If schema is set in body, use that
-    if (b.hasOwnProperty('schema')) {
+    if (b.hasOwnProperty('schema') && b.schema != null && b.schema != undefined) {
         schema = b.schema
     }
 
@@ -376,7 +376,7 @@ router.post('/api/extension/getForespoergsel', function (req, response) {
 
     let schema = s.screenName
     // If schema is set in body, use that
-    if (b.hasOwnProperty('schema')) {
+    if (b.hasOwnProperty('schema') && b.schema != null && b.schema != undefined) {
         schema = b.schema
     }
 
@@ -448,7 +448,7 @@ router.post('/api/extension/getStatus', function (req, response) {
     let chain = []
     let schema = s.screenName
     // If schema is set in body, use that
-    if (b.hasOwnProperty('schema')) {
+    if (b.hasOwnProperty('schema') && b.schema != null && b.schema != undefined) {
         schema = b.schema
     }
 
@@ -535,7 +535,7 @@ router.post('/api/extension/upsertForespoergsel', function (req, response) {
 
     let schema = s.screenName
     // If schema is set in body, use that
-    if (b.hasOwnProperty('schema')) {
+    if (b.hasOwnProperty('schema') && b.schema != null && b.schema != undefined) {
         schema = b.schema
     }
 
@@ -657,7 +657,7 @@ router.post('/api/extension/upsertStatus', function (req, response) {
 
     let schema = s.screenName
     // If schema is set in body, use that
-    if (b.hasOwnProperty('schema')) {
+    if (b.hasOwnProperty('schema') && b.schema != null && b.schema != undefined) {
         schema = b.schema
     }
 
@@ -808,7 +808,7 @@ function DONOTHING(contentType, ext, base64) {
 }
 
 // Use GEOLAMBDA
-function GEOLAMBDA(layername, format, apikey, userstring, foresp, schema) {
+function GEOLAMBDA(layername, format, apikey, userstring, foresp, schema = undefined) {
     // hit geolambda function
     var url = 'https://lskze93j56.execute-api.eu-central-1.amazonaws.com/v1/geolambda'
     var key = '9OMEn0zKMn6oznXcuO8lE5ALP6sRgtbv3dTg6ZUz'

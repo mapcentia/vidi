@@ -25,7 +25,7 @@ import FormControl from '@material-ui/core/FormControl';
 
 // Get information from config.json
 
-var schema_override = null;
+var schema_override = undefined;
 
 if (window.config?.extensionConfig?.graveAssistent) {
     if (window.config?.extensionConfig?.graveAssistent?.schema) {
@@ -654,7 +654,10 @@ module.exports = {
 
                 var pushForespoergsel = function (obj, statusKey, schema_override) {
                     obj['statusKey'] = statusKey
-                    obj['schema'] = schema_override
+                    // If schema_override is set, use that instead
+                    if (schema_override) {
+                        obj['schema'] = schema_override
+                    }
                     let opts = {
                         headers: {
                             'Accept': 'application/json',
@@ -731,8 +734,12 @@ module.exports = {
                     let postData = {
                         Ledningsejerliste: obj,
                         statusKey: statusKey,
-                        schema: schema_override
                     }
+                    // If schema_override is set, use that instead
+                    if (schema_override) {
+                        postData['schema'] = schema_override
+                    }
+
                     let opts = {
                         headers: {
                             'Accept': 'application/json',
@@ -914,7 +921,13 @@ module.exports = {
 
                                     if (me.state.authed) {
                                         me.populateDClayers()
-                                        me.populateForespoergselOption(schema_override) //
+
+                                        // Populate select with foresp. from schema - if set
+                                        if (schema_override) {
+                                            me.populateForespoergselOption(schema_override)
+                                        } else {
+                                            me.populateForespoergselOption()
+                                        }
                                     }
                                 }))
                                 .catch(e => me.setState({
@@ -979,7 +992,13 @@ module.exports = {
                             svarUploadTime: '',
                             ejerliste: [],
                         }, () => {
-                            _self.populateForespoergselOption(schema_override) // On back click, populate select with new foresp
+
+                            // Populate select with foresp. from schema - if set
+                            if (schema_override) {
+                                _self.populateForespoergselOption(schema_override)
+                            } else {
+                                _self.populateForespoergselOption()
+                            }
                             // move to last location and clear filters
                             cloud.get().map.fitBounds(_self.state.lastBounds)
                             clearFilters()
@@ -992,7 +1011,14 @@ module.exports = {
                             foresp: String(event.target.value),
                             lastBounds: cloud.get().map.getBounds()
                         })
-                        _self.getForespoergsel(String(event.target.value), schema_override)
+
+                        // getForespoergsel - use schema is set
+                        if (schema_override) {
+                            _self.getForespoergsel(String(event.target.value), schema_override)
+                        } else {
+                            _self.getForespoergsel(String(event.target.value))
+                        }
+
                         _self.setState({
                             done: true
                         })
@@ -1054,10 +1080,17 @@ module.exports = {
                             }).then(function(files) {
                                 var [status, consolidated] = files
 
-                                return [Promise.all([
-                                    pushStatus(status, statusKey, schema_override),
-                                    pushForespoergsel(consolidated, statusKey, schema_override)
-                                ]),consolidated.forespNummer]
+                                if (schema_override) {
+                                    return [Promise.all([
+                                        pushStatus(status, statusKey, schema_override),
+                                        pushForespoergsel(consolidated, statusKey, schema_override)
+                                    ]),consolidated.forespNummer]
+                                } else {
+                                    return [Promise.all([
+                                        pushStatus(status, statusKey),
+                                        pushForespoergsel(consolidated, statusKey)
+                                    ]),consolidated.forespNummer]
+                                }
                             }).then(function(files) {
                                 //console.log(files)
                                 _self.setState({
@@ -1068,7 +1101,13 @@ module.exports = {
                                     done: true,
                                     foresp: String(files[1])
                                 })
-                                _self.getForespoergsel(String(files[1]), schema_override)
+
+                                if (schema_override) {
+                                    _self.getForespoergsel(String(files[1]), schema_override)
+                                } else {
+                                    _self.getForespoergsel(String(files[1]))
+                                }
+                                
                             })
                             .catch(e => {
                                 console.log(e)
@@ -1203,7 +1242,13 @@ module.exports = {
                                 cloud.get().map.fitBounds(bounds)
                                 
                                 // Apply filter
-                                _self.getStatus(f.statuskey, schema_override)
+
+                                if (schema_override) {
+                                    _self.getStatus(f.statuskey, schema_override)
+                                } else {
+                                    _self.getStatus(f.statuskey)
+                                }
+
                                 applyFilter(buildFilter(f.forespnummer))
 
 
