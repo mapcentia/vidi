@@ -55,14 +55,10 @@ let bounds;
  * @param {Object} state Module state
  */
 const validateModuleState = (state) => {
-    if (`twoLayersAtOnceMode` in state && TWO_LAYERS_AT_ONCE_MODES.indexOf(state.twoLayersAtOnceMode) !== -1
+    return state && `twoLayersAtOnceMode` in state && TWO_LAYERS_AT_ONCE_MODES.indexOf(state.twoLayersAtOnceMode) !== -1
         && `layers` in state && Array.isArray(state.layers) && `opacity` in state
         && (state.opacity >= OVERLAY_OPACITY_RANGE[0] && state.opacity <= OVERLAY_OPACITY_RANGE[1] || state.opacity === false || state.opacity === `false`)
-        && state.layers.length === 2) {
-        return true;
-    } else {
-        return false;
-    }
+        && state.layers.length === 2;
 };
 
 /**
