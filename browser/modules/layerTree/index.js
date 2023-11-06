@@ -242,12 +242,18 @@ module.exports = {
 
                     // Wait for layer load event
                     backboneEvents.get().on(`doneLoading:layers`, (loadedLayerName) => {
+                        let parsedMeta = meta.parseLayerMeta(layerKey);
+                        let maxZoom = 16;
+                        if (parsedMeta?.max_zoom_level_table_click) {
+                            maxZoom = parseInt(parsedMeta.max_zoom_level_table_click);
+                        }
+                        console.log(parsedMeta)
                         if (layerTreeUtils.stripPrefix(loadedLayerName) === layerTreeUtils.stripPrefix(layerKey) && !initialFilterIsApplied) {
                             initialFilterIsApplied = true;
                             for (let key in cloud.get().map._layers) {
                                 let layer = cloud.get().map._layers[key];
                                 if (`id` in layer && layer.id && layerTreeUtils.stripPrefix(layer.id) === layerTreeUtils.stripPrefix(layerKey)) {
-                                    cloud.get().map.fitBounds(layer.getBounds(), {maxZoom: 16});
+                                    cloud.get().map.fitBounds(layer.getBounds(), {maxZoom});
                                     console.log(`Query filter parameter was applied`);
                                 }
                             }
@@ -3751,10 +3757,7 @@ module.exports = {
     onApplyArbitraryFiltersHandler: ({layerKey, filters}, forcedReloadLayerType = false) => {
         validateFilters(filters);
         moduleState.arbitraryFilters[layerKey] = filters;
-        // Wait a bit for filter state
-        setTimeout(() =>
-                _self.reloadLayerOnFiltersChange(layerKey, forcedReloadLayerType),
-            100);
+        _self.reloadLayerOnFiltersChange(layerKey, forcedReloadLayerType);
     },
 
     onDisableArbitraryFiltersHandler: (layerKey) => {
