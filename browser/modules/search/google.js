@@ -1,18 +1,15 @@
 /*
  * @author     Alexander Shumilov
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2023 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
 
-/**
- *
- * @type {*|exports|module.exports}
- */
-var cloud;
+import {Loader} from "@googlemaps/js-api-loader"
 
-var backboneEvents;
+let cloud;
+let backboneEvents;
 
 
 /**
@@ -27,22 +24,29 @@ module.exports = {
     },
     init: function () {
         let config = window.vidiConfig;
-        const key = window.googleApiKey ? window.googleApiKey : (config.searchConfig.google && config.searchConfig.google.apiKey ? config.searchConfig.google.apiKey : false);
+        const key = config?.searchConfig?.google?.apiKey;
         if (key) {
-            // Load Google Maps API and make sure its not loaded more than once
-            if (typeof window.GoogleMapsDirty === "undefined" && !(typeof google !== "undefined" && typeof google.maps !== "undefined")) {
-                window.GoogleMapsDirty = true;
-                jQuery.getScript("https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=places&key=" + key);
-                // Google Maps API is loaded
-            }
+                const loader = new Loader({
+                    apiKey: key,
+                    version: "weekly"
+                });
+                loader.load().then(async () => {
+                    const {Places} = await google.maps.importLibrary("places");
 
-            (function poll() {
-                if (typeof google !== "undefined" && typeof google.maps !== "undefined" && typeof google.maps.Map !== "undefined") {
-                    if (document.getElementById('custom-search')) {
-                        var autocomplete = new google.maps.places.Autocomplete(document.getElementById('custom-search')), myLayer;
+                    // map = new Au(document.getElementById("map"), {
+                    //     center: {lat: -34.397, lng: 150.644},
+                    //     zoom: 8,
+                    // });
+                    const el =document.querySelector('.custom-search');
+                    if (el) {
+                        var autocomplete = new google.maps.places.Autocomplete(el),
+                            myLayer;
                         google.maps.event.addListener(autocomplete, 'place_changed', function () {
                             var place = autocomplete.getPlace(),
-                                json = {"type": "Point", "coordinates": [place.geometry.location.lng(), place.geometry.location.lat()]};
+                                json = {
+                                    "type": "Point",
+                                    "coordinates": [place.geometry.location.lng(), place.geometry.location.lat()]
+                                };
                             myLayer = L.geoJson();
                             myLayer.addData({
                                 "type": "Feature",
@@ -65,10 +69,8 @@ module.exports = {
                     } else {
                         console.warn(`Unable to find the custom search field`);
                     }
-                } else {
-                    setTimeout(poll, 50);
-                }
-            }());
+                });
+
         } else {
             console.warn(`Google Maps API key is required in search module, please specify the valid key in configuration or disable the extension to hide this message`);
         }

@@ -74,6 +74,7 @@
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.15.4",
+    "@googlemaps/js-api-loader": "^1.16.2",
     "@material-ui/core": "^3.9.4",
     "@material-ui/icons": "^3.0.2",
     "@rjsf/bootstrap-4": "^5.11.2",

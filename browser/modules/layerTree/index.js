@@ -247,7 +247,6 @@ module.exports = {
                         if (parsedMeta?.max_zoom_level_table_click) {
                             maxZoom = parseInt(parsedMeta.max_zoom_level_table_click);
                         }
-                        console.log(parsedMeta)
                         if (layerTreeUtils.stripPrefix(loadedLayerName) === layerTreeUtils.stripPrefix(layerKey) && !initialFilterIsApplied) {
                             initialFilterIsApplied = true;
                             for (let key in cloud.get().map._layers) {
