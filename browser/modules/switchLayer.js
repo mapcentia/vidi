@@ -179,8 +179,7 @@ module.exports = module.exports = {
         return new Promise((resolve, reject) => {
             layers.addUTFGridLayer(id).then(() => {
             }).catch((err) => {
-                console.error(`Could not add ${id} UTFGrid tile layer`);
-                console.error(err);
+                console.log(`Could not add ${id} UTFGrid tile layer`);
                 resolve();
             });
         });
