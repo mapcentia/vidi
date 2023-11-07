@@ -134,6 +134,9 @@ let urlsIgnoredForCaching = [{
 }, {
     regExp: true,
     requested: '/api/df'
+}, {
+    regExp: true,
+    requested: 'https://arkiv01.forsyning.lan' // Fix for RSF local videos
 }];
 
 if (typeof CONFIG.urlsIgnoredForCaching === "object") {
