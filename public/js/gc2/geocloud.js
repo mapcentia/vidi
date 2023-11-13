@@ -188,9 +188,9 @@ geocloud = (function () {
             // debugger
             this.onLoad = this.defaults.onLoad;
             this.loading = this.defaults.loading;
+            this.layerHL = this.geoJsonLayerHL;
             if (!this.defaults.clustering) {
                 this.layer = this.geoJsonLayer;
-                this.layerHL = this.geoJsonLayerHL;
             } else {
                 this.layer = L.markerClusterGroup({
                     maxClusterRadius: 100,
