@@ -24,56 +24,43 @@ module.exports = {
     },
     init: function () {
         let config = window.vidiConfig;
-        const key = config?.searchConfig?.google?.apiKey;
+        const key = window.googleApiKey ? window.googleApiKey : config?.searchConfig?.google?.apiKey;
         if (key) {
-                const loader = new Loader({
-                    apiKey: key,
-                    version: "weekly"
-                });
-                loader.load().then(async () => {
-                    const {Places} = await google.maps.importLibrary("places");
-
-                    // map = new Au(document.getElementById("map"), {
-                    //     center: {lat: -34.397, lng: 150.644},
-                    //     zoom: 8,
-                    // });
-                    const el =document.querySelector('.custom-search');
-                    if (el) {
-                        var autocomplete = new google.maps.places.Autocomplete(el),
-                            myLayer;
-                        google.maps.event.addListener(autocomplete, 'place_changed', function () {
-                            var place = autocomplete.getPlace(),
-                                json = {
-                                    "type": "Point",
-                                    "coordinates": [place.geometry.location.lng(), place.geometry.location.lat()]
-                                };
-                            myLayer = L.geoJson();
-                            myLayer.addData({
-                                "type": "Feature",
-                                "properties": {},
-                                "geometry": json
-                            });
-                            cloud.get().map.addLayer(myLayer);
-                            cloud.get().map.setView([place.geometry.location.lat(), place.geometry.location.lng()], 17)
+            const loader = new Loader({
+                apiKey: key,
+                version: "weekly"
+            });
+            const markerLayer = L.geoJson();
+            cloud.get().map.addLayer(markerLayer);
+            backboneEvents.get().on("clear:search", function () {
+                console.info("Clearing search");
+                markerLayer.clearLayers();
+                $(".custom-search").val("");
+            });
+            loader.load().then(async () => {
+                const {Places} = await google.maps.importLibrary("places");
+                const el = document.querySelector('.custom-search');
+                if (el) {
+                    const autocomplete = new google.maps.places.Autocomplete(el);
+                    google.maps.event.addListener(autocomplete, 'place_changed', function () {
+                        const place = autocomplete.getPlace(),
+                            json = {
+                                "type": "Point",
+                                "coordinates": [place.geometry.location.lng(), place.geometry.location.lat()]
+                            };
+                        markerLayer.addData({
+                            "type": "Feature",
+                            "properties": {},
+                            "geometry": json
                         });
-
-                        // Listen for clearing event
-                        // =========================
-
-                        backboneEvents.get().on("clear:search", function () {
-                            console.info("Clearing search");
-                            myLayer.clearLayers();
-                            $("#custom-search").val("");
-                        });
-
-                    } else {
-                        console.warn(`Unable to find the custom search field`);
-                    }
-                });
-
+                        cloud.get().map.setView([place.geometry.location.lat(), place.geometry.location.lng()], 17)
+                    });
+                } else {
+                    console.warn(`Unable to find the custom search field`);
+                }
+            });
         } else {
             console.warn(`Google Maps API key is required in search module, please specify the valid key in configuration or disable the extension to hide this message`);
         }
     }
 };
-
