@@ -201,79 +201,79 @@
         <div class="offcanvas-body" style="scrollbar-gutter: stable">
             <div class="d-flex align-items-start flex-row-reverse">
                 <!-- Nav tabs -->
-                <div>
-                <ul class="nav flex-column nav-pills sticky-top" role="tablist" id="main-tabs">
-                    <li role="presentation" class="nav-item">
-                        <a class="nav-link" data-bs-toggle="tab" data-module-id="layerTree" href="#layer-content"
-                           data-module-title="{{Layers}}" aria-controls="" role="tab" data-toggle="tab">
-                            <i data-container="body" data-toggle="tooltip" data-placement="left"
-                               title="{{Layers}}" class="bi bi-layers"></i>
-                        </a>
-                    </li>
+                <div class="sticky-top">
+                    <ul class="nav flex-column nav-pills" role="tablist" id="main-tabs">
+                        <li role="presentation" class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" data-module-id="layerTree" href="#layer-content"
+                               data-module-title="{{Layers}}" aria-controls="" role="tab" data-toggle="tab">
+                                <i data-container="body" data-toggle="tooltip" data-placement="left"
+                                   title="{{Layers}}" class="bi bi-layers"></i>
+                            </a>
+                        </li>
 
-                    <li role="presentation" class="nav-item">
-                        <a class="nav-link" data-bs-toggle="tab" data-module-id="infoClick" href="#info-content"
-                           data-module-title="{{Info}}" aria-controls="info-content" role="tab" data-toggle="tab">
-                            <i data-container="body" data-toggle="tooltip" data-placement="left"
-                               title="{{Info}}" class="bi bi-info-square"></i>
-                        </a>
-                    </li>
+                        <li role="presentation" class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" data-module-id="infoClick" href="#info-content"
+                               data-module-title="{{Info}}" aria-controls="info-content" role="tab" data-toggle="tab">
+                                <i data-container="body" data-toggle="tooltip" data-placement="left"
+                                   title="{{Info}}" class="bi bi-info-square"></i>
+                            </a>
+                        </li>
 
-                    <li role="presentation" class="nav-item">
-                        <a class="nav-link" data-bs-toggle="tab" href="#search-content" aria-controls="search-content"
-                           data-module-title="{{Search}}" role="tab" data-toggle="tab">
-                            <i data-container="body" data-toggle="tooltip" data-placement="left"
-                               title="{{Search}}" class="bi bi-search"></i>
-                        </a>
-                    </li>
+                        <li role="presentation" class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#search-content" aria-controls="search-content"
+                               data-module-title="{{Search}}" role="tab" data-toggle="tab">
+                                <i data-container="body" data-toggle="tooltip" data-placement="left"
+                                   title="{{Search}}" class="bi bi-search"></i>
+                            </a>
+                        </li>
 
-                    <li role="presentation" class="nav-item">
-                        <a class="nav-link" data-bs-toggle="tab" data-module-id="baseLayer" href="#baselayer-content"
-                           data-module-title="{{Baselayers}}" aria-controls="" role="tab" data-toggle="tab">
-                            <i data-container="body" data-toggle="tooltip" data-placement="left"
-                               title="{{Baselayers}}" class="bi bi-map"></i>
-                        </a>
-                    </li>
+                        <li role="presentation" class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" data-module-id="baseLayer" href="#baselayer-content"
+                               data-module-title="{{Baselayers}}" aria-controls="" role="tab" data-toggle="tab">
+                                <i data-container="body" data-toggle="tooltip" data-placement="left"
+                                   title="{{Baselayers}}" class="bi bi-map"></i>
+                            </a>
+                        </li>
 
-                    <li role="presentation">
-                        <a class="nav-link" data-bs-toggle="tab" data-module-id="legend" href="#legend-content"
-                           aria-controls=""
-                           data-module-title="{{Legend}}" role="tab" data-toggle="tab">
-                            <i data-container="body" data-toggle="tooltip" data-placement="left"
-                               title="{{Legend}}" class="bi bi-card-text"></i>
-                        </a>
-                    </li>
+                        <li role="presentation">
+                            <a class="nav-link" data-bs-toggle="tab" data-module-id="legend" href="#legend-content"
+                               aria-controls=""
+                               data-module-title="{{Legend}}" role="tab" data-toggle="tab">
+                                <i data-container="body" data-toggle="tooltip" data-placement="left"
+                                   title="{{Legend}}" class="bi bi-card-text"></i>
+                            </a>
+                        </li>
 
-                    <li role="presentation">
-                        <a class="nav-link" data-bs-toggle="tab" data-module-id="draw" href="#draw-content"
-                           aria-controls=""
-                           data-module-title="{{Draw}}" role="tab" data-toggle="tab">
-                            <i data-container="body" data-toggle="tooltip" data-placement="left"
-                               title="{{Draw}}" class="bi bi-pencil"></i>
-                        </a>
-                    </li>
+                        <li role="presentation">
+                            <a class="nav-link" data-bs-toggle="tab" data-module-id="draw" href="#draw-content"
+                               aria-controls=""
+                               data-module-title="{{Draw}}" role="tab" data-toggle="tab">
+                                <i data-container="body" data-toggle="tooltip" data-placement="left"
+                                   title="{{Draw}}" class="bi bi-pencil"></i>
+                            </a>
+                        </li>
 
-                    <li role="presentation">
-                        <a class="nav-link" data-bs-toggle="tab" data-module-id="stateSnapshots"
-                           href="#state-snapshots-content"
-                           aria-controls=""
-                           data-module-title="{{State snapshots}}" role="tab" data-toggle="tab">
-                            <i data-container="body" data-toggle="tooltip" data-placement="left"
-                               title="{{State snapshots}}" class="bi bi-folder"></i>
-                        </a>
-                    </li>
+                        <li role="presentation">
+                            <a class="nav-link" data-bs-toggle="tab" data-module-id="stateSnapshots"
+                               href="#state-snapshots-content"
+                               aria-controls=""
+                               data-module-title="{{State snapshots}}" role="tab" data-toggle="tab">
+                                <i data-container="body" data-toggle="tooltip" data-placement="left"
+                                   title="{{State snapshots}}" class="bi bi-folder"></i>
+                            </a>
+                        </li>
 
-                    <li role="presentation">
-                        <a class="nav-link" data-bs-toggle="tab" data-module-id="print" href="#print-content"
-                           aria-controls=""
-                           data-module-title="{{Print}}" role="tab" data-toggle="tab">
-                            <i data-container="body" data-toggle="tooltip" data-placement="left"
-                               title="{{Print}}" class="bi bi-file-pdf"></i>
-                        </a>
-                    </li>
+                        <li role="presentation">
+                            <a class="nav-link" data-bs-toggle="tab" data-module-id="print" href="#print-content"
+                               aria-controls=""
+                               data-module-title="{{Print}}" role="tab" data-toggle="tab">
+                                <i data-container="body" data-toggle="tooltip" data-placement="left"
+                                   title="{{Print}}" class="bi bi-file-pdf"></i>
+                            </a>
+                        </li>
 
-                    <hr>
-                </ul>
+                        <hr>
+                    </ul>
                 </div>
                 <!-- Tab panes -->
                 <div class="tab-content main-content w-100">
