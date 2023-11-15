@@ -18,13 +18,13 @@ import {
 /**
  * @type {*|exports|module.exports}
  */
-var cloud, setBaseLayer, urlparser, backboneEvents, state, setting, layers, utils;
+let cloud, setBaseLayer, urlparser, backboneEvents, state, setting, layers, utils;
 
 /**
  * List with base layers added to the map. Can be got through API.
  * @type {Array}
  */
-var baseLayers = [];
+let baseLayers = [];
 
 let _self = false;
 
