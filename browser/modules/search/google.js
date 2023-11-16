@@ -41,6 +41,10 @@ module.exports = {
                 const {Places} = await google.maps.importLibrary("places");
                 const el = document.querySelector('.custom-search');
                 if (el) {
+                    let placeholder = window.vidiConfig?.searchConfig?.placeholderText;
+                    if (placeholder) {
+                        el.placeholder = placeholder;
+                    }
                     const autocomplete = new google.maps.places.Autocomplete(el);
                     google.maps.event.addListener(autocomplete, 'place_changed', function () {
                         const place = autocomplete.getPlace(),
