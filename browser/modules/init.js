@@ -18,6 +18,7 @@ let utils;
 const semver = require('semver');
 const md5 = require('md5');
 const cookie = require('js-cookie');
+const config = require('../../config/config.js');
 
 import mustache from 'mustache';
 
@@ -81,7 +82,7 @@ module.exports = {
         };
         // Set session from URL
         if (typeof urlVars.session === "string") {
-            const MAXAGE = (config.sessionMaxAge || 86400) / 86400; // In days
+            const MAXAGE = (config?.sessionMaxAge || 86400) / 86400; // In days
             // Try to remove existing cookie
             document.cookie = 'connect.gc2=; Max-Age=0; path=/; domain=' + location.host;
             cookie.set("connect.gc2", urlVars.session, {expires: MAXAGE});
@@ -601,6 +602,9 @@ module.exports = {
             });
         } else {
             console.error(`localforage is not available`);
+        }
+        if (utils.isEmbedEnabled() && !window.vidiConfig?.featureInfoTableOnMap) {
+            window.vidiConfig.crossMultiSelect = true;
         }
     }
 };

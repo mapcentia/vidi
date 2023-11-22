@@ -847,7 +847,7 @@ module.exports = {
     getVectorTemplate: function (layerKey, multi = true) {
         let metaDataKeys = meta.getMetaDataKeys();
         let parsedMeta = layerTree.parseLayerMeta(metaDataKeys[layerKey]);
-        template = (parsedMeta.info_template && parsedMeta.info_template !== "") ? parsedMeta.info_template : defaultTemplate;
+        template = (parsedMeta.info_template && parsedMeta.info_template !== "") ? parsedMeta.info_template : window.vidiConfig?.crossMultiSelect ? defaultTemplateForCrossMultiSelect: defaultTemplate;
         if (window.vidiConfig.enabledExtensions.includes('editor')) {
             template = editToolsHtml + template;
         }
