@@ -810,7 +810,7 @@ function DONOTHING(contentType, ext, base64) {
 // Use GEOLAMBDA
 function GEOLAMBDA(layername, format, apikey, userstring, foresp, schema = undefined) {
     // hit geolambda function
-    var url = 'https://lskze93j56.execute-api.eu-central-1.amazonaws.com/v1/geolambda'
+    var url = 'https://s35wihabjwiscd45v7we526zfu0vdtkr.lambda-url.eu-central-1.on.aws/'
     var key = '9OMEn0zKMn6oznXcuO8lE5ALP6sRgtbv3dTg6ZUz'
 
     var postData = {
