@@ -603,6 +603,7 @@ module.exports = {
         } else {
             console.error(`localforage is not available`);
         }
+        // Set crossMultiSelect to true if embed is enabled
         if (utils.isEmbedEnabled() && !window.vidiConfig?.featureInfoTableOnMap && !window.vidiConfig?.forceOffCanvasInfo) {
             window.vidiConfig.crossMultiSelect = true;
         }
