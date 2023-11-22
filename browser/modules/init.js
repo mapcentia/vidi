@@ -603,7 +603,7 @@ module.exports = {
         } else {
             console.error(`localforage is not available`);
         }
-        if (utils.isEmbedEnabled() && !window.vidiConfig?.featureInfoTableOnMap) {
+        if (utils.isEmbedEnabled() && !window.vidiConfig?.featureInfoTableOnMap && !window.vidiConfig?.forceOffCanvasInfo) {
             window.vidiConfig.crossMultiSelect = true;
         }
     }
