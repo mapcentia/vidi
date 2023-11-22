@@ -417,7 +417,7 @@ module.exports = {
                         hit = true;
                         count.hits = count.hits + Object.keys(layerObj.layer._layers).length;
                         const ns = "#_" + storeId;
-                        // HACK We need to explicit set the width of the table container, or else it's calculated wrong becouse of the use of flex boxed
+                        // HACK We need to explicit set the width of the table container, or else it's calculated wrong because of the use of flex boxed
                         try {
                             const e = featureInfoTableOnMap || forceOffCanvasInfo ? '#alternative-info-container' : '.main-content';
                             document.querySelector(ns).style.width = (document.querySelector(`${e}`).offsetWidth - 12) + "px";

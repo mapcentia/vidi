@@ -87,8 +87,8 @@ module.exports = {
                     let coords = event.getCoordinate(), wkt;
                     wkt = "POINT(" + coords.x + " " + coords.y + ")";
 
-                    // Cross Multi select disabled
-                    if (!window.vidiConfig.crossMultiSelect) {
+                    // Cross Multi select disabled unless embed is enabled or featureInfoTableOnMap is enabled
+                    if (!window.vidiConfig.crossMultiSelect && !utils.isEmbedEnabled() || window.vidiConfig.featureInfoTableOnMap) {
                         sqlQuery.init(qstore, wkt, "3857", null, null, [coords.lat, coords.lng], false, false, false, (layerId) => {
                             setTimeout(() => {
                                 let parentLayer = cloud.get().map._layers[layerId];

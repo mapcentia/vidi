@@ -191,5 +191,9 @@ module.exports = {
             result.push(key);
         }
         return result;
-    }
+    },
+
+    isEmbedEnabled: () => {
+        return $(`.embed.modal`).length > 1
+    },
 };
