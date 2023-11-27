@@ -348,7 +348,7 @@ class VectorLayerFilter extends React.Component {
         let filterHtmlTemplate = this.props.layerMeta?.filter_html_template;
         if (filterHtmlTemplate) {
             const dict = {filters: this.state.editorFilters[0]};
-            html = mustache.render(filterHtmlTemplate, dict);
+            html = Handlebars.compile(filterHtmlTemplate)(dict);
             if (html) {
                 jsx = (<div dangerouslySetInnerHTML={{__html: html}}></div>)
             }
