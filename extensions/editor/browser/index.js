@@ -304,6 +304,29 @@ module.exports = {
     },
 
     /**
+     * 
+     * @param  jsonFields 
+     * @param  fieldConf 
+     * @returns   sorted jsonFields, so they matches sort_id in gc2 
+     */ 
+    sortByConf: function(jsonFields, fieldConf) {
+  
+        for (const [key, value] of Object.entries(fieldConf)) {
+          jsonFields[key].sort_id = value.sort_id;
+        }
+        const arr = Object.entries(jsonFields).map(([key, value]) => ({ key, ...value }));
+        arr.sort((a, b) => a.sort_id - b.sort_id);
+
+        const result = arr.reduce((acc, curr) => {
+          const { key, ...rest } = curr;
+          delete rest["sort_id"];
+          acc[key] = rest;
+          return acc;
+        }, {});
+        return result;
+    },
+
+    /**
      * Create the attribute form
      * @param fields
      * @param fieldConf
@@ -315,7 +338,7 @@ module.exports = {
         let required = [];
         let properties = {};
         let uiSchema = {};
-
+        fields = this.sortByConf (fields,fieldConf );
         Object.keys(fields).map(function (key) {
             if (key !== pkey && key !== f_geometry_column && (key.indexOf(SYSTEM_FIELD_PREFIX) !== 0 && !fieldConf[key]?.filter)) {
                 let title = key;
