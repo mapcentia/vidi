@@ -96,7 +96,7 @@ module.exports = {
         "Search places": "Søg på steder",
         "Activate advanced query": "Aktivér avanceret forespørgsel",
         "Help text overlays": "Slå overlejringslag til og fra. Viste lag vil være spørgbare.",
-        "Help text baselayers": "Vælg baggrundskort. Det er muligt at sammenligne to baggrundskort. Her kan man vælge om de to baggrundskort skal vises ved siden af hinanden eller om de skal lægges ovenpå hinanden. Ved førstnævnte kan man \\'swipe\\' mellem de to kort og ved sidstnævnte kan man ændre det øverste korts gennemsigtighed.",
+        "Help text baselayers": "Vælg baggrundskort. Det er muligt at sammenligne to baggrundskort. Her kan man vælge om de to baggrundskort skal vises ved siden af hinanden eller om de skal lægges ovenpå hinanden. Ved førstnævnte kan man \\'slide\\' mellem de to kort og ved sidstnævnte kan man ændre det øverste korts gennemsigtighed.",
         "Help text legend": "Signatur for tændte overlejringskort",
         "Help text draw": "Tegn dit eget kort. Brug markører, linjer, flader, firkanter og cirkler. Under \\'Standard stilart for tegninger\\' kan du sætte farve, linjetyper, pilehoveder mm. Alle nye tegninger får disse indstillinger. Klik på en allerede tegnet figur for at tilføje standardindstillingerne.",
         "Help text print": "Lav skaleret PDF kort. Juster den orange firkant i kortet for at sætte udsnittets omfang og skala.",
@@ -244,7 +244,7 @@ module.exports = {
         // Base layers
         "Side-by-side mode": "Dobbelt baggrundskort",
         "Display two layers at once": "Vis to baggrundskort på en gang",
-        "Side-by-side": "Swipe",
+        "Side-by-side": "Slider",
         "Overlap": "Overlap",
         "Display layers": "Vis baggrundskort som",
         "The selected map has no content in the current map extent": "Det valgte kort har intet indhold i det aktuelle kortudsnit",

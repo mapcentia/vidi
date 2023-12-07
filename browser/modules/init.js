@@ -79,6 +79,11 @@ module.exports = {
             forceOffCanvasInfo: false,
             showOffcanvas: false,
             expandFirstInLayerTree: false,
+            advancedBaseLayerSwitcher: {
+                mode: 2,
+                default: 1,
+                active: false
+            }
         };
         // Set session from URL
         if (typeof urlVars.session === "string") {

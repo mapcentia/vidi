@@ -10,10 +10,7 @@ const MODULE_NAME = `baseLayer`;
 
 import {LAYER} from './layerTree/constants';
 import layerTreeUtils from './layerTree/utils';
-import {
-    polygon,
-    booleanIntersects
-} from '@turf/turf'
+import {booleanIntersects, polygon} from '@turf/turf'
 
 /**
  * @type {*|exports|module.exports}
@@ -44,7 +41,11 @@ const TWO_LAYERS_AT_ONCE_MODES = [`side-by-side`, `overlay`];
 
 const OVERLAY_OPACITY_RANGE = [10, 90];
 
-let currentTwoLayersAtOnceMode = TWO_LAYERS_AT_ONCE_MODES[0];
+const mode =  window.vidiConfig?.advancedBaseLayerSwitcher?.mode ? window.vidiConfig.advancedBaseLayerSwitcher.mode : 3;
+const active = window.vidiConfig?.advancedBaseLayerSwitcher?.active;
+const defaultMode = mode === 1 ? 1 : mode === 2 ? 2 : window.vidiConfig?.advancedBaseLayerSwitcher?.default ? window.vidiConfig.advancedBaseLayerSwitcher.default : 1
+
+let currentTwoLayersAtOnceMode = TWO_LAYERS_AT_ONCE_MODES[defaultMode - 1];
 
 let bindEvent;
 let bounds;
@@ -115,9 +116,7 @@ module.exports = module.exports = {
 
         if (typeof window.setBaseLayers !== 'object') {
             window.setBaseLayers = [
-                {"id": "mapQuestOSM", "name": "MapQuset OSM"},
-                {"id": "osm", "name": "OSM"},
-                {"id": "stamenToner", "name": "Stamen toner"}
+                {"id": "osm", "name": "OSM"}
             ];
         }
 
@@ -161,11 +160,14 @@ module.exports = module.exports = {
             _self.getSideBySideModeStatus().then(lastState => {
                 if (validateModuleState(lastState)) {
                     _self.toggleSideBySideControl(lastState);
+                } else if (active) {
+                    $(`.js-two-layers-at-once-control`).trigger(`click`);
                 }
-            });
-        });
+            })
+        })
 
         state.listen(MODULE_NAME, `side-by-side-mode-change`);
+
     },
 
     getAvailableBaseLayers: () => {
@@ -246,9 +248,9 @@ module.exports = module.exports = {
     },
 
     drawBaseLayersControl: () => {
-        let result = new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             // Resetting the side-by-side mode
-            currentTwoLayersAtOnceMode = TWO_LAYERS_AT_ONCE_MODES[0];
+            currentTwoLayersAtOnceMode = TWO_LAYERS_AT_ONCE_MODES[defaultMode - 1];
 
             // Delete current layers
             $(`.js-base-layer-control`).remove();
@@ -395,15 +397,17 @@ module.exports = module.exports = {
                         throw new Error(`Invalid two layers at once mode value (${currentTwoLayersAtOnceMode})`);
                     }
 
-                    const twoLayersAtOnceModeControl = (`<div class="js-two-layers-at-once-mode-control-container">
-                        <div class="btn-group mb-3 d-flex">
-                            <input type="radio" class="btn-check" name="two-layers-at-once-mode" id="two-layers-at-once-mode-1" ${selectedSideBySide} value="${TWO_LAYERS_AT_ONCE_MODES[0]}" >
+                    const twoLayersAtOnceModeControl = (`
+                    <div class="js-two-layers-at-once-mode-control-container">
+                        <div class="btn-group mb-3 d-flex ${mode !== 3 ? "d-none" : ""}">
+                            <input type="radio" class="btn-check" name="two-layers-at-once-mode" id="two-layers-at-once-mode-1" ${selectedSideBySide} value="${TWO_LAYERS_AT_ONCE_MODES[0]}">
                             <label class="btn btn-sm btn-outline-secondary" for="two-layers-at-once-mode-1">${__(`Side-by-side`)}</label>
                             <input type="radio" class="btn-check" name="two-layers-at-once-mode" id="two-layers-at-once-mode-2" ${selectedOverlay} value="${TWO_LAYERS_AT_ONCE_MODES[1]}">
                             <label class="btn btn-sm btn-outline-secondary" for="two-layers-at-once-mode-2">${__(`Overlap`)}</label>
                         </div>
-                        <div class="js-side-by-side-layer-opacity-slider mb-3"></div>
-                    </div>`);
+                        <div class="js-side-by-side-layer-opacity-slider mb-3 ${(mode !== 2 && mode !== 3) ? "d-none" : ""}"></div>
+                    </div>
+                    `);
 
                     const initiateSlider = (initialValue) => {
                         if (!(initialValue >= 10 && initialValue <= 90)) {
@@ -480,8 +484,6 @@ module.exports = module.exports = {
                 resolve();
             });
         });
-
-        return result;
     },
 
     /**
@@ -626,7 +628,7 @@ module.exports = module.exports = {
         return result;
     },
 
-    setBunds: function (arr) {
+    setBounds: function (arr) {
         if (arr) {
             bounds = polygon(arr);
         } else {

@@ -52,9 +52,9 @@ module.exports = module.exports = {
         $.each(window.setBaseLayers, function (i, v) {
                 if (v.id === str) {
                     if (v?.bounds?.length > 0) {
-                        baseLayer.setBunds(v.bounds);
+                        baseLayer.setBounds(v.bounds);
                     } else {
-                        baseLayer.setBunds(null);
+                        baseLayer.setBounds(null);
                     }
                 }
         })

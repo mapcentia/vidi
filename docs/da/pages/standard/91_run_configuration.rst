@@ -439,11 +439,32 @@ Load eksterne CSS filer. Filerne skal placeres på en HTTP server, som forbindes
 dontUseAdvancedBaseLayerSwitcher
 *****************************************************************
 
-Deaktiver dobbeltgrundskort funktionen.
+Deaktiver dobbelt baggrundskort funktionen.
 
 .. code-block:: json
 
     "dontUseAdvancedBaseLayerSwitcher": true
+
+.. _configjs_advancedbaselayerswitcher
+
+advancedBaseLayerSwitcher
+*****************************************************************
+
+Opsætning af dobbelt baggrundskort funktionen.
+
+- ``mode`` bestemmer om kun Slider ``1`` eller kun Overlap ``2`` eller begge ``3`` skal være tilgængelig. Default er ``3`` (begge).
+
+- ``default`` bestemmer om det er Silder ``1`` eller Overlap ``2``, der skal være aktiv fra starten. Default er ``1`` (Slider). Hvis ``mode`` er ``1`` eller ``2``, så er ``default`` ligegyldig.
+
+- ``active`` bestemmer om dobbelt baggrundskort funktionen skal være aktiv fra starten. Default er ``false``.
+
+.. code-block:: json
+
+    "advancedBaseLayerSwitcher": {
+        "mode": 3,
+        "default": 1,
+        "active": false,
+    }
 
 .. _configjs_infoclickcursorstyle:
 
