@@ -32,8 +32,7 @@ numfig = True
 # ones.
 extensions = [
   'm2r2',
-  'sphinx.ext.intersphinx',
-  'sphinx-rtd-theme'
+  'sphinx.ext.intersphinx'
   ]
 
 # Add any paths that contain templates here, relative to this directory.
