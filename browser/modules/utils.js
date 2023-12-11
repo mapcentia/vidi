@@ -196,4 +196,14 @@ module.exports = {
     isEmbedEnabled: () => {
         return $(`.embed.modal`).length > 1
     },
+
+    splitBase64(str) {
+        const parts = str.split(';');
+        const contentType = parts[0].split(':')[1];
+        const raw = parts[1].split(',')[1];
+        return {
+            contentType,
+            raw
+        };
+    }
 };

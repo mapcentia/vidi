@@ -276,7 +276,10 @@ module.exports = {
         "Required": "Required",
 
         // Editor - ImageUploadWidget
-        "Drop files here, or click to select files to upload": "Drop files here, or click to select files to upload",
+        "Drop file here, or click to select file to upload": "Drop file here, or click to select file to upload",
+        "The file type can't be shown but you can download it": "The file type can't be shown but you can download it",
+        "Download the file": "Download the file",
+        "File is too big! Maximum size is": "File is too big! Maximum size is",
 
         // OfflineMap
         "tiles failed to load": "tiles failed to load",

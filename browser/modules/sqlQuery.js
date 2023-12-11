@@ -8,7 +8,7 @@
 
 import mustache from "mustache";
 import {LAYER, MAP_RESOLUTIONS, SYSTEM_FIELD_PREFIX} from './layerTree/constants';
-import {GEOJSON_PRECISION} from './constants';
+import {GEOJSON_PRECISION, MIME_TYPES_APPS, MIME_TYPES_IMAGES} from './constants';
 
 const layerTreeUtils = require('./layerTree/utils');
 
@@ -422,7 +422,7 @@ module.exports = {
                             const e = featureInfoTableOnMap || forceOffCanvasInfo ? '#alternative-info-container' : '.main-content';
                             document.querySelector(ns).style.width = (document.querySelector(`${e}`).offsetWidth - 12) + "px";
                         } catch (e) {
-                           console.error(e.message)
+                            console.error(e.message)
                         }
                         let _table = gc2table.init({
                             el: ns + " table",
@@ -747,10 +747,10 @@ module.exports = {
                                         });
                                         value = Handlebars.compile(tmpl)(feature.properties[property.key]);
                                     } else {
-                                        let subValue = feature.properties[property.key];
+                                        let subValue = decodeURIComponent(feature.properties[property.key]);
                                         value =
                                             `<div style="cursor: pointer" onclick="window.open().document.body.innerHTML = '<img src=\\'${subValue}\\' />';">
-                                        <img style='width:250px' src='${subValue}'/>
+                                        <img class="w-100" src='${subValue}'/>
                                      </div>`;
                                     }
                                 }
@@ -765,6 +765,34 @@ module.exports = {
                                         <source src="${subValue}" type="video/ogg">
                                         <source src="${subValue}" type="video/webm">
                                     </video>`;
+                                }
+                            } else if (property.value.type === 'bytea' && feature.properties[property.key]) {
+                                let subValue = decodeURIComponent(feature.properties[property.key]);
+                                if (subValue) {
+                                    const type = utils.splitBase64(subValue).contentType;
+                                    if (MIME_TYPES_IMAGES.includes(type)) {
+                                        value =
+                                            `<div style="cursor: pointer" onclick="window.open().document.body.innerHTML = '<img src=\\'${subValue}\\' />';">
+                                        <img class="w-100" src='${subValue}'/>
+                                     </div>`;
+                                    } else if (MIME_TYPES_APPS.includes(type)) {
+                                        value = `<embed
+                                        src=${subValue}
+                                        type=${type}
+                                        width="100%"
+                                        height="200px"
+                                    />
+                                    <a download href=${subValue}>${__("Download the file")}</a>
+                                    `;
+                                    } else {
+                                        value = `
+                                        <div>
+                                            <div class="alert alert-warning" role="alert">
+                                            <i class="bi bi-exclamation-triangle-fill"></i> ${__("The file type can't be shown but you can download it") + ": <a download href=" + subValue + "/>" + type + ""}
+                                            </div>
+                                        </div>
+                                    `
+                                    }
                                 }
                             }
                             fields.push({title: property.value.alias || property.key, value});
@@ -847,7 +875,7 @@ module.exports = {
     getVectorTemplate: function (layerKey, multi = true) {
         let metaDataKeys = meta.getMetaDataKeys();
         let parsedMeta = layerTree.parseLayerMeta(metaDataKeys[layerKey]);
-        template = (parsedMeta.info_template && parsedMeta.info_template !== "") ? parsedMeta.info_template : window.vidiConfig?.crossMultiSelect ? defaultTemplateForCrossMultiSelect: defaultTemplate;
+        template = (parsedMeta.info_template && parsedMeta.info_template !== "") ? parsedMeta.info_template : window.vidiConfig?.crossMultiSelect ? defaultTemplateForCrossMultiSelect : defaultTemplate;
         if (window.vidiConfig.enabledExtensions.includes('editor')) {
             template = editToolsHtml + template;
         }

@@ -276,8 +276,11 @@ module.exports = {
         "Required": "Skal udfyldes",
 
         // Editor - ImageUploadWidget
-        "Drop files here, or click to select files to upload": "Slip filer her, eller klik for at vælge filer, der skal uploades",
-        
+        "Drop file here, or click to select file to upload": "Slip fil her, eller klik for at vælge fil, der skal uploades",
+        "The file type can't be shown but you can download it": "Filtypen kan ikke vises, men du kan downloade den",
+        "Download the file": "Download filen",
+        "File is too big! Maximum size is": "Fil er for stor! Maksimum størrelse er",
+
         // OfflineMap
         "tiles failed to load": "fliser mangler at indlæse",
         "OfflineMap block description": "Her kan specifikke kortområder opbevares for at blive brugt offline",

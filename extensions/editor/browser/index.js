@@ -56,7 +56,7 @@ let nonCommitedEditedFeature = false;
 
 let switchLayer;
 
-const ImageUploadWidget = require('./ImageUploadWidget');
+const ImageUploadWidget = require('./FileUploadWidget');
 
 const widgets = {'imageupload': ImageUploadWidget, 'time': TimeWidget};
 
