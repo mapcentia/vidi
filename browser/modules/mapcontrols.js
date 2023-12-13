@@ -188,8 +188,10 @@ module.exports = {
             embedModeIsEnabled = true;
         }
 
-        fullScreenMapControl = new FullScreenMapControl;
-        cloud.get().map.addControl(fullScreenMapControl);
+        if (document.documentElement.requestFullscreen) {
+            fullScreenMapControl = new FullScreenMapControl;
+            cloud.get().map.addControl(fullScreenMapControl);
+        }
 
         $('#mapcontrols-full-screen-map').on('click', function (e) {
             e.preventDefault();
