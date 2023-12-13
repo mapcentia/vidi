@@ -108,9 +108,8 @@ class FileUploadWidget extends React.Component {
                 el = (
                     <div>
                         <div className="alert alert-warning" role="alert">
-                            <i className="bi bi-exclamation-triangle-fill"></i> {__("The file type can't be shown but you can download it") + ": " + type}
+                            <i className="bi bi-exclamation-triangle-fill"></i> {__("The file type can't be shown but you can download it")}  : <a download href={this.state.loadedImageData}>{type}</a>
                         </div>
-                        <a download href={this.state.loadedImageData}>{__("Download the file")}</a>
                     </div>
                 )
             }
