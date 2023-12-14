@@ -151,12 +151,19 @@ module.exports = {
                 } else {
                     let results = conflictSearch.getResult();
                     let positiveHits = JSON.parse(JSON.stringify(results));
+                    let withErrors = [];
                     for (const property in results.hits) {
                         if (property && results.hits.hasOwnProperty(property)) {
+                            if (results.hits[property].error) {
+                                withErrors.push(results.hits[property].error);
+                            }
                             if (reportType === "2" && results.hits[property].hits === 0) {
                                 delete positiveHits.hits[property];
                             }
                         }
+                    }
+                    if (reportType === "2" && withErrors.length > 0) {
+                        alert(`Bemærk, at ${withErrors.length} lag meldte fejl. Disse vil ikke fremgå af valgte rapporttype. Vælge en anden type, hvis du ønsker, at fejl skal fremgå`)
                     }
                     let hits = positiveHits.hits
                     numOfHits = Object.keys(hits).length;
