@@ -624,6 +624,14 @@ module.exports = {
                                     let geom = handleGeometry(obj.geometri);
                                     //console.log(geom)
                                     delete obj.geometri;
+
+                                    // Loop through all the keys, and remove ' and "
+                                    for (const [key, value] of Object.entries(obj)) {
+                                        if (typeof value == 'string') {
+                                            obj[key] = value.replace(/['"]+/g, '')
+                                        }
+                                    }
+                                    
     
                                     //hack to geojson obj
                                     obj = {
