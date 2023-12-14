@@ -171,7 +171,15 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                 fieldStr = "*";
             }
 
-            const sql = "SELECT " + fieldStr + " FROM " + table + " WHERE  ST_intersects(" + geomField + ", ST_Transform(ST_geomfromtext('" + wkt + "',4326)," + srid + "))";
+            let quotedTableName;
+            const split = table.split('.');
+            if (split.length > 1) {
+                quotedTableName = `"${split[0]}"."${split[1]}"`;
+            } else {
+                quotedTableName = `"${table}"`;
+            }
+
+            const sql = "SELECT " + fieldStr + " FROM " + quotedTableName + " WHERE  ST_intersects(" + geomField + ", ST_Transform(ST_geomfromtext('" + wkt + "',4326)," + srid + "))";
             const queryables = JSON.parse(metaDataKeys[table].fieldconf);
             let postData = "client_encoding=UTF8&srs=4326&lifetime=0&q=" + sql + "&key=" + "&key=" + (typeof req.session.gc2ApiKey !== "undefined" ? req.session.gc2ApiKey : "xxxxx" /*Dummy key is sent to prevent start of session*/),
                 options = {
