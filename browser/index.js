@@ -143,6 +143,7 @@ window.Vidi = function () {
         utils: require('./modules/utils'),
         //loading: require('./modules/loading'),
         reset: require('./modules/reset'),
+        configSwitcher: require('./modules/configSwitcher'),
         extensions: {},
         search: {}
     };
@@ -178,6 +179,7 @@ window.Vidi = function () {
     modules.utils.set(modules);
     //modules.loading.set(modules);
     modules.reset.set(modules);
+    modules.configSwitcher.set(modules);
 
     // Return the init module to be called in index.html
     // =================================================

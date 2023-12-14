@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2019 MapCentia ApS
+ * @copyright  2013-2023 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -97,6 +97,42 @@ module.exports = {
         for (let prop in defaults) {
             window.vidiConfig[prop] = typeof window.vidiConfig[prop] !== 'undefined' ? window.vidiConfig[prop] : defaults[prop];
         }
+
+        // Set manifest
+        const hostname = urlparser.hostname;
+        const db = urlparser.db;
+        let manifest ={
+            "name": `${db} Vidi`,
+            "short_name": `${db} Vidi`,
+            "start_url": `${hostname}/app/${db}/`,
+            "display": "standalone",
+            "description": "A platform for building spatial data infrastructure and deploying browser based GIS",
+            "icons": [
+                {
+                    "src": `${hostname}/images/android-chrome-192x192.png`,
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": `${hostname}/images/android-chrome-384x384.png`,
+                    "sizes": "384x384",
+                    "type": "image/png"
+                },
+                {
+                    "src": `${hostname}/images/android-chrome-512x512.png`,
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ],
+            "theme_color": "#ffffff",
+            "background_color": "#ffffff"
+        }
+        const link = document.createElement("link");
+        link.rel = "manifest";
+        const stringManifest = JSON.stringify(manifest);
+        link.setAttribute('href', 'data:application/json;charset=utf-8,' + encodeURIComponent(stringManifest))
+        document.head.appendChild(link);
+
         (function poll() {
             if (typeof L.control.locate !== "undefined") {
                 let loadConfig = function () {
@@ -356,10 +392,15 @@ module.exports = {
 
         // Calling mandatory init method
         [`anchor`, `backboneEvents`, `socketId`, `bindEvent`, `baseLayer`, `infoClick`,
-            `advancedInfo`, `draw`, `measurements`, `mapcontrols`, `stateSnapshots`, `print`, `layerTree`, `reset`].map(name => {
+            `advancedInfo`, `draw`, `measurements`, `mapcontrols`, `stateSnapshots`, `print`, `layerTree`, `reset`, `configSwitcher`].map(name => {
             modules[name].init();
         });
 
+
+        if ((!window.vidiConfig.schemata || window.vidiConfig.schemata.length === 0) && (!schema || schema.length === 0)) {
+            modules.configSwitcher.activate();
+            return;
+        }
         const initExtensions = () => {
             try {
 
@@ -563,6 +604,7 @@ module.exports = {
                         if (semver.valid(window.vidiConfig.appVersion) !== null && semver.valid(versionValue) !== null) {
                             if (semver.gt(window.vidiConfig.appVersion, versionValue) ||
                                 (window.vidiConfig.appVersion === versionValue && window.vidiConfig.appExtensionsBuild !== extensionsBuildValue)) {
+                                alert();
                                 utils.showInfoToast(`Updating application to the newest version (current: ${versionValue}, extensions: ${extensionsBuildValue}, latest: ${window.vidiConfig.appVersion}, extensions: ${window.vidiConfig.appExtensionsBuild})?`)
                                 setTimeout(function () {
                                     let unregisteringRequests = [];

@@ -1,9 +1,8 @@
-
 import React from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 
-import LoadingOverlay from './../../../../browser/modules/shared/LoadingOverlay';
+import LoadingOverlay from './../../shared/LoadingOverlay';
 
 /**
  * Interface for applying application configurations
@@ -12,14 +11,13 @@ class ConfigSwitcher extends React.Component {
     constructor(props) {
         super(props);
 
-        const gc2host = (vidiConfig.gc2 && vidiConfig.gc2.host ? vidiConfig.gc2.host : false);
         if (!gc2host) throw new Error(`Unable to detect GC2 host to pull configurations from`);
 
         const appDatabase = (vidiConfig.appDatabase ? vidiConfig.appDatabase : false);
         if (!appDatabase) throw new Error(`Unable to detect database`);
 
         this.state = {
-            configSourceURL: `${gc2host}/api/v2/configuration/${appDatabase}`,
+            configSourceURL: `/api/v2/configuration/${appDatabase}`,
             loading: false,
             configurations: []
         };
@@ -31,7 +29,8 @@ class ConfigSwitcher extends React.Component {
 
     updateConfigurationsList() {
         this.setState({loading: true});
-        axios.get(`/api/requestProxy?request=${encodeURIComponent(this.state.configSourceURL)}`).then(response => {
+        const gc2host = (vidiConfig.gc2 && vidiConfig.gc2.host ? vidiConfig.gc2.host : false);
+        axios.get(`/api/requestProxy?request=${encodeURIComponent(gc2host + this.state.configSourceURL)}`).then(response => {
             let configurations = [];
             if (`data` in response.data && Array.isArray(response.data.data)) {
                 configurations = response.data.data;
@@ -59,7 +58,7 @@ class ConfigSwitcher extends React.Component {
         document.location.href = changedUrl;
     }
 
-    copyToClipboard (str) {
+    copyToClipboard(str) {
         const el = document.createElement('textarea');
         el.value = str;
         document.body.appendChild(el);
@@ -70,7 +69,7 @@ class ConfigSwitcher extends React.Component {
 
     /**
      *
-     * @returns {XML}
+     * @returns {React.JSX.Element}
      */
     render() {
         let overlay = false;
@@ -80,7 +79,7 @@ class ConfigSwitcher extends React.Component {
 
         let refreshButton = (<button
             type="button"
-            className="btn btn-primary btn-sm"
+            className="btn btn-outline-secondary btn-sm"
             style={{margin: `0px`}}
             onClick={this.updateConfigurationsList.bind(this)}>{__(`Refresh`)}</button>);
 
@@ -90,42 +89,34 @@ class ConfigSwitcher extends React.Component {
             this.state.configurations.map((item, index) => {
                 let parsedValue = JSON.parse(item.value);
                 let url = `${this.state.configSourceURL}/${item.key}.json`;
-                configurationControlItems.push(<div key={`configuration_${index}`} className="list-group-item">
-                    <div style={{display: `flex`}}>
-                        <div>{parsedValue.published === false ? (<i className="material-icons" title={__(`Configuration is not published yet`)}>lock</i>) : false}</div>
-                        <div style={{flexGrow: `1`}}>{parsedValue.name} {parsedValue.description ? `(${parsedValue.description})` : ``}</div>
-                        <div>
-                            <button
-                                type="button"
-                                className="btn btn-primary btn-sm"
-                                style={{margin: `0px`}}
-                                onClick={() => { this.applyConfiguration(url); }}><i className="material-icons">play_circle_filled</i> {__(`Apply`)}</button>
-                        </div>
+                configurationControlItems.push(<li key={`configuration_${index}`} className="list-group-item">
+                    <div className="d-flex align-items-center">
+                        <div><b>{parsedValue.name}</b></div>
+                        {parsedValue.published === false ? (<i className="bi bi-lock"
+                                                               title={__(`Configuration is not published yet`)}></i>) : false}
+                        <div className="flex-grow-1 ms-3 me-3 ms-sm-4 me-sm-4">{parsedValue.description ? `${parsedValue.description}` : ``}</div>
+                        <button
+                            type="button"
+                            className="btn btn-primary"
+                            style={{margin: `0px`}}
+                            onClick={() => {
+                                this.applyConfiguration(url);
+                            }}><i className="bi bi-play"></i> <span className="d-none d-md-inline">{__(`Apply`)}</span></button>
                     </div>
-                    <div>
-                        <div className="input-group form-group">
-                            <a className="input-group-addon" style={{paddingLeft: `0px`, cursor: `pointer`}} onClick={ () => { this.copyToClipboard(url) }}>{__(`Copy`)}</a>
-                            <input className="form-control" type="text" defaultValue={url}/>
-                        </div>
-                    </div>
-                </div>);
+                </li>);
             });
 
             configurationControls = (<div>
-                <div style={{display: `flex`}}>
-                    <div style={{flexGrow: `1`}}>
-                        <p>{__(`Total configurations`)}: {this.state.configurations.length}</p>
-                    </div>
-                    <div>{refreshButton}</div>
+                <ul className="list-group">{configurationControlItems}</ul>
+                <div className="d-flex align-items-center mt-2">
+                    <div className="me-3">{__(`Total configurations`)}: {this.state.configurations.length}</div>
+                    <div className="">{refreshButton}</div>
                 </div>
-                <div>{configurationControlItems}</div>
             </div>);
         } else {
-            configurationControls = (<div style={{display: `flex`}}>
-                <div style={{flexGrow: `1`}}>
-                    <p>{__(`No configurations to display`)}</p>
-                </div>
-                <div>{refreshButton}</div>
+            configurationControls = (<div className="d-flex align-items-center mt-2">
+                <div className="me-3">{__(`No configurations to display`)}</div>
+                <div className="">{refreshButton}</div>
             </div>);
         }
 
@@ -133,7 +124,6 @@ class ConfigSwitcher extends React.Component {
             {overlay}
             <div>
                 <div>{configurationControls}</div>
-                <div style={{textAlign: `right`, paddingTop: `10px`}}>{__(`Configurations source`)}: <span style={{fontFamily: `Consolas`}}>{this.state.configSourceURL}</span></div>
             </div>
         </div>);
     }

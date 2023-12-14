@@ -350,11 +350,11 @@ module.exports = {
         "No layers available": "Ingen synlige lag",
 
         //ConfigSwitcher
-        "Configuration is not published yet": "# Configuration is not published yet",
-        "Total configurations": "# Total configurations",
-        "No configurations to display": "# No configurations to display",
-        "Configurations source": "# Configurations source",
-        "Config switcher": "# Config switcher",
+        "Configurations": "Konfigurationer",
+        "Configuration is not published yet": "Konfigurationen er ikke offentlig endnu",
+        "Total configurations": "Antal konfigurationer",
+        "No configurations to display": "Ingen konfigurationer",
+        "Config switcher": "Config switcher",
         "Config switcher block description": "# Config switcher block description",
 
         //WatsonC

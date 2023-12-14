@@ -350,6 +350,7 @@ module.exports = {
         "No layers available": "No layers available",
 
         //ConfigSwitcher
+        "Configurations": "Configurations",
         "Configuration is not published yet": "Configuration is not published yet",
         "Total configurations": "Total configurations",
         "No configurations to display": "No configurations to display",

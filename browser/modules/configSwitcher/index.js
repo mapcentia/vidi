@@ -17,6 +17,7 @@ import ConfigSwitcher from './components/ConfigSwitcher';
 var exId = "config-switcher";
 
 var switcherInstance = false;
+let setBaseLayer;
 
 /**
  *
@@ -51,7 +52,29 @@ module.exports = {
          */
         var ReactDOM = require(`react-dom`);
 
-        utils.createMainTab(exId, __(`Config switcher`), ``, require('./../../../browser/modules/height')().max, "settings");
+        // utils.createMainTab(exId, __(`Config switcher`), ``, require('./../../../browser/modules/height')().max, "settings");
+
+        const modalStr = `
+                    <div class="modal fade" id="config-switcher-modal" tabindex="-1" role="dialog">
+                        <div class="modal-dialog modal-fullscreen" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5">${__('Configurations')}</h1>
+                                    <button type="button" class="btn-close d-none" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body" id="${exId}">
+                                
+                                </div>
+                                <div class="-none modal-footer d-none">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">${__('Close')}</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+        `
+
+        document.querySelector('body').insertAdjacentHTML('beforeend', modalStr);
+
 
         if (document.getElementById(exId)) {
             try {
@@ -62,5 +85,9 @@ module.exports = {
         } else {
             console.warn(`Unable to find the container for config-switcher extension (element id: ${exId})`);
         }
+    },
+
+    activate: function () {
+        new bootstrap.Modal('#config-switcher-modal').show();
     }
 };
