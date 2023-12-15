@@ -27,9 +27,9 @@ module.exports = {
             }
         });
         if (withErrors.length > 0) {
-            const alertEl = document.getElementById('with-errors')
-            alertEl.classList.remove('d-none');
-            alertEl.querySelector('div').innerHTML = "<b>Følgende lag gav fejl</b> " + withErrors.join(' | ');
+            const alertEl = $('#with-errors')
+            alertEl.show();
+            alertEl.html( "<b>Følgende lag gav fejl</b> " + withErrors.join(' | '));
         }
         $("#conflict-text").html(e.text);
 
