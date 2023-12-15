@@ -19,25 +19,26 @@ module.exports = {
     render: function (e) {
         let table = $("#report table"), tr, dataTable, dataThead, dataTr, u, m, without = [], withErrors = [],
             groups = [];
-        $.each(e.hits, function (i, v) {
+
+        Object.keys(e.hits).forEach(function (key) {
+            let v = e.hits[key];
             if (v.hits === 0 && !v.error) {
-                without.push(v.title || i);
+                without.push(v.title || key);
             }
             if (v.error) {
-                withErrors.push(v.title || i)
+                withErrors.push(v.title || key);
             }
+            v.meta.layergroup = v.meta.layergroup != null ? v.meta.layergroup : "Ungrouped";
+            groups.push(v.meta.layergroup);
         });
+
         if (withErrors.length > 0) {
             const alertEl = document.getElementById('with-errors')
             alertEl.classList.remove('d-none');
             alertEl.querySelector('div').innerHTML = "<b>Følgende lag gav fejl</b> " + withErrors.join(' | ');
         }
-        $("#conflict-text").html(e.text);
 
-        $.each(e.hits, function (i, v) {
-            v.meta.layergroup = v.meta.layergroup != null ? v.meta.layergroup : "Ungrouped";
-            groups.push(v.meta.layergroup);
-        });
+        document.querySelector("#conflict-text").innerHTML = e.text;
 
         groups = array_unique(groups.reverse());
 
