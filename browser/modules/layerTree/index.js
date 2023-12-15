@@ -1526,7 +1526,24 @@ module.exports = {
         let parentFiltersHash = ``;
         let layerKey = layer.f_table_schema + '.' + layer.f_table_name;
         const layerSpecificQueryLimit = layerTreeUtils.getQueryLimit(meta.parseLayerMeta(layerKey));
-        let sql = `SELECT *
+        const metaDataKeys = meta.getMetaDataKeys();
+        let fields = metaDataKeys?.[layerKey]?.fields || null;
+        let fieldStr;
+        let fieldNames = [];
+        if (fields) {
+            Object.keys(fields).forEach(function(i) {
+                let v = fields[i];
+                if (v.type === 'bytea') {
+                    fieldNames.push(`encode("${i}",'escape') as "${i}"`);
+                } else if (fieldConf?.[i]?.ignore !== true) {
+                    fieldNames.push(`"${i}"`);
+                }
+            });
+            fieldStr = fieldNames.join(',');
+        } else {
+            fieldStr = '*';
+        }
+        let sql = `SELECT ${fieldStr}
                    FROM ${layerKey} LIMIT ${layerSpecificQueryLimit}`;
         if (isVirtual) {
             let storeWasFound = false;
