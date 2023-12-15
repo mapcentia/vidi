@@ -14,6 +14,7 @@ const urlparser = require('./../modules/urlparser');
 const urlVars = urlparser.urlVars;
 let backboneEvents;
 let utils;
+let intervalId;
 
 const semver = require('semver');
 const md5 = require('md5');
@@ -85,6 +86,7 @@ module.exports = {
                 active: false
             },
             title: "MapCentia Vidi",
+            autoUpdate: false,
         };
         // Set session from URL
         if (typeof urlVars.session === "string") {
@@ -101,7 +103,7 @@ module.exports = {
         // Set manifest
         const hostname = urlparser.hostname;
         const db = urlparser.db;
-        let manifest ={
+        let manifest = {
             "name": `${db} Vidi`,
             "short_name": `${db} Vidi`,
             "start_url": `${hostname}/app/${db}/`,
@@ -154,13 +156,13 @@ module.exports = {
                                 stop = true;
                                 loadConfig();
                             } else {
-                                me.getVersion();
+                                me.render();
                             }
                         } else {
-                            me.getVersion();
+                            me.render();
                         }
                     }).done(function () {
-                        me.getVersion();
+                        me.render();
                     });
                 };
 
@@ -175,7 +177,7 @@ module.exports = {
                 if (configFile) {
                     loadConfig();
                 } else {
-                    me.getVersion();
+                    me.render();
                 }
             } else {
                 console.log("polling...");
@@ -184,21 +186,6 @@ module.exports = {
                 }, 10)
             }
         }());
-    },
-
-    getVersion: function () {
-        let me = this;
-        $.getJSON(`/app/${urlparser.db}/public/version.json`, function (data) {
-            window.vidiConfig.appVersion = data.version;
-            window.vidiConfig.appExtensionsBuild = '0';
-            if (`extensionsBuild` in data) {
-                window.vidiConfig.appExtensionsBuild = data.extensionsBuild;
-            }
-        }).fail(function () {
-            console.error(`Unable to detect the current application version`);
-        }).always(function () {
-            me.render();
-        });
     },
 
 
@@ -588,73 +575,118 @@ module.exports = {
         } else {
             console.warn(`Service workers are not supported in this browser, some features may be unavailable`);
         }
-        if (window.localforage) {
-            localforage.getItem('appVersion').then(versionValue => {
-                localforage.getItem('appExtensionsBuild').then(extensionsBuildValue => {
-                    if (versionValue === null) {
-                        localforage.setItem('appVersion', window.vidiConfig.appVersion).then(() => {
-                            localforage.setItem('appExtensionsBuild', window.vidiConfig.appExtensionsBuild).then(() => {
-                                console.log(`Versioning: setting new application version (${window.vidiConfig.appVersion}, ${window.vidiConfig.appExtensionsBuild})`);
-                            });
-                        }).catch(error => {
-                            console.error(`Unable to store current application version`, error);
-                        });
-                    } else {
-                        // If two versions are correctly detected
-                        if (semver.valid(window.vidiConfig.appVersion) !== null && semver.valid(versionValue) !== null) {
-                            if (semver.gt(window.vidiConfig.appVersion, versionValue) ||
-                                (window.vidiConfig.appVersion === versionValue && window.vidiConfig.appExtensionsBuild !== extensionsBuildValue)) {
-                                alert();
-                                utils.showInfoToast(`Updating application to the newest version (current: ${versionValue}, extensions: ${extensionsBuildValue}, latest: ${window.vidiConfig.appVersion}, extensions: ${window.vidiConfig.appExtensionsBuild})?`)
-                                setTimeout(function () {
-                                    let unregisteringRequests = [];
-                                    // Unregister service worker
-                                    navigator.serviceWorker.getRegistrations().then((registrations) => {
-                                        for (let registration of registrations) {
-                                            console.log(`Versioning: unregistering service worker`, registration);
-                                            unregisteringRequests.push(registration.unregister());
-                                            registration.unregister();
-                                        }
-                                    });
-                                    Promise.all(unregisteringRequests).then(() => {
-                                        // Clear caches
-                                        caches.keys().then(function (names) {
-                                            for (let name of names) {
-                                                console.log(`Versioning: clearing cache`, name);
-                                                caches.delete(name);
-                                            }
-                                        });
-
-                                        // Remove current app version
-                                        localforage.removeItem('appVersion').then(() => {
-                                            location.reload();
-                                        });
-                                    });
-                                }, 3000);
-                            } else {
-                                console.info('Versioning: new application version is not available');
-                            }
-                        } else if (typeof value === "undefined" || semver.valid(value) === null) {
-                            console.warn(`Seems like current application version is invalid, resetting it`);
-                            localforage.setItem('appVersion', '1.0.0').then(() => {
-                            }).catch(() => {
-                                localforage.setItem('appExtensionsBuild', '0').then(() => {
-                                }).catch(error => {
-                                    console.error(`Unable to store current application version`, error);
-                                });
-                            });
-                        }
-                    }
-                });
-            }).catch(error => {
-                console.error(`Can't get item from localforage`, error);
-            });
-        } else {
-            console.error(`localforage is not available`);
-        }
         // Set crossMultiSelect to true if embed is enabled
         if (utils.isEmbedEnabled() && !window.vidiConfig?.featureInfoTableOnMap && !window.vidiConfig?.forceOffCanvasInfo) {
             window.vidiConfig.crossMultiSelect = true;
         }
-    }
+
+        if (!window.vidiConfig.autoUpdate && !utils.isPWA()) {
+            getVersion().then(() => checkVersion(true));
+        } else {
+            intervalId = setInterval(() => {
+                getVersion().then(() => checkVersion());
+            }, 3000);
+        }
+
+    },
 };
+
+const getVersion = function () {
+    return new Promise((resolve, reject) => {
+        fetch(`/app/${urlparser.db}/public/version.json?${new Date().getTime()}`)
+            .then(response => response.json())
+            .then(data => {
+                window.vidiConfig.appVersion = data.version;
+                window.vidiConfig.appExtensionsBuild = '0';
+                if (`extensionsBuild` in data) {
+                    window.vidiConfig.appExtensionsBuild = data.extensionsBuild;
+                    resolve();
+                }
+            })
+            .catch(() => {
+                console.error(`1 Unable to detect the current application version`);
+                reject();
+            });
+    })
+}
+
+const checkVersion = function (autoUpdate = false) {
+    if (window.localforage) {
+        localforage.getItem('appVersion').then(versionValue => {
+            localforage.getItem('appExtensionsBuild').then(extensionsBuildValue => {
+                if (versionValue === null) {
+                    localforage.setItem('appVersion', window.vidiConfig.appVersion).then(() => {
+                        localforage.setItem('appExtensionsBuild', window.vidiConfig.appExtensionsBuild).then(() => {
+                            console.log(`Versioning: setting new application version (${window.vidiConfig.appVersion}, ${window.vidiConfig.appExtensionsBuild})`);
+                        });
+                    }).catch(error => {
+                        console.error(`2 Unable to store current application version`, error);
+                    });
+                } else {
+                    // If two versions are correctly detected
+                    if (semver.valid(window.vidiConfig.appVersion) !== null && semver.valid(versionValue) !== null) {
+                        if (semver.gt(window.vidiConfig.appVersion, versionValue) ||
+                            (window.vidiConfig.appVersion === versionValue && window.vidiConfig.appExtensionsBuild !== extensionsBuildValue)) {
+                            if (autoUpdate) {
+                                setTimeout(() => updateApp(), 1000);
+                            } else {
+                                try {
+                                    const e = new bootstrap.Toast(document.getElementById('update-toast'), {
+                                        delay: 9000000,
+                                        autohide: false
+                                    });
+                                    e.show();
+                                    document.getElementById('update-app-btn').addEventListener('click', () => updateApp());
+                                } catch (err) {
+                                    console.log("Info toast could not be shown");
+                                }
+                            }
+                            clearInterval(intervalId);
+                        } else {
+                            console.info('Versioning: new application version is not available');
+                        }
+                    } else if (typeof value === "undefined" || semver.valid(value) === null) {
+                        console.warn(`Seems like current application version is invalid, resetting it`);
+                        localforage.setItem('appVersion', '1.0.0').then(() => {
+                        }).catch(() => {
+                            localforage.setItem('appExtensionsBuild', '0').then(() => {
+                            }).catch(error => {
+                                console.error(`Unable to store current application version`, error);
+                            });
+                        });
+                    }
+                }
+            });
+        }).catch(error => {
+            console.error(`Can't get item from localforage`, error);
+        });
+    } else {
+        console.error(`localforage is not available`);
+    }
+}
+
+const updateApp = function () {
+    let unregisteringRequests = [];
+    // Unregister service worker
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+        for (let registration of registrations) {
+            console.log(`Versioning: unregistering service worker`, registration);
+            unregisteringRequests.push(registration.unregister());
+            registration.unregister();
+        }
+    });
+    Promise.all(unregisteringRequests).then(() => {
+        // Clear caches
+        caches.keys().then(function (names) {
+            for (let name of names) {
+                console.log(`Versioning: clearing cache`, name);
+                caches.delete(name);
+            }
+        });
+
+        // Remove current app version
+        localforage.removeItem('appVersion').then(() => {
+            location.reload();
+        });
+    });
+}

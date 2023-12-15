@@ -138,7 +138,8 @@
             <button id="offcanvasLayerControlBtn"
                     class="btn btn-primary text-nowrap" type="button"
             >
-                <i class="bi bi-list d-md-none"></i><span class="d-none d-md-inline">Menu</span> <i class="bi bi-arrow-bar-right"></i><i class="bi bi-arrow-bar-left d-none"></i>
+                <i class="bi bi-list d-md-none"></i><span class="d-none d-md-inline">Menu</span> <i
+                    class="bi bi-arrow-bar-right"></i><i class="bi bi-arrow-bar-left d-none"></i>
 
             </button>
             <div class="input-group d-none justify-content-end me-2" id="edit-tool-group">
@@ -146,7 +147,8 @@
                 <button id="offcanvasEditBtn"
                         class="btn btn-secondary nav-edit-btn edit-attr-btn" type="button"
                 >
-                    <span class="d-none d-md-inline">Form</span> <i class="bi bi-arrow-bar-right"></i><i class="bi bi-arrow-bar-left d-none"></i>
+                    <span class="d-none d-md-inline">Form</span> <i class="bi bi-arrow-bar-right"></i><i
+                        class="bi bi-arrow-bar-left d-none"></i>
                 </button>
                 <button id="editStopBtn"
                         class="btn btn-danger nav-edit-btn" type="button"
@@ -177,7 +179,8 @@
             <div class="nav-item sign-in-btn d-none">
                 <button class="btn btn-primary" data-bs-toggle="modal"
                         data-bs-target="#login-modal">
-                    <i class="bi bi-person"></i><span class="gc2-session-btn-text d-none d-lg-inline"> {{Sign in}}</span>
+                    <i class="bi bi-person"></i><span class="gc2-session-btn-text d-none d-lg-inline"> {{Sign
+                        in}}</span>
                 </button>
             </div>
         </div>
@@ -220,7 +223,8 @@
                         </li>
 
                         <li role="presentation" class="nav-item">
-                            <a class="nav-link" data-bs-toggle="tab" href="#search-content" aria-controls="search-content"
+                            <a class="nav-link" data-bs-toggle="tab" href="#search-content"
+                               aria-controls="search-content"
                                data-module-title="{{Search}}" role="tab" data-toggle="tab">
                                 <i data-container="body" data-toggle="tooltip" data-placement="left"
                                    title="{{Search}}" class="bi bi-search"></i>
@@ -228,7 +232,8 @@
                         </li>
 
                         <li role="presentation" class="nav-item">
-                            <a class="nav-link" data-bs-toggle="tab" data-module-id="baseLayer" href="#baselayer-content"
+                            <a class="nav-link" data-bs-toggle="tab" data-module-id="baseLayer"
+                               href="#baselayer-content"
                                data-module-title="{{Baselayers}}" aria-controls="" role="tab" data-toggle="tab">
                                 <i data-container="body" data-toggle="tooltip" data-placement="left"
                                    title="{{Baselayers}}" class="bi bi-map"></i>
@@ -657,3 +662,17 @@
     </div>
 </div>
 
+<div class="toast-container position-fixed bottom-0 start-0 p-3" style="z-index: 999999999">
+    <div id="update-toast" class="toast" role="alert" aria-live="assertive"
+         aria-atomic="true">
+        <div class="toast-header">
+            <strong class="me-auto">New version available</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="d-flex">
+            <div class="toast-body">
+                <button class='btn btn-primary' id='update-app-btn'>Update</button>
+            </div>
+        </div>
+    </div>
+</div>

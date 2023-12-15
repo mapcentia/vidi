@@ -123,15 +123,15 @@ module.exports = {
 
     },
 
-    toggleFullScreen: function() {
+    toggleFullScreen: function () {
         let fullScreenMode = false;
         if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().then(()=>{
+            document.documentElement.requestFullscreen().then(() => {
                 fullScreenMode = true;
             });
         } else {
             if (document.exitFullscreen) {
-                document.exitFullscreen().then(()=>{
+                document.exitFullscreen().then(() => {
                     fullScreenMode = false;
                 });
             }
@@ -151,7 +151,7 @@ module.exports = {
             !isNaN(parseInt(arr[1])) &&
             !isNaN(parseInt(arr[2])) &&
             !isNaN(parseInt(arr[3]))
-        )   {
+        ) {
             return {
                 z: arr[1],
                 x: arr[2],
@@ -168,17 +168,17 @@ module.exports = {
             const e = new bootstrap.Toast(document.getElementById(elementId), options);
             e.show();
         } catch (e) {
-           console.log("Info toast could not be shown");
+            console.log("Info toast could not be shown");
         }
     },
 
     hideInfoToast: (elementId = "info-toast") => {
-       try {
-           const e = new bootstrap.Toast(document.getElementById(elementId));
-           e.hide();
-       } catch (e) {
-           console.log("Info toast could not be hidden");
-       }
+        try {
+            const e = new bootstrap.Toast(document.getElementById(elementId));
+            e.hide();
+        } catch (e) {
+            console.log("Info toast could not be hidden");
+        }
     },
 
     removeDuplicates: (inputArray) => {
@@ -205,5 +205,12 @@ module.exports = {
             contentType,
             raw
         };
+    },
+    isPWA() {
+        return window.navigator.standalone === true || // iOS PWA Standalone
+            document.referrer.includes('android-app://') || // Android Trusted Web App
+            ["fullscreen", "standalone", "minimal-ui"].some(
+                (displayMode) => window.matchMedia('(display-mode: ' + displayMode + ')').matches
+            ) // Chrome PWA (supporting fullscreen, standalone, minimal-ui)
     }
 };

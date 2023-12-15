@@ -55,7 +55,7 @@ module.exports = {
         // utils.createMainTab(exId, __(`Config switcher`), ``, require('./../../../browser/modules/height')().max, "settings");
 
         const modalStr = `
-                    <div class="modal fade" id="config-switcher-modal" tabindex="-1" role="dialog">
+                    <div class="modal" id="config-switcher-modal" tabindex="-1" role="dialog">
                         <div class="modal-dialog modal-fullscreen" role="document">
                             <div class="modal-content">
                                 <div class="modal-header">
