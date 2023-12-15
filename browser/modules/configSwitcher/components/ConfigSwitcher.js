@@ -78,10 +78,10 @@ class ConfigSwitcher extends React.Component {
         }
 
         let refreshButton = (<button
-            type="button"
-            className="btn btn-outline-secondary btn-sm"
-            style={{margin: `0px`}}
-            onClick={this.updateConfigurationsList.bind(this)}>{__(`Refresh`)}</button>);
+            type='button'
+            className='btn btn-outline-secondary btn-sm'
+            style={{margin: '0px'}}
+            onClick={this.updateConfigurationsList.bind(this)}>{__('Refresh')}</button>);
 
         let configurationControls = false;
         if (this.state.configurations && this.state.configurations.length > 0) {
