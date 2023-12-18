@@ -436,23 +436,33 @@ var gc2table = (function () {
             data = [];
             $.each(store.layer._layers, function (i, v) {
                 v.feature.properties._id = i;
-                // Clone layer properties to avoid changing the original layer
+                // Clone
                 let layerClone = jQuery.extend(true, {}, v.feature.properties);
                 $.each(layerClone, function (n, m) {
                     $.each(cm, function (j, k) {
-                        if (k.dataIndex === n && (layerClone[n] && layerClone[n] !== '')) {
-                            layerClone[n] = layerClone._vidi_content.fields[j].value
-
+                        if (k.dataIndex === n && (k?.template && k?.template !== '') && (layerClone[n] && layerClone[n] !== '')) {
+                            const fieldTmpl = k.template;
+                            const fieldHtml = mustache.render(fieldTmpl, layerClone);
+                            layerClone[n] = fieldHtml;
+                        } else if (k.dataIndex === n && (k?.link === true || typeof k?.link === "string") && (layerClone[n] && layerClone[n] !== '')) {
+                            layerClone[n] = "<a style='text-decoration: underline' target='_blank' rel='noopener' href='" + layerClone[n] + "'>" + (typeof k.link === "string" ? k.link : "Link") + "</a>";
+                        } else if (k.dataIndex === n && (k?.content === 'image' && (layerClone[n] && layerClone[n] !== ''))) {
+                            layerClone[n] = `<div style="cursor: pointer" onclick="window.open().document.body.innerHTML = '<img src=\\'${layerClone[n]}\\' />';">
+                                        <img style='width:25px' src='${layerClone[n]}'/>
+                                     </div>`
                         }
                     });
                 });
                 data.push(JSON.parse(JSON.stringify(layerClone)));
                 layerClone = null;
-            })
-            if (assignFeatureEventListenersOnDataLoad) {
-                assignEventListeners();
-            }
+
+                if (assignFeatureEventListenersOnDataLoad) {
+                    assignEventListeners();
+                }
+            });
+
             originalLayers = jQuery.extend(true, {}, store.layer._layers);
+
             if ($(el).is(':visible') || forceDataLoad) {
                 $(el).bootstrapTable("load", data);
             }
