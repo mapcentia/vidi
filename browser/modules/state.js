@@ -310,7 +310,7 @@ module.exports = {
                             scriptCharset: "utf-8",
                             success: function (response) {
                                 // Server replies have different structure
-                                if (`anchor` in response.data === false && `bounds` in response.data === false && `data` in response.data && response.data.data) {
+                                if (!(`anchor` in response.data) && !(`bounds` in response.data) && `data` in response.data && response.data.data) {
                                     if (`anchor` in response.data.data && `bounds` in response.data.data) {
                                         response.data = response.data.data;
                                     }
