@@ -90,18 +90,21 @@ class ConfigSwitcher extends React.Component {
                 let parsedValue = JSON.parse(item.value);
                 let url = `${this.state.configSourceURL}/${item.key}.json`;
                 configurationControlItems.push(<li key={`configuration_${index}`} className="list-group-item">
-                    <div className="d-flex align-items-center">
-                        <div><b>{parsedValue.name}</b></div>
-                        {parsedValue.published === false ? (<i className="bi bi-lock"
-                                                               title={__(`Configuration is not published yet`)}></i>) : false}
-                        <div className="flex-grow-1 ms-3 me-3 ms-sm-4 me-sm-4">{parsedValue.description ? `${parsedValue.description}` : ``}</div>
-                        <button
-                            type="button"
-                            className="btn btn-primary"
-                            style={{margin: `0px`}}
-                            onClick={() => {
-                                this.applyConfiguration(url);
-                            }}><i className="bi bi-play"></i> <span className="d-none d-md-inline">{__(`Apply`)}</span></button>
+                        <div className="row">
+                            <div className="col-2 d-flex align-items-start"><b>{parsedValue.name}</b>
+                            {parsedValue.published === false ? (<i className="bi bi-lock"
+                                                                   title={__(`Configuration is not published yet`)}></i>) : false}</div>
+                            <div className="col">{parsedValue.description ? `${parsedValue.description}` : ``}</div>
+                            <div className="col text-end">
+                                <button
+                                    type="button"
+                                    className="btn btn-primary"
+                                    style={{margin: `0px`}}
+                                    onClick={() => {
+                                        this.applyConfiguration(url);
+                                    }}><i className="bi bi-play"></i> <span
+                                    className="d-none d-md-inline">{__(`Apply`)}</span></button>
+                            </div>
                     </div>
                 </li>);
             });

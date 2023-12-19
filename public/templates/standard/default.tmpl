@@ -129,7 +129,7 @@
     </div>
 </div>
 
-<nav class="navbar navbar-expand-sm bg-light main-navbar">
+<nav class="navbar navbar-expand-sm bg-body-tertiary main-navbar">
     <div class="container-fluid">
         <a class="navbar-brand d-none d-md-inline">
             <span>{{brandName}}</span>
@@ -166,21 +166,20 @@
 
         <div class="collapse navbar-collapse justify-content-end flex-grow-0 pe-auto mt-2 mt-sm-0 gap-2"
              id="navbarSupportedContent">
-            <div class="nav-item about-btn">
-                <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#about-modal">
-                    <i class="bi bi-info-circle"></i> <span class="d-none d-lg-inline">{{About}}</span>
-                </button>
-            </div>
-            <div class="nav-item reset-btn">
-                <button class="btn btn-outline-secondary" id="btn-reset">
-                    <i class="bi bi-x-circle"></i> <span class="d-none d-lg-inline">{{Reset}}</span>
-                </button>
+            <div class="nav-item dropdown mb-2 mb-sm-0">
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-three-dots-vertical"></i>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#about-modal">{{About}}</a></li>
+                    <li><a class="dropdown-item" href="#" id="btn-reset">{{Reset}}</a></li>
+                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#config-switcher-modal">{{Configurations}}</a></li>
+                </ul>
             </div>
             <div class="nav-item sign-in-btn d-none">
                 <button class="btn btn-primary" data-bs-toggle="modal"
                         data-bs-target="#login-modal">
-                    <i class="bi bi-person"></i><span class="gc2-session-btn-text d-none d-lg-inline"> {{Sign
-                        in}}</span>
+                    <i class="bi bi-person"></i><span class="gc2-session-btn-text d-none d-lg-inline"> {{Sign in}}</span>
                 </button>
             </div>
         </div>
