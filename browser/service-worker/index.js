@@ -75,7 +75,7 @@ const urlSubstitution = [{
     local: '/js/nr-1071.min.js'
 }, {
     regExp: true,
-    requested: '/[\\w]*/[\\w]*/[\\w]*/#',
+    requested: '^/app/',
     local: '/index.html'
 }, {
     regExp: true,
@@ -124,7 +124,7 @@ let urlsIgnoredForCaching = [{
     requested: '/wms/'
 }, {
     regExp: true,
-    requested: '/api/v2'
+    requested: '/api/v2/(?!configuration)'
 }, {
     regExp: true,
     requested: '/mapcache/'
@@ -276,9 +276,9 @@ let cacheSettingsKeeper = new Keeper(`VIDI_CACHE_SETTINGS_KEY`, (key, value) => 
  */
 const normalizeTheURL = (URL) => {
     let cleanedRequestURL = URL;
-    if (URL.indexOf('_=') !== -1) {
+    // Use app URL without parameters
+    if (URL.includes('=') && URL.includes('/app/')) {
         cleanedRequestURL = URL.split("?")[0];
-
         if (LOG) console.log(`Service worker: URL was cleaned up: ${cleanedRequestURL} (${URL})`);
     }
 
@@ -286,19 +286,14 @@ const normalizeTheURL = (URL) => {
         if (item.regExp) {
             let re = new RegExp(item.requested);
             if (re.test(URL)) {
-
                 if (LOG) console.log(`Service worker: Requested the ${cleanedRequestURL} but fetching the ${item.local} (regular expression)`);
-
                 cleanedRequestURL = item.local;
             }
         } else if (item.requested.indexOf(cleanedRequestURL) === 0 || cleanedRequestURL.indexOf(item.requested) === 0) {
-
             if (LOG) console.log(`Service worker: Requested the ${cleanedRequestURL} but fetching the ${item.local} (normal string rule)`);
-
             cleanedRequestURL = item.local;
         }
     });
-
     return cleanedRequestURL;
 };
 
