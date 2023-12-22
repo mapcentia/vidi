@@ -121,3 +121,14 @@
 .leaflet-right .leaflet-control {
   margin-right: 0.75rem;
 }
+
+.baselayer-drawer-item-shadow {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  box-shadow: var(--bs-primary) 0 0 2px 3px inset;
+  border-radius: 0;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}

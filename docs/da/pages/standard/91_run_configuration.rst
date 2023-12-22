@@ -213,8 +213,6 @@ Opsætning af tilgængelige base layers kan ske på fire forskellige metoder:
 
     "baseLayers": [
         {"id": "osm", "name": "Open Street Map"},
-        {"id": "stamenToner", "name": "Stamen Toner"},
-        {"id": "stamenTonerLite", "name": "Stamen Toner Light"},
         {"id": "bingRoad", "name": "Bing Road"},
         {"id": "bingAerial", "name": "Bing Aerial"},
         {"id": "hereNormalDay", "name": "HERE Normal Day"},
@@ -227,6 +225,8 @@ Opsætning af tilgængelige base layers kan ske på fire forskellige metoder:
         {"id": "googleSatellite", "name": "Google Satellite"},
         {"id": "googleTerrain", "name": "Google Terrain"},
         {
+            "inDrawer": true,
+            "thumbnail": "https://mapcentia.github.io/vidi_configs_common/forvaltningskort.png",
             "type": "wms",
             "url": "https://services.kortforsyningen.dk/service?SERVICENAME=forvaltning2&token=abc123&",
             "layers": ["Basis_kort", "Navne_basis_kort", "Husnummer"],
@@ -263,6 +263,8 @@ Opsætning af tilgængelige base layers kan ske på fire forskellige metoder:
             }
         }
     ],
+
+De to egenskaber ``inDrawer`` og ``thumbnail`` anvendes til baggrundskort "skuffe" og toggle knap. Se mere på :ref:`configjs_baselayerdrawer`
 
 Til WMS baggrundskort fra Datafordeler og Dataforsyningen kan der anvendes en proxy, som til dels fixer et problem med Datafordeler og til dels kan forsyne kaldene med brugernavn/kodeord eller token, så disse ikke bliver eksponeret til Vidi brugerne.
 
@@ -596,6 +598,25 @@ Sæt titel på siden (den der vises på browser-fanen).
     Titlen bliver sat dynamisk efter Vidi er startet og derfor vil titlen under opstart et øjeblik være sat til standardteksten.
 
 
+.. _configjs_baselayerdrawer:
+
+baselayerDrawer
+*****************************************************************
+
+Anvend baggrundskort "skuffe" i stedet for toggle knappen. Skuffen kan indeholde et vilkårlig antal muligheder. Udvælgelsen af baggrundskort til skuffen og thumbnails/ skal opsættes i :ref:`configjs_baselayers`
+
+.. figure:: ../../../_media/baselayer-drawer.png
+    :align: center
+    :name: feature-info-table-on-map
+    :figclass: align-center
+|
+
+.. code-block:: json
+
+    "baselayerDrawer": true
+
+.. note::
+    Template ``default.tmpl`` viser hverken skuffe eller toggle knap. Anvendes på ``embed.tmpl`` og lign., som ikke har den store baggrundskortsvælger.
 .. rubric:: Fodnoter
 
 .. [#fragment] Et fragment er den del af en URL der kommer efter `#`.

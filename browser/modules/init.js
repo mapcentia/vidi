@@ -87,7 +87,8 @@ module.exports = {
             },
             title: "MapCentia Vidi",
             autoUpdate: false,
-            configSwitcher: true, // Use this only in build time configs
+            configSwitcher: true, // Use this only in build time configs,
+            baselayerDrawer: false,
         };
         // Set session from URL
         if (typeof urlVars.session === "string") {

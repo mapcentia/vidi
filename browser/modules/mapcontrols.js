@@ -1,6 +1,6 @@
 /*
  * @author     Alexander Shumilov
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2023 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -8,15 +8,9 @@
 
 const MODULE_NAME = `mapcontrols`;
 
-/**
- * @type {*|exports|module.exports}
- */
 let state, cloud, setting, backboneEvents;
-
-let clearMapControl, fullScreenMapControl, defaultMapExtentControl, baselayerToggleControl;
-
+let clearMapControl, fullScreenMapControl, defaultMapExtentControl, baselayerToggleControl, baselayerDrawerControl;
 let _self = false;
-
 let embedModeIsEnabled = false;
 let utils;
 let anchor;
@@ -124,10 +118,7 @@ let DefaultMapExtentControl = L.Control.extend({
     }
 });
 
-/**
- * Baselayer toggle
- */
-let BaselayerToggleOptions;
+let BaselayerToggleOptions, BaselayerDrawerOptions;
 
 /**
  *
@@ -154,11 +145,10 @@ module.exports = {
                 const baseLayers = window.vidiConfig.baseLayers;
                 toggledBaselayer = baseLayers.findIndex(x => x.id === currentBaseLayerId);
                 BaselayerToggleOptions = {
-
                     template: (`<a title="${window.vidiConfig.baseLayers?.[toggledBaselayer === 0 ? 1 : 0]?.name}}"
                         id="baselayer-toggle"
                         class="leaflet-bar-part leaflet-bar-part-single overflow-hidden">
-                        <img src="${window.vidiConfig.baseLayers?.[toggledBaselayer === 0 ? 1 : 0]?.thumbnail}"></a>`),
+                        <img alt="" src="${window.vidiConfig.baseLayers?.[toggledBaselayer === 0 ? 1 : 0]?.thumbnail}"></a>`),
                     onclick: (e) => {
                         e.target.src = window.vidiConfig.baseLayers?.[toggledBaselayer]?.thumbnail;
                         e.target.parentElement.title = window.vidiConfig.baseLayers?.[toggledBaselayer]?.name;
@@ -169,14 +159,69 @@ module.exports = {
                 let BaselayerToggleControl = L.Control.extend({
                     options: {position: 'topright'},
                     onAdd: () => {
-                        let container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom baselayer-toggle');
+                        let container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom baselayer-toggle baselayer-tool');
                         let el = $(container).append(BaselayerToggleOptions.template)[0];
                         L.DomEvent.disableClickPropagation(el);
                         el.onclick = BaselayerToggleOptions.onclick;
                         return container;
                     }
                 })
-                if (window.vidiConfig.template !== "default.tmpl") {
+
+                // Start of drawer
+                let BaselayerDrawerControl;
+                let drawerItems = [];
+                let template;
+                window.vidiConfig.baseLayers.forEach((v, i) => {
+                    if (v?.inDrawer) {
+                        drawerItems.push(`
+                            <a title="${v?.name}}" class="position-relative baselayer-drawer-item leaflet-bar-part leaflet-bar-part-single overflow-hidden d-flex">
+                            <img style="height: 30px; width: 30px" data-vidi-baselayer-id="${v.id}" data-vidi-baselayer-num="${i}" alt="" src="${v?.thumbnail}">
+                            <div class="${currentBaseLayerId !== v.id ? 'd-none' : ''} baselayer-drawer-item-shadow"></div>
+                            </a>
+                            `
+                        )
+                    }
+                })
+                template = `<div class="d-flex">
+                        <div class="baselayer-drawer-container d-flex d-none">${drawerItems.join('')}</div>
+                        <a title="${__('Base layer')}" class="leaflet-bar-part leaflet-bar-part-single baselayer-drawer">
+                            <span class="bi bi-map baselayer-drawer"></span> 
+                        </a>
+                    </div>`;
+                BaselayerDrawerOptions = {
+                    template: template,
+                    onclick: (e) => {
+                        const cl = document.querySelector('.baselayer-drawer-container').classList;
+                        if (e.target.classList.contains('baselayer-drawer')) {
+                            if (cl.contains('d-none')) {
+                                cl.remove('d-none')
+                            } else {
+                                cl.add('d-none');
+                            }
+                        } else {
+                            const el = e.target;
+                            const id = el.dataset.vidiBaselayerId;
+                            document.querySelectorAll('.baselayer-drawer-item-shadow').forEach(node => node.classList.add('d-none'))
+                            el.nextElementSibling.classList.remove('d-none')
+                            setBaseLayer.init(id);
+                        }
+                    }
+                };
+                BaselayerDrawerControl = L.Control.extend({
+                    options: {position: 'topright'},
+                    onAdd: () => {
+                        let container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom baselayer-drawer baselayer-tool');
+                        let el = $(container).append(BaselayerDrawerOptions.template)[0];
+                        L.DomEvent.disableClickPropagation(el);
+                        el.onclick = BaselayerDrawerOptions.onclick;
+                        return container;
+                    }
+                })
+
+                if (window.vidiConfig.baselayerDrawer) {
+                    baselayerDrawerControl = new BaselayerDrawerControl();
+                    cloud.get().map.addControl(baselayerDrawerControl);
+                } else {
                     baselayerToggleControl = new BaselayerToggleControl();
                     cloud.get().map.addControl(baselayerToggleControl);
                 }
@@ -223,14 +268,14 @@ module.exports = {
             }
         ).addTo(cloud.get().map);
         cloud.get().map.on("simpleMapScreenshoter.done", () => {
-            utils.showInfoToast(__("Screenshot is ready") ,{delay: 2000})
+            utils.showInfoToast(__("Screenshot is ready"), {delay: 2000, autohide: true})
         });
         cloud.get().map.on('simpleMapScreenshoter.error', () => {
             alert("Something went wrong");
             resetPrintBtn();
         });
 
-        const printBtnEl =document.querySelector(".leaflet-control-simpleMapScreenshoter a");
+        const printBtnEl = document.querySelector(".leaflet-control-simpleMapScreenshoter a");
         printBtnEl.title = __("Create a screenshot of the map. The screenshot is downloaded as a PNG file");
         const resetPrintBtn = () => printBtnEl.innerHTML = "<span class='bi bi-camera'></span>";
         resetPrintBtn();
@@ -260,7 +305,6 @@ module.exports = {
         zoomOut.innerHTML = "";
         zoomOut.classList.add("bi");
         zoomOut.classList.add("bi-dash");
-
     },
 
     /**
