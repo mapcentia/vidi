@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2024.1.0] - 2024-4-1
+### Fixed
+- Small fix to conflict.tmpl
+
 ## [2023.12.0] - 2023-15-12
 ### Added
 - Errors in conflict module will now be shown on reports.
