@@ -2564,10 +2564,9 @@ module.exports = {
         let creationTime = parseInt(item.key.split(`.`)[1].replace(`query`, ``));
         let date = new Date(+creationTime);
         // TODO this is a flaky way og getting the relation name
-        let layerNamesFromSQL = item.store.sql.substring(item.store.sql.indexOf(`" FROM`) + 6, item.store.sql.indexOf(`WHERE`)).trim();
-
+        let layerNamesFromSQL = item.store.sql.substring(item.store.sql.indexOf(`" FROM`) + 22, item.store.sql.indexOf(`WHERE`)).replaceAll('"', '').trim();
         // Find the corresponding layer
-        let correspondingLayer = meta.getMetaByKey(layerNamesFromSQL);
+        let correspondingLayer = meta.getMetaByKey(layerNamesFromSQL, false);
 
         // Creating simulated layer description object
         let simulatedMetaData = {
