@@ -1,0 +1,176 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2023, MapCentia
+# This file is distributed under the same license as the Vidi package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Vidi 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-01-09 12:54+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.12.1\n"
+
+#: ../../pages/standard/00_measure.rst:5 373a1ead2c674d1b851f910f81041dd4
+msgid "Måleværktøjer"
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:5 75c815a95ff2445b8802114a9f28a68e
+msgid "Overview"
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst ecb2fad5bb9e4fee88bb8449cfe45686
+msgid "Date"
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:9 36cde2952f7b4ba1a137b97f92ad3274
+msgid "|today|"
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst baeee76124aa4cc78c42e7e0a788195c
+msgid "Vidi-version"
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:10 c2855ef340ad48a28b78abc4c93f98e8
+msgid "2020.11.0"
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst 3e096064bcc2429b85bc6a449453dbc9
+msgid "Forfatter"
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:11 93c811f78a8043abb1498512fb028d9f
+msgid "`giovanniborella <https://github.com/giovanniborella>`_"
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:15 a50fd6bc85084cfaac2844029b2abc03
+msgid "Indhold"
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:19 f7d38fbede5849dfba46925cf68fe96a
+msgid "Måle-værktøjet"
+msgstr ""
+
+#: ../../_subs/NOTE_GETTINGSTARTED.rst:4 56ac85dc6741464fb11f2b4cbd0e3696
+msgid ""
+"Hvis du er i tvivl om de forskellige UI-elementer, :ref:`kan du se mere "
+"her <gettingstarted>`"
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:23 50811b2f05284eaea62ac212323e3f20
+msgid "Elementer vil også fremgå på PDF-print."
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:25 206f92864973488595aff431404cb0b6
+msgid ""
+"Måleværktøjet vil være tilgængeligt i toolbaren. For at aktivere; klik på"
+" \"linealen\""
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:33 875e38324ff74bd5ae0a5100d2ab7b8c
+msgid "Start værktøjet ved klikke på \"linealen\""
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:36
+#: ../../pages/standard/00_measure.rst:49 05e93762d602409c86a3946fa6bc3f73
+#: 41421c6bffd74db9aeffe45b8ed91351
+msgid "Mål"
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:38 ea77d6c208b244b2b4337a9bf1414f18
+msgid ""
+"Når værktøjet er tændt er det muligt at tegne elementer ind på kortet. "
+"Elementerne er bundet op på den geografiske placering, så de vil blive "
+"selv om man panorerer i kortet."
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:46 9c8ae04557de4a6f92e92c3b29894d33
+msgid "Værktøjet er tændt, og klar til at lave elementer."
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:51 5b5447883200473fa913cc01df8e1699
+msgid "For at måles, gøres følgende:"
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:57 bb26b67cefd14885a132f66db970a261
+msgid "Afstand:"
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:54 daac64a40c31406f838a5999f123969b
+msgid "Klik for at starte linje"
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:55
+#: ../../pages/standard/00_measure.rst:68 79ff739b718c45f8acd11cba9d2bdaaf
+#: f014947302824e548b6476f7457c07ac
+msgid "Tilføj mellempunkter"
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:56
+#: ../../pages/standard/00_measure.rst:69 5e290bb53253476989268a1d4841e779
+#: ea262a180b3647e1adc4766d5743993e
+msgid "(Slet sidste punkt ved at bruge ``Slet sidste punkt``)"
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:57 56cd327e8f214a3dae9c6fd99a377285
+msgid "Klik på ``Afslut``, eller klik på det sidst tilføjede mellempunkt."
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:70 79627ca6a2fb446db1288e364e9c0ffc
+msgid "Areal:"
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:67 6fd925b0a9a9443197e4e1189895a19e
+msgid "Klik for at starte flade"
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:70 40aba8d429d8488781c8760263062314
+msgid "Klik på det første punkt for at afslutte"
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:80 75ecbbb5703344bfa1f76586c6d0b12d
+msgid "Ændre elementer"
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:82 e3bfe28f96604552984877e1bdaf7791
+msgid ""
+"Når værktøjet aktiveres er det muligt at ændre knudepunkter mm. for de "
+"tegnede mål."
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:90 613a76b243574a21886eea872ce9f29f
+msgid "Ændre elementerne ved at klikke og trække knudepunkterne (Hvide kasser)"
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:92
+#: ../../pages/standard/00_measure.rst:101 2945414a6bf844a28c431211992dcad5
+#: b11680b12dd3416783609c490940050a
+msgid "Klik for ``Gem`` for at gemme, ``Fortryd`` for at annulere alle ændringer."
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:95 3c8c013b7b3a46baa62db5b5d5cc6fa4
+msgid "Slet mål"
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:97 9fc68e62a4584800a9c721cc51f99b1b
+msgid ""
+"Når værktøjet aktiveres er det muligt at fjerne mål enkeltvis, eller alle"
+" på én gang."
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:99 0a8fc35ab7f2435581e1c5163ab563b6
+msgid "Udvælg et mål der skal fjernes."
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:103 2e929f48a3854efa962f8a228e07d0de
+msgid "Klikker man på ``Slet alle`` kan handlingen ikke fortrydes"
+msgstr ""
+

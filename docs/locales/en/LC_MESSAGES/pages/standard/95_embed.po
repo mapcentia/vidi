@@ -1,0 +1,374 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2023, MapCentia
+# This file is distributed under the same license as the Vidi package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Vidi 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-01-09 12:54+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.12.1\n"
+
+#: ../../pages/standard/95_embed.rst:5 b5ebea3143e84a4a86188e6365cbe1ad
+msgid "Indlejring af Vidi på andre hjemmesider"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:5 ceb7dc70bf7540d7bca13ad99057c4d7
+msgid "Overview"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst 58d548b767eb494fbf7563e0ac18c927
+msgid "Date"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:9 d079aff198f547a1be9891d88c0143e7
+msgid "|today|"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst 7627077b707a4d4dae97329fcc1da002
+msgid "Vidi-version"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:10 5ca55d0e5591404a82bcd32b567794b2
+msgid "UNRELEASED"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst 7a0578e05de94f4cbed3e47d4691b962
+msgid "Forfattere"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:11 1d0163d3989b4db5a3aa3bacb28601e7
+msgid "`mapcentia <https://github.com/mapcentia>`_"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:14 b8bda767c5f648f6a4d40dfa2d6a740a
+msgid "Indhold"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:20 8de73507d3fb4b9bac45e81f05f5d1af
+msgid "Embed.js script"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:22 5ec45b7878ca4838808e28d847356673
+msgid ""
+"Vidi kan indlejres på en hjemmeside vha. embed.js scriptet. Dette script "
+"skal loades på hjemmesiden, hvor Vidi skal indlejres."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:24 28976541630c4649a4981249788e8bb9
+msgid ""
+"Scriptet skal ikke nødvendigvis hentes fra samme server, hvor Vidi "
+"findes. Man kan fx selv hoste scriptet eller placere det inline på sin "
+"hjemmeside."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:30 5f5822aa1baa4c05b1b8c5ce5d3ae5cd
+msgid "Scriptet kan både placeres i toppen og bunden af hjemmesiden."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:36 d81783d5c314451d8750c3942dcb6412
+msgid "Indlejring af Vidi"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:38 917cc27eccac4700b2b6ea256f771e27
+msgid ""
+"Indlejring af Vidi sker ved at placere et ``div`` element på hjemmeside, "
+"hvor Vidi ønskes placeret. En række ``data`` attributer styrer hvordan "
+"kortet vises."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:44 f1028fe08149481785e514d7375d2cba
+msgid "Der en række data attributer, som skal/kan sættes:"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:46 8490984e74574566989c486c2cb97785
+msgid "**data-vidi-token (obligatorisk)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:47 7a9d9175c76f4e59b9e3a7329b66e24b
+msgid ""
+"Projektets \"token\" som indeholder state-id, host, database mv. Skal "
+"angives. Læse mere om :ref:`project`"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:48 25f22bc30ee84d8da58259c8b66d3d91
+msgid "**data-vidi-width (valgfri)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:49 be407f25b53c4094b2251c97c558b8ac
+msgid "Bredde på kort. Standard 100%"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:50 69667bfbbe6a44989ef41af56ab0ed43
+msgid "**data-vidi-height (valgfri)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:51 dd1ce692eb9448b09fa729208db326ca
+msgid "Højde på kort. standard 100%"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:52 e87f4314aad24a65892cb0446fcc6ed0
+msgid "**data-vidi-tmpl (valgfri)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:53 5f61a9e71c7b47a7bb548dd8aec2faf6
+msgid ""
+"Hvilken template kortet skal bruge. Standard embed.tmpl, som er en "
+"template beregnet til indlejring."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:54 4ecb78f3b64c47d7a05a3a3b78a77585
+msgid "**data-vidi-use-config (valgfri)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:55 a8a8b1cb1057493db7372fe66f2eba32
+msgid ""
+"Kan sættes til \"true\" og derved bruges config'en fra token, hvis den "
+"indeholder en config."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:56 27496dd78c084f0390f3ebb382792a9d
+msgid "**data-vidi-use-schema (valgfri)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:57 c0937e823fdc4a29a4f2caa10cf3f736
+msgid ""
+"Kan sættes til \"true\" og derved bruges schemaet fra token, hvis den "
+"indeholder et schema."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:58 01a1dab13dcb413288cb6ced79f12f08
+msgid "**data-vidi-host (valgfri)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:59 f6c3126412894c9895ad701dc6707969
+msgid ""
+"Kan sættes til en host (fx \"https://example.com\") som bruges i stedet "
+"for host angivet i token."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:60 c9b956070223426da657973ced520f11
+msgid "**data-vidi-frame-name (valgfri)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:61 4d1cdbad5e564256b6ab5184e36bd082
+msgid ""
+"Navn på det indsatte kort. Dette er nødvendig hvis :ref:`embed_api` skal "
+"anvendes."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:62 05a8dcf8477f4ac68db92b315d91213e
+msgid "**data-vidi-no-tracking (valgfri)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:63 83072dd636604e53957b64bb5388d30d
+msgid ""
+"Kan sættes til \"true\" for at undgå at Vidi's tracking cookie bliver "
+"sat. Cookien anvendes bl.a til anonyme projekter og print, hvilket der "
+"typisk ikke er behov for på indlejrede kort."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:64 9856c3aec5d841279ab3a222801a5d25
+msgid "Følgende attributer styrer hvilke funktioner, der skal være synlige."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:66 43697567912f458f92345d033962896e
+msgid ""
+"Følgende funktioner er synlige, men kan sættes til \"none\" hvis "
+"funktionerne skal skjules:"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:68 fa5ce2e961f84fbd82134f8b41a8a0fe
+msgid "**data-vidi-search (valgfri)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:69 b7b05727cdd74157acac788c4cb6383d
+msgid "Søgeboksen."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:70 c2b7f0c82fe74d83894c55f8b87e8839
+msgid "**data-vidi-history (valgfri)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:71 20d0b92d2d11428e80e7c87b4d9efcc7
+msgid "Forrige/næste udsnit knapperne."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:72 d591c95e17a64106804ae0e629d8ccdd
+msgid "**data-vidi-legend (valgfri)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:73 0d8771960d384b749d056ac135478890
+msgid "Signatur-knappen."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:74 898a70c3d9a04d2cb69237406be3aca5
+msgid "**data-vidi-layer (valgfri)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:75 b568de18b32344aabdb55d9f90c66992
+msgid "Lag-knappen."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:76 93fb68ce3fda494dafaec24daf0bd256
+msgid "**data-vidi-background (valgfri)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:77 89ddca918543444197d9a636afb58536
+msgid "Baggrund-knappen."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:78 51f076a7ddbc4986b1c08e4723deb4d4
+msgid "**data-vidi-fullscreen (valgfri)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:79 0eefb0ea8c384a5198133283682bb39b
+msgid "Fuldskærms-knappen."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:80 b1995ee98ca4456395644a1e99682399
+msgid "**data-vidi-about (valgfri)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:81 4829a58275ea4a329e47863055f39a37
+msgid "Om-knappen."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:82 92ad820921b543d5b790acddbb12a07a
+msgid "**data-vidi-location (valgfri)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:83 ea581fd218444fc694a201cf8e5acb31
+msgid "Find-mig-knappen."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:84 cbe84588eb0b44cf9ae1c4e721a06cf6
+msgid "**data-vidi-signin (valgfri)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:85 e9f502d2fff744658cbb747259138f28
+msgid "Login-knappen."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:87 7885d57f4b9349c19a0404594de7a3f5
+msgid ""
+"Følgende funktioner er skjulte, men kan sættes til \"inline\" hvis "
+"funktionerne skal være synlige:"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:89 7a94143158134be0af2af73a11957ac7
+msgid "**data-vidi-measurement (valgfri)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:90 0e2d3ac8c4ac4af49ad2961cb329145b
+msgid "Måleværktøjet."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:91 df94e1b0339744c88bf10ea0137a6e26
+msgid "**data-vidi-boxzoom (valgfri)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:92 9725376422744f178a5c5bbb8fb3d094
+msgid "\"Elastik\"-zoom-knappen."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:93 4e938fe2f3bd49caa3de84e10fce0580
+msgid "**data-vidi-reset (valgfri)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:94 96068f202579470da574bf62d360dc3f
+msgid "Reset-knappen."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:95 c7c8411ae1bd4816aabb50bb2b4a06d7
+msgid "**data-vidi-clear (valgfri)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:96 be00ce98093d49b39166f1a1a764ed88
+msgid "Ryd-kort-knappen."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:97 71d33ebc1e654968b49c41da1684be48
+msgid "**data-vidi-screenshot (valgfri)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:98 0d3d93b382164d5c88bc265e9e8f5356
+msgid "Screenshot-knappen."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:106 ../../pages/standard/95_embed.rst:115
+#: 25b02457ed304a4f99db7d2849b730bd 465936f84b4346579049953d39a9dacd
+msgid "Embed API"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:108 17ef57b304504ea9a7b2f726ac86458e
+msgid ""
+"Embed scriptet udstiller et API, så det er muligt at ændre Vidi's "
+"tilstand og definere callback funtioner fra den hjemmeside det er "
+"indlejret på."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:110 ab5768ed0e7b4c1eb4bbf22030218394
+msgid "Pt. er der to funktioner udstillet gennem API'et:"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:1 6c323e508ed24a1796931ecbc2bf0f5c
+msgid "Funktion"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:1 a31ef6dbfec94181965b9d5a1e0a48bb
+msgid "Beskrivelse"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:1 2ded5cc5f6a94792ac027b7dd853cd55
+msgid "embedApi.switchLayer(<string> *layername*, <bool> *on*, <string> *frame*)"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:1 b6c66077f3ea48c99301ea93bf9a05eb
+msgid ""
+"Tænder/slukker et lag. :raw-html:`<br />`  :raw-html:`<br />` Fx "
+"``embedApi.switchLayer('planer.lokalplan', true, 'plankort')``"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:1 c14504f580bc463eafb4359432a62c6a
+msgid "embedApi.allOff(<string> *frame*)"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:1 9184359957f2488ebdd57025bcd7f4ad
+msgid ""
+"Slukker alle tændte lag :raw-html:`<br />`  :raw-html:`<br />` Fx "
+"``embedApi.allOff('plankort')``"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:121 18537d563e8f46b99c807da51ad17124
+msgid "**Callbacks**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:123 6bd4506c17f043f39f202d206d73aa86
+msgid ""
+"Det muligt at definere callback funktioner for 1) når Vidi er loaded og "
+"klar og 2) når aktive lag fra projektet er loaded [#readyOrder]_. "
+"Callbacks kan anvendes til at automatisk at kalde API metoder, efter Vidi"
+" og lag er færdig-loaded."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:125 dd0796a4b197415b9501ee2d3c002539
+msgid ""
+"Hvis et kort er indlejret med ``data-vidi-frame-name=\"kort1\"`` kan "
+"callbacks defineres på følgende måde:"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:139 cdaacdeacef247f0bd9ff019b585cecb
+msgid "Et projekts aktive lag loades først efter Vidi har meldt loaded og klar."
+msgstr ""
+

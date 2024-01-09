@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Vidi 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-09 09:31+0100\n"
+"POT-Creation-Date: 2024-01-09 13:11+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,45 +17,56 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #: ../../index.rst:3
+#: 7b79590f591740bf9f0eb6e4cdaca798
 msgid "Vidi brugerdokumentation"
 msgstr ""
 
 #: ../../index.rst:5
-msgid "Hvis du har brug for at komme i gang med klienten fra bunden af, er her et godt sted at starte."
+#: f861bb096a9247a6a94306c8a2187a55
+msgid "Hvis du har brug for at komme i gang med Vidi fra bunden af, er her et godt sted at starte."
 msgstr ""
 
 #: ../../index.rst:15
+#: d214725100ef4fbc8e87997cea050bd9
 msgid "Standardværktøjer"
 msgstr ""
 
 #: ../../index.rst:17
+#: 5786928200f14da98af8728e4ebefeaf
 msgid "Vidi indeholder en del værktøjer som altid er slået til. Disse  værktøjer er lavet til at at gøre arbejdet nemmere. Du kan læse mere om de enkelse værktøjer herunder."
 msgstr ""
 
 #: ../../index.rst:27
+#: 85843853d0f74a2cb82940cc6112ff82
 msgid "Extensions"
 msgstr ""
 
 #: ../../index.rst:29
+#: fd2e3a33444540eaa30c8892ff1f8ab2
 msgid "Ud over standardværktøjerne, er der udviddet funktionalitet som du kan læse mere om herunder."
 msgstr ""
 
 #: ../../_subs/GIT.rst:4
+#: 91000e4b85574d9c9f7f3148988b3d19
 msgid "Mere om Vidi-projektet"
 msgstr ""
 
 #: ../../_subs/GIT.rst:6
+#: 9f9561f74ed84d44ac45b44093b4528b
 msgid "Her er links til mere generel information"
 msgstr ""
 
 #: ../../_subs/GIT.rst:8
+#: 42e76506b7fd4dffa513cc1e073ecda4
 msgid ":ref:`README`"
 msgstr ""
 
 #: ../../_subs/GIT.rst:9
+#: 48622b4105a743918f603ae07427e001
 msgid ":ref:`CHANGELOG`"
 msgstr ""
 
 #: ../../_subs/GIT.rst:10
+#: a08536a7942d4527996e48f3de91c049
 msgid ":ref:`CONTRIBUTING`"
 msgstr ""

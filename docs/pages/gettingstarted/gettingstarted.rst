@@ -5,7 +5,7 @@
   <abbr title="MapCentia Geocloud2">GC2</abbr>
 
 *****************************************************************
-Kom godt i gang med Vidi-klienten
+Kom godt i gang med Vidi
 *****************************************************************
 
 .. topic:: Overview

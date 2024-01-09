@@ -1,0 +1,73 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2023, MapCentia
+# This file is distributed under the same license as the Vidi package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Vidi 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-01-09 12:54+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.12.1\n"
+
+#: ../../pages/extensions/extensions.rst:9 afd2d09db1034da981e8c4bb21786b82
+msgid "Extensions"
+msgstr ""
+
+#: ../../pages/extensions/extensions.rst:9 c02e957d01be4b1aa883749338b70e4e
+msgid "Overview"
+msgstr ""
+
+#: ../../pages/extensions/extensions.rst 0b367b1e860e4ca883cc0f31eb52a646
+msgid "Date"
+msgstr ""
+
+#: ../../pages/extensions/extensions.rst:13 dc093f1b8f7e44049168f29f167faae6
+msgid "|today|"
+msgstr ""
+
+#: ../../pages/extensions/extensions.rst 94c86ccd870740f19eb09a490d95659b
+msgid "Vidi-version"
+msgstr ""
+
+#: ../../pages/extensions/extensions.rst:14 7d6b5cd3b31044898f4bd274f1c5015a
+msgid "UNRELEASED"
+msgstr ""
+
+#: ../../pages/extensions/extensions.rst e138496c4de84c44b1566d5a115310f5
+msgid "Forfattere"
+msgstr ""
+
+#: ../../pages/extensions/extensions.rst:15 31ec90787d99400c9c0e65f7139b6326
+msgid "`mapcentia <https://github.com/mapcentia>`_"
+msgstr ""
+
+#: ../../pages/extensions/extensions.rst:18 e0d637bc98e34c15a8e21072c56b166e
+msgid "Indhold"
+msgstr ""
+
+#: ../../pages/extensions/extensions.rst:23 1280315369204079adc268c82f6fa04b
+msgid "Editering"
+msgstr ""
+
+#: ../../pages/extensions/extensions.rst:26 5944e145da104b4cbbf578b189a3afb2
+msgid "Introduktion"
+msgstr ""
+
+#: ../../pages/extensions/extensions.rst:35 bedec73b3a81497e9b3b9585b6f446f9
+msgid "meow"
+msgstr ""
+
+#: ../../pages/extensions/extensions.rst:35 4e9caffd50ae452e9c3ba71bb45f2507
+msgid "figure are like images but with a caption"
+msgstr ""
+

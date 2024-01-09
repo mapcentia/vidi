@@ -1,0 +1,234 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2023, MapCentia
+# This file is distributed under the same license as the Vidi package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Vidi 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-01-09 12:54+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.12.1\n"
+
+#: ../../pages/standard/90_build_configuration.rst:5
+#: 72ea790c05364650aa371445064d66af
+msgid "Systemkonfiguration"
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:5
+#: e2cbb4ee5aa547318b0d93ba0aff890b
+msgid "Overview"
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst
+#: 17c81418a57947bab05a75f0ab5aae13
+msgid "Date"
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:9
+#: dddaf604267749aa86380f29e8ebf97d
+msgid "|today|"
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst
+#: 27cd9f9a0b9d4588abbf7600de0789f3
+msgid "Vidi-version"
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:10
+#: 8a522858cd14404cab4a3e2833c06a9b
+msgid "2022.9.0"
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst
+#: a90825171e7f438a916943ee9841c15c
+msgid "Forfattere"
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:11
+#: 5bf1944b8e3a4cf0a0feac0016cb4447
+msgid ""
+"`giovanniborella <https://github.com/giovanniborella>`_ | `mapcentia "
+"<https://github.com/mapcentia>`_"
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:14
+#: b4597f49692f4e1b83edb9f72c6efe1f
+msgid "Indhold"
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:16
+#: b5a0bfd8db194cdb963eb12bdb458791
+msgid ""
+"Vidi kan konfigureres under opstart. Denne konfiguration kan indeholde "
+"information om hvilke extensions, der skal indlæses, hvilke print-"
+"skabeloner der er tilgængelige med mere."
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:18
+#: 5ca220024d9a461789548ea64fbb79e6
+msgid "Laves der en ændring, skal vidi startes igen."
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:20
+#: fae83a754d5e496eb7a27cfd2df13cc8
+msgid ""
+"Vidi styres af ``config.js``. Denne fil vil være at finde i "
+"``./vidi/config/``."
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:25
+#: c7d5d4492a20410abd441333ed09b14f
+msgid "puppeteerProcesses"
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:27
+#: d2a822e065a4444a8a7f90a7fc464d98
+msgid ""
+"Denne blok styrer hvor mange arbejdere der kan være forbindet til print-"
+"køen."
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:29
+#: 11cbf3d6623b46b18d3b9b760e4f77a9
+msgid ""
+"Hvis man sætter ``\"min\": 0`` vil der ikke køre processer i baggrunden, "
+"og der skal startes en puppeteer op fra bunden. Denn \"cold-start\" kan "
+"tage flere sekunder."
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:31
+#: 7f211bd1054f4c23941a005fb1f2d8b3
+msgid ""
+"Antallet af varme puppeteer-instaser vil have en effekt på systemets RAM "
+"forbrug."
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:43
+#: 7fcdbc13005f447f8892c900cfe648d2
+msgid "print"
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:45
+#: 44cabc4561f440358b93cbf76cedaaa7
+msgid ""
+"Denne nøgle indeholder opsætningen af print. Den består af underdele som "
+"alle er obligatoriske."
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:51
+#: d52467d57d6c4f3993eab1aac75ab914
+msgid "scales"
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:53
+#: af06906cd011402ba7a5d0a3da665a5f
+msgid ""
+"``scales`` er en array af heltal der definérer hvilke zoom-forhold det er"
+" muligt at lave print i."
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:55
+#: 9a530e71c370486090731ee830c3a0ec
+msgid ""
+"Herunder er et eksempel på en opsætning der kun giver mulighed for print "
+"i ``1000``, ``2000`` og ``10000``"
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:64
+#: ca1c3a05e0a84c1aa60b9b1e7546acc1
+msgid "configUrl"
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:66
+#: d8bfa9555734420c8e031426487c3d4c
+msgid "HTTP server hvor eksterne resourcer findes. Resourcer kan være:"
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:68
+#: 724e9b113cca4882afc72a75808ddaa4
+msgid ":ref:`Kørselskonfigurationer<configjson>`"
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:69
+#: a5b0466e681c42dd8d6a8b813e6e7710
+msgid ":ref:`Templates<configjs_template>`"
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:70
+#: 0fc733e7eedd4d74946ee4be6fc6c625
+msgid ":ref:`CSS filer<configjs_cssfiles>`"
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:76
+#: 9f870e0a98c84731a181cfdf7e3402ab
+msgid ""
+"Der kan angives forskellige URLer til forskellige databaser. ``_default``"
+" betyder alle andre."
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:88
+#: 6acb142671c542979eff918e65140182
+msgid "leftSlideWidths"
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:90
+#: e8c805480ba44dd3ba70d9af0cac0889
+msgid "Angivelse af bredder i det venstre slide-ud panel i default template."
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:92
+#: e34869324fd145a792f445fe43a8d48d
+msgid "Tallene angiver brededer i hhv. phone, tablet og desktop."
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:101
+#: 3ec5742e455a454f939c798510fff806
+msgid "df"
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:103
+#: 4e134e5784e940e5b1345a259ed75817
+msgid ""
+"Til WMS baggrundskort fra Datafordeler og Dataforsyningen kan der "
+"anvendes en proxy, som til dels fixer et problem med Datafordeler og til "
+"dels kan forsyne kaldene med brugernavn/kodeord eller token, så disse "
+"ikke bliver eksponeret til Vidi brugerne."
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:105
+#: f1172211f4454ecebe2cc338d8c50ca0
+msgid ""
+"Det er kun nødvendig at angive enten username/password eller token. Token"
+" har forrang hvis begge er angivet:"
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:122
+#: e0cf23fd555b45f7b6db94955eaf9f04
+msgid ""
+"Se i Kørselskonfigurationen :ref:`configjs_baselayers` hvordan WMS'er fra"
+" Datafordeler og Dataforsyningen kan anvendes"
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:125
+#: 81bd395e64944ed3b0655774444fc024
+msgid "Komplet eksempel"
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:127
+#: c8035dc43f9b4faeb60094b24f5ec071
+msgid ""
+"For at se et komplet eksempel på en konfiguration henvises til default "
+"config i repo. `Den kan du finde her "
+"<https://github.com/mapcentia/vidi/blob/master/docker/stable/conf/vidi/config.js>`_"
+msgstr ""
+

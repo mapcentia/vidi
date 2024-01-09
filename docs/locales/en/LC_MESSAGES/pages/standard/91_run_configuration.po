@@ -1,0 +1,756 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2023, MapCentia
+# This file is distributed under the same license as the Vidi package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Vidi 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-01-09 12:54+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.12.1\n"
+
+#: ../../pages/standard/91_run_configuration.rst:5
+#: d2a620cf0927448ba4dc10afd80f22c8
+msgid "Kørselskonfiguration (configs)"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:5
+#: a0e97f41fadd471a9ee63cd9d2275e9a
+msgid "Overview"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst
+#: 265821656f28442cae85ae11582734ee
+msgid "Date"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:9
+#: 40aec6549d6245b9a4f21e3b242b4b4a
+msgid "|today|"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst
+#: 73c1c7188a734a9a91a4068c5536027b
+msgid "Vidi-version"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:10
+#: f60104f5fd1542ffa3ed0804bfbe2704
+msgid "2020.11.0"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst
+#: f4cf7d6398f84cd5a4ca39d10bbca8c0
+msgid "Forfattere"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:11
+#: 3b2a05af47104b238af8f175d18f0b75
+msgid ""
+"`giovanniborella <https://github.com/giovanniborella>`_ | `mapcentia "
+"<https://github.com/mapcentia>`_"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:14
+#: 1f3e4f3d3969419e98637ae8fa1e3fb9
+msgid "Indhold"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:16
+#: 5ea676534baf40bfacd78e2b14f83d43
+msgid ""
+"Når vidi startes i browseren læses værdier ind fra :ref:`configjs`. I "
+"flere tilfælde kan denne konfiguration ændres til eksempelvis at "
+"inkludere bestemte extensions, eller print-templates."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:18
+#: 88aa65801a8a45e2ac0fb839bfd48679
+msgid "Vidi startes med en URL som denne (uden fragments [#fragment]_):"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:20
+#: 860666fd5c5f422297a2968c6e459444
+msgid "``https://vidi.dk/app/mindb/?config=minconfig.json``"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:22
+#: 824f6d9048bf471485eee83f29100083
+msgid "Som kan læses sådan:"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:24
+#: b3c987feaa804fa3a8b00e524e01c3e3
+msgid "``https://<host>/app/<database>/?config=<kørselskonfiguration>.json``"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:29
+#: dad4b017c4a94b4e9d026b91bc208e40
+msgid "schemata"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:31
+#: 67daa9e6532643f3a00a4a2c05699f4c
+msgid ""
+"Her angives hvilke lag, der skal hente ind i lagtræet. Der er tre måder "
+"at angive på:"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:33
+#: 6ba5d1f6ac824c03bc465322c7d2c9e4
+msgid "*Schema*. Alle lag i schemaet."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:34
+#: 98478b0b6b9f424ca837c33f8172fefa
+msgid "*Lag*. Et enkelt lag."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:35
+#: fc0295c601af4b13bc37a27f55ff3b31
+msgid "*Tag*. Alle lag med taggen."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:37
+#: 2562132e9842415ba22a7393d09bf607
+msgid "De tre måder kan kombineres."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:49
+#: b04d1bfa84734a148816e6e5c3138ef1
+msgid ""
+"Lag skal være placeret i en laggruppe for at kunne hentes ind. Dette "
+"gøres i GC2 Admin."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:55
+#: 1ad31f9d823740149e039760d4e2c60e
+msgid "enabledExtensions"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:57
+#: 1102b7593c1e46d99d256550ed63dfc0
+msgid "Her angives hvilke extensions, som skal aktiveres."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:75
+#: 8684798195fd4866ac67285251186e28
+msgid "extensionConfig"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:77
+#: fc70b16189564c42bf40b0cd86920e6d
+msgid ""
+"Her kan opsætningen af de enkelte extensions laves. Det er ikke alle "
+"extensions, som har sine egne indstillinger."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:79
+#: 79b6d6f9e6944ff1b47e0f257a81a5e4
+msgid "Opsætningen sker efter følgende princip:"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:88
+#: 6daf6b418c5844e7b0027429f0600364
+msgid ""
+"Her følger hvordan de enkelte extensions kan opsættes (Pt. omfatter denne"
+" del af dokumentationen ikke alle extensions)"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:127
+#: 83a8a79cf2224a31beaed105a9651c8d
+msgid "enabledPrints"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:129
+#: 1e6a27b14df24a4aaabaf856e9b18542
+msgid ""
+"Her angives hvilke print-templates der skal være adgang til. Angives "
+"flere end én kan brugeren vælge mellem dem i print-dialogen."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:138
+#: fa0369863dfb4583bd6db849ca52b796
+msgid "enabledSearch"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:140
+#: cfdb52f05dfe47248de29b302473f1d7
+msgid ""
+"Her angives hvilket søgemodul, der skal være aktiveret. Pt. er der to "
+"standard moduler:"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:142
+#: 0888ea91b00d4277bdd7cc991a58d943
+msgid "``danish`` Søgning på danske adresser, jordstykker og ejendomme"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:143
+#: f590fade175f4a299adebc498716dddc
+msgid ""
+"``google`` Google's Place Search (kræver Google API Key. Se "
+":ref:`configjs_searchconfig`)"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:152
+#: 42ba0c3db855497ba3246c99561c530d
+msgid "searchConfig"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:154
+#: e51775f7aedd4b50a99a41b4e54d0e5e
+msgid "Her kan det valgte søgemodul konfigureres."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:156
+#: d4504e1d9f55499a92fd06d5edc9fc25
+msgid "``size`` Hvor mange forslag skal der vises."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:157
+#: 4e887d945bd84a8b89148f194edf155a
+msgid ""
+"``komkode`` Hvilket eller hvilke kommunekoder skal søgningen omfatte. "
+"Angives enten som \"851\", [\"851\", \"727\"] eller \"*\""
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:158
+#: 51d288362357448c83d886f2e402db08
+msgid "``esrSearchActive`` Aktiver søgning på esr ejendomsnummer"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:159
+#: 4fb363c95691409f9635b5d99151afad
+msgid "``sfeSearchActive`` Aktiver søgning på sfe ejendomsnummer"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:160
+#: 8d57265066db46ff8be622a1c46dac6b
+msgid "``placeholderText`` Udskift standard-teksten med en anden"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:161
+#: 83f8304c33724722bb4eba36b8caf3c2
+msgid "``google`` Google API key."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:175
+#: dfeefbb1f9734333a2629cb04099b46a
+msgid ""
+"Indstillerne har kun indflydelse på \"danish\" søgemodulet Kun \"google\""
+" vedrører Google Place Search og behøver ikke udfyldes, hvis det ikke "
+"bruges. Google API kan også sættes i GC2."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:180
+#: e492371394744ea4848fabb26bab2261
+msgid "template"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:182
+#: db37f0045a8744c6b177443531e526de
+msgid ""
+"Her angives hvilken template, som skal bruges. Angives det ikke, bruges "
+"standard-templaten ``default.tmpl``. Egne Templates kan placeres på egen "
+"server ved angivelse af :ref:`configUrl<configjs_configurl>` "
+"indstillingen."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:192
+#: fe68acf1027246e0b760138ccfb54d82
+msgid "brandName"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:194
+#: 584f4796f1654da7881f8310b30e76fb
+msgid "Her kan sættes en tekst som placeres vha. en placeholder i templates."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:203
+#: 2aa4dfda200d42c0a57e9e2f47f798f4
+msgid "baseLayers"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:205
+#: c911224a776b47f08a4ac6f3ad36f6e5
+msgid "Opsætning af tilgængelige base layers kan ske på fire forskellige metoder:"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:207
+#: 4c0481944d3e43c4b40a669dc4c7ab00
+msgid "Indbyggede lag"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:208
+#: 27574494ea6f495b805f109941d985b8
+msgid "WMS lag"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:209
+#: 54b61224d94f4df287243bce43fbfc04
+msgid "XYZ lag"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:210
+#: 2b05baea2e6a4263986270233e3ba697
+msgid "GC2 lag"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:267
+#: 81b2190032e548e1b1ac41633fed8529
+msgid ""
+"De to egenskaber ``inDrawer`` og ``thumbnail`` anvendes til baggrundskort"
+" \"skuffe\" og toggle knap. Se mere på :ref:`configjs_baselayerdrawer`"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:269
+#: 78aeecac4a704415bc1a27bdd3502fce
+msgid ""
+"Til WMS baggrundskort fra Datafordeler og Dataforsyningen kan der "
+"anvendes en proxy, som til dels fixer et problem med Datafordeler og til "
+"dels kan forsyne kaldene med brugernavn/kodeord eller token, så disse "
+"ikke bliver eksponeret til Vidi brugerne."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:271
+#: ba98f4d098b2459c817851444b8a278c
+msgid ""
+"Se hvordan bruger-information opsættes i Systemkonfigurationen "
+":ref:`configjs_df`"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:273
+#: 38a3a13d21134ba88d6b2650d2c07e93
+msgid "Derefter kan WMS'er opsættes således. Fx hvis man ønsker at anvende:"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:275
+#: 36d2fce25578498883571076b796cc12
+msgid "``https://services.datafordeler.dk/GeoDanmarkOrto/orto_foraar/1.0.0/WMS``"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:277
+#: 0f591bf4519c4049894335316137f18d
+msgid "skal \"url\" angives til:"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:279
+#: 511e6032f14540a08161defef98423c6
+msgid "``/api/datafordeler/GeoDanmarkOrto/orto_foraar/1.0.0/WMS``"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:281
+#: a5124722998746c5ad45edf9af356d9f
+msgid "Vidi sørger så for at tilføje bruger-infomationen og tilrette URL."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:315
+#: dce46acbb8444e478be1217c8169a54e
+msgid ""
+"HERE, Bing og Google Maps kræver API nøgle opsat i GC2. Google Maps "
+"fungerer på en anden måde end andre lag og langt fra optimalt. Fx kan man"
+" ikke printe Google Maps."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:320
+#: 317e9155130a4017ac6427dc225d5a9e
+msgid "aboutBox"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:322
+#: 9246c1f026614290b026b13159e51340
+msgid "Her kan sættes en tekst eller HTML som vises i About Box."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:331
+#: 096c07e74b2d492bacbf77a26ffd225c
+msgid "startUpModal"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:333
+#: 265d433d94bc4015bef25e5c2b8a927e
+msgid ""
+"Hvis angivet, vil et modal-vindue vises ved opstart med tekst eller HTML."
+" Vinduet kan skjules en gang eller for altid (indtil cookies nulstilles "
+"eller indeholdet ændres)."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:342
+#: 295faf34ecab48eabda3f5afedb5698a
+msgid "startupModalSupressionTemplates"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:344
+#: 64a11842ed0b483395e72f00af461172
+msgid ""
+":ref:`startUpModal <configjs_startupmodal>` kan undertrykkes ved udvalgte"
+" templates. Templates kan angives ved navn eller regular expression."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:356
+#: 5bd89e61f9a940ba8962f2afd5ebda8f
+msgid "featureInfoTableOnMap"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:358
+#: 4ffa69ee08bf4cfeafe22c6b9dd77514
+msgid ""
+"Når denne er sat til ``true`` vises feature-info tabellerne i en popup på"
+" kortet i stedet for i sidepanelet. Det gør indstillingen veleget til "
+"embed template. Ved brug af \"avanceret forespørgelse\" vises tabellerne "
+"dog stadig i sidepanelet."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:373
+#: 02917d1fa6ca456f81cddd5c704e0219
+msgid "Kan ikke anvendes i sammenhæng med :ref:`configjs_crossmultiselect`"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:378
+#: 44b60a638c86446e94e30a2faedc0031
+msgid "crossMultiSelect"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:380
+#: 0bcc1d1ba4d0436493e82f03f4218da8
+msgid ""
+"Når denne er sat til ``true`` vil feature info klik fange både raster- og"
+" vektor-lag og opstille de enkelte resultater i en \"harmonika\". Derved "
+"inddeles resultatet ikke efter hvilke lag de tilhører. Overskrifterne har"
+" to dele:"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:383
+#: ac11948cca3b4a5f9541f010a5b9c6a2
+msgid "``Accordion summery prefix`` En fritekst efter eget valg."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:384
+#: fe732f2f91b14f68a696f99aad847f11
+msgid "``Accordion summery`` En celle værdi, angivet med kolonnenavn."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:386
+#: 3cd1d618599d401191615329fd05a3ca
+msgid "Ovenstående sættes i GC2 Meta."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:400
+#: dfc27b8930a04162b1a620122e9748d4
+msgid ""
+"Hvis extension ``editor`` er aktiv vil ``crossMultiSelect`` bliver sat "
+"til ``false``."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:405
+#: 79dddbec250647058a54ede5ac615ce7
+msgid "activateMainTab"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:407
+#: 3d024ceb342143db8616ddd5c2795b33
+msgid "Sæt hvilket modul, som skal være aktivt fra starten. Mulighederne er:"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:409
+#: 59272a2a4c7d4c939feb6854bdb3e9fe
+msgid "search"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:410
+#: 402c4eb426ce4592a87e6689a6100f81
+msgid "info"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:411
+#: 661a261fab264d4d9a6a2e3dda3c0ede
+msgid "layer"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:412
+#: 6cef557cbb494925a68b59ccf2600782
+msgid "baselayer"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:413
+#: c98210febb0a4e8fa79c6d5b71746b39
+msgid "legend"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:414
+#: 7602ded2ed3f4b2cbd059bd5e23767d1
+msgid "draw"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:415
+#: 1a3de40f76ba44fba76c82a367dac497
+msgid "state-snapshot"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:416
+#: 54d1e2662f9b40b3a8be70a5712fb9c1
+msgid "print"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:417
+#: 98c2cf0f6b814ebd8e15ce6e0dfbf373
+msgid "conflict"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:418
+#: b3c7c448a8ec4482a9371ed1c63fda26
+msgid "streetView"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:419
+#: 2b2be638a7204448a2ac3a8698ea5f6b
+msgid "coordinates"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:428
+#: 15797f4900f44e6c86fb9e818ed85003
+msgid "cssFiles"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:430
+#: 3fddb60291e442c3b3d376419dbaab72
+msgid ""
+"Load eksterne CSS filer. Filerne skal placeres på en HTTP server, som "
+"forbindes til vha. :ref:`configUrl<configjs_configurl>`"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:442
+#: 4bb6276928f540348de9a3c9642cf775
+msgid "dontUseAdvancedBaseLayerSwitcher"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:444
+#: f2e8f80e362a456cbe9d12b095c7a003
+msgid "Deaktiver dobbelt baggrundskort funktionen."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:453
+#: 8b697874b390458699712bc691499252
+msgid "advancedBaseLayerSwitcher"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:455
+#: 2e339f4e74724e1598096387cd247fcc
+msgid "Opsætning af dobbelt baggrundskort funktionen."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:457
+#: 311d2657c35f491c934f531bdddf2340
+msgid ""
+"``mode`` bestemmer om kun Slider ``1`` eller kun Overlap ``2`` eller "
+"begge ``3`` skal være tilgængelig. Default er ``3`` (begge)."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:459
+#: a8c826133bac4b8cabc12c6a3893d1fd
+msgid ""
+"``default`` bestemmer om det er Silder ``1`` eller Overlap ``2``, der "
+"skal være aktiv fra starten. Default er ``1`` (Slider). Hvis ``mode`` er "
+"``1`` eller ``2``, så er ``default`` ligegyldig."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:461
+#: 11798e20fa924a8ba44c4d380b9e42a7
+msgid ""
+"``active`` bestemmer om dobbelt baggrundskort funktionen skal være aktiv "
+"fra starten. Default er ``false``."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:474
+#: 20f2f22826164133b7dbf026572d14a6
+msgid "infoClickCursorStyle"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:476
+#: 8c58a00178264ab3a1ba5208e97ff475
+msgid ""
+"Sæt hvilken CSS cursor style markøren skal have når feature-info modulet "
+"er aktivt. Default er \"crosshair\"."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:478
+#: 8ca0775cd62848da9dc099330a12f5bb
+msgid ""
+"Andre muligheder kan ses `her <https://developer.mozilla.org/en-"
+"US/docs/Web/CSS/cursor>`_."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:487
+#: 3ce4e7bbae544809a21e1f1f5b750608
+msgid "showLayerGroupCheckbox"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:489
+#: ec9ba8abf1fc44d5840444f370f5df30
+msgid ""
+"Viser en tjekboks i hver lag-gruppe og under-gruppe, som tænder/slukker "
+"alle lag i den pågældende gruppe."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:498
+#: 41a56b2ef0ba45228d8559024aec5f6f
+msgid "activeLayers"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:500
+#: 0922da78b82946d5a7eb945eb130906c
+msgid ""
+"Liste over lag, som skal tændes fra starten. Lag angives schema qualified"
+" og med evt. type præfiks (v:, mvt:, w:). De angivne lag behøver ikke at "
+"være includeret i :ref:`schemata<configjs_schemata>`. Hvis Vidi startes "
+"med et projekt link, vil denne konfiguration blive ignoreret."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:513
+#: adceb65b2d49474e8238489bc8da5961
+msgid "removeDisabledLayersFromLegend"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:515
+#: d35a3bc90ea143379c1c586b6999e1c2
+msgid ""
+"Hvis sættes til true, så fjernes lag fra signaturforklaringen, når laget "
+"slukkes. Ellers forbliver det på signaturen, men tjekboksen bliver tom. "
+"Default er \"false\"."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:524
+#: 08898cade20b49e08d762502c13612c8
+msgid "autoPanPopup"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:526
+#: 0c49e0b7dbbd48bb98f26a14a2fbb177
+msgid ""
+"Denne indstilling bevirker, at når en pop-up åbnes, så panoreres kort "
+"således, at pop-up'en kommer indenfor kortets udsnit. Bemærk, at "
+"indstillingen helst skal sættes til \"false\", hvis der anvendes vektor-"
+"lag med dynamisk loading af data, fordi panoreringen evt. kan bevirke "
+"reload af data og derefter lukkes pop-up'en Default er \"false\"."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:535
+#: c9cbb7da9bf24757a67ea5f622981441
+msgid "vectorTable"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:537
+#: f22ff1a56a064456987238f4baaf1ad3
+msgid ""
+"Denne indstilling styrer om :ref:`vektorlag "
+"tabellen<gc2mata_vectorsettings>` skal vises til højre for eller i bunden"
+" af kortet. Endvidere kan højde/bredde styres. Hvis positionen er sat til"
+" ``right`` vil kun ``width`` have effekt og tabellen vil altid fylde "
+"højden ud. Hvis position er sat til ``bottom`` vil kun ``height`` have "
+"effekt og bredden bliver den samme som kortet. ``width`` kan både være "
+"relativ ``%`` og absolute ``px`` mens ``height`` kun kan angives som "
+"absolute ``px``. Hvis ikke denne indstilling sættes bruges default "
+"værdier som vist nedenunder."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:552
+#: 358fe41166d14ad6827bdc0a4fbbbebc
+msgid "initFunction"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:554
+#: 902b10b5e9eb48fa8039e6473decd130
+msgid ""
+"Her kan angives en JavaScript funktion, som bliver kørt når Vidi er klar."
+" Funktionen skal skrives som en linje tekst startende med `function()` og"
+" den efterfølgende blok er den, som bliver eksekveret:"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:563
+#: a0df737d49884e1ea16aff50de360bab
+msgid "initZoomCenter"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:565
+#: 334a37f226a94a14bc265c2df67dafc2
+msgid ""
+"Hvis sat vil Vidi starte op på det angivet zoom/center. Denne indstilling"
+" vil have forrang over zoom/center sat i URL og projekt-link. Kan fx "
+"anvendes til at sikre, at alle indlejrede kort starter med samme "
+"zoom/center."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:567
+#: 08d0b63067f341719e1b2f649bd9b3a7
+msgid "Angives således `/z/x/y`. Dette svarer til det, der vises i Vidi URL'en."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:577
+#: 8abce31170d6489284c8e42f1c9aec41
+msgid "popupDraggable"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:579
+#: f9aedc0c84aa47eeb4c67a67dbfba636
+msgid "Hvis sat til `true` kan man flytte feature-info pop-up'en på kortet."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:589
+#: 869ea287079f4e2fb6c56032bacc4378
+msgid "title"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:591
+#: 24b42066c63e4ea1b6fd25ff0ebf3e55
+msgid "Sæt titel på siden (den der vises på browser-fanen)."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:598
+#: 02440d4db2ed44698aa601e1bb8020ea
+msgid ""
+"Titlen bliver sat dynamisk efter Vidi er startet og derfor vil titlen "
+"under opstart et øjeblik være sat til standardteksten."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:604
+#: c7ae81741e8147a4867d9071d9f65959
+msgid "baselayerDrawer"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:606
+#: 2525296baf274995b8224625b290dc1b
+msgid ""
+"Anvend baggrundskort \"skuffe\" i stedet for toggle knappen. Skuffen kan "
+"indeholde et vilkårlig antal muligheder. Udvælgelsen af baggrundskort til"
+" skuffen og thumbnails/ skal opsættes i :ref:`configjs_baselayers`"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:619
+#: d375cc863f2a47efa7369b925b547e8d
+msgid ""
+"Template ``default.tmpl`` viser hverken skuffe eller toggle knap. "
+"Anvendes på ``embed.tmpl`` og lign., som ikke har den store "
+"baggrundskortsvælger."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:621
+#: de9b722cf0254a8f98333f050b372a2e
+msgid "Fodnoter"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:622
+#: c6adf5db20a84a33ba079b8aba73491d
+msgid "Et fragment er den del af en URL der kommer efter `#`."
+msgstr ""
+

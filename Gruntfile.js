@@ -283,7 +283,16 @@ module.exports = function (grunt) {
         },
         shell: {
             buildDocs: {
-                command: '. ./venv/bin/activate && sphinx-build ./docs ./docs/_build/html'
+                command: '. ./venv/bin/activate && sphinx-build ./docs ./docs/_build/html/da'
+            },
+            gettext: {
+                command: '. ./venv/bin/activate && cd ./docs && sphinx-build -b gettext . _build/gettext'
+            },
+            updateEn: {
+                command: '. ./venv/bin/activate && cd ./docs && sphinx-intl update -p _build/gettext -l en'
+            },
+            buildEn: {
+                command: '. ./venv/bin/activate && cd ./docs && sphinx-build -b html -D language=en . _build/html/en'
             }
         },
         cacheBust: {

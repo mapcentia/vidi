@@ -2,7 +2,7 @@
 Vidi brugerdokumentation
 #################################################################
 
-Hvis du har brug for at komme i gang med klienten fra bunden af, er her et godt sted at starte.
+Hvis du har brug for at komme i gang med Vidi fra bunden af, er her et godt sted at starte.
 
 .. toctree::
     :maxdepth: 1
