@@ -43,7 +43,7 @@ msgid ""
 msgstr ""
 "Vidi has a number of tools that are always on. These tools"
 " is made to make work easier. You can read more about the simple"
-"tools below."
+"tools below. TEST"
 
 #: ../../index.rst:27 85843853d0f74a2cb82940cc6112ff82
 msgid "Extensions"
