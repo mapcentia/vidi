@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Vidi 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-09 13:11+0100\n"
+"POT-Creation-Date: 2024-01-09 15:15+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -19,11 +19,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.12.1\n"
 
-#: ../../index.rst:3 7b79590f591740bf9f0eb6e4cdaca798
+#: ../../index.rst:3 ab7f0f262e234a81ad5a4a8f2aeb7d31
 msgid "Vidi brugerdokumentation"
 msgstr "Vidi user documentation"
 
-#: ../../index.rst:5 f861bb096a9247a6a94306c8a2187a55
+#: ../../index.rst:5 9abe452ab0cb4408810b339435619e10
 msgid ""
 "Hvis du har brug for at komme i gang med Vidi fra bunden af, er her et "
 "godt sted at starte."
@@ -31,50 +31,48 @@ msgstr ""
 "If you need to get started with Vidi from scratch, here is a good place "
 "to start."
 
-#: ../../index.rst:15 d214725100ef4fbc8e87997cea050bd9
+#: ../../index.rst:15 412751837d7d44d98622b1a59235b135
 msgid "Standardværktøjer"
 msgstr "Standard tools"
 
-#: ../../index.rst:17 5786928200f14da98af8728e4ebefeaf
+#: ../../index.rst:17 54e20ba8f0a94efc943e3691d90e5540
 msgid ""
 "Vidi indeholder en del værktøjer som altid er slået til. Disse  værktøjer"
 " er lavet til at at gøre arbejdet nemmere. Du kan læse mere om de enkelse"
 " værktøjer herunder."
 msgstr ""
-"Vidi has a number of tools that are always on. These tools"
-" is made to make work easier. You can read more about the simple"
-"tools below. TEST"
+"Vidi has a number of tools that are always on. These tools is made to "
+"make work easier. You can read more about the simpletools below. TEST"
 
-#: ../../index.rst:27 85843853d0f74a2cb82940cc6112ff82
+#: ../../index.rst:27 4870dabd37fc4fd4b82708d4d71dd301
 msgid "Extensions"
 msgstr ""
 
-#: ../../index.rst:29 fd2e3a33444540eaa30c8892ff1f8ab2
+#: ../../index.rst:29 97d94de39b164893a99cfc0e81dfda7c
 msgid ""
 "Ud over standardværktøjerne, er der udviddet funktionalitet som du kan "
 "læse mere om herunder."
 msgstr ""
-"In addition to the standard tools, there is extended functionality that you can "
-"read more about below."
+"In addition to the standard tools, there is extended functionality that "
+"you can read more about below."
 
-#: ../../_subs/GIT.rst:4 91000e4b85574d9c9f7f3148988b3d19
+#: ../../_subs/GIT.rst:4 0a7e54ac6771451ea075086b5358ecd3
 msgid "Mere om Vidi-projektet"
 msgstr "More about the Vidi project"
 
-
-#: ../../_subs/GIT.rst:6 9f9561f74ed84d44ac45b44093b4528b
+#: ../../_subs/GIT.rst:6 ea6dca4e8a724c94b5c514f930e531e5
 msgid "Her er links til mere generel information"
 msgstr "Here are links to more general information"
 
-#: ../../_subs/GIT.rst:8 42e76506b7fd4dffa513cc1e073ecda4
+#: ../../_subs/GIT.rst:8 cb198a5d4c064eb4bbf8ddb97e6a2232
 msgid ":ref:`README`"
 msgstr ""
 
-#: ../../_subs/GIT.rst:9 48622b4105a743918f603ae07427e001
+#: ../../_subs/GIT.rst:9 b3e33ee6495c4a0b80b5007ab42a06d0
 msgid ":ref:`CHANGELOG`"
 msgstr ""
 
-#: ../../_subs/GIT.rst:10 a08536a7942d4527996e48f3de91c049
+#: ../../_subs/GIT.rst:10 729bc4d657cb4c44b8ceea8a96439599
 msgid ":ref:`CONTRIBUTING`"
 msgstr ""
 

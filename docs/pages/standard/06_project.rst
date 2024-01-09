@@ -29,7 +29,7 @@ Når der bliver lavet et projekt, gemmes kort-udstrækningen, tegnede elementer 
 
 Når værktøjet startes, vises en liste med allerede eksisterende projekter.
 
-.. figure:: ../../../_media/project-on.png
+.. figure:: ../../_media/project-on.png
     :width: 400px
     :align: center
     :name: project-on

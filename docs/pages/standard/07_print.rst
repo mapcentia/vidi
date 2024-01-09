@@ -29,7 +29,7 @@ Print
 
 Når værktøjet er tændt vil man se en rød kasser der representerer udskriftsområdet.
 
-.. figure:: ../../../_media/print-on.png
+.. figure:: ../../_media/print-on.png
     :width: 400px
     :align: center
     :name: print-on
@@ -60,7 +60,7 @@ Følgende indstillinger kan også sættes:
 
 Når man er tilfreds med indstillingerne, klikker man på ``Lav PDF``. Det er også muligt at bruge drop-down til at printe som ``PNG``
 
-.. figure:: ../../../_media/print-ready.png
+.. figure:: ../../_media/print-ready.png
     :width: 400px
     :align: center
     :name: print-ready
@@ -68,7 +68,7 @@ Når man er tilfreds med indstillingerne, klikker man på ``Lav PDF``. Det er og
 
     Klar til at printe
 
-.. figure:: ../../../_media/print-complete.png
+.. figure:: ../../_media/print-complete.png
     :width: 400px
     :align: center
     :name: print-complete

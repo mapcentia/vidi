@@ -19,7 +19,7 @@ GC2 Meta information
 
 GC2 har et konfigurerbart Meta Data system med egenskaber tilknyttet de enkelte lag, som Vidi læser ved opstart. Egenskaberne omfatter fx om lag kan editeres, om et lag skal vises som tile- eller vektorlag osv.
 
-.. figure:: ../../../_media/gc2-meta.png
+.. figure:: ../../_media/gc2-meta.png
     :width: 700px
     :align: center
     :name: cross-multi-select
@@ -156,7 +156,7 @@ Editor
 
 Skal laget være editerbart? Både Tile og Vector kan editeres. Det anbefales dog at benytte Vector til lag, som skal editeres i marken, da der er fuld funktionalitet uden netværk eller med langsom forbindelse.
 
-.. figure:: ../../../_media/gc2-meta-editor.png
+.. figure:: ../../_media/gc2-meta-editor.png
     :width: 400px
     :align: center
     :name: cross-multi-select
@@ -293,7 +293,7 @@ Hvis der allerede er en tabel åben, sker der ingenting ved åbning af en anden 
 Virker kun i embed template.
 Positionen og bredde/højde på tabellen kan styres gennem :ref:`Kørselskonfiguration (configs)<configjs_vectorTable>`
 
-.. figure:: ../../../_media/vector-table.png
+.. figure:: ../../_media/vector-table.png
     :width: 400px
     :align: center
     :name: vector-table
@@ -348,7 +348,7 @@ Filteropsætningen er en liste af objekter med hver to egenskaber: field og oper
 
 Som giver dette resultat:
 
-.. figure:: ../../../_media/gc2-meta-filters.png
+.. figure:: ../../_media/gc2-meta-filters.png
     :width: 400px
     :align: center
     :name: cross-multi-select
@@ -369,7 +369,7 @@ Præ-definerede filtre gør det muligt, at aktivere fastsatte filtrer med en tje
 
 Eksemplet ser sådan ud i lag-træet:
 
-.. figure:: ../../../_media/gc2-meta-filters2.png
+.. figure:: ../../_media/gc2-meta-filters2.png
     :width: 400px
     :align: center
     :name: cross-multi-select
@@ -438,7 +438,7 @@ Her er der kun ét børne-lag, men der skrives flere objekter ind i listen.
 
 I Vidi i laget-træet kan børne-lagene ses på forældre-laget:
 
-.. figure:: ../../../_media/gc2-meta-references.png
+.. figure:: ../../_media/gc2-meta-references.png
     :width: 400px
     :align: center
     :name: cross-multi-select
@@ -487,7 +487,7 @@ GC2 Struktur-fanen
 
 I GC2's struktur-fane kan der laves en række indstillinger på feltniveau.
 
-.. figure:: ../../../_media/structure-overview.png
+.. figure:: ../../_media/structure-overview.png
     :width: 700px
     :align: center
     :name: cross-multi-select
@@ -517,7 +517,7 @@ Søgbar
 
 Gør feltet søgbart i lagets fritekstsøgning.
 
-.. figure:: ../../../_media/layer-search.png
+.. figure:: ../../_media/layer-search.png
     :width: 500px
     :align: center
     :name: cross-multi-select
@@ -535,7 +535,7 @@ Autocomplete
 
 Aktiver autocomplete på feltet i filtrering.
 
-.. figure:: ../../../_media/filter-autocomplete.png
+.. figure:: ../../_media/filter-autocomplete.png
     :width: 450px
     :align: center
     :name: cross-multi-select

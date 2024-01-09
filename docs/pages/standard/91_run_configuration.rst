@@ -362,7 +362,7 @@ Ved brug af "avanceret forespørgelse" vises tabellerne dog stadig i sidepanelet
 
     "featureInfoTableOnMap": true,
 
-.. figure:: ../../../_media/feature-info-table-on-map.png
+.. figure:: ../../_media/feature-info-table-on-map.png
     :width: 400px
     :align: center
     :name: feature-info-table-on-map
@@ -389,7 +389,7 @@ Ovenstående sættes i GC2 Meta.
 
     "crossMultiSelect": true,
 
-.. figure:: ../../../_media/cross-multi-select.png
+.. figure:: ../../_media/cross-multi-select.png
     :width: 400px
     :align: center
     :name: cross-multi-select
@@ -605,7 +605,7 @@ baselayerDrawer
 
 Anvend baggrundskort "skuffe" i stedet for toggle knappen. Skuffen kan indeholde et vilkårlig antal muligheder. Udvælgelsen af baggrundskort til skuffen og thumbnails/ skal opsættes i :ref:`configjs_baselayers`
 
-.. figure:: ../../../_media/baselayer-drawer.png
+.. figure:: ../../_media/baselayer-drawer.png
     :align: center
     :name: feature-info-table-on-map
     :figclass: align-center

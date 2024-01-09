@@ -27,7 +27,7 @@ Typer
 
 Når værktøjet er tændt er det muligt at tegne elementer ind på kortet. Elementerne er bundet op på den geografiske placering, så de vil blive selv om man panorerer i kortet.
 
-.. figure:: ../../../_media/draw-on.png
+.. figure:: ../../_media/draw-on.png
     :width: 400px
     :align: center
     :name: draw-on
@@ -46,7 +46,7 @@ For at tegne elementer, gøres følgende:
     * (Slet sidste punkt ved at bruge ``Slet sidste punkt``)
     * Klik på ``Afslut``, eller klik på det sidst tilføjede mellempunkt.
 
-.. figure:: ../../../_media/draw-create-line.png
+.. figure:: ../../_media/draw-create-line.png
     :width: 400px
     :align: center
     :name: draw-create-line
@@ -59,7 +59,7 @@ For at tegne elementer, gøres følgende:
     * (Slet sidste punkt ved at bruge ``Slet sidste punkt``)
     * Klik på det første punkt for at afslutte
 
-.. figure:: ../../../_media/draw-create-polygon.png
+.. figure:: ../../_media/draw-create-polygon.png
     :width: 400px
     :align: center
     :name: draw-create-polygon
@@ -83,7 +83,7 @@ For at tegne elementer, gøres følgende:
 
 Når værktøjet aktiveres er det muligt at ændre knudepunkter mm. for de tegnede elementer. 
 
-.. figure:: ../../../_media/draw-edit.png
+.. figure:: ../../_media/draw-edit.png
     :width: 400px
     :align: center
     :name: draw-edit
@@ -116,7 +116,7 @@ Det er muligt at definere en ende på hver linje. Denne indstilling sættes inde
 
 Der er også mulighed for at få vist mål på linjer, samt totalmål.
 
-.. figure:: ../../../_media/draw-linestyle.png
+.. figure:: ../../_media/draw-linestyle.png
     :width: 400px
     :align: center
     :name: draw-linestyle
@@ -129,7 +129,7 @@ Oversigt
 
 Nederst vil der være en tabel over de tegnede geometrier. Ved at klikke på en række vil kortet flyve over til den relevante geometri.
 
-.. figure:: ../../../_media/draw-list.png
+.. figure:: ../../_media/draw-list.png
     :width: 400px
     :align: center
     :name: draw-list

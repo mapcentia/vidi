@@ -289,7 +289,7 @@ module.exports = function (grunt) {
                 command: '. ./venv/bin/activate && sphinx-build ./docs -b gettext ./docs/_build/gettext'
             },
             updateEn: {
-                command: '. ./venv/bin/activate && sphinx-intl update -p ./docs/_build/gettext -l en'
+                command: '. ./venv/bin/activate && cd ./docs && sphinx-intl update -p _build/gettext -l en'
             },
             buildEn: {
                 command: '. ./venv/bin/activate && sphinx-build -b html -D language=en ./docs ./docs/_build/html/en'

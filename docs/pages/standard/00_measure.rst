@@ -24,7 +24,7 @@ Elementer vil også fremgå på PDF-print.
 
 Måleværktøjet vil være tilgængeligt i toolbaren. For at aktivere; klik på "linealen"
 
-.. figure:: ../../../_media/sidebar-expanded.png
+.. figure:: ../../_media/sidebar-expanded.png
     :width: 400px
     :align: center
     :name: sidebar-expanded
@@ -37,7 +37,7 @@ Mål
 
 Når værktøjet er tændt er det muligt at tegne elementer ind på kortet. Elementerne er bundet op på den geografiske placering, så de vil blive selv om man panorerer i kortet.
 
-.. figure:: ../../../_media/measure-on.png
+.. figure:: ../../_media/measure-on.png
     :width: 400px
     :align: center
     :name: measure-on
@@ -56,7 +56,7 @@ For at måles, gøres følgende:
     * (Slet sidste punkt ved at bruge ``Slet sidste punkt``)
     * Klik på ``Afslut``, eller klik på det sidst tilføjede mellempunkt.
 
-.. figure:: ../../../_media/draw-create-line.png
+.. figure:: ../../_media/draw-create-line.png
     :width: 400px
     :align: center
     :name: measure-create-line
@@ -69,7 +69,7 @@ For at måles, gøres følgende:
     * (Slet sidste punkt ved at bruge ``Slet sidste punkt``)
     * Klik på det første punkt for at afslutte
 
-.. figure:: ../../../_media/measure-create-area.png
+.. figure:: ../../_media/measure-create-area.png
     :width: 400px
     :align: center
     :name: measure-create-area
@@ -81,7 +81,7 @@ For at måles, gøres følgende:
 
 Når værktøjet aktiveres er det muligt at ændre knudepunkter mm. for de tegnede mål. 
 
-.. figure:: ../../../_media/measure-edit.png
+.. figure:: ../../_media/measure-edit.png
     :width: 400px
     :align: center
     :name: measure-edit
