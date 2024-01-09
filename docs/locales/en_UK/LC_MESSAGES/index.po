@@ -1,0 +1,72 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2023, MapCentia
+# This file is distributed under the same license as the Vidi package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Vidi 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-01-09 09:31+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en_UK\n"
+"Language-Team: en_UK <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.12.1\n"
+
+#: ../../index.rst:3
+msgid "Vidi brugerdokumentation"
+msgstr "Vidi user documentations"
+
+#: ../../index.rst:5
+msgid ""
+"Hvis du har brug for at komme i gang med klienten fra bunden af, er her "
+"et godt sted at starte."
+msgstr ""
+
+#: ../../index.rst:15
+msgid "Standardværktøjer"
+msgstr ""
+
+#: ../../index.rst:17
+msgid ""
+"Vidi indeholder en del værktøjer som altid er slået til. Disse  værktøjer"
+" er lavet til at at gøre arbejdet nemmere. Du kan læse mere om de enkelse"
+" værktøjer herunder."
+msgstr ""
+
+#: ../../index.rst:27
+msgid "Extensions"
+msgstr ""
+
+#: ../../index.rst:29
+msgid ""
+"Ud over standardværktøjerne, er der udviddet funktionalitet som du kan "
+"læse mere om herunder."
+msgstr ""
+
+#: ../../_subs/GIT.rst:4
+msgid "Mere om Vidi-projektet"
+msgstr ""
+
+#: ../../_subs/GIT.rst:6
+msgid "Her er links til mere generel information"
+msgstr ""
+
+#: ../../_subs/GIT.rst:8
+msgid ":ref:`README`"
+msgstr ""
+
+#: ../../_subs/GIT.rst:9
+msgid ":ref:`CHANGELOG`"
+msgstr ""
+
+#: ../../_subs/GIT.rst:10
+msgid ":ref:`CONTRIBUTING`"
+msgstr ""
+

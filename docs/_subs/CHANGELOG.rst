@@ -1,7 +1,7 @@
-.. _README:
+.. _CHANGELOG:
 
 
-Readme
+Changelog
 =================================================================
 
-.. mdinclude:: ../../../README.md
+.. mdinclude:: ../../CHANGELOG.md

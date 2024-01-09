@@ -1,0 +1,2255 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2023, MapCentia
+# This file is distributed under the same license as the Vidi package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Vidi 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-01-09 09:31+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ../../pages/extensions/extensions.rst:9
+msgid "Extensions"
+msgstr ""
+
+#: ../../pages/extensions/extensions.rst:9
+#: ../../pages/extensions/non_standard.rst:9
+#: ../../pages/gettingstarted/gettingstarted.rst:9
+#: ../../pages/standard/00_measure.rst:5
+#: ../../pages/standard/05_draw.rst:5
+#: ../../pages/standard/06_project.rst:5
+#: ../../pages/standard/07_print.rst:5
+#: ../../pages/standard/80_standard_query_string.rst:5
+#: ../../pages/standard/90_build_configuration.rst:5
+#: ../../pages/standard/91_run_configuration.rst:5
+#: ../../pages/standard/92_gc2_meta_information.rst:5
+#: ../../pages/standard/95_embed.rst:5
+#: ../../pages/standard/96_api.rst:5
+msgid "Overview"
+msgstr ""
+
+#: ../../pages/extensions/extensions.rst:0
+#: ../../pages/extensions/non_standard.rst:0
+#: ../../pages/gettingstarted/gettingstarted.rst:0
+#: ../../pages/standard/00_measure.rst:0
+#: ../../pages/standard/05_draw.rst:0
+#: ../../pages/standard/06_project.rst:0
+#: ../../pages/standard/07_print.rst:0
+#: ../../pages/standard/80_standard_query_string.rst:0
+#: ../../pages/standard/90_build_configuration.rst:0
+#: ../../pages/standard/91_run_configuration.rst:0
+#: ../../pages/standard/92_gc2_meta_information.rst:0
+#: ../../pages/standard/95_embed.rst:0
+#: ../../pages/standard/96_api.rst:0
+msgid "Date"
+msgstr ""
+
+#: ../../pages/extensions/extensions.rst:13
+#: ../../pages/extensions/non_standard.rst:13
+#: ../../pages/gettingstarted/gettingstarted.rst:13
+#: ../../pages/standard/00_measure.rst:9
+#: ../../pages/standard/05_draw.rst:9
+#: ../../pages/standard/06_project.rst:9
+#: ../../pages/standard/07_print.rst:9
+#: ../../pages/standard/80_standard_query_string.rst:9
+#: ../../pages/standard/90_build_configuration.rst:9
+#: ../../pages/standard/91_run_configuration.rst:9
+#: ../../pages/standard/92_gc2_meta_information.rst:9
+#: ../../pages/standard/95_embed.rst:9
+#: ../../pages/standard/96_api.rst:9
+msgid "|today|"
+msgstr ""
+
+#: ../../pages/extensions/extensions.rst:0
+#: ../../pages/gettingstarted/gettingstarted.rst:0
+#: ../../pages/standard/00_measure.rst:0
+#: ../../pages/standard/05_draw.rst:0
+#: ../../pages/standard/06_project.rst:0
+#: ../../pages/standard/07_print.rst:0
+#: ../../pages/standard/80_standard_query_string.rst:0
+#: ../../pages/standard/90_build_configuration.rst:0
+#: ../../pages/standard/91_run_configuration.rst:0
+#: ../../pages/standard/92_gc2_meta_information.rst:0
+#: ../../pages/standard/95_embed.rst:0
+#: ../../pages/standard/96_api.rst:0
+msgid "Vidi-version"
+msgstr ""
+
+#: ../../pages/extensions/extensions.rst:14
+#: ../../pages/standard/95_embed.rst:10
+msgid "UNRELEASED"
+msgstr ""
+
+#: ../../pages/extensions/extensions.rst:0
+#: ../../pages/standard/80_standard_query_string.rst:0
+#: ../../pages/standard/90_build_configuration.rst:0
+#: ../../pages/standard/91_run_configuration.rst:0
+#: ../../pages/standard/92_gc2_meta_information.rst:0
+#: ../../pages/standard/95_embed.rst:0
+#: ../../pages/standard/96_api.rst:0
+msgid "Forfattere"
+msgstr ""
+
+#: ../../pages/extensions/extensions.rst:15
+#: ../../pages/extensions/non_standard.rst:14
+#: ../../pages/standard/80_standard_query_string.rst:11
+#: ../../pages/standard/92_gc2_meta_information.rst:11
+#: ../../pages/standard/95_embed.rst:11
+#: ../../pages/standard/96_api.rst:11
+msgid "`mapcentia <https://github.com/mapcentia>`_"
+msgstr ""
+
+#: ../../pages/extensions/extensions.rst:18
+#: ../../pages/extensions/non_standard.rst:17
+#: ../../pages/gettingstarted/gettingstarted.rst:19
+#: ../../pages/standard/00_measure.rst:15
+#: ../../pages/standard/05_draw.rst:15
+#: ../../pages/standard/06_project.rst:15
+#: ../../pages/standard/07_print.rst:17
+#: ../../pages/standard/80_standard_query_string.rst:14
+#: ../../pages/standard/90_build_configuration.rst:14
+#: ../../pages/standard/91_run_configuration.rst:14
+#: ../../pages/standard/92_gc2_meta_information.rst:14
+#: ../../pages/standard/95_embed.rst:14
+#: ../../pages/standard/96_api.rst:14
+msgid "Indhold"
+msgstr ""
+
+#: ../../pages/extensions/extensions.rst:23
+msgid "Editering"
+msgstr ""
+
+#: ../../pages/extensions/extensions.rst:26
+#: ../../pages/extensions/non_standard.rst:21
+msgid "Introduktion"
+msgstr ""
+
+#: ../../pages/extensions/extensions.rst:35
+msgid "meow"
+msgstr ""
+
+#: ../../pages/extensions/extensions.rst:35
+msgid "figure are like images but with a caption"
+msgstr ""
+
+#: ../../pages/extensions/non_standard.rst:9
+msgid "Ikke-standard extensions"
+msgstr ""
+
+#: ../../pages/extensions/non_standard.rst:0
+msgid "Author"
+msgstr ""
+
+#: ../../pages/extensions/non_standard.rst:23
+msgid "Herunder findes dokumentation på nogle af de extensions, som ikke følger med Vidi som standard. Skal en af disse anvendes kræves det, at den bliver installeret."
+msgstr ""
+
+#: ../../pages/extensions/non_standard.rst:27
+msgid "Rejsetid (otp)"
+msgstr ""
+
+#: ../../pages/extensions/non_standard.rst:29
+msgid "Rejsetid extensionen opsættes i en kørselskonfiguration (config) under :ref:`configjs_extensionconfig`"
+msgstr ""
+
+#: ../../pages/extensions/non_standard.rst:31
+msgid "``routes`` er en liste med de grafer, som brugeren skal kunne vælge imellem i Vidi."
+msgstr ""
+
+#: ../../pages/extensions/non_standard.rst:33
+msgid "``default`` angiver start-værdier for de forskellige indstillinger i Vidi. Alle behøves ikke udfyldes. Hvis der undlades indstillinger, bliver der anvendt værdier, som svarer til de nedenunser viste."
+msgstr ""
+
+#: ../../pages/extensions/non_standard.rst:35
+msgid "``parameters`` angiver ekstra URL parametre, som skal sendes med til OTP serveren. Default bliver ingen parametre sat."
+msgstr ""
+
+#: ../../pages/extensions/non_standard.rst:37
+msgid "``helpText`` angiver den tekst, som skal vises i modulets hjælpefunktion. Default er en tom tekst."
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:9
+msgid "Kom godt i gang med Vidi-klienten"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:14
+#: ../../pages/standard/00_measure.rst:10
+#: ../../pages/standard/05_draw.rst:10
+#: ../../pages/standard/07_print.rst:10
+#: ../../pages/standard/91_run_configuration.rst:10
+#: ../../pages/standard/92_gc2_meta_information.rst:10
+msgid "2020.11.0"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:0
+#: ../../pages/standard/00_measure.rst:0
+#: ../../pages/standard/05_draw.rst:0
+#: ../../pages/standard/06_project.rst:0
+#: ../../pages/standard/07_print.rst:0
+msgid "Forfatter"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:15
+#: ../../pages/standard/00_measure.rst:11
+#: ../../pages/standard/05_draw.rst:11
+#: ../../pages/standard/07_print.rst:11
+msgid "`giovanniborella <https://github.com/giovanniborella>`_"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:22
+msgid "Hvad er Vidi?"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:24
+msgid "Vidi er en HTML5 applikation til at vise og forespørge på kortdata fra |gc2|. Klienten læser information fra GC2's meta-api, og viser en moderne kort-browser med lag for den specificerede PostGreSQL"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:26
+msgid "Her er et udpluk af nogle af funktionaliteterne."
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:28
+msgid "Avanceret forespørgsler med buffer"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:29
+msgid "Print til PDF"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:30
+msgid "Klar til udvidelser"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:32
+msgid "Vidi er ikke bygget ind i GC2, men kræver sin egen installation."
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:34
+msgid "`Du kan prøve det live her <https://kort.geofyn.dk/>`_"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:39
+msgid "Vidi ved et øjekast"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:41
+#: ../../pages/gettingstarted/gettingstarted.rst:46
+#: ../../pages/gettingstarted/gettingstarted.rst:51
+#: ../../pages/gettingstarted/gettingstarted.rst:56
+#: ../../pages/gettingstarted/gettingstarted.rst:61
+#: ../../pages/gettingstarted/gettingstarted.rst:66
+#: ../../pages/gettingstarted/gettingstarted.rst:71
+#: ../../pages/standard/05_draw.rst:110
+msgid "TBD"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:44
+msgid "Kortvinduet"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:49
+msgid "Toolbar"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:54
+msgid "Navigér"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:59
+msgid "Sidebar"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:64
+msgid "Skifte visning"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:69
+msgid "Tool"
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:5
+msgid "Måleværktøjer"
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:19
+msgid "Måle-værktøjet"
+msgstr ""
+
+#: ../../_subs/NOTE_GETTINGSTARTED.rst:4
+msgid "Hvis du er i tvivl om de forskellige UI-elementer, :ref:`kan du se mere her <gettingstarted>`"
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:23
+#: ../../pages/standard/05_draw.rst:23
+msgid "Elementer vil også fremgå på PDF-print."
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:25
+msgid "Måleværktøjet vil være tilgængeligt i toolbaren. For at aktivere; klik på \"linealen\""
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:33
+msgid "Start værktøjet ved klikke på \"linealen\""
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:36
+#: ../../pages/standard/00_measure.rst:49
+msgid "Mål"
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:38
+#: ../../pages/standard/05_draw.rst:28
+msgid "Når værktøjet er tændt er det muligt at tegne elementer ind på kortet. Elementerne er bundet op på den geografiske placering, så de vil blive selv om man panorerer i kortet."
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:46
+#: ../../pages/standard/05_draw.rst:36
+msgid "Værktøjet er tændt, og klar til at lave elementer."
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:51
+msgid "For at måles, gøres følgende:"
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:57
+msgid "Afstand:"
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:54
+#: ../../pages/standard/05_draw.rst:44
+msgid "Klik for at starte linje"
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:55
+#: ../../pages/standard/00_measure.rst:68
+#: ../../pages/standard/05_draw.rst:45
+#: ../../pages/standard/05_draw.rst:58
+msgid "Tilføj mellempunkter"
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:56
+#: ../../pages/standard/00_measure.rst:69
+#: ../../pages/standard/05_draw.rst:46
+#: ../../pages/standard/05_draw.rst:59
+msgid "(Slet sidste punkt ved at bruge ``Slet sidste punkt``)"
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:57
+#: ../../pages/standard/05_draw.rst:47
+msgid "Klik på ``Afslut``, eller klik på det sidst tilføjede mellempunkt."
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:70
+msgid "Areal:"
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:67
+#: ../../pages/standard/05_draw.rst:57
+msgid "Klik for at starte flade"
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:70
+#: ../../pages/standard/05_draw.rst:60
+msgid "Klik på det første punkt for at afslutte"
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:80
+#: ../../pages/standard/05_draw.rst:82
+msgid "Ændre elementer"
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:82
+msgid "Når værktøjet aktiveres er det muligt at ændre knudepunkter mm. for de tegnede mål."
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:90
+#: ../../pages/standard/05_draw.rst:92
+msgid "Ændre elementerne ved at klikke og trække knudepunkterne (Hvide kasser)"
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:92
+#: ../../pages/standard/00_measure.rst:101
+#: ../../pages/standard/05_draw.rst:94
+#: ../../pages/standard/05_draw.rst:103
+msgid "Klik for ``Gem`` for at gemme, ``Fortryd`` for at annulere alle ændringer."
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:95
+msgid "Slet mål"
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:97
+msgid "Når værktøjet aktiveres er det muligt at fjerne mål enkeltvis, eller alle på én gang."
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:99
+#: ../../pages/standard/05_draw.rst:101
+msgid "Udvælg et mål der skal fjernes."
+msgstr ""
+
+#: ../../pages/standard/00_measure.rst:103
+#: ../../pages/standard/05_draw.rst:105
+msgid "Klikker man på ``Slet alle`` kan handlingen ikke fortrydes"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:5
+msgid "Tegn"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:19
+msgid "Tegn-værktøjet"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:26
+msgid "Typer"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:39
+msgid "Tegn elementer"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:41
+msgid "For at tegne elementer, gøres følgende:"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:47
+msgid "Linjer:"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:60
+msgid "Arealer/Flader:"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:69
+msgid "Rektangel:"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:69
+msgid "Klik og træk for at tegne et rektangel"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:72
+msgid "Cirkel:"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:72
+msgid "Klik og træk for at slå cirkel"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:75
+msgid "Punkt:"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:75
+msgid "Klik for placere punkt."
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:79
+msgid "Annotation:"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:78
+msgid "Klik for at placere"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:79
+msgid "Indtast notat"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:84
+msgid "Når værktøjet aktiveres er det muligt at ændre knudepunkter mm. for de tegnede elementer."
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:97
+msgid "Slet elementer"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:99
+msgid "Når værktøjet aktiveres er det muligt at fjerne elementer enkeltvis, eller alle på én gang."
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:108
+msgid "Stilart"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:113
+msgid "Linjer"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:115
+msgid "Det er muligt at definere en ende på hver linje. Denne indstilling sættes inden man tegner sin linje."
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:117
+msgid "Der er også mulighed for at få vist mål på linjer, samt totalmål."
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:125
+#: ../../pages/standard/05_draw.rst:138
+msgid "Fra venstre mod højre: Pilehoved, Stop, firkant, punkt. Den sidste linje er sat op som vist i billedet."
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:128
+msgid "Oversigt"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:130
+msgid "Nederst vil der være en tabel over de tegnede geometrier. Ved at klikke på en række vil kortet flyve over til den relevante geometri."
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:5
+#: ../../pages/standard/06_project.rst:19
+msgid "Projekter"
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:10
+msgid "2021.9.0"
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:11
+#: ../../pages/standard/90_build_configuration.rst:11
+#: ../../pages/standard/91_run_configuration.rst:11
+msgid "`giovanniborella <https://github.com/giovanniborella>`_ | `mapcentia <https://github.com/mapcentia>`_"
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:24
+msgid "Projekt"
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:26
+msgid "Projekt-værktøjet kan bruges til at gemme og distribuere øjebliksbilleder af kortets tilstand."
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:28
+msgid "Når der bliver lavet et projekt, gemmes kort-udstrækningen, tegnede elementer (:ref:`draw`), lag med mere - og kan bruges som en direkte genvej tilbage til hvor man arbejdede tidligere."
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:30
+msgid "Når værktøjet startes, vises en liste med allerede eksisterende projekter."
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:38
+msgid "Værktøjet er tændt, og klar til at lave projekter."
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:40
+msgid "Projekter kan gemmes på to måder: Lokalt eller under en brugerprofil."
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:42
+msgid "**Lokal gemte projekter**"
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:44
+msgid "Projektet bliver gemt på serveren, men referencen til det er knyttet til browser-sessionen. Dvs. at projektet kan ses på listen og ændres så længe der anvendes den samme browser og browser-cachen ikke er ryddet. Mistes referencen til projektet vil det stadig eksistere, men kan ikke ændres eller slettes."
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:46
+msgid "**Bruger gemte projekter**"
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:48
+msgid "Er man logget ind i Vidi kan projektet gemmes under ens bruger-profil. På denne måde kan man altid se projektet på listen og det kan ændres/slettes fra en hvilken som helst browser."
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:50
+msgid "Det er muligt at tilgå et projekt på flere måder:"
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:52
+msgid "Direkte som link. Et link direkte til et projekt kan se sådan ud:"
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:54
+msgid "`http://mapgoviditest.geopartner.dk/app/vandvaerker/public/?state=state_snapshot_35f2ea90-5975-11eb-8a1b-e3cc28c27983`_"
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:56
+msgid "Man få et link til at printe kortet ud som png:"
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:58
+msgid "`http://mapgoviditest.geopartner.dk/api/static/vandvaerker/public/?state=state_snapshot_35f2ea90-5975-11eb-8a1b-e3cc28c27983&width=1920&height=1080`_"
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:61
+msgid "Skab projekt"
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:63
+msgid "Når kortet er opsat med de relevante lag, baggrundskort, tegninger mv. Indtastes et projektnavn, og man trykker på ``Gem``-knappen."
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:65
+msgid "Knappen er \"Disketten\" vist på :numfig:`project-on`"
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:68
+msgid "Genskab projekt"
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:70
+msgid "For at gå til projektet, klik på \"Play\"-ikonet. Den gemte opsætning vil nu blive genskabt."
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:73
+msgid "Editér projekt"
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:74
+msgid "Hvis man vil editere et projekt, starter man med at genskabe det - lave ændringerne i baggrundskort mv. og derefter gemme projektet påny."
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:76
+msgid "Det er også muligt at omdøbe projektet."
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:79
+msgid "Slet projekt"
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:81
+msgid "For at slette et projekt bruges \"Skraldespand\"-ikonet. Der vil komme en pop-up for at bekræfte dit valg. Hvis et projekt slettes er det ikke muligt at genskabe det."
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:5
+#: ../../pages/standard/07_print.rst:28
+msgid "Print"
+msgstr ""
+
+#: ../../_subs/NOTE_CONF.rst:4
+msgid "Indhold i dette værktøj er betinget af opsætningen af Vidi."
+msgstr ""
+
+#: ../../_subs/NOTE_CONF.rst:6
+msgid "For at læse mere om opsætningen, kan du gå til :ref:`configjs` eller :ref:`configjson`"
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:21
+msgid "Printværktøj"
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:25
+msgid "Når værktøjet vælges er det indledningsvis tændt."
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:30
+msgid "Når værktøjet er tændt vil man se en rød kasser der representerer udskriftsområdet."
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:38
+msgid "Værktøjet er tændt, og klar til at printe"
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:41
+msgid "Muligheder"
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:43
+msgid "Efter print-området er dannet er det muligt i kortvinduet at:"
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:45
+msgid "Flytte området ved hjælp af punktet i midten."
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:46
+msgid "Ændre målestoksforhold ved at trække i de yderste punkter."
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:48
+msgid "Følgende indstillinger kan også sættes:"
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:50
+msgid "Skabelon"
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:51
+msgid "Hvis der er defineret flere skabeloner i konfigurationen, vises disse her"
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:52
+msgid "Papirstørrelse"
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:53
+msgid "Her vælges den relevante papirstørrelse som er tilgængelig i skabelonen"
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:54
+msgid "Orientering"
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:55
+msgid "Der understøttes print i `Liggende` og `Stående`"
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:56
+msgid "Titel, Kommentar"
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:57
+msgid "Hvis disse felter, eller et af disse felder udfyldes vil der være et korthoved indeholdende teksterne på printet."
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:59
+msgid "Vis signatur"
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:59
+msgid "Er denne slået til, vil der blive genereret en signatur over de de aktive lag på kortet."
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:61
+msgid "Når man er tilfreds med indstillingerne, klikker man på ``Lav PDF``. Det er også muligt at bruge drop-down til at printe som ``PNG``"
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:69
+msgid "Klar til at printe"
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:77
+msgid "Print er gennemført"
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:79
+msgid "Når printet er gennemført har man muligheden for at åbne printet i browseren - eller ved hjælp af drop-down; downloade printet eller få vist kortet i en HTML version."
+msgstr ""
+
+#: ../../pages/standard/80_standard_query_string.rst:5
+msgid "Standard query string"
+msgstr ""
+
+#: ../../pages/standard/80_standard_query_string.rst:10
+msgid "2022.8.4"
+msgstr ""
+
+#: ../../pages/standard/80_standard_query_string.rst:16
+msgid "Når Vidi starter kan man indsætte parametre i url'en som styre en række egenskaber."
+msgstr ""
+
+#: ../../pages/standard/80_standard_query_string.rst:19
+msgid "initialFilter"
+msgstr ""
+
+#: ../../pages/standard/80_standard_query_string.rst:21
+msgid "Denne parameter kan sætte filtre på lag således, at de er filtreret fra startet. Der kan sættes flere filtre på det samme lag og flere lag kan filtreres. Filtrede lag bliver aktiveret i vektor-udgave og der zoomes til filtrerede features på det sidst færdig-loadede lag. Hvis laget ikke er udgivet i vektor-udgave, vil tile-udgaven tænde og der zoomes ikke."
+msgstr ""
+
+#: ../../pages/standard/80_standard_query_string.rst:24
+msgid "Et filter objekt ser sådeles ud:"
+msgstr ""
+
+#: ../../pages/standard/80_standard_query_string.rst:42
+msgid "Når det skal bruges i URL'en skal filter objektet Base64URL kodes. Det ligner dette:"
+msgstr ""
+
+#: ../../pages/standard/80_standard_query_string.rst:49
+msgid "Base64URL er en afart af Base64, som ikke kan indeholde tegnene +=/ og er derfor \"url sikker\". https://www.npmjs.com/package/base64url"
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:5
+msgid "Systemkonfiguration"
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:10
+msgid "2022.9.0"
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:16
+msgid "Vidi kan konfigureres under opstart. Denne konfiguration kan indeholde information om hvilke extensions, der skal indlæses, hvilke print-skabeloner der er tilgængelige med mere."
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:18
+msgid "Laves der en ændring, skal vidi startes igen."
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:20
+msgid "Vidi styres af ``config.js``. Denne fil vil være at finde i ``./vidi/config/``."
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:25
+msgid "puppeteerProcesses"
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:27
+msgid "Denne blok styrer hvor mange arbejdere der kan være forbindet til print-køen."
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:29
+msgid "Hvis man sætter ``\"min\": 0`` vil der ikke køre processer i baggrunden, og der skal startes en puppeteer op fra bunden. Denn \"cold-start\" kan tage flere sekunder."
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:31
+msgid "Antallet af varme puppeteer-instaser vil have en effekt på systemets RAM forbrug."
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:43
+#: ../../pages/standard/91_run_configuration.rst:416
+msgid "print"
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:45
+msgid "Denne nøgle indeholder opsætningen af print. Den består af underdele som alle er obligatoriske."
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:51
+msgid "scales"
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:53
+msgid "``scales`` er en array af heltal der definérer hvilke zoom-forhold det er muligt at lave print i."
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:55
+msgid "Herunder er et eksempel på en opsætning der kun giver mulighed for print i ``1000``, ``2000`` og ``10000``"
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:64
+msgid "configUrl"
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:66
+msgid "HTTP server hvor eksterne resourcer findes. Resourcer kan være:"
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:68
+msgid ":ref:`Kørselskonfigurationer<configjson>`"
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:69
+msgid ":ref:`Templates<configjs_template>`"
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:70
+msgid ":ref:`CSS filer<configjs_cssfiles>`"
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:76
+msgid "Der kan angives forskellige URLer til forskellige databaser. ``_default`` betyder alle andre."
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:88
+msgid "leftSlideWidths"
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:90
+msgid "Angivelse af bredder i det venstre slide-ud panel i default template."
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:92
+msgid "Tallene angiver brededer i hhv. phone, tablet og desktop."
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:101
+msgid "df"
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:103
+#: ../../pages/standard/91_run_configuration.rst:269
+msgid "Til WMS baggrundskort fra Datafordeler og Dataforsyningen kan der anvendes en proxy, som til dels fixer et problem med Datafordeler og til dels kan forsyne kaldene med brugernavn/kodeord eller token, så disse ikke bliver eksponeret til Vidi brugerne."
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:105
+msgid "Det er kun nødvendig at angive enten username/password eller token. Token har forrang hvis begge er angivet:"
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:122
+msgid "Se i Kørselskonfigurationen :ref:`configjs_baselayers` hvordan WMS'er fra Datafordeler og Dataforsyningen kan anvendes"
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:125
+msgid "Komplet eksempel"
+msgstr ""
+
+#: ../../pages/standard/90_build_configuration.rst:127
+msgid "For at se et komplet eksempel på en konfiguration henvises til default config i repo. `Den kan du finde her <https://github.com/mapcentia/vidi/blob/master/docker/stable/conf/vidi/config.js>`_"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:5
+msgid "Kørselskonfiguration (configs)"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:16
+msgid "Når vidi startes i browseren læses værdier ind fra :ref:`configjs`. I flere tilfælde kan denne konfiguration ændres til eksempelvis at inkludere bestemte extensions, eller print-templates."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:18
+msgid "Vidi startes med en URL som denne (uden fragments [#fragment]_):"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:20
+msgid "``https://vidi.dk/app/mindb/?config=minconfig.json``"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:22
+msgid "Som kan læses sådan:"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:24
+msgid "``https://<host>/app/<database>/?config=<kørselskonfiguration>.json``"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:29
+msgid "schemata"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:31
+msgid "Her angives hvilke lag, der skal hente ind i lagtræet. Der er tre måder at angive på:"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:33
+msgid "*Schema*. Alle lag i schemaet."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:34
+msgid "*Lag*. Et enkelt lag."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:35
+msgid "*Tag*. Alle lag med taggen."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:37
+msgid "De tre måder kan kombineres."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:49
+msgid "Lag skal være placeret i en laggruppe for at kunne hentes ind. Dette gøres i GC2 Admin."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:55
+msgid "enabledExtensions"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:57
+msgid "Her angives hvilke extensions, som skal aktiveres."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:75
+msgid "extensionConfig"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:77
+msgid "Her kan opsætningen af de enkelte extensions laves. Det er ikke alle extensions, som har sine egne indstillinger."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:79
+msgid "Opsætningen sker efter følgende princip:"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:88
+msgid "Her følger hvordan de enkelte extensions kan opsættes (Pt. omfatter denne del af dokumentationen ikke alle extensions)"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:127
+msgid "enabledPrints"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:129
+msgid "Her angives hvilke print-templates der skal være adgang til. Angives flere end én kan brugeren vælge mellem dem i print-dialogen."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:138
+msgid "enabledSearch"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:140
+msgid "Her angives hvilket søgemodul, der skal være aktiveret. Pt. er der to standard moduler:"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:142
+msgid "``danish`` Søgning på danske adresser, jordstykker og ejendomme"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:143
+msgid "``google`` Google's Place Search (kræver Google API Key. Se :ref:`configjs_searchconfig`)"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:152
+msgid "searchConfig"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:154
+msgid "Her kan det valgte søgemodul konfigureres."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:156
+msgid "``size`` Hvor mange forslag skal der vises."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:157
+msgid "``komkode`` Hvilket eller hvilke kommunekoder skal søgningen omfatte. Angives enten som \"851\", [\"851\", \"727\"] eller \"*\""
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:158
+msgid "``esrSearchActive`` Aktiver søgning på esr ejendomsnummer"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:159
+msgid "``sfeSearchActive`` Aktiver søgning på sfe ejendomsnummer"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:160
+msgid "``placeholderText`` Udskift standard-teksten med en anden"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:161
+msgid "``google`` Google API key."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:175
+msgid "Indstillerne har kun indflydelse på \"danish\" søgemodulet Kun \"google\" vedrører Google Place Search og behøver ikke udfyldes, hvis det ikke bruges. Google API kan også sættes i GC2."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:180
+msgid "template"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:182
+msgid "Her angives hvilken template, som skal bruges. Angives det ikke, bruges standard-templaten ``default.tmpl``. Egne Templates kan placeres på egen server ved angivelse af :ref:`configUrl<configjs_configurl>` indstillingen."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:192
+msgid "brandName"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:194
+msgid "Her kan sættes en tekst som placeres vha. en placeholder i templates."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:203
+msgid "baseLayers"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:205
+msgid "Opsætning af tilgængelige base layers kan ske på fire forskellige metoder:"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:207
+msgid "Indbyggede lag"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:208
+msgid "WMS lag"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:209
+msgid "XYZ lag"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:210
+msgid "GC2 lag"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:267
+msgid "De to egenskaber ``inDrawer`` og ``thumbnail`` anvendes til baggrundskort \"skuffe\" og toggle knap. Se mere på :ref:`configjs_baselayerdrawer`"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:271
+msgid "Se hvordan bruger-information opsættes i Systemkonfigurationen :ref:`configjs_df`"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:273
+msgid "Derefter kan WMS'er opsættes således. Fx hvis man ønsker at anvende:"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:275
+msgid "``https://services.datafordeler.dk/GeoDanmarkOrto/orto_foraar/1.0.0/WMS``"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:277
+msgid "skal \"url\" angives til:"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:279
+msgid "``/api/datafordeler/GeoDanmarkOrto/orto_foraar/1.0.0/WMS``"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:281
+msgid "Vidi sørger så for at tilføje bruger-infomationen og tilrette URL."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:315
+msgid "HERE, Bing og Google Maps kræver API nøgle opsat i GC2. Google Maps fungerer på en anden måde end andre lag og langt fra optimalt. Fx kan man ikke printe Google Maps."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:320
+msgid "aboutBox"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:322
+msgid "Her kan sættes en tekst eller HTML som vises i About Box."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:331
+msgid "startUpModal"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:333
+msgid "Hvis angivet, vil et modal-vindue vises ved opstart med tekst eller HTML. Vinduet kan skjules en gang eller for altid (indtil cookies nulstilles eller indeholdet ændres)."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:342
+msgid "startupModalSupressionTemplates"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:344
+msgid ":ref:`startUpModal <configjs_startupmodal>` kan undertrykkes ved udvalgte templates. Templates kan angives ved navn eller regular expression."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:356
+msgid "featureInfoTableOnMap"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:358
+msgid "Når denne er sat til ``true`` vises feature-info tabellerne i en popup på kortet i stedet for i sidepanelet. Det gør indstillingen veleget til embed template. Ved brug af \"avanceret forespørgelse\" vises tabellerne dog stadig i sidepanelet."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:373
+msgid "Kan ikke anvendes i sammenhæng med :ref:`configjs_crossmultiselect`"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:378
+msgid "crossMultiSelect"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:380
+msgid "Når denne er sat til ``true`` vil feature info klik fange både raster- og vektor-lag og opstille de enkelte resultater i en \"harmonika\". Derved inddeles resultatet ikke efter hvilke lag de tilhører. Overskrifterne har to dele:"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:383
+msgid "``Accordion summery prefix`` En fritekst efter eget valg."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:384
+msgid "``Accordion summery`` En celle værdi, angivet med kolonnenavn."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:386
+msgid "Ovenstående sættes i GC2 Meta."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:400
+msgid "Hvis extension ``editor`` er aktiv vil ``crossMultiSelect`` bliver sat til ``false``."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:405
+msgid "activateMainTab"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:407
+msgid "Sæt hvilket modul, som skal være aktivt fra starten. Mulighederne er:"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:409
+msgid "search"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:410
+msgid "info"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:411
+msgid "layer"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:412
+msgid "baselayer"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:413
+msgid "legend"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:414
+msgid "draw"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:415
+msgid "state-snapshot"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:417
+msgid "conflict"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:418
+msgid "streetView"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:419
+msgid "coordinates"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:428
+msgid "cssFiles"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:430
+msgid "Load eksterne CSS filer. Filerne skal placeres på en HTTP server, som forbindes til vha. :ref:`configUrl<configjs_configurl>`"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:442
+msgid "dontUseAdvancedBaseLayerSwitcher"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:444
+msgid "Deaktiver dobbelt baggrundskort funktionen."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:453
+msgid "advancedBaseLayerSwitcher"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:455
+msgid "Opsætning af dobbelt baggrundskort funktionen."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:457
+msgid "``mode`` bestemmer om kun Slider ``1`` eller kun Overlap ``2`` eller begge ``3`` skal være tilgængelig. Default er ``3`` (begge)."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:459
+msgid "``default`` bestemmer om det er Silder ``1`` eller Overlap ``2``, der skal være aktiv fra starten. Default er ``1`` (Slider). Hvis ``mode`` er ``1`` eller ``2``, så er ``default`` ligegyldig."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:461
+msgid "``active`` bestemmer om dobbelt baggrundskort funktionen skal være aktiv fra starten. Default er ``false``."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:474
+msgid "infoClickCursorStyle"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:476
+msgid "Sæt hvilken CSS cursor style markøren skal have når feature-info modulet er aktivt. Default er \"crosshair\"."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:478
+msgid "Andre muligheder kan ses `her <https://developer.mozilla.org/en-US/docs/Web/CSS/cursor>`_."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:487
+msgid "showLayerGroupCheckbox"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:489
+msgid "Viser en tjekboks i hver lag-gruppe og under-gruppe, som tænder/slukker alle lag i den pågældende gruppe."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:498
+msgid "activeLayers"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:500
+msgid "Liste over lag, som skal tændes fra starten. Lag angives schema qualified og med evt. type præfiks (v:, mvt:, w:). De angivne lag behøver ikke at være includeret i :ref:`schemata<configjs_schemata>`. Hvis Vidi startes med et projekt link, vil denne konfiguration blive ignoreret."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:513
+msgid "removeDisabledLayersFromLegend"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:515
+msgid "Hvis sættes til true, så fjernes lag fra signaturforklaringen, når laget slukkes. Ellers forbliver det på signaturen, men tjekboksen bliver tom. Default er \"false\"."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:524
+msgid "autoPanPopup"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:526
+msgid "Denne indstilling bevirker, at når en pop-up åbnes, så panoreres kort således, at pop-up'en kommer indenfor kortets udsnit. Bemærk, at indstillingen helst skal sættes til \"false\", hvis der anvendes vektor-lag med dynamisk loading af data, fordi panoreringen evt. kan bevirke reload af data og derefter lukkes pop-up'en Default er \"false\"."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:535
+msgid "vectorTable"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:537
+msgid "Denne indstilling styrer om :ref:`vektorlag tabellen<gc2mata_vectorsettings>` skal vises til højre for eller i bunden af kortet. Endvidere kan højde/bredde styres. Hvis positionen er sat til ``right`` vil kun ``width`` have effekt og tabellen vil altid fylde højden ud. Hvis position er sat til ``bottom`` vil kun ``height`` have effekt og bredden bliver den samme som kortet. ``width`` kan både være relativ ``%`` og absolute ``px`` mens ``height`` kun kan angives som absolute ``px``. Hvis ikke denne indstilling sættes bruges default værdier som vist nedenunder."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:552
+msgid "initFunction"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:554
+msgid "Her kan angives en JavaScript funktion, som bliver kørt når Vidi er klar. Funktionen skal skrives som en linje tekst startende med `function()` og den efterfølgende blok er den, som bliver eksekveret:"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:563
+msgid "initZoomCenter"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:565
+msgid "Hvis sat vil Vidi starte op på det angivet zoom/center. Denne indstilling vil have forrang over zoom/center sat i URL og projekt-link. Kan fx anvendes til at sikre, at alle indlejrede kort starter med samme zoom/center."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:567
+msgid "Angives således `/z/x/y`. Dette svarer til det, der vises i Vidi URL'en."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:577
+msgid "popupDraggable"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:579
+msgid "Hvis sat til `true` kan man flytte feature-info pop-up'en på kortet."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:589
+msgid "title"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:591
+msgid "Sæt titel på siden (den der vises på browser-fanen)."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:598
+msgid "Titlen bliver sat dynamisk efter Vidi er startet og derfor vil titlen under opstart et øjeblik være sat til standardteksten."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:604
+msgid "baselayerDrawer"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:606
+msgid "Anvend baggrundskort \"skuffe\" i stedet for toggle knappen. Skuffen kan indeholde et vilkårlig antal muligheder. Udvælgelsen af baggrundskort til skuffen og thumbnails/ skal opsættes i :ref:`configjs_baselayers`"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:619
+msgid "Template ``default.tmpl`` viser hverken skuffe eller toggle knap. Anvendes på ``embed.tmpl`` og lign., som ikke har den store baggrundskortsvælger."
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:621
+msgid "Fodnoter"
+msgstr ""
+
+#: ../../pages/standard/91_run_configuration.rst:622
+msgid "Et fragment er den del af en URL der kommer efter `#`."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:5
+msgid "Lagopsætning fra GC2"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:18
+msgid "GC2 Meta information"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:20
+msgid "GC2 har et konfigurerbart Meta Data system med egenskaber tilknyttet de enkelte lag, som Vidi læser ved opstart. Egenskaberne omfatter fx om lag kan editeres, om et lag skal vises som tile- eller vektorlag osv."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:28
+msgid "Herunder følger de forskellige egenskaber, der har betydning for Vidi."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:33
+msgid "Info pop-up"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:35
+msgid "**Pop-up template**"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:37
+msgid "Indeholdet i feature-info pop-up'en styres vha. en template, som anvender sproget `handlebars <https://handlebarsjs.com>`_"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:39
+msgid "Hvis der ikke angives en template, så anvendes en standard, som looper felterne igennem og lister dem. Den ser således ud:"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:53
+msgid "**Element selector**"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:55
+msgid "Hvilket DOM element skal pop-up templaten renderes i? Kan bruges til brugerdefinerede templates."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:57
+msgid "**Function**"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:59
+msgid "En JavaScript funktion som kaldes når feature-info foretages. En række argumenter bliver sendt til funktionen, herunder det objekt man har klikket i GeoJSON formatet."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:68
+#: ../../pages/standard/92_gc2_meta_information.rst:96
+msgid "Man kan nøjes med at skrive selve funktionens \"body\" og undlade `function` og listen af argumenterne. I såfald kan argumenterne tilgås med de navne, som angivet ovenfor:"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:75
+msgid "**Select function**"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:77
+msgid "En JavaScript funktion, som kaldes når der vælges en række i feature-listen. Id på Leaflet layer samt selve Leaflet layer bliver sendt som argumenter."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:113
+msgid "**Accordion summery prefix**"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:115
+#: ../../pages/standard/92_gc2_meta_information.rst:119
+msgid "Anvendes ved brugen af :ref:`configjs_crossmultiselect`"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:117
+msgid "**Accordion summery**"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:124
+msgid "Layer type"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:126
+msgid "**Type**"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:128
+msgid "Hvilken type skal laget have i Vidi? Enten Vector eller Tile. Tile er WMS fra MapServer/QGIS Server og er standard. Hvis Vector vælges vil Vidi hente rå-dataene og vise som et vektorlag. Vektorlag gemmes i browseren og kan bruges uden netværk. Hvis begge tjekkes af, vil man kunne vælge mellem dem i lag-træet."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:131
+msgid "Typerne WebGL og MVT (vector tiles) er eksperimentielle og virker givetvis ikke i Vidi."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:133
+msgid "**Default**"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:135
+msgid "Hvilken type skal være valgt fra starten."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:140
+msgid "Tables"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:142
+msgid "**Zoom on select**"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:144
+msgid "Skal der zoomes ved valg af objekt i feature-info-tabellen?"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:146
+msgid "**Max zoom level**"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:148
+msgid "Hvis der zoomes, så kan maks zoom-level sættes. Jo højere tal jo længere ind zoomes der. Er speciel anvendelig ved punktlag, hvor der altid zoomes maks ind. Standard sat til 17."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:153
+msgid "Editor"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:155
+msgid "**Editable**"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:157
+msgid "Skal laget være editerbart? Både Tile og Vector kan editeres. Det anbefales dog at benytte Vector til lag, som skal editeres i marken, da der er fuld funktionalitet uden netværk eller med langsom forbindelse."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:168
+msgid "Tile settings"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:170
+msgid "(Har kun betydning for lag af typen Tile)"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:172
+msgid "**Use tile cache (WMS)**"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:174
+msgid "Hvis tjekket af, vil Vidi omgå MapCache og trække laget direkte fra WMS. Dette gør, at laget altid er synkront med databasen. Ulempen er, at databasen bliver belastet mere, så dette er ikke velegnet til lag, som har mange samtidige visninger."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:176
+msgid "**Tile service URI**"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:178
+msgid "Denne egenskab bevirker, at laget tiles bliver trukket fra et brugerdefineret API. Fx en extension til GC2."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:180
+msgid "**Selected style**"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:182
+msgid "Her kan angives et style-objekt, som styrer hvordan det valgte objekt bliver markeret ved feature-info. Hvis det angives anvendes e. standard styling."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:184
+msgid "Eksempel på et style-objekt:"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:200
+msgid "Vector settings"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:202
+msgid "(Har kun betydning for lag af typen Vector)"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:204
+msgid "**Load strategy**"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:206
+msgid "Kan enten være Static eller dynamic. Static betyder, at alle lagets data bliver hentet fra databasen, når laget tændes. Ved dynamic hentes kun de data, som er synlige inden for kortet viewport plus en buffer. Når der zoom/panes bliver nye data hentet, hvis det er nødvendigt. Static er standard."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:208
+msgid "**Max features**"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:210
+msgid "Hvor mange features skal skal der max leveres? Når laget tændes og max bliver nået, vises ingen features i laget og brugeren bliver informeret om, at max blev nået."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:212
+msgid "**Use clustering**"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:214
+msgid "Aktiverer Leaflet Cluster Map på laget."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:216
+msgid "**Point to layer**"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:218
+msgid "Vektor-punkter punkter kan vises som enten circle markers eller grafiske markers. Førstnævnte kan sammenlignes med vektor-linjer og flader og vil anvende nedenfornævnte Style function."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:220
+msgid "Men punkter kan også vises som grafisk ikoner. Vidi har indbygget Leaflet Plugin'en `Extra Markers <https://github.com/coryasilva/Leaflet.ExtraMarkers>`_ med `Font Awesome <https://fontawesome.com>`_ , som anvendes uden videre:"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:236
+msgid "Her er et eksempel på hvordan et brugerdefineret SVG symbol kan anvendes:"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:251
+msgid "Markers placeres som standard i \"marker-pane\", som ligger øverste i kortet. Dvs. at marker-lag ikke kan sorteres mellem andre lag ej heller andre marker-lag. For at kun sortere marker-lag som andre typer af lag, er det nødvendigt at angive i marker-definitionen, at de skal placeres i eget pane."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:253
+msgid "Hvert lag har sit eget pane, som hedder \"schemanavn-lagnavn\". Dette kan angives i hhv. ``pane`` og ``shadowPane``. Sidstnævnte anvendes kun ved bruge af ExtraMarkers eller tilsvarende, som har en skygge:"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:271
+msgid "**Style function**"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:273
+msgid "Funktion til styling af vektor-lag. Funktionen modtager hver enkelt feature i laget og leverer en style tilbage. Man kan derved lave meget anvanceret tematiseringer:"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:288
+msgid "**Show table**"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:290
+msgid "Hvis tjekket af og laget bliver tændt som vektor vil en tabel med lagets attributter vises. Kolonnerne styres af ``Vis i klik-info`` og ``Alias`` i GC2 Admin. Der kan kun vises en tabel ad gangen. Hvis der allerede er en tabel åben, sker der ingenting ved åbning af en anden - det første lag skal slukkes før en anden tabel kan åbnes. Virker kun i embed template. Positionen og bredde/højde på tabellen kan styres gennem :ref:`Kørselskonfiguration (configs)<configjs_vectorTable>`"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:302
+msgid "**Reload Interval**"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:304
+msgid "Hvis dette sættes vil laget refreshe i det angivne interval. Angives i millisekunder."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:306
+msgid "**Reload callback**"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:308
+msgid "Hvis ovenfor er sat, vil denne funktion blive kørt ved hvert refresh."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:310
+msgid "**Disable feature info**"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:312
+msgid "Deaktiverer feature-info på vektor-laget."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:314
+msgid "**Max zoom**"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:316
+msgid "Højeste zoom-level hvor laget skal være synligt. Værdien skal være en tile-set zoom level (0-20). Virker for både vektor og marker lag."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:318
+msgid "**Min zoom**"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:320
+msgid "Laveste zoom-level hvor laget skal være synligt. Værdien skal være en tile-set zoom level (0-20). Virker for både vektor og marker lag."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:322
+msgid "**Tooltip template**"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:324
+msgid "Hvis der angives en tooltip template får hver vektorfeature et tooltip/label med værdien. Templaten har adgang til alle attributter for feature:"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:333
+msgid "Filters"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:335
+msgid "**Filter config**"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:337
+msgid "Her kan der foruddefineres hvilke filtre, der skal være parate til brug fra starten. Derved skal brugeren blot skrive værdier i filtrene og klikke Apply."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:339
+msgid "Filteropsætningen er en liste af objekter med hver to egenskaber: field og operator. Eksempel på en opsætning:"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:349
+msgid "Som giver dette resultat:"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:357
+msgid "**Predefined filters**"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:359
+msgid "Præ-definerede filtre gør det muligt, at aktivere fastsatte filtrer med en tjekboks. Som udgangspunkt er et filter aktiveret og som match bruges altid \"Any\". Dette er velegnet til at give brugeren mulighed for at slukke/tænde klasser i kortet. Et eksempel på Præ-definerede filtre kan ses nedenunder. Først skrives titlen på filteret og på højresiden skrives selve filtret, som er en SQL where clause."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:370
+msgid "Eksemplet ser sådan ud i lag-træet:"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:379
+msgid "**Default match**"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:381
+msgid "Hvad skal match være som standard: All eller Any"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:383
+msgid "**Immutable**"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:385
+msgid "Hvis denne egenskab er slået til kan filteropsætningen ikke ændres i Vidi."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:390
+msgid "Mouse over"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:392
+msgid "**Activate mouse over**"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:394
+msgid "Aktiverer mouse over på laget. Virker på tile- og vektor-lag."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:396
+msgid "**Template**"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:398
+msgid "Indeholdet i mouse over labelen styres vha. en template, som anvender sproget `handlebars <https://handlebarsjs.com>`_"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:400
+msgid "Hvis der ikke angives en template, så anvendes en standard, som looper valgte felterne (tjekket af i :ref:`gc2structure_mouseover`) igennem og lister dem. Den ser således ud:"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:410
+msgid "**Cache UTF grid**"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:412
+msgid "Ved mouse over på tile-lag anvendes et såkaldt UTF grid, som er en slags interaktivt lag, som loades bag tile-laget. Det kræver database og CPU resourcer at danne disse grids, så det er muligt at cache dem, således allerede brugte grids ikke skal gendannes."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:417
+msgid "References"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:419
+msgid "**Referenced by**"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:421
+msgid "Her kan et lag linkes til et eller flere andre lag. Dvs. at når \"forældre\"-laget filtreres, så bliver \"børne\"-lagene også filtreret. forældre-laget og børne-lagene skal kunne linkes samme efter princippet med en nøgle og fremmednøgle: Forældre-laget skal have en et unikt nøglefelt, som optræder som fremmednøglefelt i børne-lagene."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:423
+msgid "Opsætningen sker i forældre-laget, som refererer til børne-lagene."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:425
+msgid "I eksemplet nedenunder refererer børne-laget drift.vw_searchjourneystop til forældrelaget, som har det unikke nøglefelt vj_gid. Fremmednøglen i børne-laget hedder vehjourneygid."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:427
+msgid "Her er der kun ét børne-lag, men der skrives flere objekter ind i listen."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:439
+msgid "I Vidi i laget-træet kan børne-lagene ses på forældre-laget:"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:451
+msgid "Layer tree"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:453
+msgid "**Sub group**"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:455
+msgid "Denne egenskab kan gruppere lag i en under-lag-grupper. Alle lag med samme Sub group vil blive samlet i en gruppe. Lagene skal ligge i samme GC2 Group."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:457
+msgid "Man kan have uendelig mange undergrupper og stien af undergrupper, hvor laget skal befinde sig skal angives således:"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:463
+msgid "**Open tools**"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:465
+msgid "Her kan angives om et lags værktøjer skal være åbne fra starten. Hvilke værktøjer, der skal være åbne, angives således:"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:471
+msgid "I ovenstående tilfælde vil filter-værktøjerne være åbne."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:473
+msgid "Her ses alle mulighederne:"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:479
+msgid "**Disable check box**"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:481
+msgid "Laget kan låses. Det låses op, hvis laget er registreret som \"barn\" til et andet lag gennem :ref:`gc2mata_references`, hvorpå der aktiveres et filter."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:486
+msgid "GC2 Struktur-fanen"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:488
+msgid "I GC2's struktur-fane kan der laves en række indstillinger på feltniveau."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:498
+msgid "Alias"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:500
+msgid "Giv feltet et alias, som vises i stedet for det tekniske feltnavn i Vidi. Kan indeholde specialtegn"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:503
+msgid "Vis i klik-info"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:505
+msgid "Medtag feltet i feature-info. Gælder kun ved brugen af standard pop-up templaten. (se :ref:`gc2mata_infopopup`)"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:510
+msgid "Vis i mouse-over"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:512
+msgid "Medtag feltet i mouse-over. Gælder kun ved brugen af standard mouse-over-templaten. Men skal klikkes af, hvis feltet overhovedet skal med i UTF Grid'et. (se :ref:`gc2mata_mouseover`)"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:516
+msgid "Søgbar"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:518
+msgid "Gør feltet søgbart i lagets fritekstsøgning."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:528
+msgid "Deaktiver filtrering"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:530
+msgid "Ekskluder feltet fra lag-filtrering."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:534
+msgid "Autocomplete"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:536
+msgid "Aktiver autocomplete på feltet i filtrering."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:548
+msgid "Gør til link"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:550
+msgid "Hvis feltet indholder en web-adresse gøres det til et aktivt link i pop-up'en."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:553
+#: ../../pages/standard/92_gc2_meta_information.rst:561
+#: ../../pages/standard/92_gc2_meta_information.rst:571
+#: ../../pages/standard/92_gc2_meta_information.rst:579
+#: ../../pages/standard/92_gc2_meta_information.rst:591
+msgid "Hvis der anvendes en brugerdefineret pop-up template, har denne indstilling ingen effekt (se :ref:`gc2mata_infopopup`)"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:556
+msgid "Content"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:558
+msgid "Hvis feltet indeholder et link til et billede eller mp4-video kan der her vælges typen. Ved brug af standard templaten bliver billedet eller videoen sat ind (se :ref:`gc2mata_infopopup`)"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:566
+msgid "Link prefix"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:568
+msgid "Hvis :ref:`gc2structure_link` er tjekket af, kan der sættes en tekst-streng foran linket. Fx hvis ``https://`` mangler i linket (fx ``minside.dk/mitdok.pdf``) således det blivet et gyldigt link."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:574
+msgid "Link suffix"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:576
+msgid "Som ved :ref:`gc2structure_link_prefix` men bare bagved. Fx hvis feltet kun indeholder en titel på et dokument: ``mitdok``, så kan ``https://minside.dk`` sættes som prefix og ``.pdf`` som suffix. og resultatet bliver ``https://minside.dk/mitdok.pdf``."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:582
+msgid "Template"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:584
+msgid "Hvis værdien af et felt skal udtrykkes i pop-up og tabel ved andet end selve den rå værdi kan der indsættes en template for feltet. En template har adgang til alle objektets attributter. Fx kan der defineres en template, som skaber et link med link-tekst og ``title`` og ``aria-label`` attributter fra et andet felt. Fx:"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:594
+msgid "Egenskaber"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:596
+msgid "Her kan der defineres hvilke værdier, der kan være i feltet. Hvis dette defineres, vil der i Vidi's filter og editerings funktioner blive dannet en drop-down-liste, hvor værdierne kan vælges. Det vil altså ikke være muligt at indtaste vilkårlige værdier."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:599
+msgid "Listen af værdier kan defineres på en række forskellige måder."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:601
+msgid "**Reference-tabel**"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:603
+msgid "Værdier kan komme fra en anden tabel i databasen. Dette angives ved tre parameter i et JSON objekt:"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:609
+msgid "``_rel`` angiver reference-tabellen (eller view) som schema-kvalificeret (schema-navnet skal angives foran tabelnavnet)."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:610
+msgid "``_value`` angiver feltet, som indeholder værdierne."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:611
+msgid "``_text`` angiver feltet, som indeholder den tekst, der skal vises i drop-down-listen. Dette felt kan godt være det samme som ovenstående _value felt."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:613
+msgid "**Værdi-tekst liste**"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:615
+msgid "Værdier kan angive som en liste af værdi-tekst par i et JSON objekt. Dvs. at det er teksten (venstre side), som bliver vist i drop-down-listen, mens værdien (højre side) bliver anvendt."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:621
+msgid "**Værdi liste**"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:623
+msgid "Værdier kan angives som en liste i et JSON array. Værdierne bliver vist i drop-down-listen."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:629
+msgid "Listen kan både bestå af tal og tekster."
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:631
+msgid "**Wild card**"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:633
+msgid "Der kan dannes en drop-down-liste af samtlige unikke værdier som allerede findes i feltet. Det gøres ved at indsætte ``*`` i feltet."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:5
+msgid "Indlejring af Vidi på andre hjemmesider"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:20
+msgid "Embed.js script"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:22
+msgid "Vidi kan indlejres på en hjemmeside vha. embed.js scriptet. Dette script skal loades på hjemmesiden, hvor Vidi skal indlejres."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:24
+msgid "Scriptet skal ikke nødvendigvis hentes fra samme server, hvor Vidi findes. Man kan fx selv hoste scriptet eller placere det inline på sin hjemmeside."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:30
+msgid "Scriptet kan både placeres i toppen og bunden af hjemmesiden."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:36
+msgid "Indlejring af Vidi"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:38
+msgid "Indlejring af Vidi sker ved at placere et ``div`` element på hjemmeside, hvor Vidi ønskes placeret. En række ``data`` attributer styrer hvordan kortet vises."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:44
+msgid "Der en række data attributer, som skal/kan sættes:"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:46
+msgid "**data-vidi-token (obligatorisk)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:47
+msgid "Projektets \"token\" som indeholder state-id, host, database mv. Skal angives. Læse mere om :ref:`project`"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:48
+msgid "**data-vidi-width (valgfri)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:49
+msgid "Bredde på kort. Standard 100%"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:50
+msgid "**data-vidi-height (valgfri)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:51
+msgid "Højde på kort. standard 100%"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:52
+msgid "**data-vidi-tmpl (valgfri)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:53
+msgid "Hvilken template kortet skal bruge. Standard embed.tmpl, som er en template beregnet til indlejring."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:54
+msgid "**data-vidi-use-config (valgfri)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:55
+msgid "Kan sættes til \"true\" og derved bruges config'en fra token, hvis den indeholder en config."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:56
+msgid "**data-vidi-use-schema (valgfri)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:57
+msgid "Kan sættes til \"true\" og derved bruges schemaet fra token, hvis den indeholder et schema."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:58
+msgid "**data-vidi-host (valgfri)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:59
+msgid "Kan sættes til en host (fx \"https://example.com\") som bruges i stedet for host angivet i token."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:60
+msgid "**data-vidi-frame-name (valgfri)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:61
+msgid "Navn på det indsatte kort. Dette er nødvendig hvis :ref:`embed_api` skal anvendes."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:62
+msgid "**data-vidi-no-tracking (valgfri)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:63
+msgid "Kan sættes til \"true\" for at undgå at Vidi's tracking cookie bliver sat. Cookien anvendes bl.a til anonyme projekter og print, hvilket der typisk ikke er behov for på indlejrede kort."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:64
+msgid "Følgende attributer styrer hvilke funktioner, der skal være synlige."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:66
+msgid "Følgende funktioner er synlige, men kan sættes til \"none\" hvis funktionerne skal skjules:"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:68
+msgid "**data-vidi-search (valgfri)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:69
+msgid "Søgeboksen."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:70
+msgid "**data-vidi-history (valgfri)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:71
+msgid "Forrige/næste udsnit knapperne."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:72
+msgid "**data-vidi-legend (valgfri)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:73
+msgid "Signatur-knappen."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:74
+msgid "**data-vidi-layer (valgfri)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:75
+msgid "Lag-knappen."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:76
+msgid "**data-vidi-background (valgfri)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:77
+msgid "Baggrund-knappen."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:78
+msgid "**data-vidi-fullscreen (valgfri)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:79
+msgid "Fuldskærms-knappen."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:80
+msgid "**data-vidi-about (valgfri)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:81
+msgid "Om-knappen."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:82
+msgid "**data-vidi-location (valgfri)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:83
+msgid "Find-mig-knappen."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:84
+msgid "**data-vidi-signin (valgfri)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:85
+msgid "Login-knappen."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:87
+msgid "Følgende funktioner er skjulte, men kan sættes til \"inline\" hvis funktionerne skal være synlige:"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:89
+msgid "**data-vidi-measurement (valgfri)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:90
+msgid "Måleværktøjet."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:91
+msgid "**data-vidi-boxzoom (valgfri)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:92
+msgid "\"Elastik\"-zoom-knappen."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:93
+msgid "**data-vidi-reset (valgfri)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:94
+msgid "Reset-knappen."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:95
+msgid "**data-vidi-clear (valgfri)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:96
+msgid "Ryd-kort-knappen."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:97
+msgid "**data-vidi-screenshot (valgfri)**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:98
+msgid "Screenshot-knappen."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:106
+#: ../../pages/standard/95_embed.rst:115
+msgid "Embed API"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:108
+msgid "Embed scriptet udstiller et API, så det er muligt at ændre Vidi's tilstand og definere callback funtioner fra den hjemmeside det er indlejret på."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:110
+msgid "Pt. er der to funktioner udstillet gennem API'et:"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:1
+msgid "Funktion"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:1
+msgid "Beskrivelse"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:1
+msgid "embedApi.switchLayer(<string> *layername*, <bool> *on*, <string> *frame*)"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:1
+msgid "Tænder/slukker et lag. :raw-html:`<br />`  :raw-html:`<br />` Fx ``embedApi.switchLayer('planer.lokalplan', true, 'plankort')``"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:1
+msgid "embedApi.allOff(<string> *frame*)"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:1
+msgid "Slukker alle tændte lag :raw-html:`<br />`  :raw-html:`<br />` Fx ``embedApi.allOff('plankort')``"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:121
+msgid "**Callbacks**"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:123
+msgid "Det muligt at definere callback funktioner for 1) når Vidi er loaded og klar og 2) når aktive lag fra projektet er loaded [#readyOrder]_. Callbacks kan anvendes til at automatisk at kalde API metoder, efter Vidi og lag er færdig-loaded."
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:125
+msgid "Hvis et kort er indlejret med ``data-vidi-frame-name=\"kort1\"`` kan callbacks defineres på følgende måde:"
+msgstr ""
+
+#: ../../pages/standard/95_embed.rst:139
+msgid "Et projekts aktive lag loades først efter Vidi har meldt loaded og klar."
+msgstr ""
+
+#: ../../pages/standard/96_api.rst:5
+msgid "Vidi API"
+msgstr ""
+
+#: ../../pages/standard/96_api.rst:10
+msgid "MASTER"
+msgstr ""
+
+#: ../../pages/standard/96_api.rst:18
+msgid "Brug"
+msgstr ""
+
+#: ../../pages/standard/96_api.rst:20
+msgid "APIet kan bruges i de forskellige templates og funktioner, der kan defineres forskellige steder i en Vidi opsætning. Fx i :ref:`gc2mata_infopopup` templates og funktioner."
+msgstr ""
+
+#: ../../pages/standard/96_api.rst:23
+msgid "APIet kan ikke bruges til indlejrede Vidi kort - dvs. på den webside som Vidi er indlejret på. Her henvises til :ref:`embed_api`"
+msgstr ""
+
+#: ../../pages/standard/96_api.rst:26
+msgid "Tænd lag (turnOn)"
+msgstr ""
+
+#: ../../pages/standard/96_api.rst:28
+msgid "Med denne metode kan man tænde for et lag. Den tager et argument som er et fuldt lagnavn med evt. type præfiks:"
+msgstr ""
+
+#: ../../pages/standard/96_api.rst:35
+msgid "Sæt filter på lag (filter)"
+msgstr ""
+
+#: ../../pages/standard/96_api.rst:37
+msgid "Med denne metode kan der sættes et filter på et givnet lag. Første argument er et fuldt lagnavn (uden type præfiks) og andet argument er filter objektet:"
+msgstr ""
