@@ -29,7 +29,7 @@ msgid ""
 "godt sted at starte."
 msgstr ""
 "If you need to get started with Vidi from scratch, here is a good place "
-"to start TEST."
+"to start."
 
 #: ../../index.rst:15 d214725100ef4fbc8e87997cea050bd9
 msgid "Standardværktøjer"
