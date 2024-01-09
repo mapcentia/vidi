@@ -12,7 +12,7 @@ build:
     python: "3.11"
   jobs:
     post_build:
-     - sphinx-build -b gettext ./docs _build/gettext
+     - sphinx-build -b gettext ./docs ./docs/_build/gettext
      - sphinx-intl update -p ./docs/_build/gettext -l en
 
 # Build documentation in the docs/ directory with Sphinx
