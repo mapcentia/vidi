@@ -11,7 +11,7 @@ build:
   tools:
     python: "3.11"
   jobs:
-    pre_build:
+    post_create_environment:
      - sphinx-build -b gettext . _build/gettext
      - sphinx-intl update -p _build/gettext -l en
 
