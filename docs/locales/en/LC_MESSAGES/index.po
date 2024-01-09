@@ -41,7 +41,7 @@ msgid ""
 " er lavet til at at gøre arbejdet nemmere. Du kan læse mere om de enkelse"
 " værktøjer herunder."
 msgstr ""
-"Vidi contains a number of tools that are always on. These tools"
+"Vidi has a number of tools that are always on. These tools"
 " is made to make work easier. You can read more about the simple"
 "tools below."
 
