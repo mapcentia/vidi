@@ -283,7 +283,7 @@ module.exports = function (grunt) {
         },
         shell: {
             buildDocs: {
-                command: '. ./venv/bin/activate && sphinx-build ./docs ./docs/html'
+                command: '. ./venv/bin/activate && sphinx-build ./docs ./docs/_build/html'
             }
         },
         cacheBust: {

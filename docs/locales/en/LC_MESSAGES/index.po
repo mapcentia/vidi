@@ -11,8 +11,8 @@ msgstr ""
 "POT-Creation-Date: 2024-01-09 09:31+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language: en_UK\n"
-"Language-Team: en_UK <LL@li.org>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
@@ -21,13 +21,13 @@ msgstr ""
 
 #: ../../index.rst:3
 msgid "Vidi brugerdokumentation"
-msgstr "Vidi user documentations"
+msgstr ""
 
 #: ../../index.rst:5
 msgid ""
 "Hvis du har brug for at komme i gang med klienten fra bunden af, er her "
 "et godt sted at starte."
-msgstr ""
+msgstr "EN"
 
 #: ../../index.rst:15
 msgid "Standardværktøjer"
