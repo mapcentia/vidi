@@ -1022,7 +1022,7 @@ module.exports = {
         } else {
             intervalId = setInterval(() => {
                 getVersion().then(() => checkVersion());
-            }, 3000);
+            }, 30000);
         }
 
     },

@@ -41,6 +41,8 @@ module.exports = {
         "Error or timeout on": "Fejl eller timeout på",
         "Couldn't get the data. Trying again...": "Kunne ikke hente data. Prøver igen...",
         "Sign in": "Log ind",
+        "Update": "Opdater",
+        "New version available": "Ny version er tilgængelig",
 
         // Drawing
         "Cancel drawing": " Afbryd tegning",

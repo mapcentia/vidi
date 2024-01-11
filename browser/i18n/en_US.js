@@ -41,6 +41,8 @@ module.exports = {
         "Error or timeout on": "Error or timeout on",
         "Couldn't get the data. Trying again...": "Couldn't get the data. Trying again...",
         "Sign in": "Sign in",
+        "Update": "Update",
+        "New version available": "New version available",
 
         // Drawing
         "Cancel drawing": "Cancel drawing",
