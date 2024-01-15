@@ -17,6 +17,7 @@ const config = require('./../../../config/config.js');
 const urlparser = require('./../../../browser/modules/urlparser');
 const urlVars = urlparser.urlVars;
 const cookie = require('js-cookie');
+const React = require("react");
 
 /**
  *
@@ -40,7 +41,7 @@ module.exports = {
         //===================
         class Status extends React.Component {
             render() {
-                return <div className={"alert alert-dismissible " + this.props.alertClass} role="alert">
+                return <div className="text-nowrap">
                     {this.props.statusText}
                 </div>
             }
@@ -188,45 +189,52 @@ module.exports = {
 
             render() {
                 return (
-                    <div className="w-100 d-flex justify-content-center">
-                        <div className="w-100" style={{maxWidth: "650px"}}>
-                            <Status statusText={this.state.statusText} alertClass={this.state.alertClass}/>
-                            <div className="login">
-                                <form onSubmit={this.handleSubmit}>
-                                    <div style={{display: this.state.auth ? 'none' : 'inline'}}>
-                                        <div className="form-floating mb-3">
-                                            <input
-                                                id="sessionScreenName"
-                                                className="form-control"
-                                                defaultValue={this.state.sessionScreenName}
-                                                onChange={this.handleChange}
-                                                placeholder={__("User name")}
-                                            />
-                                            <label htmlFor="sessionScreenName">{__("User name")}</label>
-                                        </div>
-                                        <div className="form-floating mb-3">
-                                            <input
-                                                id="sessionPassword"
-                                                className="form-control"
-                                                defaultValue={this.state.sessionPassword}
-                                                onChange={this.handleChange}
-                                                type="password"
-                                                placeholder={__("Password")}
-                                            />
-                                            <label htmlFor="sessionPassword">{__("Password")}</label>
-                                        </div>
+                        <div className="login">
+                            <form onSubmit={this.handleSubmit}>
+                                <div className="row g-3 align-items-center">
+                                    <div className="col-auto"
+                                         style={{display: !this.state.auth ? 'none' : 'block'}}>
+                                        <Status statusText={this.state.statusText}/>
                                     </div>
-                                    <button
-                                        type="submit"
-                                        disabled={!this.validateForm()}
-                                        className="btn btn-outline-primary w-100"
-                                    >
-                                        {this.state.btnText}
-                                    </button>
-                                </form>
-                            </div>
+                                    <div className="col-4"
+                                         style={{
+                                             display: this.state.auth ? 'none' : 'block',
+                                             minWidth: '250px'
+                                         }}>
+                                        <input
+                                            id="sessionScreenName"
+                                            className="form-control"
+                                            defaultValue={this.state.sessionScreenName}
+                                            onChange={this.handleChange}
+                                            placeholder={__("User name")}
+                                        />
+                                    </div>
+                                    <div className="col-4"
+                                         style={{
+                                             display: this.state.auth ? 'none' : 'block',
+                                             minWidth: '250px'
+                                         }}>
+                                        <input
+                                            id="sessionPassword"
+                                            className="form-control"
+                                            defaultValue={this.state.sessionPassword}
+                                            onChange={this.handleChange}
+                                            type="password"
+                                            placeholder={__("Password")}
+                                        />
+                                    </div>
+                                    <div className="col-2">
+                                        <button
+                                            type="submit"
+                                            disabled={!this.validateForm()}
+                                            className="btn btn-outline-primary text-nowrap"
+                                        >
+                                            {this.state.btnText}
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
                         </div>
-                    </div>
                 );
             }
         }

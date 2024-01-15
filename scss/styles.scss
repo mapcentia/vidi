@@ -2,16 +2,23 @@
 }
 
 .modal {
-  --bs-modal-zindex: 999999
+  //--bs-modal-zindex: 1047
 }
 
 .offcanvas {
   --bs-offcanvas-width: 550px;
 }
 
+.offcanvas-backdrop {
+  z-index: 1100;
+}
+
+
 #mainLayerOffcanvas .offcanvas-body {
   padding: 0;
 }
+
+
 
 .navbar {
   z-index: 1046;

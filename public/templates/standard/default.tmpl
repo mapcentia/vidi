@@ -74,6 +74,11 @@
     .baselayer-tool {
         display: none !important;
     }
+
+    .configuration {
+        display: {{_displayConfigSwitcher}};
+    }
+
 </style>
 <style>
     .leaflet-control-custom, .history-control, .leaflet-control-boxzoom {
@@ -116,19 +121,12 @@
     </div>
 </div>
 
-<!-- Login Modal -->
-<div class="modal" id="login-modal" tabindex="-1" role="dialog" aria-labelledby="click-modalLabel">
-    <div class="modal-dialog modal-fullscreen" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h1 class="modal-title fs-5" id="login-modalLabel">{{Sign in}}</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{Close}}"></button>
-            </div>
-            <div class="modal-body" id="login-modal-body"></div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{Close}}</button>
-            </div>
-        </div>
+<div class="offcanvas offcanvas-top" style="z-index: 1101; height: max-content" tabindex="-1" id="login-modal" aria-labelledby="offcanvasLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasLabel">{{Sign in}}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body" id="login-modal-body">
     </div>
 </div>
 
@@ -176,11 +174,11 @@
                 <ul class="dropdown-menu">
                     <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#about-modal">{{About}}</a></li>
                     <li><a class="dropdown-item" href="#" id="btn-reset">{{Reset}}</a></li>
-                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#config-switcher-modal">{{Configurations}}</a></li>
+                    <li><a class="dropdown-item configuration" href="#" data-bs-toggle="modal" data-bs-target="#config-switcher-modal">{{Configurations}}</a></li>
                 </ul>
             </div>
             <div class="nav-item sign-in-btn d-none">
-                <button class="btn btn-primary" data-bs-toggle="modal"
+                <button class="btn btn-primary" data-bs-toggle="offcanvas"
                         data-bs-target="#login-modal">
                     <i class="bi bi-person"></i><span class="gc2-session-btn-text d-none d-lg-inline"> {{Sign in}}</span>
                 </button>

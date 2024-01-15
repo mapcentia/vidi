@@ -690,6 +690,7 @@ module.exports = {
         gc2i18n.dict._displayScreenshot = urlVars?.scr || "inline";
         gc2i18n.dict._displayBrand = urlVars?.bra || "inline";
         gc2i18n.dict._displayToggler = urlVars?.tog || "inline";
+        gc2i18n.dict._displayConfigSwitcher = window.vidiConfig.configSwitcher ? "inline" : "none";
 
         // Render the page
         // ===============
@@ -819,12 +820,6 @@ module.exports = {
             modules[name].init();
         });
 
-        // Check if there are set anything, which can result in loading schemata
-        if (window.vidiConfig.configSwitcher && (!window.vidiConfig.schemata || window.vidiConfig.schemata.length === 0) && (!schema || schema.length === 0) &&
-            urlparser.hash.length === 0 && Object.keys(urlVars).length === 0) {
-            modules.configSwitcher.activate();
-            return;
-        }
         const initExtensions = () => {
             try {
 
@@ -916,6 +911,12 @@ module.exports = {
             console.log("Enable fast init")
             $("#loadscreen").fadeOut(200);
             initExtensions();
+            // Check if there are set anything, which can result in loading schemata
+            if (window.vidiConfig.configSwitcher && (!window.vidiConfig.schemata || window.vidiConfig.schemata.length === 0) && (!schema || schema.length === 0) &&
+                urlparser.hash.length === 0 && Object.keys(urlVars).length === 0) {
+                modules.configSwitcher.activate();
+                return;
+            }
             modules.state.init().then(() => {
                 // Only fetch Meta and Settings if schemata pattern are use in either config or URL
                 if (window.vidiConfig.schemata.length > 0 || (schema && schema.length > 0)) {

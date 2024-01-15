@@ -83,6 +83,15 @@ class ConfigSwitcher extends React.Component {
             style={{margin: '0px'}}
             onClick={this.updateConfigurationsList.bind(this)}>{__('Refresh')}</button>);
 
+        let signInButton = (<button
+            type='button'
+            className='btn btn-link btn-sm'
+            style={{margin: '0px'}}
+            data-bs-toggle='offcanvas'
+            data-bs-target='#login-modal'
+           >{__('Sign in')}
+        </button>);
+
         let configurationControls = false;
         if (this.state.configurations && this.state.configurations.length > 0) {
             let configurationControlItems = [];
@@ -111,9 +120,10 @@ class ConfigSwitcher extends React.Component {
 
             configurationControls = (<div>
                 <ul className="list-group">{configurationControlItems}</ul>
-                <div className="d-flex align-items-center mt-2">
+                <div className="d-flex align-items-center mt-2 gap-2">
                     <div className="me-3">{__(`Total configurations`)}: {this.state.configurations.length}</div>
                     <div className="">{refreshButton}</div>
+                    <div className="">{signInButton}</div>
                 </div>
             </div>);
         } else {
