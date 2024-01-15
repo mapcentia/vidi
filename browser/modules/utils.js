@@ -194,7 +194,7 @@ module.exports = {
     },
 
     isEmbedEnabled: () => {
-        return $(`.embed.modal`).length > 1
+        return $(`.embed.modal`).length > 0
     },
 
     splitBase64(str) {
