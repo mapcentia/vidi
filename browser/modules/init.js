@@ -81,7 +81,7 @@ module.exports = {
             showOffcanvas: false,
             expandFirstInLayerTree: false,
             advancedBaseLayerSwitcher: {
-                mode: 2,
+                mode: 3,
                 default: 1,
                 active: false
             },

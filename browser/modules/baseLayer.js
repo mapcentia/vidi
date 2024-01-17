@@ -41,12 +41,10 @@ const TWO_LAYERS_AT_ONCE_MODES = [`side-by-side`, `overlay`];
 
 const OVERLAY_OPACITY_RANGE = [10, 90];
 
-const mode =  window.vidiConfig?.advancedBaseLayerSwitcher?.mode ? window.vidiConfig.advancedBaseLayerSwitcher.mode : 3;
-const active = window.vidiConfig?.advancedBaseLayerSwitcher?.active;
-const defaultMode = mode === 1 ? 1 : mode === 2 ? 2 : window.vidiConfig?.advancedBaseLayerSwitcher?.default ? window.vidiConfig.advancedBaseLayerSwitcher.default : 1
-
-let currentTwoLayersAtOnceMode = TWO_LAYERS_AT_ONCE_MODES[defaultMode - 1];
-
+let currentTwoLayersAtOnceMode;
+let active;
+let mode;
+let defaultMode;
 let bindEvent;
 let bounds;
 
@@ -92,6 +90,10 @@ module.exports = module.exports = {
     init: () => {
         state.listenTo('baseLayer', _self);
 
+        mode =  window.vidiConfig?.advancedBaseLayerSwitcher?.mode ? window.vidiConfig.advancedBaseLayerSwitcher.mode : 3;
+        active = window.vidiConfig?.advancedBaseLayerSwitcher?.active;
+        defaultMode = mode === 1 ? 1 : mode === 2 ? 2 : window.vidiConfig?.advancedBaseLayerSwitcher?.default ? window.vidiConfig.advancedBaseLayerSwitcher.default : 1
+        currentTwoLayersAtOnceMode = TWO_LAYERS_AT_ONCE_MODES[defaultMode - 1];
         cloud.get().map.on('moveend baselayerchange', () => {
             if (bounds) {
                 const b = cloud.get().map.getBounds();
