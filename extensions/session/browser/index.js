@@ -41,9 +41,11 @@ module.exports = {
         //===================
         class Status extends React.Component {
             render() {
-                return <div className="text-nowrap">
-                    {this.props.statusText}
-                </div>
+                return <h6>
+                   <span className={"badge bg-" + this.props.alertClass + " text-nowrap"}>
+                        {this.props.statusText}
+                    </span>
+                </h6>
             }
         }
 
@@ -55,7 +57,7 @@ module.exports = {
                     sessionScreenName: "",
                     sessionPassword: "",
                     statusText: __("Type your user name and password"),
-                    alertClass: "alert-info",
+                    alertClass: "info",
                     btnText: __("Sign in"),
                     auth: false
                 };
@@ -99,7 +101,7 @@ module.exports = {
                         success: function (data) {
                             backboneEvents.get().trigger(`session:authChange`, true);
                             me.setState({statusText: `Signed in as ${data.screen_name} (${data.email})`});
-                            me.setState({alertClass: "alert-success"});
+                            me.setState({alertClass: "success"});
                             me.setState({btnText: __("Sign out")});
                             me.setState({auth: true});
                             $(".gc2-session-lock").show();
@@ -111,7 +113,7 @@ module.exports = {
 
                         error: function () {
                             me.setState({statusText: __("Wrong user name or password")});
-                            me.setState({alertClass: "alert-danger"});
+                            me.setState({alertClass: "danger"});
                         }
                     });
                 } else {
@@ -123,7 +125,7 @@ module.exports = {
                             backboneEvents.get().trigger(`session:authChange`, false);
 
                             me.setState({statusText: __("Not signed in")});
-                            me.setState({alertClass: "alert-info"});
+                            me.setState({alertClass: "info"});
                             me.setState({btnText: __("Sign in")});
                             me.setState({auth: false});
                             $(".gc2-session-lock").hide();
@@ -151,7 +153,7 @@ module.exports = {
                             backboneEvents.get().trigger(`session:authChange`, true);
                             me.setState({sessionScreenName: data.status.screen_name});
                             me.setState({statusText: `${__("Signed in as")} ${data.status.screen_name} (${data.status.email})`});
-                            me.setState({alertClass: "alert-success"});
+                            me.setState({alertClass: "success"});
                             me.setState({btnText: __("Sign out")});
                             me.setState({auth: true});
                             $(".gc2-session-lock").show();
@@ -189,52 +191,49 @@ module.exports = {
 
             render() {
                 return (
-                        <div className="login">
-                            <form onSubmit={this.handleSubmit}>
-                                <div className="row g-3 align-items-center">
-                                    <div className="col-auto"
-                                         style={{display: !this.state.auth ? 'none' : 'block'}}>
-                                        <Status statusText={this.state.statusText}/>
-                                    </div>
-                                    <div className="col-4"
-                                         style={{
-                                             display: this.state.auth ? 'none' : 'block',
-                                             minWidth: '250px'
-                                         }}>
-                                        <input
-                                            id="sessionScreenName"
-                                            className="form-control"
-                                            defaultValue={this.state.sessionScreenName}
-                                            onChange={this.handleChange}
-                                            placeholder={__("User name")}
-                                        />
-                                    </div>
-                                    <div className="col-4"
-                                         style={{
-                                             display: this.state.auth ? 'none' : 'block',
-                                             minWidth: '250px'
-                                         }}>
-                                        <input
-                                            id="sessionPassword"
-                                            className="form-control"
-                                            defaultValue={this.state.sessionPassword}
-                                            onChange={this.handleChange}
-                                            type="password"
-                                            placeholder={__("Password")}
-                                        />
-                                    </div>
-                                    <div className="col-2">
-                                        <button
-                                            type="submit"
-                                            disabled={!this.validateForm()}
-                                            className="btn btn-outline-primary text-nowrap"
-                                        >
-                                            {this.state.btnText}
-                                        </button>
-                                    </div>
+                    <div className="login">
+                        <form onSubmit={this.handleSubmit}>
+                            <Status statusText={this.state.statusText} alertClass={this.state.alertClass}/>
+                            <div className="row g-3 align-items-center">
+                                <div className="col-4"
+                                     style={{
+                                         display: this.state.auth ? 'none' : 'block',
+                                         minWidth: '250px'
+                                     }}>
+                                    <input
+                                        id="sessionScreenName"
+                                        className="form-control"
+                                        defaultValue={this.state.sessionScreenName}
+                                        onChange={this.handleChange}
+                                        placeholder={__("User name")}
+                                    />
                                 </div>
-                            </form>
-                        </div>
+                                <div className="col-4"
+                                     style={{
+                                         display: this.state.auth ? 'none' : 'block',
+                                         minWidth: '250px'
+                                     }}>
+                                    <input
+                                        id="sessionPassword"
+                                        className="form-control"
+                                        defaultValue={this.state.sessionPassword}
+                                        onChange={this.handleChange}
+                                        type="password"
+                                        placeholder={__("Password")}
+                                    />
+                                </div>
+                                <div className="col-2">
+                                    <button
+                                        type="submit"
+                                        disabled={!this.validateForm()}
+                                        className="btn btn-outline-primary text-nowrap"
+                                    >
+                                        {this.state.btnText}
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
                 );
             }
         }
