@@ -8,12 +8,20 @@ var express = require('express');
 var router = express.Router();
 var host = require('../config/config.js').gc2.host;
 var request = require('request');
+const {gc2: config} = require("../config/config");
 
 router.get('/api/localconfig', function (req, response) {
     var file = req.query.file;
     var url = host + file;
     var json;
-    request.get(url, function (err, res, body) {
+    const options = {
+        uri: url,
+        headers: {
+            'Cookie': "XDEBUG_SESSION=XDEBUG_SESSION;PHPSESSID=" + req?.session?.gc2SessionId,
+            'GC2-API-KEY': req?.session?.gc2ApiKey
+        }
+    };
+    request.get(options, function (err, res, body) {
         if (err || res.statusCode !== 200) {
             response.header('content-type', 'application/json');
             response.status(400).send({
