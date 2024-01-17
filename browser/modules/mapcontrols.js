@@ -145,7 +145,7 @@ module.exports = {
                 const baseLayers = window.vidiConfig.baseLayers;
                 toggledBaselayer = baseLayers.findIndex(x => x.id === currentBaseLayerId);
                 BaselayerToggleOptions = {
-                    template: (`<a title="${window.vidiConfig.baseLayers?.[toggledBaselayer === 0 ? 1 : 0]?.name}}"
+                    template: (`<a title="${window.vidiConfig.baseLayers?.[toggledBaselayer === 0 ? 1 : 0]?.name}"
                         id="baselayer-toggle"
                         class="leaflet-bar-part leaflet-bar-part-single overflow-hidden">
                         <img alt="" src="${window.vidiConfig.baseLayers?.[toggledBaselayer === 0 ? 1 : 0]?.thumbnail}"></a>`),
