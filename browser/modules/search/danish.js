@@ -1143,7 +1143,7 @@ module.exports = {
                                     }
                                 };
                                 $.ajax({
-                                    url: v.host + '/api/v2/elasticsearch/search/' + v.db + '/' + v.index.name,
+                                    url: v?.host ? v.host + '/api/v2/elasticsearch/search/' + v.db + '/' + v.index.name : '/api/elasticsearch/search/' + v.db + '/' + v.index.name,
                                     data: JSON.stringify(dsl),
                                     contentType: "application/json; charset=utf-8",
                                     scriptCharset: "utf-8",
@@ -1262,8 +1262,11 @@ module.exports = {
                     default: // Extra searches
                         placeStores[key] = getPlaceStore();
                         placeStores[key].db = extraSearchesObj[name].db;
-                        placeStores[key].host = extraSearchesObj[name].host;
+                        placeStores[key].host = extraSearchesObj[name]?.host || '';
                         placeStores[key].sql = "SELECT *,ST_asgeojson(ST_transform(" + extraSearchesObj[name].relation.geom + ",4326)) as geojson FROM " + extraSearchesObj[name].relation.name + " WHERE " + extraSearchesObj[name].relation.key + "='" + gids[name][datum.value] + "'";
+                        if (!extraSearchesObj[name]?.host) {
+                            placeStores[key].uri = '/api/sql'
+                        }
                         placeStores[key].load();
                         break;
                 }
