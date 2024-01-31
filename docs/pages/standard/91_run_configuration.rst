@@ -617,6 +617,74 @@ Anvend baggrundskort "skuffe" i stedet for toggle knappen. Skuffen kan indeholde
 
 .. note::
     Template ``default.tmpl`` viser hverken skuffe eller toggle knap. Anvendes på ``embed.tmpl`` og lign., som ikke har den store baggrundskortsvælger.
+
+
+#################################################################
+Referencer
+#################################################################
+
+En konfiguration kan henvise til andre konfigurationer og på den måde kan dele af en opsætning genbruges i flere konfigurationer.
+
+Fx kan man definere sine standard baggrundskort i en konfiguration og så henvise til den fra andre konfigurationer:
+
+Først baggrundskort opsætningen:
+
+.. code-block:: json
+
+    [
+        {
+            "id": "osm",
+            "name": "Open Street Map"
+        },
+        {
+            "id": "bingRoad",
+            "name": "Bing Road"
+        },
+        {
+            "id": "bingAerial",
+            "name": "Bing Aerial"
+        }
+    ]
+
+Og så en konfiguration, som henviser til ovenstående:
+
+.. code-block:: json
+
+    {
+        "schemata": [
+            "public"
+        ],
+        "brandName": "MapCentia ApS",
+        "aboutBox": "<p>My awesome web map</p>",
+        "template": "default.tmpl",
+        "baseLayers": {
+            "$ref": "http://127.0.0.1:8080/api/v2/configuration/mydb/configuration_defs_65a15aa97c2df746526680.json"
+        }
+    }
+
+Som det ses, så henviser `baseLayers` til konfigurationen med baggrundskort. Dvs. at indholdet i `baseLayers` bliver skiftet ud med indholdet i den konfiguration, der henvises til.
+
+Det er også muligt at henvise længere ned i en konfiguration. Fx her henvises til en anden konfigurationens `baseLayers` egenskab:
+
+.. code-block:: json
+
+    {
+        "baseLayers": {
+            "$ref": "http://127.0.0.1:8080/api/v2/configuration/mydb/configuration_en_anden_config_65a15aa97c2df746526680.json#/baseLayers"
+        }
+    }
+
+URL'en til konfigurationen fås ved at anvende knappen KOPIER LINK:
+
+.. figure:: ../../_media/json-refs.png
+    :width: 400px
+    :align: center
+    :name: feature-info-table-on-map
+    :figclass: align-center
+
+.. note::
+    Henvisninger virker kun for konfigurationer lavet i GC2 Kontrolcenter. Konfigurationer, som anvendes i henvisninger, skal være udgivet. Hvis en henvises ikke virker (fx hvis url'en er forkert) vises "$ref" egenskaben uforandret.
+
 .. rubric:: Fodnoter
 
 .. [#fragment] Et fragment er den del af en URL der kommer efter `#`.

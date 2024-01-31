@@ -97,6 +97,9 @@ class ConfigSwitcher extends React.Component {
             let configurationControlItems = [];
             this.state.configurations.map((item, index) => {
                 let parsedValue = JSON.parse(item.value);
+                if (parsedValue.name.startsWith('_')) {
+                    return;
+                }
                 let url = `${this.state.configSourceURL}/${item.key}.json`;
                 configurationControlItems.push(<li key={`configuration_${index}`} className="list-group-item">
                         <div className="row">
