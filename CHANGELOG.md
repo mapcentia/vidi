@@ -6,7 +6,13 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ## [2024.2.0] - 2024-2-2
 ### Changed
-- The entire GUI is rewritten in Bootstrap 5.3
+- The entire GUI is rewritten in Bootstrap 5.3.
+
+### Added
+- New startup modal with config-switcher, which will show if Vidi is started with database in URL.
+
+### Fixed
+- A lot!
 
 ## [2024.1.0] - 2024-4-1
 ### Fixed
