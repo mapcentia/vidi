@@ -34,7 +34,7 @@ class MarkupGenerator {
                             <input class="form-check-input" type="checkbox" data-gc2-group-name="${name}">
                         </span>
                         <div class="position-relative flex-fill layer-group-checkbox-wrapper">
-                            <a class="text-uppercase link-dark stretched-link accordion-toggle js-toggle-layer-panel collapsed" data-bs-toggle="collapse" data-parent="#layers" href="#collapse${base64GroupName}">${name}</a>
+                            <a class="text-uppercase text-body-secondary stretched-link accordion-toggle js-toggle-layer-panel collapsed" data-bs-toggle="collapse" data-parent="#layers" href="#collapse${base64GroupName}">${name}</a>
                         </div>
                         <div class="layer-count badge bg-secondary">
                             <span>0</span> / <span></span>
