@@ -89,6 +89,7 @@ module.exports = {
             autoUpdate: false,
             configSwitcher: true, // Use this only in build time configs,
             baselayerDrawer: false,
+            theme: 'light'
         };
         // Set session from URL
         if (typeof urlVars.session === "string") {
@@ -203,6 +204,7 @@ module.exports = {
         // ====================================
 
         tmpl = window.vidiConfig.template;
+        document.documentElement.setAttribute('data-bs-theme', <window className="vidiConfig theme"></window>)
 
         // Check if template is set in URL vars
         // ====================================
