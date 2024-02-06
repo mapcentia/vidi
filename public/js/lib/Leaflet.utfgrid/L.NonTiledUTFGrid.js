@@ -40,39 +40,20 @@
             this._updateCursor = function (cursor) {
                 //console.log(this)
             }; //no-op, overridden below
-            if (!this._div) {
-                this._div = leaflet.DomUtil.create('div', 'leaflet-utfgrid-layer');
-                if (this.options.pointerEvents) {
-                    this._div.style['pointer-events'] = this.options.pointerEvents;
-                }
-                if (typeof this.options.zIndex !== 'undefined') {
-                    this._div.style.zIndex = this.options.zIndex;
-                }
-                if (typeof this.options.opacity !== 'undefined') {
-                    this._div.style.opacity = this.options.opacity;
-                }
-            }
             this._throttleMove = L.Util.throttle(this._move, 66, this);
-            this.getPane().appendChild(this._div);
-            // this._bufferImage = this._initImage();
             this._currentImage = this._initImage();
             this._update();
             this._connectMapEventHandlers();
         },
         _connectMapEventHandlers: function () {
-            //this._map.on('click', this._onClick, this);
             this._map.on('mousemove', this._throttleMove, this);
         },
         _disconnectMapEventHandlers: function () {
-            // this._map.off('click', this._onClick, this);
             this._map.off('mousemove', this._throttleMove, this);
+            this._map.off('moveend', this._update, this);
         },
         onRemove: function onRemove() {
-            this.getPane().removeChild(this._div);
-            // this._div.removeChild(this._bufferImage);
-            this._div.removeChild(this._currentImage);
             this._disconnectMapEventHandlers();
-            // NonTiledUTFGrid.prototype.onRemove.call(this, map);
         },
         addTo: function addTo(map) {
             map.addLayer(this);
@@ -81,8 +62,6 @@
         _setZoom: function setZoom() {
             if (this._currentImage._bounds)
                 this._resetImageScale(this._currentImage, true);
-            // if (this._bufferImage._bounds)
-            //     this._resetImageScale(this._bufferImage);
         },
         getEvents: function getEvents() {
             const events = {
@@ -109,7 +88,6 @@
             if (this.options.crossOrigin) {
                 image.crossOrigin = this.options.crossOrigin;
             }
-            this._div.appendChild(image);
             if (this._map.options.zoomAnimation && leaflet.Browser.any3d) {
                 leaflet.DomUtil.addClass(image, 'leaflet-zoom-animated');
             } else {
@@ -215,14 +193,12 @@
             height *= this._getImageScale();
             // create a key identifying the current request
             this.key = [bounds.getNorthWest(), bounds.getSouthEast(), width, height].join(', ');
+            let _self = this;
             if (this.getImageUrl) {
                 i.src = this.getImageUrl(bounds, width, height);
                 i.key = this.key;
-            } else {
-                this.getImageUrlAsync(bounds, width, height, this.key, (key, url, tag) => {
-                    i.key = key;
-                    i.src = url;
-                    i.tag = tag;
+                $.getJSON(i.src, function (data) {
+                    _self._cache["test"] = data;
                 });
             }
         },
@@ -245,19 +221,7 @@
             this.fire('load', e);
         },
         _onImageDone: function onImageDone(e) {
-            this._cache["test"] = JSON.parse(e.path[0].contentWindow.document.body.innerText);
-            // let tmp;
-            // leaflet.DomUtil.setOpacity(this._currentImage, 1);
-            // leaflet.DomUtil.setOpacity(this._bufferImage, 0);
-            // if (this._addInteraction && this._currentImage.tag) {
-            //     this._addInteraction(this._currentImage.tag);
-            // }
-            // tmp = this._bufferImage;
-            // this._bufferImage = this._currentImage;
-            // this._currentImage = tmp;
-            // if (e.target.key !== '<empty>') {
-            //     this._div.style.visibility = 'visible';
-            // }
+            this._cache["test"] = JSON.parse(e.target.contentWindow.document.body.innerText);
         },
 
         _move: function (e) {
