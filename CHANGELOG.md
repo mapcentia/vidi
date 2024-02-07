@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2024.2.1] - 2024-7-2
+### Changed
+- New config option `themes`, which will set the Bootstrap theme. `light` and `dark` are build in and custom ones can be added to `/scss/themes.scss`.
+
 ## [2024.2.0] - 2024-2-2
 ### Changed
 - The entire GUI is rewritten in Bootstrap 5.3.
