@@ -204,7 +204,7 @@ module.exports = {
         // ====================================
 
         tmpl = window.vidiConfig.template;
-        document.documentElement.setAttribute('data-bs-theme', <window className="vidiConfig theme"></window>)
+        document.documentElement.setAttribute('data-bs-theme', window.vidiConfig.theme)
 
         // Check if template is set in URL vars
         // ====================================
