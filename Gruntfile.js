@@ -9,7 +9,25 @@ var fs = require('fs');
 module.exports = function (grunt) {
     "use strict";
 
-    let lessConfig = {"public/css/styles.css": "public/less/styles.default.less"};
+    const lessConfig = {"public/css/styles.css": "public/less/styles.default.less"};
+    const transform = [['babelify', {
+        presets: ["@babel/preset-env", "@babel/preset-react"],
+        plugins: ["@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread"]
+    }], 'require-globify', 'windowify', 'envify', ['browserify-css', {global: true}]];
+    const transform_sw = [['babelify', {
+        presets: ["@babel/preset-env", "@babel/preset-react"],
+        plugins: ["@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread", "@babel/plugin-proposal-optional-chaining"]
+    }], 'require-globify'];
+    const browserifyOptions = {
+        debug: true,
+        fullPaths: true
+    };
+    const files = {
+        'public/js/bundle.js': ['browser/index.js'],
+    };
+    const files_sw = {
+        'public/service-worker.bundle.js': ['browser/service-worker/index.js']
+    };
 
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
@@ -140,72 +158,41 @@ module.exports = function (grunt) {
         },
         browserify: {
             publish: {
-                files: {
-                    'public/js/bundle.js': ['browser/index.js'],
-                },
+                files,
                 options: {
-                    transform: [['babelify', {
-                        presets: ["@babel/preset-env", "@babel/preset-react"],
-                        plugins: ["@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread"]
-                    }], 'require-globify', 'windowify', 'envify', ['browserify-css', {global: true}]]
+                    transform
                 }
             },
             debug: {
-                files: {
-                    'public/js/bundle.js': ['browser/index.js'],
-                },
+                files,
                 options: {
-                    browserifyOptions: {
-                        debug: true,
-                        fullPaths: true
-                    },
-                    transform: [['babelify', {
-                        presets: ["@babel/preset-env", "@babel/preset-react"],
-                        plugins: ["@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread"]
-                    }], 'require-globify', 'windowify', 'envify', ['browserify-css', {global: true}]]
+                    browserifyOptions,
+                    transform
                 }
             },
             publish_sw: {
-                files: {
-                    'public/service-worker.bundle.js': ['browser/service-worker/index.js']
-                },
+                files: files_sw,
                 options: {
                     alias: {
                         'urls-to-cache': './browser/service-worker/cache.production.js'
                     },
-                    transform: [['babelify', {
-                        presets: ["@babel/preset-env", "@babel/preset-react"],
-                        plugins: ["@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread"]
-                    }], 'require-globify']
+                    transform: transform_sw
                 }
             },
             publish_sw_dev: {
-                files: {
-                    'public/service-worker.bundle.js': ['browser/service-worker/index.js']
-                },
+                files: files_sw,
                 options: {
                     alias: {
                         'urls-to-cache': './browser/service-worker/cache.development.js'
                     },
-                    transform: [['babelify', {
-                        presets: ["@babel/preset-env", "@babel/preset-react"],
-                        plugins: ["@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread", "@babel/plugin-proposal-optional-chaining"]
-                    }], 'require-globify']
+                    transform: transform_sw
                 }
             },
             watch: {
-                files: {
-                    'public/js/bundle.js': ['browser/index.js']
-                },
+                files,
                 options: {
-                    browserifyOptions: {
-                        debug: true,
-                        fullPaths: true
-                    },
-                    transform: [['babelify', {
-                        presets: ["@babel/preset-env", "@babel/preset-react"],
-                        plugins: ["@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread"]
-                    }], 'require-globify', 'windowify', 'envify', ['browserify-css', {global: true}]],
+                    browserifyOptions,
+                    transform,
                     watch: true,
                     keepAlive: true
                 }
@@ -365,5 +352,5 @@ module.exports = function (grunt) {
     grunt.registerTask('default', ['prepareAssets', 'browserify:publish', 'browserify:publish_sw_dev', 'css', 'hogan', 'version']);
     grunt.registerTask('production', ['env:prod', 'hogan', 'prepareAssets', 'browserify:publish', 'browserify:publish_sw', 'css', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust', 'version', 'appendBuildHashToVersion']);
     grunt.registerTask('production-test', ['env:prod', 'browserify:publish']);
-    grunt.registerTask('css', ['less','sass', 'cssmin']);
+    grunt.registerTask('css', ['less', 'sass', 'cssmin']);
 };
