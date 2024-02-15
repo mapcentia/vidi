@@ -419,6 +419,7 @@ module.exports = {
                             break;
                         case `boolean`:
                             properties[key].type = `boolean`;
+                            properties[key].default = false; // Checkbox is either checked or unchecked
                             break;
                         case `bytea`:
                             uiSchema[key] = {
