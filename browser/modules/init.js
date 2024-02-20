@@ -478,7 +478,7 @@ module.exports = {
          */
 
 
-        if (urlVars.state || urlparser.hash.length === 0 && (!urlVars.initialFilter)) {
+        if (urlVars.state || urlparser.hash.length === 0 && (!urlVars.initialFilter && !urlVars.dfi)) {
             console.log("Enable fast init")
             $("#loadscreen").fadeOut(200);
             initExtensions();
