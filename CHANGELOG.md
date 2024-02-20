@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2024.2.2] - 2024-20-2
+### Changed
+- Added the `dfi` url parameter, which if set, will disable fast init regardless other evaluated parameters.
+- Set the default boolean property to false in the extensions/editor/browser/index.js. This pertains to user interface properties where a checkbox is either checked or unchecked.
+- The polyfill script for IE compatibility was removed from the index.html.default file.
+- The repetitive code in Gruntfile.js related to browserify options and transformations have been extracted to constants.
+
 ## [2024.2.1] - 2024-7-2
 ### Changed
 - New config option `themes`, which will set the Bootstrap theme. `light` and `dark` are build in and custom ones can be added to `/scss/themes.scss`.
