@@ -40,6 +40,9 @@ module.exports = {
         "Waiting to start": "Waiting to start",
         "Error or timeout on": "Error or timeout on",
         "Couldn't get the data. Trying again...": "Couldn't get the data. Trying again...",
+        "Sign in": "Sign in",
+        "Update": "Update",
+        "New version available": "New version available",
 
         // Drawing
         "Cancel drawing": "Cancel drawing",
@@ -101,6 +104,7 @@ module.exports = {
         "Help text print": "Make scaled PDF map. Tweak the orange square in the map to set view extent and scale.",
         "Activate drawing tools": "Activate drawing tools",
         "Activate print tools": "Activate print tools",
+        "Make": "Make",
         "Make PDF": "Make PDF",
         "Make PNG": "Make PNG",
         "Download": "Download",
@@ -207,9 +211,10 @@ module.exports = {
         "Cancel feature changes": "Cancel feature changes",
         "This browser does not support Service Workers, some features may be unavailable": "This browser does not support Service Workers, some features may be unavailable",
         "Match": "Match",
-        "of the following": "of the following",
-        "any": "any",
-        "all": "all",
+        "Match the following using operator": "Match the following using operator",
+        "any": "OR",
+        "all": "AND",
+        "not": "NOT",
         "Select": "Select",
         "Opacity": "Opacity",
         "Filters": "Filters",
@@ -236,6 +241,7 @@ module.exports = {
         "Labels": "Labels",
         "Show labels": "Show labels",
         "Layer filter": "Layer filter",
+        "New block": "New block",
 
         // Base layers
         "Side-by-side mode": "Side-by-side mode",
@@ -243,6 +249,7 @@ module.exports = {
         "Side-by-side": "Side-by-side",
         "Overlap": "Overlap",
         "Display layers": "Display layers as",
+        "The selected map has no content in the current map extent": "The selected map has no content in the current map extent",
 
         // Map controls
         "Map controls": "Map controls",
@@ -251,6 +258,8 @@ module.exports = {
         "Previous extent": "Previous extent",
         "Next extent": "Next extent",
         "Click here then draw a square on the map, to zoom in to an area": "Click here then draw a square on the map, to zoom in to an area",
+        "Create a screenshot of the map. The screenshot is downloaded as a PNG file": "Create a screenshot of the map. The screenshot is downloaded as a PNG file",
+        "Screenshot is ready": "Screenshot is ready",
 
         // APIBridge
         "Not authorized to perform this action": "Not authorized to perform this action",
@@ -260,9 +269,19 @@ module.exports = {
         "Are you sure you want to delete the feature?": "Are you sure you want to delete the feature?",
         "The page was loaded without service workers enabled, features editing is not available (the page was loaded via plain HTTP or browser does not support service workers)": "The page was loaded without service workers enabled, features editing is not available (the page was loaded via plain HTTP or browser does not support service workers)",
         "Editing of geometry is not possible when number of nodes exceed": "Editing of geometry is not possible when number of nodes exceed",
+        "Submit": "Submit",
+        "Are you sure you want to cancel?": "Are you sure you want to cancel?",
+        "Feature added": "Feature added",
+        "You need to plot a point": "You need to plot a point",
+        "You need to plot at least two points": "You need to plot at least two points",
+        "You need to plot at least three points": "You need to plot at least three points",
+        "Required": "Required",
 
         // Editor - ImageUploadWidget
-        "Drop files here, or click to select files to upload": "Drop files here, or click to select files to upload",
+        "Drop file here, or click to select file to upload": "Drop file here, or click to select file to upload",
+        "The file type can't be shown but you can download it": "The file type can't be shown but you can download it",
+        "Download the file": "Download the file",
+        "File is too big! Maximum size is": "File is too big! Maximum size is",
 
         // OfflineMap
         "tiles failed to load": "tiles failed to load",
@@ -333,6 +352,7 @@ module.exports = {
         "No layers available": "No layers available",
 
         //ConfigSwitcher
+        "Configurations": "Configurations",
         "Configuration is not published yet": "Configuration is not published yet",
         "Total configurations": "Total configurations",
         "No configurations to display": "No configurations to display",
@@ -453,6 +473,16 @@ module.exports = {
         "Tsvector": "Tsvector",
         "No searchable fields on layer": "No searchable fields on layer",
         "Method": "Method",
-        "Find me": "Find me"
+        "Find me": "Find me",
+
+        "Symbols": "Symbols",
+
+        // Sign in
+        "User name": "User name",
+        "Password": "Password",
+        "Wrong user name or password": "Wrong user name or password",
+        "Signed in as": "Signed in as",
+        "Not signed in": "Not signed in",
+        "Sign out": "Sign out"
     }
 };

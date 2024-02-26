@@ -1,0 +1,37 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2023, MapCentia
+# This file is distributed under the same license as the Vidi package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Vidi 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-01-09 12:34+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.12.1\n"
+
+#: ../../_subs/WARNING_OLD_DOC.rst:3 9de3a679ba4845908b3e264c583210c5
+msgid ""
+"Indhold fra denne side er overført direkte fra ældre wiki, og kan derfor "
+"være uddateret. Billeder er linket udenfor dette bibliotek."
+msgstr ""
+
+#: ../../_subs/WARNING_OLD_DOC.rst:5 9d090de83b0347819ec68bace5bfe0a5
+msgid ""
+"Du er velkommen til at hjælpe med at holde dokumentationen opdateret. Læs"
+" mere her"
+msgstr ""
+
+#: ../../_subs/WARNING_OLD_DOC.rst:7 a6841710a4e0447aafc64aa80bd3dacf
+msgid ":ref:`CONTRIBUTING`"
+msgstr ""
+

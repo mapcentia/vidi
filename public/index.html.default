@@ -12,16 +12,13 @@
     | |              | || |              | || |              | || |              | |
     | '--------------' || '--------------' || '--------------' || '--------------' |
     '----------------'  '----------------'  '----------------'  '----------------'
-    Ring the bells that still can ring
-    Forget your perfect offering
-    There is a crack, a crack in everything
-    That's how the light gets in
+    The world breaks everyone, and afterward, some are strong at the broken places.
 
 
   ~ @author     Martin Høgh <mh@mapcentia.com>
-  ~ @copyright  2013-2022 MapCentia ApS
+  ~ @copyright  2013-2024 MapCentia ApS
   ~ @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
-  ~ @version    2023.6.0
+  ~ @version    2024.2.2
 
   -->
 <html lang="en">
@@ -32,10 +29,9 @@
     <meta name="google" value="notranslate">
     <meta name="Description" content="A platform for building spatial data infrastructure and deploying browser based GIS.">
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" sizes="16x16"  href="/images/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="32x32"  href="/images/favicon-32x32.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
-    <link rel="manifest" href="/site.webmanifest">
     <link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
     <meta name="msapplication-TileColor" content="#00aba9">
     <meta name="theme-color" content="#ffffff">
@@ -43,8 +39,6 @@
     <link rel="preload" href="/fonts/roboto-v18-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/fonts/roboto-v18-latin-500.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/fonts/roboto-v18-latin-300.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="/icons/MaterialIcons-Regular.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="/js/lib/bootstrap/dist/fonts/glyphicons-halflings-regular.woff2" as="font" type="font/woff2" crossorigin>
     <!-- Build -->
     <link rel="stylesheet" href="/css/build/all.min.css" type="text/css">
 </head>
@@ -56,22 +50,10 @@
     <div class="loadingIndicator__bar"></div>
 </div>
 <div id="loadscreen">
-    <div class="center text">
+    <div class="position-absolute bottom-50 start-50 p-2 translate-middle">
         <div id="loadscreentext"></div>
     </div>
-    <div class="center bounce">
-        <div class="bouncywrap">
-            <div class="dotcon dc1">
-                <div class="dot"></div>
-            </div>
-            <div class="dotcon dc2">
-                <div class="dot"></div>
-            </div>
-            <div class="dotcon dc3">
-                <div class="dot"></div>
-            </div>
-        </div>
-    </div>
+    <div class="position-absolute top-50 start-50 translate-middle spinner-grow" role="status"></div>
 </div>
 <div id="main-container"></div>
 <script src="/js/lib/hogan.js/hogan-3.0.2.js"></script>
@@ -91,8 +73,6 @@
         console.info("Using pre-processed load screen template: " + tmpl);
     }
 </script>
-<!-- Polyfill for IE -->
-<script src="https://cdn.polyfill.io/v2/polyfill.min.js"></script>
 <!-- Dynamic js -->
 <script src="/locale"></script>
 <script src="/api/baselayer"></script>

@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2022 MapCentia ApS
+ * @copyright  2013-2023 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -11,7 +11,6 @@ import {scrollBehaviourDragImageTranslateOverride} from 'mobile-drag-drop/scroll
 
 
 let utils;
-let exId = "symbols";
 let cloud;
 let markers = {};
 let symbolState = {}
@@ -25,16 +24,12 @@ let creatingFromState = false;
 let filesAreLoaded = false;
 let autoScale = false;
 let locked = false;
+const exId = "symbols";
 const urlparser = require('./../../../browser/modules/urlparser');
 const db = urlparser.db;
 const MODULE_ID = exId;
 const config = require('../../../config/config.js');
 
-/**
- *
- * @type {*|exports|HTMLElement}
- */
-const symbolWrapper = $(`<div class="symbols-lib drag-marker" draggable="true"></div>`);
 
 /**
  *
@@ -49,9 +44,9 @@ const createId = () => (+new Date * (Math.random() + 1)).toString(36).substr(2, 
 const htmlFragments = {
     "outer": `
         <div class="tab-pane" role="tabpanel">
-            <div class="symbols-cover-text" style="position: absolute; top: 50%; left: 50px; display: none; opacity: 0; font-weight: 600; color: #333333">Zoom tættere på</div>
-            <div class="symbols-cover" style="position: relative;">
-                <div class="d-flex flex-wrap" style="display: flex; flex-wrap: wrap"></div>
+            <div class="symbols-cover-text position-absolute" style="top: 50%; left: 50px; display: none; opacity: 0; font-weight: 600; color: #333333">Zoom tættere på</div>
+            <div class="symbols-cover position-relative">
+                <div class="d-flex flex-wrap gap-4"></div>
             </div>
             <div class="symbols-desc"></div>
         </div>
@@ -74,8 +69,9 @@ const store = (tag) => {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                userId: window.aauUserId,
-                userGr: window.aauUserGr,
+                browserId: window?._browserId || null,
+                userId: window?._userId || null,
+                props: window?._props || null,
                 tag,
                 symbolState
             }),
@@ -164,6 +160,8 @@ const scale = (e, img, id, classStr) => {
  * @param e
  */
 const handleDragEnd = (e) => {
+    // const svg = e.target.querySelector("svg-container").shadowRoot.innerHTML;
+    const svg = e.target.querySelector("svg-container").innerHTML;
     const targetElements = document.elementsFromPoint(e.clientX, e.clientY);
     // Don't do anything if symbols is dropped on container
     for (let i = 0; i < targetElements.length; i++) {
@@ -177,7 +175,6 @@ const handleDragEnd = (e) => {
         return;
     }
     let map = cloud.get().map;
-    let innerHtml = $(e.target).clone().html();
     let id = createId();
     let coord = map.mouseEventToLatLng(e);
     let file = $(e.target).attr("data-file");
@@ -209,7 +206,7 @@ const handleDragEnd = (e) => {
             }
         }
     }
-    createSymbol(innerHtml, id, coord, 0, 1, map.getZoom(), file, group);
+    createSymbol(svg, id, coord, 0, 1, map.getZoom(), file, group);
 }
 
 /**
@@ -221,23 +218,19 @@ const handleDragEnd = (e) => {
  * @param sc
  * @param zoomLevel
  * @param file
+ * @param group
  */
 const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file, group) => {
     let map = cloud.get().map;
-    let func = ()=>{};
+    let func;
     let classStr = "dm_" + id;
     let rotateHandleStr = "r_" + id;
     let deleteHandleStr = "d_" + id;
     let scaleHandleStr = "s_" + id;
-    let outerHtml = $(symbolWrapper).clone().html(innerHtml);
-    outerHtml.removeClass("symbols-lib");
-    outerHtml.removeClass("col");
-    outerHtml.addClass("symbols-map");
-    outerHtml.attr("draggable", "false")
-    outerHtml.addClass(classStr);
+    let html = `<div class="drag-marker symbols-map ${classStr}" draggable="false">`;
     let callback = config?.extensionConfig?.symbols?.symbolOptions?.[file]?.callback;
     if (callback === undefined) {
-        callback = config?.extensionConfig?.symbols?.options?.callback || null;
+        callback = config?.extensionConfig?.symbols?.options?.callback;
     }
     if (callback) {
         try {
@@ -246,28 +239,35 @@ const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file, gro
             console.error("Error in callback for " + file, e.message)
         }
     }
-
     let doRotate = config?.extensionConfig?.symbols?.symbolOptions?.[file]?.rotate
     let doScale = config?.extensionConfig?.symbols?.symbolOptions?.[file]?.scale
     let doDelete = config?.extensionConfig?.symbols?.symbolOptions?.[file]?.delete
     if (doRotate === undefined) {
-        doRotate = config?.extensionConfig?.symbols?.options?.rotate || true;
+        doRotate = config?.extensionConfig?.symbols?.options?.rotate;
     }
     if (doScale === undefined) {
-        doScale = config?.extensionConfig?.symbols?.options?.scale || true;
+        doScale = config?.extensionConfig?.symbols?.options?.scale;
     }
     if (doDelete === undefined) {
-        doDelete = config?.extensionConfig?.symbols?.options?.delete || true;
+        doDelete = config?.extensionConfig?.symbols?.options?.delete;
     }
 
-    if (doRotate) outerHtml.append(`<div class="symbols-handles symbols-rotate ${rotateHandleStr}"></div>`);
-    if (doScale) outerHtml.append(`<div class="symbols-handles symbols-scale ${scaleHandleStr}"></div>`);
-    if (doDelete) outerHtml.append(`<div class="symbols-handles symbols-delete ${deleteHandleStr}" id="${id}"></div>`);
+    if (doRotate || doRotate === undefined) {
+        html += `<div class="symbols-handles symbols-rotate ${rotateHandleStr}"></div>`;
+    }
+    if (doScale || doScale === undefined) {
+        html += `<div class="symbols-handles symbols-scale ${scaleHandleStr}"></div>`;
+    }
+    if (doDelete || doDelete === undefined) {
+        html += `<div class="symbols-handles symbols-delete ${deleteHandleStr}" id="${id}"></div>`;
+    }
+    html += `<svg-container>${innerHtml}</svg-container>`;
+    html += `</div>`;
     let icon = L.divIcon({
         className: "drag-symbole",
-        // iconSize: new L.Point(72, 72),
-        iconAnchor: [26, 26],
-        html: `${outerHtml[0].outerHTML}`
+        iconSize: new L.Point(50, 50),
+        iconAnchor: [25, 25],
+        html: html
     });
     markers[id] = L.marker(coord, {icon: icon, draggable: true}).addTo(map);
     symbolState[id] = {};
@@ -276,9 +276,11 @@ const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file, gro
     symbolState[id].coord = markers[id].getLatLng();
     symbolState[id].file = file;
     symbolState[id].group = group;
-    markers[id].on("moveend", (e) => {
-        symbolState[id].coord = e.target.getLatLng();
+    markers[id].on("movestart", () => {
         idBeingChanged = id;
+    })
+    markers[id].on("moveend", () => {
+        symbolState[id].coord = markers[id].getLatLng();
     })
     symbolState[id].rotation = ro;
     symbolState[id].scale = sc;
@@ -302,7 +304,7 @@ const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file, gro
         delete symbolState[e.target.id];
         setState();
         try {
-            func(file, symbolState, "delete");
+            func(file, group, symbolState, "delete");
         } catch (e) {
             console.error("Error in callback for " + file, e.message)
         }
@@ -333,12 +335,25 @@ const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file, gro
     if (callback) {
         try {
             let func = Function('"use strict";return (' + callback + ')')();
-            func(file, symbolState, "create");
+            func(file, group, symbolState, "create");
         } catch (e) {
             console.error("Error in callback for " + file, e.message)
         }
     }
 }
+
+/**
+ * Custom shadow DOM element for encapsulating SVG
+ */
+class SVGContainer extends HTMLElement {
+    constructor() {
+        super();
+        const shadowRoot = this.attachShadow({mode: 'open'});
+        shadowRoot.append(...this.childNodes);
+    }
+}
+//customElements.define('svg-container', SVGContainer);
+customElements.define("svg-container", ()=>{}, { extends: "div" });
 
 
 module.exports = {
@@ -394,28 +409,22 @@ module.exports = {
             // _self.off();
         });
 
-        utils.createMainTab(exId, __("Symbols"), __("Info"), require('./../../../browser/modules/height')().max, "local_florist", false, exId);
+        utils.createMainTab(exId, __("Symbols"), __("Info"), require('./../../../browser/modules/height')().max, "bi bi-flower1", false, exId);
 
         const gui = `
-                    <div class="form-inline">
-                      <div class="form-group">
-                            <div class="togglebutton">
-                                <label>
-                                    <input id="vidi-symbols-lock" type="checkbox">${__("Lock")}
+                      <div class="symbol-tools d-flex gap-4 align-items-center mb-4">
+                            <div class="form-check form-switch">
+                                <label >
+                                    <input id="vidi-symbols-lock" class="form-check-input" type="checkbox">${__("Lock")}
                                 </label>
                             </div>
-                        </div>
-                        <div class="form-group">
-                            <div class="togglebutton">
-                                <label>
-                                    <input id="vidi-symbols-autoscale" type="checkbox">${__("Auto scale")}
+                            <div class="form-check form-switch">
+                                <label class="form-check-label">
+                                    <input id="vidi-symbols-autoscale" class="form-check-input" type="checkbox">${__("Auto scale")}
                                 </label>
                             </div>
-                        </div>
-                        <div class="form-group">
-                            <button class="btn" id="vidi-symbols-store">${__("Save in db")}</button>
-                        </div>
                     </div>
+                    
                     <div id="vidi_symbols"></div>
                     `
         $(`#${exId}`).html(gui);
@@ -438,77 +447,69 @@ module.exports = {
         let symbols = {};
         let descs = {};
         let files = config.extensionConfig.symbols.files;
-        let symbolOptions = config?.extensionConfig?.symbols?.symbolOptions;
         let i = 0;
 
-        backboneEvents.get().on(`on:${exId}`, () => {
-            if (!filesAreLoaded) {
-                (function iter() {
-                    $.getJSON("/api/symbols/" + files[i].file, (data) => {
-                        symbols[files[i].title] = data;
-                        descs[files[i].title] = files[i]?.desc;
-                        i++;
-                        if (i === files.length) {
-                            try {
-                                let inner = $(htmlFragments.inner);
-                                let tabs = $(`<ul class="nav nav-tabs mb-3"></ul>`);
-                                let tabPanes = $(`<div class="tab-content"></div>`);
-                                let first = true;
-                                let u = 0;
-                                for (const group in symbols) {
-                                    let outer = $(htmlFragments.outer).clone();
-                                    if (descs[group]) $(outer.find('.symbols-desc')[0]).append(`${descs[group]}`);
-                                    let id = createId();
-                                    for (const id in symbols[group]) {
-                                        if (id && symbols[group].hasOwnProperty(id)) {
-                                            const parser = new DOMParser();
-                                            const doc = parser.parseFromString(symbols[group][id].svg, "image/svg+xml");
-                                            // Gets desc from inside the svg-file, if any
-                                            //let text = doc.getElementsByTagName("desc")?.[0]?.textContent
-                                            // Instead, gets desc from svg-file.
-                                            let text = symbols[group][id]?.desc;
-                                            let desc = text || '';
-                                            let svg = $(inner.clone()[0]).append(symbols[group][id].svg);
-                                            svg.attr('data-file', id);
-                                            svg.attr('data-group', group);
-                                            let e = $('<div class="p-1 text-center symbol-text-wrapper">');
-                                            e.append(svg[0], `<div style="font-size: 8pt">${desc}</div>`)
-                                            outer.find('.d-flex').append(e);
-                                        }
+        // backboneEvents.get().on(`on:${exId}`, () => {
+        if (!filesAreLoaded) {
+            (function iter() {
+                $.getJSON("/api/symbols/" + files[i].file, (data) => {
+                    symbols[files[i].title] = data;
+                    descs[files[i].title] = files[i]?.desc;
+                    i++;
+                    if (i === files.length) {
+                        try {
+                            let inner = $(htmlFragments.inner);
+                            let tabs = $(`<ul class="nav nav-pills mb-3"></ul>`);
+                            let tabPanes = $(`<div class="tab-content"></div>`);
+                            let first = true;
+                            let u = 0;
+                            for (const group in symbols) {
+                                let outer = $(htmlFragments.outer).clone();
+                                if (descs[group]) $(outer.find('.symbols-desc')[0]).append(`${descs[group]}`);
+                                let id = createId();
+                                for (const id in symbols[group]) {
+                                    if (id && symbols[group].hasOwnProperty(id)) {
+                                        const parser = new DOMParser();
+                                        const doc = parser.parseFromString(symbols[group][id].svg, "image/svg+xml");
+                                        let text = doc.getElementsByTagName("desc")?.[0]?.textContent
+                                        let desc = text || '';
+                                        let svg = $(inner.clone()[0]).append(`<svg-container>${symbols[group][id].svg}</svg-container>`);
+                                        svg.attr('data-file', id);
+                                        svg.attr('data-group', group);
+                                        let e = $('<div class="p-1 text-center symbol-text-wrapper">');
+                                        e.append(svg[0], `<div style="font-size: 8pt">${desc}</div>`)
+                                        outer.find('.d-flex').append(e);
                                     }
-                                    let tab = $(`<li class="nav-item" role="presentation"><a id="symbol-tab-${u}" data-mdb-toggle="pill" class="nav-link ` + (first ? ` active` : ``) + `" href="#_${id}" role="tab" data-toggle="tab">${group}</a></li>`);
-                                    tabs.append(tab)
-                                    tabPanes.append(outer);
-                                    outer.attr('id', '_' + id);
-                                    if (first) {
-                                        outer.addClass('active');
-                                        tab.addClass('active');
-                                        first = false;
-                                    }
-                                    u++;
                                 }
-
-                                let c = $(`#vidi_symbols`);
-                                c.append(tabs);
-                                c.append(tabPanes);
-                                $(".drag-marker").on("dragend", handleDragEnd);
-                                filesAreLoaded = true;
-                            } catch (e) {
-                                console.error(e.message);
+                                let tab = $(`<li class="nav-item" role="presentation"><a id="symbol-tab-${u}" data-bs-toggle="pill" class="nav-link ` + (first ? ` active` : ``) + `" href="#_${id}" role="tab" data-toggle="tab">${group}</a></li>`);
+                                tabs.append(tab)
+                                tabPanes.append(outer);
+                                outer.attr('id', '_' + id);
+                                if (first) {
+                                    outer.addClass('active');
+                                    tab.addClass('active');
+                                    first = false;
+                                }
+                                u++;
                             }
-                        } else {
-                            iter()
-                        }
-                    })
-                }())
-            }
-        });
 
-        $('#vidi-symbols-store').on('click', () => {
-            store().then((e) => {
-                console.log(e)
-            })
-        });
+                            let c = $(`#vidi_symbols`);
+                            c.append(tabs);
+                            c.append(tabPanes);
+                            $(".drag-marker").on("dragend", handleDragEnd);
+                            filesAreLoaded = true;
+                        } catch (e) {
+                            console.error(e.message);
+                        }
+                    } else {
+                        iter()
+                    }
+                })
+            }())
+        }
+        // }
+        // );
+
 
         $(document).on("touchend mouseup", function () {
             for (const id in symbolState) {
@@ -518,14 +519,12 @@ module.exports = {
             }
             map.dragging.enable();
             map.touchZoom.enable();
-            setTimeout(() => {
-                if (idBeingChanged) {
-                    setState();
-                    mouseDown = false;
-                    idBeingChanged = false;
-                }
-            }, 0);
+            if (idBeingChanged) {
+                setState();
+            }
             $(document).off("mousemove touchmove");
+            mouseDown = false;
+            idBeingChanged = false;
         });
 
         map.on("zoomend", () => {
@@ -583,6 +582,10 @@ module.exports = {
      */
     applyState: (newState) => {
         return new Promise((resolve) => {
+            if (config?.extensionConfig?.symbols?.stateless === true) {
+                resolve();
+                return;
+            }
             _self.resetState();
             if (newState) {
                 _self.recreateSymbolsFromState(newState.symbolState);
@@ -653,6 +656,7 @@ module.exports = {
 
     createId: () => {
         return createId();
-    }
+    },
 
+    store
 };

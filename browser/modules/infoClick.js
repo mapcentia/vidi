@@ -1,12 +1,14 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2022 MapCentia ApS
+ * @copyright  2013-2023 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
 
-import {LAYER} from "./layerTree/constants";
+import {LAYER, MAP_RESOLUTIONS} from "./layerTree/constants";
+import {booleanIntersects as turfIntersects, buffer as turfBuffer} from "@turf/turf";
+import {feature as turfFeature, point as turfPoint} from "@turf/helpers";
 
 const MODULE_ID = `infoClick`;
 
@@ -22,6 +24,7 @@ let active = false;
 let _self = false;
 let blocked = false;
 let advancedInfo;
+let meta;
 
 /**
  *
@@ -37,6 +40,7 @@ module.exports = {
         _layers = o.layers;
         _self = this;
         advancedInfo = o.advancedInfo;
+        meta = o.meta;
         return this;
     },
 
@@ -73,6 +77,7 @@ module.exports = {
             // Reset all SQL Query layers
             backboneEvents.get().trigger("sqlQuery:clear");
 
+
             const event = new geocloud.clickEvent(e, cloud.get());
             if (clicktimer) {
                 clearTimeout(clicktimer);
@@ -82,7 +87,7 @@ module.exports = {
                     let coords = event.getCoordinate(), wkt;
                     wkt = "POINT(" + coords.x + " " + coords.y + ")";
 
-                    // Cross Multi select disabled
+                    // Cross Multi select disabled unless embed is enabled or featureInfoTableOnMap is enabled
                     if (!window.vidiConfig.crossMultiSelect) {
                         sqlQuery.init(qstore, wkt, "3857", null, null, [coords.lat, coords.lng], false, false, false, (layerId) => {
                             setTimeout(() => {
@@ -95,27 +100,79 @@ module.exports = {
                         }, "", true);
                         // Cross Multi select enabled
                     } else {
+                        let coord3857 = utils.transform("EPSG:4326", "EPSG:3857", [e.latlng.lng, e.latlng.lat]);
                         let intersectingFeatures = [];
-                        sqlQuery.init(qstore, wkt, "3857", (store) => {
-                            setTimeout(() => {
-                                if (store.geoJSON) {
-                                    sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + store.key, store.geoJSON.features);
-                                    store.layer.eachLayer((layer) => {
-                                        intersectingFeatures.push({
-                                            feature: layer.feature,
-                                            layer: layer,
-                                            layerKey: store.key
-                                        });
-                                    })
+                        const distance = 10 * MAP_RESOLUTIONS[cloud.get().getZoom()];
+                        const clickFeature = turfBuffer(turfPoint([e.latlng.lng, e.latlng.lat]), distance, {units: 'meters'});
+                        let mapObj = cloud.get().map;
+                        for (let l in mapObj._layers) {
+                            let overlay = mapObj._layers[l];
+                            if (overlay._layers) {
+                                for (let f in overlay._layers) {
+                                    if (!overlay._layers[f]?.feature?.geometry || overlay?.id?.startsWith('HL:')) {
+                                        continue;
+                                    }
+                                    let featureForChecking = overlay._layers[f];
+                                    let feature = turfFeature(featureForChecking.feature.geometry);
+                                    try {
+                                        if (turfIntersects(clickFeature, feature) && overlay.id) {
+                                            const layerId = overlay.id.split(":")[1];
+                                            try {
+                                                const zoom = mapObj.getZoom();
+                                                const parsedMeta = JSON.parse(meta.getMetaByKey(layerId).meta);
+                                                const minZoom = parseInt(parsedMeta.vector_min_zoom);
+                                                const maxZoom = parseInt(parsedMeta.vector_max_zoom);
+                                                if (minZoom > zoom || maxZoom < zoom) {
+                                                    console.log(layerId + " is out of min/max zoom")
+                                                    continue;
+                                                }
+                                            } catch (e) {
+                                                console.error(e)
+                                            }
+                                            intersectingFeatures.push({
+                                                feature: featureForChecking.feature,
+                                                layer: featureForChecking,
+                                                layerKey: layerId,
+                                                vector: true
+                                            })
+                                        }
+                                    } catch (e) {
+                                        console.log(e);
+                                    }
                                 }
-                                _layers.decrementCountLoading("_vidi_sql_" + store.id);
-                                backboneEvents.get().trigger("doneLoading:layers", "_vidi_sql_" + store.id);
-                                if (_layers.getCountLoading() === 0) {
-                                    layerTree.displayAttributesPopup(intersectingFeatures, e, '');
+                            }
+                        }
+                        let activelayers = _layers.getMapLayers() ? _layers.getLayers().split(",") : [];
+                        let activeTilelayers = activelayers.filter(e => {
+                            if (e.split(':').length === 1) {
+                                const m = meta.getMetaByKey(e)
+                                if (m?.not_querable !== true) {
+                                    return true;
                                 }
-                            }, 200)
-                        }, null, [coords.lat, coords.lng]);
-
+                            }
+                        })
+                        if (activeTilelayers.length > 0) {
+                            const t = sqlQuery.init(qstore, wkt, "3857", (store) => {
+                                setTimeout(() => {
+                                    if (store?.geoJSON) {
+                                        sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + store.key, store.geoJSON.features);
+                                        store.layer.eachLayer((layer) => {
+                                            intersectingFeatures.push({
+                                                feature: layer.feature,
+                                                layer: layer,
+                                                layerKey: store.key
+                                            });
+                                        })
+                                        _layers.decrementCountLoading("_vidi_sql_" + store.id);
+                                        backboneEvents.get().trigger("doneLoading:layers", "_vidi_sql_" + store.id);
+                                    }
+                                    if (_layers.getCountLoading() === 0) {
+                                        layerTree.displayAttributesPopup(intersectingFeatures, e);
+                                    }
+                                }, 200)
+                            }, null, [coord3857[0], coord3857[1]]);
+                        } else
+                            layerTree.displayAttributesPopup(intersectingFeatures, e);
                     }
                 }, 250);
             }

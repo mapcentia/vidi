@@ -1,43 +1,22 @@
 /*
  * @author     Alexander Shumilov
- * @copyright  2013-2021 MapCentia ApS
+ * @copyright  2013-2023 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
-    validateFilters,
     MATCHES,
-    EXPRESSIONS_FOR_STRINGS,
-    EXPRESSIONS_FOR_NUMBERS,
-    EXPRESSIONS_FOR_DATES,
-    EXPRESSIONS_FOR_BOOLEANS
+    validateFilters
 } from './filterUtils';
-import {
-    StringControl,
-    NumberControl,
-    BooleanControl,
-    DatetimeControl,
-    DateControl,
-    AutocompleteControl
-} from './controls';
 
-/**
- * Layer filter component
- */
+import LayerFilterSubBlock from "./LayerFilterSubBlock";
+import mustache from 'mustache';
+
 const SELECT_WIDTH = `50px`;
-
-const STRING_TYPES = [`text`, `string`, `character`, `character varying`, `uuid`];
-const NUMBER_TYPES = [`smallint`, `bigint`, `integer`, `double precision`, `numeric`, `decimal`, 'real'];
-const DATE_TYPES = [`date`];
-const DATETIME_TYPES = [`timestamp`, `timestamp with time zone`, `timestamp without time zone`];
-const BOOLEAN_TYPES = [`boolean`];
-const ALLOWED_TYPES_IN_FILTER = [].concat(STRING_TYPES).concat(NUMBER_TYPES).concat(DATETIME_TYPES).concat(DATE_TYPES).concat(BOOLEAN_TYPES).filter((v, i, a) => a.indexOf(v) === i);
-
 const PREDEFINED_TAB = 0;
 const ARBITRARY_TAB = 1;
-
 const DUMMY_RULE = {
     fieldname: `null`,
     expression: `null`,
@@ -47,6 +26,8 @@ const DUMMY_RULE = {
 class VectorLayerFilter extends React.Component {
     constructor(props) {
         super(props);
+        this.block = React.createRef();
+
         let predefinedFilters = [];
         for (let key in props.predefinedFilters) {
             predefinedFilters.push({
@@ -91,7 +72,7 @@ class VectorLayerFilter extends React.Component {
                         fieldname: item.field,
                         expression: item.operator,
                         value: ``,
-                        restriction: this.props.layer.fields[item.field].restriction || false
+                        restriction: this.props.layer.fields[item.field]?.restriction || false
                     });
                 }
             });
@@ -101,7 +82,7 @@ class VectorLayerFilter extends React.Component {
 
         // Validating the arbitraryFilters structure
         validateFilters(arbitraryFilters);
-
+        this.setFilters = this.setFilters.bind(this);
         this.state = {
             activeTab: PREDEFINED_TAB,
             layer: props.layer,
@@ -110,34 +91,21 @@ class VectorLayerFilter extends React.Component {
             disabledPredefinedFilters,
             editorFilters: props.editorFilters,
             editorFiltersActive: props.editorFiltersActive,
-            fitBoundsActiveOnLayer: props.fitBoundsActiveOnLayer,
-            downLoadFormat: 'geojson'
+            isAllBlocksValid: true
         };
     }
 
-    onRuleDelete(index) {
-        let filters = this.state.arbitraryFilters;
-        filters.columns.splice(index, 1);
-        this.setState({arbitraryFilters: filters});
-    }
-
-    onRuleAdd() {
-        let filters = this.state.arbitraryFilters;
-        filters.columns.push(DUMMY_RULE);
-        this.setState({arbitraryFilters: filters});
-    }
-
     onRulesApply() {
-        this.setState({fitBoundsActiveOnLayer: true})
+        const filters = this.block.current.getFilters();
+        this.setState({arbitraryFilters: filters})
         this.props.onApplyArbitrary({
             layerKey: (this.props.layer.f_table_schema + `.` + this.props.layer.f_table_name),
-            filters: JSON.parse(JSON.stringify(this.state.arbitraryFilters))
+            filters: JSON.parse(JSON.stringify(filters))
         });
     }
 
     onRulesClear() {
         let layerKey = this.props.layer.f_table_schema + `.` + this.props.layer.f_table_name;
-        this.setState({fitBoundsActiveOnLayer: false});
         this.props.onDisableArbitrary(layerKey);
         this.props.onApplyArbitrary({
             layerKey: layerKey,
@@ -148,161 +116,9 @@ class VectorLayerFilter extends React.Component {
         });
     }
 
-    changeMatchType(value) {
-        let filters = JSON.parse(JSON.stringify(this.state.arbitraryFilters));
-        filters.match = value;
-        this.setState({arbitraryFilters: filters});
-    }
-
-    getExpressionSetForType(type) {
-        let expressionSet = EXPRESSIONS_FOR_STRINGS;
-        if (NUMBER_TYPES.indexOf(type) !== -1) {
-            expressionSet = EXPRESSIONS_FOR_NUMBERS;
-        } else if (DATE_TYPES.indexOf(type) !== -1 || DATETIME_TYPES.indexOf(type) !== -1) {
-            expressionSet = EXPRESSIONS_FOR_DATES;
-        } else if (BOOLEAN_TYPES.indexOf(type) !== -1) {
-            expressionSet = EXPRESSIONS_FOR_BOOLEANS;
-        }
-
-        return expressionSet;
-    }
-
-    changeFieldname(value, columnIndex) {
-        let filters = JSON.parse(JSON.stringify(this.state.arbitraryFilters));
-
-        // Check if current expression is valid against new fieldname type
-        for (let key in this.state.layer.fields) {
-            if (key === value) {
-                let type = this.state.layer.fields[key].type;
-                let expressionSet = this.getExpressionSetForType(type);
-                if (expressionSet.indexOf(filters.columns[columnIndex].expression) === -1) {
-                    filters.columns[columnIndex].expression = expressionSet[0];
-                }
-
-                if (this.state.layer.fields[key].restriction) {
-                    filters.columns[columnIndex].restriction = this.state.layer.fields[key].restriction;
-                } else {
-                    filters.columns[columnIndex].restriction = false;
-                }
-            }
-        }
-
-        filters.columns[columnIndex].value = DUMMY_RULE.value;
-        filters.columns[columnIndex].fieldname = value;
-        this.setState({arbitraryFilters: filters});
-    }
-
-    changeExpression(value, columnIndex) {
-        let filters = JSON.parse(JSON.stringify(this.state.arbitraryFilters));
-        filters.columns[columnIndex].expression = value;
-        this.setState({arbitraryFilters: filters});
-    }
-
-    changeValue(value, columnIndex) {
-        let filters = JSON.parse(JSON.stringify(this.state.arbitraryFilters));
-        filters.columns[columnIndex].value = value;
-        this.setState({arbitraryFilters: filters});
-    }
-
-    isValid(value, type) {
-        let valueIsValid = false;
-        if (NUMBER_TYPES.indexOf(type) === -1) {
-            valueIsValid = true;
-        } else {
-            let intReg = /^\d+$/;
-            let floatReg = /^[+-]?\d+(\.\d+)?$/;
-            if ((type === `smallint` || type === `integer` || type === `bigint`) && value.match(intReg)) {
-                valueIsValid = true;
-            } else if ((type === `double precision` || type === `numeric` || type === `real` || type === `decimal`) && value.match(floatReg)) {
-                valueIsValid = true;
-            }
-        }
-
-        return valueIsValid;
-    }
-
-    changeDownLoadFormat(value) {
-        this.setState({downLoadFormat: value});
-    }
-
-    /**
-     * Constructing select control for column fieldname
-     *
-     * @param {*} column
-     * @param {*} index
-     * @param {*} layerKey
-     */
-    renderFieldControl(column, index, layerKey) {
-        let columnOptions = [];
-        columnOptions.push(<option key={`field_` + layerKey + `_0`} value="null">{__(`Select`)}</option>);
-        let columnIndex = 1;
-        let fieldconf = null;
-        if (this.state.layer.fieldconf) {
-            try {
-                fieldconf = JSON.parse(this.state.layer.fieldconf)
-            } catch (e) {
-            }
-        }
-        for (let key in this.state.layer.fields) {
-            let field = this.state.layer.fields[key];
-            if ((fieldconf === null || fieldconf[key] === undefined) || (typeof fieldconf[key]["filter"] !== "undefined" && fieldconf[key]["filter"] !== true)) {
-                let alias = null;
-                if (fieldconf && typeof fieldconf[key] === "object" && typeof fieldconf[key]["alias"] !== "undefined") {
-                    alias = fieldconf[key]["alias"];
-                }
-                if (ALLOWED_TYPES_IN_FILTER.indexOf(field.type) !== -1) {
-                    columnOptions.push(
-                        <option key={`field_` + layerKey + `_` + columnIndex} value={key}>{alias || key}</option>);
-                    columnIndex++;
-                }
-            }
-        }
-
-        return (<select
-            id={`column_select_` + layerKey + `_` + index}
-            className="form-control"
-            onChange={(event) => {
-                this.changeFieldname(event.target.value, index)
-            }}
-            value={column.fieldname}
-            style={{width: `100px`}}>{columnOptions}</select>);
-    }
-
-    /**
-     * Constructing select control for expression
-     *
-     * @param {*} column
-     * @param {*} index
-     * @param {*} layerKey
-     */
-    renderExpressionControl(column, index, layerKey) {
-        let expressionControl;
-        if (column.fieldname === DUMMY_RULE.fieldname || column.expression === DUMMY_RULE.expression) {
-            expressionControl = (<p className="text-secondary" style={{paddingTop: `12px`}}>{__(`Select field`)}</p>);
-        } else {
-            let expressionOptions = [];
-            for (let key in this.state.layer.fields) {
-                if (key === column.fieldname) {
-                    let expressionSet = this.getExpressionSetForType(this.state.layer.fields[key].type);
-                    expressionSet.map((expression, index) => {
-                        expressionOptions.push(
-                            <option key={`expression_` + layerKey + `_` + (index + 1)}
-                                    value={expression}>{expression}</option>);
-                    });
-                }
-            }
-
-            expressionControl = (<select
-                id={`expression_select_` + layerKey + `_` + index}
-                className="form-control"
-                onChange={(event) => {
-                    this.changeExpression(event.target.value, index)
-                }}
-                value={column.expression}
-                style={{width: SELECT_WIDTH}}>{expressionOptions}</select>);
-        }
-
-        return expressionControl;
+    setFilters() {
+        const filters = this.block.current.getFilters();
+        this.setState({arbitraryFilters: filters})
     }
 
     switchActiveTab() {
@@ -323,7 +139,6 @@ class VectorLayerFilter extends React.Component {
             filters: disabledPredefinedFilters
         });
     }
-
 
     applyEditor() {
         this.props.onApplyEditor({
@@ -361,122 +176,16 @@ class VectorLayerFilter extends React.Component {
         validateFilters(resetArbitraryFilters);
         this.onRulesClear();
         this.setState({arbitraryFilters: resetArbitraryFilters});
-        this.setState({fitBoundsActiveOnLayer: false});
     }
 
     handleFitBounds() {
         this.props.onApplyFitBounds(this.props.layer.f_table_schema + `.` + this.props.layer.f_table_name);
     }
 
-    handleDownload() {
-        this.props.onApplyDownload(this.props.layer.f_table_schema + `.` + this.props.layer.f_table_name, this.state.downLoadFormat);
-    }
-
     render() {
-        let allRulesAreValid = true;
-        let layerKey = this.state.layer.f_table_schema + '.' + this.state.layer.f_table_name;
-
         let matchSelectorOptions = [];
         MATCHES.map((match, index) => {
             matchSelectorOptions.push(<option key={`match_` + index} value={match}>{__(match)}</option>);
-        });
-        let matchSelector = (<select
-            id={`match_select_` + layerKey}
-            onChange={(event) => {
-                this.changeMatchType(event.target.value)
-            }}
-            value={this.state.arbitraryFilters.match}
-            className="form-control" style={{
-            display: `inline`,
-            width: SELECT_WIDTH
-        }}>{matchSelectorOptions}</select>);
-
-        let filterControls = [];
-
-        if (this.state.arbitraryFilters.columns.length === 0) {
-            allRulesAreValid = false;
-        }
-
-        this.state.arbitraryFilters.columns.map((column, index) => {
-            let type = false;
-            for (let key in this.state.layer.fields) {
-                if (key === column.fieldname) {
-                    type = this.state.layer.fields[key].type;
-                }
-            }
-
-            let fieldControl = this.renderFieldControl(column, index, layerKey);
-            let expressionControl = this.renderExpressionControl(column, index, layerKey);
-
-            let valueIsValid = false;
-            if (column.fieldname && column.fieldname !== 'null' && column.expression && column.expression !== 'null' && column.value) {
-                valueIsValid = this.isValid(column.value, type);
-            }
-
-            let ruleValidityIndicator = (<span style={{color: 'green'}}><i className="fa fa-check-circle"></i></span>);
-            if (!valueIsValid) {
-                ruleValidityIndicator = (<span style={{color: 'red'}}><i className="fa fa-ban"></i></span>);
-                allRulesAreValid = false;
-            }
-
-            /**
-             * Different control for different types
-             */
-            let control = false;
-            if (column.fieldname !== DUMMY_RULE.fieldname) {
-                let id = (`expression_input_` + layerKey + `_` + index);
-                const changeHandler = (value) => {
-                    this.changeValue(value, index);
-                };
-
-                let fieldconf = null;
-                if (this.state.layer.fieldconf) {
-                    try {
-                        fieldconf = JSON.parse(this.state.layer.fieldconf)
-                    } catch (e) {
-                    }
-                }
-
-                if (STRING_TYPES.indexOf(type) !== -1 && fieldconf && fieldconf[column.fieldname] && fieldconf[column.fieldname].autocomplete) {
-                    control = (
-                        <AutocompleteControl id={id} value={column.value} layerKey={layerKey} field={column.fieldname}
-                                             restriction={column.restriction} db={this.props.db}
-                                             onChange={changeHandler}/>);
-                } else if (STRING_TYPES.indexOf(type) !== -1) {
-                    control = (
-                        <StringControl id={id} value={column.value} restriction={column.restriction}
-                                       onChange={changeHandler}/>);
-                } else if (NUMBER_TYPES.indexOf(type) !== -1) {
-                    control = (
-                        <NumberControl id={id} value={column.value} restriction={column.restriction}
-                                       onChange={changeHandler}/>);
-                } else if (DATE_TYPES.indexOf(type) !== -1) {
-                    control = (<DateControl id={id} value={column.value} onChange={changeHandler}/>);
-                } else if (DATETIME_TYPES.indexOf(type) !== -1) {
-                    control = (<DatetimeControl id={id} value={column.value} onChange={changeHandler}/>);
-                } else if (BOOLEAN_TYPES.indexOf(type) !== -1) {
-                    control = (<BooleanControl id={id} value={column.value} onChange={changeHandler}/>);
-                } else {
-                    throw new Error(`Unrecognized type`);
-                }
-            }
-
-            let divStyle = {paddingRight: `10px`};
-            let controlDivStyle = divStyle;
-            controlDivStyle.maxWidth = `160px`;
-            filterControls.push(<div key={`column_` + index} style={{display: `flex`}}>
-                <div className="form-group" style={divStyle}>
-                    <button className="btn btn-xs btn-warning" type="button"
-                            onClick={this.onRuleDelete.bind(this, index)}
-                            style={{display: this.props.isFilterImmutable ? "none" : "inline"}}>
-                        <i className="fa fa-minus"></i>
-                    </button>
-                </div>
-                <div className="form-group" style={divStyle}>{fieldControl}</div>
-                <div className="form-group" style={divStyle}>{expressionControl}</div>
-                <div className="form-group" style={controlDivStyle}>{control}</div>
-                <div style={{paddingRight: `10px`, paddingTop: `16px`}}>{ruleValidityIndicator}</div>
-            </div>);
         });
 
         /**
@@ -487,51 +196,29 @@ class VectorLayerFilter extends React.Component {
             /**
              * Build notification about the existing children
              */
-            const childrenInfo = () => {
-                let result = false;
-                if (this.state.layer.children && Array.isArray(this.state.layer.children)) {
-                    let records = [];
-                    this.state.layer.children.map((item, index) => {
-                        if (item.rel && item.parent_column && item.child_column) {
-                            records.push(
-                                <li key={`child_record_${index}`}
-                                    style={{fontFamily: `"Courier New", Courier, monospace`}}>
-                                    {layerKey}.{item.parent_column} - {item.rel}.{item.child_column}
-                                </li>);
-                        }
-                    });
-
-                    result = (
-                        <div style={{borderBottom: `1px solid #c4c4c4`, paddingBottom: `10px`, marginBottom: `6px`}}>
-                            <p>{__(`Layer has following children`)}:</p>
-                            <ul>{records}</ul>
-                        </div>);
-                }
-
-                return result;
-            };
-
             return (
-                <div className="js-arbitrary-filters" style={this.state.editorFiltersActive ? {
-                    pointerEvents: "none",
-                    opacity: "0.2"
-                } : {}}>
-                    <div className="form-group" style={{display: this.props.isFilterImmutable ? "none" : "inline"}}>
-                        <p>{__(`Match`)} {matchSelector} {__(`of the following`)}</p>
-                    </div>
-                    <div>{filterControls}</div>
-                    <div>
-                        <button className="btn btn-sm" type="button" onClick={this.onRuleAdd.bind(this)}
-                                style={{display: this.props.isFilterImmutable ? "none" : "inline"}}>
-                            <i className="fa fa-plus"></i> {__(`Add condition`)}
-                        </button>
-                        <button className="btn btn-sm btn-success" type="button" disabled={!allRulesAreValid}
+                <div className="js-arbitrary-filters gap-1 d-flex flex-column mb-2"
+                     style={this.state.editorFiltersActive ? {
+                         pointerEvents: "none",
+                         opacity: "0.2"
+                     } : {}}>
+                    <div className="d-flex flex-column gap-1">{<LayerFilterSubBlock ref={this.block}
+                                                                                    layer={this.props.layer}
+                                                                                    layerMeta={this.props.layerMeta}
+                                                                                    presetFilters={this.props.presetFilters}
+                                                                                    arbitraryFilters={this.state.arbitraryFilters}
+                                                                                    setFilters={this.setFilters}
+                                                                                    isFilterImmutable={this.props.isFilterImmutable}
+                    />}</div>
+                    <div className="d-flex gap-1">
+                        <button className="btn btn-outline-success btn-sm" type="button"
                                 onClick={this.onRulesApply.bind(this)}>
-                            <i className="fa fa-check"></i> {__(`Apply`)}
+                            <i className="bi bi-check"></i><span className="d-none d-lg-inline"> {__(`Apply`)}</span>
                         </button>
-                        <button className="btn btn-sm" type="button" onClick={this.onRulesClear.bind(this)}>
-                            <i className="fa fa-eraser"></i> {__(`Disable`)}
+                        <button className="btn btn-light btn-sm" type="button" onClick={this.onRulesClear.bind(this)}>
+                            <i className="bi bi-eraser"></i><span className="d-none d-lg-inline"> {__(`Disable`)}</span>
                         </button>
+                        {buildResetButton()}
                     </div>
                 </div>
             );
@@ -544,26 +231,25 @@ class VectorLayerFilter extends React.Component {
             let predefinedFiltersTab = [];
             this.state.predefinedFilters.map((item, index) => {
                 let filterIsActive = (this.state.disabledPredefinedFilters.indexOf(item.name) === -1);
+                const id = `tile_filter_` + (this.props.layer.f_table_schema + `.` + this.props.layer.f_table_name);
                 predefinedFiltersTab.push(
                     <div key={`tile_filter_` + index} style={this.state.editorFiltersActive ? {
                         pointerEvents: "none",
                         opacity: "0.2"
                     } : {}}>
-                        <div style={{display: `inline-block`}}>
-                            <div className="checkbox">
-                                <label>
-                                    <input
-                                        checked={filterIsActive}
-                                        onChange={(event) => {
-                                            this.handlePredefinedFiltersChange(event, item.name)
-                                        }}
-                                        type="checkbox"
-                                        name={`tile_filter_` + (this.props.layer.f_table_schema + `.` + this.props.layer.f_table_name)}/>
-                                </label>
-                            </div>
-                        </div>
-                        <div style={{display: `inline-block`}}>
-                            <span>{item.name}</span>
+                        <div className="form-check">
+                            <label className="form-check-label d-flex align-items-center gap-1">
+                                <input
+                                    className="form-check-input"
+                                    checked={filterIsActive}
+                                    onChange={(event) => {
+                                        this.handlePredefinedFiltersChange(event, item.name)
+                                    }}
+                                    type="checkbox"
+                                    name={id}
+                                />
+                                {item.name}
+                            </label>
                         </div>
                     </div>
                 );
@@ -577,13 +263,7 @@ class VectorLayerFilter extends React.Component {
          */
         const buildWhereClauseField = () => {
             const handleChange = (event) => {
-                let parsedValue;
-                try {
-                    parsedValue = JSON.parse(event.target.value);
-                } catch (e) {
-                    parsedValue = null;
-                    return;
-                }
+                let parsedValue = [event.target.value];
                 this.setState({"editorFilters": parsedValue});
                 this.props.onChangeEditor({
                     layerKey: (this.props.layer.f_table_schema + `.` + this.props.layer.f_table_name),
@@ -595,28 +275,30 @@ class VectorLayerFilter extends React.Component {
                     marginTop: "25px",
                     display: this.props.isFilterImmutable ? "none" : "inline"
                 }}>
-                    <div style={!this.state.editorFiltersActive ? {pointerEvents: "none", opacity: "0.2"} : {}}>
-                        <div style={{marginLeft: "10px", marginRight: "10px"}}>
-                            <textarea
-                                style={{"width": "100%", " boxSizing": "border-box", "height": "26px"}}
-                                onChange={handleChange}
-                                name={`editor_filter_` + (this.props.layer.f_table_schema + `.` + this.props.layer.f_table_name)}
-                                value={JSON.stringify(
-                                    this.state.editorFilters
-                                )}
-                            />
-                        </div>
-                    </div>
-                    <div>
-                        <label>
-                            <input type="checkbox" checked={this.state.editorFiltersActive}
-                                   onChange={this.activateEditor.bind(this)}/> {__(`Filter editor`)}
+                    <div className="form-check">
+                        <input id="filter-editor-switch" className="form-check-input" type="checkbox"
+                               checked={this.state.editorFiltersActive}
+                               onChange={this.activateEditor.bind(this)}/>
+                        <label htmlFor="filter-editor-switch"
+                               className="form-check-label d-flex align-items-center gap-1">
+                            {__(`Filter editor`)}
                         </label>
+                    </div>
+                    <div style={!this.state.editorFiltersActive ? {pointerEvents: "none", display: "none"} : {}}>
+                        <textarea
+                            className="form-control w-100 mb-2"
+                            onChange={handleChange}
+                            name={`editor_filter_` + (this.props.layer.f_table_schema + `.` + this.props.layer.f_table_name)}
+                            value={
+                                this.state.editorFilters[0]
+                            }
+                        />
                         <button style={!this.state.editorFiltersActive ? {
                             pointerEvents: "none",
                             opacity: "0.2"
-                        } : {}} type="button" className="btn btn-xs btn-success" onClick={this.applyEditor.bind(this)}>
-                            <i className="fa fa-check"></i> {__(`Apply`)}
+                        } : {}} type="button" className="btn btn-sm btn-outline-success w-100"
+                                onClick={this.applyEditor.bind(this)}>
+                            <i className="bi bi-check"></i><span className="d-none d-lg-inline"> {__(`Apply`)}</span>
                         </button>
                     </div>
                 </div>
@@ -624,59 +306,33 @@ class VectorLayerFilter extends React.Component {
         };
 
         const buildResetButton = () => {
-            return (<button className="btn btn-xs btn-danger" onClick={this.handleReset.bind(this)}>
-                <i className="fa fa-reply"></i> {__(`Reset filter`)}</button>)
+            return (<button className="btn btn-sm btn-outline-danger" onClick={this.handleReset.bind(this)}>
+                <i className="bi bi-reply"></i><span className="d-none d-lg-inline"> {__(`Reset`)}</span></button>)
         };
 
         const buildFitBoundsButton = () => {
-            return (<button disabled={!this.state.fitBoundsActiveOnLayer} className="btn btn-xs btn-info"
+            return (<button className="btn btn-sm btn-outline-secondary set-extent-btn w-100"
                             onClick={this.handleFitBounds.bind(this)}>
-                <i className="fa fa-arrows-alt"></i> {__(`Fit bounds to filter`)}</button>)
-        };
-
-        const buildDownloadButton = () => {
-            return (
-                <div className='row'>
-                    <div className='form-group col-md-6' style={{paddingBottom: "0px"}}>
-                        <button
-                            disabled={!this.state.fitBoundsActiveOnLayer}
-                            className="btn btn-xs btn-info"
-                            onClick={this.handleDownload.bind(this)}>
-                            <i className="fa fa-download"></i> {__(`Download`)}
-                        </button>
-                    </div>
-                    <div className='form-group col-md-6'>
-                        <select
-                            className="form-control"
-                            onChange={(event) => {
-                                this.changeDownLoadFormat(event.target.value)
-                            }}
-                            disabled={!this.state.fitBoundsActiveOnLayer}
-                        >
-                            <option value={'geojson'}>GeoJson</option>
-                            <option value={'csv'}>Csv</option>
-                            <option value={'excel'}>Excel</option>
-                        </select>
-                    </div>
-                </div>
-            )
+                <i className="bi bi-arrows-fullscreen"></i> {__(`Fit bounds to filter`)}</button>)
         };
 
         let activeFiltersTab;
         let tabControl = false;
         if (Object.keys(this.state.predefinedFilters).length > 0) {
             tabControl = (<div>
-                <div className="btn-group btn-group-justified" role="group">
-                    <div className="btn-group" role="group">
-                        <button type="button" className="btn btn-default"
-                                disabled={this.state.activeTab === PREDEFINED_TAB}
-                                onClick={this.switchActiveTab.bind(this)}>{__(`Predefined`)}</button>
-                    </div>
-                    <div className="btn-group" role="group">
-                        <button type="button" className="btn btn-default"
-                                disabled={this.state.activeTab === ARBITRARY_TAB}
-                                onClick={this.switchActiveTab.bind(this)}>{__(`Arbitrary`)}</button>
-                    </div>
+                <div className="btn-group w-100" role="group">
+                    <input type="radio" id="predefined-filter-tab" name="sdsd" className="btn-check"
+                           checked={this.state.activeTab === PREDEFINED_TAB}
+                           onChange={this.switchActiveTab.bind(this)}/>
+                    <label className="btn btn-outline-secondary btn-sm" htmlFor="predefined-filter-tab">
+                        {__(`Predefined`)}
+                    </label>
+                    <input type="radio" id="arbitrary-filter-tab" name="sdsd" className="btn-check"
+                           checked={this.state.activeTab === ARBITRARY_TAB}
+                           onChange={this.switchActiveTab.bind(this)}/>
+                    <label className="btn btn-outline-secondary btn-sm" htmlFor="arbitrary-filter-tab">
+                        {__(`Arbitrary`)}
+                    </label>
                 </div>
             </div>);
 
@@ -688,21 +344,25 @@ class VectorLayerFilter extends React.Component {
         } else {
             activeFiltersTab = buildArbitraryTab();
         }
+        let html, jsx;
+        let filterHtmlTemplate = this.props.layerMeta?.filter_html_template;
+        if (filterHtmlTemplate) {
+            const dict = {filters: this.state.editorFilters[0]};
+            html = Handlebars.compile(filterHtmlTemplate)(dict);
+            if (html) {
+                jsx = (<div dangerouslySetInnerHTML={{__html: html}}></div>)
+            }
+        }
 
         return (
-            <div>
+            <div className="d-flex flex-column gap-1">
                 {tabControl}
                 {activeFiltersTab}
+                {buildFitBoundsButton()}
                 <div className="filter-functions">
                     {buildWhereClauseField()}
-                    <div className="row">
-                        <div className="col-md-6">{buildResetButton()}</div>
-                        <div className="col-md-6">{buildFitBoundsButton()}</div>
-                    </div>
-                    <div className="row">
-                        <div className="col-md-6">{buildDownloadButton()}</div>
-                    </div>
                 </div>
+                {jsx}
             </div>
         );
     }
@@ -719,14 +379,12 @@ VectorLayerFilter.propTypes = {
     onApplyArbitrary: PropTypes.func.isRequired,
     onDisableArbitrary: PropTypes.func.isRequired,
     onApplyFitBounds: PropTypes.func.isRequired,
-    onApplyDownload: PropTypes.func.isRequired,
     onChangeEditor: PropTypes.func.isRequired,
     onActivateEditor: PropTypes.func.isRequired,
     onApplyEditor: PropTypes.func.isRequired,
     editorFilters: PropTypes.array.isRequired,
     editorFiltersActive: PropTypes.bool.isRequired,
     isFilterImmutable: PropTypes.bool.isRequired,
-
 };
 
 export default VectorLayerFilter;

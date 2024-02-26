@@ -1,0 +1,31 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2023, MapCentia
+# This file is distributed under the same license as the Vidi package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Vidi 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-01-09 12:34+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.12.1\n"
+
+#: ../../_subs/NOTE_CONF.rst:4 2ee52ac9ddce49108b1b5c6ad969d6bb
+msgid "Indhold i dette værktøj er betinget af opsætningen af Vidi."
+msgstr ""
+
+#: ../../_subs/NOTE_CONF.rst:6 a67282e9790d43aba4d3677730475586
+msgid ""
+"For at læse mere om opsætningen, kan du gå til :ref:`configjs` eller "
+":ref:`configjson`"
+msgstr ""
+

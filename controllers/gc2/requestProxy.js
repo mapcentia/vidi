@@ -14,7 +14,7 @@ const proxifyRequest = (req, response) => {
     let requestURL = decodeURIComponent(req.url.substr(req.url.indexOf('?request=') + 9));
 
     // Rewrite URL in case of subUser
-    if (req.session.subUser) {
+    if (req?.session?.subUser) {
         requestURL = requestURL.replace(`/${req.session.parentDb}/`, `/${req.session.screenName}@${req.session.parentDb}/`);
     }
 
@@ -27,7 +27,7 @@ const proxifyRequest = (req, response) => {
             uri: requestURL
         };
 
-        if (req.session.gc2SessionId) {
+        if (req?.session?.gc2SessionId) {
             options.headers = {Cookie: "PHPSESSID=" + req.session.gc2SessionId + ";"}
         }
 

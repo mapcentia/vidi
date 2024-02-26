@@ -31,7 +31,23 @@ window.$ = window.jQuery = require('jquery');
 function ಠ_ಠ() {
     require('./i18n/*.js', {glob: true});
 }
+const current = document.addEventListener;
 
+// Dirty hack so Bootstrap doesn't add focusin listners.
+// The focusin will focus the first input element when clicking the map.
+document.addEventListener = function (type, listener) {
+    if(type === "focusin")
+    {
+        //do nothing
+    }
+    else
+    {
+        let args = [];
+        args[0] = type;
+        args[1] = listener;
+        current.apply(this, args);
+    }
+};
 /**
  * Global i18n dict
  */
@@ -45,7 +61,7 @@ window.vidiConfig = require('../config/config.js');
 /**
  * Th global Vidi API
  */
-window.vidiApi = {};
+window.api = {};
 
 window.Promise = require('es6-promise').Promise;
 
@@ -127,6 +143,7 @@ window.Vidi = function () {
         utils: require('./modules/utils'),
         //loading: require('./modules/loading'),
         reset: require('./modules/reset'),
+        configSwitcher: require('./modules/configSwitcher'),
         extensions: {},
         search: {}
     };
@@ -162,6 +179,7 @@ window.Vidi = function () {
     modules.utils.set(modules);
     //modules.loading.set(modules);
     modules.reset.set(modules);
+    modules.configSwitcher.set(modules);
 
     // Return the init module to be called in index.html
     // =================================================

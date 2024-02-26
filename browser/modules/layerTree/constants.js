@@ -42,10 +42,10 @@ const LAYER_TYPE_DEFAULT = LAYER.RASTER_TILE;
  * Layer type icons
  */
 let icons = {};
-icons[LAYER.VECTOR] = `<i style="font-size: 18px" class="material-icons">gesture</i>`;
-icons[LAYER.RASTER_TILE] = `<i style="font-size: 18px" class="material-icons">border_all</i>`;
-icons[LAYER.VECTOR_TILE] = `<i style="font-size: 18px" class="material-icons">domain</i>`;
-icons[LAYER.WEBGL] = `<i style="font-size: 18px" class="material-icons">grain</i>`;
+icons[LAYER.VECTOR] = `<i class="bi bi-bounding-box"></i>`;
+icons[LAYER.RASTER_TILE] = `<i class="bi bi-border-all"></i>`;
+icons[LAYER.VECTOR_TILE] = `<i class="bi bi-paint-bucket"></i>`;
+icons[LAYER.WEBGL] = `<i class="bi bi-gpu-card"></i>`;
 const ICONS = icons;
 
 const VECTOR_SIDE_TABLE_EL = 'vector-side-table';
@@ -65,6 +65,8 @@ const VECTOR_STYLE = () => {
     }
 }
 
+const SELECTED_ICON_SCALE = 1.3;
+
 export {
     LOG,
     MODULE_NAME,
@@ -78,5 +80,6 @@ export {
     MAP_RESOLUTIONS,
     VECTOR_SIDE_TABLE_EL,
     SELECTED_STYLE,
-    VECTOR_STYLE
+    VECTOR_STYLE,
+    SELECTED_ICON_SCALE
 };

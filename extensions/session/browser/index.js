@@ -30,6 +30,7 @@ const config = require('./../../../config/config.js');
 const urlparser = require('./../../../browser/modules/urlparser');
 const urlVars = urlparser.urlVars;
 const cookie = require('js-cookie');
+const React = require("react");
 
 /**
  *
@@ -47,21 +48,18 @@ module.exports = {
         let React = require('react');
         let ReactDOM = require('react-dom');
 
-        if (typeof urlVars.session === "string") {
-            const MAXAGE = (config.sessionMaxAge || 86400) / 86400; // In days
-            // Try to remove existing cookie
-            document.cookie = 'connect.gc2=; Max-Age=0; path=/; domain=' + location.host;
-            cookie.set("connect.gc2", urlVars.session, {expires: MAXAGE});
-        }
+        document.querySelector(".sign-in-btn")?.classList.remove("d-none");
 
         // Check if signed in
         // sign in if autoLogin is set to true
         //===================
         class Status extends React.Component {
             render() {
-                return <div className={"alert alert-dismissible " + this.props.alertClass} role="alert">
-                    {this.props.statusText}
-                </div>
+                return <h6>
+                   <span className={"badge bg-" + this.props.alertClass + " text-nowrap"}>
+                        {this.props.statusText}
+                    </span>
+                </h6>
             }
         }
 
@@ -72,23 +70,15 @@ module.exports = {
                 this.state = {
                     sessionScreenName: "",
                     sessionPassword: "",
-                    statusText: "Type your user name and password",
-                    alertClass: "alert-info",
-                    btnText: "Sign in",
+                    statusText: __("Type your user name and password"),
+                    alertClass: "info",
+                    btnText: __("Sign in"),
                     auth: false
                 };
 
                 this.validateForm = this.validateForm.bind(this);
                 this.handleChange = this.handleChange.bind(this);
                 this.handleSubmit = this.handleSubmit.bind(this);
-
-                this.padding = {
-                    padding: "12px"
-                };
-                this.sessionLoginBtn = {
-                    width: "100%"
-                };
-
             }
 
             validateForm() {
@@ -125,18 +115,19 @@ module.exports = {
                         success: function (data) {
                             backboneEvents.get().trigger(`session:authChange`, true);
                             me.setState({statusText: `Signed in as ${data.screen_name} (${data.email})`});
-                            me.setState({alertClass: "alert-success"});
-                            me.setState({btnText: "Log out"});
+                            me.setState({alertClass: "success"});
+                            me.setState({btnText: __("Sign out")});
                             me.setState({auth: true});
                             $(".gc2-session-lock").show();
                             $(".gc2-session-unlock").hide();
+                            $(".gc2-session-btn-text").html(data.screen_name)
                             userName = data.screen_name;
                             parent.update();
                         },
 
                         error: function () {
-                            me.setState({statusText: "Wrong user name or password"});
-                            me.setState({alertClass: "alert-danger"});
+                            me.setState({statusText: __("Wrong user name or password")});
+                            me.setState({alertClass: "danger"});
                         }
                     });
                 } else {
@@ -147,12 +138,13 @@ module.exports = {
                         success: function () {
                             backboneEvents.get().trigger(`session:authChange`, false);
 
-                            me.setState({statusText: "Not signed in"});
-                            me.setState({alertClass: "alert-info"});
-                            me.setState({btnText: "Sign in"});
+                            me.setState({statusText: __("Not signed in")});
+                            me.setState({alertClass: "info"});
+                            me.setState({btnText: __("Sign in")});
                             me.setState({auth: false});
                             $(".gc2-session-lock").hide();
                             $(".gc2-session-unlock").show();
+                            $(".gc2-session-btn-text").html(__("Sign in"))
                             userName = null;
                             parent.update();
                         },
@@ -177,13 +169,14 @@ module.exports = {
                         if (data.status.authenticated) {                            
                             backboneEvents.get().trigger(`session:authChange`, true);
                             me.setState({sessionScreenName: data.status.screen_name});
-                            me.setState({statusText: `Signed in as ${data.status.screen_name} (${data.status.email})`});
-                            me.setState({alertClass: "alert-success"});
-                            me.setState({btnText: "Sign out"});
+                            me.setState({statusText: `${__("Signed in as")} ${data.status.screen_name} (${data.status.email})`});
+                            me.setState({alertClass: "success"});
+                            me.setState({btnText: __("Sign out")});
                             me.setState({auth: true});
                             $(".gc2-session-lock").show();
                             $(".gc2-session-unlock").hide();
                             userName = data.status.screen_name;
+                            $(".gc2-session-btn-text").html(userName);
                             // True if auto login happens. When reload meta
                             if (data?.screen_name && data?.status?.authenticated) {
                                 // Wait for layer tree to be built before reloading
@@ -214,42 +207,51 @@ module.exports = {
             }
 
             render() {
-                return (<div style={this.padding}>
-                    <Status statusText={this.state.statusText} alertClass={this.state.alertClass}/>
+                return (
                     <div className="login">
                         <form onSubmit={this.handleSubmit}>
-                            <div style={{display: this.state.auth ? 'none' : 'inline'}}>
-                                <div className="form-group">
-                                    <label htmlFor="session-email">User name</label>
+                            <Status statusText={this.state.statusText} alertClass={this.state.alertClass}/>
+                            <div className="row g-3 align-items-center">
+                                <div className="col-4"
+                                     style={{
+                                         display: this.state.auth ? 'none' : 'block',
+                                         minWidth: '250px'
+                                     }}>
                                     <input
                                         id="sessionScreenName"
                                         className="form-control"
                                         defaultValue={this.state.sessionScreenName}
                                         onChange={this.handleChange}
+                                        placeholder={__("User name")}
                                     />
                                 </div>
-                                <div className="form-group">
-                                    <label htmlFor="session-password">Password</label>
+                                <div className="col-4"
+                                     style={{
+                                         display: this.state.auth ? 'none' : 'block',
+                                         minWidth: '250px'
+                                     }}>
                                     <input
                                         id="sessionPassword"
                                         className="form-control"
                                         defaultValue={this.state.sessionPassword}
                                         onChange={this.handleChange}
                                         type="password"
+                                        placeholder={__("Password")}
                                     />
                                 </div>
+                                <div className="col-2">
+                                    <button
+                                        type="submit"
+                                        disabled={!this.validateForm()}
+                                        className="btn btn-outline-primary text-nowrap"
+                                    >
+                                        {this.state.btnText}
+                                    </button>
+                                </div>
                             </div>
-                            <button
-                                type="submit"
-                                disabled={!this.validateForm()}
-                                className="btn btn-raised"
-                                style={this.sessionLoginBtn}
-                            >
-                                {this.state.btnText}
-                            </button>
                         </form>
                     </div>
-                </div>);
+                );
             }
         }
 

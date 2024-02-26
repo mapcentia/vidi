@@ -141,7 +141,7 @@ module.exports = {
             }
         };
 
-        utils.createMainTab(exId, utils.__("Coordinates", dict), utils.__("Info", dict), require('./../../../browser/modules/height')().max, "my_location");
+        utils.createMainTab(exId, utils.__("Coordinates", dict), utils.__("Info", dict), require('./../../../browser/modules/height')().max, "bi bi-globe");
 
 
         // Create React component
@@ -320,86 +320,84 @@ module.exports = {
                 return (
                     <div role="tabpanel">
 
-                        <h3>{utils.__("Choose coordinate system", dict)}</h3>
-                        <div className="radio">
+                        <h4>{utils.__("Choose coordinate system", dict)}</h4>
+                        <div className="form-check">
                             <label>
-                                <input onClick={this.onCoordinatesSystemClick} type="radio"
+                                <input className="form-check-input" onClick={this.onCoordinatesSystemClick} type="radio"
                                        id="coordinates-system-dd"
                                        name="coordinates-system" value="dd" defaultChecked="1"/>
                                 {utils.__("Latitude/Longitude, decimal degrees", dict)}
                             </label>
                         </div>
 
-                        <div className="radio">
+                        <div className="form-check">
                             <label>
-                                <input onClick={this.onCoordinatesSystemClick} type="radio"
+                                <input className="form-check-input" onClick={this.onCoordinatesSystemClick} type="radio"
                                        id="coordinates-system-dms"
                                        name="coordinates-system" value="dms"/>
                                 {utils.__("Latitude/Longitude, degrees, minutes and seconds", dict)}
                             </label>
                         </div>
 
-                        <div className="radio">
+                        <div className="form-check">
                             <label>
-                                <input onClick={this.onCoordinatesSystemClick} type="radio"
+                                <input className="form-check-input" onClick={this.onCoordinatesSystemClick} type="radio"
                                        id="coordinates-system-utm"
                                        name="coordinates-system" value="utm"/>
                                 UTM
                             </label>
                         </div>
 
-                        <h3>{utils.__("Cursor position", dict)}</h3>
+                        <h4 className="mt-3">{utils.__("Cursor position", dict)}</h4>
 
                         <div>
-                            <div><strong>{this.state.zone}</strong></div>
-                            <div><strong>{this.state.lat}</strong></div>
-                            <div><strong>{this.state.lng}</strong></div>
+                            <div>{this.state.zone}</div>
+                            <div>{this.state.lat}</div>
+                            <div>{this.state.lng}</div>
                         </div>
 
 
-                        <h3>{utils.__("Extent", dict)}</h3>
+                        <h4 className="mt-3">{utils.__("Extent", dict)}</h4>
                         <div>
 
                             <div>
                                 <div style={this.center}>
-                                    <strong>{this.state.north}</strong>
+                                    {this.state.north}
                                 </div>
                                 <div style={this.center}>
-                                    <strong>↑</strong>
+                                    ↑
                                 </div>
                             </div>
 
                             <div>
 
                                 <div style={this.left}>
-                                    <strong>{this.state.west}</strong>
+                                    {this.state.west}
                                 </div>
 
                                 <div style={this.right}>
-                                    <strong>{this.state.east}</strong>
+                                    {this.state.east}
                                 </div>
 
                                 <div style={this.centerFloat}>
-                                    <strong>
                                         <div style={this.left}>←</div>
                                         <div style={this.right}>→</div>
-                                    </strong>
                                 </div>
 
                             </div>
 
                             <div>
                                 <div style={this.center}>
-                                    <strong>↓</strong>
+                                    ↓
                                 </div>
                                 <div style={this.center}>
-                                    <strong>{this.state.south}</strong>
+                                    {this.state.south}
                                 </div>
                             </div>
 
                         </div>
-                        <div>
-                            <h3>{utils.__("Pan to", dict)}</h3>
+                        <div className="mt-3">
+                            <h4>{utils.__("Pan to", dict)}</h4>
                             <form onSubmit={this.handlePanToCoordsSubmit}>
                                 <div className="form-group">
                                     <input type="text" className="form-control" value={this.state.panTo}

@@ -33,7 +33,8 @@ class AutocompleteControl extends React.Component {
         if (this.state.currentField !== this.props.field) {
             let field = this.props.field;
             this.setState({"currentField": field});
-            let sql = btoa(`SELECT distinct(${this.props.field}) FROM ${this.props.layerKey}`);
+            let sql = btoa(`SELECT distinct(${this.props.field})
+                            FROM ${this.props.layerKey}`);
             $.ajax({
                 url: '/api/sql/' + this.props.db,
                 contentType: 'application/x-www-form-urlencoded',
@@ -57,6 +58,7 @@ class AutocompleteControl extends React.Component {
     render() {
         return (
             <ReactAutocomplete
+                wrapperStyle={{display: "inline"}}
                 id={this.props.id}
                 items={this.state.options}
                 shouldItemRender={(item, value) => {
@@ -89,34 +91,13 @@ class AutocompleteControl extends React.Component {
                         background: 'rgba(255, 255, 255, 1)',
                         zIndex: '10000'
 
-                    }} className="menu">{children.slice(0, 10)}</div>
+                    }}
+                         className="menu">{children.slice(0, 10)}</div>
                 )}
                 inputProps={{
                     placeholder: "abc123",
-                    style: {
-                        boxSizing: "border-box",
-                        margin: "0",
-                        font: "inherit",
-                        fontFamily: "inherit",
-                        display: "block",
-                        width: "100%",
-                        color: "#555",
-                        height: "38px",
-                        padding: "7px 0",
-                        fontSize: "16px",
-                        lineHeight: "1.42857143",
-                        border: "0",
-                        backgroundImage: "linear-gradient(#222, #222), linear-gradient(#D2D2D2, #D2D2D2)",
-                        backgroundSize: "0 2px, 100% 1px",
-                        backgroundRepeat: "no-repeat",
-                        backgroundPosition: "center bottom, center calc(100% - 1px)",
-                        backgroundColor: "rgba(0, 0, 0, 0)",
-                        transition: "background 0s ease-out",
-                        float: "none",
-                        boxShadow: "none",
-                        borderRadius: "0",
-                        marginBottom: "7px"
-                    }
+                    className: "form-control form-control-sm"
+
                 }}
             />
         )

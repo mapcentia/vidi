@@ -58,7 +58,7 @@ const returnPNGForStateSnapshot = (localRequest, localResponse) => {
 
                             if (localRequest.query.filter) { // Print as soon Vidi is loaded
                                 go = true;
-                                delay = 1000; // wait a bit longer because zooming has to finish
+                                delay = 3000; // wait a bit longer because zooming has to finish
                             }
 
                             if (
@@ -102,8 +102,8 @@ const returnPNGForStateSnapshot = (localRequest, localResponse) => {
                     });
                 }).catch(error => {
                     headless.destroy(browser);
-                    response.status(500);
-                    response.send(error);
+                    localResponse.status(500);
+                    localResponse.send(error);
                 });
             }).catch(error => {
                 console.log("Can't get a browser right now: ", error.message);

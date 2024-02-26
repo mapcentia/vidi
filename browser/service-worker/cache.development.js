@@ -102,7 +102,6 @@ let urlsToCache = [
     '/js/lib/bootstrap-table/bootstrap-table.css',
     '/js/lib/bootstrap/dist/css/bootstrap.min.css',
     '/js/lib/q-cluster/css/q-cluster.css',
-    '/js/lib/snackbarjs/snackbar.min.css',
     '/js/lib/leaflet-history/leaflet-history.css',
     '/js/lib/leaflet-boxzoom/leaflet-boxzoom.css',
     '/js/lib/leaflet-measure/leaflet-measure.css',

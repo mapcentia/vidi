@@ -1,6 +1,6 @@
 /*
  * @author     Alexander Shumilov
- * @copyright  2013-2022 MapCentia ApS
+ * @copyright  2013-2023 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -9,9 +9,12 @@
 import {LAYER, SYSTEM_FIELD_PREFIX} from '../../../browser/modules/layerTree/constants';
 import {GEOJSON_PRECISION} from '../../../browser/modules/constants';
 import dayjs from 'dayjs';
-
-const jquery = require('jquery');
-require('snackbarjs');
+import {withTheme} from '@rjsf/core';
+import {Theme} from '@rjsf/bootstrap-4';
+import validator from "@rjsf/validator-ajv8";
+import SelectWidget from "./SelectWidget.jsx";
+import TimeWidget from "./TimeWidget.jsx";
+import {coordAll} from "@turf/turf";
 
 /**
  *
@@ -19,7 +22,8 @@ require('snackbarjs');
  */
 let APIBridgeSingletone = require('../../../browser/modules/api-bridge');
 
-let PANEL_DOCKING_PARAMETER = 1024;
+const config = require('../../../config/config.js');
+const drawTooltip = config?.extensionConfig?.editor?.tooltip;
 
 /**
  *
@@ -31,7 +35,13 @@ let apiBridgeInstance = false;
 
 let multiply = require('geojson-multiply');
 
-import Form from "@rjsf/core";
+
+const Theme5 = {
+    ...Theme,
+    widgets: {...Theme.widgets, SelectWidget}
+}
+
+const Form = withTheme(Theme5);
 
 let markers = [];
 
@@ -46,13 +56,14 @@ let nonCommitedEditedFeature = false;
 
 let switchLayer;
 
-const ImageUploadWidget = require('./ImageUploadWidget');
+const ImageUploadWidget = require('./FileUploadWidget');
 
-const widgets = {'imageupload': ImageUploadWidget};
+const widgets = {'imageupload': ImageUploadWidget, 'time': TimeWidget};
 
 const MODULE_NAME = `editor`;
-const EDITOR_FORM_CONTAINER_ID = 'editor-attr-form';
-const EDITOR_CONTAINER_ID = 'editor-attr-dialog';
+const PLACEMENT = window.screen.width >= 768 ? "start" : "bottom"
+const EDITOR_OFFCANVAS_CONTAINER_ID = `offcanvas-edit-${PLACEMENT}`;
+const EDITOR_FORM_CONTAINER_ID = document.querySelector(`#${EDITOR_OFFCANVAS_CONTAINER_ID} .offcanvas-body`);
 const MAX_NODE_IN_FEATURE = 1000; // If number of nodes exceed this number, when the geometry editor is not enabled.
 const EDIT_STYLE = {
     color: 'blue',
@@ -95,6 +106,18 @@ let _self = false;
 
 let vectorLayers;
 
+let bindEvent;
+
+let offcanvasEdit;
+
+const transformErrors = (errors, uiSchema) => {
+    return errors.map((error) => {
+        if (error.name === 'required') {
+            error.message = __(`Required`);
+        }
+        return error;
+    });
+}
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -115,6 +138,7 @@ module.exports = {
         layerTree = o.layerTree;
         switchLayer = o.switchLayer;
         backboneEvents = o.backboneEvents;
+        bindEvent = o.bindEvent;
 
         _self = this;
         try {
@@ -134,11 +158,44 @@ module.exports = {
             return;
         }
 
+        if (drawTooltip) {
+            $("body").append(`<div id="editor-tooltip" style="position: fixed; float: left; display: none">${drawTooltip}</div>`);
+            $(document).on('mousemove', function (e) {
+                $('#editor-tooltip').css({
+                    left: e.pageX + 20,
+                    top: e.pageY
+                });
+            });
+            cloud.get().map.on("editable:drawing:clicked", function () {
+                $("#editor-tooltip").hide();
+            });
+        }
+
+        $("#editStopBtn").on("click", () => {
+            _self.stopEditWithConfirm();
+        })
+
         if (vidiConfig.enabledExtensions.indexOf(`embed`) !== -1) {
             embedIsEnabled = true;
         }
 
         apiBridgeInstance = APIBridgeSingletone();
+
+        try {
+            offcanvasEdit = new bootstrap.Offcanvas(`#${EDITOR_OFFCANVAS_CONTAINER_ID}`);
+            document.getElementById(EDITOR_OFFCANVAS_CONTAINER_ID).addEventListener('shown.bs.offcanvas', event => {
+                document.querySelector(".edit-attr-btn .bi-arrow-bar-left").classList.remove("d-none");
+                document.querySelector(".edit-attr-btn .bi-arrow-bar-right").classList.add("d-none");
+            })
+            document.getElementById(EDITOR_OFFCANVAS_CONTAINER_ID).addEventListener('hidden.bs.offcanvas', event => {
+                document.querySelector(".edit-attr-btn .bi-arrow-bar-right").classList.remove("d-none");
+                document.querySelector(".edit-attr-btn .bi-arrow-bar-left").classList.add("d-none");
+            })
+
+            document.getElementById("offcanvasEditBtn").addEventListener("click", () => offcanvasEdit.toggle());
+        } catch (e) {
+            console.log(e)
+        }
 
         // Listen to arrival of add-feature buttons
         $(document).arrive('.gc2-add-feature', {
@@ -186,33 +243,21 @@ module.exports = {
             });
         });
 
-        // Listen to close of attr box
-        $(".editor-attr-dialog__close-hide").on("click", function () {
-            _self.stopEdit();
-            backboneEvents.get().trigger("sqlQuery:clear");
-        });
-
-        $(".editor-attr-dialog__expand-less").on("click", function () {
-            let e = $("#" + EDITOR_CONTAINER_ID);
-            e.animate({
-                bottom: ((e.height() * -1) + 30) + "px"
-            }, 500, function () {
-                $(".editor-attr-dialog__expand-less").hide();
-                $(".editor-attr-dialog__expand-more").show();
-            });
-        });
-
-        $(".editor-attr-dialog__expand-more").on("click", function () {
-            $("#" + EDITOR_CONTAINER_ID).animate({
-                bottom: "0"
-            }, 500, function () {
-                $(".editor-attr-dialog__expand-less").show();
-                $(".editor-attr-dialog__expand-more").hide();
-            });
-        });
-
         backboneEvents.get().on("ready:meta", function () {
             _self.setHandlersForVectorLayers();
+            if (config?.extensionConfig?.editor?.addOnStart) {
+                function poll() {
+                    if (('serviceWorker' in navigator) && navigator?.serviceWorker?.controller) {
+                        _self.add(config?.extensionConfig?.editor?.addOnStart, true, true);
+                    } else {
+                        setTimeout(() => {
+                            poll();
+                        }, 200)
+                    }
+                }
+
+                poll();
+            }
         });
 
         /*
@@ -221,6 +266,14 @@ module.exports = {
         */
         _self.setHandlersForVectorLayers();
     },
+
+    showOffcanvasEdit: () => {
+        offcanvasEdit.show();
+    },
+    hideOffcanvasEdit: () => {
+        offcanvasEdit.hide();
+    },
+
 
     setHandlersForVectorLayers: () => {
         let metaData = meta.getMetaData();
@@ -251,7 +304,7 @@ module.exports = {
                             tooltipSettings.className = `api-bridge-popup-warning`;
 
                             content = `<div class="js-feature-notification-tooltip">
-                                <i class="fa fa-exclamation"></i> ${__(`Awaiting network`)}
+                                <i class="bi bi-exclamation"></i> ${__(`Awaiting network`)}
                                 <span class="js-tooltip-content"></span>
                             </div>`;
                         } else if (feature.meta.apiRecognitionStatus === 'rejected_by_server') {
@@ -260,13 +313,13 @@ module.exports = {
                             if (feature.meta.serverErrorType) {
                                 if (feature.meta.serverErrorType === `REGULAR_ERROR`) {
                                     content = `<div class="js-feature-notification-tooltip">
-                                        <i class="fa fa-exclamation"></i> ${__(`Error`)}
+                                        <i class="bi bi-exclamation"></i> ${__(`Error`)}
                                         <span class="js-tooltip-content"></span>
                                     </div>`;
                                 } else if (feature.meta.serverErrorType === `AUTHORIZATION_ERROR`) {
                                     tooltipSettings.className = `api-bridge-popup-warning`;
                                     content = `<div class="js-feature-notification-tooltip">
-                                        <i class="fa fa-exclamation"></i> ${__(`Awaiting login`)}
+                                        <i class="bi bi-exclamation"></i> ${__(`Awaiting login`)}
                                         <span class="js-tooltip-content"></span>
                                     </div>`;
                                 } else {
@@ -274,7 +327,7 @@ module.exports = {
                                 }
                             } else {
                                 content = `<div class="js-feature-notification-tooltip">
-                                    <i class="fa fa-exclamation"></i> ${__(`Error`)}
+                                    <i class="bi bi-exclamation"></i> ${__(`Error`)}
                                     <span class="js-tooltip-content"></span>
                                 </div>`;
                             }
@@ -345,14 +398,13 @@ module.exports = {
                 if (fieldConf[key]?.alias) {
                     title = fieldConf[key].alias;
                 }
-
                 properties[key] = {title, type: `string`};
-
                 if (fields[key].is_nullable !== true) {
                     required.push(key);
                 }
 
                 if (fields[key]) {
+                    uiSchema[key] = {};
                     switch (fields[key].type) {
                         case `smallint`:
                         case `integer`:
@@ -365,11 +417,12 @@ module.exports = {
                         case `double precision`:
                             properties[key].type = `number`;
                             break;
-                        // case `time without time zone`:
-                        //     uiSchema[key] = {
-                        //         'ui:widget': 'time'
-                        //     };
-                        //     break;
+                        case `time with time zone`:
+                        case `time without time zone`:
+                            uiSchema[key] = {
+                                'ui:widget': 'time'
+                            };
+                            break;
                         case `date`:
                             uiSchema[key] = {
                                 'ui:widget': 'date'
@@ -389,6 +442,7 @@ module.exports = {
                             break;
                         case `boolean`:
                             properties[key].type = `boolean`;
+                            properties[key].default = false; // Checkbox is either checked or unchecked
                             break;
                         case `bytea`:
                             uiSchema[key] = {
@@ -396,6 +450,7 @@ module.exports = {
                             };
                             break;
                     }
+                    uiSchema[key]["ui:placeholder"] = fieldConf[key]?.desc;
                 }
 
                 // Properties have priority over default types
@@ -433,6 +488,12 @@ module.exports = {
      * @param isVector
      */
     add: function (k, doNotRemoveEditor, isVector = false) {
+        if (editedFeature) {
+            alert("Ongoing edit. Please stop editing before starting a new one");
+            return;
+        }
+
+
         isVectorLayer = isVector;
         _self.stopEdit();
         editedFeature = false;
@@ -459,6 +520,10 @@ module.exports = {
 
             me.stopEdit();
 
+            if (drawTooltip) {
+                $("#editor-tooltip").show();
+            }
+
             backboneEvents.get().trigger('block:infoClick');
             // Create schema for attribute form
             let formBuildInformation = this.createFormObj(fields, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column, fieldconf);
@@ -484,6 +549,19 @@ module.exports = {
              */
             const onSubmit = function (formData) {
                 let featureCollection, geoJson = editor.toGeoJSON(GEOJSON_PRECISION);
+                if ((type === "POINT" || type === "MULTIPOINT") && !editor?.dragging) {
+                    alert(__("You need to plot a point"));
+                    return;
+                }
+                if ((type === "LINESTRING" || type === "MULTILINESTRING") && coordAll(geoJson).length < 2) {
+                    alert(__("You need to plot at least two points"));
+                    return;
+                }
+                if ((type === "POLYGON" || type === "MULTIPOLYGON") && coordAll(geoJson).length < 4) {
+                    console.log(coordAll(geoJson).length)
+                    alert(__("You need to plot at least three points"));
+                    return;
+                }
 
                 // Promote MULTI geom
                 if (type.substring(0, 5) === "MULTI") {
@@ -527,12 +605,12 @@ module.exports = {
                         layerTree.reloadLayer("v:" + schemaQualifiedName, true);
                     }
 
-                    $.snackbar({
-                        id: "snackbar-conflict",
-                        content: "Feature  stedfæstet",
-                        htmlAllowed: true,
-                        timeout: 5000
-                    });
+                    utils.showInfoToast(__("Feature added"));
+                    if (config?.extensionConfig?.editor?.repeatMode) {
+                        setTimeout(() => {
+                            _self.add(schemaQualifiedName, true, true)
+                        }, 1000);
+                    }
                 };
 
                 apiBridgeInstance.addFeature(featureCollection, db, metaDataKeys[schemaQualifiedName]).then(featureIsSaved).catch(error => {
@@ -542,21 +620,24 @@ module.exports = {
             };
 
             // Slide panel with attributes in and render form component
-            ReactDOM.unmountComponentAtNode(document.getElementById(EDITOR_FORM_CONTAINER_ID));
+            ReactDOM.unmountComponentAtNode(document.querySelector(`#${EDITOR_OFFCANVAS_CONTAINER_ID} .offcanvas-body`));
             ReactDOM.render((
-                <div style={{"padding": "15px"}}>
-                    <Form
-                        className="feature-attribute-editing-form"
-                        schema={schema} noHtml5Validate
-                        uiSchema={uiSchema}
-                        widgets={widgets}
-                        onSubmit={onSubmit}>
-                        <div className="buttons">
-                            <button type="submit" className="btn btn-info">Submit</button>
-                        </div>
-                    </Form>
-                </div>
-            ), document.getElementById(EDITOR_FORM_CONTAINER_ID));
+                <Form
+                    validator={validator}
+                    className="feature-attribute-editing-form"
+                    schema={schema} noHtml5Validate
+                    uiSchema={uiSchema}
+                    widgets={widgets}
+                    onSubmit={onSubmit}
+                    transformErrors={transformErrors}>
+                    <div className="buttons">
+                        <button type="submit"
+                                className="btn btn btn-success mb-2 mt-2 w-100">{__("Submit")}</button>
+                        <button type="button" onClick={_self.stopEditWithConfirm}
+                                className="btn btn btn-outline-secondary mb-2 mt-2 w-100">{__("Cancel")}</button>
+                    </div>
+                </Form>
+            ), EDITOR_FORM_CONTAINER_ID);
 
             _self.openAttributesDialog();
         };
@@ -696,6 +777,10 @@ module.exports = {
      * @param isVector
      */
     edit: function (e, k, isVector = false) {
+        if (editedFeature) {
+            alert("Ongoing edit. Please stop editing before starting a new one");
+            return;
+        }
         isVectorLayer = isVector;
         _self.stopEdit();
         editedFeature = e;
@@ -790,11 +875,7 @@ module.exports = {
                         editor = e.enableEdit();
                     } else {
                         editor = false;
-                        jquery.snackbar({
-                            content: `<span>${__("Editing of geometry is not possible when number of nodes exceed")} ${MAX_NODE_IN_FEATURE}</span>`,
-                            htmlAllowed: true,
-                            timeout: 6000
-                        })
+                        utils.showInfoToast(__("Editing of geometry is not possible when number of nodes exceed") + " " + MAX_NODE_IN_FEATURE);
                     }
                     break;
             }
@@ -941,7 +1022,7 @@ module.exports = {
             const uiSchema = formBuildInformation.uiSchema;
 
             cloud.get().map.closePopup();
-            ReactDOM.unmountComponentAtNode(document.getElementById(EDITOR_FORM_CONTAINER_ID));
+            ReactDOM.unmountComponentAtNode(EDITOR_FORM_CONTAINER_ID);
             let eventFeatureParsed = {};
             for (let [key, value] of Object.entries(eventFeatureCopy.properties)) {
                 if (fields[key].type.includes("timestamp with time zone")) {
@@ -952,20 +1033,22 @@ module.exports = {
                 eventFeatureParsed[key] = value;
             }
             ReactDOM.render((
-                <div style={{"padding": "15px"}}>
-                    <Form
-                        className="feature-attribute-editing-form"
-                        schema={schema} noHtml5Validate
-                        widgets={widgets}
-                        uiSchema={uiSchema}
-                        formData={eventFeatureParsed}
-                        onSubmit={onSubmit}>
-                        <div className="buttons">
-                            <button type="submit" className="btn btn-info">Submit</button>
-                        </div>
-                    </Form>
-                </div>
-            ), document.getElementById(EDITOR_FORM_CONTAINER_ID));
+                <Form
+                    validator={validator}
+                    className="feature-attribute-editing-form"
+                    schema={schema} noHtml5Validate
+                    widgets={widgets}
+                    uiSchema={uiSchema}
+                    formData={eventFeatureParsed}
+                    onSubmit={onSubmit}
+                    transformErrors={transformErrors}>
+                    <div className="buttons">
+                        <button type="submit" className="btn btn btn-success mb-2 mt-2 w-100">{__("Submit")}</button>
+                        <button type="button" onClick={_self.stopEditWithConfirm}
+                                className="btn btn btn-outline-secondary mb-2 mt-2 w-100">{__("Cancel")}</button>
+                    </div>
+                </Form>
+            ), EDITOR_FORM_CONTAINER_ID);
             _self.openAttributesDialog();
         };
         let confirmMessage = __(`Application is offline, tiles will not be updated. Proceed?`);
@@ -994,24 +1077,8 @@ module.exports = {
      * @returns {void}
      */
     openAttributesDialog: () => {
-        if (embedIsEnabled && ($(window).width() < PANEL_DOCKING_PARAMETER || $(window).height() < (PANEL_DOCKING_PARAMETER / 2))) {
-            let e = $("#" + EDITOR_CONTAINER_ID);
-            e.animate({
-                bottom: ((e.height() * -1) + 30) + "px"
-            }, 500, () => {
-                $(".editor-attr-dialog__expand-less").hide();
-                $(".editor-attr-dialog__expand-more").show();
-            });
-
-            $('#layer-slide').find('.close').trigger('click');
-        } else {
-            $("#" + EDITOR_CONTAINER_ID).animate({
-                bottom: "0"
-            }, 500, () => {
-                $(".editor-attr-dialog__expand-less").show();
-                $(".editor-attr-dialog__expand-more").hide();
-            });
-        }
+        $("#offcanvasEditBtn").trigger("click");
+        $("#edit-tool-group").removeClass("d-none")
     },
 
     /**
@@ -1079,8 +1146,13 @@ module.exports = {
      * Stop editing and clean up
      */
     stopEdit: function () {
+        if (drawTooltip) {
+            $("#editor-tooltip").hide();
+        }
         backboneEvents.get().trigger('unblock:infoClick');
         cloud.get().map.editTools.stopDrawing();
+        $("#edit-tool-group").addClass("d-none");
+        _self.hideOffcanvasEdit()
 
         if (editor) {
             cloud.get().map.removeLayer(editor);
@@ -1099,7 +1171,7 @@ module.exports = {
             if (editedFeature.feature.geometry.type !== `Point` && editedFeature.feature.geometry.type !== `MultiPoint`) {
                 editedFeature.disableEdit();
                 if (featureWasEdited) {
-                    switchLayer.init(editedFeature.id, false);
+                    // switchLayer.init(editedFeature.id, false);
                     switchLayer.init(editedFeature.id, true);
                 }
             }
@@ -1114,16 +1186,15 @@ module.exports = {
 
         featureWasEdited = false;
 
-        // Close the attribute dialog
-        $("#" + EDITOR_CONTAINER_ID).animate({
-            bottom: "-100%"
-        }, 500, function () {
-            $(".editor-attr-dialog__expand-less").show();
-            $(".editor-attr-dialog__expand-more").hide();
-        });
 
         editedFeature = false;
         sqlQuery.resetAll();
+    },
+
+    stopEditWithConfirm: () => {
+        if (window.confirm(__("Are you sure you want to cancel?"))) {
+            _self.stopEdit();
+        }
     },
 
     /**
@@ -1151,5 +1222,4 @@ module.exports = {
         return editedFeature;
     }
 };
-
 

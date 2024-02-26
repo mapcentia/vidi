@@ -28,9 +28,13 @@ module.exports = {
                         filename = 'file.xlsx';
                         type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
                         break;
-                    default:
+                    case "geojson":
                         filename = 'file.geojson';
                         type = 'application/json';
+                        break;
+                    default:
+                        filename = 'file.zip';
+                        type = 'application/zip';
                         break;
                 }
                 let blob = new Blob([request.response], {type: type});
@@ -40,6 +44,8 @@ module.exports = {
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
+            } else {
+                request.response.text().then(e => alert(JSON.parse(e).message.join("\n")));
             }
             // some error handling should be done here...
         };

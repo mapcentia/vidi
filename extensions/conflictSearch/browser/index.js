@@ -143,11 +143,13 @@ var debounce = require('lodash/debounce');
 
 var _result = {};
 
-import {
-    buffer as turfBuffer,
-    union as turfUnion,
-} from '@turf/turf'
+import {buffer as turfBuffer, dissolve as turDissolve, multiPolygon as turfMultiPolygon} from '@turf/turf'
+
 const wicket = require('wicket');
+const TOAST_ID = "conflict-toast";
+
+let isCurrentFromDrawing = false;
+let currentFromDrawingId = null;
 
 /**
  *
@@ -315,11 +317,23 @@ module.exports = module.exports = {
         cloud.map.addLayer(dataItems);
 
         // Create a new tab in the main tab bar
-        utils.createMainTab("conflict", "Konfliktsøgning", "Lav en konfliktsøgning ned igennem alle lag. Der kan søges med en adresse/matrikelnr., en tegning eller et objekt fra et lag. Det sidste gøres ved at klikke på et objekt i et tændt lag og derefter på \'Søg med dette objekt\'", require('./../../../browser/modules/height')().max, "check_circle", false, "conflictSearch");
+        utils.createMainTab("conflict", "Konfliktsøgning", "Lav en konfliktsøgning ned igennem alle lag. Der kan søges med en adresse/matrikelnr., en tegning eller et objekt fra et lag. Det sidste gøres ved at klikke på et objekt i et tændt lag og derefter på \'Søg med dette objekt\'", require('./../../../browser/modules/height')().max, "bi-check2-square", false, "conflictSearch");
         $("#conflict").append(dom);
+        $("body").append(`
+            <div class="toast-container bottom-0 end-0 p-3 me-5">
+            <div id="${TOAST_ID}" class="toast align-items-center text-bg-primary border-0" role="alert" aria-live="assertive"
+                 aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body" id="conflict-toast-body"></div>
+                </div>
+            </div>
+            </div>
+        `)
 
         // DOM created
-
+        $('#searchclear2').on('click', function () {
+            backboneEvents.get().trigger('clear:search');
+        });
         // Init search with custom callback
         getPlaceStore = search.init(function () {
             _clearDrawItems();
@@ -327,8 +341,8 @@ module.exports = module.exports = {
             this.layer._layers[Object.keys(this.layer._layers)[0]]._vidi_type = "query_draw"; // Tag it, so it serialized
             drawnItems.addLayer(this.layer._layers[Object.keys(this.layer._layers)[0]]);
             cloud.zoomToExtentOfgeoJsonStore(this, 17);
-            me.makeSearch($("#conflict-custom-search").val());
-        }, id, false, getProperty);
+            me.makeSearch($(".custom-search-conflict")[1].value);
+        }, ".custom-search-conflict", false, getProperty);
 
 
         sliderEl = $('#conflict-buffer-slider');
@@ -343,10 +357,14 @@ module.exports = module.exports = {
         slider.on('input change', debounce(function (values) {
             bufferValue.value = parseFloat(values.target.value);
             currentBufferValue = bufferValue.value;
-            if (typeof bufferItems._layers[Object.keys(bufferItems._layers)[0]] !== "undefined" && typeof bufferItems._layers[Object.keys(bufferItems._layers)[0]]._leaflet_id !== "undefined") {
+            if (isCurrentFromDrawing) {
                 bufferItems.clearLayers();
-                me.makeSearch()
+                me.makeSearch("HEJ", null, id = currentFromDrawingId, true)
+            } else if (typeof bufferItems?._layers?.[Object.keys(bufferItems._layers)[0]]?._leaflet_id !== "undefined") {
+                bufferItems.clearLayers();
+                me.makeSearch("1")
             }
+
         }, 300));
         // When the input changes, set the slider value
         if (bufferValue) {
@@ -564,6 +582,8 @@ module.exports = module.exports = {
      * @param fromDrawing
      */
     makeSearch: function (text, callBack, id = null, fromDrawing = false) {
+        isCurrentFromDrawing = fromDrawing;
+        currentFromDrawingId = id;
         var primitive, coord,
             layer, buffer = parseFloat($("#conflict-buffer-value").val()), bufferValue = buffer,
             hitsTable = $("#hits-content tbody"),
@@ -571,20 +591,7 @@ module.exports = module.exports = {
             errorTable = $("#error-content tbody"),
             hitsData = $("#hits-data"),
             row, fileId, searchFinish, geomStr,
-            visibleLayers = cloud.getAllTypesOfVisibleLayers().split(";"), crss;
-
-        const setCrss = (layer) => {
-            if (typeof layer.getBounds !== "undefined") {
-                coord = layer.getBounds().getSouthWest();
-            } else {
-                coord = layer.getLatLng();
-            }
-            var zone = require('./../../../browser/modules/utmZone.js').getZone(coord.lat, coord.lng);
-            crss = {
-                "proj": "+proj=utm +zone=" + zone + " +ellps=WGS84 +datum=WGS84 +units=m +no_defs",
-                "unproj": "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
-            };
-        }
+            visibleLayers = cloud.getAllTypesOfVisibleLayers().split(";");
 
         let _self = this;
         visibleLayers = cloud.getAllTypesOfVisibleLayers().split(";");
@@ -605,9 +612,12 @@ module.exports = module.exports = {
         if (fromDrawing) {
             layer = draw.getStore().layer;
             if (id) {
-                layer = layer._layers[id];
+                layer.eachLayer(l => {
+                    if (l._vidi_id === id) {
+                        layer = l;
+                    }
+                })
             } else {
-                setCrss(layer);
                 let collection = {
                     "type": "FeatureCollection",
                     "features": [],
@@ -617,23 +627,19 @@ module.exports = module.exports = {
                     // We use a buffer to recreate a circle from the GeoJSON point
                     if (typeof l._mRadius !== "undefined") {
                         let buffer = l._mRadius;
-                        let primitive = l.toGeoJSON(GEOJSON_PRECISION);
-                        primitive.type = "Feature"; // Must be there
-                        collection.features.push(turfBuffer(primitive, buffer, {units: 'meters'}))
+                        let primitive = l.toGeoJSON(GEOJSON_PRECISION).geometry;
+                        const bufferPolygon = turfBuffer(primitive, buffer, {units: 'meters'}).geometry;
+                        collection.geometries.push(bufferPolygon)
                     } else {
-                        collection.features.push(l.toGeoJSON(GEOJSON_PRECISION).geometry)
+                        let primitive = l.toGeoJSON(GEOJSON_PRECISION).geometry;
+                        collection.geometries.push(primitive);
                     }
                 })
-                let newLayer = L.geoJSON(collection)
-                layer = newLayer;
-            
+                layer = L.geoJSON(collection);
             }
-        } else if (id) {
-            layer = drawnItems._layers[id];
         } else {
             for (var prop in drawnItems._layers) {
                 layer = drawnItems._layers[prop];
-                break;
             }
         }
         if (typeof layer === "undefined") {
@@ -656,17 +662,14 @@ module.exports = module.exports = {
         }
 
         if (primitive) {
-            setCrss(layer);
-            var geom = turfBuffer(primitive, buffer, {units: 'meters'});
-            
-            // When handeling a featurecollection, we need to merge buffers into a single multipolygon
-            if (typeof geom.features !== "undefined") {
-                let polygons = geom.features
-                let union = polygons.reduce((a, b) => turfUnion(a, b), polygons[0]); // turf v7 will support union on featurecollection, v6 does not.
-                geom = union;
+            let geom;
+            if (primitive.geometry.type === 'GeometryCollection') {
+                // We dissolve the buffer and turn the GeometryCollection into a MultiPolygon
+                geom = turfMultiPolygon(turDissolve(turfBuffer(primitive.geometry, buffer, {units: 'meters'})).features.map((e) => e.geometry.coordinates));
+            } else {
+                geom = turfBuffer(primitive.geometry, buffer, {units: 'meters'});
             }
-
-            var l = L.geoJson(geom, {
+            let l = L.geoJson(geom, {
                 "color": "#ff7800",
                 "weight": 1,
                 "opacity": 1,
@@ -675,12 +678,7 @@ module.exports = module.exports = {
             }).addTo(bufferItems);
             l._layers[Object.keys(l._layers)[0]]._vidi_type = "query_buffer";
 
-            $.snackbar({
-                id: "snackbar-conflict",
-                content: "<span id='conflict-progress'>" + __("Waiting to start") + "....</span>",
-                htmlAllowed: true,
-                timeout: 1000000
-            });
+            utils.showInfoToast("<span id='conflict-progress'>" + __("Waiting to start") + "....</span>", {autohide: false}, TOAST_ID);
 
             var schemata = [];
             var schemataStr = urlparser.schema;
@@ -693,18 +691,17 @@ module.exports = module.exports = {
                 }
                 schemataStr = schemata.join(",");
             }
-
             preProcessor({
                 // "projWktWithBuffer": projWktWithBuffer
             }).then(function () {
                 xhr = $.ajax({
                     method: "POST",
                     url: "/api/extension/conflictSearch",
-                    data: "db=" + db + "&schema=" + (searchLoadedLayers ? schemataStr : "") + (searchStr !== "" ? "," + searchStr : "") + "&socketId=" + socketId.get() + "&layers=" + visibleLayers.join(",") + "&buffer=" + bufferValue + "&text=" + currentFromText + "&wkt=" + new wicket.Wkt().read(JSON.stringify(geom.geometry)).write(),
+                    data: "db=" + db + "&schema=" + (searchLoadedLayers ? schemataStr : "") + (searchStr !== "" ? "," + searchStr : "") + "&socketId=" + socketId.get() + "&layers=" + visibleLayers.join(",") + "&buffer=" + bufferValue + "&text=" + currentFromText + "&wkt=" + new wicket.Wkt().read(JSON.stringify(geom)).write(),
                     scriptCharset: "utf-8",
                     success: _self.handleResult,
                     error: function () {
-                        $("#snackbar-conflict").snackbar("hide");
+                        utils.hideInfoToast(TOAST_ID);
                     }
                 })
             })
@@ -804,7 +801,7 @@ module.exports = module.exports = {
         let hitsCount = 0, noHitsCount = 0, errorCount = 0, resultOrigin, groups = [];
         _result = response;
         setTimeout(function () {
-            $("#snackbar-conflict").snackbar("hide");
+            utils.hideInfoToast(TOAST_ID);
         }, 200);
         $("#spinner span").hide();
         $("#result-origin").html(response.text);
@@ -815,7 +812,7 @@ module.exports = module.exports = {
             $('#conflict-result-content a[href="#hits-content"]').tab('show');
         }
         $('#conflict-open-pdf').attr("href", "/html?id=" + response.file)
-        $("#conflict-download-pdf").prop("download", `Søgning foretaget med ${response.text} d. ${response.dateTime}`);
+        $("#conflict-download-pdf").prop("download", `Søgning foretaget med ${response.text} d. ${response.dateTime}.pdf`);
 
         if ('bufferItems' in response) {
             this.recreateDrawings(JSON.parse(response.bufferItems), bufferItems);
@@ -840,7 +837,7 @@ module.exports = module.exports = {
                     let metaData = v.meta;
                     if (metaData.layergroup === groups[i]) {
                         count++;
-                        row = "<tr><td>" + v.title + "</td><td>" + v.hits + "</td><td><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + v.table + "' " + ($.inArray(v.table, visibleLayers) > -1 ? "checked" : "") + "></label></div></td></tr>";
+                        row = "<tr><td>" + v.title + "</td><td>" + v.hits + "</td><td><div class='form-check form-switch text-end'><label class='form-check-label'><input class='form-check-input' type='checkbox' data-gc2-id='" + v.table + "' " + ($.inArray(v.table, visibleLayers) > -1 ? "checked" : "") + "></label></div></td></tr>";
                         hitsTable.append(row);
                     }
                 }
@@ -863,12 +860,12 @@ module.exports = module.exports = {
                         if (metaData.meta_url) {
                             title = "<a target='_blank' href='" + metaData.meta_url + "'>" + title + "</a>";
                         }
-                        row = "<tr><td>" + title + "</td><td>" + v.hits + "</td><td><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + table + "' " + ($.inArray(i, visibleLayers) > -1 ? "checked" : "") + "></label></div></td></tr>";
+                        row = "<tr><td>" + title + "</td><td>" + v.hits + "</td><td><div class='form-check form-switch text-end'><label class='form-check-label'><input class='form-check-input' type='checkbox' data-gc2-id='" + table + "' " + ($.inArray(i, visibleLayers) > -1 ? "checked" : "") + "></label></div></td></tr>";
                         if (v.hits > 0) {
                             count++;
                             hitsCount++;
                             table1 = $("<table class='table table-data'/>");
-                            hitsData.append("<h5>" + title + " (" + v.hits + ")<div class='checkbox' style='float: right; margin-top: 25px'><label><input type='checkbox' data-gc2-id='" + table + "' " + ($.inArray(i, visibleLayers) > -1 ? "checked" : "") + "></label></div></h5>");
+                            hitsData.append("<h5>" + title + " (" + v.hits + ")<div class='form-check form-switch text-end float-end'><label class='form-check-label'><input class='form-check-input' type='checkbox' data-gc2-id='" + table + "' " + ($.inArray(i, visibleLayers) > -1 ? "checked" : "") + "></label></div></h5>");
                             let conflictForLayer = metaData.meta !== null ? JSON.parse(metaData.meta) : null;
                             if (conflictForLayer !== null && 'short_conflict_meta_desc' in conflictForLayer) {
                                 hitsData.append("<p style='margin: 0'>" + conflictForLayer.short_conflict_meta_desc + "</p>");
@@ -910,7 +907,7 @@ module.exports = module.exports = {
                                         }
                                     });
                                     td.append(table2);
-                                    tr.append("<td style='width: 60px'><button type='button' class='btn btn-default btn-xs zoom-to-feature' data-gc2-sf-table='" + v.table + "' data-gc2-sf-key='" + key + "' data-gc2-sf-fid='" + fid + "'>#" + (u + 1) + " <i class='fa fa-search'></i></button></td>");
+                                    tr.append("<td style='width: 60px'><button type='button' class='btn btn-light btn-sm zoom-to-feature' data-gc2-sf-table='" + v.table + "' data-gc2-sf-key='" + key + "' data-gc2-sf-fid='" + fid + "'>#" + (u + 1) + " <i class='bi bi-search'></i></button></td>");
                                     tr.append(td);
                                     table1.append(tr);
                                 });
@@ -974,6 +971,8 @@ module.exports = module.exports = {
         _result.drawnItems = drawnItems;
         _result.bufferItems = bufferItems;
         _result.bufferValue = parseFloat(currentBufferValue);
+        _result.isCurrentFromDrawing = isCurrentFromDrawing
+        _result.currentFromDrawingId = currentFromDrawingId
         return _result;
     },
     setPreProcessor: function (fn) {
@@ -985,81 +984,105 @@ module.exports = module.exports = {
     getBufferItems: function () {
         return bufferItems;
     },
+    getDrawItems: function () {
+        return drawnItems;
+    },
     setValueForSlider: function (v) {
-        let slider = sliderEl.find('.js-info-buffer-slider');
-        slider.val(v);
-        bufferValue.value = v;
+        if (v) {
+            let slider = sliderEl.find('.js-info-buffer-slider');
+            slider.val(v);
+            bufferValue.value = currentBufferValue = v;
+        }
     },
     getFromVarsIsDone: function () {
         return fromVarsIsDone;
-    }
+    },
+    setIsCurrentFromDrawing: (i) => {
+        isCurrentFromDrawing = i;
+    },
+    setCurrentFromDrawingId: (i) => {
+        currentFromDrawingId = i;
+    },
+    TOAST_ID,
 };
 
 let dom = `
 <div role="tabpanel">
-    <div id="conflict-buffer" style="display: none">
-        <div>
-            <label for="conflict-buffer-value" class="control-label">Buffer</label>
-            <input id="conflict-buffer-value" class="form-control">
-            <div id="conflict-buffer-slider" style="margin-bottom: 20px"></div>
+    <div class="d-flex flex-column gap-4 mb-4">
+        <div id="conflict-places" class="places" style="display: none">
+            <div class="input-group mb-3">
+                <input class="typeahead form-control custom-search-conflict" type="text" placeholder="Adresse eller matrikelnr.">
+                <button class="btn btn-outline-secondary searchclear" type="button">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+        </div>
+        <div id="conflict-buffer" style="display: none">
+            <div>
+                <label for="conflict-buffer-value" class="control-label">Buffer</label>
+                <input id="conflict-buffer-value" class="form-control">
+                <div id="conflict-buffer-slider"></div>
+            </div>
         </div>
     </div>
-    <div id="conflict-places" class="places" style="margin-bottom: 20px; display: none">
-        <input id="${id}" class="${id} typeahead" type="text" placeholder="Adresse eller matrikelnr.">
-    </div>
     <div id="conflict-main-tabs-container" style="display: none">
-        <ul class="nav nav-tabs" role="tablist" id="conflict-main-tabs">
-            <li role="presentation" class="active"><a href="#conflict-result-content" aria-controls="" role="tab" data-toggle="tab">Resultat</a></li>
-            <li role="presentation"><a href="#conflict-info-content" aria-controls="" role="tab" data-toggle="tab">Info</a></li>
-            <li role="presentation"><a href="#conflict-log-content" aria-controls="" role="tab" data-toggle="tab">Log</a></li>
+        <ul class="nav nav-pills nav-fill" role="tablist" id="conflict-main-tabs">
+            <li role="presentation" class="nav-item"><a class="nav-link active" href="#conflict-result-content" aria-controls="" role="tab" data-bs-toggle="tab">Resultat</a></li>
+            <li role="presentation" class="nav-item"><a class="nav-link" href="#conflict-info-content" aria-controls="" role="tab" data-bs-toggle="tab">Info</a></li>
+            <li role="presentation" class="nav-item"><a class="nav-link" href="#conflict-log-content" aria-controls="" role="tab" data-bs-toggle="tab">Log</a></li>
         </ul>
         <!-- Tab panes -->
         <div class="tab-content" style="display: none">
             <div role="tabpanel" class="tab-pane active" id="conflict-result-content">
-                <div id="conflict-result">
-                    <div><span id="conflict-result-origin"></span></div>
-                    <div><a href="" target="_blank" class="btn btn-sm btn-raised" id="conflict-excel-btn">Excel</a></div>
-                    <div class="btn-toolbar bs-component" style="margin: 0;">
-                        <div class="btn-group">
-                            <button disabled class="btn btn-sm btn-raised" id="conflict-print-btn" data-loading-text="<i class='fa fa-cog fa-spin fa-lg'></i> PDF rapport"><i class='fa fa-cog fa-lg'></i> Print rapport</button>
-                        </div>
-                        <div class="btn-group">
-                            <button disabled class="btn btn-sm btn-raised" id="conflict-set-print-area-btn"><i class='fas fa-expand'></i></button>
-                        </div>
-                        <fieldset disabled id="conflict-get-print-fieldset">
-                            <div class="btn-group">
-                                <a target="_blank" href="javascript:void(0)" class="btn btn-sm btn-primary btn-raised" id="conflict-open-pdf">Åben PDF</a>
-                                <a href="bootstrap-elements.html" class="btn btn-sm btn-primary btn-raised dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></a>
-                                <ul class="dropdown-menu">
-                                    <li><a href="javascript:void(0)" id="conflict-download-pdf">Download PDF</a></li>
-                                </ul>
-                            </div>
-                        </fieldset>
-                        <div>
-                            <span class="radio radio-primary">
-                                <label>
-                                    <input type="radio" name="conflict-report-type" value="1" checked>
-                                    Kompakt
-                                </label>
-                                <label>
-                                    <input type="radio" name="conflict-report-type" value="2">
-                                    Lang, kun hits
-                                </label>
-                                <label>
-                                    <input type="radio" name="conflict-report-type" value="3">
-                                    Lang, alle
-                                </label>
-                            </span>
+                <div id="conflict-result" class="d-flex flex-column gap-4">
+                    <div class="d-flex flex-column gap-4">
+                        <span id="conflict-result-origin" class="mt-2"></span>
+                        <span class="btn-group">
+                            <input class="btn-check" type="radio" name="conflict-report-type" id="conflict-report-type-1" value="1" checked>
+                            <label for="conflict-report-type-1" class="btn btn-sm btn-outline-secondary">
+                                Kompakt
+                            </label>
+                            <input class="btn-check" type="radio" name="conflict-report-type" id="conflict-report-type-2" value="2">
+                            <label for="conflict-report-type-2" class="btn btn-sm btn-outline-secondary">
+                                Lang, kun hits
+                            </label>
+                            <input class="btn-check" type="radio" name="conflict-report-type" id="conflict-report-type-3" value="3">
+                            <label for="conflict-report-type-3" class="btn btn-sm btn-outline-secondary">
+                                Lang, alle
+                            </label>
+                        </span>
+                        <div class="d-flex gap-2 justify-content-start">
+                            <button disabled class="btn btn-sm btn-outline-success start-print-btn" id="conflict-print-btn">
+                                <span class="spinner-border spinner-border-sm"
+                                          role="status" aria-hidden="true" style="display: none">
+                                </span> Print rapport
+                            </button>
+                            <button disabled class="btn btn-sm btn-light" id="conflict-set-print-area-btn"><i class='bi bi-fullscreen'></i></button>
+                            <fieldset disabled id="conflict-get-print-fieldset">
+                                <div class="input-group">
+                                    <a target="_blank" href="javascript:void(0)" class="btn btn-sm btn-outline-success" id="conflict-open-pdf">Åben PDF</a>
+                                    <a href="javascript:void(0)"
+                                       class="btn btn-outline-success btn-sm dropdown-toggle"
+                                       data-bs-toggle="dropdown"
+                                       id="conflict-open-pdf"
+                                    ></a>
+                                    <ul class="dropdown-menu get-print-btn">
+                                        <li><a class="dropdown-item" href="javascript:void(0)"
+                                               id="conflict-download-pdf">Download</a></li>
+                                    </ul>
+                                </div>
+                            </fieldset>
+                            <a href="" target="_blank" class="btn btn-sm btn-outline-secondary" id="conflict-excel-btn">Excel</a>
                         </div>
                     </div>
 
                     <div role="tabpanel">
                         <!-- Nav tabs -->
-                        <ul class="nav nav-tabs" role="tablist">
-                            <li role="presentation" class="active"><a href="#hits-content" aria-controls="hits-content" role="tab" data-toggle="tab">Med konflikter<span></span></a></li>
-                            <li role="presentation"><a href="#hits-data-content" aria-controls="hits-data-content" role="tab" data-toggle="tab">Data fra konflikter<span></span></a></li>
-                            <li role="presentation"><a href="#nohits-content" aria-controls="nohits-content" role="tab" data-toggle="tab">Uden konflikter<span></span></a></li>
-                            <li role="presentation"><a href="#error-content" aria-controls="error-content" role="tab" data-toggle="tab">Fejl<span></span></a></li>
+                        <ul class="nav nav-pills nav-fill" role="tablist">
+                            <li role="presentation" class="active nav-item"><a class="nav-link" href="#hits-content" aria-controls="hits-content" role="tab" data-bs-toggle="tab">Med konflikter<span></span></a></li>
+                            <li role="presentation" class="nav-item"><a class="nav-link" href="#hits-data-content" aria-controls="hits-data-content" role="tab" data-bs-toggle="tab">Data fra konflikter<span></span></a></li>
+                            <li role="presentation" class="nav-item"><a class="nav-link" href="#nohits-content" aria-controls="nohits-content" role="tab" data-bs-toggle="tab">Uden konflikter<span></span></a></li>
+                            <li role="presentation" class="nav-item"><a class="nav-link" href="#error-content" aria-controls="error-content" role="tab" data-bs-toggle="tab">Fejl<span></span></a></li>
                         </ul>
                         <div class="tab-content">
                             <div role="tabpanel" class="tab-pane active conflict-result-content" id="hits-content">
@@ -1091,15 +1114,18 @@ let dom = `
                 </div>
             </div>
             <div role="tabpanel" class="tab-pane" id="conflict-info-content">
-                <div id="conflict-info-box">
-                    <div id="conflict-modal-info-body">
-                        <ul class="nav nav-tabs" id="conflict-info-tab"></ul>
-                        <div class="tab-content" id="conflict-info-pane"></div>
-                    </div>
-                </div><button class="btn btn-default btn-xs" id="conflict-search-with-feature">Søg med valgte</button>
+            <div class="d-grid gap-2 mt-2 mb-2">
+                <button style="display: none" class="btn btn-outline-secondary btn-block" id="conflict-search-with-feature">Søg med valgte</button>
+            </div>
+            <div id="conflict-info-box">
+                <div id="conflict-modal-info-body">
+                    <ul class="nav nav-pills mb-2" id="conflict-info-tab"></ul>
+                    <div class="tab-content" id="conflict-info-pane"></div>
+                </div>
+            </div>
             </div>
             <div role="tabpanel" class="tab-pane" id="conflict-log-content">
-                <textarea style="width: 100%" rows="8" id="conflict-console"></textarea>
+                <textarea class="mt-2 w-100 form-control" rows="8" id="conflict-console"></textarea>
             </div>
         </div>
     </div>

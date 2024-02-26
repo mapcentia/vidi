@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2021 MapCentia ApS
+ * @copyright  2013-2023 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -17,15 +17,28 @@ module.exports = {
     init: function () {
     },
     render: function (e) {
-        let table = $("#report table"), tr, dataTable, dataThead, dataTr, u, m, without = [], groups = [];
-        $("#conflict-text").html(e.text);
+        let table = $("#report table"), tr, dataTable, dataThead, dataTr, u, m, without = [], withErrors = [],
+            groups = [];
 
-        // console.log('reportRender event', e)
-
-        $.each(e.hits, function (i, v) {
+        Object.keys(e.hits).forEach(function (key) {
+            let v = e.hits[key];
+            if (v.hits === 0 && !v.error) {
+                without.push(v.title || key);
+            }
+            if (v.error) {
+                withErrors.push(v.title || key);
+            }
             v.meta.layergroup = v.meta.layergroup != null ? v.meta.layergroup : "Ungrouped";
             groups.push(v.meta.layergroup);
         });
+
+        if (withErrors.length > 0) {
+            const alertEl = document.getElementById('with-errors')
+            alertEl.classList.remove('d-none');
+            alertEl.querySelector('div').innerHTML = "<b>Følgende lag gav fejl</b> " + withErrors.join(' | ');
+        }
+
+        document.querySelector("#conflict-text").innerHTML = e.text;
 
         groups = array_unique(groups.reverse());
 
@@ -125,11 +138,6 @@ module.exports = {
             }
         }
 
-        $.each(e.hits, function (i, v) {
-            if (v.hits === 0) {
-                without.push((v.title || i));
-            }
-        });
         if (without.length > 0) {
             let e = $("#report #without");
             e.append("<caption style='white-space: nowrap;'>Lag uden forekomster i denne søgning</caption>");

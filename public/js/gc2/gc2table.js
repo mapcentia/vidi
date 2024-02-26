@@ -149,7 +149,11 @@ var gc2table = (function () {
                 console.warn("Can't set style on marker")
             }
 
-            onSelect(id, layer, key, caller);
+            try {
+                onSelect(id, layer, key, store);
+            } catch (e) {
+                console.info("Error in select function for: " + store.id, e.message);
+            }
 
             if (openPopUp) {
                 let str = "<table>", renderedText;
@@ -215,7 +219,7 @@ var gc2table = (function () {
         }
 
         $.each(cm, function (i, v) {
-            $(el + ' thead tr').append("<th data-filter-control=" + (v.filterControl || "false") + " data-field='" + v.dataIndex + "' data-sortable='" + (v.sortable || "false") + "' data-editable='false' data-formatter='" + (v.formatter || "") + "'>" + v.header + "</th>");
+            $(el + ' thead tr').append("<th data-filter-control=" + (v.filterControl || "false") + " data-field='" + v.dataIndex + "' data-sortable='" + (v.sortable || "false") + "' data-editable='false' data-formatter='" + (v.formatter || "") + "' data-events='" + (v.events || "") + "'>" + v.header + "</th>");
         });
         var filterMap =
             debounce(function () {

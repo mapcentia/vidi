@@ -153,6 +153,30 @@ module.exports = {
      */
     init: function () {
         _self = this;
+        /**
+         * Creates promise
+         *
+         * @param {String} data Input data for underlying function
+         *
+         * @return {Function}
+         */
+        const createPromise = (data) => {
+            return new Promise(resolve => {
+                switchLayer.init(data, true, true).then(() => {
+                    backboneEvents.get().trigger(`layerTree:activeLayersChange`);
+                    resolve()
+                });
+            })
+        };
+
+        /**
+         * Executes promises one after another
+         *
+         * @param {Array} data Set of input values
+         */
+        const executeSequentially = (data) => {
+            return createPromise(data.pop()).then(x => data.length === 0 ? x : executeSequentially(data));
+        };
         return new Promise((initResolve, initReject) => {
             try {
 
@@ -195,20 +219,6 @@ module.exports = {
                 hash = decodeURIComponent(window.location.hash);
                 hashArr = hash.replace("#", "").split("/");
 
-                const removeDuplicates = (inputArray) => {
-                    var temp = {};
-                    for (var i = 0; i < inputArray.length; i++) {
-                        temp[inputArray[i]] = true;
-                    }
-
-                    var result = [];
-                    for (var key in temp) {
-                        result.push(key);
-                    }
-
-                    return result;
-                };
-
                 const setLayers = (hash = true) => {
                     let layersToActivate = [];
                     let baseLayerId = false;
@@ -221,37 +231,12 @@ module.exports = {
 
                             // Layers to activate
                             if (hashArr[4]) {
-                                layersToActivate = removeDuplicates(hashArr[4].split(","));
+                                layersToActivate = utils.removeDuplicates(hashArr[4].split(","));
                             }
                         }
                     }
                     // This is used if fastInit is not used
-                    layersToActivate = removeDuplicates(layersToActivate.concat(window.vidiConfig.activeLayers));
-
-                    /**
-                     * Creates promise
-                     *
-                     * @param {String} data Input data for underlying function
-                     *
-                     * @return {Function}
-                     */
-                    const createPromise = (data) => {
-                        return new Promise(resolve => {
-                            switchLayer.init(data, true, true).then(() => {
-                                backboneEvents.get().trigger(`layerTree:activeLayersChange`);
-                                resolve()
-                            });
-                        })
-                    };
-
-                    /**
-                     * Executes promises one after another
-                     *
-                     * @param {Array} data Set of input values
-                     */
-                    const executeSequentially = (data) => {
-                        return createPromise(data.pop()).then(x => data.length == 0 ? x : executeSequentially(data));
-                    };
+                    layersToActivate = utils.removeDuplicates(layersToActivate.concat(window.vidiConfig.activeLayers));
 
                     const initializeLayersFromURL = () => {
                         if (layersToActivate.length === 0) {
@@ -282,6 +267,7 @@ module.exports = {
                         if (hashArr[0]) {
                             setLayers();
                         } else {
+                            let layersToActivate = [];
                             // Set base layer to the first added one
                             setBaseLayer.init(baseLayer.getAvailableBaseLayers()[0].id);
 
@@ -293,7 +279,19 @@ module.exports = {
                                     cloud.get().zoomToExtent();
                                 }
                             }
-                            initResolve();
+                            // If initialFilter is set, when Fast Init is disabled. We need to activate layers from config.activeLayers
+                            if (!urlVars.state && urlVars.initialFilter) {
+                                layersToActivate = utils.removeDuplicates(window.vidiConfig.activeLayers);
+                                if (layersToActivate.length === 0) {
+                                    initResolve();
+                                } else {
+                                    executeSequentially(layersToActivate).then(() => {
+                                        initResolve();
+                                    });
+                                }
+                            } else {
+                                initResolve();
+                            }
                         }
                     } else {
                         var parr, v, l, t, GeoJsonAdded = false;
@@ -312,7 +310,7 @@ module.exports = {
                             scriptCharset: "utf-8",
                             success: function (response) {
                                 // Server replies have different structure
-                                if (`anchor` in response.data === false && `bounds` in response.data === false && `data` in response.data && response.data.data) {
+                                if (!(`anchor` in response.data) && !(`bounds` in response.data) && `data` in response.data && response.data.data) {
                                     if (`anchor` in response.data.data && `bounds` in response.data.data) {
                                         response.data = response.data.data;
                                     }
@@ -418,7 +416,13 @@ module.exports = {
                                             l.addLayer(g);
                                         }
                                         if (m.type === "Marker") {
-                                            g = L.marker(m._latlng, m.style);
+                                            if (m?._vidi_awesomemarkers) {
+                                                g = L.marker(m._latlng, {
+                                                    icon: L.AwesomeMarkers.icon(m._vidi_awesomemarkers)
+                                                })
+                                            } else {
+                                                g = L.marker(m._latlng, m.style);
+                                            }
                                             g.feature = m.feature;
                                             l.addLayer(g);
                                         }
@@ -538,6 +542,7 @@ module.exports = {
                         if (state) {
                             if (state.snapshot.map.layers.length === 0) {
                                 console.log("No active layers in snapshot");
+                                $('.layer-loading-indicator').hide();
                             } else {
                                 console.log("Active layers in snapshot");
                                 activeLayersInSnapshot = true;

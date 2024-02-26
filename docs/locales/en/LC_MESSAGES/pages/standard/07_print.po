@@ -1,0 +1,177 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2023, MapCentia
+# This file is distributed under the same license as the Vidi package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Vidi 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-01-09 12:54+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.12.1\n"
+
+#: ../../pages/standard/07_print.rst:5 ../../pages/standard/07_print.rst:28
+#: 1e3e2ccba9ba4b76ac7578c6b95eccff 5a7aa921b1594099a3535b1fa6bf463a
+msgid "Print"
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:5 0f9feb0e2d9845d9b0917d9f8a4b2c7e
+msgid "Overview"
+msgstr ""
+
+#: ../../pages/standard/07_print.rst 0022f5ac29d944b193d75e51faae8e2c
+msgid "Date"
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:9 90cda3f9ab6d4bc4b9a1e19b6c588809
+msgid "|today|"
+msgstr ""
+
+#: ../../pages/standard/07_print.rst ee23b853837e4d7e96ea7a1842f6e356
+msgid "Vidi-version"
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:10 5f2fd2d880d447399e663dfcbe5b2311
+msgid "2020.11.0"
+msgstr ""
+
+#: ../../pages/standard/07_print.rst d092c6bae6df42eabd7831f988ff096e
+msgid "Forfatter"
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:11 c1d5ad788c4e406eb262c49acf4467f3
+msgid "`giovanniborella <https://github.com/giovanniborella>`_"
+msgstr ""
+
+#: ../../_subs/NOTE_CONF.rst:4 788e5bebd7664874b766d7b529af7cee
+msgid "Indhold i dette værktøj er betinget af opsætningen af Vidi."
+msgstr ""
+
+#: ../../_subs/NOTE_CONF.rst:6 2b70f7717e834d36883224b4950177f3
+msgid ""
+"For at læse mere om opsætningen, kan du gå til :ref:`configjs` eller "
+":ref:`configjson`"
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:17 28e723d9d71b491d8c9e5647b4a4e5de
+msgid "Indhold"
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:21 c0aae50ad7284d3e9d03e1e5666ac475
+msgid "Printværktøj"
+msgstr ""
+
+#: ../../_subs/NOTE_GETTINGSTARTED.rst:4 b9d96fe556c24d9a8c5285038a0a991c
+msgid ""
+"Hvis du er i tvivl om de forskellige UI-elementer, :ref:`kan du se mere "
+"her <gettingstarted>`"
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:25 4456e35431b74ced84f2f196f30c6b66
+msgid "Når værktøjet vælges er det indledningsvis tændt."
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:30 23419beb771e4489aa5a00b16d2329e4
+msgid ""
+"Når værktøjet er tændt vil man se en rød kasser der representerer "
+"udskriftsområdet."
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:38 fdb5f50739f64a0290395c510ef0829f
+msgid "Værktøjet er tændt, og klar til at printe"
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:41 83915f8afb7d4e15b3cd70a4ff07f49b
+msgid "Muligheder"
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:43 7d6f0d583e564cbb80233fe197b45357
+msgid "Efter print-området er dannet er det muligt i kortvinduet at:"
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:45 e2ec136f1c89404988badf5f45cfcca7
+msgid "Flytte området ved hjælp af punktet i midten."
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:46 5490fa682fde4e66a030215dfef52c20
+msgid "Ændre målestoksforhold ved at trække i de yderste punkter."
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:48 2f78769a80014bd095b0fa4fa7319cef
+msgid "Følgende indstillinger kan også sættes:"
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:50 2c72231fc9ef40e28bb9f7e163527643
+msgid "Skabelon"
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:51 3374efe0ed004148aaf09720d28a9ad4
+msgid "Hvis der er defineret flere skabeloner i konfigurationen, vises disse her"
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:52 b85793dbfd4143aca9f6bcbff633c8f2
+msgid "Papirstørrelse"
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:53 b8cb1b2843af47129dd5c19f5c4a4cd5
+msgid "Her vælges den relevante papirstørrelse som er tilgængelig i skabelonen"
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:54 7f801c5fe6ec4ab89c8cf185560792cd
+msgid "Orientering"
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:55 c042a61fe81844c58fbfd1e428366a4e
+msgid "Der understøttes print i `Liggende` og `Stående`"
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:56 3f24ced7cd634252ac560ec152026d44
+msgid "Titel, Kommentar"
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:57 867e56bb29514f08bab2e318f4c45106
+msgid ""
+"Hvis disse felter, eller et af disse felder udfyldes vil der være et "
+"korthoved indeholdende teksterne på printet."
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:59 5b17d9c90e68499b8dc89c7e137b4b6a
+msgid "Vis signatur"
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:59 d7f4f4e4c1db41e784de8592e04f1551
+msgid ""
+"Er denne slået til, vil der blive genereret en signatur over de de aktive"
+" lag på kortet."
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:61 7b6bf30ef4264f61bfb528dbeb50fcaf
+msgid ""
+"Når man er tilfreds med indstillingerne, klikker man på ``Lav PDF``. Det "
+"er også muligt at bruge drop-down til at printe som ``PNG``"
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:69 af869cc56be04714b35390b2781e71ce
+msgid "Klar til at printe"
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:77 49dcb7509e544d4c892efa93cd9551e4
+msgid "Print er gennemført"
+msgstr ""
+
+#: ../../pages/standard/07_print.rst:79 8a0e98c37d114b759d4b6de0c4dc26e5
+msgid ""
+"Når printet er gennemført har man muligheden for at åbne printet i "
+"browseren - eller ved hjælp af drop-down; downloade printet eller få vist"
+" kortet i en HTML version."
+msgstr ""
+

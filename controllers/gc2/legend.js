@@ -19,7 +19,7 @@ router.get('/api/legend/:db', function (req, response) {
         uri: url,
         encoding: 'utf8',
         headers: {
-            Cookie: "PHPSESSID=" + req.session.gc2SessionId
+            Cookie: "PHPSESSID=" + req?.session?.gc2SessionId
         }
     };
 

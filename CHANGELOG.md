@@ -24,6 +24,38 @@ and this project adheres to [CalVer](https://calver.org/).
       }
     }
     ```
+## [2024.2.2] - 2024-20-2
+### Changed
+- Added the `dfi` url parameter, which if set, will disable fast init regardless other evaluated parameters.
+- Set the default boolean property to false in the extensions/editor/browser/index.js. This pertains to user interface properties where a checkbox is either checked or unchecked.
+- The polyfill script for IE compatibility was removed from the index.html.default file.
+- The repetitive code in Gruntfile.js related to browserify options and transformations have been extracted to constants.
+
+## [2024.2.1] - 2024-7-2
+### Changed
+- New config option `themes`, which will set the Bootstrap theme. `light` and `dark` are build in and custom ones can be added to `/scss/themes.scss`.
+
+## [2024.2.0] - 2024-2-2
+### Changed
+- The entire GUI is rewritten in Bootstrap 5.3.
+
+### Added
+- New startup modal with config-switcher, which will show if Vidi is started with database in URL.
+
+### Fixed
+- A lot!
+
+## [2024.1.0] - 2024-4-1
+### Fixed
+- Small fix to conflict.tmpl
+
+## [2023.12.0] - 2023-15-12
+### Added
+- Errors in conflict module will now be shown on reports.
+
+## [2023.11.0] - 2023-2-11
+### Fixed
+- Bug in ConflictSearch when stateless mode is enabled.
 
 ## [2023.6.0] - 2023-20-6
 ### Fixed
@@ -43,7 +75,7 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ## [2023.1.0] - 2023-18-1
 ### Fixed
-- Update to new Skråfoto viewer in Streetview module. 
+- Update to new Skråfoto viewer in Streetview module.
 
 ## [2022.12.0] - 2022-8-12
 ### Changed
@@ -79,7 +111,7 @@ and this project adheres to [CalVer](https://calver.org/).
 ## [2022.11.0] - 2022-8-11
 ### Added
 - The url parameter `dps=1` will prevent browser state from being pushed to history. This parameter will be set by embed.js, so the browser history will not be pushed to the parent frame. Snapshot links will also have this parameter set.
-- A new faster init process is implemented which cuts about 50% of startup time for Vidi. This new init process will automatic be invoked unless a URL achor is used - when the old process will be invoked. 
+- A new faster init process is implemented which cuts about 50% of startup time for Vidi. This new init process will automatic be invoked unless a URL achor is used - when the old process will be invoked.
 
 ### Changed
 - When using `crossMultiSelect` the geometry for the open accordion panel will now get the 'selected' style.
@@ -89,7 +121,7 @@ and this project adheres to [CalVer](https://calver.org/).
 ### Fixed
 - Update the editor queue statistics when group panel is opened in case of the layer tree component is not rendered yet. Before the queue statistics was not shown after a refresh.
 - Click on set default extent button will now set initZoomCenter if present.
-- It's now possible to use WMS overlays in base layer definitions. Before is was only possible to use GC2 layers for this. 
+- It's now possible to use WMS overlays in base layer definitions. Before is was only possible to use GC2 layers for this.
 - Komkode filter on esr/sfe search.
 
 ## [2022.10.0] - 2022-5-10
@@ -111,7 +143,7 @@ and this project adheres to [CalVer](https://calver.org/).
   "popupDraggable": true
 }
 ```
-- Geometry created by feature-info module now stick after the module is swtiched off. So now it's possible to print maps with feature-info results. To clear the map the "Clear map" tool button can be used. 
+- Geometry created by feature-info module now stick after the module is swtiched off. So now it's possible to print maps with feature-info results. To clear the map the "Clear map" tool button can be used.
 - A sort-by-score mode is added to Danish search module. The setting will sort the address list by a calculated score, so most relavant suggestions will be a the top. If switched off the list will be sorted alphanumeric. For now only works for address not cadastre.
 ```json
 {
@@ -138,7 +170,7 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ## [2022.8.4] - 2022-31-8
 ### Changed
-- conflictSearch now prints with concurrency when selecting a multiple page report. 
+- conflictSearch now prints with concurrency when selecting a multiple page report.
 
 ## [2022.8.3] - 2022-29-8
 ### Fixed
@@ -147,7 +179,7 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ## [2022.8.2] - 2022-17-8
 ### Added
-- New runtime config `initZoomCenter`, which will locks Vidi to a specific zoom/center. This will override zoom/center in URL and snapshot link.  
+- New runtime config `initZoomCenter`, which will locks Vidi to a specific zoom/center. This will override zoom/center in URL and snapshot link.
 
 ## [2022.8.1] - 2022-10-8
 ### Changed
@@ -183,7 +215,7 @@ This is a label for feature <b>{{gid}}</b>
 
 ## [2022.6.0] - 2022-15-6
 ### Added
-- The URL parameters `var_matrikelnr` and `var_landsejerlavskode` will trigger search on the specified cadastral number using `danish` module. These parameters are already used in module `conflictSearch`. 
+- The URL parameters `var_matrikelnr` and `var_landsejerlavskode` will trigger search on the specified cadastral number using `danish` module. These parameters are already used in module `conflictSearch`.
 
 ### Changed
 - UTFgrids are now single tiled for better performance due to fewer network reqeusts. But MapCache can't "untile" raw data, so the GC2 Meta setting `cache_utf_grid` will be ignorred.
@@ -191,10 +223,10 @@ This is a label for feature <b>{{gid}}</b>
 
 ## [2022.5.2] - 2022-27-5
 ### Changed
-- `crossMultiSelect` on vector features now used `@turf/boolean-intersects` instead of comparing the bounds of features with Leafletjs. This gives the expected result when clicking on stacked vector features. 
+- `crossMultiSelect` on vector features now used `@turf/boolean-intersects` instead of comparing the bounds of features with Leafletjs. This gives the expected result when clicking on stacked vector features.
 
 ### Fixed
-- When signed in as a sub-user, cached tile layers wouldn't work but give a 404 error. Vidi changed the 'db' URI part to 'user@db' but the URI for cached layers can't be dynamic. 
+- When signed in as a sub-user, cached tile layers wouldn't work but give a 404 error. Vidi changed the 'db' URI part to 'user@db' but the URI for cached layers can't be dynamic.
 - Added some auto-pan-padding to accordion popups, so they don't open up outside the map.
 - When selecting a vector feature it will now get the below shown style. Colors will not be changed. Get Feature info on raster tile layer will use the same style, but get a red outline.
 ```json
@@ -217,7 +249,7 @@ This is a label for feature <b>{{gid}}</b>
 
 ## [2022.5.0] - 2022-5-5
 ### Changed
-- In conflictSearch requests to the GC2 SQL API now happens concurrently. This is done by implementing a promise pool. The default size of the pool is 30, but this can be set in the build config. Note that this setting can't be changed in a run-time config. 
+- In conflictSearch requests to the GC2 SQL API now happens concurrently. This is done by implementing a promise pool. The default size of the pool is 30, but this can be set in the build config. Note that this setting can't be changed in a run-time config.
 - conflictSearch now has a `stateless` option, which can be set in both build and run-time config. In stateless mode the state of the module will not be kept. Default `false`.
 ```json
 {
@@ -231,7 +263,7 @@ This is a label for feature <b>{{gid}}</b>
 ```
 
 ### Fixed
-- Tile layer opacity state now is kept betweens browser refreshes. 
+- Tile layer opacity state now is kept betweens browser refreshes.
 
 ## [2022.4.0] - 2022-8-4
 ### Fixed
@@ -240,12 +272,12 @@ This is a label for feature <b>{{gid}}</b>
 ## [2022.3.3] - 2022-24-3
 ### Fixed
 - Regression bug, which kept the right side-panel closed after load of app.
-- The Leaflet method `toGeoJSON` rounds of coordinates with 6 decimals by default. But this may result in up to 10 cm on the map (tested at about 57 degrees north). This makes the editor and snapping very unprecise. So all `toGeoJSON` calls are now done with a precision argument of 14 through out the app. 
+- The Leaflet method `toGeoJSON` rounds of coordinates with 6 decimals by default. But this may result in up to 10 cm on the map (tested at about 57 degrees north). This makes the editor and snapping very unprecise. So all `toGeoJSON` calls are now done with a precision argument of 14 through out the app.
 
 ## [2022.3.2] - 2022-18-3
 ### Fixed
 - Bug in sqlQuery.js, which rendered feature-info inoperable.
-- Added `geolocation` to the `allow` attribut on the created iframe in embed.js. 
+- Added `geolocation` to the `allow` attribut on the created iframe in embed.js.
 
 ## [2022.3.1] - 2022-15-3
 ### Added
@@ -297,7 +329,7 @@ This is a label for feature <b>{{gid}}</b>
 
 ## [2022.2.0] - 2022-3-2
 ### Fixed
-- Fix for buggy print recreation from state. The print frame was re-calculated each time the state was applied making a small change in latitude coords. This made the frame drift south-east and rendered errors on big geographical frames. 
+- Fix for buggy print recreation from state. The print frame was re-calculated each time the state was applied making a small change in latitude coords. This made the frame drift south-east and rendered errors on big geographical frames.
 
 ## [2021.12.1] - 2021-29-12
 ### Changed
@@ -365,7 +397,6 @@ This is a label for feature <b>{{gid}}</b>
 ## [2021.11.2] - 2021-17-11
 
 ### Fixed
-
 - `layerTree` state was not updated when Vidi was initiated with layers in URL anchor, resulting in no active layers in state until some changes was done by user afterward.
 
 ## [2021.11.1] - 2021-16-11
@@ -520,7 +551,6 @@ This is a label for feature <b>{{gid}}</b>
   ```
 
 ### Fixed
-
 - In conflictSearch module, the adding of sheets to excel is now in a try/catch so invalid sheet names won't crash the Node process.
 
 ## [2021.8.0] - 2021-12-8
@@ -530,7 +560,6 @@ This is a label for feature <b>{{gid}}</b>
 - `select_function` is now called when opening a panel in a accordion pop-up.
 
 ### Fixed
-
 - Print and Conflict modules will not longer keep unnecessary Meta data in state. This reduce the data volume.
 - Layer tree will now build with all valid layers. Before it would start building as soon an invalid layer was proccess leaving out the rest.
 
@@ -614,7 +643,6 @@ This is a label for feature <b>{{gid}}</b>
 ## [2021.5.0] - 2021-4-5
 
 ### Changed
-
 - Node >= 14 er required.
 - Docker files are added to the project.
 - It's now possible to set `gc2.host` through the environment variable `GC2_HOST`. If set in `config/config.js` it will have precedence.
@@ -758,16 +786,16 @@ function(store, map) {
 - New print API `/api/print/[database]/?state=[state id]` which will return the stored print from a snapshot as PNG (PDF is coming). The print will be created on the fly.
 - `embed.js` has two new attributes: `data-vidi-use-config` and `data-vidi-use-schema`. These will trigger the use of schema and/or config from the token if present.
 - New GC2 Meta property which automatically can open a layer tool when the layer is switched on:
-  - _default_open_tools_: JSON array with tools to open. Available options: `["filters","opacity","load-strategy","search"]` ("table" are not supported)
+  - *default_open_tools*: JSON array with tools to open. Available options: `["filters","opacity","load-strategy","search"]` ("table" are not supported)
 - New GC2 Meta properties:
-  - _disable_check_box_: boolean, disables the layer check box:
+  - *disable_check_box*: boolean, disables the layer check box:
     - When filtering a layer all its child layers with this property set to true will have their check boxes enabled. And when the filters are disabled again all child layers will be turned off and have their check boxes disabled again.
     - This makes it possible to setup child layers, which can only be viewed when filtered by its parent layer.
-  - _filter_immutable_: boolean, makes the filter setup immutable.
+  - *filter_immutable*: boolean, makes the filter setup immutable.
     - Then set, the arbitrary filter setup can't be changes. Only values can. Should be used together with `filter_config`.
-  - _reload_interval_ integer, set a reload interval for vector layers. Can be used to autoload fresh data from live data sources. Units are milliseconds.
-  - _show_table_on_side_: boolean, render the vector list of the layer in an injected element with id `vector-side-table`, so you get a map and list side-by-side.
-  - _zoom_on_table_click_: boolean, whether the map should zoom to vector feature or not when clicked in table. Is set on both vector layer tables and feature info result tables.
+  - *reload_interval* integer, set a reload interval for vector layers. Can be used to autoload fresh data from live data sources. Units are milliseconds.
+  - *show_table_on_side*: boolean, render the vector list of the layer in an injected element with id `vector-side-table`, so you get a map and list side-by-side.
+  - *zoom_on_table_click*: boolean, whether the map should zoom to vector feature or not when clicked in table. Is set on both vector layer tables and feature info result tables.
 - A Reset filter button is added, which will reset the filter to the original state.
 - The `infoClickCursorStyle` setting will set cursor style when using feature info click. Can be set to `pointer` or `crosshair`. The setting can be set in `config/config.js` or in a runtime config.
 - New Autocomplete control in filters. The control will fetch distinct values from PostgreSQL for use in the autocomplete field. All distinct values are fetch at once. 100.000 distinct values can be handle without problems. Only works on text fields and must be enabled in GC2 Structure tab.
@@ -915,11 +943,12 @@ function(store, map) {
 ```
 
 - New GC2 Meta properties which controls the info pop-up and styling of vector layers:
-  - _info_template_: Mustache template for use in pop-up.
-  - _info_element_selector_: Which element to render info template in? Defaults to pop-up.
-  - _info_function_: Function which is run when clicking on a vector feature. Takes five args: feature (Leaflet), layer (Leaflet), layer key (Vidi), SQL store (Vidi) and map (Leaflet).
-  - _point_to_layer_: Leaflet pointToLayer function.
-  - _vector_style_: Leaflet vector styling function.
+  - *info_template*: Mustache template for use in pop-up.
+  - *info_element_selector*: Which element to render info template in? Defaults to pop-up.
+  - *info_function*: Function which is run when clicking on a vector feature. Takes five args: feature (Leaflet), layer (Leaflet), layer key (Vidi), SQL store (Vidi) and map (Leaflet).
+  - *point_to_layer*: Leaflet pointToLayer function.
+  - *vector_style*: Leaflet vector styling function.
+
 - The help buttons now work like toggles, so a second click will close the help box.
 
 ### Fixed
@@ -986,7 +1015,6 @@ function(store, map) {
 - Support of MVT base layers.
 
 ### Changed
-
 - Optimized rendering of layer tree. Implemented lazy rendering of layer groups and tools.
 - Hide login button if session module is disabled.
 

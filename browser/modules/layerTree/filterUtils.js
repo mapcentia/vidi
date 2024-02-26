@@ -37,11 +37,12 @@ const validateFilters = (filters) => {
         if (`fieldname` in column === false) errors.push(`Column fieldname does not exist`);
         if (`expression` in column === false || (EXPRESSIONS.indexOf(column.expression) === -1 && column.expression !== `null`)) errors.push(`Invalid column expression`);
         if (`value` in column === false) errors.push(`Column value does not exist`);
+        if (`sub` in column) errors = [];
     });
 
     if (errors.length > 0) {
         console.error(`Invalid filters: ${errors.join(`,`)}`);
-        // throw new Error(`Invalid filters`);
+        throw new Error(`Invalid filters`);
     }
 };
 
