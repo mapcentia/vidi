@@ -2197,15 +2197,7 @@ module.exports = {
                         "mapsizeMm": [190, 120]
                     }
                 }
-            }/*,
-            "_mapGoPrint": {
-                "A4": {
-                    "p": {
-                        "mapsizePx": [700, 500],
-                        "mapsizeMm": [190, 120]
-                    }
-                }
-            },*/
+            }
         },
 
 
@@ -2265,10 +2257,6 @@ module.exports = {
         {
             "blueidea": ["index"]
         }
-        /*,
-            {
-                "MapGOMenu": ["index", "reportRender", "infoClick", "controller"]
-            }*/
         ],
         "server": [{
             "conflictSearch": ["index"]

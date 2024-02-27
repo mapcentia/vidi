@@ -21,6 +21,8 @@ const md5 = require('md5');
 const cookie = require('js-cookie');
 const config = require('../../config/config.js');
 
+const bootstrap = require('bootstrap');
+
 import mustache from 'mustache';
 
 module.exports = {

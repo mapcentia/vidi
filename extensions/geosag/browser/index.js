@@ -7,30 +7,14 @@
 'use strict';
 
 /* Import big-brains*/
-import {
-    v4 as uuidv4
-} from 'uuid';
-import Dropzone from 'react-dropzone';
-import JSZip from 'jszip';
-import Button from '@material-ui/core/Button';
-import ArrowBackIcon from '@material-ui/icons/ArrowBack';
-import Select from '@material-ui/core/Select';
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import FormHelperText from '@material-ui/core/FormHelperText';
-import FormControl from '@material-ui/core/FormControl';
 import { isNull, isSet } from 'lodash';
-import { getClassSet } from 'react-bootstrap/lib/utils/bootstrapUtils';
 import MatrikelTable from './MatrikelTable';
 import DAWASearch from './DAWASearch';
 import SaveIcon from '@material-ui/icons/Save';
 import IconButton from '@material-ui/core/IconButton';
 import CheckIcon from '@material-ui/icons/Check';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import FolderIcon from '@material-ui/icons/Folder';
-import ErrorIcon from '@material-ui/icons/Error';
 import Tooltip from '@material-ui/core/Tooltip';
-import { reject } from 'async';
 
 /**
  *

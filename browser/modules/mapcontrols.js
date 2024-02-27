@@ -260,25 +260,26 @@ module.exports = {
         defaultMapExtentControl = new DefaultMapExtentControl();
         cloud.get().map.addControl(defaultMapExtentControl);
 
-        const simpleMapScreenshoter = L.simpleMapScreenshoter(
-            {
-                position: 'topright',
-                screenName: 'Screenshot',
-                hideElementsWithSelectors: ['.leaflet-top.leaflet-right'],
-            }
-        ).addTo(cloud.get().map);
-        cloud.get().map.on("simpleMapScreenshoter.done", () => {
-            utils.showInfoToast(__("Screenshot is ready"), {delay: 2000, autohide: true})
-        });
-        cloud.get().map.on('simpleMapScreenshoter.error', () => {
-            alert("Something went wrong");
-            resetPrintBtn();
-        });
+        // Removed initially - RGB
+        //const simpleMapScreenshoter = L.simpleMapScreenshoter(
+        //    {
+        //        position: 'topright',
+        //        screenName: 'Screenshot',
+        //        hideElementsWithSelectors: ['.leaflet-top.leaflet-right'],
+        //    }
+        //).addTo(cloud.get().map);
+        //cloud.get().map.on("simpleMapScreenshoter.done", () => {
+        //    utils.showInfoToast(__("Screenshot is ready"), {delay: 2000, autohide: true})
+        //});
+        //cloud.get().map.on('simpleMapScreenshoter.error', () => {
+        //    alert("Something went wrong");
+        //    resetPrintBtn();
+        //});
 
-        const printBtnEl = document.querySelector(".leaflet-control-simpleMapScreenshoter a");
-        printBtnEl.title = __("Create a screenshot of the map. The screenshot is downloaded as a PNG file");
-        const resetPrintBtn = () => printBtnEl.innerHTML = "<span class='bi bi-camera'></span>";
-        resetPrintBtn();
+        //const printBtnEl = document.querySelector(".leaflet-control-simpleMapScreenshoter a");
+        //printBtnEl.title = __("Create a screenshot of the map. The screenshot is downloaded as a PNG file");
+        //const resetPrintBtn = () => printBtnEl.innerHTML = "<span class='bi bi-camera'></span>";
+        //resetPrintBtn();
 
         new L.HistoryControl({
             orientation: 'vertical',

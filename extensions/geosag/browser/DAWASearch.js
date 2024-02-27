@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-//import { throttle, debounce } from "throttle-debounce";
 import IconButton from '@material-ui/core/IconButton';
 import ClearIcon from '@material-ui/icons/Clear';
 

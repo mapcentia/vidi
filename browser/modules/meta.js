@@ -139,7 +139,6 @@ module.exports = {
                                     ready = true;
                                     let endTime = new Date().getTime();
                                     console.info("Meta loaded in " + (endTime - startTime) + " ms");
-                                    console.info("Cache info:", response.cache.hit)
                                     resolve(schemata);
                                 } else {
                                     reject();
