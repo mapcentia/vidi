@@ -12014,4 +12014,19 @@ textarea.form-control-lg {
   pointer-events: none;
 }
 
+[data-bs-theme=geopartner] {
+  --bs-primary: #009688;
+  --bs-primary-rgb: 0, 150, 136;
+}
+
+[data-bs-theme=geopartner] .form-check-input:checked {
+  background-color: var(--bs-primary);
+  border-color: var(--bs-primary);
+}
+
+[data-bs-theme=geopartner] .nav-pills .nav-link.active {
+  color: --bs-white;
+  background-color: var(--bs-primary);
+}
+
 /*# sourceMappingURL=main.css.map */

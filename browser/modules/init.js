@@ -90,11 +90,11 @@ module.exports = {
                 default: 1,
                 active: false
             },
-            title: "MapCentia Vidi",
+            title: "MapConnect",
             autoUpdate: false,
             configSwitcher: false, // Use this only in build time configs,
             baselayerDrawer: false,
-            theme: 'light'
+            theme: 'geopartner'
         };
         // Set session from URL
         if (typeof urlVars.session === "string") {
