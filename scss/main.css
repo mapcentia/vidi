@@ -12017,16 +12017,38 @@ textarea.form-control-lg {
 [data-bs-theme=geopartner] {
   --bs-primary: #009688;
   --bs-primary-rgb: 0, 150, 136;
+  --active-brightness: 0.85;
+  --hover-brightness: 1.2;
 }
 
-[data-bs-theme=geopartner] .form-check-input:checked {
-  background-color: var(--bs-primary);
-  border-color: var(--bs-primary);
-}
-
+/* Værktøjslinje */
 [data-bs-theme=geopartner] .nav-pills .nav-link.active {
   color: --bs-white;
   background-color: var(--bs-primary);
+}
+
+[data-bs-theme=geopartner] .nav-link.active:hover {
+  filter: brightness(var(--hover-brightness));
+}
+
+[data-bs-theme=geopartner] .nav-link {
+  color: var(--bs-primary);
+}
+
+/* Komponenter */
+[data-bs-theme=geopartner] .btn-primary {
+  background-color: var(--bs-primary);
+  border-color: shade(var(--bs-primary), 10%);
+}
+
+[data-bs-theme=geopartner] .btn-primary:active {
+  background-color: var(--bs-primary);
+  filter: brightness(var(--active-brightness));
+}
+
+[data-bs-theme=geopartner] .btn-primary:hover {
+  background-color: var(--bs-primary);
+  filter: brightness(var(--hover-brightness));
 }
 
 /*# sourceMappingURL=main.css.map */
