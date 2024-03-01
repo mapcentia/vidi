@@ -86,6 +86,22 @@
     display: inline;
   }
 </style>
+<script>
+    const toggleButton = document.getElementById('gp-themeToggle');
+    const htmlElement = document.documentElement;
+
+    toggleButton.addEventListener('click', function() {
+        const currentTheme = htmlElement.getAttribute('data-bs-theme');
+        
+        if (currentTheme === 'geopartner') {
+            htmlElement.setAttribute('data-bs-theme', 'geopartner-dark');
+            toggleButton.innerHTML = '<i class="bi bi-sun"></i>'; // Crescent moon icon
+        } else {
+            htmlElement.setAttribute('data-bs-theme', 'geopartner');
+            toggleButton.innerHTML = '<i class="bi bi-moon"></i>'; // Sun icon
+        }
+    });
+</script>
 <!-- map -->
 <div id="pane">
   <div id="container">
@@ -220,6 +236,11 @@
       class="collapse navbar-collapse justify-content-end flex-grow-0 pe-auto mt-2 mt-sm-0 gap-2"
       id="navbarSupportedContent"
     >
+    <div class="nav-item">
+      <button id="gp-themeToggle" class="gp-themeToggle">
+        <i class="bi bi-moon"></i>
+      </button>
+    </div>
       <div class="nav-item dropdown mb-2 mb-sm-0">
         <a
           class="nav-link dropdown-toggle"
