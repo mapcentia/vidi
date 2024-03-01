@@ -482,6 +482,21 @@ module.exports = {
          * TODO remove if
          */
 
+        // Fix alignment-bug of leaflet-toolbar - rgb@Geopartner.dk
+        // Select the parent element with the specified classes
+        var parentElement = document.querySelector('.leaflet-top.leaflet-right');
+
+        // Check if the parent element exists to avoid errors
+        if (parentElement) {
+            // Select all child elements of the parent
+            var childElements = parentElement.querySelectorAll('*');
+
+            // Iterate through each child element and remove its style attribute
+            childElements.forEach(function(child) {
+                child.removeAttribute('style');
+            });
+        }
+
 
         if (urlVars.state || urlparser.hash.length === 0 && (!urlVars.initialFilter && !urlVars.dfi)) {
             console.log("Enable fast init")
