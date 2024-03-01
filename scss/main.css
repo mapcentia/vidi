@@ -12044,11 +12044,35 @@ textarea.form-control-lg {
 [data-bs-theme=geopartner] .btn-primary:active {
   background-color: var(--bs-primary);
   filter: brightness(var(--active-brightness));
+  border-color: shade(var(--bs-primary), 10%);
 }
 
 [data-bs-theme=geopartner] .btn-primary:hover {
   background-color: var(--bs-primary);
   filter: brightness(var(--hover-brightness));
 }
+
+[data-bs-theme=geopartner] .btn-outline-primary {
+  color: var(--bs-primary);
+  border-color: shade(var(--bs-primary), 10%);
+}
+
+[data-bs-theme=geopartner] .btn-check:checked + .btn {
+  background-color: var(--bs-primary);
+  border-color: shade(var(--bs-primary), 10%);
+}
+
+[data-bs-theme=geopartner] .btn-check:checked + .btn:hover {
+  background-color: var(--bs-primary);
+  color: var(--bs-white);
+  border-color: shade(var(--bs-primary), 10%);
+}
+
+[data-bs-theme=geopartner] .btn-check + .btn:hover {
+  color: var(--bs-primary);
+  border-color: shade(var(--bs-primary), 10%);
+}
+
+/* Leaflet */
 
 /*# sourceMappingURL=main.css.map */
