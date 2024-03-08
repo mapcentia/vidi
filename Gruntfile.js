@@ -194,9 +194,18 @@ module.exports = function (grunt) {
                     browserifyOptions,
                     transform,
                     watch: true,
-                    keepAlive: true
+                    keepAlive: true,
+
                 }
             }
+        },
+        watch: {
+            bundle: {
+                files:'public/js/bundle.js',
+                options: {
+                    livereload: true,
+                },
+            },
         },
         uglify: {
             publish: {
