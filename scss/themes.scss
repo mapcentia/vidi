@@ -128,10 +128,15 @@
     color: var(--bs-primary);
     border-color: var(--bs-primary-shade-20);
 }
+
 [data-bs-theme="geopartner"] .dropdown-item:active {
     background-color: var(--bs-primary-shade-20);
 }
 
+[data-bs-theme="geopartner"] .form-check-input:checked {
+    background-color: var(--bs-primary-shade-20);
+    border-color: var(--bs-primary-shade-20);
+}
 
 /* Leaflet */
 /* Align leaflet-draw */
