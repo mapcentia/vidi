@@ -196,8 +196,8 @@ module.exports = {
                 var dict = {
 
                     "Info": {
-                        "da_DK": "infoDK",
-                        "en_US": "infoUS"
+                        "da_DK": "Graveassistenten gør det muligt at uploade en ledningspakke og se status på ledningsejere og ledninger i området. Du kan også downloade ledningsoplysningerne i andre formater.",
+                        "en_US": "Graveassistenten makes it possible to upload a ledningspakke and see the status of ledningsejere and ledninger in the area. You can also download the data contained in other formats."
                     },
 
                     "Plugin Tooltip": {
@@ -1335,7 +1335,7 @@ module.exports = {
                                             <div className = "form-group" >
                                                 <div>
                                                     <LedningsProgress progress = {s.progress} text = {s.progressText} iserror = {s.isError} errorlist = {[]} />
-                                                    {s.isError === true ? <Button size = "large" color = "default" style = {margin} onClick = {_self.onBackClickHandler.bind(this)}>< ArrowBackIcon fontSize = "small" /> {__("backbutton")} </Button> : ''}
+                                                    {s.isError === true ? <button class="btn btn-sm btn-light" id="_draw_download_geojson" onClick={_self.onBackClickHandler.bind(this)}><i class="bi bi-arrow-left-short" aria-hidden="true"></i> Tilbage</button> : ''}
                                                 </div >
                                             </div>
                                         </div>
@@ -1347,9 +1347,9 @@ module.exports = {
                                             <div className = "form-group">
                                                 <p>{__("uploadtime") + ': ' + this.humanTime(s.svarUploadTime)}</p>
                                                 <div style = {{display: 'flex'}}>
-                                                    <Button size = "large" color = "default" variant = "contained" style = {margin} onClick = {_self.onBackClickHandler.bind(this)}>
-                                                        <ArrowBackIcon fontSize = "small" />{__("backbutton")}
-                                                    </Button>
+                                                    <button class="btn btn-sm btn-light" id="_draw_download_geojson" onClick={_self.onBackClickHandler.bind(this)}>
+                                                        <i class="bi bi-arrow-left-short" aria-hidden="true"></i> Tilbage
+                                                    </button>
                                                     <LedningsDownload style = {margin} size = "large" color = "default" variant = "contained" endpoint = "/api/extension/downloadForespoergsel" forespnummer = {s.foresp} schema={schema_override} />
                                                 </div >
                                                 <div id = "graveAssistent-feature-ledningsejerliste" >
@@ -1403,7 +1403,7 @@ module.exports = {
                                 }
                             }
 
-                            utils.createMainTab(exId, __("Plugin Tooltip"), __("Info"), require('./../../../browser/modules/height')().max, "create_new_folder", false, exId);
+                            utils.createMainTab(exId, __("Plugin Tooltip"), __("Info"), require('./../../../browser/modules/height')().max, "bi-folder-plus", false, exId);
 
                             // Append to DOM
                             //==============

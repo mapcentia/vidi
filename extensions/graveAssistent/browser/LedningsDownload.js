@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -13,9 +12,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import FormControl from '@material-ui/core/FormControl';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
-import FormLabel from '@material-ui/core/FormLabel';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import SaveIcon from '@material-ui/icons/Save';
 import Grid from '@material-ui/core/Grid';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
@@ -149,53 +146,50 @@ class LedningsDownload extends React.Component {
         return (
             
             <div>
-              <Button
-                  size={p.size}
-                  variant={p.variant}
-                  color={p.color}
-                  onClick={_self.handleClickOpen}
-                  style={margin}
-                >
-                   <SaveIcon
-                   fontSize="small"
-                   /> Download
-                </Button>
-              <Dialog disableBackdropClick disableEscapeKeyDown open={s.open} onClose={_self.handleClose}>
-                <DialogTitle>Vælg format</DialogTitle>
-                <DialogContent>
-                <Grid
-                  container
-                  direction="row"
-                  justify="center"
-                  alignItems="flex-start"
-                >
+                <button type="button" class="btn btn-sm btn-light" id="_draw_download_geojson" data-bs-toggle="modal" data-bs-target="#downloadModal">
+                    <i class="bi bi-save" aria-hidden="true"></i> Download
+                </button>
 
-                
-                    <Grid item xs={6}>
-                        <form style={container}>
-                          <FormControl style={formControl}>
-                              <RadioGroup aria-label="format" name="format1" value={s.format} onChange={_self.handleChange}>
-                                  {s.formatList.map(f => <FormControlLabel key={f.format} value={f.format} disabled={f.formatDisable} control={<Radio />} label={f.formatTitle} />)}
-                              </RadioGroup>
-                          </FormControl>
-                        </form>
-                    </Grid>
-                    <Grid item xs={6}>
-                        {desc === '' ? '' : <p>{desc}</p>}
-                        {product === '' ? '' : <p>{product}</p>}
-                    </Grid>
-                </Grid>
-                </DialogContent>
-                <DialogActions>
-                  <Button onClick={_self.handleClose} color="default" size={p.size} variant={p.variant}>
-                    Fortryd
-                  </Button>
-                  <Button onClick={_self.handleDownload} color="primary" size={p.size} variant={p.variant} disabled={s.format == '' ? true : false}>
-                    {s.loading ? 'Oversætter' : 'Download'}
-                  </Button>
-                  {s.loading && <CircularProgress size={20} />}
-                </DialogActions>
-              </Dialog>
+                <div class="modal" id="downloadModal" tabindex="-1" aria-labelledby="downloadModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4 class="modal-title">Vælg format</h4>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div className="form-check">
+                                    <label>
+                                        <input className="form-check-input" onClick={this.onCoordinatesSystemClick} type="radio"
+                                            id="coordinates-system-utm"
+                                            name="coordinates-system" value="utm"/>
+                                        UTM
+                                    </label>
+                                </div>
+                                <div class="container-fluid">
+                                    <div class="row">
+                                        <div class="col-sm-9">
+                                            Level 1: .col-sm-9
+                                            <div class="row">
+                                            <div class="col-8 col-sm-6">
+                                                Level 2: .col-8 .col-sm-6
+                                            </div>
+                                            <div class="col-4 col-sm-6">
+                                                Level 2: .col-4 .col-sm-6
+                                            </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>                      
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Fortryd</button>
+                                <button type="button" class="btn btn-sm btn-primary" onClick={this.handleDownload} disabled={this.state.format == '' ? true : false}>{this.state.loading ? 'Oversætter' : 'Download'}</button>
+                                {this.state.loading && <div class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></div>}
+                            </div>
+                        </div>
+                    </div>
+                </div>  
             </div>
           );
     }

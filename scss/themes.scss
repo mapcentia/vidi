@@ -33,9 +33,11 @@
     --bs-secondary-bg-rgb: 52, 58, 64;
     --bs-tertiary-bg: #2b3035;
     --bs-tertiary-bg-rgb: 43, 48, 53;
-    --bs-navbar-brand-color: var(--bs-white);
+    --bs-emphasis-color: var(--bs-white);
     --bs-secondary-color: rgba(222, 226, 230, 0.75);
     --bs-secondary-color-rgb: 222, 226, 230;
+    --bs-list-group-color: var(--bs-white);
+    --bs-headings-color: var(--bs-white);
 
     /* Copy parameters from light mode */
     --bs-primary: #009688;
