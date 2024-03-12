@@ -5,25 +5,13 @@
  */
 
 import React from 'react';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import FormControl from '@material-ui/core/FormControl';
-import Radio from '@material-ui/core/Radio';
-import RadioGroup from '@material-ui/core/RadioGroup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Grid from '@material-ui/core/Grid';
-import CircularProgress from '@material-ui/core/CircularProgress';
-
 
 class LedningsDownload extends React.Component {
     constructor(props) {
         super(props);
-
         this.state = {
-            open: false,
-            format: '',
+            show: false,
+            format: 'shp',
             formatList: [
                 {
                     format: 'shp',
@@ -42,32 +30,21 @@ class LedningsDownload extends React.Component {
                 {
                     format: 'geojson',
                     formatTitle: 'GeoJSON',
-                    formatDesc: 'GeoJSON er et åbent tekst-baseret format. Bruges ofte i web-sammenhæng. Filen kan med fordel indlæses i  QGIS.',
+                    formatDesc: 'GeoJSON er et åbent tekst-baseret format. Bruges ofte i web-sammenhæng. Filen kan med fordel indlæses i QGIS.',
                     formatDisable: false,
                     formatProduct: 'Man får en GeoJSON fil, dette er et direkte udtræk af ledningspakken.'
                 }
             ],
-            loading: false
+            loading: false,
         };
     }
+
     handleChange = (event) => {
-        const _self = this
-
-        _self.setState({format:event.target.value || ''})
+        this.setState({ format: event.target.value || '' });
     };
 
-    handleClickOpen = () => {
-        const _self = this
-        _self.setState({open:true});
-    };
-
-    handleClose = () => {
-        const _self = this
-        _self.setState({
-            open:false,
-            format: ''
-        });
-    };
+    handleShow = () => this.setState({ show: true });
+    handleClose = () => this.setState({ show: false, format: '', loading: false });
 
     handleDownload = () => {
         const _self = this
@@ -106,93 +83,77 @@ class LedningsDownload extends React.Component {
                 a.addEventListener('click', clickHandler(file), false);
                 a.click();
                 a.removeEventListener('click', clickHandler);
-                _self.setState({loading:false})
+                this.handleClose()
             })
-            .then(_self.setState({open:false,format: ''}))
             .catch(e => console.log(e))
         })
         .catch(e => console.log(e))
     };
 
     render() {
-        const p = this.props
-        const _self = this;
-        const s = _self.state
-        
-        //console.log(p)
-        //console.log(s)
-
-        const container = {
-            display: 'flex',
-            flexWrap: 'wrap'
-        }
-        const formControl = {
-            minWidth: 120
-        }
-        const margin = {
-            margin: 10
-        }
-
-        let formatDescription, desc, product
-        if (s.format === '') {
-            desc = 'Vælg et format i siden, og få en fin forklaring over de forskellige formater du kan hente.'
-            product = ''
-        } else {
-            desc = s.formatList.find(x => x.format === s.format).formatDesc
-            product = s.formatList.find(x => x.format === s.format).formatProduct
-        }
-
+        const { show, format, formatList, loading } = this.state;
+        const selectedFormat = formatList.find(f => f.format === format);
+        const modalClass = show ? "modal fade show d-block" : "modal fade";
 
         return (
-            
             <div>
-                <button type="button" class="btn btn-sm btn-light" id="_draw_download_geojson" data-bs-toggle="modal" data-bs-target="#downloadModal">
-                    <i class="bi bi-save" aria-hidden="true"></i> Download
+                <button type="button" className="btn btn-sm btn-light" onClick={this.handleShow}>
+                    Download
                 </button>
 
-                <div class="modal" id="downloadModal" tabIndex="-1" aria-labelledby="downloadModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h4 class="modal-title">Vælg format</h4>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div className={modalClass} tabIndex="-1" style={show ? { backgroundColor: 'rgba(0,0,0,0.5)' } : {}}>
+                    <div className="modal-dialog modal-dialog-centered modal-lg">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">Vælg format</h5>
+                                <button type="button" className="btn-close" onClick={this.handleClose}></button>
                             </div>
-                            <div class="modal-body">
-                                <div className="form-check">
-                                    <label>
-                                        <input className="form-check-input" onClick={this.onCoordinatesSystemClick} type="radio"
-                                            id="coordinates-system-utm"
-                                            name="coordinates-system" value="utm"/>
-                                        UTM
-                                    </label>
-                                </div>
-                                <div class="container-fluid">
-                                    <div class="row">
-                                        <div class="col-sm-9">
-                                            Level 1: .col-sm-9
-                                            <div class="row">
-                                            <div class="col-8 col-sm-6">
-                                                Level 2: .col-8 .col-sm-6
+                            <div className="modal-body">
+                                <div className="row">
+                                    <div className="col-md-6">
+                                        {formatList.map(f => (
+                                            <div className="form-check" key={f.format}>
+                                                <input 
+                                                    className="form-check-input" 
+                                                    type="radio" 
+                                                    name="formatOption" 
+                                                    id={`format-${f.format}`}
+                                                    value={f.format}
+                                                    checked={format === f.format}
+                                                    onChange={this.handleChange}
+                                                    disabled={f.formatDisable}
+                                                />
+                                                <label className="form-check-label" htmlFor={`format-${f.format}`}>
+                                                    {f.formatTitle}
+                                                </label>
                                             </div>
-                                            <div class="col-4 col-sm-6">
-                                                Level 2: .col-4 .col-sm-6
-                                            </div>
-                                            </div>
-                                        </div>
+                                        ))}
+                                    </div>
+                                    <div className="col-md-6">
+                                        {selectedFormat && (
+                                            <>
+                                                <p>{selectedFormat.formatDesc}</p>
+                                                <p>{selectedFormat.formatProduct}</p>
+                                            </>
+                                        )}
                                     </div>
                                 </div>
-                            </div>                      
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Fortryd</button>
-                                <button type="button" class="btn btn-sm btn-primary" onClick={this.handleDownload} disabled={this.state.format == '' ? true : false}>{this.state.loading ? 'Oversætter' : 'Download'}</button>
-                                {this.state.loading && <div class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></div>}
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" onClick={this.handleClose}>Fortryd</button>
+                                <button type="button" className="btn btn-primary" onClick={this.handleDownload} disabled={!format || loading}>
+                                    {loading && <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>}
+                                    {loading ? ' Loading...' : 'Download'}
+                                </button>
                             </div>
                         </div>
                     </div>
-                </div>  
-            </div>
-          );
-    }
-};
+                </div>
 
-module.exports = LedningsDownload;
+                {show && <div className="modal-backdrop fade show"></div>}
+            </div>
+        );
+    }
+}
+
+export default LedningsDownload;

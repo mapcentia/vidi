@@ -15,7 +15,8 @@ class LedningsProgress extends React.Component {
     }
 
     getVariant(progress) {
-        return progress < 100 ? 'progress-bar-striped progress-bar-animated' : '';
+        // Add check for undefined or null progress to apply indeterminate style
+        return progress === undefined || progress === null || progress < 100 ? 'progress-bar-striped progress-bar-animated' : '';
     }
 
     getProgressColor(isError) {
@@ -24,13 +25,19 @@ class LedningsProgress extends React.Component {
 
     render() {
         const p = this.props;
+        const hasProgress = p.progress !== undefined && p.progress !== null;
 
         return (
             <div className="d-flex align-items-center justify-content-center" style={{ height: '100%' }}>
                 <div className="w-60 mt-10">
                     <div className="d-flex flex-column align-items-center justify-content-center mb-2">
                         <div className="progress" style={{ width: '100%', height: '40px' }}>
-                            <div className={`progress-bar ${this.getVariant(p.progress)} ${this.getProgressColor(p.isError)}`} role="progressbar" style={{ width: `${p.progress}%` }} aria-valuenow={p.progress} aria-valuemin="0" aria-valuemax="100"></div>
+                            <div className={`progress-bar ${this.getVariant(p.progress)} ${this.getProgressColor(p.isError)}`} role="progressbar" 
+                                style={{ width: hasProgress ? `${p.progress}%` : '100%' }} 
+                                aria-valuenow={hasProgress ? p.progress : undefined} 
+                                aria-valuemin="0" 
+                                aria-valuemax="100">
+                            </div>
                         </div>
                         <div>{p.text}</div>
                         {p.errorList.map((f, index) => (

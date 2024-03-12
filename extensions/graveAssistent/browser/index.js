@@ -1313,7 +1313,7 @@ module.exports = {
                                                     {s.harMegetFarlig && <div className='p-2'>Indeholder meget farlige ledninger!</div>}
                                                 </div>
                                                 <div id="graveAssistent-feature-ledningsejerliste" >
-                                                    {s.ejerliste.length > 0 ? <LedningsEjerStatusTable statusliste = {s.ejerliste}/> : <LedningsProgress text={'Henter'} iserror={false} errorList={[]} />}
+                                                    {s.ejerliste.length > 0 ? <LedningsEjerStatusTable statusliste = {s.ejerliste}/> : <LedningsProgress progress={67} text={'Henter'} iserror={false} errorList={[]} />}
                                                 </div>
                                             </div>
                                         </div>
