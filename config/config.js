@@ -2513,7 +2513,7 @@ module.exports = {
         },
         {
             "type": "wms",
-            "url": "/api/datafordeler/Matrikel/MatrikelGaeldendeOgForeloebigWMS/1.0.0/WMS",
+            "url": "/api/datafordeler/MATRIKLEN2/MatGaeldendeOgForeloebigWMS/1.0.0/WMS",
             "layers": [
                 "Centroide_Gaeldende",
                 "OptagetVej_Gaeldende",
