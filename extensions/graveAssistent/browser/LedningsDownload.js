@@ -150,7 +150,7 @@ class LedningsDownload extends React.Component {
                     <i class="bi bi-save" aria-hidden="true"></i> Download
                 </button>
 
-                <div class="modal" id="downloadModal" tabindex="-1" aria-labelledby="downloadModalLabel" aria-hidden="true">
+                <div class="modal" id="downloadModal" tabIndex="-1" aria-labelledby="downloadModalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
                             <div class="modal-header">

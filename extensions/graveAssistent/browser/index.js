@@ -15,12 +15,9 @@ import JSZip from 'jszip';
 import LedningsEjerStatusTable from "./LedningsEjerStatusTable";
 import LedningsProgress from "./LedningsProgress";
 import LedningsDownload from "./LedningsDownload";
-import Button from '@material-ui/core/Button';
-import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import Select from '@material-ui/core/Select';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
-import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
 
 // Get information from config.json
@@ -289,8 +286,8 @@ module.exports = {
                  * @param {*} xmlData 
                  */
                 var parsetoJSON = function (xmlData) {
+                    const {XMLParser} = require('fast-xml-parser');
                     var jsonObj, Err = {}
-                    var parser = require('fast-xml-parser');
                     var he = require('he');
 
                     var options = {
@@ -306,16 +303,15 @@ module.exports = {
                         cdataTagName: "__cdata", //default is 'false'
                         cdataPositionChar: "\\c",
                         parseTrueNumberOnly: false,
-                        arrayMode: false, //"strict"
-                        stopNodes: ["parse-me-as-string"],
-                        attrValueProcessor: (val, attrName) => he.decode(val, {isAttributeValue: true}),//default is a=>a
-                        tagValueProcessor : (val, tagName) => he.decode(val), //default is a=>a
+                        removeNSPrefix: true,
                     };
 
                     try {
-                        jsonObj = parser.parse(xmlData, options);
+                        var parser = new XMLParser(options);
+                        jsonObj = parser.parse(xmlData);
                     } catch (error) {
                         Err = error
+                        console.log(Err)
                     }
                     
                     // If you try to validate before parseing, like a good boy, you get TypeError in production!
@@ -465,7 +461,6 @@ module.exports = {
                  */
                 var parseConsolidated = function (consolidated) {
                     const cons = consolidated['FeatureCollection']['featureMember']
-                    //console.log(cons)
 
                     const returnObj = {
                         foresp: {},
@@ -687,6 +682,7 @@ module.exports = {
                 }
 
                 var parseStatus = function (statusObj) {
+                    //console.log(statusObj);
 
                     let ejerList = statusObj.LedningsejerListe.Ledningsejer
 
@@ -1040,8 +1036,6 @@ module.exports = {
                         var _self = this;
                         var newZip = new JSZip();
 
-                        let wait = 5000
-
                         var statusKey = uuidv4()
                         var b64 = zipblob.split(',')[1];
                        
@@ -1073,6 +1067,7 @@ module.exports = {
                                 ])
                             }).then(function(files) {
                                 var [status, consolidated] = files
+                                //console.log(files);
 
                                 return Promise.all([
                                     parsetoJSON(status),
@@ -1080,6 +1075,7 @@ module.exports = {
                                 ])
                             }).then(function(files) {
                                 var [status, consolidated] = files
+                                //console.log(files);
 
                                 return Promise.all([
                                     parseStatus(status),
@@ -1087,6 +1083,7 @@ module.exports = {
                                 ])
                             }).then(function(files) {
                                 var [status, consolidated] = files
+                                //console.log(files);
 
                                 if (schema_override) {
                                     return [Promise.all([
@@ -1272,7 +1269,7 @@ module.exports = {
                     }
 
                     clickLogin() {
-                        document.getElementById('session').click()
+                        document.querySelector('[data-bs-target="#login-modal"]').click();
                     }
 
                     /**
@@ -1282,81 +1279,41 @@ module.exports = {
                             const _self = this;
                             const s = _self.state
                             //console.log(s)
-
-                            const formControl = {
-                                minWidth: 120
-                            }
-                            const margin = {
-                                margin: 10
-                            }
-                            const bad = {
-                                color: 'white',
-                                padding: '2%',
-                                position: 'relative',
-                                display: 'block',
-                                textAlign: 'center',
-                                fontSize: '2rem',
-                                margin: '1rem',
-                                height: '50px',
-                                backgroundColor: '#eda72d'
-                            }
-                            const badder = {
-                                color: 'white',
-                                padding: '2%',
-                                position: 'relative',
-                                display: 'block',
-                                textAlign: 'center',
-                                fontSize: '2rem',
-                                margin: '1rem',
-                                height: '50px',
-                                backgroundColor: '#ed6d2d'
-                            }
-                            const baddest = {
-                                color: 'white',
-                                padding: '2%',
-                                position: 'relative',
-                                display: 'block',
-                                textAlign: 'center',
-                                fontSize: '2rem',
-                                margin: '1rem',
-                                height: '50px',
-                                backgroundColor: '#ed2d2d'
-                            }
-
-
-                    
-
+                   
                             if (s.authed) {
                                 // Logged in
                                 if (s.loading) {
                                     // If Loading, show progress
                                     return (
-                                        <div role = "tabpanel" >
-                                            <div className = "form-group" >
+                                        <div role="tabpanel">
+                                            <div>
                                                 <div>
-                                                    <LedningsProgress progress = {s.progress} text = {s.progressText} iserror = {s.isError} errorlist = {[]} />
-                                                    {s.isError === true ? <button class="btn btn-sm btn-light" id="_draw_download_geojson" onClick={_self.onBackClickHandler.bind(this)}><i class="bi bi-arrow-left-short" aria-hidden="true"></i> Tilbage</button> : ''}
-                                                </div >
+                                                    <LedningsProgress progress={s.progress} text={s.progressText} isError={s.isError} errorList={[]} />
+                                                    {s.isError === true ? <button className="btn btn-sm btn-light" id="_draw_download_geojson" onClick={_self.onBackClickHandler.bind(this)}><i className="bi bi-arrow-left-short" aria-hidden="true"></i> Tilbage</button> : ''}
+                                                </div>
                                             </div>
                                         </div>
+
                                     )
                                 } else if (s.done) {
                                     // Either selected or uploaded.
                                     return ( 
                                         <div role = "tabpanel">
-                                            <div className = "form-group">
+                                            <div className = "form-group p-2">
                                                 <p>{__("uploadtime") + ': ' + this.humanTime(s.svarUploadTime)}</p>
-                                                <div style = {{display: 'flex'}}>
-                                                    <button class="btn btn-sm btn-light" id="_draw_download_geojson" onClick={_self.onBackClickHandler.bind(this)}>
-                                                        <i class="bi bi-arrow-left-short" aria-hidden="true"></i> Tilbage
+                                                <div className="p-2" style = {{display: 'flex'}}>
+                                                    <button className="btn btn-sm btn-light" id="_draw_download_geojson" onClick={_self.onBackClickHandler.bind(this)}>
+                                                        <i className="bi bi-arrow-left-short" aria-hidden="true"></i> Tilbage
                                                     </button>
-                                                    <LedningsDownload style = {margin} size = "large" color = "default" variant = "contained" endpoint = "/api/extension/downloadForespoergsel" forespnummer = {s.foresp} schema={schema_override} />
+                                                    <LedningsDownload size = "large" color = "default" variant = "contained" endpoint = "/api/extension/downloadForespoergsel" forespnummer = {s.foresp} schema={schema_override} />
                                                 </div >
-                                                <div id = "graveAssistent-feature-ledningsejerliste" >
-                                                    {s.overskredetDato && <div style={baddest}>Denne ledningspakke er ikke længere gyldig!</div>}
-                                                    {s.harFarlig && <div style={bad} >Indeholder farlige ledninger</div>}
-                                                    {s.harMegetFarlig && <div style={badder} >Indeholder meget farlige ledninger!</div>}
-                                                    {s.ejerliste.length > 0 ? <LedningsEjerStatusTable statusliste = {s.ejerliste}/> : <LedningsProgress progress={50} text={'Henter'} iserror={false} errorlist={[]} />}
+                                                <div className="d-flex flex-column bg-danger text-center text-light fw-bold p-2" id="graveAssistent-feature-warnings">
+                                                    {s.overskredetDato && <div className='p-2'>Denne ledningspakke er ikke længere gyldig!</div>}
+                                                    {s.harFarlig && <div className='p-2'>Indeholder farlige ledninger</div>}
+                                                    {s.harMegetFarlig && <div className='p-2'>Indeholder meget farlige ledninger!</div>}
+                                                </div>
+                                                <div id="graveAssistent-feature-ledningsejerliste" >
+                                                    {s.ejerliste.length > 0 ? <LedningsEjerStatusTable statusliste = {s.ejerliste}/> : <LedningsProgress text={'Henter'} iserror={false} errorList={[]} />}
                                                 </div>
                                             </div>
                                         </div>
@@ -1393,9 +1350,9 @@ module.exports = {
                                                     <div id = "graveAssistent-feature-login" className = "alert alert-info" role = "alert" >
                                                         {__("MissingLogin")}
                                                     </div>
-                                                    <Button onClick = {() => this.clickLogin()} color = "primary" size = "large" variant = "contained" style = {{marginRight: "auto", marginLeft: "auto", display: "block" }}>
-                                                        {__("Login")}
-                                                    </Button>
+                                                    <div class="d-grid col-3 mx-auto">
+                                                        <button onClick = {() => this.clickLogin()} type="button" class="btn btn-primary">{__("Login")}</button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         )

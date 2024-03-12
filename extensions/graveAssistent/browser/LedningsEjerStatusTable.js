@@ -5,18 +5,6 @@
  */
 
 import React from 'react';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import ErrorIcon from '@material-ui/icons/Error';
-import WarningIcon from '@material-ui/icons/Warning';
-import NotInterestedIcon from '@material-ui/icons/NotInterested';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import Tooltip from '@material-ui/core/Tooltip';
-import CancelIcon from '@material-ui/icons/Cancel';
-
 
 const getUnique = function(arr) {
     let a = []
@@ -45,15 +33,15 @@ const shorter = function(string) {
 const statusIcon = function(statusText) {
     switch(statusText) {
         case 'Sendes via mail udenom LER':
-            return <WarningIcon style={{ color: '#808080'}}/>
+            return <i className="bi bi-exclamation-triangle-fill" style={{ color: '#808080'}}></i>;
         case 'Ledningsoplysninger udleveret':
-            return  <CheckCircleIcon style={{ color: '#7FFF00'}} />
+            return <i className="bi bi-check-circle-fill" style={{ color: '#7FFF00'}}></i>;
         case 'Ingen ledninger i graveområde':
-            return  <CheckCircleIcon style={{ color: '#808080'}} />
+            return <i className="bi bi-check-circle-fill" style={{ color: '#808080'}}></i>;
         case 'Ikke leveret':
-            return <CancelIcon style={{ color: '#ff3700'}} />
+            return <i className="bi bi-x-circle-fill" style={{ color: '#ff3700'}}></i>;
         default:
-            return <WarningIcon style={{ color: '#FFA500'}} />
+            return <i className="bi bi-exclamation-triangle-fill" style={{ color: '#FFA500'}}></i>;
     }
 }
 
@@ -82,7 +70,6 @@ class LedningsEjerStatusTable extends React.Component {
     render() {
         const p = this.props
         const s = this.state
-        const FS = '1rem'
         //let orderedArr = this.showStatusList(this.state.ejerListe)
 
         if (this.props.statusliste.map.length == 0) {
@@ -91,29 +78,28 @@ class LedningsEjerStatusTable extends React.Component {
             )
         } else {
             return (
-                <div>
-                    <Table style={{ width: "auto", tableLayout: "auto" }}>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell align="center" style={{ padding: "4px 4px 4px 4px", fontSize: FS }}>Status</TableCell>
-                                <TableCell align="center" style={{ padding: "4px 4px 4px 4px", fontSize: FS }}>Område</TableCell>
-                                <TableCell align="center" style={{ padding: "4px 4px 4px 4px", fontSize: FS }}>Status</TableCell>
-                                <TableCell align="center" style={{ padding: "4px 4px 4px 4px", fontSize: FS }}>Ejer</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                    {this.props.statusliste.map(ejer =>{ 
-                        return (
-                        <TableRow key={'graveAssistent-feature-ledningsejerliste-status-'+ejer.CVR+ejer.indberetningsnr}>
-                            <TableCell align="center" style={{ padding: "4px 4px 4px 4px", fontSize: FS }}>{statusIcon(ejer.status)}</TableCell>
-                            <TableCell align="right" style={{ padding: "4px 4px 4px 4px", fontSize: FS }}>{ejer.indberetningsnr}</TableCell>
-                            <TableCell align="left" style={{ padding: "4px 4px 4px 4px", fontSize: FS }}>{ejer.status}</TableCell>
-                            <TableCell align="left" style={{ padding: "4px 4px 4px 4px", fontSize: FS }} >{shorter(ejer.navn)}</TableCell>
-                        </TableRow>)
-                    })}
-                        </TableBody>
-                    </Table>
-                </div>
+                    <div>
+                    <table className="table" style={{ width: "auto", tableLayout: "auto" }}>
+                        <thead>
+                        <tr>
+                            <th className="text-center fs-6">Status</th>
+                            <th className="text-center fs-6">Område</th>
+                            <th className="text-center fs-6">Status</th>
+                            <th className="text-center fs-6">Ejer</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {this.props.statusliste.map(ejer => (
+                            <tr key={'graveAssistent-feature-ledningsejerliste-status-' + ejer.CVR + ejer.indberetningsnr}>
+                            <td className="text-center fs-6">{statusIcon(ejer.status)}</td>
+                            <td className="text-end fs-6" >{ejer.indberetningsnr}</td>
+                            <td className="text-start fs-6">{ejer.status}</td>
+                            <td className="text-start fs-6">{shorter(ejer.navn)}</td>
+                            </tr>
+                        ))}
+                        </tbody>
+                    </table>
+                    </div>
             );
         }
     }

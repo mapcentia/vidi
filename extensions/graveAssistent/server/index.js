@@ -319,7 +319,7 @@ router.post('/api/extension/getForespoergselOption', function (req, response) {
         schema = b.schema
     }
 
-    let q = "SELECT forespnummer, bemaerkning, svar_uploadtime, statuskey FROM " + schema + '.' + TABLEPREFIX + "graveforespoergsel where svar_uploadtime > now() - INTERVAL '30 days' ORDER by forespnummer DESC"
+    let q = "SELECT forespnummer, bemaerkning, svar_uploadtime, statuskey FROM " + schema + '.' + TABLEPREFIX + "graveforespoergsel ORDER by forespnummer DESC"
     
     
 
