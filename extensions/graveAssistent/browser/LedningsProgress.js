@@ -29,11 +29,10 @@ class LedningsProgress extends React.Component {
 
         return (
             <div className="d-flex align-items-center justify-content-center" style={{ height: '100%' }}>
-                <div className="w-60 mt-10">
+                <div className="w-80 m-6 p-6">
                     <div className="d-flex flex-column align-items-center justify-content-center mb-2">
-                        <div className="progress" style={{ width: '100%', height: '40px' }}>
-                            <div className={`progress-bar ${this.getVariant(p.progress)} ${this.getProgressColor(p.isError)}`} role="progressbar" 
-                                style={{ width: hasProgress ? `${p.progress}%` : '100%' }} 
+                        <div className="progress">
+                            <div className={`progress-bar ${this.getVariant(p.progress)} ${this.getProgressColor(p.isError)}`} role="progressbar"  
                                 aria-valuenow={hasProgress ? p.progress : undefined} 
                                 aria-valuemin="0" 
                                 aria-valuemax="100">
@@ -41,7 +40,7 @@ class LedningsProgress extends React.Component {
                         </div>
                         <div>{p.text}</div>
                         {p.errorList.map((f, index) => (
-                            <div key={index} className="text-center" style={{ fontSize: '10pt' }}>{f.message}</div>
+                            <div key={index} className="text-center"><p>{f.message}</p></div>
                         ))}
                     </div>
                 </div>

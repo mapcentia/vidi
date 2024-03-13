@@ -1011,21 +1011,32 @@ module.exports = {
 
                     handleForespSelectChange(event) {
                         const _self = this
-                        _self.setState({
-                            foresp: String(event.target.value),
-                            lastBounds: cloud.get().map.getBounds()
-                        })
 
-                        // getForespoergsel - use schema is set
-                        if (schema_override) {
-                            _self.getForespoergsel(String(event.target.value), schema_override)
-                        } else {
-                            _self.getForespoergsel(String(event.target.value))
+                        var options = document.getElementById('graveAssistent-features').options;
+                        var found = Array.from(options).some(function(option) {
+                            return option.value === event.target.value;
+                        });
+
+                        if (found) {
+
+                            // Get forespoergsel, which is the part of options before the first':'
+                            var foresp = String(event.target.value.split(':')[0])
+                            _self.setState({
+                                foresp: foresp,
+                                lastBounds: cloud.get().map.getBounds()
+                            })
+    
+                            // getForespoergsel - use schema is set
+                            if (schema_override) {
+                                _self.getForespoergsel(foresp, schema_override)
+                            } else {
+                                _self.getForespoergsel(foresp)
+                            }
+    
+                            _self.setState({
+                                done: true
+                            })
                         }
-
-                        _self.setState({
-                            done: true
-                        })
                     }
 
                     /**
@@ -1313,7 +1324,7 @@ module.exports = {
                                                     {s.harMegetFarlig && <div className='p-2'>Indeholder meget farlige ledninger!</div>}
                                                 </div>
                                                 <div id="graveAssistent-feature-ledningsejerliste" >
-                                                    {s.ejerliste.length > 0 ? <LedningsEjerStatusTable statusliste = {s.ejerliste}/> : <LedningsProgress progress={67} text={'Henter'} iserror={false} errorList={[]} />}
+                                                    {s.ejerliste.length > 0 ? <LedningsEjerStatusTable statusliste = {s.ejerliste}/> : <LedningsProgress progress={89} text={'Henter'} iserror={false} errorList={[]} />}
                                                 </div>
                                             </div>
                                         </div>
@@ -1321,25 +1332,27 @@ module.exports = {
                                 } else {
                                     // Just Browsing
                                     return (
-                                        <div role = "tabpanel" >
-                                            <div className = "form-group">
-                                                <div id = "graveAssistent-feature-select-container" style = {{width: '80%',margin: '10px auto 10px auto'}}>
-                                                    <FormControl style = {{width: '100%',padding: '20px'}}>
-                                                        <InputLabel id = "graveAssistent-feature-select-label"> Vælg eksisterende forespørgsel </InputLabel>
-                                                        <Select id = "graveAssistent-feature-select" value = {s.foresp} onChange = {_self.handleForespSelectChange.bind(this)}>
-                                                            {s.forespOptions.map(f => <MenuItem key = {f.forespnummer} value = {f.forespnummer}> {f.forespnummer + ': ' + f.bemaerkning + ' (Uploaded: ' + f.svar_uploadtime + ')'} </MenuItem>)}
-                                                        </Select>
-                                                    </FormControl>
-                                                    <div><p>Eller</p></div>
-                                                </div>
-                                                <div id = "graveAssistent-feature-dropzone">
-                                                    <Dropzone onDrop = {acceptedFiles => _self.onDrop(acceptedFiles)} style = {{width: '80%',height: '160px',padding: '50px',border: '1px green dashed',margin: '20px auto 20px auto',textAlign: 'center'}}>
-                                                        <p>{__("uploadmessage")}</p>
-                                                    </Dropzone>
+                                        <div role="tabpanel">
+                                            <div className="form-group p-4">
+                                                <div id="graveAssistent-feature-select-container" className="w-80 mx-auto my-2">
+                                                    <label htmlFor="graveAssistent-feature-input" className="form-label">Vælg eksisterende forespørgsel</label>
+                                                    <input className="form-control" placeholder="Søg efter forespørgsel..." list="graveAssistent-features" id="graveAssistent-feature-input" onChange={_self.handleForespSelectChange.bind(this)} />
+                                                    <datalist id="graveAssistent-features">
+                                                        {s.forespOptions.map(f => <option value={`${f.forespnummer}: ${f.bemaerkning} (Uploaded: ${this.humanTime(f.svar_uploadtime)})`} />)}
+                                                    </datalist>
+                                                    <div className='d-grid mt-4'>
+                                                        <p className="text-center">Eller</p>
+                                                    </div>
+                                                    <div id="graveAssistent-feature-dropzone" className="w-80 mx-auto">
+                                                        <Dropzone className="d-grid align-items-center" onDrop={acceptedFiles => _self.onDrop(acceptedFiles)} style={{height: '160px',backgroundColor: 'var(--bs-primary-tint-90)', borderRadius:'10px'}}>
+                                                            <p className='text-center'>{__("uploadmessage")}</p>
+                                                        </Dropzone>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                            )
+                                    )
+                                    
                                         }
                                     }
                                     else {
@@ -1350,8 +1363,8 @@ module.exports = {
                                                     <div id = "graveAssistent-feature-login" className = "alert alert-info" role = "alert" >
                                                         {__("MissingLogin")}
                                                     </div>
-                                                    <div class="d-grid col-3 mx-auto">
-                                                        <button onClick = {() => this.clickLogin()} type="button" class="btn btn-primary">{__("Login")}</button>
+                                                    <div className="d-grid col-3 mx-auto">
+                                                        <button onClick = {() => this.clickLogin()} type="button" className="btn btn-primary">{__("Login")}</button>
                                                     </div>
                                                 </div>
                                             </div>
