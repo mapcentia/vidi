@@ -309,8 +309,10 @@ module.exports = module.exports = {
 
         // Set up draw module for conflict
         draw.setConflictSearch(this);
-        $("#_draw_make_conflict_with_selected").show();
-        $("#_draw_make_conflict_with_all").show();
+        
+        // moved to group
+        $("#_draw_conflict_group").show();
+
 
         cloud.map.addLayer(drawnItems);
         cloud.map.addLayer(bufferItems);

@@ -94,6 +94,10 @@ module.exports = {
         "Conflict with all": "Konflikt med alle",
         "Prints completed": "Antal print udført",
 
+        // Lukkeliste
+        "Send selected to Blueidea": "Blueidea med valgte",
+        "Send all to Blueidea": "Blueidea med alle",
+
         "Print": "Print",
         "Search places": "Søg på steder",
         "Activate advanced query": "Aktivér avanceret forespørgsel",

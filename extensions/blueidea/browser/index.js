@@ -525,18 +525,15 @@ module.exports = {
               if (me.state.authed && me.state.user_id) {
                 // If user has blueidea, show buttons
                 if (me.state.user_blueidea == true) {
-                  $("#_draw_make_blueidea_with_selected").show();
-                  $("#_draw_make_blueidea_with_all").show();
+                  $("#_draw_blueidea_group").show();
                 } else {
-                  $("#_draw_make_blueidea_with_selected").hide();
-                  $("#_draw_make_blueidea_with_all").hide();
+                  $("#_draw_blueidea_group").hide();
                 }
                 // TODO: Disabled for now, but lists templates
                 //this.getTemplates();
               } else {
                 // If not logged in, hide buttons
-                $("#_draw_make_blueidea_with_selected").hide();
-                $("#_draw_make_blueidea_with_all").hide();
+                $("#_draw_blueidea_group").hide();
               }
             });
         });
@@ -975,7 +972,13 @@ module.exports = {
        */
       clickDraw() {
         _clearAll();
-        $('#main-tabs a[href="#draw-content"]').trigger("click");
+        const e = document.querySelector('#main-tabs a[href="#draw-content"]');
+        if (e) {
+            bootstrap.Tab.getInstance(e).show();
+            e.click();
+        } else {
+            console.warn(`Unable to locate #draw-content`)
+        }
       }
 
       /**
@@ -1493,7 +1496,7 @@ module.exports = {
       __("Plugin Tooltip"),
       __("Info"),
       require("./../../../browser/modules/height")().max,
-      "timeline",
+      "bi-node-minus",
       false,
       exId
     );

@@ -25,6 +25,7 @@ let backboneEvents;
 let editing = false;
 let _self = false;
 let conflictSearch;
+let blueIdea;
 let selectedDrawing;
 let overRideOnCheck = false;
 const createId = () => (+new Date * (Math.random() + 1)).toString(36).substr(2, 5);
@@ -123,6 +124,12 @@ module.exports = {
                 $("#_draw_make_conflict_with_all").on("click", () => {
                     _self.makeConflictSearchWithAll();
                 })
+                $("#_draw_make_blueidea_with_selected").on("click", () => {
+                    _self.makeBlueIdeaWithSelected();
+                })
+                $("#_draw_make_blueidea_with_all").on("click", () => {
+                    _self.makeBlueIdeaWithAll();
+                })
                 table.object.on("selected_" + table.uid, (e) => {
                     selectedDrawing = drawnItems._layers[e]._vidi_id;
                 })
@@ -141,6 +148,15 @@ module.exports = {
             console.warn(`Unable to locate #conflict-content`)
         }
 
+    },
+    showBlueIdea: () => {
+        const e = document.querySelector('#main-tabs a[href="#blueidea-content"]');
+        if (e) {
+            bootstrap.Tab.getInstance(e).show();
+            e.click();
+        } else {
+            console.warn(`Unable to locate #blueidea-content`)
+        }
     },
     makeConflictSearchWithSelected: () => {
         if (!selectedDrawing) {
@@ -164,6 +180,47 @@ module.exports = {
             _self.showConflictSearch();
             setTimeout(() =>
                 conflictSearch.makeSearch("Fra tegning", null, null, true), 200);
+        });
+    },
+
+    // BlueIdea integration
+    makeBlueIdeaWithSelected: () => {
+        if (!selectedDrawing) {
+        alert("Vælg en tegning");
+        return;
+        }
+
+        // get geojson from selected drawing
+        var geojson = {
+        type: "FeatureCollection",
+        features: [],
+        };
+        // for each layer in drawnItems, get geojson
+        drawnItems.eachLayer(function (layer) {
+            if (layer._vidi_id === selectedDrawing) {
+                geojson.features.push(layer.toGeoJSON(GEOJSON_PRECISION));
+            }
+        });
+
+        state.resetState(["blueidea"]).then(() => {
+        _self.showBlueIdea();
+        blueIdea.queryAddresses(geojson);
+        });
+    },
+    makeBlueIdeaWithAll: () => {
+        // get geojson from all drawings
+        var geojson = {
+        type: "FeatureCollection",
+        features: [],
+        };
+        // for each layer in drawnItems, get geojson
+        drawnItems.eachLayer(function (layer) {
+            geojson.features.push(layer.toGeoJSON(GEOJSON_PRECISION));
+        });
+
+        state.resetState(["blueidea"]).then(() => {
+        _self.showBlueIdea();
+        blueIdea.queryAddresses(geojson);
         });
     },
 
@@ -719,7 +776,10 @@ module.exports = {
 
     setConflictSearch: function (o) {
         conflictSearch = o;
-    }
+    },
+    setBlueIdea: function (o) {
+        blueIdea = o;
+    },
 };
 
 
