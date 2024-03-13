@@ -151,8 +151,8 @@ module.exports = {
                 var dict = {
 
                     "Info": {
-                        "da_DK": "infoDK",
-                        "en_US": "infoUS"
+                        "da_DK": "Fremsøg den relevante matrikel, og tilknyt enten den enkelte matrikel eller ejendommen til sagen.",
+                        "en_US": "Find the relevant matrikel, and attach either the individual matrikel or the property to the case."
                     },
 
                     "Plugin Tooltip": {
@@ -1002,8 +1002,8 @@ module.exports = {
 
                         container.append(`
                             <p>
-                            <b>Tilføj: </b><a class="addMatrikel" alt="Tilføj matrikel">matrikel</a> / <a class="addEjendom" alt="Tilføj ejendom">ejendom</a></br>
-                            <b>Fjern: </b><a class="deleteMatrikel" alt="Fjern matrikel">matrikel</a> / <a  class="deleteEjendom" alt="Fjern ejendom">ejendom</a></br>
+                            <b>Tilføj: </b><a href="javascript:void(0)"class="addMatrikel" alt="Tilføj matrikel">matrikel</a> / <a href="javascript:void(0)" class="addEjendom" alt="Tilføj ejendom">ejendom</a></br>
+                            <b>Fjern: </b><a href="javascript:void(0)" class="deleteMatrikel" alt="Fjern matrikel">matrikel</a> / <a href="javascript:void(0)" class="deleteEjendom" alt="Fjern ejendom">ejendom</a></br>
                             </p>
                         `)
 
@@ -1126,21 +1126,31 @@ module.exports = {
                             fontSize: '1rem'
                         }
 
-                        const flexStyle = {
-                            display: 'flex',
-                            alignItems: 'center',
-                        }
-
                         var saveButton = () => {
                             switch(s.saveState) {
-                                case 'saving':
-                                    return <Tooltip title={<span style={tooltipStyle}>Gemmer på sagen</span>}><CircularProgress color={"primary"}/></Tooltip>
-                                case 'done':
-                                    return <Tooltip title={<span style={tooltipStyle}>Alt OK</span>}><CheckIcon /></Tooltip>
-                                default:
-                                    return <Tooltip title={<span style={tooltipStyle}>Gem ændringer</span>}><IconButton color={"primary"} onClick={_self.saveChangesHandler.bind(this, s.matrList)}><SaveIcon /></IconButton></Tooltip>
+                              case 'saving':
+                                return (
+                                  <div title="Gemmer på sagen" style={tooltipStyle}>
+                                    <div className="progress">
+                                      <div className="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style={{ width: '100%' }}></div>
+                                    </div>
+                                  </div>
+                                );
+                              case 'done':
+                                return (
+                                  <span title="Alt OK" style={tooltipStyle}>
+                                    <i className="bi bi-check-circle" style={{ color: 'green' }}></i>
+                                  </span>
+                                );
+                              default:
+                                return (
+                                  <button className="btn btn-primary" title="Gem ændringer" style={tooltipStyle} onClick={() => _self.saveChangesHandler(s.matrList)}>
+                                    <i className="bi bi-save"></i>
+                                  </button>
+                                );
                             }
                         }
+                          
 
                         if (s.allow) {
                             return (
@@ -1149,8 +1159,8 @@ module.exports = {
                                         {s.error.length > 0 && <div style={error} >{s.error}</div>}
                                         <h4>Journalnummer: {s.case.number} {_self.hasChanges() && saveButton()}</h4>
                                         <p>{s.case.title}</p>
-                                        <div style={flexStyle}>
-                                            <div style={{alignSelf: 'center'}}>
+                                        <div>
+                                            <div>
                                             <DAWASearch 
                                                 _handleResult = {_self.findMatrikel}
                                                 nocache = {true}
@@ -1178,7 +1188,7 @@ module.exports = {
                     }
                 }
                                 
-                utils.createMainTab(exId, __("Plugin Tooltip"), __("Info"), require('./../../../browser/modules/height')().max, "label", false, exId)
+                utils.createMainTab(exId, __("Plugin Tooltip"), __("Info"), require('./../../../browser/modules/height')().max, "bi-tags", false, exId)
                     // Append to DOM
                     //==============
                     try {
