@@ -141,17 +141,26 @@
 /* Leaflet */
 /* Align leaflet-draw */
 @media (max-height: 700px) {
-    [data-bs-theme="geopartner"] .leaflet-draw .leaflet-control {
-        margin-right: 2px!important;
+    [data-bs-theme="geopartner"] .leaflet-draw.leaflet-control {
+        margin-right: 54px !important;
+        top: -384px;
         position: relative;
     }
 }
 
 /* Change tool colors */
-[data-bs-theme="geopartner"] .leaflet-control-locate a, .leaflet-control-zoom a, .leaflet-bar a, .leaflet-control a, .leaflet-draw-draw-polyline, .leaflet-draw-draw-polygon, .leaflet-draw-draw-rectangle, .leaflet-draw-draw-circle, .leaflet-draw-draw-marker, .leaflet-draw-draw-circlemarker, .leaflet-draw-edit-edit, .leaflet-draw-edit-remove {
+[data-bs-theme="geopartner"] .leaflet-control-locate a, .leaflet-control-zoom a, .leaflet-bar a, .leaflet-control a , .leaflet-draw-draw-circlemarker{
     color: var(--bs-primary-shade-30)
 }
 
+/* leaflet-draw */
+/* Color is hardcoded to --bs-primary-shade-30  - omit circlemarker, because it is an icon */
+[data-bs-theme="geopartner"] .leaflet-draw-draw-marker, .leaflet-draw-draw-circle, .leaflet-draw-draw-rectangle, .leaflet-draw-draw-polygon, .leaflet-draw-draw-polyline, .leaflet-draw-edit-edit, .leaflet-draw-edit-remove {
+    background-image: linear-gradient(transparent, transparent), url(../../images/leaflet-draw-spritesheet-gp-light.svg) !important;
+}
+
+
+/***************************************************************************/
 
 /* Dark mode */
 

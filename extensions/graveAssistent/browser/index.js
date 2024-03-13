@@ -1338,7 +1338,7 @@ module.exports = {
                                                     <label htmlFor="graveAssistent-feature-input" className="form-label">Vælg eksisterende forespørgsel</label>
                                                     <input className="form-control" placeholder="Søg efter forespørgsel..." list="graveAssistent-features" id="graveAssistent-feature-input" onChange={_self.handleForespSelectChange.bind(this)} />
                                                     <datalist id="graveAssistent-features">
-                                                        {s.forespOptions.map(f => <option value={`${f.forespnummer}: ${f.bemaerkning} (Uploaded: ${this.humanTime(f.svar_uploadtime)})`} />)}
+                                                        {s.forespOptions.map(f => <option key={f.forespnummer} value={`${f.forespnummer}: ${f.bemaerkning} (Uploaded: ${this.humanTime(f.svar_uploadtime)})`} />)}
                                                     </datalist>
                                                     <div className='d-grid mt-4'>
                                                         <p className="text-center">Eller</p>
