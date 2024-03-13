@@ -964,7 +964,7 @@ module.exports = {
        * Simulates a click on the login button
        */
       clickLogin() {
-        document.getElementById("session").click();
+        document.querySelector('[data-bs-target="#login-modal"]').click();
       }
 
       /**
@@ -1363,73 +1363,48 @@ module.exports = {
           // Logged in
           return (
             <div role="tabpanel">
-              <div className="form-group">
+              <div className="form-group p-3">
                 <div style={{ alignSelf: "center" }}>
                   <h4>{__("Select area")}</h4>
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      width: "100%",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Button
+                  <div className="d-grid mx-auto gap-3">
+                    <button
                       onClick={() => this.clickDraw()}
-                      size="large"
-                      variant="contained"
-                      style={{ margin: "10px" }}
+                      className="btn btn-light"
                       disabled={!this.allowBlueIdea()}
                     >
                       {__("Draw area")}
-                    </Button>
-                    <Button
+                    </button>
+                    <button
                       onClick={() => this.selectPointLukkeliste()}
-                      color="primary"
-                      size="large"
-                      variant="contained"
-                      style={{ margin: "10px" }}
+                      className="btn btn-primary"
                       disabled={!this.allowLukkeliste()}
                     >
                       {__("Select point on map")}
-                    </Button>
+                    </button>
                   </div>
                 </div>
 
                 <div style={{ alignSelf: "center" }}>
                   <h4>{__("Show results")}</h4>
-                  Der blev fundet {Object.keys(s.results_adresser).length}{" "}
-                  adresser i området.
+                  Der blev fundet {Object.keys(s.results_adresser).length} adresser i området.
                 </div>
 
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    width: "100%",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Button
+                <div className="d-grid mx-auto gap-3">
+                  <button
                     onClick={() => this.downloadAdresser()}
-                    size="large"
-                    variant="contained"
-                    style={{ margin: "10px" }}
+                    className="btn btn-light"
                     disabled={!this.readyToSend()}
                   >
                     {__("Download addresses")}
-                  </Button>
+                  </button>
 
-                  <Button
+                  <button
                     onClick={() => this.sendToBlueIdea()}
-                    color="primary"
-                    size="large"
-                    variant="contained"
-                    style={{ margin: "10px" }}
+                    className="btn btn-light"
                     disabled={!this.readyToBlueIdea()}
                   >
                     {__("Go to blueidea")}
-                  </Button>
+                  </button>
                 </div>
 
                 <div
@@ -1437,56 +1412,34 @@ module.exports = {
                   hidden={!s.user_lukkeliste}
                 >
                   <h4>{__("Valve list")}</h4>
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      width: "100%",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Button
+                  <div className="d-grid mx-auto gap-3">
+                    <button
                       onClick={() => this.downloadVentiler()}
-                      size="large"
-                      variant="contained"
-                      style={{ margin: "10px" }}
+                      className="btn btn-light"
                       disabled={!this.allowVentilDownload()}
                     >
                       {__("Download valves")}
-                    </Button>
+                    </button>
                   </div>
                 </div>
               </div>
             </div>
+
           );
         }
 
         // Not Logged in - or not configured
         return (
-          <div role="tabpanel">
-            <div className="form-group">
-              <div
-                id="blueidea-feature-login"
-                className="alert alert-info"
-                role="alert"
-              >
-                {__("MissingLogin")}
-              </div>
-              <Button
-                onClick={() => this.clickLogin()}
-                color="primary"
-                size="large"
-                variant="contained"
-                style={{
-                  marginRight: "auto",
-                  marginLeft: "auto",
-                  display: "block",
-                }}
-              >
-                {__("Login")}
-              </Button>
+          <div role = "tabpanel" >
+            <div className = "form-group" >
+                <div id = "blueidea-feature-login" className = "alert alert-info" role = "alert" >
+                    {__("MissingLogin")}
+                </div>
+                <div className="d-grid mx-auto">
+                    <button onClick = {() => this.clickLogin()} type="button" className="btn btn-primary">{__("Login")}</button>
+                </div>
             </div>
-          </div>
+        </div>
         );
       }
     }

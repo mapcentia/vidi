@@ -15,10 +15,6 @@ import JSZip from 'jszip';
 import LedningsEjerStatusTable from "./LedningsEjerStatusTable";
 import LedningsProgress from "./LedningsProgress";
 import LedningsDownload from "./LedningsDownload";
-import Select from '@material-ui/core/Select';
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import FormControl from '@material-ui/core/FormControl';
 
 // Get information from config.json
 
