@@ -200,12 +200,23 @@ module.exports = function (grunt) {
             }
         },
         watch: {
-            bundle: {
-                files:'public/js/bundle.js',
+            reload: {
+                files: ['public/js/bundle.js', 'public/js/templates.js', 'public/css/build/all.min.css'],
                 options: {
                     livereload: true,
                 },
             },
+            hogan: {
+                files: [
+                    'public/templates/**/*.tmpl',
+                    'extensions/**/templates/*.tmpl'
+                ],
+                tasks: 'hogan'
+            },
+            css: {
+                files: ['scss/styles.scss'],
+                tasks: 'css'
+            }
         },
         uglify: {
             publish: {
