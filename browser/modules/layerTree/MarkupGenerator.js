@@ -85,7 +85,7 @@ class MarkupGenerator {
         </li>`);
     }
 
-    getLayerControlRecord(layerKeyWithGeom, layerKey, layerIsActive, layer, layerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo, isSubLayer, moduleState, disableCheckBox, parentLayerKeys, childLayerKeys) {
+    getLayerControlRecord(layerKeyWithGeom, layerKey, layerIsActive, layer, layerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo, isSubLayer, moduleState, disableCheckBox, parentLayerKeys, childLayerKeys, hasFilter) {
         let queueFailedButtonStyle = regularButtonStyle + ` color: orange;`;
         let queueRejectedByServerButtonStyle = regularButtonStyle + ` color: red;`;
         let tooltip = layer.f_table_abstract || ``;
@@ -115,6 +115,8 @@ class MarkupGenerator {
                                                                        ${lockedLayer}
                                                                        <span class="js-tiles-contain-data" style="display: ${moduleState.tileContentCache[layerKey] ? "inline" : "none"};" data-toggle="tooltip" data-bs-placement="right"
                                                                        title="${__("Layer is visible")}"><i class="bi bi-eye info-icon text-success"></i></span>
+                                                                       <span class="js-tiles-has-filter" style="visibility: ${hasFilter ? "inline" : "hidden"};" data-toggle="tooltip" data-placement="right"
+                                                                        title="${__("Layer has filter")}"><i class="bi bi-filter text-success"></i></span>
                                                                        <span class="js-layer-is-disabled" style="display: ${disableCheckBox ? "inline" : "none"};" data-toggle="tooltip" data-bs-placement="right"
                                                                        title="${__("Locked")}"><i class="bi bi-lock text-danger"></i></span>
                                                                        <span class="js-layer-has-parents info-icon" style="display: ${parentLayerKeys.length > 0 ? "inline" : "none"};" data-toggle="tooltip" data-bs-placement="right"

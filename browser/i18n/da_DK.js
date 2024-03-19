@@ -238,6 +238,7 @@ module.exports = {
         "Reset filter": "Nulstil",
         "Filter editor": "Filter editor",
         "Layer is visible": "Laget er synligt",
+        "Layer has filter": "Laget har et tændt filter",
         "Parents": "Forældre",
         "Children": "Børn",
         "Back": "Tilbage",
