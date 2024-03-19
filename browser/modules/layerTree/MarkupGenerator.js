@@ -29,12 +29,12 @@ class MarkupGenerator {
     getGroupPanel(base64GroupName, name, addGroupCheckbox = false) {
         return (`<div class="card panel-layertree" id="layer-panel-${base64GroupName}" xmlns="http://www.w3.org/1999/html">
                 <div class="card-body p-0">
-                    <div class="d-flex align-items-center p-3">
+                    <div class="d-flex align-items-center p-3 js-toggle-layer-panel" data-parent="#layers" data-bs-toggle="collapse" href="#collapse${base64GroupName}" style="cursor: pointer;">
                         <span style="display: ${addGroupCheckbox ? "flex" : "none"}" class="form-check align-items-center" id="group-check-box-${base64GroupName}">
                             <input class="form-check-input" type="checkbox" data-gc2-group-name="${name}">
                         </span>
                         <div class="position-relative flex-fill layer-group-checkbox-wrapper">
-                            <a class="text-uppercase text-body-secondary stretched-link accordion-toggle js-toggle-layer-panel collapsed" data-bs-toggle="collapse" data-parent="#layers" href="#collapse${base64GroupName}">${name}</a>
+                            <a class="text-uppercase text-body-secondary stretched-link accordion-toggle collapsed">${name}</a>
                         </div>
                         <div class="layer-count badge bg-secondary">
                             <span>0</span> / <span></span>
