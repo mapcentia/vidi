@@ -789,8 +789,13 @@
               >
                 <i class="bi bi-download" aria-hidden="true"></i> GeoJson
               </button>
-
-              <div id="_draw_conflict_group" class="btn-group" role="group" style="display: none;">
+              <button id="_draw_upload_shape_btn" class="btn btn-sm btn-light" for="_draw_upload_shape_file" title="Upload shape zip file" target="_blank" href="javascript:void(0)">
+                <i class="bi bi-upload" aria-hidden="true"></i> Shape
+                <input id="_draw_upload_shape_file"  style="display:none;" type="file"  accept-language  accept="zip,application/octet-stream,application/zip,application/x-zip,application/x-zip-compressed" >                                
+              </button>
+            </div>
+            <div class="d-flex mb-3 col-7 mx-auto">
+              <div id="_draw_conflict_group" class="" role="group" style="display: none;">
                 <button type="button" class="btn btn-sm btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                   Konflikt
                 </button>
@@ -799,8 +804,7 @@
                   <li><a class="dropdown-item" href="javascript:void(0)" id="_draw_make_conflict_with_all">{{Conflict with all}}</a></li>
                 </ul>
               </div>
-
-              <div id="_draw_blueidea_group" class="btn-group" role="group" style="display: none;">
+              <div id="_draw_blueidea_group" class="" role="group" style="display: none;">
                 <button type="button" class="btn btn-sm btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                   BlueIdea
                 </button>

@@ -487,7 +487,16 @@ module.exports = {
         "Wrong user name or password": "Forkert brugernavn eller kodeord",
         "Signed in as": "Logget ind som",
         "Not signed in": "Ikke logget ind",
-        "Sign out": "Log ud"
+        "Sign out": "Log ud",
+
+        // Shape upload
+        "Error on upload": "Fejl ved upload",
+        "Error in input files": "Fejl ved indlæsning af filer",
+        "Error while parsing file": "Fejl ved læsning af indhold i zip-fil",
+        "File contains": "Filen indeholder",
+        "objects": "elementer",
+        "No features found in file": "Ingen elementer fundet i filen",
+        "File parsed successfully": "Filen blev læst korrekt",
 
     }
 };

@@ -8,6 +8,7 @@
 
 const MODULE_NAME = `draw`;
 import {GEOJSON_PRECISION} from './constants';
+import shp from "shpjs";
 
 const drawTools = require(`./drawTools`);
 const fileSaver = require(`file-saver`);
@@ -46,6 +47,27 @@ module.exports = {
 
         $("#_draw_download_geojson").click(function () {
             _self.download();
+        });
+        // Upload shape file
+        $("#_draw_upload_shape_file").on('change', async function (e) {
+            try {
+                $("#_draw_upload_shape_error").text('');
+                if (e.target.files && e.target.files.length > 0) {
+                let file = e.target.files[0];
+                if (!file.name.toLowerCase().endsWith(".zip")) {
+                    $("#_draw_upload_shape_error").text('Must be a .zip file');
+                    return;
+                }
+                $("#_draw_upload_shape_error").text(file.name);
+                _self.handleZipFile(file);
+                }
+            } catch (e) {
+                $("#_draw_upload_shape_error").text('Error on upload. Not a zip file');
+            }
+        });
+    
+        $("#_draw_upload_shape_btn").on('click', function (e) {
+        document.getElementById('_draw_upload_shape_file').click();
         });
 
         backboneEvents.get().on(`reset:all`, () => {
@@ -132,6 +154,7 @@ module.exports = {
                 })
                 table.object.on("selected_" + table.uid, (e) => {
                     selectedDrawing = drawnItems._layers[e]._vidi_id;
+                    console.log(selectedDrawing);
                 })
             } else {
                 setTimeout(poll, 30);
@@ -180,6 +203,108 @@ module.exports = {
             _self.showConflictSearch();
             setTimeout(() =>
                 conflictSearch.makeSearch("Fra tegning", null, null, true), 200);
+        });
+    },
+
+    // Upload shape functions
+    handleZipFile: (file) => {
+        try {
+            const reader = new FileReader();
+            reader.onload = function () {
+                if (reader.readyState != 2 || reader.error) {
+                    return;
+                } else {
+                    _self.convertToLayer(reader.result);
+                }
+            }
+            reader.readAsArrayBuffer(file);
+        } catch (err) {
+            console.log('Shape upload error: ', err);
+            utils.showInfoToast(__('Error on upload'))
+        }
+    },
+    handleFileInput: (files) => {
+        try {
+            const reader = new FileReader();
+            for (const element of files) {
+                const file = element
+                reader.onload = function (e) {
+                    const buffer = e.target.result;
+                    // Behandle bufferen her, f.eks. gemme eller vise den
+                    console.log(buffer);
+                };
+
+                reader.readAsArrayBuffer(file);
+            }
+        } catch (err) {
+            console.log(err);
+            utils.showInfoToast(__('Error in input files'))
+        }
+    },
+    countObjects: (geojson) => {
+        try {
+            return geojson.features.length;
+        } catch (err) {
+            console.log(err);
+            return 0;
+        }
+    },
+    setGeometryProperties: (geoJson) => {
+
+        for (const feature of geoJson.features) {
+
+            if (feature.geometry.type === 'LineString') {
+                feature.properties.type = 'polyline';
+                feature.properties.distance = drawTools.getFeatureDistance(feature);
+            }
+
+            else if (feature.geometry.type === 'Polygon') {
+                feature.properties.type = 'polygon';
+                feature.properties.area = drawTools.getFeatureArea(feature)
+            }
+            else
+                feature.properties.type = 'marker';
+        }
+    },
+
+    convertToLayer: (buffer) => {
+        shp(buffer)
+        .then(function (geojson) {
+            // If the file is not an array, make it an array
+            if (!Array.isArray(geojson)) {
+                geojson = [geojson];
+            }
+
+            // Handle as array
+            for (const element of geojson) {
+                // Count elements
+                var count = _self.countObjects(element);
+                
+                // If no features, continue 
+                if (count == 0) {
+                    throw new Error(__("No features found in file"));
+                }
+
+                // If too many features, continue
+                const maxCount = 200;
+                if (count > maxCount) {
+                    const errTxt = __("File contains") + " " + count + " " +__("objects") + ". Max: " + maxCount;
+                    throw new Error(errTxt)
+                }
+
+                // If we got so far, we can add the layer
+                _self.setGeometryProperties(element);
+
+                _self.recreateDrawnings([{ 'geojson': element, 'type': 'Vector' }], true);
+            }
+
+            // Done
+            backboneEvents.get().trigger(`${MODULE_NAME}:update`);
+            utils.showInfoToast(__("File parsed successfully"))
+        })
+        .catch(function (err) {
+            console.log(err);
+            utils.showInfoToast(__('Error while parsing file'))
         });
     },
 
@@ -528,6 +653,11 @@ module.exports = {
 
         if (parr.length === 1) {
             $.each(v[0].geojson.features, function (n, m) {
+
+                // if vidi specific properties are not set, set them
+                if (!m._vidi_type) {m._vidi_type = "draw";}
+                if (!m._vidi_id) {m._vidi_id = createId();}
+
                 // If polyline or polygon
                 // ======================
                 if (m.type === "Feature" && GeoJsonAdded === false) {
