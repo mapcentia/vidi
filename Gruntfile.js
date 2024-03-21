@@ -194,8 +194,28 @@ module.exports = function (grunt) {
                     browserifyOptions,
                     transform,
                     watch: true,
-                    keepAlive: true
+                    keepAlive: true,
+
                 }
+            }
+        },
+        watch: {
+            reload: {
+                files: ['public/js/bundle.js', 'public/js/templates.js', 'public/css/build/all.min.css'],
+                options: {
+                    livereload: true,
+                },
+            },
+            hogan: {
+                files: [
+                    'public/templates/**/*.tmpl',
+                    'extensions/**/templates/*.tmpl'
+                ],
+                tasks: 'hogan'
+            },
+            css: {
+                files: ['scss/styles.scss'],
+                tasks: 'css'
             }
         },
         uglify: {
