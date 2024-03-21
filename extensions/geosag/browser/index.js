@@ -6,15 +6,9 @@
 
 'use strict';
 
-/* Import big-brains*/
 import { isNull, isSet } from 'lodash';
 import MatrikelTable from './MatrikelTable';
 import DAWASearch from './DAWASearch';
-import SaveIcon from '@material-ui/icons/Save';
-import IconButton from '@material-ui/core/IconButton';
-import CheckIcon from '@material-ui/icons/Check';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import Tooltip from '@material-ui/core/Tooltip';
 
 /**
  *

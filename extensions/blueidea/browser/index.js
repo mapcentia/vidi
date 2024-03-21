@@ -6,17 +6,6 @@
 
 "use strict";
 
-/* Import big-brains*/
-import { v4 as uuidv4 } from "uuid";
-
-import Button from "@material-ui/core/Button";
-import ArrowBackIcon from "@material-ui/icons/ArrowBack";
-import Select from "@material-ui/core/Select";
-import InputLabel from "@material-ui/core/InputLabel";
-import MenuItem from "@material-ui/core/MenuItem";
-import FormHelperText from "@material-ui/core/FormHelperText";
-import FormControl from "@material-ui/core/FormControl";
-
 import {
   buffer as turfBuffer,
   flatten as turfFlatten,
