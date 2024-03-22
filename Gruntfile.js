@@ -268,7 +268,7 @@ module.exports = function (grunt) {
                         'public/js/lib/leaflet-dash-flow/L.Path.DashFlow.js',
 
                         'public/js/lib/typeahead.js/typeahead.jquery.js',
-                        'node_modules/bootstrap/dist/js/bootstrap.bundle.js',
+                        //'node_modules/bootstrap/dist/js/bootstrap.bundle.js',
 
                         'node_modules/leaflet.glify/dist/glify-browser.js',
                         'node_modules/bootstrap-table/dist/bootstrap-table.js',
