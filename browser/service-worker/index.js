@@ -1045,7 +1045,10 @@ self.addEventListener('fetch', (event) => {
                             if (LOG_FETCH_EVENTS) console.log(`Service worker: caching ${requestToMake.url}`);
 
                             return caches.open(CACHE_NAME).then((cache) => {
-                                return fetch(requestToMake).then(response => {
+                                return fetch(requestToMake, {redirect: 'follow'}).then(response => {
+                                    if (response.redirected === true) {
+                                        return fetch(requestToMake, {redirect: 'follow'});
+                                    }
                                     return cache.put(requestToMake.url, response.clone()).then(() => {
                                         return response;
                                     });
