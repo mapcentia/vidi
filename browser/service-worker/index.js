@@ -1041,9 +1041,6 @@ self.addEventListener('fetch', (event) => {
 
                             return caches.open(CACHE_NAME).then((cache) => {
                                 return fetch(requestToMake, {redirect: 'follow'}).then(response => {
-                                    if (response.redirected === true) {
-                                        return fetch(requestToMake, {redirect: 'follow'});
-                                    }
                                     return cache.put(requestToMake.url, response.clone()).then(() => {
                                         return response;
                                     });
