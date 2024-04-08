@@ -471,7 +471,6 @@ geocloud = (function () {
                 '&key=' + this.defaults.key + '&format=ndjson';
 
             let i = 1;
-            let first = true;
 
             if (me.defaults.type === 'POINT') {
                 layer = L.glify.points({
@@ -563,12 +562,13 @@ geocloud = (function () {
                 reader.read().then(read = (result) => {
                     if (result.done) {
                         if (me.onLoad) me.onLoad();
-                        me.onLoad(me);
+                       // me.onLoad(me);
                         if (onLoadCallback) onLoadCallback();
                         layer.update(geoJSON)
                         return;
                     }
                     if (Number.isInteger(i / 10000)) {
+                        layer.update(geoJSON)
                         console.log(i)
                     }
                     i++
@@ -583,132 +583,6 @@ geocloud = (function () {
         }
     };
 
-    cartoDbStore = function (config) {
-        var prop, me = this, map, sql, xhr;
-        this.defaults = $.extend({}, STOREDEFAULTS);
-        if (config) {
-            for (prop in config) {
-                this.defaults[prop] = config[prop];
-            }
-        }
-        this.init();
-        this.name = this.defaults.name;
-        this.id = this.defaults.id;
-        this.sql = this.defaults.sql;
-        this.db = this.defaults.db;
-        this.onLoad = this.defaults.onLoad;
-        this.dataType = this.defaults.dataType;
-        this.async = this.defaults.async;
-        this.jsonp = this.defaults.jsonp;
-        this.method = this.defaults.method;
-        this.load = function (doNotShowAlertOnError) {
-            try {
-                map = me.map;
-                sql = this.sql;
-                sql = sql.replace("{centerX}", map.getCenter().lat.toString());
-                sql = sql.replace("{centerY}", map.getCenter().lon.toString());
-                sql = sql.replace("{minX}", map.getExtent().left);
-                sql = sql.replace("{maxX}", map.getExtent().right);
-                sql = sql.replace("{minY}", map.getExtent().bottom);
-                sql = sql.replace("{maxY}", map.getExtent().top);
-                sql = sql.replace("{bbox}", map.getExtent().toString());
-            } catch (e) {
-            }
-            xhr = $.ajax({
-                dataType: (this.defaults.jsonp) ? 'jsonp' : 'json',
-                async: this.defaults.async,
-                data: 'format=geojson&q=' + encodeURIComponent(sql) + '&srs=' + this.defaults.projection + '&lifetime=' + this.defaults.lifetime + "&srs=" + this.defaults.projection + '&client_encoding=' + this.defaults.clientEncoding,
-                jsonp: (this.defaults.jsonp) ? 'callback' : false,
-                url: '//' + this.db + '.cartodb.com' + '/api/v2/sql',
-                type: this.defaults.method,
-                success: function (response) {
-                    if (response.features !== null) {
-                        me.geoJSON = response;
-                        switch (MAPLIB) {
-                            case "ol2":
-                                me.layer.addFeatures(new OpenLayers.Format.GeoJSON().read(response));
-                                break;
-                            case "ol3":
-                                me.layer.getSource().addFeatures(new ol.source.GeoJSON(
-                                    {
-                                        object: response.features[0]
-                                    }
-                                ));
-
-                                break;
-                            case "leaflet":
-                                me.layer.addData(response);
-                                break;
-                        }
-                    } else {
-                        me.geoJSON = null;
-                    }
-                },
-                error: this.defaults.error,
-                complete: function () {
-                    me.onLoad();
-                }
-
-            });
-            return this.layer;
-        };
-        this.abort = function () {
-            xhr.abort();
-        }
-    };
-
-    tweetStore = function (config) {
-        var prop, me = this;
-        this.defaults = $.extend({}, STOREDEFAULTS);
-        if (config) {
-            for (prop in config) {
-                this.defaults[prop] = config[prop];
-            }
-        }
-        this.init();
-        this.load = function (doNotShowAlertOnError) {
-            var q = this.defaults.q;
-            try {
-                var map = me.map;
-                //q = q.replace("{centerX}", map.getCenter().lat.toString());
-                // = q.replace("{centerY}", map.getCenter().lon.toString());
-                q = q.replace(/\{minX\}/g, map.getExtent().left);
-                q = q.replace(/\{maxX\}/g, map.getExtent().right);
-                q = q.replace(/\{minY\}/g, map.getExtent().bottom);
-                q = q.replace(/\{maxY\}/g, map.getExtent().top);
-                q = q.replace(/\{bbox\}/g, map.getExtent().toString());
-            } catch (e) {
-            }
-            $.ajax({
-                dataType: 'jsonp',
-                data: 'search=' + encodeURIComponent(q),
-                jsonp: 'jsonp_callback',
-                url: this.defaults.host + '/api/v1/twitter/' + this.db,
-                success: function (response) {
-                    if (response.success === false && doNotShowAlertOnError === undefined) {
-                        alert(response.message);
-                    }
-                    if (response.success === true) {
-                        if (response.features !== null) {
-                            me.geoJSON = response;
-                            switch (MAPLIB) {
-                                case "ol2":
-                                    me.layer.addFeatures(new OpenLayers.Format.GeoJSON().read(response));
-                                    break;
-                                case "leaflet":
-                                    me.layer.addData(response);
-                                    break;
-                            }
-                        }
-                    }
-                },
-                complete: function () {
-                    me.onLoad();
-                }
-            });
-            return this.layer;
-        };
-    };
     elasticStore = function (config) {
         var prop, me = this;
         this.defaults = $.extend({}, STOREDEFAULTS);
@@ -785,9 +659,7 @@ geocloud = (function () {
     // Extend store classes
     extend(sqlStore, storeClass);
     extend(webGLStore, storeClass);
-    extend(tweetStore, storeClass);
     extend(elasticStore, storeClass);
-    extend(cartoDbStore, storeClass);
 
     //ol2, ol3 and leaflet
     tileLayer = function (config) {
