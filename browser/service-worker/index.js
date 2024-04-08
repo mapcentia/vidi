@@ -731,7 +731,7 @@ self.addEventListener('fetch', (event) => {
         if (LOG_FETCH_EVENTS) console.log('Service worker: API call detected', cleanedRequestURL);
 
         if (cleanedRequestURL.indexOf('/api/feature') !== -1) {
-            return fetch(event.request, {redirect: 'follow'});
+            return fetch(event.request);
         } else {
             let result = new Promise((resolve, reject) => {
                 return caches.open(CACHE_NAME).then((cache) => {
@@ -882,7 +882,7 @@ self.addEventListener('fetch', (event) => {
                                     if (result && result.response) {
                                         resolve(result.response);
                                     } else {
-                                        return fetch(event.request, {redirect: 'follow'}).then(apiResponse => {
+                                        return fetch(event.request).then(apiResponse => {
 
                                             if (LOG_FETCH_EVENTS) console.log('Service worker: API request was performed');
                                             if (LOG_OFFLINE_MODE_EVENTS) console.log(`Layer vector was requested, storing response in cache and updating the cache settings`);
@@ -926,7 +926,7 @@ self.addEventListener('fetch', (event) => {
                                 });
                             } else {
                                 // Regular API request
-                                return fetch(event.request, {redirect: 'follow'}).then(apiResponse => {
+                                return fetch(event.request).then(apiResponse => {
                                     resolve(apiResponse);
                                 });
                             }
@@ -936,7 +936,7 @@ self.addEventListener('fetch', (event) => {
                         });
                     } else {
                         // Regular API request, always trying to perform it
-                        return fetch(event.request, {redirect: 'follow'}).then(apiResponse => {
+                        return fetch(event.request).then(apiResponse => {
 
                             if (LOG_FETCH_EVENTS) console.log('Service worker: API request was performed despite the existence of cached request');
 
@@ -1025,7 +1025,7 @@ self.addEventListener('fetch', (event) => {
                         let requestToMake = new Request(cleanedRequestURL);
                         if (cleanedRequestURL.indexOf('/connection-check.ico') !== -1) {
                             var result = new Promise((resolve, reject) => {
-                                fetch(requestToMake, {redirect: 'follow'}).then(() => {
+                                fetch(requestToMake).then(() => {
                                     let dummyResponse = new Response(null, {statusText: 'ONLINE'});
                                     resolve(dummyResponse);
                                 }).catch(() => {
@@ -1040,7 +1040,7 @@ self.addEventListener('fetch', (event) => {
                             if (LOG_FETCH_EVENTS) console.log(`Service worker: caching ${requestToMake.url}`);
 
                             return caches.open(CACHE_NAME).then((cache) => {
-                                return fetch(requestToMake, {redirect: 'follow'}).then(response => {
+                                return fetch(requestToMake).then(response => {
                                     return cache.put(requestToMake.url, response.clone()).then(() => {
                                         return response;
                                     });
@@ -1049,7 +1049,7 @@ self.addEventListener('fetch', (event) => {
                                 });
                             });
                         } else {
-                            return fetch(requestToMake, {redirect: 'follow'});
+                            return fetch(requestToMake);
                         }
                     }
                 }
