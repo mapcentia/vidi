@@ -112,6 +112,7 @@ module.exports = {
         state.listen(MODULE_ID, `state_change`);
         backboneEvents.get().on("end:print", function (response) {
             console.log("Response", response)
+            let pathstring = '';
             $("#open-pdf, #open-pdf-toggle").show();
             if (response.format === "pdf") {
                 $("#download-pdf, #open-pdf").attr("href", "/tmp/print/pdf/" + response.key + ".pdf");
@@ -133,6 +134,7 @@ module.exports = {
             $("#send-pdf").attr("href", mailHref);
 
             $("#start-print-btn").button('reset');
+            $("#start-print-btn").find("span").hide();
             $(".dropdown-toggle.start-print-btn").prop("disabled", false);
             // GeoEnviron
             console.log("GEMessage:LaunchURL:" + urlparser.urlObj.protocol + "://" + urlparser.urlObj.host + "/tmp/print/pdf/" + response.key + ".pdf");
@@ -308,7 +310,7 @@ module.exports = {
         return new Promise((resolve, reject) => {
             state.bookmarkState(customData, png).then(response => {
                 backboneEvents.get().trigger(endEventName, response);
-                callBack(response.responseJSON);
+                callBack(JSON.stringify(response));
                 resolve(response);
             }).catch(response => {
                 backboneEvents.get().trigger(endEventName, response);
