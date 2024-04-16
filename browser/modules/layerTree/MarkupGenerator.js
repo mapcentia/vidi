@@ -73,7 +73,7 @@ class MarkupGenerator {
             <div class="d-flex align-items-center gap-1">
                 <span style="display: ${addGroupCheckbox ? "inline" : "none"};" class="togglebutton">
                     <label>
-                        <input type="checkbox" data-gc2-subgroup-name="${name}" data-gc2-subgroup-level="${level}">
+                        <input type="checkbox" class="form-check-input" data-gc2-subgroup-name="${name}" data-gc2-subgroup-level="${level}">
                     </label>
                 </span>
                 <button type="button" class="btn btn-light btn-sm js-subgroup-toggle-button">
