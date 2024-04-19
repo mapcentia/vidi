@@ -209,6 +209,7 @@ class VectorLayerFilter extends React.Component {
                                                                                     arbitraryFilters={this.state.arbitraryFilters}
                                                                                     setFilters={this.setFilters}
                                                                                     isFilterImmutable={this.props.isFilterImmutable}
+                                                                                    db={this.props.db}
                     />}</div>
                     <div className="d-flex gap-1">
                         <button className="btn btn-outline-success btn-sm" type="button"

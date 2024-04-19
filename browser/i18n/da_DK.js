@@ -336,6 +336,9 @@ module.exports = {
         "New title": "Ny titel",
         "StateSnapshots description": "Gem, genskab og del projekter. Et projekt indeholder kortets udstrækning, hvilket baggrundskort er tændt og hvilke lag er vist, hvilke filtre er aktive samt dine tegninger. Du kan dele et projekt ved at dele den viste URL. Hvis du ikke er logget ind, vil projekter blive knyttet den den browser du bruger. Ellers vil de blive gemt under dit bruger login. Det er muligt at overføre projekter fra browser til login",
         "Copied": "Kopieret",
+        "There is no tags in the list": "Der er ingen tags i listen",
+        "Create tag": "Opret tag",
+        "The filter returned no results": "Filteret gav ingen resultater",
 
         //Measurements
         "Measure distance": "Mål afstand",

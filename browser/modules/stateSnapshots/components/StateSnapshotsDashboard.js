@@ -208,6 +208,7 @@ class StateSnapshotsDashboard extends React.Component {
      * @param data
      * @param title
      * @param tags
+     * @param refresh
      */
     updateSnapshot(data, title, tags, refresh = true) {
         let _self = this;
@@ -215,7 +216,7 @@ class StateSnapshotsDashboard extends React.Component {
         this.props.state.getState().then(state => {
             state.map = this.props.anchor.getCurrentMapParameters();
             data.title = title;
-            data.tags = tags;
+            data.tags = tags.filter((value, index, array) => array.indexOf(value) === index);
             data.snapshot = state;
             data.snapshot.meta = _self.getSnapshotMeta();
             $.ajax({
@@ -384,7 +385,7 @@ class StateSnapshotsDashboard extends React.Component {
                             }}>{options}</select>)
         };
 
-        const createSnapshotRecord = (item, local = false) => {
+        const createSnapshotRecord = (item, allTags, local = false) => {
             let date = new Date(item.updated_at || item.created_at); // updated_at is a newer property, which may not be present in older snapshots
             let dateFormatted = (`${date.getHours()}:${date.getMinutes()} ${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`);
 
@@ -528,7 +529,7 @@ class StateSnapshotsDashboard extends React.Component {
                                 {selectSize}
                             </div>
                         </div>)}
-                    <TagComponent onAdd={tags => this.updateSnapshot(item, item.title, tags, false)} tags={item.tags}/>
+                    <TagComponent onAdd={tags => this.updateSnapshot(item, item.title, tags, false)} tags={item.tags} allTags={allTags}/>
                 </div>
             </div>);
         };
@@ -544,11 +545,14 @@ class StateSnapshotsDashboard extends React.Component {
         const createTagBadge = (tag) => {
             this.tmp.push(tag)
             return (
-                <div key={tag} className="badge bg-secondary me-1 mb-1">{tag}<input name={tag}
-                                                                                    className="form-check-input"
+                <div key={tag}><input id={tag} name={tag}
+                                                                                    className="btn-check"
                                                                                     type="checkbox"
                                                                                     onChange={event => handleTagCheck(event)}
-                                                                                    checked={!this.state.unCheckedTags.includes(tag)}/>
+                                                                                      checked={!this.state.unCheckedTags.includes(tag)}/>
+                    <label className="btn btn-sm" htmlFor={tag}>
+                        {tag}
+                    </label>
                 </div>)
         }
 
@@ -559,13 +563,25 @@ class StateSnapshotsDashboard extends React.Component {
             </div>);
         }
 
+        // Get all tags
+        let allTags = [];
+        this.state.browserOwnerSnapshots.forEach(item =>{
+            if (item?.tags) {
+                allTags = [...allTags, ...item.tags.filter(tag => !allTags.includes(tag))];
+            }
+        })
+        this.state.userOwnerSnapshots.forEach(item =>{
+            if (item?.tags) {
+                allTags = [...allTags, ...item.tags.filter(tag => !allTags.includes(tag))];
+            }
+        })
+
         let tags = [];
         if (this.state.browserOwnerSnapshots && this.state.browserOwnerSnapshots.length > 0) {
             browserOwnerSnapshots = [];
-            this.state.browserOwnerSnapshots.map((item, index) => {
-                tags = [...tags, ...item.tags.filter(tag => !tags.includes(tag))];
-                if (this.state.unCheckedTags.filter(value => item.tags.includes(value)).length === 0 && (!item?.title || this.state.filter === `` || item.title.toLowerCase().indexOf(this.state.filter.toLowerCase()) > -1)) {
-                    browserOwnerSnapshots.push(createSnapshotRecord(item, true));
+            this.state.browserOwnerSnapshots.forEach((item, index) => {
+                if (!item?.tags || (item.tags.filter(value => !this.state.unCheckedTags.includes(value)).length || item.tags.length === 0) > 0 && (!item?.title || this.state.filter === `` || item.title.toLowerCase().indexOf(this.state.filter.toLowerCase()) > -1)) {
+                    browserOwnerSnapshots.push(createSnapshotRecord(item, allTags, true));
                 }
             });
         }
@@ -576,10 +592,9 @@ class StateSnapshotsDashboard extends React.Component {
 
         if (this.state.userOwnerSnapshots && this.state.userOwnerSnapshots.length > 0) {
             userOwnerSnapshots = [];
-            this.state.userOwnerSnapshots.map((item, index) => {
-                tags = [...tags, ...item.tags.filter(tag => !tags.includes(tag))];
-                if (this.state.unCheckedTags.filter(value => item.tags.includes(value)).length === 0 && (!item?.title || this.state.filter === `` || item.title.toLowerCase().indexOf(this.state.filter.toLowerCase()) > -1)) {
-                    userOwnerSnapshots.push(createSnapshotRecord(item));
+            this.state.userOwnerSnapshots.forEach((item, index) => {
+                if (!item?.tags || (item.tags.filter(value => !this.state.unCheckedTags.includes(value)).length || item.tags.length === 0) > 0 && (!item?.title || this.state.filter === `` || item.title.toLowerCase().indexOf(this.state.filter.toLowerCase()) > -1)) {
+                    userOwnerSnapshots.push(createSnapshotRecord(item, allTags));
                 }
             });
         }
@@ -632,7 +647,7 @@ class StateSnapshotsDashboard extends React.Component {
         }
 
         const tagsCloud = (
-            <div>{tags.map(tag => createTagBadge(tag))}</div>
+            <div className="d-flex flex-wrap gap-1 mb-3">{allTags.map(tag => createTagBadge(tag))}</div>
         )
 
         const filterSnapShots = (

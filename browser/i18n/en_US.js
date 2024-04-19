@@ -336,6 +336,9 @@ module.exports = {
         "New title": "New title",
         "StateSnapshots description": "Save, restore and share projects. A project contains the extent of the map, which background map is visible and which layers are turned on, which filters are active as well as your drawings. You can share a project by sharing the displayed URL. If you are not logged in, projects will be linked to the browser you are using. Otherwise, they will be stored under your user login. It is possible to transfer projects from browser to login.",
         "Copied": "Copied",
+        "There is no tags in the list": "There is no tags in the list",
+        "Create tag": "Create tag",
+        "The filter returned no results": "The filter returned no results",
 
         //Measurements
         "Expand measurements control": "Activate measurements control",
