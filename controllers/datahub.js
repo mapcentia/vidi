@@ -8,9 +8,10 @@ const express = require("express");
 const request = require("request");
 const router = express.Router();
 const fetch = require("node-fetch");
+const config = require("../config/config.js");
 
 DATAHUB = {
-  host: "https://mapgogc2.geopartner.dk",
+  host: config.gc2.host,
   user: "api@grunddata",
   key: "c78646f7c717bf265f8e9e0a8a313785",
 };
