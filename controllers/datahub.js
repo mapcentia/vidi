@@ -10,9 +10,9 @@ const router = express.Router();
 const fetch = require("node-fetch");
 
 DATAHUB = {
-  host: "https://datahub.geopartner.dk",
+  host: "https://mapgogc2.geopartner.dk",
   user: "api@grunddata",
-  key: "c0d78e089a39d8477d3f5867a30e4ded",
+  key: "c78646f7c717bf265f8e9e0a8a313785",
 };
 
 const queryDatahub = async (sql, options = null) => {
@@ -37,13 +37,15 @@ const queryDatahub = async (sql, options = null) => {
   const response = await fetch(url, options);
   let json = await response.json();
 
+  //console.log(json);
+
   // We something that looks very much like DAWA, so we remove the GC2 wrapper
   let data = {
     _mem: json.peak_memory_usage,
     _time: json._execution_time,
     _success: json.success,
     _message: json.message,
-    _rows: json.features.length,
+    _rows: json.features.length ? json.features.length : 0,
     crs: {
       type: "name",
       properties: {
@@ -85,7 +87,7 @@ router.get("/api/datahub/jordstykker", async (req, res, next) => {
   var sql = "SELECT";
 
   // Define the fields to return
-  sql += " lokalid as featureid";
+  sql += " gid as featureid";
   sql += ", matrikelnummer as matrikelnr";
   sql += ", ejerlavskode as ejerlavkode";
   sql += ", ejerlavsnavn";
