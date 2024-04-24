@@ -5,6 +5,7 @@
  */
 
 "use strict";
+const config = require("../../../config/config.js");
 
 /**
  *
@@ -16,9 +17,8 @@ var moment = require("moment");
 // Set locale for date/time string
 moment.locale("da_DK");
 
-// Hardcode hose
-var GC2_HOST;
-GC2_HOST = "https://mapgogc2.geopartner.dk";
+// Hardcode host
+var GC2_HOST = config.gc2.host;
 
 /**
  *
@@ -136,9 +136,6 @@ var documentCreateItems = new L.FeatureGroup();
  *
  */
 var mapObj;
-
-// Get global vars from config
-var config = require("../../../config/config.js");
 
 /**
  *

@@ -11,13 +11,8 @@ var bi = require("../../../config/gp/config.blueidea");
 const { post } = require("request");
 const { reject } = require("underscore");
 
-/**
- *
- * @type {string}
- */
-// GC2_HOST = (GC2_HOST.split("http://").length > 1 ? GC2_HOST.split("http://")[1] : GC2_HOST);
-// Hardcoded host - config has internal name in docker-compose
-GC2_HOST = "https://mapgogc2.geopartner.dk";
+// SET GC2 HOST
+GC2_HOST = config.gc2.host;
 
 // Set locale for date/time string
 moment.locale("da_DK");

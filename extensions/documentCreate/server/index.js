@@ -10,10 +10,6 @@ var config = require("../../../config/config.js");
 var session = require("../../session/server");
 const { VERSION } = require("underscore");
 
-/**
- *
- * @type {string}
- */
 var GC2_HOST = config.gc2.host;
 
 // GC2_HOST = (GC2_HOST.split("http://").length > 1 ? GC2_HOST.split("http://")[1] : GC2_HOST);

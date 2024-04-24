@@ -2030,6 +2030,28 @@ module.exports = {
                     }
                 }
             },
+			"vandvaerk_faarupnordrevand2": { // Your print templates. "print" is the default
+                A4: {
+                    l: {
+                        mapsizePx: [1060, 730],
+                        mapsizeMm: [280, 192]
+                    },
+                    p: {
+                        mapsizePx: [730, 1060],
+                        mapsizeMm: [192, 280]
+                    }
+                },
+                A3: {
+                    l: {
+                        mapsizePx: [1525, 1065],
+                        mapsizeMm: [401, 282]
+                    },
+                    p: {
+                        mapsizePx: [1065, 1525],
+                        mapsizeMm: [282, 401]
+                    }
+                }
+            },
 			"vestjyllands_andel": { // Your print templates. "print" is the default
                 A4: {
                     l: {
@@ -2501,7 +2523,7 @@ module.exports = {
         },
         {
             "type": "wms",
-            "url": "/api/datafordeler/Matrikel/MatrikelGaeldendeOgForeloebigWMS/1.0.0/WMS",
+            "url": "/api/datafordeler/MATRIKLEN2/MatGaeldendeOgForeloebigWMS/1.0.0/WMS",
             "layers": [
                 "Centroide_Gaeldende",
                 "OptagetVej_Gaeldende",
