@@ -57,12 +57,6 @@ window.gc2i18n = require('./i18n/' + window._vidiLocale + '.js');
  * Global var with config object
  */
 window.vidiConfig = require('../config/config.js');
-if (!window.vidiConfig?.gc2?.host) {
-    if (!window.vidiConfig?.gc2) {
-        window.vidiConfig.gc2 = {};
-    }
-    window.vidiConfig.gc2.host = process.env.GC2_HOST;
-}
 
 /**
  * Th global Vidi API

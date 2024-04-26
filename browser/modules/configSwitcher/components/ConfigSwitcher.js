@@ -30,7 +30,7 @@ class ConfigSwitcher extends React.Component {
     updateConfigurationsList() {
         this.setState({loading: true});
         const gc2host = vidiConfig?.gc2?.host;
-        axios.get(`/api/requestProxy?request=${encodeURIComponent(gc2host + this.state.configSourceURL)}`).then(response => {
+        axios.get(`/api/config/${vidiConfig?.appDatabase}`).then(response => {
             let configurations = [];
             if (`data` in response.data && Array.isArray(response.data.data)) {
                 configurations = response.data.data;
