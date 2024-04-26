@@ -142,7 +142,6 @@ module.exports = {
             {"offlineMap": ["index"]},
             {"session": ["index"]},
             {"editor": ["index"]},
-            {"configSwitcher": ["index"]},
         ],
         "server": [
             {"conflictSearch": ["index"]},
@@ -248,13 +247,12 @@ module.exports = {
     // Extensions are enabled both browser and server side
     // ===================================================
     "enabledExtensions": [
-        // "conflictSearch",
+        "conflictSearch",
         "streetView",
         "session",
         "coordinates",
         "offlineMap",
         "editor",
-        // "configSwitcher",
     ],
 
     // ====================================
@@ -298,9 +296,7 @@ module.exports = {
     // its a good idea to put them inside this property
     // ==========================================================
     "extensionConfig": {
-        "layerSearch": {
-            "host": "localhost:9200"
-        }
+
     },
 
     // ===================================================
