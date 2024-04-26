@@ -145,9 +145,8 @@
 }
 
 [data-bs-theme="geopartner"] .form-switch .form-check-input:focus {
-    --bs-form-switch-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23b3e0db'/%3e%3c/svg%3e");}
-
-
+    --bs-form-switch-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23b3e0db'/%3e%3c/svg%3e");
+}
 
 /* Leaflet */
 /* Align leaflet-draw */
