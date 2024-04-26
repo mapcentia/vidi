@@ -114,18 +114,6 @@ function hasChild(obj) {
     return !!Object.keys(obj).length;
 }
 
-require('snackbarjs');
-/**
- * Displays a snack!
- * @param {*} msg 
- */
-var snack = function (msg) {
-    jquery.snackbar({
-        htmlAllowed: true,
-        content: '<p>' + msg + '</p>',
-        timeout: 10000
-    });
-}
 
 /**
  * 

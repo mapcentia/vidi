@@ -80,17 +80,12 @@ if (urlparser.urlVars.sagsnr) {
     var sagsnr = urlparser.urlVars.sagsnr;
 }
 
-require('snackbarjs');
 /**
  * Displays a snack!
  * @param {*} msg 
  */
 var snack = function (msg) {
-    jquery.snackbar({
-        htmlAllowed: true,
-        content: '<p>' + msg + '</p>',
-        timeout: 10000
-    });
+    utils.showInfoToast('<p>' + msg + '</p>', { timeout: 5000, autohide: false})
 };
 
 var matrikelLayer = new L.FeatureGroup();

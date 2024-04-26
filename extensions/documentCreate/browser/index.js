@@ -118,7 +118,6 @@ if (urlparser.urlVars.fileIdent) {
 var _USERSTR = "";
 
 var jquery = require("jquery");
-require("snackbarjs");
 
 /**
  *
@@ -804,11 +803,7 @@ var getEjdNr = function (adgangsadresseid) {
  */
 
 var snack = function (msg) {
-  jquery.snackbar({
-    htmlAllowed: true,
-    content: "<p>" + msg + "</p>",
-    timeout: 10000,
-  });
+  utils.showInfoToast("<p>" + msg + "</p>", { timeout: 5000, autohide: false})
 };
 
 /**

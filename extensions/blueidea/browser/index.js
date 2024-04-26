@@ -69,19 +69,6 @@ var config = require("../../../config/config.js");
 
 const download = require("../../../browser/modules/download");
 
-require("snackbarjs");
-/**
- * Displays a snack!
- * @param {*} msg
- */
-var snack = function (msg) {
-  jquery.snackbar({
-    htmlAllowed: true,
-    content: "<p>" + msg + "</p>",
-    timeout: 10000,
-  });
-};
-
 /**
  * Draw module
  */
@@ -376,6 +363,10 @@ module.exports = {
         da_DK: "Du har ikke adgang til BlueIdea",
         en_US: "You are not allowed to use BlueIdea",
       },
+      "Starting analysis": {
+        da_DK: "Starter analyse",
+        en_US: "Starting analysis",
+      },
     };
 
     /**
@@ -656,7 +647,7 @@ module.exports = {
           this.addBufferToMap(geom);
 
           // Let user know we are starting
-          this.createSnack(__("Waiting to start"));
+          me.createSnack(__("Waiting to start"));
 
           // For each flattened element, start a query for matrikels intersected
           let promises = [];
@@ -673,7 +664,7 @@ module.exports = {
               try {
                 let merged = this.mergeMatrikler(results);
                 this.addMatrsToMap(merged);
-                this.createSnack(__("Found parcels"));
+                me.createSnack(__("Found parcels"));
 
                 return merged;
               } catch (error) {
@@ -690,7 +681,7 @@ module.exports = {
 
               Promise.all(promises2).then((results) => {
                 let adresser = this.mergeAdresser(results);
-                this.createSnack(__("Found addresses"));
+                me.createSnack(__("Found addresses"));
 
                 //console.debug("Got addresses", adresser);
                 // Set results
@@ -707,7 +698,7 @@ module.exports = {
 
               // If error has a message, display it
               if (error.message) {
-                this.createSnack(__("Error in seach") + ": " + error);
+                me.createSnack(__("Error in seach") + ": " + error);
               } else {
                 console.error(error);
                 _clearAll();
@@ -716,7 +707,7 @@ module.exports = {
             });
         } catch (error) {
           console.warn(error);
-          this.createSnack(error);
+          me.createSnack(error);
           return;
         }
       }
@@ -932,22 +923,9 @@ module.exports = {
        * @param {*} text
        */
       createSnack(text) {
-        $.snackbar({
-          id: exSnackId,
-          content: "<span id='blueidea-progress'>" + text + "</span>",
-          htmlAllowed: true,
-          timeout: 1000000,
-        });
+        utils.showInfoToast("<span id='blueidea-progress'>" + text + "</span>", { timeout: 5000, autohide: false})
       }
 
-      /**
-       * Updates the snackbar
-       * @param {*} text
-       */
-      updateSnack(text) {
-        $(exSnackId).snackbar("show");
-        $("blueidea-progress").html(text);
-      }
 
       /**
        * Simulates a click on the login button
@@ -1079,6 +1057,8 @@ module.exports = {
           if (blocked) {
             return;
           }
+
+          me.createSnack(__("Starting analysis"))
 
           // get the clicked point
           point = e.latlng;
