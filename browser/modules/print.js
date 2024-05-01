@@ -278,7 +278,12 @@ module.exports = {
                 change();
                 // Click the first options in orientation
                 setTimeout(function () {
-                    $("input:radio[name=print-orientation]:first").trigger("click");
+                    // Check if we had an orientation already?
+                    if (printingOrientation && printingOrientation === 'p') {
+                        $("input:radio[name=print-orientation]:last").trigger("click");
+                    } else {
+                        $("input:radio[name=print-orientation]:first").trigger("click");
+                    }
                 }, 5);
                 $.each(printC[$('input[name=print-tmpl]:checked', '#print-form').val()][e.target.value], function (i, v) {
                     $("#print-orientation").append('<input type="radio" class="print print-orientation btn-check" name="print-orientation" id="' + i + '" value="' + i + '"><label for="' + i + '" class="btn btn-sm btn-outline-secondary">' + (i === "l" ? "Landscape" : "Portrait") + '</label>');
