@@ -36,6 +36,15 @@ module.exports = {
     },
 
     // ===============================================================
+    // Setup the connection to use stuff in grunddata globally
+    // ===============================================================
+
+    "datahub": {
+        "user": "api@grunddata",
+        "key": "c78646f7c717bf265f8e9e0a8a313785"
+    },
+
+    // ===============================================================
     // Configuration of print templates.
     // Print templates must be enabled - look further down.
     // mapsizePx ~ is the pixel dimension of the map view
