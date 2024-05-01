@@ -6,21 +6,12 @@
 
 "use strict";
 
-/* Import big-brains*/
-import { v4 as uuidv4 } from "uuid";
-
-import Button from "@material-ui/core/Button";
-import ArrowBackIcon from "@material-ui/icons/ArrowBack";
-import Select from "@material-ui/core/Select";
-import InputLabel from "@material-ui/core/InputLabel";
-import MenuItem from "@material-ui/core/MenuItem";
-import FormHelperText from "@material-ui/core/FormHelperText";
-import FormControl from "@material-ui/core/FormControl";
-
 import {
   buffer as turfBuffer,
+  point as turfPoint,
   flatten as turfFlatten,
   union as turfUnion,
+  booleanPointInPolygon,
   featureCollection as turfFeatureCollection,
   applyFilter,
 } from "@turf/turf";
@@ -66,8 +57,6 @@ var switchLayer = require("./../../../browser/modules/switchLayer");
  * @type {string}
  */
 var exId = "blueidea";
-var exSnackId = "blueidea-snack";
-var exResultsId = "blueidea-results";
 var exBufferDistance = 0.1;
 
 /**
@@ -77,21 +66,6 @@ var mapObj;
 
 //var gc2host = 'http://localhost:3000'
 var config = require("../../../config/config.js");
-
-const download = require("../../../browser/modules/download");
-
-require("snackbarjs");
-/**
- * Displays a snack!
- * @param {*} msg
- */
-var snack = function (msg) {
-  jquery.snackbar({
-    htmlAllowed: true,
-    content: "<p>" + msg + "</p>",
-    timeout: 10000,
-  });
-};
 
 /**
  * Draw module
@@ -387,6 +361,14 @@ module.exports = {
         da_DK: "Du har ikke adgang til BlueIdea",
         en_US: "You are not allowed to use BlueIdea",
       },
+      "Starting analysis": {
+        da_DK: "Starter analyse",
+        en_US: "Starting analysis",
+      },
+      "modify parcels": {
+        da_DK: "Tilføj eller fjern matrikler",
+        en_US: "Add or remove parcels",
+      },
     };
 
     /**
@@ -458,6 +440,7 @@ module.exports = {
           user_ventil_layer_key: null,
           user_udpeg_layer: null,
           user_ventil_export: null,
+          edit_matr: false,
         };
       }
 
@@ -477,6 +460,7 @@ module.exports = {
           //console.debug("Starting blueidea");
           me.setState({
             active: true,
+            edit_matr: false,
           });
 
           // if logged in, get user
@@ -495,6 +479,7 @@ module.exports = {
           me.setState({
             active: false,
             user_lukkeliste: false,
+            edit_matr: false,
           });
         });
 
@@ -525,18 +510,15 @@ module.exports = {
               if (me.state.authed && me.state.user_id) {
                 // If user has blueidea, show buttons
                 if (me.state.user_blueidea == true) {
-                  $("#_draw_make_blueidea_with_selected").show();
-                  $("#_draw_make_blueidea_with_all").show();
+                  $("#_draw_blueidea_group").show();
                 } else {
-                  $("#_draw_make_blueidea_with_selected").hide();
-                  $("#_draw_make_blueidea_with_all").hide();
+                  $("#_draw_blueidea_group").hide();
                 }
                 // TODO: Disabled for now, but lists templates
                 //this.getTemplates();
               } else {
                 // If not logged in, hide buttons
-                $("#_draw_make_blueidea_with_selected").hide();
-                $("#_draw_make_blueidea_with_all").hide();
+                $("#_draw_blueidea_group").hide();
               }
             });
         });
@@ -670,7 +652,7 @@ module.exports = {
           this.addBufferToMap(geom);
 
           // Let user know we are starting
-          this.createSnack(__("Waiting to start"));
+          me.createSnack(__("Waiting to start"));
 
           // For each flattened element, start a query for matrikels intersected
           let promises = [];
@@ -687,7 +669,7 @@ module.exports = {
               try {
                 let merged = this.mergeMatrikler(results);
                 this.addMatrsToMap(merged);
-                this.createSnack(__("Found parcels"));
+                me.createSnack(__("Found parcels"));
 
                 return merged;
               } catch (error) {
@@ -704,13 +686,14 @@ module.exports = {
 
               Promise.all(promises2).then((results) => {
                 let adresser = this.mergeAdresser(results);
-                this.createSnack(__("Found addresses"));
+                me.createSnack(__("Found addresses"));
 
                 //console.debug("Got addresses", adresser);
                 // Set results
                 me.setState({
                   results_adresser: adresser,
                   results_matrikler: matrikler,
+                  edit_matr: false,
                 });
 
                 return;
@@ -721,7 +704,7 @@ module.exports = {
 
               // If error has a message, display it
               if (error.message) {
-                this.createSnack(__("Error in seach") + ": " + error);
+                me.createSnack(__("Error in seach") + ": " + error);
               } else {
                 console.error(error);
                 _clearAll();
@@ -730,7 +713,7 @@ module.exports = {
             });
         } catch (error) {
           console.warn(error);
-          this.createSnack(error);
+          me.createSnack(error);
           return;
         }
       }
@@ -871,7 +854,7 @@ module.exports = {
        */
       addBufferToMap(geojson) {
         try {
-          var l = L.geoJSON(geojson, styleObject.buffer).addTo(bufferItems);
+          var l = L.geoJSON(geojson, {...styleObject.buffer,interactive: false}).addTo(bufferItems);
         } catch (error) {
           console.warn(error, geojson);
         }
@@ -882,7 +865,10 @@ module.exports = {
        */
       addMatrsToMap(geojson) {
         try {
-          var l = L.geoJSON(geojson, styleObject.matrikel).addTo(queryMatrs);
+          // Make a layer per feature.
+          geojson.features.forEach((feature) => {
+            let l = L.geoJSON(feature, {...styleObject.matrikel, interactive: false}).addTo(queryMatrs);
+          });
         } catch (error) {
           console.warn(error, geojson);
         }
@@ -896,15 +882,13 @@ module.exports = {
           var l = L.geoJSON(geojson, {
             pointToLayer: function (feature, latlng) {
               // //console.debug(feature.properties, latlng);
-
               // if the feature has a forbundet property, use a different icon
               if (feature.properties.forbundet) {
                 // //console.debug(feature.properties, latlng);
-                return L.circleMarker(latlng, styleObject.ventil_forbundet);
+                return L.circleMarker(latlng, {...styleObject.ventil_forbundet, interactive: false});
               }
-
               // else, use the default icon
-              return L.circleMarker(latlng, styleObject.ventil);
+              return L.circleMarker(latlng, {...styleObject.ventil, interactive: false});
             },
           }).addTo(queryVentils);
         } catch (error) {
@@ -917,9 +901,7 @@ module.exports = {
        */
       addSelectedLedningerToMap(geojson) {
         try {
-          var l = L.geoJSON(geojson, styleObject.selectedLedning).addTo(
-            seletedLedninger
-          );
+          var l = L.geoJSON(geojson, {...styleObject.selectedLedning, interactive: false}).addTo(seletedLedninger);
         } catch (error) {
           console.warn(error, geojson);
         }
@@ -933,7 +915,7 @@ module.exports = {
           var myIcon = new L.DivIcon(styleObject.selectedPoint);
           var l = L.geoJSON(geojson, {
             pointToLayer: function (feature, latlng) {
-              return new L.Marker(latlng, { icon: myIcon });
+              return new L.Marker(latlng, { icon: myIcon, interactive: false });
             },
           }).addTo(selectedPoint);
         } catch (error) {
@@ -946,28 +928,15 @@ module.exports = {
        * @param {*} text
        */
       createSnack(text) {
-        $.snackbar({
-          id: exSnackId,
-          content: "<span id='blueidea-progress'>" + text + "</span>",
-          htmlAllowed: true,
-          timeout: 1000000,
-        });
+        utils.showInfoToast("<span id='blueidea-progress'>" + text + "</span>", { timeout: 5000, autohide: false})
       }
 
-      /**
-       * Updates the snackbar
-       * @param {*} text
-       */
-      updateSnack(text) {
-        $(exSnackId).snackbar("show");
-        $("blueidea-progress").html(text);
-      }
 
       /**
        * Simulates a click on the login button
        */
       clickLogin() {
-        document.getElementById("session").click();
+        document.querySelector('[data-bs-target="#login-modal"]').click();
       }
 
       /**
@@ -975,7 +944,13 @@ module.exports = {
        */
       clickDraw() {
         _clearAll();
-        $('#main-tabs a[href="#draw-content"]').trigger("click");
+        const e = document.querySelector('#main-tabs a[href="#draw-content"]');
+        if (e) {
+            bootstrap.Tab.getInstance(e).show();
+            e.click();
+        } else {
+            console.warn(`Unable to locate #draw-content`)
+        }
       }
 
       /**
@@ -1072,6 +1047,7 @@ module.exports = {
         me.setState({
           results_adresser: {},
           results_matrikler: [],
+          edit_matr: false,
         });
 
         // if udpeg_layer is set, make sure it is turned on
@@ -1087,6 +1063,8 @@ module.exports = {
           if (blocked) {
             return;
           }
+
+          me.createSnack(__("Starting analysis"))
 
           // get the clicked point
           point = e.latlng;
@@ -1129,13 +1107,126 @@ module.exports = {
                     results_ventiler: data.ventiler.features,
                   });
                 }
+                return
               }
             })
             .catch((error) => {
               console.warn(error);
+              return
             });
         });
+        return
       };
+
+      toggleEdit = () => {
+        let me = this;
+
+        // If the edit state is false, we enable it
+        if (!me.state.edit_matr) {
+          utils.cursorStyle().crosshair();
+          cloud.get().map.on("click", function (e) {
+            // if the edit state is true, and the event is a click, add the matrikel to the list
+
+            // 2 things can happen here, either we hit an already selected matrikel, or we hit somewhere without a matrikel.
+            // if we hit a matrikel, we remove it from the list, if we hit somewhere without a matrikel, we add it and the adresse it represents to the lists
+
+            // get the clicked point
+            let point = e.latlng;
+            point = turfPoint([point.lng, point.lat]);
+
+            // Did we hit a feature on queryMatrs?
+            let hit = false;
+            let feature
+
+            // Check if the point is inside a feature on queryMatrs. The point needs to be inside a feature, and the feature needs to be a matrikel
+            queryMatrs.eachLayer(function (layer) {
+              // We need to go further down the rabbit hole, and check if the point is inside the feature
+              layer.eachLayer(function (sublayer) {
+                if (booleanPointInPolygon(point, sublayer.feature)) {
+                  hit = true;
+                  feature = layer;
+                }
+              });
+            });      
+            
+            // If we dit not hit a feature, we add it to the list, and query the addresses
+            if (!hit) {
+              // Add matrikel and adress to the list
+              me.addSingleMatrikel(point)
+            } else {
+              // Remove matrikel from list and map.
+              me.removeSingleMatrikel(feature)
+            }
+          });
+        } else {
+          utils.cursorStyle().reset();
+          cloud.get().map.off("click");
+        }
+
+        // switch the current state
+        me.setState({
+          edit_matr: !me.state.edit_matr,
+        })
+      };
+      addSingleMatrikel = async function(point) {
+        let me = this;
+
+        // Based on clicked point, query for matrikel and adresse information. add these to map and lists.
+        // create a simple point feature, using a very small buffer
+        let buffered = turfBuffer(point, 0.0001, {
+          units: "meters",
+        });
+
+        // Query for matrikel & Adresse
+        let matrikel = await findMatriklerInPolygon(buffered);
+        let adresse = await findAddressesInMatrikel(matrikel.features[0]);
+
+        // Add matrikel to map
+        me.addMatrsToMap(matrikel);
+
+        // Merge the new adresse and matrilkel into the existing lists
+        let newAdresser = Object.assign({}, me.state.results_adresser);
+        adresse.forEach((a) => {
+          newAdresser[a.kvhx] = a;
+        });
+
+        // Set the new state
+        me.setState({
+          results_adresser: newAdresser
+        });
+      };
+
+      removeSingleMatrikel = function(layer) {
+        // Remove matrikel from list and map
+
+        // Using the matrikelnr and ejerlavkode, we can remove the matrikel from the list of matrikler
+        let matrikel, ejerlav
+        layer.eachLayer(function (sublayer) {
+          matrikel = sublayer.feature.properties.matrikelnr;
+          ejerlav = sublayer.feature.properties.ejerlavkode;
+        });
+
+        console.log(matrikel, ejerlav)
+
+        // Remove adresse from list
+        let newAdresser = Object.assign({}, this.state.results_adresser);
+
+        // filter out the addresses that contain the matrikel and ejerlav
+        let filtered = []
+        for (let key in newAdresser) {
+          let a = newAdresser[key];
+          if (a.matrikelnr != matrikel || a.ejerlavkode != ejerlav) {
+            filtered.push(a);
+          }
+        }
+        // Remove matrikel from map
+        queryMatrs.removeLayer(layer);
+
+        // Set the new state
+        this.setState({
+          results_adresser: filtered
+        });
+      }
 
       clearVentilFilter = () => {
         me.turnOnLayer(me.state.ventil_layer, me.buildVentilFilter());
@@ -1260,7 +1351,7 @@ module.exports = {
                 .join(",") // comma-separated
           )
           .join("\r\n"); // rows starting on new lines
-      }
+      };
 
       /**
        * Downloads blob to file, using ANSI encoding
@@ -1360,73 +1451,59 @@ module.exports = {
           // Logged in
           return (
             <div role="tabpanel">
-              <div className="form-group">
+              <div className="form-group p-3">
                 <div style={{ alignSelf: "center" }}>
                   <h4>{__("Select area")}</h4>
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      width: "100%",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Button
+                  <div className="d-grid mx-auto gap-3">
+                    <button
                       onClick={() => this.clickDraw()}
-                      size="large"
-                      variant="contained"
-                      style={{ margin: "10px" }}
+                      className="btn btn-light"
                       disabled={!this.allowBlueIdea()}
                     >
                       {__("Draw area")}
-                    </Button>
-                    <Button
+                    </button>
+                    <button
                       onClick={() => this.selectPointLukkeliste()}
-                      color="primary"
-                      size="large"
-                      variant="contained"
-                      style={{ margin: "10px" }}
-                      disabled={!this.allowLukkeliste()}
+                      className="btn btn-primary"
+                      disabled={!this.allowLukkeliste() | s.edit_matr}
                     >
                       {__("Select point on map")}
-                    </Button>
+                    </button>
                   </div>
                 </div>
 
-                <div style={{ alignSelf: "center" }}>
-                  <h4>{__("Show results")}</h4>
-                  Der blev fundet {Object.keys(s.results_adresser).length}{" "}
-                  adresser i området.
+                <div className="row">
+                  <div className="col">
+                    <h4>{__("Show results")}</h4>
+                    <div className="d-flex align-items-center justify-content-between">
+                      <span>Der blev fundet {Object.keys(s.results_adresser).length} adresser i området.</span>                            
+                      <button 
+                        disabled={Object.keys(s.results_adresser).length == 0}
+                        title={__("modify parcels")}
+                        className="btn btn-light"
+                        onClick={() => this.toggleEdit()}>
+                          {s.edit_matr ? <i className="bi bi-x"></i> : <i className="bi bi-pencil"></i>}
+                      </button>
+                    </div>
+                  </div>
                 </div>
 
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    width: "100%",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Button
+                <div className="d-grid mx-auto gap-3">
+                  <button
                     onClick={() => this.downloadAdresser()}
-                    size="large"
-                    variant="contained"
-                    style={{ margin: "10px" }}
+                    className="btn btn-light"
                     disabled={!this.readyToSend()}
                   >
                     {__("Download addresses")}
-                  </Button>
+                  </button>
 
-                  <Button
+                  <button
                     onClick={() => this.sendToBlueIdea()}
-                    color="primary"
-                    size="large"
-                    variant="contained"
-                    style={{ margin: "10px" }}
+                    className="btn btn-light"
                     disabled={!this.readyToBlueIdea()}
                   >
                     {__("Go to blueidea")}
-                  </Button>
+                  </button>
                 </div>
 
                 <div
@@ -1434,66 +1511,44 @@ module.exports = {
                   hidden={!s.user_lukkeliste}
                 >
                   <h4>{__("Valve list")}</h4>
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      width: "100%",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Button
+                  <div className="d-grid mx-auto gap-3">
+                    <button
                       onClick={() => this.downloadVentiler()}
-                      size="large"
-                      variant="contained"
-                      style={{ margin: "10px" }}
+                      className="btn btn-light"
                       disabled={!this.allowVentilDownload()}
                     >
                       {__("Download valves")}
-                    </Button>
+                    </button>
                   </div>
                 </div>
               </div>
             </div>
+
           );
         }
 
         // Not Logged in - or not configured
         return (
-          <div role="tabpanel">
-            <div className="form-group">
-              <div
-                id="blueidea-feature-login"
-                className="alert alert-info"
-                role="alert"
-              >
-                {__("MissingLogin")}
-              </div>
-              <Button
-                onClick={() => this.clickLogin()}
-                color="primary"
-                size="large"
-                variant="contained"
-                style={{
-                  marginRight: "auto",
-                  marginLeft: "auto",
-                  display: "block",
-                }}
-              >
-                {__("Login")}
-              </Button>
+          <div role = "tabpanel" >
+            <div className = "form-group" >
+                <div id = "blueidea-feature-login" className = "alert alert-info" role = "alert" >
+                    {__("MissingLogin")}
+                </div>
+                <div className="d-grid mx-auto">
+                    <button onClick = {() => this.clickLogin()} type="button" className="btn btn-primary">{__("Login")}</button>
+                </div>
             </div>
-          </div>
+        </div>
         );
       }
-    }
+    };
 
     utils.createMainTab(
       exId,
       __("Plugin Tooltip"),
       __("Info"),
       require("./../../../browser/modules/height")().max,
-      "timeline",
+      "bi-node-minus",
       false,
       exId
     );

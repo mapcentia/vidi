@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2021 MapCentia ApS
+ * @copyright  2013-2023 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -8,14 +8,14 @@
 
 import mustache from "mustache";
 import {LAYER, MAP_RESOLUTIONS, SYSTEM_FIELD_PREFIX} from './layerTree/constants';
-import {GEOJSON_PRECISION} from './constants';
+import {GEOJSON_PRECISION, MIME_TYPES_APPS, MIME_TYPES_IMAGES} from './constants';
 
 const layerTreeUtils = require('./layerTree/utils');
 
 /**
  * @type {*|exports|module.exports}
  */
-let cloud, backboneEvents, meta, layerTree, advancedInfo, switchLayer;
+let cloud, backboneEvents, meta, layerTree, advancedInfo, switchLayer, utils;
 
 /**
  * @type {*|exports|module.exports}
@@ -27,8 +27,8 @@ let _layers;
  * @type {*|exports|module.exports}
  */
 const urlparser = require('./urlparser');
-
 const download = require('./download');
+
 
 /**
  * @type {string}
@@ -56,22 +56,15 @@ let defaultSelectedStyle = {
 
 let backArrowIsAdded = false;
 
-const jquery = require('jquery');
-require('snackbarjs');
-
 let editToolsHtml = `
         <div class="form-group gc2-edit-tools" data-edit-layer-id="{{_vidi_edit_layer_id}}" data-edit-layer-name="{{_vidi_edit_layer_name}}" data-edit-vector="{{_vidi_edit_vector}}" style="display: {{_vidi_edit_display}};">
-            <div class="btn-group btn-group-justified" style="margin: 10px 0;">
-                <div class="btn-group">
-                    <button class="btn btn-primary btn-xs popup-edit-btn">
-                        <i class="fa fa-pencil-alt" aria-hidden="true"></i>
-                    </button>
-                </div>
-                <div class="btn-group">
-                    <button class="btn btn-danger btn-xs popup-delete-btn">
-                        <i class="fa fa-trash" aria-hidden="true"></i>
-                    </button>
-                </div>
+            <div class="btn-group mt-1 w-100 mb-2">
+                <button class="btn btn-outline-secondary btn-sm popup-edit-btn">
+                    <i class="bi bi-pencil" aria-hidden="true"></i>
+                </button>
+                <button class="btn btn-outline-danger btn-sm popup-delete-btn">
+                    <i class="bi bi-trash" aria-hidden="true"></i>
+                </button>
             </div>
         </div>
 `;
@@ -149,6 +142,7 @@ module.exports = {
         switchLayer = o.switchLayer;
         backboneEvents = o.backboneEvents;
         _layers = o.layers;
+        utils = o.utils;
         extensions = o.extensions;
 
         _self = this;
@@ -209,8 +203,12 @@ module.exports = {
                 layers.splice(i, 1);
             }
         }
+        if (layers.length === 0 && callBack) {
+            callBack();
+        }
 
         backboneEvents.get().trigger("start:sqlQuery");
+
 
         $.each(layers, function (index, value) {
             // No need to search in the already displayed vector layers
@@ -252,17 +250,17 @@ module.exports = {
             let fieldConf = metaDataKeys?.[value]?.fieldconf !== "" ? JSON.parse(metaDataKeys[value].fieldconf) : null;
             let parsedMeta = layerTree.parseLayerMeta(metaDataKeys[value]);
             let featureInfoTableOnMap = window.vidiConfig.featureInfoTableOnMap === true && simple;
+            let forceOffCanvasInfo = window.vidiConfig.forceOffCanvasInfo === true;
             let f_geometry_column = metaDataKeys[value].f_geometry_column
             let styleForSelectedFeatures;
+            let defaultTemplateWithBackBtn = false;
 
             // Back arrow to template if featureInfoTableOnMap is true
-            if (featureInfoTableOnMap && !backArrowIsAdded) {
-                backArrowIsAdded = true;
-                defaultTemplate = `
-                                <div class='show-when-multiple-hits' style='cursor: pointer;'>
-                                    <span class='material-icons' style=''>keyboard_arrow_left </span>
-                                    <span style="top: -7px;position: relative;">${__("Back")}</span>
-                                </div>` + defaultTemplate;
+            if ((featureInfoTableOnMap || forceOffCanvasInfo) && !backArrowIsAdded) {
+                defaultTemplateWithBackBtn = `
+                                <button class='btn btn-sm btn-outline-secondary mb-2 show-when-multiple-hits'>
+                                    <i class='bi bi-arrow-left'></i> ${__("Back")}
+                                </button>` + defaultTemplate;
                 $(document).arrive('.show-when-multiple-hits', function (e, data) {
                     $(this).on('click', function (e) {
                         $("#modal-info-body").show();
@@ -277,10 +275,6 @@ module.exports = {
                         })
                     })
                 })
-            }
-
-            if (parsedMeta.info_element_selector) {
-                $(parsedMeta.info_element_selector).empty();
             }
 
             if (typeof parsedMeta.tiles_selected_style !== "undefined" && parsedMeta.tiles_selected_style !== "") {
@@ -310,7 +304,7 @@ module.exports = {
 
                     isEmpty = layerObj.isEmpty();
 
-                    template = metaDataKeys[value].type === "RASTER" ? defaultTemplateRaster : defaultTemplate;
+                    template = metaDataKeys[value].type === "RASTER" ? defaultTemplateRaster : defaultTemplateWithBackBtn ? defaultTemplateWithBackBtn : defaultTemplate;
                     template = parsedMeta.info_template && parsedMeta.info_template !== "" ? parsedMeta.info_template : template;
                     if (editingIsEnabled && layerIsEditable) {
                         template = editToolsHtml + template;
@@ -321,84 +315,117 @@ module.exports = {
                         if (firstLoop) { // Only add html once
                             firstLoop = false;
                             let popUpInner = `<div id="modal-info-body">
-                                <ul class="nav nav-tabs" id="info-tab"></ul>
+                                <ul class="nav nav-pills mb-2" id="info-tab"></ul>
                                 <div class="tab-content" id="info-pane"></div>
                             </div>
                             <div id="alternative-info-container" class="alternative-info-container-right" style="display:none"></div>`;
 
-                            // Add alternative-info-container to pop-up if featureInfoTableOnMap or else in left slide panel
-                            if (featureInfoTableOnMap) {
-                                var popup = L.popup({
-                                    minWidth: 350
-                                })
-                                    .setLatLng(infoClickPoint)
-                                    .setContent(`<div id="info-box-pop-up"></div>`)
-                                    .openOn(cloud.get().map)
-                                    .on('remove', () => {
-                                        if (!editor?.getEditedFeature()) {
-                                            _self.resetAll();
-                                        }
-                                    });
+                            if (featureInfoTableOnMap || forceOffCanvasInfo) {
+                                if (forceOffCanvasInfo) {
+                                    $('#offcanvas-info-container').html(popUpInner);
+                                } else {
+                                    const popup = L.popup({
+                                        minWidth: 350
+                                    })
+                                        .setLatLng(infoClickPoint)
+                                        .setContent(`<div id="info-box-pop-up"></div>`)
+                                        .openOn(cloud.get().map)
+                                        .on('remove', () => {
+                                            if (editor && editor.getEditedFeature()) {
+                                                _self.resetAll();
+                                            }
+                                        });
 
-                                if (draggableEnabled) {
-                                    _self.makeDraggable(popup);
+                                    if (draggableEnabled) {
+                                        _self.makeDraggable(popup);
+                                    }
+
+                                    $("#info-box-pop-up").html(popUpInner);
                                 }
-
-                                $("#info-box-pop-up").html(popUpInner);
 
                             } else {
                                 $("#info-box").html(popUpInner);
                             }
                         }
 
-                        let display = simple ? "none" : "inline";
+                        let display = simple ? "none" : "flex";
                         let dataShowExport, dataShowColumns, dataShowToggle, dataDetailView;
                         let info = infoText ? `<div>${infoText}</div>` : "";
                         dataShowExport = dataShowColumns = dataShowToggle = dataDetailView = simple ? "false" : "true";
 
                         $(`#${elementPrefix}modal-info-body`).show();
-                        $(`#${elementPrefix}info-tab`).append(`<li><a onclick="setTimeout(()=>{$('#${elementPrefix}modal-info-body table').bootstrapTable('resetView'),100})" id="tab_${storeId}" data-toggle="tab" href="#_${storeId}">${layerTitel}</a></li>`);
+                        $(`#${elementPrefix}info-tab`).append(`<li class="nav-item">
+                                                                    <button type="button" class="nav-link" data-bs-toggle="tab" onclick="setTimeout(()=>{$('#${elementPrefix}modal-info-body table').bootstrapTable('resetView'),100})" id="tab_${storeId}" data-bs-target="#_${storeId}">${layerTitel}</button>
+                                                               </li>`);
                         $(`#${elementPrefix}info-pane`).append(`<div class="tab-pane _sql_query" id="_${storeId}">
-                            <div style="display: ${display}">
-                                <a class="btn btn-sm btn-raised" id="_download_geojson_${storeId}" target="_blank" href="javascript:void(0)">
-                                    <i class="fa fa-download" aria-hidden="true"></i> GeoJson
+                            <div style="display: ${display}" class="justify-content-around mt-3 mb-3">
+                                <a class="btn btn-sm btn-light" id="_download_geojson_${storeId}" target="_blank" href="javascript:void(0)">
+                                    <i class="bi bi-download" aria-hidden="true"></i> GeoJson
                                 </a> 
-                                <a class="btn btn-sm btn-raised" id="_download_excel_${storeId}" target="_blank" href="javascript:void(0)">
-                                    <i class="fa fa-download" aria-hidden="true"></i> Excel
+                                <a class="btn btn-sm btn-light" id="_download_excel_${storeId}" target="_blank" href="javascript:void(0)">
+                                    <i class="bi bi-download" aria-hidden="true"></i> Excel
                                 </a>
-                                <button class="btn btn-sm btn-raised" id="_create_layer_${storeId}" target="_blank" href="javascript:void(0)">
-                                    <i class="fa fa-plus" aria-hidden="true"></i> ${__(`Create virtual layer`)}
+                                <button class="btn btn-sm btn-light" id="_create_layer_${storeId}" target="_blank" href="javascript:void(0)">
+                                    <i class="bi bi-plus" aria-hidden="true"></i> ${__(`Create virtual layer`)}
                                 </button>
                             </div>
                             ${info}
-                            <table class="table" data-detail-view="${dataDetailView}" data-detail-formatter="detailFormatter" data-show-toggle="${dataShowToggle}" data-show-export="${dataShowExport}" data-show-columns="${dataShowColumns}"></table>
+                            <table class="table table-sm" data-detail-view="${dataDetailView}" data-detail-formatter="detailFormatter" data-show-toggle="${dataShowToggle}" data-show-export="${dataShowExport}" data-show-columns="${dataShowColumns}"></table>
                         </div>`);
 
-                        // Set select_function if featureInfoTableOnMap = true
-                        if ((typeof parsedMeta.select_function === "undefined" || parsedMeta.select_function === "") && featureInfoTableOnMap) {
-
-                            selectCallBack = function (id, layer, key, sqlQuery) {
-
-                                $("#modal-info-body").hide();
-                                $("#alternative-info-container").show();
-                            };
-                        } else if (typeof parsedMeta.select_function !== "undefined" && parsedMeta.select_function !== "") {
+                        let s = () => {
+                        };
+                        if (typeof parsedMeta.select_function !== "undefined" && parsedMeta.select_function !== "") {
                             try {
-                                selectCallBack = Function('"use strict";return (' + parsedMeta.select_function + ')')();
+                                s = Function('"use strict";return (' + parsedMeta.select_function + ')')();
                             } catch (e) {
-                                console.info("Error in select function for: " + _key_);
-                                console.error(e.message);
+                                const f = `
+                                        function(id, layer, key, sqlQuery) {
+                                            ${parsedMeta.select_function}
+                                        }
+                                        `;
+                                s = Function('"use strict";return (' + f + ')')();
                             }
                         }
+                        let selectCallBack2;
+                        if (featureInfoTableOnMap || forceOffCanvasInfo) {
+                            selectCallBack2 = function (id, layer, key, sqlQuery) {
+                                $("#modal-info-body").hide();
+                                $("#alternative-info-container").show();
+                                try {
+                                    s(id, layer, key, sqlQuery);
+                                    selectCallBack(id, layer, key, sqlQuery);
+                                } catch (e) {
+                                    console.info("Error in select function for: " + _key_, e.message);
+                                }
+                            };
+                        } else {
+                            selectCallBack2 = function (id, layer, key, sqlQuery) {
+                                try {
+                                    s(id, layer, key, sqlQuery);
+                                    selectCallBack(id, layer, key, sqlQuery);
+                                } catch (e) {
+                                    console.info("Error in select function for: " + _key_, e.message);
+                                }
+                            };
+                        }
+
                         cm = _self.prepareDataForTableView(value, layerObj.geoJSON.features);
                         $('#tab_' + storeId).tab('show');
 
                         hit = true;
                         count.hits = count.hits + Object.keys(layerObj.layer._layers).length;
-
+                        const ns = "#_" + storeId;
+                        // HACK We need to explicit set the width of the table container, or else it's calculated wrong because of the use of flex boxed
+                        try {
+                            const e = featureInfoTableOnMap || forceOffCanvasInfo ? '#alternative-info-container' : '.main-content';
+                            document.querySelector(ns).style.width = (document.querySelector(`${e}`).offsetWidth - 12) + "px";
+                        } catch (e) {
+                            console.error(e.message)
+                        }
                         let _table = gc2table.init({
-                            el: "#_" + storeId + " table",
-                            ns: "#_" + storeId,
+                            el: ns + " table",
+                            ns,
                             geocloud2: cloud.get(),
                             store: layerObj,
                             cm: cm,
@@ -413,45 +440,49 @@ module.exports = {
                             locale: window._vidiLocale.replace("_", "-"),
                             template: template,
                             pkey: pkey,
-                            renderInfoIn: !!parsedMeta.info_element_selector || featureInfoTableOnMap ? "#alternative-info-container" : null,
-                            onSelect: selectCallBack,
+                            renderInfoIn: featureInfoTableOnMap || forceOffCanvasInfo ? '#alternative-info-container' : null,
+                            onSelect: selectCallBack2,
                             key: keyWithoutGeom,
                             caller: _self,
                             styleSelected: styleForSelectedFeatures,
                             setZoom: parsedMeta?.zoom_on_table_click ? parsedMeta.zoom_on_table_click : false,
                         });
-                        if (!parsedMeta.info_element_selector) {
-                            _table.object.on("openpopup" + "_" + _table.uid, function (e, layersClone) {
-                                let popup = e.getPopup();
-                                if (popup?._closeButton) {
-                                    popup._closeButton.onclick = function () {
-                                        if (onPopupCloseButtonClick) {
-                                            onPopupCloseButtonClick(e._leaflet_id);
-                                        }
+                        _table.object.on("openpopup" + "_" + _table.uid, function (e, layersClone) {
+                            let popup = e.getPopup();
+                            if (popup?._closeButton) {
+                                popup._closeButton.onclick = function () {
+                                    if (onPopupCloseButtonClick) {
+                                        onPopupCloseButtonClick(e._leaflet_id);
                                     }
                                 }
+                            }
 
-                                if (draggableEnabled) {
-                                    _self.makeDraggable(popup);
-                                }
-                            });
-                        }
+                            if (draggableEnabled) {
+                                _self.makeDraggable(popup);
+                            }
+                        });
                         // Here inside onLoad we call loadDataInTable(), so the table is populated
                         _table.loadDataInTable(false, true);
 
                         if (typeof parsedMeta.info_function !== "undefined" && parsedMeta.info_function !== "") {
+                            let func;
                             try {
-                                let func = Function('"use strict";return (' + parsedMeta.info_function + ')')();
-                                func(this.layer.toGeoJSON(GEOJSON_PRECISION).features[0], this.layer, keyWithoutGeom, _self, this, cloud.get().map);
+                                try {
+                                    func = Function('"use strict";return (' + parsedMeta.info_function + ')')();
+                                } catch (e) {
+                                    const f = `
+                                        function(feature, layer, layerKey, sqlQuery, store, map) {
+                                            ${parsedMeta.info_function}
+                                        }
+                                        `;
+                                    func = Function('"use strict";return (' + f + ')')();
+                                }
+                                func(this.layer.toGeoJSON(GEOJSON_PRECISION).features[0], null, keyWithoutGeom, _self, this, cloud.get().map);
                             } catch (e) {
-                                console.info("Error in click function for: " + _key_);
-                                console.error(e.message);
+                                console.info("Error in click function for: " + _key_, e.message);
                             }
                         }
 
-
-                        // Add fancy material raised style to buttons
-                        $(".bootstrap-table .btn-default").addClass("btn-raised");
                         // Stop the click on detail icon from bubbling up the DOM tree
                         $(".detail-icon").click(function (event) {
                             event.stopPropagation();
@@ -484,13 +515,13 @@ module.exports = {
                     count.index++;
                     if (count.index === layers.length) {
                         if (!hit) {
+                            _self.closeInfoSlidePanel();
                             $(`#${elementPrefix}modal-info-body`).hide();
-                            jquery.snackbar({
-                                content: "<span id=`conflict-progress`>" + __("Didn't find anything") + "</span>",
-                                htmlAllowed: true,
-                                timeout: 2000
-                            });
+                            utils.showInfoToast(__("Didn't find anything"))
                         } else {
+                            if (forceOffCanvasInfo) {
+                                _self.openInfoSlidePanel();
+                            }
                             $(`#${elementPrefix}main-tabs a[href="#${elementPrefix}info-content"]`).tab('show');
                             if (zoomToResult) {
                                 cloud.get().zoomToExtentOfgeoJsonStore(qstore[storeId], 16);
@@ -524,11 +555,7 @@ module.exports = {
                 base64: true,
                 styleMap: styleForSelectedFeatures,
                 error: () => {
-                    jquery.snackbar({
-                        content: "<span>" + __("Error or timeout on") + " " + layerTitel + "</span>",
-                        htmlAllowed: true,
-                        timeout: 2000
-                    })
+                    utils.showInfoToast(__("Error or timeout on") + " " + layerTitel);
                 },
                 // Set _vidi_type on all vector layers,
                 // so they can be recreated as query layers
@@ -589,7 +616,7 @@ module.exports = {
                     const envelope = `"${f_geometry_column}" && ST_Transform(ST_MakeEnvelope(${extent.join(',')}, 4326), ${srid})`;
                     const type = srid === 4326 ? "geography" : "geometry";
                     if (geoType !== "POLYGON" && geoType !== "MULTIPOLYGON" && (!advancedInfo.getSearchOn())) {
-                        sql = "SELECT " + fieldStr + " FROM (SELECT * FROM " + schemaQualifiedName + " WHERE " + filters + ") AS foo WHERE " + envelope + " AND round(ST_Distance(\"" + f_geometry_column + "\", ST_Transform(ST_GeomFromText('" + wkt + "'," + proj + ")," + srid +")::" + type + ")) < " + distance;
+                        sql = "SELECT " + fieldStr + " FROM (SELECT * FROM " + schemaQualifiedName + " WHERE " + filters + ") AS foo WHERE " + envelope + " AND round(ST_Distance(\"" + f_geometry_column + "\", ST_Transform(ST_GeomFromText('" + wkt + "'," + proj + ")," + srid + ")::" + type + ")) < " + distance;
                         if (versioning) {
                             sql = sql + " AND gc2_version_end_date IS NULL ";
                         }
@@ -690,7 +717,7 @@ module.exports = {
                                         let tmpl = `<div id="${carouselId}" class="carousel slide" data-ride="carousel">
                                                     <ol class="carousel-indicators">
                                                         {{#@root}}
-                                                        <li data-target="#${carouselId}" data-slide-to="{{@index}}"  class="{{#if @first}}active{{/if}}"></li>
+                                                        <li data-bs-target="#${carouselId}" data-slide-to="{{@index}}"  class="{{#if @first}}active{{/if}}"></li>
                                                         {{/@root}}
                                                     </ol>
                                                     <div class="carousel-inner" role="listbox">
@@ -719,10 +746,10 @@ module.exports = {
                                         });
                                         value = Handlebars.compile(tmpl)(feature.properties[property.key]);
                                     } else {
-                                        let subValue = feature.properties[property.key];
+                                        let subValue = decodeURIComponent(feature.properties[property.key]);
                                         value =
                                             `<div style="cursor: pointer" onclick="window.open().document.body.innerHTML = '<img src=\\'${subValue}\\' />';">
-                                        <img style='width:250px' src='${subValue}'/>
+                                        <img class="w-100" src='${subValue}'/>
                                      </div>`;
                                     }
                                 }
@@ -737,6 +764,34 @@ module.exports = {
                                         <source src="${subValue}" type="video/ogg">
                                         <source src="${subValue}" type="video/webm">
                                     </video>`;
+                                }
+                            } else if (property.value.type === 'bytea' && feature.properties[property.key]) {
+                                let subValue = decodeURIComponent(feature.properties[property.key]);
+                                if (subValue) {
+                                    const type = utils.splitBase64(subValue).contentType;
+                                    if (MIME_TYPES_IMAGES.includes(type)) {
+                                        value =
+                                            `<div style="cursor: pointer" onclick="window.open().document.body.innerHTML = '<img src=\\'${subValue}\\' />';">
+                                        <img class="w-100" src='${subValue}'/>
+                                     </div>`;
+                                    } else if (MIME_TYPES_APPS.includes(type)) {
+                                        value = `<embed
+                                        src=${subValue}
+                                        type=${type}
+                                        width="100%"
+                                        height="200px"
+                                    />
+                                    <a download href=${subValue}>${__("Download the file")}</a>
+                                    `;
+                                    } else {
+                                        value = `
+                                        <div>
+                                            <div class="alert alert-warning" role="alert">
+                                            <i class="bi bi-exclamation-triangle-fill"></i> ${__("The file type can't be shown but you can download it") + ": <a download href=" + subValue + "/>" + type + ""}
+                                            </div>
+                                        </div>
+                                    `
+                                    }
                                 }
                             }
                             fields.push({title: property.value.alias || property.key, value});
@@ -819,23 +874,18 @@ module.exports = {
     getVectorTemplate: function (layerKey, multi = true) {
         let metaDataKeys = meta.getMetaDataKeys();
         let parsedMeta = layerTree.parseLayerMeta(metaDataKeys[layerKey]);
-        template = (parsedMeta.info_template && parsedMeta.info_template !== "") ? parsedMeta.info_template : defaultTemplate;
+        template = (parsedMeta.info_template && parsedMeta.info_template !== "") ? parsedMeta.info_template : window.vidiConfig?.crossMultiSelect ? defaultTemplateForCrossMultiSelect : defaultTemplate;
         if (window.vidiConfig.enabledExtensions.includes('editor')) {
             template = editToolsHtml + template;
         }
         return template;
     },
 
-    openInfoSlidePanel: function (layerKey = null) {
-        let e = $("#click-for-info-slide.slide-left");
-        e.show();
-        e.animate({left: "0"}, 200);
-        if (layerKey) {
-            let metaDataKeys = meta.getMetaDataKeys();
-            let title = typeof metaDataKeys[layerKey].f_table_title !== "undefined" ? metaDataKeys[layerKey].f_table_title : metaDataKeys[layerKey].f_table_name;
-            $("#click-for-info-slide .modal-title").html(title);
-
-        }
+    openInfoSlidePanel: function () {
+        layerTree.getInfoOffCanvas().show();
+    },
+    closeInfoSlidePanel: function () {
+        layerTree.getInfoOffCanvas().hide();
     },
 
     /**

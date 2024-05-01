@@ -4,21 +4,17 @@
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
-import React from 'react';
-//import { throttle, debounce } from "throttle-debounce";
-import IconButton from '@material-ui/core/IconButton';
-import ClearIcon from '@material-ui/icons/Clear';
 
+import React from 'react';
 import debounce from 'lodash.debounce';
 import throttle from 'lodash.throttle';
-
 
 function uniqBy(a, key) {
     var seen = {};
     return a.filter(function(item) {
         var k = key(item);
         return seen.hasOwnProperty(k) ? false : (seen[k] = true);
-    })
+    });
 }
 
 class DAWASearch extends React.Component {
@@ -28,54 +24,49 @@ class DAWASearch extends React.Component {
         this.state = {
             searchTerm: '',
             searchResults: [],
-
-            resultsPerSource: (props.resultsPerSource === undefined ) ? 3 : parseInt(props.resultsPerSource),
-            resultsMax: (props.resultsMax === undefined ) ? 10 : parseInt(props.resultsMax),
-            resultsKeepOpen: (props.resultsKeepOpen === undefined ) ? false : props.resultsKeepOpen,
-            fuzzy: (props.fuzzy === undefined ) ? true : props.fuzzy,
-            srid: (props.srid === undefined ) ? 25832 : parseInt(props.srid),
-            nocache: (props.nocache === undefined ) ? false : props.nocache,
-
-            enableAdresse: (props.enableAdresse === undefined ) ? true : props.enableAdresse,
-            enableMatrikel: (props.enableMatrikel === undefined ) ? true : props.enableMatrikel,
-            enableBFE: (props.enableBFE === undefined ) ? true : props.enableBFE,
-            enableSFE: (props.enableSFE === undefined ) ? true : props.enableSFE,
-
+            resultsPerSource: props.resultsPerSource === undefined ? 3 : parseInt(props.resultsPerSource),
+            resultsMax: props.resultsMax === undefined ? 10 : parseInt(props.resultsMax),
+            resultsKeepOpen: props.resultsKeepOpen === undefined ? false : props.resultsKeepOpen,
+            fuzzy: props.fuzzy === undefined ? true : props.fuzzy,
+            srid: props.srid === undefined ? 25832 : parseInt(props.srid),
+            nocache: props.nocache === undefined ? false : props.nocache,
+            enableAdresse: props.enableAdresse === undefined ? true : props.enableAdresse,
+            enableMatrikel: props.enableMatrikel === undefined ? true : props.enableMatrikel,
+            enableBFE: props.enableBFE === undefined ? true : props.enableBFE,
+            enableSFE: props.enableSFE === undefined ? true : props.enableSFE,
             placeholder: this.buildPlaceholder(),
-            triggerAtChar: (props.triggerAtChar === undefined ) ? 0 : parseInt(props.triggerAtChar)
-
+            triggerAtChar: props.triggerAtChar === undefined ? 0 : parseInt(props.triggerAtChar),
         };
+
         this.autocompleteSearchDebounced = debounce(this.autocompleteSearch, 1200);
         this.autocompleteSearchThrottled = throttle(this.autocompleteSearch, 1200);
         this.escFunction = this.escFunction.bind(this);
-
     }
-    componentDidMount(){
+
+    componentDidMount() {
         document.addEventListener("keydown", this.escFunction, false);
-      }
-    componentWillUnmount(){
-      document.removeEventListener("keydown", this.escFunction, false);
     }
 
-    escFunction(event){
-        if(event.keyCode === 27) {
-          this.clear();
-        }
-      }
+    componentWillUnmount() {
+        document.removeEventListener("keydown", this.escFunction, false);
+    }
 
-    clear(){
-        const _self = this;
-        _self.setState({ searchResults: [], searchTerm: '' })
+    escFunction(event) {
+        if (event.keyCode === 27) {
+            this.clear();
+        }
+    }
+
+    clear() {
+        this.setState({ searchResults: [], searchTerm: '' });
     }
 
     buildPlaceholder() {
-        //console.log(this.state);
         return 'Adresse, matr.nr, ESR nr. eller SFE nr.';
     }
 
     _handleResult = (id) => {
-        var s = this.state;
-        if (!s.resultsKeepOpen) {
+        if (!this.state.resultsKeepOpen) {
             this.setState({
                 searchResults: [],
                 searchTerm: ''
@@ -85,26 +76,20 @@ class DAWASearch extends React.Component {
     }
 
     dynamicSearch = (event) => {
-
-        var _self = this;
-        var s = _self.state;
         var term = event.target.value;
-
-        _self.setState({
+        this.setState({
             searchTerm: term,
-            }, () => {
-                const q = s.searchTerm;
-                if (q.length < s.triggerAtChar) {
-                    _self.autocompleteSearchThrottled(s.searchTerm);
-                } else {
-                    _self.autocompleteSearchDebounced(s.searchTerm);
+        }, () => {
+            const q = this.state.searchTerm;
+            if (q.length < this.state.triggerAtChar) {
+                this.autocompleteSearchThrottled(this.state.searchTerm);
+            } else {
+                this.autocompleteSearchDebounced(this.state.searchTerm);
             }
         });
-        
     };
 
     autocompleteSearch = q => {
-        //console.log(`Query: ${q}`)
         this._fetch(q);
     };
 
@@ -211,60 +196,49 @@ class DAWASearch extends React.Component {
     };
 
     render() {
-        var _self = this;
-        var p = this.props;
         var s = this.state;
 
-
         return (
-            <div>
-                <input id="geosag-input" type='text' value= { s.searchTerm } onChange={ this.dynamicSearch } placeholder={ s.placeholder } />
-                {s.searchTerm.length > 0 && 
-                <IconButton
-                    className="geosag-clear-button"
-                    onClick={event => this.clear()}
-                    size= {'small'}
-                    >
-                    <ClearIcon />
-                </IconButton>
-                }
-                
-                <ResultsList
-                    results= { s.searchResults }
-                    _handleResult={ _self._handleResult }
-                    q={ s.searchTerm }
-                    t={ s.triggerAtChar }
-                />
+            <div className='d-flex col-9 mx-auto position-relative'>
+                <div className="input-group">
+                    <input type="text" className="form-control" placeholder={s.placeholder} value={s.searchTerm} onChange={this.dynamicSearch} />
+                    {s.searchTerm.length > 0 && (
+                        <button className="btn btn-outline-secondary" type="button" onClick={this.clear.bind(this)}>
+                            <i className="bi bi-x"></i>
+                        </button>
+                    )}
+                </div>
+                {s.searchResults.length > 0 && <ResultsList
+                    results={s.searchResults}
+                    _handleResult={this._handleResult}
+                    q={s.searchTerm}
+                    t={s.triggerAtChar}
+                />}
             </div>
         );
     }
-};
+}
 
 class ResultsList extends React.Component {
-    constructor(props) {
-        super(props);
-    }
-
     _handleResult = (id) => {
         this.props._handleResult(id);
-    }
-    
-    render() {
-        var _self = this;
+    };
 
+    render() {
         if (this.props.results.length > 0) {
             return (
-                <div id="geosag-results">
-                    {this.props.results.map(r => <div className="geosag-result" onClick={_self._handleResult.bind(this, r)} key={r.tekst}>{r.tekst}</div>)}
-                </div> 
+                <div className="list-group position-absolute w-100 mt-37">
+                    {this.props.results.map((r, index) => (
+                        <button key={index} className="list-group-item list-group-item-action" onClick={() => this._handleResult(r)}>
+                            {r.tekst}
+                        </button>
+                    ))}
+                </div>
             );
         } else {
-            //if (this.props.q.length > 0 && this.props.q.length > this.props.t) {
-            //    return <p>Der er ikke fundet noget, prøv igen.</p>
-            //}
-            return '';
+            return null;
         }
     }
 }
 
-module.exports = DAWASearch;
+export default DAWASearch;

@@ -6,7 +6,6 @@
 
 'use strict';
 
-/* Import big-brains*/
 import {
     v4 as uuidv4
 } from 'uuid';
@@ -15,13 +14,6 @@ import JSZip from 'jszip';
 import LedningsEjerStatusTable from "./LedningsEjerStatusTable";
 import LedningsProgress from "./LedningsProgress";
 import LedningsDownload from "./LedningsDownload";
-import Button from '@material-ui/core/Button';
-import ArrowBackIcon from '@material-ui/icons/ArrowBack';
-import Select from '@material-ui/core/Select';
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import FormHelperText from '@material-ui/core/FormHelperText';
-import FormControl from '@material-ui/core/FormControl';
 
 // Get information from config.json
 
@@ -122,18 +114,6 @@ function hasChild(obj) {
     return !!Object.keys(obj).length;
 }
 
-require('snackbarjs');
-/**
- * Displays a snack!
- * @param {*} msg 
- */
-var snack = function (msg) {
-    jquery.snackbar({
-        htmlAllowed: true,
-        content: '<p>' + msg + '</p>',
-        timeout: 10000
-    });
-}
 
 /**
  * 
@@ -196,8 +176,8 @@ module.exports = {
                 var dict = {
 
                     "Info": {
-                        "da_DK": "infoDK",
-                        "en_US": "infoUS"
+                        "da_DK": "Graveassistenten gør det muligt at uploade en ledningspakke og se status på ledningsejere og ledninger i området. Du kan også downloade ledningsoplysningerne i andre formater.",
+                        "en_US": "Graveassistenten makes it possible to upload a ledningspakke and see the status of ledningsejere and ledninger in the area. You can also download the data contained in other formats."
                     },
 
                     "Plugin Tooltip": {
@@ -289,8 +269,8 @@ module.exports = {
                  * @param {*} xmlData 
                  */
                 var parsetoJSON = function (xmlData) {
+                    const {XMLParser} = require('fast-xml-parser');
                     var jsonObj, Err = {}
-                    var parser = require('fast-xml-parser');
                     var he = require('he');
 
                     var options = {
@@ -306,16 +286,15 @@ module.exports = {
                         cdataTagName: "__cdata", //default is 'false'
                         cdataPositionChar: "\\c",
                         parseTrueNumberOnly: false,
-                        arrayMode: false, //"strict"
-                        stopNodes: ["parse-me-as-string"],
-                        attrValueProcessor: (val, attrName) => he.decode(val, {isAttributeValue: true}),//default is a=>a
-                        tagValueProcessor : (val, tagName) => he.decode(val), //default is a=>a
+                        removeNSPrefix: true,
                     };
 
                     try {
-                        jsonObj = parser.parse(xmlData, options);
+                        var parser = new XMLParser(options);
+                        jsonObj = parser.parse(xmlData);
                     } catch (error) {
                         Err = error
+                        console.log(Err)
                     }
                     
                     // If you try to validate before parseing, like a good boy, you get TypeError in production!
@@ -465,7 +444,6 @@ module.exports = {
                  */
                 var parseConsolidated = function (consolidated) {
                     const cons = consolidated['FeatureCollection']['featureMember']
-                    //console.log(cons)
 
                     const returnObj = {
                         foresp: {},
@@ -687,6 +665,7 @@ module.exports = {
                 }
 
                 var parseStatus = function (statusObj) {
+                    //console.log(statusObj);
 
                     let ejerList = statusObj.LedningsejerListe.Ledningsejer
 
@@ -1015,21 +994,32 @@ module.exports = {
 
                     handleForespSelectChange(event) {
                         const _self = this
-                        _self.setState({
-                            foresp: String(event.target.value),
-                            lastBounds: cloud.get().map.getBounds()
-                        })
 
-                        // getForespoergsel - use schema is set
-                        if (schema_override) {
-                            _self.getForespoergsel(String(event.target.value), schema_override)
-                        } else {
-                            _self.getForespoergsel(String(event.target.value))
+                        var options = document.getElementById('graveAssistent-features').options;
+                        var found = Array.from(options).some(function(option) {
+                            return option.value === event.target.value;
+                        });
+
+                        if (found) {
+
+                            // Get forespoergsel, which is the part of options before the first':'
+                            var foresp = String(event.target.value.split(':')[0])
+                            _self.setState({
+                                foresp: foresp,
+                                lastBounds: cloud.get().map.getBounds()
+                            })
+    
+                            // getForespoergsel - use schema is set
+                            if (schema_override) {
+                                _self.getForespoergsel(foresp, schema_override)
+                            } else {
+                                _self.getForespoergsel(foresp)
+                            }
+    
+                            _self.setState({
+                                done: true
+                            })
                         }
-
-                        _self.setState({
-                            done: true
-                        })
                     }
 
                     /**
@@ -1039,8 +1029,6 @@ module.exports = {
                     readContents(zipblob) {
                         var _self = this;
                         var newZip = new JSZip();
-
-                        let wait = 5000
 
                         var statusKey = uuidv4()
                         var b64 = zipblob.split(',')[1];
@@ -1073,6 +1061,7 @@ module.exports = {
                                 ])
                             }).then(function(files) {
                                 var [status, consolidated] = files
+                                //console.log(files);
 
                                 return Promise.all([
                                     parsetoJSON(status),
@@ -1080,6 +1069,7 @@ module.exports = {
                                 ])
                             }).then(function(files) {
                                 var [status, consolidated] = files
+                                //console.log(files);
 
                                 return Promise.all([
                                     parseStatus(status),
@@ -1087,6 +1077,7 @@ module.exports = {
                                 ])
                             }).then(function(files) {
                                 var [status, consolidated] = files
+                                //console.log(files);
 
                                 if (schema_override) {
                                     return [Promise.all([
@@ -1272,7 +1263,7 @@ module.exports = {
                     }
 
                     clickLogin() {
-                        document.getElementById('session').click()
+                        document.querySelector('[data-bs-target="#login-modal"]').click();
                     }
 
                     /**
@@ -1282,81 +1273,41 @@ module.exports = {
                             const _self = this;
                             const s = _self.state
                             //console.log(s)
-
-                            const formControl = {
-                                minWidth: 120
-                            }
-                            const margin = {
-                                margin: 10
-                            }
-                            const bad = {
-                                color: 'white',
-                                padding: '2%',
-                                position: 'relative',
-                                display: 'block',
-                                textAlign: 'center',
-                                fontSize: '2rem',
-                                margin: '1rem',
-                                height: '50px',
-                                backgroundColor: '#eda72d'
-                            }
-                            const badder = {
-                                color: 'white',
-                                padding: '2%',
-                                position: 'relative',
-                                display: 'block',
-                                textAlign: 'center',
-                                fontSize: '2rem',
-                                margin: '1rem',
-                                height: '50px',
-                                backgroundColor: '#ed6d2d'
-                            }
-                            const baddest = {
-                                color: 'white',
-                                padding: '2%',
-                                position: 'relative',
-                                display: 'block',
-                                textAlign: 'center',
-                                fontSize: '2rem',
-                                margin: '1rem',
-                                height: '50px',
-                                backgroundColor: '#ed2d2d'
-                            }
-
-
-                    
-
+                   
                             if (s.authed) {
                                 // Logged in
                                 if (s.loading) {
                                     // If Loading, show progress
                                     return (
-                                        <div role = "tabpanel" >
-                                            <div className = "form-group" >
+                                        <div role="tabpanel">
+                                            <div>
                                                 <div>
-                                                    <LedningsProgress progress = {s.progress} text = {s.progressText} iserror = {s.isError} errorlist = {[]} />
-                                                    {s.isError === true ? <Button size = "large" color = "default" style = {margin} onClick = {_self.onBackClickHandler.bind(this)}>< ArrowBackIcon fontSize = "small" /> {__("backbutton")} </Button> : ''}
-                                                </div >
+                                                    <LedningsProgress progress={s.progress} text={s.progressText} isError={s.isError} errorList={[]} />
+                                                    {s.isError === true ? <button className="btn btn-sm btn-light" id="_draw_download_geojson" onClick={_self.onBackClickHandler.bind(this)}><i className="bi bi-arrow-left-short" aria-hidden="true"></i> Tilbage</button> : ''}
+                                                </div>
                                             </div>
                                         </div>
+
                                     )
                                 } else if (s.done) {
                                     // Either selected or uploaded.
                                     return ( 
                                         <div role = "tabpanel">
-                                            <div className = "form-group">
+                                            <div className = "form-group p-2">
                                                 <p>{__("uploadtime") + ': ' + this.humanTime(s.svarUploadTime)}</p>
-                                                <div style = {{display: 'flex'}}>
-                                                    <Button size = "large" color = "default" variant = "contained" style = {margin} onClick = {_self.onBackClickHandler.bind(this)}>
-                                                        <ArrowBackIcon fontSize = "small" />{__("backbutton")}
-                                                    </Button>
-                                                    <LedningsDownload style = {margin} size = "large" color = "default" variant = "contained" endpoint = "/api/extension/downloadForespoergsel" forespnummer = {s.foresp} schema={schema_override} />
+                                                <div className="p-2" style = {{display: 'flex'}}>
+                                                    <button className="btn btn-sm btn-light" id="_draw_download_geojson" onClick={_self.onBackClickHandler.bind(this)}>
+                                                        <i className="bi bi-arrow-left-short" aria-hidden="true"></i> Tilbage
+                                                    </button>
+                                                    <LedningsDownload size = "large" color = "default" variant = "contained" endpoint = "/api/extension/downloadForespoergsel" forespnummer = {s.foresp} schema={schema_override} />
                                                 </div >
-                                                <div id = "graveAssistent-feature-ledningsejerliste" >
-                                                    {s.overskredetDato && <div style={baddest}>Denne ledningspakke er ikke længere gyldig!</div>}
-                                                    {s.harFarlig && <div style={bad} >Indeholder farlige ledninger</div>}
-                                                    {s.harMegetFarlig && <div style={badder} >Indeholder meget farlige ledninger!</div>}
-                                                    {s.ejerliste.length > 0 ? <LedningsEjerStatusTable statusliste = {s.ejerliste}/> : <LedningsProgress progress={50} text={'Henter'} iserror={false} errorlist={[]} />}
+                                                <div className="d-flex flex-column bg-danger text-center text-light fw-bold p-2" id="graveAssistent-feature-warnings">
+                                                    {s.overskredetDato && <div className='p-2'>Denne ledningspakke er ikke længere gyldig!</div>}
+                                                    {s.harFarlig && <div className='p-2'>Indeholder farlige ledninger</div>}
+                                                    {s.harMegetFarlig && <div className='p-2'>Indeholder meget farlige ledninger!</div>}
+                                                </div>
+                                                <div id="graveAssistent-feature-ledningsejerliste" >
+                                                    {s.ejerliste.length > 0 ? <LedningsEjerStatusTable statusliste = {s.ejerliste}/> : <LedningsProgress progress={89} text={'Henter'} iserror={false} errorList={[]} />}
                                                 </div>
                                             </div>
                                         </div>
@@ -1364,25 +1315,27 @@ module.exports = {
                                 } else {
                                     // Just Browsing
                                     return (
-                                        <div role = "tabpanel" >
-                                            <div className = "form-group">
-                                                <div id = "graveAssistent-feature-select-container" style = {{width: '80%',margin: '10px auto 10px auto'}}>
-                                                    <FormControl style = {{width: '100%',padding: '20px'}}>
-                                                        <InputLabel id = "graveAssistent-feature-select-label"> Vælg eksisterende forespørgsel </InputLabel>
-                                                        <Select id = "graveAssistent-feature-select" value = {s.foresp} onChange = {_self.handleForespSelectChange.bind(this)}>
-                                                            {s.forespOptions.map(f => <MenuItem key = {f.forespnummer} value = {f.forespnummer}> {f.forespnummer + ': ' + f.bemaerkning + ' (Uploaded: ' + f.svar_uploadtime + ')'} </MenuItem>)}
-                                                        </Select>
-                                                    </FormControl>
-                                                    <div><p>Eller</p></div>
-                                                </div>
-                                                <div id = "graveAssistent-feature-dropzone">
-                                                    <Dropzone onDrop = {acceptedFiles => _self.onDrop(acceptedFiles)} style = {{width: '80%',height: '160px',padding: '50px',border: '1px green dashed',margin: '20px auto 20px auto',textAlign: 'center'}}>
-                                                        <p>{__("uploadmessage")}</p>
-                                                    </Dropzone>
+                                        <div role="tabpanel">
+                                            <div className="form-group p-4">
+                                                <div id="graveAssistent-feature-select-container" className="w-80 mx-auto my-2">
+                                                    <label htmlFor="graveAssistent-feature-input" className="form-label">Vælg eksisterende forespørgsel</label>
+                                                    <input className="form-control" placeholder="Søg efter forespørgsel..." list="graveAssistent-features" id="graveAssistent-feature-input" onChange={_self.handleForespSelectChange.bind(this)} />
+                                                    <datalist id="graveAssistent-features">
+                                                        {s.forespOptions.map(f => <option key={f.forespnummer} value={`${f.forespnummer}: ${f.bemaerkning} (Uploaded: ${this.humanTime(f.svar_uploadtime)})`} />)}
+                                                    </datalist>
+                                                    <div className='d-grid mt-4'>
+                                                        <p className="text-center">Eller</p>
+                                                    </div>
+                                                    <div id="graveAssistent-feature-dropzone" className="w-80 mx-auto">
+                                                        <Dropzone className="d-grid align-items-center" onDrop={acceptedFiles => _self.onDrop(acceptedFiles)} style={{height: '160px',backgroundColor: 'var(--bs-primary-tint-90)', borderRadius:'10px'}}>
+                                                            <p className='text-center'>{__("uploadmessage")}</p>
+                                                        </Dropzone>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                            )
+                                    )
+                                    
                                         }
                                     }
                                     else {
@@ -1393,9 +1346,9 @@ module.exports = {
                                                     <div id = "graveAssistent-feature-login" className = "alert alert-info" role = "alert" >
                                                         {__("MissingLogin")}
                                                     </div>
-                                                    <Button onClick = {() => this.clickLogin()} color = "primary" size = "large" variant = "contained" style = {{marginRight: "auto", marginLeft: "auto", display: "block" }}>
-                                                        {__("Login")}
-                                                    </Button>
+                                                    <div className="d-grid col-3 mx-auto">
+                                                        <button onClick = {() => this.clickLogin()} type="button" className="btn btn-primary">{__("Login")}</button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         )
@@ -1403,7 +1356,7 @@ module.exports = {
                                 }
                             }
 
-                            utils.createMainTab(exId, __("Plugin Tooltip"), __("Info"), require('./../../../browser/modules/height')().max, "create_new_folder", false, exId);
+                            utils.createMainTab(exId, __("Plugin Tooltip"), __("Info"), require('./../../../browser/modules/height')().max, "bi-folder-plus", false, exId);
 
                             // Append to DOM
                             //==============

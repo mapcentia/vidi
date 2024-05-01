@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh
- * @copyright  2013-2020 MapCentia ApS
+ * @copyright  2013-2022 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -25,10 +25,9 @@ class LabelSettingToggle extends React.Component {
 
     render() {
         return (<div>
-            <div className="togglebutton">
-                <label style={{ textIndent: `0px`, paddingLeft: `0px` }}>
-                    <input checked={this.state.checked} onChange={this.handleChange} type="checkbox"/> {__(`Show labels`)}
-                </label>
+            <div className="form-check">
+                <input className="form-check-input" id="label-setting-switch" checked={this.state.checked} onChange={this.handleChange} type="checkbox"/>
+                <label className="form-check-label" htmlFor="label-setting-switch">{__(`Show labels`)}</label>
             </div>
         </div>)
     }

@@ -14,6 +14,7 @@ let reportRender;
 let infoClick;
 let cloud;
 let state;
+let utils;
 let stateFromDb;
 let reportType = "1";
 let _self;
@@ -38,6 +39,7 @@ module.exports = {
         backboneEvents = o.backboneEvents;
         conflictSearch = o.extensions.conflictSearch.index;
         cloud = o.cloud;
+        utils = o.utils;
         _self = this;
         return this;
     },
@@ -67,6 +69,8 @@ module.exports = {
                     stateFromDb = null;
                 }, 0);
                 conflictSearch.setValueForSlider(stateFromDb.bufferValue);
+                conflictSearch.setIsCurrentFromDrawing(stateFromDb.isCurrentFromDrawing);
+                conflictSearch.setCurrentFromDrawingId(stateFromDb.currentFromDrawingId);
                 conflictSearch.handleResult(stateFromDb);
                 reportType = stateFromDb.reportType;
                 $("input[name='conflict-report-type'][value='" + reportType + "']").prop("checked", true);
@@ -74,11 +78,17 @@ module.exports = {
             }
             state.getModuleState(MODULE_ID).then(initialState => {
                 if (initialState) {
-                    conflictSearch.setValueForSlider(initialState.bufferValue);
-                    if (typeof urlparser.urlVars?.var_landsejerlavskode === "undefined" || conflictSearch.getFromVarsIsDone()) {
-                        conflictSearch.handleResult(initialState);
+                    try {
+                        conflictSearch.setValueForSlider(initialState.bufferValue);
+                        conflictSearch.setIsCurrentFromDrawing(initialState.isCurrentFromDrawing);
+                        conflictSearch.setCurrentFromDrawingId(initialState.currentFromDrawingId);
+                        if (typeof urlparser.urlVars?.var_landsejerlavskode === "undefined" || conflictSearch.getFromVarsIsDone()) {
+                            conflictSearch.handleResult(initialState);
+                        }
+                        reportType = initialState.reportType || "1";
+                    } catch (e) {
+                       console.error(e)
                     }
-                    reportType = initialState.reportType || "1";
                 }
                 $("input[name='conflict-report-type'][value='" + reportType + "']").prop("checked", true);
             });
@@ -136,7 +146,7 @@ module.exports = {
                 // Trigger print dialog off
                 $("#conflict-set-print-area-btn").prop("disabled", true);
                 $("#conflict-get-print-fieldset").prop("disabled", true);
-                $(this).button('loading');
+                $(this).find("span").show()
                 print.control(printC, scales, "_conflictPrint", "A4", "p", "inline");
 
                 
@@ -153,7 +163,7 @@ module.exports = {
                         print.cleanUp(true);
                         $("#conflict-get-print-fieldset").prop("disabled", false);
                         $("#conflict-download-pdf, #conflict-open-pdf").prop("href", "/tmp/print/pdf/" + res.key + ".pdf");
-                        $("#conflict-print-btn").button('reset');
+                        $("#conflict-print-btn").find("span").hide()
                         backboneEvents.get().trigger("end:conflictSearchPrint", res);
                         $("#conflict-set-print-area-btn").prop("disabled", false);
                     });
@@ -162,22 +172,25 @@ module.exports = {
                     // Report is lang/komplet
                     let results = conflictSearch.getResult();
                     let positiveHits = JSON.parse(JSON.stringify(results));
+                    let withErrors = [];
                     for (const property in results.hits) {
                         if (property && results.hits.hasOwnProperty(property)) {
+                            if (results.hits[property].error) {
+                                withErrors.push(results.hits[property].error);
+                            }
                             if (reportType === "2" && results.hits[property].hits === 0) {
                                 delete positiveHits.hits[property];
                             }
                         }
                     }
+                    if (reportType === "2" && withErrors.length > 0) {
+                        alert(`Bemærk, at ${withErrors.length} lag meldte fejl. Disse vil ikke fremgå af valgte rapporttype. Vælge en anden type, hvis du ønsker, at fejl skal fremgå`)
+                    }
                     let hits = positiveHits.hits
                     numOfHits = Object.keys(hits).length;
                     let track = [];
-                    $.snackbar({
-                        id: "snackbar-conflict-print",
-                        content: "<span>" + __("Prints completed") + " <span id='conflict-print-progress'>0/" + numOfHits + "</span></span>",
-                        htmlAllowed: true,
-                        timeout: 1000000
-                    });
+
+                    utils.showInfoToast("<span>" + __("Prints completed") + " <span id='conflict-print-progress'>0/" + numOfHits + "</span></span>", {autohide: false}, conflictSearch.TOAST_ID)
 
                     let plotsArr = [];
                     for (const property in positiveHits.hits) {
@@ -207,10 +220,10 @@ module.exports = {
                             .then((data) => {
                                 $("#conflict-get-print-fieldset").prop("disabled", false);
                                 $("#conflict-download-pdf, #conflict-open-pdf").prop("href", "/tmp/print/pdf/" + data.key + ".pdf");
-                                $("#conflict-print-btn").button('reset');
+                                $("#conflict-print-btn").find("span").hide()
                                 backboneEvents.get().trigger("end:conflictSearchPrint", data);
                                 setTimeout(function () {
-                                    $("#snackbar-conflict-print").snackbar("hide");
+                                    utils.hideInfoToast(conflictSearch.TOAST_ID);
                                 }, 200);
                             });
                     }

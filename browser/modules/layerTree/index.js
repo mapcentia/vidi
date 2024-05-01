@@ -1,6 +1,6 @@
 /*
  * @author     Alexander Shumilov
- * @copyright  2013-2021 MapCentia ApS
+ * @copyright  2013-2023 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -16,12 +16,12 @@ import {
     LOG,
     MAP_RESOLUTIONS,
     MODULE_NAME,
+    SELECTED_ICON_SCALE,
+    SELECTED_STYLE,
     SUB_GROUP_DIVIDER,
     SYSTEM_FIELD_PREFIX,
-    VIRTUAL_LAYERS_SCHEMA,
     VECTOR_SIDE_TABLE_EL,
-    SELECTED_STYLE,
-    VECTOR_STYLE
+    VIRTUAL_LAYERS_SCHEMA
 } from './constants';
 import dayjs from 'dayjs';
 import mustache from 'mustache';
@@ -45,6 +45,7 @@ import {
     point as turfPoint
 } from '@turf/turf'
 import MetaSettingForm from "./MetaSettingForm";
+import Download from './Download';
 
 
 let _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEvents,
@@ -100,6 +101,9 @@ let moduleState = {
     labelSettings: {},
     vectorStyles: {}
 };
+let infoOffCanvas;
+let bindEvent;
+let initialFilterIsApplied = false;
 
 /**
  *
@@ -117,14 +121,32 @@ module.exports = {
         backboneEvents = o.backboneEvents;
         extensions = o.extensions;
         utils = o.utils;
+        bindEvent = o.bindEvent;
 
         offlineModeControlsManager = new OfflineModeControlsManager(meta);
+
+        // expose api
+        api.filter = (l, f) => {
+            _self.onApplyArbitraryFiltersHandler({"layerKey": l, "filters": f});
+            filterComp[l].setState({"arbitraryFilters": f});
+        }
 
         return this;
     },
 
     init: function () {
         _self = this;
+
+        try {
+            infoOffCanvas = new bootstrap.Offcanvas('#offcanvasInfo');
+            document.getElementById('offcanvasInfo').addEventListener('hide.bs.offcanvas', event => {
+                _self.resetAllVectorLayerStyles();
+                sqlQuery.resetAll();
+            })
+        } catch (e) {
+
+        }
+
         // Update the queue statistics when group panel is opened.
         // In case of the layer tree component is not rendered yet
         $(document).arrive('.js-toggle-layer-panel', function (e, data) {
@@ -136,8 +158,30 @@ module.exports = {
         });
         // If map is clicked, when clear all selections
         cloud.get().map.on('preclick', () => {
-            _self.resetAllVectorLayerStyles();
-            sqlQuery.resetAll()
+            try {
+                _self.resetAllVectorLayerStyles();
+                _self.getInfoOffCanvas().hide();
+                sqlQuery.resetAll();
+                // If no queryable tile layers are active then close the off canvas.
+                const l = _self.getActiveLayers().filter(e => {
+                    if (e.split(':').length === 1) {
+                        try {
+                            const m = meta.getMetaByKey(e)
+                            if (m?.not_querable !== true) {
+                                return true;
+                            }
+                        } catch (e) {
+                            console.error(e.message)
+                            return true;
+                        }
+                    }
+                })
+                if (l.length === 0) {
+                    // sqlQuery.closeInfoSlidePanel();
+                }
+            } catch (e) {
+
+            }
         })
         if (window.vidiConfig.enabledExtensions.indexOf(`editor`) !== -1) moduleState.editingIsEnabled = true;
         $(document).arrive('#layers-filter-reset', function (e, data) {
@@ -148,7 +192,7 @@ module.exports = {
         });
         $(document).arrive('#layers-filter', function (e, data) {
             const filterBusy = $('#layers-filter-busy');
-            const filterReset = $('#layers-filter-reset');
+            const filterReset = $('#layers-filter-reset i');
             let timeOut;
             $(this).on('input', function (e) {
                 clearTimeout(timeOut)
@@ -169,7 +213,17 @@ module.exports = {
                 c();
             })
         });
-        $("#layers").before(`<div id="layer-filter-container" style="display: flex; align-items: center"><div class="form-group" style="flex-grow: 1;"><input placeholder="${__('Layer filter')}" class="form-control" type="text" id="layers-filter" autocomplete="off"></div><div style="width: 18px; display: flex; justify-content:center"><div id="layers-filter-reset" style="display: inline; cursor: pointer"><i class="fas fa-times"></i></div><div id="layers-filter-busy" style="display: none"><i class="fas fa-circle-notch fa-spin"></i></div></div></div>`);
+        $("#layers").before(`
+                                <div class="input-group mb-3 layer-filter">
+                                    <input placeholder="${__('Filter')}" class="form-control" type="text" id="layers-filter" autocomplete="off">
+                                    <button id="layers-filter-reset" class="btn btn-outline-secondary" type="button" id="button-addon2">
+                                        <i class="bi bi-x-lg"></i>
+                                        <div id="layers-filter-busy" style="display: none" class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                                    </button>
+                                  
+                                </div>
+                             
+                             `);
 
         if (urlparser && urlparser.urlVars && urlparser.urlVars.initialFilter) {
             backboneEvents.get().on(`${MODULE_NAME}:ready`, () => {
@@ -188,14 +242,18 @@ module.exports = {
 
                     // Wait for layer load event
                     backboneEvents.get().on(`doneLoading:layers`, (loadedLayerName) => {
-                        if (layerTreeUtils.stripPrefix(loadedLayerName) === layerTreeUtils.stripPrefix(layerKey)) {
+                        let parsedMeta = meta.parseLayerMeta(layerKey);
+                        let maxZoom = 16;
+                        if (parsedMeta?.max_zoom_level_table_click) {
+                            maxZoom = parseInt(parsedMeta.max_zoom_level_table_click);
+                        }
+                        if (layerTreeUtils.stripPrefix(loadedLayerName) === layerTreeUtils.stripPrefix(layerKey) && !initialFilterIsApplied) {
+                            initialFilterIsApplied = true;
                             for (let key in cloud.get().map._layers) {
                                 let layer = cloud.get().map._layers[key];
                                 if (`id` in layer && layer.id && layerTreeUtils.stripPrefix(layer.id) === layerTreeUtils.stripPrefix(layerKey)) {
-                                    cloud.get().map.fitBounds(layer.getBounds(), {maxZoom: 16});
-                                    setTimeout(() => {
-                                        console.log(`Query filter parameter was applied`);
-                                    }, 1000);
+                                    cloud.get().map.fitBounds(layer.getBounds(), {maxZoom});
+                                    console.log(`Query filter parameter was applied`);
                                 }
                             }
                         }
@@ -321,8 +379,23 @@ module.exports = {
             data[layerKey] = overallFilters;
             parameterString = `filters=` + base64url(JSON.stringify(data));
         }
-        $(`[data-gc2-layer-key^="${layerKey}"]`).find(`.js-toggle-filters-number-of-filters`).text(overallFilters.length);
+        _self.activeFiltersChange(layerKey)
+
         return parameterString;
+    },
+
+    activeFiltersChange: (layerKey) => {
+        const bg = $(`[data-gc2-layer-key^="${layerKey}"]`);
+        let activeFilters = _self.getActiveLayerFilters(layerKey);
+        let parentFilters = _self.getParentLayerFilters(layerKey);
+        let overallFilters = activeFilters.concat(parentFilters);
+        const show = overallFilters.length > 0;
+        if (show) {
+            bg.find(`.rounded-pill`).removeClass('d-none');
+        } else {
+            bg.find(`.rounded-pill`).addClass('d-none');
+        }
+        bg.find(`.set-extent-btn`).prop('disabled', !show);
     },
 
     /**
@@ -330,11 +403,11 @@ module.exports = {
      *
      * @returns {Array}
      */
-    getActiveLayers: () => {
+    getActiveLayers: (ignoreEnabled = false) => {
         let result = [];
         let activeLayers = switchLayer.getLayersEnabledStatus();
         for (let key in activeLayers) {
-            if (activeLayers[key].enabled) {
+            if (activeLayers[key].enabled || ignoreEnabled) {
                 result.push(activeLayers[key].fullLayerKey);
             }
         }
@@ -377,7 +450,6 @@ module.exports = {
                     let parsedMeta = meta.parseLayerMeta(layerKey);
 
                     const hideFilters = () => {
-                        $(container).find(`.js-toggle-filters, .js-toggle-filters-number-of-filters`).hide(0);
                         $(container).find('.js-layer-settings-filters').hide(0);
                     };
 
@@ -416,11 +488,19 @@ module.exports = {
                     };
 
                     const hideAddFeature = () => {
-                        $(container).find('.gc2-add-feature').css(`visibility`, `hidden`);
+                        $(container).find('.gc2-add-feature').css(`display`, `none`);
                     };
                     const hideSettingsBtn = () => {
                         $(container).find('.js-settings-panel-btn').prop(`disabled`, true);
                         $(container).find('.collapse').collapse('hide');
+                    };
+                    const hideDownload = () => {
+                        $(container).find(`.js-toggle-download`).hide(0);
+                        $(container).find('.js-layer-settings-download').hide(0);
+                    };
+
+                    const deactivateAll = () => {
+                        $(container).find('.js-toggle-btn').removeClass(`active`);
                     }
                     const getLayerSwitchControl = () => {
                         let controlElement = $('input[class="js-show-layer-control"][data-gc2-id="' + layerKey + '"]');
@@ -444,14 +524,14 @@ module.exports = {
                         }
 
                         if (layerIsEnabled) {
-                            $(container).find('.gc2-add-feature').css(`visibility`, `visible`);
+                            $(container).find('.gc2-add-feature').css(`display`, `inline`);
                             $(container).find('.js-settings-panel-btn').prop(`disabled`, false);
                             $(container).find(`.js-toggle-search`).show(0);
-                            $(container).find(`.js-toggle-filters, .js-toggle-filters-number-of-filters`).show(0);
                             $(container).find(`.js-toggle-load-strategy`).show(0);
                             $(container).find(`.js-toggle-layer-offline-mode-container`).css(`display`, `inline-block`);
                             $(container).find(`.js-toggle-table`).show(0);
                             $(container).find(`.js-toggle-style`).show(0);
+                            $(container).find(`.js-toggle-download`).show(0);
                         } else {
                             hideAddFeature();
                             hideFilters();
@@ -463,6 +543,8 @@ module.exports = {
                             hideSearch();
                             hideStyleFn();
                             hideSettingsBtn();
+                            deactivateAll();
+                            hideDownload();
                         }
                     } else if (desiredSetupType === LAYER.RASTER_TILE || desiredSetupType === LAYER.VECTOR_TILE) {
                         // Opacity and filters should be kept opened after setLayerState()
@@ -475,13 +557,13 @@ module.exports = {
 
                         hideOfflineMode();
                         if (layerIsEnabled) {
-                            $(container).find('.gc2-add-feature').css(`visibility`, `visible`);
+                            $(container).find('.gc2-add-feature').css(`display`, `inline`);
                             $(container).find('.js-settings-panel-btn').prop(`disabled`, false);
                             $(container).find(`.js-toggle-opacity`).show(0);
                             $(container).find(`.js-toggle-labels`).show(0);
                             $(container).find(`.js-toggle-filters`).show(0);
-                            $(container).find(`.js-toggle-filters-number-of-filters`).show(0);
                             $(container).find(`.js-toggle-search`).show(0);
+                            $(container).find(`.js-toggle-download`).show(0);
                         } else {
                             hideAddFeature();
                             hideFilters();
@@ -489,6 +571,8 @@ module.exports = {
                             hideLabels();
                             hideSearch();
                             hideSettingsBtn();
+                            deactivateAll();
+                            hideDownload();
                         }
 
                         // Hide filters if cached, but not if layer has a valid predefined filter
@@ -520,9 +604,11 @@ module.exports = {
                         hideLabels();
                         hideSearch();
                         hideSettingsBtn();
+                        deactivateAll();
                     } else {
                         throw new Error(`${desiredSetupType} control setup is not supported yet`);
                     }
+                    _self.activeFiltersChange(layerKey)
 
                     // Open filter dialog.
                     if (desiredSetupType === LAYER.RASTER_TILE || desiredSetupType === LAYER.VECTOR_TILE || desiredSetupType === LAYER.VECTOR) {
@@ -644,8 +730,10 @@ module.exports = {
             preparedVirtualLayers.push(localLayer);
         });
 
+        let order = moduleState.layerTreeOrder;
+
         return {
-            order: moduleState.layerTreeOrder,
+            order,
             arbitraryFilters: moduleState.arbitraryFilters,
             fitBoundsActiveOnLayers: moduleState.fitBoundsActiveOnLayers,
             labelSettings: moduleState.labelSettings,
@@ -818,10 +906,25 @@ module.exports = {
 
         /**
          * Listening to event that indicates if viewport tiles of specific layer contain any data
+         * Legend for layer will be hidden if it doesn't contain data.
          */
         backboneEvents.get().on(`tileLayerVisibility:layers`, (data) => {
             moduleState.tileContentCache[data.id] = data.dataIsVisible;
-            $(`[data-gc2-layer-key^="${data.id}."]`).find(`.js-tiles-contain-data`).css(`visibility`, (data.dataIsVisible ? `visible` : `hidden`));
+            $(`[data-gc2-layer-key^="${data.id}."]`).find(`.js-tiles-contain-data`).css(`display`, (data.dataIsVisible ? `inline` : `none`));
+            if (data.shouldLegendReact) {
+                const poll = (d) => {
+                    let clone = JSON.parse(JSON.stringify(d));
+                    const s = `#legend [data-gc2-id^="${clone.id}"]`;
+                    let e = document.querySelector(s);
+                    if (e) {
+                        const p = e.parentElement.parentElement.parentElement;
+                        p.style.setProperty(`display`, (clone.dataIsVisible ? `inline` : `none`));
+                    } else {
+                        setTimeout(() => poll(clone), 100)
+                    }
+                };
+                poll.bind(this, data)();
+            }
         });
 
         /**
@@ -1023,9 +1126,9 @@ module.exports = {
                                 moduleState.layerTreeOrder = order;
                                 if (moduleState.editingIsEnabled) {
                                     let toggleOfllineOnlineMode = _self._setupToggleOfflineModeControl();
-                                    if (toggleOfllineOnlineMode) {
-                                        $("#layers").append(toggleOfllineOnlineMode);
-                                    }
+                                    // if (toggleOfllineOnlineMode) {
+                                    //     $("#layers").append(toggleOfllineOnlineMode);
+                                    // }
                                 }
 
                                 let groups = [];
@@ -1049,7 +1152,7 @@ module.exports = {
                                     arr = layerSortingInstance.sortGroups(order, notSortedGroupsArray);
                                 }
 
-                                $("#layers").append(`<div id="layers_list"></div>`);
+                                $("#layers").append(`<div class="layer-list vstack gap-2"></div>`);
 
                                 // Filling up groups and underlying layers (except ungrouped ones)
                                 latestFullTreeStructure = [];
@@ -1065,7 +1168,7 @@ module.exports = {
                                 }
 
                                 _self._setupToggleOfflineModeControlsForLayers().then(() => {
-                                    $(`#layers_list`).sortable({
+                                    $(`.layer-list`).sortable({
                                         axis: 'y',
                                         handle: `.layer-move-vert`,
                                         stop: (event, ui) => {
@@ -1095,8 +1198,12 @@ module.exports = {
                                                         if (!dt) layersAreActivatedPromises.push(switchLayer.init(layerName, true, true));
                                                     });
 
+                                                    // Init legend after a state is invoked but not if print
+                                                    // because the print process will end with a legend init.
                                                     Promise.all(layersAreActivatedPromises).then(() => {
-                                                        legend.init();
+                                                        if (!urlparser.urlVars.k) {
+                                                            legend.init();
+                                                        }
                                                     });
                                                 }
 
@@ -1399,12 +1506,7 @@ module.exports = {
      * @return {void}
      */
     maxFeaturesNotification: (layerKey) => {
-        $.snackbar({
-            id: "snackbar-watsonc",
-            content: `<span id="conflict-progress">${__("max_number_of_loaded_features_was_reached_notification")} (${layerKey})</span>`,
-            htmlAllowed: true,
-            timeout: 7000
-        });
+        utils.showInfoToast(__("max_number_of_loaded_features_was_reached_notification") + ' ' + layerKey);
     },
 
     /**
@@ -1424,7 +1526,24 @@ module.exports = {
         let parentFiltersHash = ``;
         let layerKey = layer.f_table_schema + '.' + layer.f_table_name;
         const layerSpecificQueryLimit = layerTreeUtils.getQueryLimit(meta.parseLayerMeta(layerKey));
-        let sql = `SELECT *
+        const metaDataKeys = meta.getMetaDataKeys();
+        let fields = metaDataKeys?.[layerKey]?.fields || null;
+        let fieldStr;
+        let fieldNames = [];
+        if (fields) {
+            Object.keys(fields).forEach(function(i) {
+                let v = fields[i];
+                if (v.type === 'bytea') {
+                    fieldNames.push(`encode("${i}",'escape') as "${i}"`);
+                } else if (fieldConf?.[i]?.ignore !== true) {
+                    fieldNames.push(`"${i}"`);
+                }
+            });
+            fieldStr = fieldNames.join(',');
+        } else {
+            fieldStr = '*';
+        }
+        let sql = `SELECT ${fieldStr}
                    FROM ${layerKey} LIMIT ${layerSpecificQueryLimit}`;
         if (isVirtual) {
             let storeWasFound = false;
@@ -1446,12 +1565,10 @@ module.exports = {
             overallFilters.map(item => {
                 whereClauses.push(item);
             });
-
             if (parentFilters && parentFilters.length > 0) {
                 parentFiltersHash = btoa(JSON.stringify(parentFilters));
             }
-
-            $(`[data-gc2-layer-key="${layerKey + `.` + layer.f_geometry_column}"]`).find(`.js-toggle-filters-number-of-filters`).text(activeFilters.length);
+            _self.activeFiltersChange(layerKey)
 
             // Checking if versioning is enabled for layer
             if (`versioning` in layer && layer.versioning) {
@@ -1503,6 +1620,13 @@ module.exports = {
             fieldConf = {};
         }
         const pane = layer.f_table_schema + '-' + layer.f_table_name;
+        let hl = null;
+        try {
+            hl = meta.parseLayerMeta(layerKey)?.line_highlight_style ? JSON.parse(meta.parseLayerMeta(layerKey).line_highlight_style) : null
+        } catch (e) {
+            hl = null;
+            console.error(`Error in highlight style for ${layerKey}`, e.message);
+        }
         if (typeof moduleState.vectorStores[trackingLayerKey] !== "object" || recreateStores) {
             moduleState.vectorStores[trackingLayerKey] = new geocloud.sqlStore({
                 map: cloud.get().map,
@@ -1527,11 +1651,12 @@ module.exports = {
                 styleMap: styles[trackingLayerKey],
                 sql,
                 clustering: layerTreeUtils.getIfClustering(meta.parseLayerMeta(layerKey)),
+                hl,
                 onLoad: (l) => {
                     let reloadInterval = meta.parseLayerMeta(layerKey)?.reload_interval;
                     let tableElement = meta.parseLayerMeta(layerKey)?.show_table_on_side;
                     // Create side table once
-                    if (tableElement && !$('#' + VECTOR_SIDE_TABLE_EL).length && window.vidiConfig.template === "embed.tmpl") {
+                    if (tableElement) {
                         let styles;
                         let height = null;
                         let tableBodyHeight;
@@ -1596,15 +1721,17 @@ module.exports = {
                     if (tooltipTemplate) {
                         _self.toolTip(layer, feature, tooltipTemplate, pane);
                     }
+                    // TODO test with and without crossMultiSelect
                     if ((LAYER.VECTOR + ':' + layerKey) in onEachFeature && !window.vidiConfig.crossMultiSelect) {
                         /*
                             Checking for correct onEachFeature structure
                         */
-                        if (`fn` in onEachFeature[LAYER.VECTOR + ':' + layerKey] === false || !onEachFeature[LAYER.VECTOR + ':' + layerKey].fn ||
-                            `caller` in onEachFeature[LAYER.VECTOR + ':' + layerKey] === false || !onEachFeature[LAYER.VECTOR + ':' + layerKey].caller) {
+                        if (!(`fn` in onEachFeature[LAYER.VECTOR + ':' + layerKey]) || !onEachFeature[LAYER.VECTOR + ':' + layerKey].fn || !(`caller` in onEachFeature[LAYER.VECTOR + ':' + layerKey]) || !onEachFeature[LAYER.VECTOR + ':' + layerKey].caller) {
                             throw new Error(`Invalid onEachFeature structure`);
                         }
+                        onEachFeature[LAYER.VECTOR + ':' + layerKey].fn(feature, layer);
                         if (onEachFeature[LAYER.VECTOR + ':' + layerKey].caller === `editor`) {
+                            // TODO Is this used?
                             /*
                                 If the handler was set by the editor extension, then display the attributes popup and editing buttons
                             */
@@ -1614,6 +1741,12 @@ module.exports = {
                             layer.on("click", function (e) {
                                 _self.resetAllVectorLayerStyles();
                                 sqlQuery.resetAll();
+
+                                // Scale icon markers
+                                if (e.target?._icon) {
+                                    _self.scaleIcon(e.target._icon)
+                                }
+
                                 if (!window.vidiConfig.crossMultiSelect && e.target?.setStyle) {
                                     e.target.setStyle(SELECTED_STYLE);
                                 }
@@ -1637,19 +1770,22 @@ module.exports = {
                             });
                         }
 
-                        onEachFeature[LAYER.VECTOR + ':' + layerKey].fn(feature, layer);
                     } else {
                         // If there is no handler for specific layer, then display attributes only
                         layer.on("click", function (e) {
                             _self.resetAllVectorLayerStyles();
                             sqlQuery.resetAll();
+                            // Cross Multi select disabled
                             if (!window.vidiConfig?.crossMultiSelect) {
                                 if (e.target?.setStyle) {
                                     e.target.setStyle(SELECTED_STYLE);
+
                                 }
-                            }
-                            // Cross Multi select disabled
-                            if (!window.vidiConfig.crossMultiSelect) {
+                                // Scale icon markers
+                                if (e.target?._icon) {
+                                    _self.scaleIcon(e.target._icon)
+                                }
+
                                 _self.displayAttributesPopup([{
                                         feature: feature,
                                         layer: layer,
@@ -1666,7 +1802,14 @@ module.exports = {
                             let intersectingFeatures = [];
                             // Get active raster tile layers, so we can check if database should be queried
                             let activelayers = layers.getMapLayers() ? layers.getLayers().split(",") : [];
-                            let activeTilelayers = activelayers.filter(layer => !layer.startsWith(LAYER.VECTOR + ':') && !layer.startsWith(LAYER.VECTOR_TILE + ':') && !layer.startsWith(LAYER.WEBGL + ':'))
+                            let activeTilelayers = activelayers.filter(e => {
+                                if (e.split(':').length === 1) {
+                                    const m = meta.getMetaByKey(e)
+                                    if (m?.not_querable !== true) {
+                                        return true;
+                                    }
+                                }
+                            })
                             // Filter tiles layer without pixels
                             activeTilelayers = activeTilelayers.filter((key) => {
                                 if (typeof moduleState.tileContentCache[key] === "boolean" && moduleState.tileContentCache[key] === true) {
@@ -1701,13 +1844,26 @@ module.exports = {
                                 let overlay = mapObj._layers[l];
                                 if (overlay._layers) {
                                     for (let f in overlay._layers) {
-                                        let featureForChecking = overlay._layers[f];
-                                        if (!featureForChecking?.feature?.geometry) {
+                                        if (!overlay._layers[f]?.feature?.geometry || overlay?.id?.startsWith('HL:')) {
                                             continue;
                                         }
+                                        let featureForChecking = overlay._layers[f];
                                         let feature = turfFeature(featureForChecking.feature.geometry);
                                         try {
                                             if (turfIntersects(clickFeature, feature) && overlay.id) {
+                                                const layerId = overlay.id.split(":")[1];
+                                                try {
+                                                    const zoom = mapObj.getZoom();
+                                                    const parsedMeta = JSON.parse(meta.getMetaByKey(layerId).meta);
+                                                    const minZoom = parseInt(parsedMeta.vector_min_zoom);
+                                                    const maxZoom = parseInt(parsedMeta.vector_max_zoom);
+                                                    if (minZoom > zoom || maxZoom < zoom) {
+                                                        console.log(layerId + " is out of min/max zoom")
+                                                        continue;
+                                                    }
+                                                } catch (e) {
+                                                    console.error(e)
+                                                }
                                                 intersectingFeatures.push({
                                                     feature: featureForChecking.feature,
                                                     layer: featureForChecking,
@@ -1757,9 +1913,7 @@ module.exports = {
         overallFilters.map(item => {
             whereClauses.push(item);
         });
-
-        $(`[data-gc2-layer-key="${layerKey + `.` + layer.f_geometry_column}"]`).find(`.js-toggle-filters-number-of-filters`).text(activeFilters.length);
-
+        _self.activeFiltersChange(layerKey)
         // Checking if versioning is enabled for layer
         if (`versioning` in layer && layer.versioning) {
             whereClauses.push(`gc2_version_end_date is null`);
@@ -1855,12 +2009,65 @@ module.exports = {
         if (layerWithData.length === 1) {
             let tableContainerId = element ? element : `#table_view-${layerKey.replace(".", "_")}`;
             if ($(tableContainerId + ` table`).length > 0) $(tableContainerId).empty();
-            $(tableContainerId).append(`<table class="table" data-show-toggle="${defaults.showToggle}" data-search-highlight="true"  data-search="${defaults.showSearch}" data-show-export="${defaults.showExport}" data-show-columns="${defaults.showColumns}" data-card-view="${defaults.cardView}"></table>`);
+            $(tableContainerId).append(`<table class="table table-sm" data-show-toggle="${defaults.showToggle}" data-search-highlight="true"  data-search="${defaults.showSearch}" data-show-export="${defaults.showExport}" data-show-columns="${defaults.showColumns}" data-card-view="${defaults.cardView}"></table>`);
 
             let metaDataKeys = meta.getMetaDataKeys();
             let template = sqlQuery.getVectorTemplate(layerKey);
             let tableHeaders = sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + layerKey,
                 JSON.parse(JSON.stringify(layerWithData[0].toGeoJSON(GEOJSON_PRECISION).features)));
+
+            window.operateFormatter = (value, row, index) => {
+                return `
+                    <div class="d-flex justify-content-around">
+                    <a class="btn btn-light btn-sm filter" href="javascript:void(0)" title="Filter">
+                        <i class="bi bi-filter-square text-primary"></i>
+                    </a>
+                    <a class="btn btn-light btn-sm unfilter" href="javascript:void(0)" title="Unfilter">
+                        <i class="bi bi-x-lg text-danger"></i>
+                    </a>
+                    </div>
+                    `;
+            }
+            const filter = (row) => {
+                console.log(row)
+                _self.onApplyArbitraryFiltersHandler({
+                    layerKey,
+                    filters: {
+                        match: "any",
+                        columns: [
+                            {
+                                fieldname: "gid",
+                                expression: "=",
+                                value: row.gid.toString(),
+                                restriction: false
+                            }
+                        ]
+                    }
+                }, LAYER.VECTOR);
+            }
+            const unfilter = () => {
+                _self.onDisableArbitraryFiltersHandler(layerKey)
+                _self.onApplyArbitraryFiltersHandler({
+                    layerKey,
+                    filters: {
+                        match: "any",
+                        columns: []
+                    }
+                }, LAYER.VECTOR)
+            }
+            window.operateEvents = {
+                'click .filter': (e, value, row, index) => filter(row),
+                'click .unfilter': (e, value, row, index) => unfilter()
+            }
+
+            /*
+                        tableHeaders.push({
+                            header: "Filter",
+                            dataIndex: "filter",
+                            formatter: "operateFormatter",
+                            events: "operateEvents"
+                        })
+            */
 
             let styleSelected = (onSelectedStyle[LAYER.VECTOR + ':' + layerKey] ? onSelectedStyle[LAYER.VECTOR + ':' + layerKey] : {
                 weight: 5,
@@ -1870,6 +2077,21 @@ module.exports = {
             });
 
             let parsedMeta = _self.parseLayerMeta(meta.getMetaByKey(layerKey, false));
+
+            let selectCallBack = () => {
+            };
+            if (typeof parsedMeta.select_function !== "undefined" && parsedMeta.select_function !== "") {
+                try {
+                    selectCallBack = Function('"use strict";return (' + parsedMeta.select_function + ')')();
+                } catch (e) {
+                    const f = `
+                            function(id, layer, key, sqlQuery) {
+                                ${parsedMeta.select_function}
+                            }
+                            `;
+                    selectCallBack = Function('"use strict";return (' + f + ')')();
+                }
+            }
 
             let localTable = gc2table.init({
                 el: tableContainerId + ` table`,
@@ -1890,7 +2112,9 @@ module.exports = {
                 template: template,
                 styleSelected,
                 setZoom: parsedMeta?.zoom_on_table_click ? parsedMeta.zoom_on_table_click : false,
-                maxZoom: parsedMeta?.max_zoom_level_table_click && parsedMeta.max_zoom_level_table_click !== "" ? parsedMeta.max_zoom_level_table_click : 17
+                maxZoom: parsedMeta?.max_zoom_level_table_click && parsedMeta.max_zoom_level_table_click !== "" ? parsedMeta.max_zoom_level_table_click : 17,
+                onSelect: selectCallBack,
+                caller: _self
             });
 
             localTable.loadDataInTable(true, forceDataLoad);
@@ -1903,7 +2127,7 @@ module.exports = {
 
     displayAttributesPopup(features, event, additionalControls = ``, multi = true) {
         if (window.vidiConfig.crossMultiSelect) {
-            _self.resetAllVectorLayerStyles();
+            // _self.resetAllVectorLayerStyles();
         }
         event.originalEvent.clickedOnFeature = true;
         let renderedText = null;
@@ -1946,11 +2170,21 @@ module.exports = {
             }
 
             if (typeof parsedMeta.info_function !== "undefined" && parsedMeta.info_function !== "") {
+                let func;
                 try {
-                    let func = Function('"use strict";return (' + parsedMeta.info_function + ')')();
+                    try {
+                        func = Function('"use strict";return (' + parsedMeta.info_function + ')')();
+                    } catch (e) {
+                        const f = `
+                            function(feature, layer, layerKey, sqlQuery, store, map) {
+                                ${parsedMeta.info_function}
+                            }
+                        `;
+                        func = Function('"use strict";return (' + f + ')')();
+                    }
                     func(feature, layer, layerKey, sqlQuery, moduleState.vectorStores[LAYER.VECTOR + ':' + layerKey], cloud.get().map);
                 } catch (e) {
-                    console.info("Error in click function for: " + layerKey, e);
+                    console.info("Error in click function for: " + layerKey, e.message);
                 }
             }
 
@@ -1982,14 +2216,16 @@ module.exports = {
                     if (typeof parsedMeta.disable_vector_feature_info === "undefined" || parsedMeta.disable_vector_feature_info === false) {
                         count++;
                         if (multi) {
-                            accordion += `<div class="panel panel-default vector-feature-info-panel" id="vector-feature-info-panel-${randText}" style="box-shadow: none;border-radius: 0; margin-bottom: 0">
-                                        <div class="panel-heading" role="tab" style="padding: 8px 0px 8px 15px;border-bottom: 1px white solid">
-                                            <h4 class="panel-title">
-                                                <a style="display: block; color: black" class="feature-info-accordion-toggle accordion-toggle js-toggle-feature-panel" data-toggle="collapse" data-parent="#layers" href="#collapse${randText}" id="a-collapse${randText}">${title}</a>
+                            accordion += `
+                                        <div class="accordion-item">
+                                            <h4 class="accordion-header">
+                                                <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#collapse${randText}" id="a-collapse${randText}">${title}</button>
                                             </h4>
+                                            <div class="accordion-collapse collapse" data-layer-id="${layer._leaflet_id}" id="collapse${randText}" data-bs-parent="#vector-feature-info-panel">
+                                                <div class="feature-info-accordion-body accordion-body">${renderedText}</div>
+                                            </div>
                                         </div>
-                                        <ul class="list-group" id="group-${randText}" role="tabpanel"><div data-layer-id="${layer._leaflet_id}" id="collapse${randText}" class="feature-info-accordion-body accordion-body collapse" style="padding: 3px 8px 3px 8px">${renderedText}</div></ul>
-                                    </div>`;
+                                    `;
                         } else {
                             accordion = renderedText;
                         }
@@ -2007,14 +2243,36 @@ module.exports = {
                 try {
                     selectCallBack = Function('"use strict";return (' + parsedMeta.select_function + ')')();
                 } catch (e) {
-                    console.info("Error in select function for: " + key);
-                    console.error(e.message);
+                    const f = `
+                            function(id, layer, key, sqlQuery) {
+                                ${parsedMeta.select_function}
+                            }
+                            `;
+                    selectCallBack = Function('"use strict";return (' + f + ')')();
                 }
             }
             let func = selectCallBack.bind(this, null, layer, layerKey, _self);
             $(document).arrive(`#a-collapse${randText}`, function () {
+                const e = $(`#collapse${randText}`);
+                const bsCollapse = document.getElementById(`collapse${randText}`);
+                bsCollapse.addEventListener('hidden.bs.collapse', event => {
+                    // Do something
+                })
+                bsCollapse.addEventListener('shown.bs.collapse', event => {
+                    func();
+                    cloud.get().map.eachLayer(layer => {
+                        if (parseInt(layer._leaflet_id) === parseInt(e[0].dataset.layerId)) {
+                            if (layer?.setStyle) {
+                                layer.setStyle(SELECTED_STYLE);
+                            }
+                            if (layer?._icon) {
+                                _self.scaleIcon(layer._icon);
+                            }
+                        }
+                    })
+                })
                 $(this).on('click', function () {
-                    let e = $(`#collapse${randText}`);
+                    _self.resetAllVectorLayerStyles();
                     sqlQuery.getQstore()?.forEach(store => {
                         $.each(store.layer._layers, function (i, v) {
                             if (store.layer && store.layer.resetStyle) {
@@ -2022,26 +2280,17 @@ module.exports = {
                             }
                         });
                     })
-                    _self.resetAllVectorLayerStyles();
-                    if (!e.hasClass("in")) {
-                        func();
-
-                        cloud.get().map.eachLayer(layer => {
-                            if (parseInt(layer._leaflet_id) === parseInt(e[0].dataset.layerId)) {
-                                if (layer?.setStyle) {
-                                    layer.setStyle(SELECTED_STYLE);
-                                }
-                            }
-                        })
-                    }
-                    $('.feature-info-accordion-body').collapse("hide")
                 });
             });
             if (count > 0) {
-                if (typeof parsedMeta.info_element_selector !== "undefined" && parsedMeta.info_element_selector !== "" && renderedText !== null) {
-                    $(parsedMeta.info_element_selector).html(renderedText)
-                } else {
-                    if (count2 === features.length) {
+                if (count2 === features.length) {
+                    if (multi) {
+                        accordion = `<div class="accordion vector-feature-info-panel" id="vector-feature-info-panel">${accordion}</div>`;
+                    }
+                    if (window.vidiConfig.forceOffCanvasInfo === true) {
+                        sqlQuery.openInfoSlidePanel();
+                        $('#offcanvas-info-container').html(`${additionalControls}${accordion}`)
+                    } else {
                         vectorPopUp = L.popup({
                             autoPan: window.vidiConfig.autoPanPopup,
                             autoPanPaddingTopLeft: L.point(multi ? 20 : 0, multi ? 300 : 0),
@@ -2051,9 +2300,9 @@ module.exports = {
                             .on('remove', () => {
                                 if (`editor` in extensions) {
                                     editor = extensions.editor.index;
-                                }
-                                if (!editor?.getEditedFeature()) {
-                                    sqlQuery.resetAll();
+                                    if (!editor.getEditedFeature()) {
+                                        sqlQuery.resetAll();
+                                    }
                                 }
                                 _self.resetAllVectorLayerStyles();
                             });
@@ -2064,9 +2313,12 @@ module.exports = {
         })
         if (count === 1) {
             setTimeout(() => {
-                $(".js-toggle-feature-panel:first").trigger('click');
+                $('#vector-feature-info-panel .accordion-button').trigger('click');
             }, 200);
         }
+        // if (count === 0) {
+        //     utils.showInfoToast(__("Didn't find anything"));
+        // }
     },
 
     /**
@@ -2079,16 +2331,16 @@ module.exports = {
      */
     getParentLayerFilters(layerKey) {
         let parentLayers = [];
-        let activeLayers = _self.getActiveLayers();
-        activeLayers.map(activeLayerName => {
-            let layerMeta = meta.getMetaByKey(layerTreeUtils.stripPrefix(activeLayerName), false);
+        let allLayers = _self.getActiveLayers(true);
+        allLayers.map(layerName => {
+            let layerMeta = meta.getMetaByKey(layerTreeUtils.stripPrefix(layerName), false);
             if (layerMeta.children && Array.isArray(layerMeta.children)) {
                 layerMeta.children.map(child => {
                     if (child.rel === layerKey) {
-                        let activeFiltersForParentLayer = _self.getActiveLayerFilters(layerTreeUtils.stripPrefix(activeLayerName));
+                        let activeFiltersForParentLayer = _self.getActiveLayerFilters(layerTreeUtils.stripPrefix(layerName));
                         if (activeFiltersForParentLayer && activeFiltersForParentLayer.length > 0) {
                             activeFiltersForParentLayer.map(filter => {
-                                parentLayers.push(`${child.child_column} IN (SELECT ${child.parent_column} FROM ${layerTreeUtils.stripPrefix(activeLayerName)} WHERE ${filter})`);
+                                parentLayers.push(`${child.child_column} IN (SELECT ${child.parent_column} FROM ${layerTreeUtils.stripPrefix(layerName)} WHERE ${filter})`);
                             });
                         }
                     }
@@ -2172,84 +2424,112 @@ module.exports = {
                     }
                 }
             }
+            const proccess = (column) => {
+                let block;
+                if (column.fieldname && column.value) {
+                    for (let key in layerDescription.fields) {
+                        if (key === column.fieldname) {
+                            switch (layerDescription.fields[key].type) {
+                                case `boolean`:
+                                    if (EXPRESSIONS_FOR_BOOLEANS.indexOf(column.expression) === -1) {
+                                        throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layerDescription.fields[key].type} type)`);
+                                    }
 
-            // Processing arbitrary filters
-            let arbitraryConditions = [];
-            if (moduleState.arbitraryFilters && layerKey in moduleState.arbitraryFilters) {
-                moduleState.arbitraryFilters[layerKey].columns.map((column, index) => {
-                    if (column.fieldname && column.value) {
-                        for (let key in layerDescription.fields) {
-                            if (key === column.fieldname) {
-                                switch (layerDescription.fields[key].type) {
-                                    case `boolean`:
-                                        if (EXPRESSIONS_FOR_BOOLEANS.indexOf(column.expression) === -1) {
-                                            throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layerDescription.fields[key].type} type)`);
-                                        }
+                                    let value = `NULL`;
+                                    if (column.value === `true`) value = `TRUE`;
+                                    if (column.value === `false`) value = `FALSE`;
 
-                                        let value = `NULL`;
-                                        if (column.value === `true`) value = `TRUE`;
-                                        if (column.value === `false`) value = `FALSE`;
+                                    block = `${column.fieldname} ${column.expression} ${value}`;
+                                    break;
+                                case `date`:
+                                case `timestamp with time zone`:
+                                case `timestamp without time zone`:
+                                case `time with time zone`:
+                                case `time without time zone`:
+                                    if (EXPRESSIONS_FOR_DATES.indexOf(column.expression) === -1) {
+                                        throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layerDescription.fields[key].type} type)`);
+                                    }
 
-                                        arbitraryConditions.push(`${column.fieldname} ${column.expression} ${value}`);
-                                        break;
-                                    case `date`:
-                                    case `timestamp with time zone`:
-                                    case `timestamp without time zone`:
-                                        if (EXPRESSIONS_FOR_DATES.indexOf(column.expression) === -1) {
-                                            throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layerDescription.fields[key].type} type)`);
-                                        }
+                                    block = `${column.fieldname} ${column.expression} '${column.value}'`;
+                                    break;
+                                case `text`:
+                                case `string`:
+                                case `character`:
+                                case `uuid`:
+                                case `character varying`:
+                                    if (EXPRESSIONS_FOR_STRINGS.indexOf(column.expression) === -1) {
+                                        throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layerDescription.fields[key].type} type)`);
+                                    }
 
-                                        arbitraryConditions.push(`${column.fieldname} ${column.expression} '${column.value}'`);
-                                        break;
-                                    case `text`:
-                                    case `string`:
-                                    case `character`:
-                                    case `uuid`:
-                                    case `character varying`:
-                                        if (EXPRESSIONS_FOR_STRINGS.indexOf(column.expression) === -1) {
-                                            throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layerDescription.fields[key].type} type)`);
-                                        }
+                                    if (column.expression === 'like') {
+                                        block = `${column.fieldname} ILIKE '%${column.value}%'`;
+                                    } else {
+                                        block = `${column.fieldname} ${column.expression} '${column.value}'`;
+                                    }
 
-                                        if (column.expression === 'like') {
-                                            arbitraryConditions.push(`${column.fieldname} ILIKE '%${column.value}%'`);
-                                        } else {
-                                            arbitraryConditions.push(`${column.fieldname} ${column.expression} '${column.value}'`);
-                                        }
+                                    break;
+                                case `smallint`:
+                                case `integer`:
+                                case `bigint`:
+                                case `decimal`:
+                                case `numeric`:
+                                case `real`:
+                                case `double precision`:
+                                    if (EXPRESSIONS_FOR_NUMBERS.indexOf(column.expression) === -1) {
+                                        throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layerDescription.fields[key].type} type)`);
+                                    }
 
-                                        break;
-                                    case `smallint`:
-                                    case `integer`:
-                                    case `bigint`:
-                                    case `decimal`:
-                                    case `numeric`:
-                                    case `real`:
-                                    case `double precision`:
-                                        if (EXPRESSIONS_FOR_NUMBERS.indexOf(column.expression) === -1) {
-                                            throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layerDescription.fields[key].type} type)`);
-                                        }
-
-                                        arbitraryConditions.push(`${column.fieldname} ${column.expression} ${column.value}`);
-                                        break;
-                                    default:
-                                        console.error(`Unable to process filter with type '${layerDescription.fields[key].type}'`);
-                                }
+                                    block = `${column.fieldname} ${column.expression} ${column.value}`;
+                                    break;
+                                default:
+                                    console.error(`Unable to process filter with type '${layerDescription.fields[key].type}'`);
                             }
                         }
                     }
-                });
-            }
-
-            if (arbitraryConditions.length > 0) {
-                let additionalConditions = ``;
-                if (moduleState.arbitraryFilters[layerKey].match === `any`) {
-                    additionalConditions = arbitraryConditions.join(` OR `);
-                } else if (moduleState.arbitraryFilters[layerKey].match === `all`) {
-                    additionalConditions = arbitraryConditions.join(` AND `);
-                } else {
-                    throw new Error(`Invalid match type value`);
                 }
+                return block;
+            }
+            // Processing arbitrary filters
+            let arbitraryConditions = "";
+            const loop = (column, match) => {
+                const op = match === "all" ? "AND" : "OR";
+                if (column.sub) {
+                    arbitraryConditions += "(";
+                    column.sub.columns.forEach(c => {
+                        loop(c, column.sub.match);
+                    })
+                    arbitraryConditions += ")" + " " + op + " ";
+                } else {
+                    let c = proccess(column);
+                    if (c) {
+                        arbitraryConditions += c + " " + op + " ";
+                    }
+                }
+                arbitraryConditions = arbitraryConditions.replace("()", "");
 
-                appliedFilters[tableName].push(`(${additionalConditions})`);
+            }
+            if (moduleState.arbitraryFilters && layerKey in moduleState.arbitraryFilters) {
+                moduleState.arbitraryFilters[layerKey].columns.forEach(column => {
+                    loop(column, moduleState.arbitraryFilters[layerKey].match)
+                })
+            }
+            // Clean up
+            (function clean() {
+                const tmp = arbitraryConditions.replace(" ()", "")
+                    .replace(/ OR\s+\)| AND\s+\)/g, ")")
+                    .replace(/\b(OR)\s+\1\b/g, "OR")
+                    .replace(/\b(AND)\s+\1\b/g, "AND")
+                    .replace(/AND\s+$|OR\s+$/g, "").trim();
+                if (tmp !== arbitraryConditions) {
+                    arbitraryConditions = tmp;
+                    clean();
+                } else {
+                    arbitraryConditions = tmp;
+                }
+            }())
+
+            if (arbitraryConditions && arbitraryConditions.length !== 0) {
+                appliedFilters[tableName].push(arbitraryConditions);
             }
         }
 
@@ -2284,10 +2564,9 @@ module.exports = {
         let creationTime = parseInt(item.key.split(`.`)[1].replace(`query`, ``));
         let date = new Date(+creationTime);
         // TODO this is a flaky way og getting the relation name
-        let layerNamesFromSQL = item.store.sql.substring(item.store.sql.indexOf(`" FROM`) + 6, item.store.sql.indexOf(`WHERE`)).trim();
-
+        let layerNamesFromSQL = item.store.sql.substring(item.store.sql.indexOf(`" FROM`) + 22, item.store.sql.indexOf(`WHERE`)).replaceAll('"', '').trim();
         // Find the corresponding layer
-        let correspondingLayer = meta.getMetaByKey(layerNamesFromSQL);
+        let correspondingLayer = meta.getMetaByKey(layerNamesFromSQL, false);
 
         // Creating simulated layer description object
         let simulatedMetaData = {
@@ -2325,7 +2604,7 @@ module.exports = {
         // Only if container doesn't exist
         // ===============================
         if ($("#layer-panel-" + base64GroupName).length === 0) {
-            $("#layers_list").append(markupGeneratorInstance.getGroupPanel(base64GroupName, groupName, window.vidiConfig.showLayerGroupCheckbox));
+            $(".layer-list").append(markupGeneratorInstance.getGroupPanel(base64GroupName, groupName, window.vidiConfig.showLayerGroupCheckbox));
 
             // Append to inner group container
             // ===============================
@@ -2715,7 +2994,7 @@ module.exports = {
         $(parentNode).append(markup);
         $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-id`).append(`
                 ${subgroup.id}
-                <i style="font-size: 26px; margin-left: auto" class="material-icons layer-move-vert layer-move-vert-subgroup">more_vert</i>
+                <i class="bi-grip-vertical layer-move-vert layer-move-vert-subgroup ms-auto"></i>
         `);
 
         $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-toggle-button`).click((event) => {
@@ -2726,10 +3005,10 @@ module.exports = {
             }
 
             if (subgroupRootElement.find(`.js-subgroup-children`).first().is(`:visible`)) {
-                subgroupRootElement.find(`.js-subgroup-toggle-button`).first().html(`<i class="fa fa-arrow-down"></i>`);
+                subgroupRootElement.find(`.js-subgroup-toggle-button`).first().html(`<i class="bi bi-arrow-down"></i>`);
                 subgroupRootElement.find(`.js-subgroup-children`).first().hide();
             } else {
-                subgroupRootElement.find(`.js-subgroup-toggle-button`).first().html(`<i class="fa fa-arrow-up"></i>`);
+                subgroupRootElement.find(`.js-subgroup-toggle-button`).first().html(`<i class="bi bi-arrow-up"></i>`);
                 subgroupRootElement.find(`.js-subgroup-children`).first().show();
             }
         });
@@ -2820,12 +3099,12 @@ module.exports = {
             }
 
             let layerIsEditable = false;
-            let displayInfo = layer.f_table_abstract ? `visible` : `hidden`;
+            let displayInfo = layer.f_table_abstract ? `inline` : `none`;
             let disableCheckBox = false;
             let parsedMeta = false;
             let layerKey = layer.f_table_schema + "." + layer.f_table_name;
             let layerKeyWithGeom = layerKey + "." + layer.f_geometry_column;
-            let lockedLayer = (layer.authentication === "Read/write" ? " <i class=\"fa fa-lock gc2-session-lock\" aria-hidden=\"true\"></i>" : "");
+            let lockedLayer = (layer.authentication === "Read/write" ? ` <i class="bi bi-key-fill text-danger gc2-session-lock" aria-hidden="true"></i>` : ``);
             let layerTypeSelector = ``;
             let parentLayerKeys = [];
             let childLayerKeys = [];
@@ -2841,7 +3120,7 @@ module.exports = {
                     }
 
                     if (`meta_desc` in parsedMeta) {
-                        displayInfo = (parsedMeta.meta_desc || layer.f_table_abstract) ? `visible` : `hidden`;
+                        displayInfo = (parsedMeta.meta_desc || layer.f_table_abstract) ? `inline` : `none`;
                     }
 
                     if (`referenced_by` in parsedMeta) {
@@ -2894,10 +3173,9 @@ module.exports = {
                 layer, defaultLayerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo, subgroupId !== false, moduleState, disableCheckBox, parentLayerKeys, childLayerKeys,hasFilter));
 
             // Callback for selecting specific layer type to enable (layer type dropdown)
-            $(layerControlRecord).find('[class^="js-layer-type-selector"]').on('click', (e, data) => {
+            $(layerControlRecord).find('.js-layer-type-selector').on('click', (e, data) => {
                 let type = false;
-                let className = $(e.target).attr(`class`);
-                switch (className.replace(`js-layer-type-selector-`, ``)) {
+                switch ($(e.target).attr('data-layer-type')) {
                     case `tile`:
                         type = LAYER.RASTER_TILE;
                         break;
@@ -2967,24 +3245,29 @@ module.exports = {
 
                 html = html ? mustache.render(html, parsedMeta) : "";
 
-                // Right slide in default.tmpl
-                $("#info-modal.slide-right").css("right", "0");
-                $("#info-modal .modal-title").html(title || name);
-                $("#info-modal .modal-body").html(html + '<div id="info-modal-legend" class="legend"></div>');
-
-                // Left slide in embed.tmpl
-                $("#info-modal-top.slide-left").show();
-                $("#info-modal-top.slide-left").animate({left: "0"}, 200);
-                $("#info-modal-top .modal-title").html(title || name);
-                $("#info-modal-top .modal-body").html(html + '<div id="info-modal-legend" class="legend"></div>');
-
-                legend.init([`${layer.f_table_schema}.${layer.f_table_name}`], "#info-modal-legend");
+                $("#offcanvas-layer-desc-container").html(html);
+                $("#offcanvasLayerDesc h5").html(title || name);
+                bindEvent.showOffcanvasInfo()
                 e.stopPropagation();
             });
 
             $(parentNode).append(layerControlRecord);
 
             _self.setLayerState(defaultLayerType, layerKey, true, layerIsActive, true, isVirtual, layerControlRecord);
+
+            // Toggle settings button active on/off
+            // This is necessary bacause data-bs-toggle is already set to "collapse"
+            // and can not be used to "button" also.
+            setTimeout(() => {
+                const settingsCollapsible = document.getElementById(`settings-${layer.f_table_schema}-${layer.f_table_name}`);
+                const btn = document.getElementById(`settings-${layer.f_table_schema}-${layer.f_table_name}-btn`);
+                settingsCollapsible?.addEventListener('shown.bs.collapse', event => {
+                    btn.classList.add('active');
+                })
+                settingsCollapsible?.addEventListener('hidden.bs.collapse', event => {
+                    btn.classList.remove('active');
+                })
+            }, 100)
         }
     },
 
@@ -3073,7 +3356,7 @@ module.exports = {
                         }
                     }
                     // Opacity slider
-                    $(layerContainer).find('.js-layer-settings-opacity').append(`<div class="range" style="padding: 10px;">
+                    $(layerContainer).find('.js-layer-settings-opacity').append(`<div class="range">
                         <input type="range"  min="1" max="100" value="${initialSliderValue * 100}" class="js-opacity-slider form-range">
                     </div>`);
 
@@ -3098,7 +3381,7 @@ module.exports = {
                     if (layerKey in moduleState.labelSettings && [true, false].indexOf(moduleState.labelSettings[layerKey]) !== -1) {
                         value = moduleState.labelSettings[layerKey];
                     }
-                    $(layerContainer).find('.js-layer-settings-labels').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
+                    $(layerContainer).find('.js-layer-settings-labels').append(`<div id="${componentContainerId}"></div>`);
                     setTimeout(() => {
                         if (document.getElementById(componentContainerId)) {
                             ReactDOM.render(<LabelSettingToggle
@@ -3119,7 +3402,7 @@ module.exports = {
 
                 if (isVirtual === false) {
                     let componentContainerId = `layer-settings-filters-${layerKey.replace('.', '-')}`;
-                    $(layerContainer).find('.js-layer-settings-filters').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
+                    $(layerContainer).find('.js-layer-settings-filters').append(`<div id="${componentContainerId}"></div>`);
 
                     let localArbitraryfilters = {};
                     if (moduleState.arbitraryFilters && layerKey in moduleState.arbitraryFilters) {
@@ -3173,11 +3456,14 @@ module.exports = {
                     if (moduleState.fitBoundsActiveOnLayers && layerKey in moduleState.fitBoundsActiveOnLayers) {
                         localFitBoundsActiveOnLayer = moduleState.fitBoundsActiveOnLayers[layerKey];
                     } else {
-                        localFitBoundsActiveOnLayer = false;
+                        if (_self.getActiveLayerFilters(layerKey)?.length > 0) {
+                            localFitBoundsActiveOnLayer = true;
+                        } else {
+                            localFitBoundsActiveOnLayer = false;
+                        }
                     }
 
-                    let activeFilters = _self.getActiveLayerFilters(layerKey);
-                    $(layerContainer).find(`.js-toggle-filters-number-of-filters`).text(activeFilters.length);
+                    _self.activeFiltersChange(layerKey)
                     setTimeout(() => {
                         if (document.getElementById(componentContainerId)) {
                             filterComp[layerKey] = ReactDOM.render(
@@ -3193,7 +3479,6 @@ module.exports = {
                                     onApplyArbitrary={_self.onApplyArbitraryFiltersHandler}
                                     onDisableArbitrary={_self.onDisableArbitraryFiltersHandler}
                                     onApplyFitBounds={_self.onApplyFitBoundsFiltersHandler}
-                                    onApplyDownload={_self.onApplyDownloadHandler}
                                     onApplyEditor={_self.onApplyEditorFiltersHandler}
                                     onActivateEditor={_self.onActivateEditorFiltersHandler}
                                     onChangeEditor={_self.onChangeEditorFiltersHandler}
@@ -3201,6 +3486,7 @@ module.exports = {
                                     editorFiltersActive={localEditorFiltersActive}
                                     isFilterImmutable={isFilterImmutable}
                                     db={db}
+                                    getActiveLayerFilters={_self.getActiveLayerFilters}
                                 />, document.getElementById(componentContainerId));
                             $(layerContainer).find('.js-layer-settings-filters').hide(0);
 
@@ -3222,7 +3508,7 @@ module.exports = {
                         }
 
                         let componentContainerId = `layer-settings-load-strategy-${layerKey}`;
-                        $(layerContainer).find('.js-layer-settings-load-strategy').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
+                        $(layerContainer).find('.js-layer-settings-load-strategy').append(`<div id="${componentContainerId}"></div>`);
                         setTimeout(() => {
                             if (document.getElementById(componentContainerId)) {
                                 ReactDOM.render(<LoadStrategyToggle
@@ -3265,7 +3551,7 @@ module.exports = {
                 // Vector styles
                 const settingsStyle = $(layerContainer).find('.js-layer-settings-style')
                 const componentContainerId = `layer-settings-styles-${layerKey}`;
-                settingsStyle.append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
+                settingsStyle.append(`<div id="${componentContainerId}"></div>`);
 
                 let values = {};
                 if (layerKey in moduleState.vectorStyles) {
@@ -3300,48 +3586,69 @@ module.exports = {
                     $(layerContainer).find('.js-layer-settings-search').toggle();
                 });
 
+                $(layerContainer).find(`.js-toggle-download`).click(() => {
+                    _self._selectIcon($(layerContainer).find('.js-toggle-download'));
+                    $(layerContainer).find('.js-layer-settings-download').toggle();
+                });
+
                 // PostgreSQL search is for all types of layers
                 $(layerContainer).find('.js-layer-settings-search').append(
-                    `<div style="padding-left: 15px; padding-right: 10px; padding-bottom: 20px; padding-top: 20px;">
-                        <div>
-                            <form class="form" onsubmit="return false">
+                    `
+                    <div>
+                        <form class="row g-2" onsubmit="return false">
+                            <div class="col-auto">
+                                <input type="text" class="js-search-input form-control form-control-sm" placeholder="Abc123")}">
+                            </div>
+                            <div class="col-auto">
+                                <button type="submit" class="btn btn-primary btn-sm">${__("Search")}</button>
+                            </div>
+                            <div class="form-inline" style="display: none">
                                 <div class="form-group">
-                                    <input type="test" class="js-search-input form-control" placeholder="${__("Search")}">
+                                    <label>${__("Method")}</label>
+                                    <select class="form-control js-search-method">
+                                    <option value="like">${__("Like")}</option>
+                                    <option value="tsvector">${__("Tsvector")}</option>                                      
+                                    <option value="similarity">${__("Similarity")}</option>
+                                    </select>
                                 </div>
-                                <div class="form-inline">
-                                    <div class="form-group">
-                                        <label>${__("Method")}</label>
-                                        <select class="form-control js-search-method">
-                                        <option value="like">${__("Like")}</option>
-                                        <option value="tsvector">${__("Tsvector")}</option>                                      
-                                        <option value="similarity">${__("Similarity")}</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>${__("Similarity")}</label>
-                                        <select class="form-control js-search-similarity">
-                                        <option value="1">100 %</option>
-                                        <option value="0.9">90 %</option>
-                                        <option value="0.8" selected>80 %</option>
-                                        <option value="0.7">70 %</option>
-                                        <option value="0.6">60 %</option>
-                                        <option value="0.5">50 %</option>
-                                        <option value="0.4">40 %</option>
-                                        <option value="0.3">30 %</option>
-                                        <option value="0.2">20 %</option>
-                                        <option value="0.1">10 %</option>
-                                        </select>
-                                    </div>
+                                <div class="form-group">
+                                    <label>${__("Similarity")}</label>
+                                    <select class="form-control js-search-similarity">
+                                    <option value="1">100 %</option>
+                                    <option value="0.9">90 %</option>
+                                    <option value="0.8" selected>80 %</option>
+                                    <option value="0.7">70 %</option>
+                                    <option value="0.6">60 %</option>
+                                    <option value="0.5">50 %</option>
+                                    <option value="0.4">40 %</option>
+                                    <option value="0.3">30 %</option>
+                                    <option value="0.2">20 %</option>
+                                    <option value="0.1">10 %</option>
+                                    </select>
                                 </div>
-                                <div class="alert alert-warning no-searchable-fields" style="display: none;">
-                                    ${__("No searchable fields on layer")}
-                                </div>
-                                <div class="searchable-fields" style="display: none;">${__("Searchable fields")} </div>
-                            </form>
-                        </div>
-                    </div>`
+                            </div>
+                            <div class="alert alert-warning no-searchable-fields" style="display: none;">
+                                ${__("No searchable fields on layer")}
+                            </div>
+                            <div class="searchable-fields" style="display: none;">${__("Searchable fields")} </div>
+                        </form>
+                    </div>
+                    `
                 );
 
+                setTimeout(() => {
+                    let componentContainerId = `layer-settings-download-${layerKey.replace('.', '-')}`;
+                    $(layerContainer).find('.js-layer-settings-download').append(`<div id="${componentContainerId}"></div>`);
+                    if (document.getElementById(componentContainerId)) {
+                        ReactDOM.render(<Download
+                                layer={layer}
+                                onApplyDownload={_self.onApplyDownloadHandler}
+                            />,
+                            document.getElementById(componentContainerId));
+                    } else {
+                        console.error(`Unable to find the download container`);
+                    }
+                }, 10);
                 let search = $(layerContainer).find('.js-layer-settings-search').find(`form`).get(0);
                 if (search) {
                     let fieldConf = JSON.parse(layer.fieldconf) || {}, countSearchFields = [];
@@ -3361,7 +3668,7 @@ module.exports = {
                         });
                     }
 
-                    $(search).on('change', (e) => {
+                    $(search).on('submit', (e) => {
                         let fieldConf = JSON.parse(layer.fieldconf) || {}, searchFields = [], whereClauses = [];
                         $.each(fieldConf, function (i, val) {
                             if (typeof val.searchable === "boolean" && val.searchable === true) {
@@ -3506,8 +3813,10 @@ module.exports = {
     onApplyDownloadHandler: (layerKey, format) => {
         let whereClause = _self.getActiveLayerFilters(layerKey)[0];
         let sql = `SELECT *
-                   FROM ${layerKey}
-                   WHERE ${whereClause}`;
+                   FROM ${layerKey}`
+        if (whereClause) {
+            sql += ` WHERE ${whereClause}`;
+        }
         download.download(sql, format)
     },
 
@@ -3602,7 +3911,7 @@ module.exports = {
                     backboneEvents.get().once("doneLoading:layers", function (e) {
                         if (layerTreeUtils.stripPrefix(e) === layerTreeUtils.stripPrefix(layerKey)) {
                             // Check if child layer should be reloaded.
-                            if (_self.getChildLayersThatShouldBeEnabled().includes(localLayerKey)) {
+                            if (_self.getChildLayersThatShouldBeEnabled().includes(layerTreeUtils.stripPrefix(localLayerKey))) {
                                 reloadLayer();
                             }
                         }
@@ -3707,10 +4016,12 @@ module.exports = {
     setChildLayersThatShouldBeEnabled: function (arr) {
         childLayersThatShouldBeEnabled = arr;
     },
+
     toolTip: function (layer, feature, template, pane) {
         const tooltipHtml = Handlebars.compile(template)(feature.properties);
         layer.bindTooltip(tooltipHtml, {permanent: true, pane}).openTooltip();
     },
+
     mouseOver: function (layer, fieldConf, template) {
         let flag = false, tooltipHtml, tail = $("#tail");
         layer.on('mouseover', function (e) {
@@ -3754,6 +4065,13 @@ module.exports = {
     resetAllVectorLayerStyles: () => {
         $.each(moduleState.vectorStores, function (u, store) {
             $.each(store.layer._layers, function (i, v) {
+                if (v?._icon) {
+                    const style = getComputedStyle(v._icon);
+                    let matrix = new DOMMatrix(style.transform);
+                    matrix.a = matrix.d = 1;
+                    v._icon.style.transform = matrix.toString();
+                    // v._icon.style.transition = 'transform 0s ease-in-out'
+                }
                 try {
                     if (store.layer && store.layer.resetStyle) {
                         store.layer.resetStyle(v);
@@ -3763,5 +4081,22 @@ module.exports = {
                 }
             });
         })
+    },
+
+    scaleIcon: (icon) => {
+        const style = getComputedStyle(icon);
+        const matrix = new DOMMatrix(style.transform);
+        matrix.a = matrix.d = SELECTED_ICON_SCALE;
+        icon.style.transformOrigin = 'center';
+        icon.style.transform = matrix.toString();
+        // icon.style.transition = 'transform .1s ease-in-out'
+    },
+    getInfoOffCanvas: () => {
+        return infoOffCanvas;
+    },
+    getLatestFullTreeStructure: () => {
+        return latestFullTreeStructure;
     }
-};
+
+}
+

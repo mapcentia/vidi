@@ -36,6 +36,15 @@ module.exports = {
     },
 
     // ===============================================================
+    // Setup the connection to use stuff in grunddata globally
+    // ===============================================================
+
+    "datahub": {
+        "user": "api@grunddata",
+        "key": "c78646f7c717bf265f8e9e0a8a313785"
+    },
+
+    // ===============================================================
     // Configuration of print templates.
     // Print templates must be enabled - look further down.
     // mapsizePx ~ is the pixel dimension of the map view
@@ -2219,15 +2228,7 @@ module.exports = {
                         "mapsizeMm": [190, 120]
                     }
                 }
-            }/*,
-            "_mapGoPrint": {
-                "A4": {
-                    "p": {
-                        "mapsizePx": [700, 500],
-                        "mapsizeMm": [190, 120]
-                    }
-                }
-            },*/
+            }
         },
 
 
@@ -2287,10 +2288,6 @@ module.exports = {
         {
             "blueidea": ["index"]
         }
-        /*,
-            {
-                "MapGOMenu": ["index", "reportRender", "infoClick", "controller"]
-            }*/
         ],
         "server": [{
             "conflictSearch": ["index"]

@@ -247,6 +247,10 @@ module.exports = {
                 console.info(`${layerKey} UTFgrid was added to the map`);
                 resolve();
             });
+        } else {
+            result = new Promise((resolve, reject) => {
+                reject();
+            });
         }
         return result;
     },
@@ -350,7 +354,8 @@ module.exports = {
                             }
                             backboneEvents.get().trigger("tileLayerVisibility:layers", {
                                 id: e.target.id,
-                                dataIsVisible: canvasHasData
+                                dataIsVisible: canvasHasData,
+                                shouldLegendReact: true
                             });
 
                             me.decrementCountLoading(layer);

@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2022 MapCentia ApS
+ * @copyright  2013-2023 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -10,17 +10,18 @@ const MODULE_NAME = `baseLayer`;
 
 import {LAYER} from './layerTree/constants';
 import layerTreeUtils from './layerTree/utils';
+import {booleanIntersects, polygon} from '@turf/turf'
 
 /**
  * @type {*|exports|module.exports}
  */
-var cloud, setBaseLayer, urlparser, backboneEvents, state, setting, layers, utils;
+let cloud, setBaseLayer, urlparser, backboneEvents, state, setting, layers, utils;
 
 /**
  * List with base layers added to the map. Can be got through API.
  * @type {Array}
  */
-var baseLayers = [];
+let baseLayers = [];
 
 let _self = false;
 
@@ -40,7 +41,12 @@ const TWO_LAYERS_AT_ONCE_MODES = [`side-by-side`, `overlay`];
 
 const OVERLAY_OPACITY_RANGE = [10, 90];
 
-let currentTwoLayersAtOnceMode = TWO_LAYERS_AT_ONCE_MODES[0];
+let currentTwoLayersAtOnceMode;
+let active;
+let mode;
+let defaultMode;
+let bindEvent;
+let bounds;
 
 /**
  * Checks if the module state has correct structure
@@ -48,14 +54,10 @@ let currentTwoLayersAtOnceMode = TWO_LAYERS_AT_ONCE_MODES[0];
  * @param {Object} state Module state
  */
 const validateModuleState = (state) => {
-    if (`twoLayersAtOnceMode` in state && TWO_LAYERS_AT_ONCE_MODES.indexOf(state.twoLayersAtOnceMode) !== -1
+    return state && `twoLayersAtOnceMode` in state && TWO_LAYERS_AT_ONCE_MODES.indexOf(state.twoLayersAtOnceMode) !== -1
         && `layers` in state && Array.isArray(state.layers) && `opacity` in state
         && (state.opacity >= OVERLAY_OPACITY_RANGE[0] && state.opacity <= OVERLAY_OPACITY_RANGE[1] || state.opacity === false || state.opacity === `false`)
-        && state.layers.length === 2) {
-        return true;
-    } else {
-        return false;
-    }
+        && state.layers.length === 2;
 };
 
 /**
@@ -77,6 +79,7 @@ module.exports = module.exports = {
         backboneEvents = o.backboneEvents;
         utils = o.utils;
         setting = o.setting;
+        bindEvent = o.bindEvent;
 
         _self = this;
         return this;
@@ -87,11 +90,35 @@ module.exports = module.exports = {
     init: () => {
         state.listenTo('baseLayer', _self);
 
-        var schemas = urlparser.schema.split(",");
+        mode =  window.vidiConfig?.advancedBaseLayerSwitcher?.mode ? window.vidiConfig.advancedBaseLayerSwitcher.mode : 3;
+        active = window.vidiConfig?.advancedBaseLayerSwitcher?.active;
+        defaultMode = mode === 1 ? 1 : mode === 2 ? 2 : window.vidiConfig?.advancedBaseLayerSwitcher?.default ? window.vidiConfig.advancedBaseLayerSwitcher.default : 1
+        currentTwoLayersAtOnceMode = TWO_LAYERS_AT_ONCE_MODES[defaultMode - 1];
+        cloud.get().map.on('moveend baselayerchange', () => {
+            if (bounds) {
+                const b = cloud.get().map.getBounds();
+                let b2;
+                let outside = false;
+                try {
+                    b2 = polygon([[[b.getWest(), b.getSouth()], [b.getWest(), b.getNorth()], [b.getEast(), b.getNorth()], [b.getEast(), b.getSouth()], [b.getWest(), b.getSouth()]]]);
+                    outside = !booleanIntersects(bounds, b2);
+                } catch (e) {
+                    console.log(e)
+                }
+                console.log(outside)
+                if (outside) {
+                    utils.showInfoToast(__("The selected map has no content in the current map extent"), {delay: 150000000})
+                } else {
+                    utils.hideInfoToast();
+                }
+            } else {
+                utils.hideInfoToast();
+            }
+        })
 
         if (typeof window.setBaseLayers !== 'object') {
             window.setBaseLayers = [
-                {"id": "mapQuestOSM", "name": "MapQuset OSM"},
+                {"id": "mapQuestOSM", "name": "MapQuest OSM"},
                 {"id": "osm", "name": "OSM"}
             ];
         }
@@ -108,10 +135,9 @@ module.exports = module.exports = {
         if (typeof window.vidiConfig.dontUseAdvancedBaseLayerSwitcher === "undefined" ||
             (typeof window.vidiConfig.dontUseAdvancedBaseLayerSwitcher === "boolean" && window.vidiConfig.dontUseAdvancedBaseLayerSwitcher === false)) {
             $("#base-layer-list").append(`
-                <div class="togglebutton">
-                    <label>
-                        <input class="js-two-layers-at-once-control" type="checkbox"> ${__(`Display two layers at once`)}
-                    </label>
+                <div class="d-grid mb-2">
+                    <input class="btn-check js-two-layers-at-once-control" id="js-two-layers-at-once-control" type="checkbox">
+                    <label class="btn btn-outline-secondary btn-block mb-3" for="js-two-layers-at-once-control">${__(`Display two layers at once`)}</label>
                 </div>`);
         }
 
@@ -137,11 +163,14 @@ module.exports = module.exports = {
             _self.getSideBySideModeStatus().then(lastState => {
                 if (validateModuleState(lastState)) {
                     _self.toggleSideBySideControl(lastState);
+                } else if (active) {
+                    $(`.js-two-layers-at-once-control`).trigger(`click`);
                 }
-            });
-        });
+            })
+        })
 
         state.listen(MODULE_NAME, `side-by-side-mode-change`);
+
     },
 
     getAvailableBaseLayers: () => {
@@ -222,9 +251,9 @@ module.exports = module.exports = {
     },
 
     drawBaseLayersControl: () => {
-        let result = new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             // Resetting the side-by-side mode
-            currentTwoLayersAtOnceMode = TWO_LAYERS_AT_ONCE_MODES[0];
+            currentTwoLayersAtOnceMode = TWO_LAYERS_AT_ONCE_MODES[defaultMode - 1];
 
             // Delete current layers
             $(`.js-base-layer-control`).remove();
@@ -243,7 +272,7 @@ module.exports = module.exports = {
                     layerName = bl.name;
                 } else if (typeof window.setBaseLayers[i].restrictTo === "undefined"
                     || window.setBaseLayers[i].restrictTo.filter((n) => {
-                        return schemas.indexOf(n) != -1;
+                        return schemas.indexOf(n) !== -1;
                     }).length > 0) {
                     baseLayers.push(window.setBaseLayers[i].id);
                     layerId = window.setBaseLayers[i].id;
@@ -252,40 +281,33 @@ module.exports = module.exports = {
 
                 let sideBySideLayerControl = ``;
                 if (twoLayersAtOnceEnabled) {
-                    sideBySideLayerControl = `<div class='radio radio-primary base-layer-item' data-gc2-side-by-side-base-id='${layerId}' style='float: left;'>
-                        <label class='side-by-side-baselayers-label'>
-                            <input type='radio' name='side-by-side-baselayers' value='${layerId}' ${layerId === activeTwoLayersModeLayer ? `checked=""` : ``}>
-                        </label>
-
-
+                    sideBySideLayerControl = `<div class='base-layer-item' data-gc2-side-by-side-base-id='${layerId}' style='float: left;'>
+                            <input type='radio' class="form-check-input" name='side-by-side-baselayers' value='${layerId}' ${layerId === activeTwoLayersModeLayer ? `checked=""` : ``}>
                     </div>`;
                 }
 
                 let displayInfo = (bl.abstract ? `visible` : `hidden`);
                 let tooltip = (bl.abstract ? $(bl.abstract).text() : ``);
-                appendedCode += `<div class="list-group-item js-base-layer-control" style="display: flex; align-items: center;">
-                    <div style="flex-grow: 1;">
-                        <div class='radio radio-primary base-layer-item' data-gc2-base-id='${layerId}' style='float: left;'>
-                            <label class='baselayer-label'>
-                                <input type='radio' name='baselayers' value='${layerId}' ${layerId === activeBaseLayer ? `checked=""` : ``}> 
-                            </label>
+                appendedCode += `<li class="list-group-item js-base-layer-control d-flex align-items-center">
+                    <div class="d-flex align-items-center gap-1 me-auto">
+                        <div class='base-layer-item' data-gc2-base-id='${layerId}'>
+                            <input type='radio' class="form-check-input" name='baselayers' value='${layerId}' ${layerId === activeBaseLayer ? `checked=""` : ``}> 
                         </div>
                         ${sideBySideLayerControl}
                         <div>${layerName}</div>
                     </div>
                     <div>
-                        <a
-                            href="javascript:void(0);"
+                        <button
                             data-toggle="tooltip"
-                            data-placement="left"
+                            data-bs-placement="right"
                             title="${tooltip}"
                             style="visibility: ${displayInfo};"
                             data-baselayer-name="${layerName}"
                             data-baselayer-info="${bl.abstract}"
-                            class="info-label">${__(`Info`)}</a>
+                            class="info-label btn btn-sm btn-light"><i class="bi bi-info-square pe-none"></i></button>
                     </div>
-                </div>
-                <div class='list-group-separator'></div>`;
+                </li>`;
+
             }
 
             const disableInputs = () => {
@@ -359,18 +381,9 @@ module.exports = module.exports = {
                 $("#base-layer-list").find('.info-label').on('click', e => {
                     let rawHtml = $(e.target).attr(`data-baselayer-info`);
                     let layerName = $(e.target).attr(`data-baselayer-name`);
-
-                    // Right slide in default.tmpl
-                    $("#info-modal.slide-right").css("right", "0");
-                    $("#info-modal .modal-title").html(layerName);
-                    $("#info-modal .modal-body").html(rawHtml);
-
-                    // Left slide in embed.tmpl
-                    $("#info-modal-top.slide-left").show();
-                    $("#info-modal-top.slide-left").animate({left: "0"}, 200);
-                    $("#info-modal-top .modal-title").html(layerName);
-                    $("#info-modal-top .modal-body").html(rawHtml);
-
+                    $("#offcanvas-layer-desc-container").html(rawHtml);
+                    $("#offcanvasLayerDesc h5").html(layerName);
+                    bindEvent.showOffcanvasInfo()
                     e.stopPropagation();
                 });
 
@@ -387,38 +400,17 @@ module.exports = module.exports = {
                         throw new Error(`Invalid two layers at once mode value (${currentTwoLayersAtOnceMode})`);
                     }
 
-                    const twoLayersAtOnceModeControl = (`<div class="js-two-layers-at-once-mode-control-container">
-                        <div style="display: flex; padding-top: 10px;">
-                            <div>
-                                <h5>${__(`Display layers`)}:</h5>
-                            </div>
-                            <div style="padding-top: 8px;">
-                                <div class="radio radio-primary" style="float: left; width: 30px;">
-                                    <label class="baselayer-label">
-                                        <input type="radio" name="two-layers-at-once-mode" ${selectedSideBySide} value="${TWO_LAYERS_AT_ONCE_MODES[0]}" >
-                                        <span class="circle"></span>
-                                        <span class="check"></span> 
-                                    </label>
-                                </div>
-                                <div style="float: left;">${__(`Side-by-side`)}</div>
-                            </div>
-                            <div style="padding-top: 8px;">
-                                <div class="radio radio-primary" style="float: left; width: 30px;">
-                                    <label class="baselayer-label">
-                                        <input type="radio" name="two-layers-at-once-mode" ${selectedOverlay} value="${TWO_LAYERS_AT_ONCE_MODES[1]}">
-                                        <span class="circle"></span>
-                                        <span class="check"></span> 
-                                    </label>
-                                </div>
-                                <div style="float: left;">${__(`Overlap`)}</div>
-                            </div>
+                    const twoLayersAtOnceModeControl = (`
+                    <div class="js-two-layers-at-once-mode-control-container">
+                        <div class="btn-group mb-3 d-flex ${mode !== 3 ? "d-none" : ""}">
+                            <input type="radio" class="btn-check" name="two-layers-at-once-mode" id="two-layers-at-once-mode-1" ${selectedSideBySide} value="${TWO_LAYERS_AT_ONCE_MODES[0]}">
+                            <label class="btn btn-sm btn-outline-secondary" for="two-layers-at-once-mode-1">${__(`Side-by-side`)}</label>
+                            <input type="radio" class="btn-check" name="two-layers-at-once-mode" id="two-layers-at-once-mode-2" ${selectedOverlay} value="${TWO_LAYERS_AT_ONCE_MODES[1]}">
+                            <label class="btn btn-sm btn-outline-secondary" for="two-layers-at-once-mode-2">${__(`Overlap`)}</label>
                         </div>
-                        <div>
-                            <div style="margin: 10px  0 20px 0">
-                                <div class="js-side-by-side-layer-opacity-slider"></div>
-                            </div>
-                        </div>
-                    </div>`);
+                        <div class="js-side-by-side-layer-opacity-slider mb-3 ${(mode !== 2 && mode !== 3) ? "d-none" : ""}"></div>
+                    </div>
+                    `);
 
                     const initiateSlider = (initialValue) => {
                         if (!(initialValue >= 10 && initialValue <= 90)) {
@@ -495,8 +487,6 @@ module.exports = module.exports = {
                 resolve();
             });
         });
-
-        return result;
     },
 
     /**
@@ -639,5 +629,13 @@ module.exports = module.exports = {
         }
 
         return result;
+    },
+
+    setBounds: function (arr) {
+        if (arr) {
+            bounds = polygon(arr);
+        } else {
+            bounds = null;
+        }
     }
 };

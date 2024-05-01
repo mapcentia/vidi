@@ -1,0 +1,192 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2023, MapCentia
+# This file is distributed under the same license as the Vidi package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Vidi 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-01-09 12:54+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.12.1\n"
+
+#: ../../pages/standard/06_project.rst:5 ../../pages/standard/06_project.rst:19
+#: 6d17a41a77984fa1a3b5a4702c6d288e 82722f69233442ad8790571d469b5142
+msgid "Projekter"
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:5 4f88a7a293aa4437b74f21c6eeb8b731
+msgid "Overview"
+msgstr ""
+
+#: ../../pages/standard/06_project.rst ce279c86f8e1427ca96e9520cbfb4458
+msgid "Date"
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:9 64dc76a11ae44334bda37bfab78592e9
+msgid "|today|"
+msgstr ""
+
+#: ../../pages/standard/06_project.rst 34c902f3fc824ef191ed8b0cb7f0e078
+msgid "Vidi-version"
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:10 563c46cc405847578176f2838f4b92f3
+msgid "2021.9.0"
+msgstr ""
+
+#: ../../pages/standard/06_project.rst e347167376a64db9a5a272716a1b873f
+msgid "Forfatter"
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:11 0f9672acd81749128e13d5013c4079e4
+msgid ""
+"`giovanniborella <https://github.com/giovanniborella>`_ | `mapcentia "
+"<https://github.com/mapcentia>`_"
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:15 15374c28131b4c5abc06f0fb3349fd8e
+msgid "Indhold"
+msgstr ""
+
+#: ../../_subs/NOTE_GETTINGSTARTED.rst:4 b66ade195c224624a1264b69464a0169
+msgid ""
+"Hvis du er i tvivl om de forskellige UI-elementer, :ref:`kan du se mere "
+"her <gettingstarted>`"
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:24 c2de5f1d78504b4a84708d0bbaed4e40
+msgid "Projekt"
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:26 fe0517cca1194bc6a43d4974baf65835
+msgid ""
+"Projekt-værktøjet kan bruges til at gemme og distribuere øjebliksbilleder"
+" af kortets tilstand."
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:28 45bbae481c254622859adc40e975dc20
+msgid ""
+"Når der bliver lavet et projekt, gemmes kort-udstrækningen, tegnede "
+"elementer (:ref:`draw`), lag med mere - og kan bruges som en direkte "
+"genvej tilbage til hvor man arbejdede tidligere."
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:30 1f2f8b2c7c214511a1f4634345f2631b
+msgid "Når værktøjet startes, vises en liste med allerede eksisterende projekter."
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:38 7d5a3774f3e744f09e04a2f5398f72a0
+msgid "Værktøjet er tændt, og klar til at lave projekter."
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:40 42892cfbbbec438898c4b886852142d3
+msgid "Projekter kan gemmes på to måder: Lokalt eller under en brugerprofil."
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:42 d1e5d39c28b44dc8a709aa8dcf00dce8
+msgid "**Lokal gemte projekter**"
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:44 beaff67566004cb4b683f0ef9d78e492
+msgid ""
+"Projektet bliver gemt på serveren, men referencen til det er knyttet til "
+"browser-sessionen. Dvs. at projektet kan ses på listen og ændres så længe"
+" der anvendes den samme browser og browser-cachen ikke er ryddet. Mistes "
+"referencen til projektet vil det stadig eksistere, men kan ikke ændres "
+"eller slettes."
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:46 3a18263fe26f4c38b355266bd1dc85db
+msgid "**Bruger gemte projekter**"
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:48 3aa2bb8cf8f742569f8116b481570c68
+msgid ""
+"Er man logget ind i Vidi kan projektet gemmes under ens bruger-profil. På"
+" denne måde kan man altid se projektet på listen og det kan "
+"ændres/slettes fra en hvilken som helst browser."
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:50 259e97ab0cf54dc894a9934b68312b52
+msgid "Det er muligt at tilgå et projekt på flere måder:"
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:52 44d8c72fefd544d694b33eea4582f7c1
+msgid "Direkte som link. Et link direkte til et projekt kan se sådan ud:"
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:54 be808e47f4e44258971c70d035d6ede4
+msgid ""
+"`http://mapgoviditest.geopartner.dk/app/vandvaerker/public/?state=state_snapshot_35f2ea90-5975"
+"-11eb-8a1b-e3cc28c27983`_"
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:56 9f1d25a64f8d4cf9943fb839b194b5e4
+msgid "Man få et link til at printe kortet ud som png:"
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:58 09a4032b711e42be92679da9bfe82442
+msgid ""
+"`http://mapgoviditest.geopartner.dk/api/static/vandvaerker/public/?state=state_snapshot_35f2ea90-5975"
+"-11eb-8a1b-e3cc28c27983&width=1920&height=1080`_"
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:61 c485993aecc84e4992926820b9b5b123
+msgid "Skab projekt"
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:63 f89f4c5736a4454d810f245bd6ee6b4c
+msgid ""
+"Når kortet er opsat med de relevante lag, baggrundskort, tegninger mv. "
+"Indtastes et projektnavn, og man trykker på ``Gem``-knappen."
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:65 bb213a3ac18a414ba3cf6fceab75b9f2
+msgid "Knappen er \"Disketten\" vist på :numfig:`project-on`"
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:68 0e1d7a1c1ab94a05a1607b139d3b6dc9
+msgid "Genskab projekt"
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:70 87d863d9c0b64a429273a491f17da32d
+msgid ""
+"For at gå til projektet, klik på \"Play\"-ikonet. Den gemte opsætning vil"
+" nu blive genskabt."
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:73 ae086d5bffe149ba90da99432f72cf7e
+msgid "Editér projekt"
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:74 2a513a876cd34ca098c8d689bc867bdb
+msgid ""
+"Hvis man vil editere et projekt, starter man med at genskabe det - lave "
+"ændringerne i baggrundskort mv. og derefter gemme projektet påny."
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:76 23d1936e62024e89935f8c99ccf32227
+msgid "Det er også muligt at omdøbe projektet."
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:79 c456cbd9fa5c4cf481fc8d0e39a4150b
+msgid "Slet projekt"
+msgstr ""
+
+#: ../../pages/standard/06_project.rst:81 47d7eb4902754e1081e7080ec54c4d7a
+msgid ""
+"For at slette et projekt bruges \"Skraldespand\"-ikonet. Der vil komme en"
+" pop-up for at bekræfte dit valg. Hvis et projekt slettes er det ikke "
+"muligt at genskabe det."
+msgstr ""
+

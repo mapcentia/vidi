@@ -5,28 +5,13 @@
  */
 
 import React from 'react';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import FormControl from '@material-ui/core/FormControl';
-import Radio from '@material-ui/core/Radio';
-import RadioGroup from '@material-ui/core/RadioGroup';
-import FormLabel from '@material-ui/core/FormLabel';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import SaveIcon from '@material-ui/icons/Save';
-import Grid from '@material-ui/core/Grid';
-import CircularProgress from '@material-ui/core/CircularProgress';
-
 
 class LedningsDownload extends React.Component {
     constructor(props) {
         super(props);
-
         this.state = {
-            open: false,
-            format: '',
+            show: false,
+            format: 'shp',
             formatList: [
                 {
                     format: 'shp',
@@ -45,32 +30,21 @@ class LedningsDownload extends React.Component {
                 {
                     format: 'geojson',
                     formatTitle: 'GeoJSON',
-                    formatDesc: 'GeoJSON er et åbent tekst-baseret format. Bruges ofte i web-sammenhæng. Filen kan med fordel indlæses i  QGIS.',
+                    formatDesc: 'GeoJSON er et åbent tekst-baseret format. Bruges ofte i web-sammenhæng. Filen kan med fordel indlæses i QGIS.',
                     formatDisable: false,
                     formatProduct: 'Man får en GeoJSON fil, dette er et direkte udtræk af ledningspakken.'
                 }
             ],
-            loading: false
+            loading: false,
         };
     }
+
     handleChange = (event) => {
-        const _self = this
-
-        _self.setState({format:event.target.value || ''})
+        this.setState({ format: event.target.value || '' });
     };
 
-    handleClickOpen = () => {
-        const _self = this
-        _self.setState({open:true});
-    };
-
-    handleClose = () => {
-        const _self = this
-        _self.setState({
-            open:false,
-            format: ''
-        });
-    };
+    handleShow = () => this.setState({ show: true });
+    handleClose = () => this.setState({ show: false, format: '', loading: false });
 
     handleDownload = () => {
         const _self = this
@@ -109,96 +83,77 @@ class LedningsDownload extends React.Component {
                 a.addEventListener('click', clickHandler(file), false);
                 a.click();
                 a.removeEventListener('click', clickHandler);
-                _self.setState({loading:false})
+                this.handleClose()
             })
-            .then(_self.setState({open:false,format: ''}))
             .catch(e => console.log(e))
         })
         .catch(e => console.log(e))
     };
 
     render() {
-        const p = this.props
-        const _self = this;
-        const s = _self.state
-        
-        //console.log(p)
-        //console.log(s)
-
-        const container = {
-            display: 'flex',
-            flexWrap: 'wrap'
-        }
-        const formControl = {
-            minWidth: 120
-        }
-        const margin = {
-            margin: 10
-        }
-
-        let formatDescription, desc, product
-        if (s.format === '') {
-            desc = 'Vælg et format i siden, og få en fin forklaring over de forskellige formater du kan hente.'
-            product = ''
-        } else {
-            desc = s.formatList.find(x => x.format === s.format).formatDesc
-            product = s.formatList.find(x => x.format === s.format).formatProduct
-        }
-
+        const { show, format, formatList, loading } = this.state;
+        const selectedFormat = formatList.find(f => f.format === format);
+        const modalClass = show ? "modal fade show d-block" : "modal fade";
 
         return (
-            
             <div>
-              <Button
-                  size={p.size}
-                  variant={p.variant}
-                  color={p.color}
-                  onClick={_self.handleClickOpen}
-                  style={margin}
-                >
-                   <SaveIcon
-                   fontSize="small"
-                   /> Download
-                </Button>
-              <Dialog disableBackdropClick disableEscapeKeyDown open={s.open} onClose={_self.handleClose}>
-                <DialogTitle>Vælg format</DialogTitle>
-                <DialogContent>
-                <Grid
-                  container
-                  direction="row"
-                  justify="center"
-                  alignItems="flex-start"
-                >
+                <button type="button" className="btn btn-sm btn-light" onClick={this.handleShow}>
+                    Download
+                </button>
 
-                
-                    <Grid item xs={6}>
-                        <form style={container}>
-                          <FormControl style={formControl}>
-                              <RadioGroup aria-label="format" name="format1" value={s.format} onChange={_self.handleChange}>
-                                  {s.formatList.map(f => <FormControlLabel key={f.format} value={f.format} disabled={f.formatDisable} control={<Radio />} label={f.formatTitle} />)}
-                              </RadioGroup>
-                          </FormControl>
-                        </form>
-                    </Grid>
-                    <Grid item xs={6}>
-                        {desc === '' ? '' : <p>{desc}</p>}
-                        {product === '' ? '' : <p>{product}</p>}
-                    </Grid>
-                </Grid>
-                </DialogContent>
-                <DialogActions>
-                  <Button onClick={_self.handleClose} color="default" size={p.size} variant={p.variant}>
-                    Fortryd
-                  </Button>
-                  <Button onClick={_self.handleDownload} color="primary" size={p.size} variant={p.variant} disabled={s.format == '' ? true : false}>
-                    {s.loading ? 'Oversætter' : 'Download'}
-                  </Button>
-                  {s.loading && <CircularProgress size={20} />}
-                </DialogActions>
-              </Dialog>
+                <div className={modalClass} tabIndex="-1" style={show ? { backgroundColor: 'rgba(0,0,0,0.5)' } : {}}>
+                    <div className="modal-dialog modal-dialog-centered modal-lg">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">Vælg format</h5>
+                                <button type="button" className="btn-close" onClick={this.handleClose}></button>
+                            </div>
+                            <div className="modal-body">
+                                <div className="row">
+                                    <div className="col-md-6">
+                                        {formatList.map(f => (
+                                            <div className="form-check" key={f.format}>
+                                                <input 
+                                                    className="form-check-input" 
+                                                    type="radio" 
+                                                    name="formatOption" 
+                                                    id={`format-${f.format}`}
+                                                    value={f.format}
+                                                    checked={format === f.format}
+                                                    onChange={this.handleChange}
+                                                    disabled={f.formatDisable}
+                                                />
+                                                <label className="form-check-label" htmlFor={`format-${f.format}`}>
+                                                    {f.formatTitle}
+                                                </label>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className="col-md-6">
+                                        {selectedFormat && (
+                                            <>
+                                                <p>{selectedFormat.formatDesc}</p>
+                                                <p>{selectedFormat.formatProduct}</p>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" onClick={this.handleClose}>Fortryd</button>
+                                <button type="button" className="btn btn-primary" onClick={this.handleDownload} disabled={!format || loading}>
+                                    {loading && <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>}
+                                    {loading ? ' Loading...' : 'Download'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {show && <div className="modal-backdrop fade show"></div>}
             </div>
-          );
+        );
     }
-};
+}
 
-module.exports = LedningsDownload;
+export default LedningsDownload;

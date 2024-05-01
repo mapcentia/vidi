@@ -9,7 +9,22 @@
  */
 
 const GEOJSON_PRECISION = 14;
+const MIME_TYPES_IMAGES = ['image/png', 'image/jpeg', 'image/gif'];
+const MIME_TYPES_APPS = [
+    'application/pdf',
+    'text/plain',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.oasis.opendocument.text',
+    'video/mp4',
+    'video/webm',
+    'video/ogg',
+    'audio/mpeg',
+    'audio/ogg',
+    'audio/wav',
+    'audio/aac',
+]
 
 export {
-    GEOJSON_PRECISION
+    GEOJSON_PRECISION, MIME_TYPES_APPS, MIME_TYPES_IMAGES
 };

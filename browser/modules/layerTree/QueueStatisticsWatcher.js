@@ -1,6 +1,6 @@
 /*
  * @author     Alexander Shumilov
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2023 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -25,6 +25,7 @@ let switchLayer = false, layerTree = false, offlineModeControlsManager = false;
 
 
 const base64url = require('base64url');
+const cloud = require('./../cloud');
 
 class QueueStatisticsWatcher {
     constructor(o) {
@@ -63,23 +64,24 @@ class QueueStatisticsWatcher {
             lastStatistics = statistics;
 
             let actions = ['add', 'update', 'delete'];
+            $(`[data-gc2-layer-key]`).find('.js-failed-container').addClass('d-none');
             $(`[data-gc2-layer-key]`).each((index, container) => {
                 actions.map(action => {
-                    $(container).find('.js-failed-' + action).addClass('hidden');
+                    $(container).find('.js-failed-' + action).addClass('d-none');
                     $(container).find('.js-failed-' + action).find('.js-value').html('');
-                    $(container).find('.js-rejectedByServer-' + action).addClass('hidden');
+                    $(container).find('.js-rejectedByServer-' + action).addClass('d-none');
                     $(container).find('.js-rejectedByServer-' + action).find('.js-value').html('');
 
                     $(container).find('.js-rejectedByServerItems').empty();
-                    $(container).find('.js-rejectedByServerItems').addClass('hidden');
+                    $(container).find('.js-rejectedByServerItems').addClass('d-none');
                 });
             });
 
-            $('.js-clear').addClass('hidden');
+            $('.js-clear').addClass('d-none');
             $('.js-clear').off();
 
-            $('.js-app-is-online-badge').addClass('hidden');
-            $('.js-app-is-offline-badge').addClass('hidden');
+            $('.js-app-is-online-badge').addClass('d-none');
+            $('.js-app-is-offline-badge').addClass('d-none');
 
             if ($('.js-app-is-online-badge').length === 1) {
                 theStatisticsPanelWasDrawn = true;
@@ -95,22 +97,25 @@ class QueueStatisticsWatcher {
                     let totalRequests = 0;
                     let rejectedByServerRequests = 0;
                     actions.map(action => {
+
+                        $(layerControlContainer).find('.js-failed-container').removeClass('d-none');
+
                         if (statistics[key]['failed'][action.toUpperCase()] > 0) {
                             totalRequests++;
-                            $(layerControlContainer).find('.js-failed-' + action).removeClass('hidden');
+                            $(layerControlContainer).find('.js-failed-' + action).removeClass('d-none');
                             $(layerControlContainer).find('.js-failed-' + action).find('.js-value').html(statistics[key]['failed'][action.toUpperCase()]);
                         }
 
                         if (statistics[key]['rejectedByServer'][action.toUpperCase()] > 0) {
                             rejectedByServerRequests++;
                             totalRequests++;
-                            $(layerControlContainer).find('.js-rejectedByServer-' + action).removeClass('hidden');
+                            $(layerControlContainer).find('.js-rejectedByServer-' + action).removeClass('d-none');
                             $(layerControlContainer).find('.js-rejectedByServer-' + action).find('.js-value').html(statistics[key]['rejectedByServer'][action.toUpperCase()]);
                         }
                     });
 
                     if (rejectedByServerRequests > 0) {
-                        $(layerControlContainer).find('.js-rejectedByServerItems').removeClass('hidden');
+                        $(layerControlContainer).find('.js-rejectedByServerItems').removeClass('d-none');
                         statistics[key]['rejectedByServer'].items.map(item => {
                             let copiedItem = Object.assign({}, item.feature.features[0]);
                             let copiedItemProperties = Object.assign({}, item.feature.features[0].properties);
@@ -121,19 +126,19 @@ class QueueStatisticsWatcher {
                                 errorMessage = __(`Not authorized to perform this action`);
                             }
 
-                            let errorRecord = $(`<div>
-                                <span class="label label-danger"><i style="color: black;" class="fa fa-exclamation"></i></span>
-                                <button data-feature-geometry='${JSON.stringify(copiedItem.geometry)}' class="btn btn-secondary js-center-map-on-item" type="button" style="padding: 4px; margin-top: 0px; margin-bottom: 0px;">
-                                    <i style="color: black;" class="fa fa-map-marker"></i>
+                            let errorRecord = $(`
+                            <div class="d-flex align-items-center gap-2">
+                                <button data-feature-geometry='${JSON.stringify(copiedItem.geometry)}' class="btn btn-sm btn-light js-center-map-on-item" type="button">
+                                    <i class="bi bi-pin-map text-danger"></i>
                                 </button>
-                                <div style="overflow-x: scroll; font-size: 12px; color: darkgray;">${errorMessage}</div>
+                                <div class="text-danger">${errorMessage}</div>
                             </div>`);
 
                             $(errorRecord).find('.js-center-map-on-item').click((event) => {
                                 let geometry = $(event.currentTarget).data(`feature-geometry`);
                                 if (geometry) {
                                     // Centering on non-point feature
-                                    if (geometry.coordinates.length > 1) {
+                                    if (geometry.type !== 'MultiPoint' || geometry.type !== 'Point') {
                                         let geojsonLayer = L.geoJson(geometry);
                                         let bounds = geojsonLayer.getBounds();
                                         cloud.get().map.panTo(bounds.getCenter());
@@ -147,7 +152,7 @@ class QueueStatisticsWatcher {
                     }
 
                     if (totalRequests > 0) {
-                        $(layerControlContainer).find('.js-clear').removeClass('hidden');
+                        $(layerControlContainer).find('.js-clear').removeClass('d-none');
 
                         $(layerControlContainer).find('.js-clear').on('click', (event) => {
                             let gc2Id = $(event.target).data('gc2-id');

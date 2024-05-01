@@ -60,6 +60,15 @@ module.exports = module.exports = {
                 }
             }
         });
+
+        // Expose init in global scope
+        api.turnOn = (l) => {
+            const status = _self.getLayersEnabledStatus();
+            if (!status?.[l] || !status[l].enabled) {
+                _self.init(l, true);
+            }
+        }
+
         return this;
     },
 
@@ -110,15 +119,20 @@ module.exports = module.exports = {
                     layerTree.createStore(layerMeta);
                     vectorDataStores = layerTree.getStores();
                 }
-
-                cloud.get().layerControl.addOverlay(vectorDataStores[vectorLayerId].layer, vectorLayerId);
-                let existingLayer = cloud.get().getLayersByName(vectorLayerId);
-                cloud.get().map.addLayer(existingLayer);
-                vectorDataStores[vectorLayerId].load();
-
-                backboneEvents.get().trigger("startLoading:layers", vectorLayerId);
-
-                _self.checkLayerControl(vectorLayerId, doNotLegend, setupControls);
+                try {
+                    cloud.get().layerControl.addOverlay(vectorDataStores[vectorLayerId].layerHL, 'HL:' + vectorLayerId);
+                    cloud.get().layerControl.addOverlay(vectorDataStores[vectorLayerId].layer, vectorLayerId);
+                    let existingLayer = cloud.get().getLayersByName(vectorLayerId);
+                    let existingLayerHL = cloud.get().getLayersByName('HL:' + vectorLayerId);
+                    cloud.get().map.addLayer(existingLayer);
+                    cloud.get().map.addLayer(existingLayerHL);
+                    vectorDataStores[vectorLayerId].load();
+                    backboneEvents.get().trigger("startLoading:layers", vectorLayerId);
+                    _self.checkLayerControl(vectorLayerId, doNotLegend, setupControls);
+                    _self.enableCheckBoxesOnChildren(gc2Id);
+                } catch (e) {
+                    console.error(e)
+                }
                 resolve();
             } else if (failedBefore !== false) {
                 if (failedBefore.reason === `NO_VECTOR_DATA_STORE`) {
@@ -142,6 +156,7 @@ module.exports = module.exports = {
                         _self.init(vectorLayerId, true, false, false, true, {
                             reason: `NO_VECTOR_DATA_STORE`
                         }).then(() => {
+                            _self.enableCheckBoxesOnChildren(gc2Id);
                             resolve();
                         });
                     });
@@ -164,8 +179,7 @@ module.exports = module.exports = {
         return new Promise((resolve, reject) => {
             layers.addUTFGridLayer(id).then(() => {
             }).catch((err) => {
-                console.error(`Could not add ${id} UTFGrid tile layer`);
-                console.error(err);
+                console.log(`Could not add ${id} UTFGrid tile layer`);
                 resolve();
             });
         });
@@ -481,11 +495,13 @@ module.exports = module.exports = {
 
             let rasterTileLayer = cloud.get().getLayersByName(gc2Id, false);
             let vectorLayer = cloud.get().getLayersByName(vectorLayerId, false);
+            let vectorLayerHL = cloud.get().getLayersByName('HL:' + vectorLayerId, false);
             let vectorTileLayer = cloud.get().getLayersByName(vectorTileLayerId, false);
             let webGLLayer = cloud.get().getLayersByName(webGLLayerId, false);
 
             if (rasterTileLayer) cloud.get().map.removeLayer(rasterTileLayer);
             if (vectorLayer) cloud.get().map.removeLayer(vectorLayer);
+            if (vectorLayerHL) cloud.get().map.removeLayer(vectorLayerHL);
             if (vectorTileLayer) cloud.get().map.removeLayer(vectorTileLayer);
             if (webGLLayer) cloud.get().map.removeLayer(webGLLayer);
 
@@ -497,7 +513,8 @@ module.exports = module.exports = {
             // Always trig tileLayerVisibility with false
             backboneEvents.get().trigger("tileLayerVisibility:layers", {
                 id: gc2Id,
-                dataIsVisible: false
+                dataIsVisible: false,
+                shouldLegendReact: false
             });
 
             if (enable) {
@@ -569,7 +586,7 @@ module.exports = module.exports = {
             }
         }
 
-        let controlElement = $('input[class="js-show-layer-control"][data-gc2-id="' + layerTreeUtils.stripPrefix(layerName) + '"]');
+        let controlElement = $('input[data-gc2-id="' + layerTreeUtils.stripPrefix(layerName) + '"].js-show-layer-control');
         if (controlElement.length === 1) {
             let siblings = $(controlElement).parents(".accordion-body").find("input.js-show-layer-control"), c = 0;
 

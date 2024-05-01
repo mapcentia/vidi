@@ -9,32 +9,25 @@ var fs = require('fs');
 module.exports = function (grunt) {
     "use strict";
 
-    // Detecting optional theme
-    let theme = false;
-    process.argv.forEach(val => {
-        if (val.indexOf(`--theme=`) !== -1) {
-            theme = val.replace(`--theme=`, ``);
-        }
-    });
-
-    // Default build parameters
-    let copyBootstrapVariablesCommand;
-    let lessConfig = {"public/css/styles.css": "public/less/styles.default.less"};
-    if (theme && theme === 'watsonc') {
-        if(process.platform === 'win32') {
-            copyBootstrapVariablesCommand = 'copy "extensions\\' + theme + '\\config\\_variables.less" "public\\js\\lib\\bootstrap-material-design\\less';
-            lessConfig = {"public\\css\\styles.css": "public\\less\\styles." + theme + ".less"};
-        } else {
-            copyBootstrapVariablesCommand = 'cp ./extensions/' + theme + '/config/_variables.less ./public/js/lib/bootstrap-material-design/less';
-            lessConfig = {"public/css/styles.css": "public/less/styles." + theme + ".less"};
-        }
-    } else {
-        if(process.platform === 'win32') {
-            copyBootstrapVariablesCommand = 'copy "config\\_variables.less" "public\\js\\lib\\bootstrap-material-design\\less"'
-        } else {
-            copyBootstrapVariablesCommand = 'cp ./config/_variables.less ./public/js/lib/bootstrap-material-design/less';
-        }
-    }
+    const lessConfig = {"public/css/styles.css": "public/less/styles.default.less"};
+    const transform = [['babelify', {
+        presets: ["@babel/preset-env", "@babel/preset-react"],
+        plugins: ["@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread"]
+    }], 'require-globify', 'windowify', 'envify', ['browserify-css', {global: true}]];
+    const transform_sw = [['babelify', {
+        presets: ["@babel/preset-env", "@babel/preset-react"],
+        plugins: ["@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread", "@babel/plugin-proposal-optional-chaining"]
+    }], 'require-globify'];
+    const browserifyOptions = {
+        debug: true,
+        fullPaths: true
+    };
+    const files = {
+        'public/js/bundle.js': ['browser/index.js'],
+    };
+    const files_sw = {
+        'public/service-worker.bundle.js': ['browser/service-worker/index.js']
+    };
 
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
@@ -73,18 +66,13 @@ module.exports = function (grunt) {
             build: {
                 options: {
                     target: "./build",
-                    rebase: true
+                    rebase: true,
                 },
                 files: {
                     'public/css/build/all.min.css': [
-                        // Material Design fonts
-                        'public/fonts/fonts.css',
-                        'public/icons/material-icons.css',
-                        // jQuery UI
-                        // 'public/js/lib/jquery-ui/jquery-ui.min.css',
-                        // Font Awesome
-                        'public/css/font-awesome.min.css',
-                        'public/css/font-awesome.v5.15/all.css',
+                        // Bootstrap icons
+                        'node_modules/bootstrap-icons/font/bootstrap-icons.css',
+                        'node_modules/@fortawesome/fontawesome-free/css/all.css',
                         // Leaflet
                         'public/js/lib/leaflet/leaflet.css',
                         'public/js/lib/leaflet-draw/leaflet.draw.css',
@@ -100,13 +88,7 @@ module.exports = function (grunt) {
                         // Bootstrap
                         'node_modules/bootstrap-select/dist/css/bootstrap-select.css',
                         'node_modules/bootstrap-table/dist/bootstrap-table.css',
-                        'public/js/lib/bootstrap/dist/css/bootstrap.css',
-
-                        'public/js/lib/snackbarjs/snackbar.min.css',
-                        'public/js/lib/bootstrap-material-design/dist/css/ripples.css',
-                        'public/js/lib/bootstrap-material-datetimepicker/bootstrap-material-datetimepicker.css',
-                        'public/js/lib/bootstrap-material-design/dist/css/bootstrap-material-design.css',
-                        'public/js/lib/bootstrap-colorpicker/css/bootstrap-colorpicker.css',
+                        'scss/main.css',
                         //custom
                         'public/css/styles.min.css'
                     ]
@@ -176,75 +158,64 @@ module.exports = function (grunt) {
         },
         browserify: {
             publish: {
-                files: {
-                    'public/js/bundle.js': ['browser/index.js'],
-                },
+                files,
                 options: {
-                    transform: [['babelify', {
-                        presets: ["@babel/preset-env", "@babel/preset-react"],
-                        plugins: ["@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread"]
-                    }], 'require-globify', 'windowify', 'envify', ['browserify-css', {global: true}]]
+                    transform
                 }
             },
             debug: {
-                files: {
-                    'public/js/bundle.js': ['browser/index.js'],
-                },
+                files,
                 options: {
-                    browserifyOptions: {
-                        debug: true,
-                        fullPaths: true
-                    },
-                    transform: [['babelify', {
-                        presets: ["@babel/preset-env", "@babel/preset-react"],
-                        plugins: ["@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread"]
-                    }], 'require-globify', 'windowify', 'envify', ['browserify-css', {global: true}]]
+                    browserifyOptions,
+                    transform
                 }
             },
             publish_sw: {
-                files: {
-                    'public/service-worker.bundle.js': ['browser/service-worker/index.js']
-                },
+                files: files_sw,
                 options: {
                     alias: {
                         'urls-to-cache': './browser/service-worker/cache.production.js'
                     },
-                    transform: [['babelify', {
-                        presets: ["@babel/preset-env", "@babel/preset-react"],
-                        plugins: ["@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread"]
-                    }], 'require-globify']
+                    transform: transform_sw
                 }
             },
             publish_sw_dev: {
-                files: {
-                    'public/service-worker.bundle.js': ['browser/service-worker/index.js']
-                },
+                files: files_sw,
                 options: {
                     alias: {
                         'urls-to-cache': './browser/service-worker/cache.development.js'
                     },
-                    transform: [['babelify', {
-                        presets: ["@babel/preset-env", "@babel/preset-react"],
-                        plugins: ["@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread", "@babel/plugin-proposal-optional-chaining"]
-                    }], 'require-globify']
+                    transform: transform_sw
                 }
             },
             watch: {
-                files: {
-                    'public/js/bundle.js': ['browser/index.js']
-                },
+                files,
                 options: {
-                    browserifyOptions: {
-                        debug: true,
-                        fullPaths: true
-                    },
-                    transform: [['babelify', {
-                        presets: ["@babel/preset-env", "@babel/preset-react"],
-                        plugins: ["@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread"]
-                    }], 'require-globify', 'windowify', 'envify', ['browserify-css', {global: true}]],
+                    browserifyOptions,
+                    transform,
                     watch: true,
-                    keepAlive: true
+                    keepAlive: true,
+
                 }
+            }
+        },
+        watch: {
+            reload: {
+                files: ['public/js/bundle.js', 'public/js/templates.js', 'public/css/build/all.min.css'],
+                options: {
+                    livereload: true,
+                },
+            },
+            hogan: {
+                files: [
+                    'public/templates/**/*.tmpl',
+                    'extensions/**/templates/*.tmpl'
+                ],
+                tasks: 'hogan'
+            },
+            css: {
+                files: ['scss/styles.scss'],
+                tasks: 'css'
             }
         },
         uglify: {
@@ -279,6 +250,7 @@ module.exports = function (grunt) {
                         'public/js/lib/Leaflet.markercluster/leaflet.markercluster.js',
                         'public/js/lib/Leaflet.extra-markers/leaflet.extra-markers.js',
                         'public/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.js',
+                        'public/js/lib/leaflet-simple-map-screenshoter/dist/leaflet-simple-map-screenshoter.js',
 
                         'public/js/lib/jquery.canvasResize.js/jquery.canvasResize.js',
                         'public/js/lib/jquery.canvasResize.js/jquery.exif.js',
@@ -296,10 +268,7 @@ module.exports = function (grunt) {
                         'public/js/lib/leaflet-dash-flow/L.Path.DashFlow.js',
 
                         'public/js/lib/typeahead.js/typeahead.jquery.js',
-                        'node_modules/bootstrap/dist/js/bootstrap.js',
-                        'public/js/lib/bootstrap-material-design/dist/js/ripples.js',
-                        'public/js/lib/bootstrap-material-design/dist/js/material.js',
-                        'public/js/lib/bootstrap-colorpicker/js/bootstrap-colorpicker.js',
+                        //'node_modules/bootstrap/dist/js/bootstrap.bundle.js',
 
                         'node_modules/leaflet.glify/dist/glify-browser.js',
                         'node_modules/bootstrap-table/dist/bootstrap-table.js',
@@ -320,14 +289,17 @@ module.exports = function (grunt) {
             }
         },
         shell: {
-            default: {
-                command: [
-                   copyBootstrapVariablesCommand,
-                    'grunt --gruntfile ./public/js/lib/bootstrap-material-design/Gruntfile.js dist-less'
-                ].join('&&')
-            },
             buildDocs: {
-                command: 'sphinx-build ./docs/da ./docs/html'
+                command: '. ./venv/bin/activate && sphinx-build ./docs ./docs/_build/html/da'
+            },
+            gettext: {
+                command: '. ./venv/bin/activate && sphinx-build ./docs -b gettext ./docs/_build/gettext'
+            },
+            updateEn: {
+                command: '. ./venv/bin/activate && cd ./docs && sphinx-intl update -p _build/gettext -l en'
+            },
+            buildEn: {
+                command: '. ./venv/bin/activate && sphinx-build -b html -D language=en ./docs ./docs/_build/html/en'
             }
         },
         cacheBust: {
@@ -345,33 +317,35 @@ module.exports = function (grunt) {
                     src: ['index.html']
                 }]
             }
+        },
+        sass: {
+            dist: {                            // Target
+                options: {                       // Target options
+                    style: 'expanded'
+                },
+                files: {
+                    'scss/main.css': 'scss/main.scss'       // 'destination': 'source'
+                }
+            }
         }
     });
 
     grunt.registerTask('prepareAssets', 'Updates assets if specific modules are enabled', function () {
-        if (theme && theme === 'watsonc') {
-            fs.createReadStream('./extensions/watsonc/public/index.html').pipe(fs.createWriteStream('./public/index.html'));
-            fs.createReadStream('./extensions/watsonc/public/favicon.ico').pipe(fs.createWriteStream('./public/favicon.ico'));
-        } else {
-            fs.createReadStream('./public/index.html.default').pipe(fs.createWriteStream('./public/index.html'));
-            fs.createReadStream('./public/favicon.ico.default').pipe(fs.createWriteStream('./public/favicon.ico'));
-        }
+        fs.createReadStream('./public/index.html.default').pipe(fs.createWriteStream('./public/index.html'));
+        fs.createReadStream('./public/favicon.ico.default').pipe(fs.createWriteStream('./public/favicon.ico'));
     });
 
     grunt.registerTask('appendBuildHashToVersion', 'Appends the build hash to the application version', function () {
         var crypto = require('crypto');
         var md5 = crypto.createHash('md5');
 
-        // Disables for ease of use - add latør
-        //var jsSource = grunt.file.expand({filter: "isFile", cwd: "public/js/build"}, ["all.min.js"]);
-        //var cssSource = grunt.file.expand({filter: "isFile", cwd: "public/css/build"}, ["all.min.css"]);
-        //if (jsSource.length !== 1 || cssSource.length !== 1) {
-        //    throw new Error(`Unable to find all.min.*.js[css] sources`);
-        //}
+        var jsSource = grunt.file.expand({filter: "isFile", cwd: "public/js/build"}, ["all.min.js"]);
+        var cssSource = grunt.file.expand({filter: "isFile", cwd: "public/css/build"}, ["all.min.css"]);
+        if (jsSource.length !== 1 || cssSource.length !== 1) {
+            throw new Error(`Unable to find all.min.*.js[css] sources`);
+        }
 
-        //var buffer = grunt.file.read('public/js/build/' + jsSource[0]) + grunt.file.read('public/css/build/' + cssSource[0]);
-
-        var buffer = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        var buffer = grunt.file.read('public/js/build/' + jsSource[0]) + grunt.file.read('public/css/build/' + cssSource[0]);
         md5.update(buffer);
         var md5Hash = md5.digest('hex');
         var versionJSON = grunt.file.readJSON('public/version.json');
@@ -384,7 +358,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-browserify');
     grunt.loadNpmTasks('grunt-shell');
     grunt.loadNpmTasks('grunt-contrib-less');
-    grunt.loadNpmTasks('grunt-contrib-uglify-es');
+    grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-processhtml');
     grunt.loadNpmTasks('grunt-cache-bust');
@@ -392,9 +366,11 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-handlebars');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-version');
+    grunt.loadNpmTasks('grunt-contrib-sass');
 
-    grunt.registerTask('default', ['prepareAssets', 'browserify:publish', 'browserify:publish_sw_dev', 'extension-css', 'shell:default', 'hogan', 'version']);
-    grunt.registerTask('production', ['env:prod', 'hogan', 'prepareAssets', 'browserify:publish', 'browserify:publish_sw', 'extension-css', 'shell:default', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust', 'version', 'appendBuildHashToVersion']);
+
+    grunt.registerTask('default', ['prepareAssets', 'browserify:publish', 'browserify:publish_sw_dev', 'css', 'hogan', 'version']);
+    grunt.registerTask('production', ['env:prod', 'hogan', 'prepareAssets', 'browserify:publish', 'browserify:publish_sw', 'css', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust', 'version', 'appendBuildHashToVersion']);
     grunt.registerTask('production-test', ['env:prod', 'browserify:publish']);
-    grunt.registerTask('extension-css', ['less', 'cssmin:extensions']);
+    grunt.registerTask('css', ['less', 'sass', 'cssmin']);
 };

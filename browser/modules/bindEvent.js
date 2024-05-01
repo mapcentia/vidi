@@ -10,12 +10,7 @@ import {LAYER_TYPE_DEFAULT} from './layerTree/constants';
 
 require('dom-shims');
 require('arrive');
-const config = require('../../config/config.js');
 const layerTreeUtils = require('./layerTree/utils');
-const LEFT_SLIDE_WIDTHS = config?.leftSlideWidths || [300, 400, 550];
-const BUTTON_WITH = 24;
-const mobile = require('is-mobile');
-const jrespond = require('jrespond'); //TODO Change to Window.matchMedia()
 const APIBridgeSingletone = require('./api-bridge');
 let advancedInfo, cloud, switchLayer, meta, utils;
 let apiBridgeInstance = false;
@@ -32,6 +27,9 @@ let isStarted = false;
 let readyCallbackIsfired = false;
 let firstGroupIsOpened = false;
 let urlVars = urlparser.urlVars;
+
+let mainLayerOffcanvas;
+let offcanvasInfo;
 
 
 /**
@@ -59,6 +57,25 @@ module.exports = {
     },
     init: function () {
         apiBridgeInstance = APIBridgeSingletone();
+
+        try {
+            mainLayerOffcanvas = new bootstrap.Offcanvas('#mainLayerOffcanvas');
+            offcanvasInfo = new bootstrap.Offcanvas('#offcanvasLayerDesc');
+            document.getElementById('mainLayerOffcanvas').addEventListener('shown.bs.offcanvas', event => {
+                document.querySelector("#offcanvasLayerControlBtn .bi-arrow-bar-left").classList.remove("d-none");
+                document.querySelector("#offcanvasLayerControlBtn .bi-arrow-bar-right").classList.add("d-none");
+            })
+            document.getElementById('mainLayerOffcanvas').addEventListener('hidden.bs.offcanvas', event => {
+                document.querySelector("#offcanvasLayerControlBtn .bi-arrow-bar-right").classList.remove("d-none");
+                document.querySelector("#offcanvasLayerControlBtn .bi-arrow-bar-left").classList.add("d-none");
+            })
+            $("#offcanvasLayerControlBtn").on("click", () => { mainLayerOffcanvas.toggle()});
+            if (window.vidiConfig.showOffcanvas === true) {
+                mainLayerOffcanvas.show();
+            }
+        } catch (e) {
+
+        }
 
         let doneL = false, doneB = false, loadingL = 0, loadingB = 0;
         const fadeWhenDraggingClass = $(".fade-then-dragging");
@@ -128,7 +145,7 @@ module.exports = {
                 if (isChecked) {
                     layerTreeUtils.setupLayerNumberIndicator(base64GroupName, layers.length, layers.length);
                 } else {
-                    $("#layer-panel-" + base64GroupName + " . layer-count span:eq(0)").html(0);
+                    $("#layer-panel-" + base64GroupName + " .layer-count span:eq(0)").html(0);
                 }
             });
         });
@@ -152,28 +169,24 @@ module.exports = {
             });
         });
 
-        $('#searchclear').on('click', function () {
+        $('.searchclear').on('click', function () {
             backboneEvents.get().trigger('clear:search');
+        });
+        $(document).arrive('.searchclear', function () {
+            $(this).on('click', function () {
+                backboneEvents.get().trigger('clear:search');
+            });
         });
 
         backboneEvents.get().on("allDoneLoading:layers", function () {
             const openFirtIfNotOpen = () => {
-                let e = $('.js-toggle-layer-panel:first');
-                if (window?.vidiConfig?.extensionConfig?.embed?.expandFirstInLayerTree === true && e.hasClass('collapsed')) {
-                    e.trigger('click');
+                let e = document.querySelector('.js-toggle-layer-panel');
+                if (window.vidiConfig.expandFirstInLayerTree === true && e?.classList?.contains("collapsed")) {
+                    e.click();
                 }
             }
             if (!isStarted) {
-                if (mobile()) {
-                    $('ul[role="tablist"]:last-child').attr('style', 'padding-bottom: 100px');
-                }
                 isStarted = true;
-                if ($(document).width() > 1024 && !window.vidiConfig.activateMainTab) {
-                    $('#search-border').trigger('click');
-                }
-                if (window?.vidiConfig?.extensionConfig?.embed?.slideOutLayerTree === true) {
-                    $('#burger-btn').trigger('click');
-                }
                 openFirtIfNotOpen();
 
             } else {
@@ -280,11 +293,6 @@ module.exports = {
         // Init some GUI stuff after modules are loaded
         // ============================================
         $('[data-toggle=tooltip]').tooltip();
-        try {
-            $.material.init();
-        } catch (e) {
-            console.warn('Material Design could not be initiated');
-        }
 
         touchScroll('.tab-pane');
         touchScroll('#info-modal-body-wrapper');
@@ -292,16 +300,26 @@ module.exports = {
 
         backboneEvents.get().on(`extensions:initialized`, () => {
             if (window.vidiConfig.activateMainTab) {
-                setTimeout(function () {
-                    const e = $('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]');
-                    if (e.length === 1) {
-                        e.trigger('click');
-                    } else {
-                        console.warn(`Unable to locate specified activateMainTab ${window.vidiConfig.activateMainTab}`)
-                    }
-                }, 200);
+                // Activate tabs
+                const triggerTabList = document.querySelectorAll('#main-tabs a')
+                triggerTabList.forEach(triggerEl => {
+                    const tabTrigger = new bootstrap.Tab(triggerEl)
+                    triggerEl.addEventListener('click', event => {
+                        event.preventDefault()
+                        tabTrigger.show()
+                    })
+                })
+                const e = document.querySelector('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]');
+                if (e) {
+                    bootstrap.Tab.getInstance(e).show();
+                    setTimeout(()=>{
+                        e.click();
+                    }, 100)
+                } else {
+                    console.warn(`Unable to locate specified activateMainTab ${window.vidiConfig.activateMainTab}`)
+                }
             }
-        });
+        })
 
         $(document).arrive('[data-toggle="tooltip"]', function () {
             $(this).tooltip()
@@ -313,228 +331,26 @@ module.exports = {
             });
         });
 
-        // Set up the open/close functions for side panel
-        let searchPanelOpen, width, defaultCollapsedWidth = 260;
-
-        backboneEvents.get().on('show:leftSlidePanel', () => {
-            let localCollapsedWidth = Math.max.apply(Math, $('#side-panel #main-tabs > li > a, #side-panel #main-tabs > li [role="tab"]').map(function () {
-                return $(this).width();
-            }).get());
-            if (localCollapsedWidth > 0) {
-                if (localCollapsedWidth < 170) localCollapsedWidth = 170;
-                localCollapsedWidth = localCollapsedWidth + 80;
+        const legendToast = document.getElementById('legend-toast');
+        const legendBtn = document.getElementById("btn-show-legend-in-map");
+        legendToast?.addEventListener('hidden.bs.toast', () => {
+            $('#legend-content').append($('#legend'));
+            legendBtn.classList.remove("btn-secondary");
+            legendBtn.classList.add("btn-outline-secondary");
+        })
+        legendToast?.addEventListener('shown.bs.toast', () => {
+            $('#legend-toast-body').append($('#legend'));
+            legendBtn.classList.add("btn-secondary");
+            legendBtn.classList.remove("btn-outline-secondary");
+        })
+        legendBtn?.addEventListener("click", (el) => {
+            const t = new bootstrap.Toast(legendToast, {autohide: false});
+            if (t.isShown()) {
+                t.hide();
             } else {
-                localCollapsedWidth = defaultCollapsedWidth + 80;
+                t.show();
             }
-            $('#search-ribbon').css('right', '-' + (width - localCollapsedWidth) + 'px');
-            $('#pane').css('right', (localCollapsedWidth - BUTTON_WITH) + 'px');
-            $('#map').css('width', 'calc(100% - ' + (localCollapsedWidth / 2) + 'px)');
-            searchPanelOpen = true;
-            $('.slide-collapsed').hide();
-            $('.slide-expanded').show();
-        });
-        backboneEvents.get().on(`hide:leftSlidePanel`, () => {
-            $('#pane').css('right', '0');
-            $('#map').css('width', '100%');
-            $('#search-ribbon').css('right', '-' + (width - BUTTON_WITH) + 'px');
-            searchPanelOpen = false;
-            $('#side-panel ul li').removeClass('active');
-            $('.slide-collapsed').show();
-            $('.slide-expanded').hide();
-        });
-
-        $('#main-tabs a').on('click', function () {
-            if ($(this).data(`module-ignore`) !== true && $(this).data(`module-ignore`) !== `true`) {
-                $('#module-container.slide-right').css('right', '0');
-                searchShowFull();
-            }
-        });
-
-        $(document).arrive('#main-tabs a', function () {
-            $(this).on('click', function () {
-                if ($(this).data(`module-ignore`) !== true && $(this).data(`module-ignore`) !== `true`) {
-                    $('#module-container.slide-right').css('right', '0');
-                    searchShowFull();
-                }
-            });
-        });
-
-        $('#info-modal .modal-header button').on('click', function () {
-            if (!$(this).data('extraClickHandlerIsEnabled')) {
-                infoModalHide();
-            }
-        });
-
-        $('#module-container .modal-header button').on('click', function () {
-            searchShow();
-            if (!$(this).data('extraClickHandlerIsEnabled')) {
-                moduleContainerHide();
-                $('#side-panel ul li').removeClass('active');
-            }
-        });
-
-        const setWidth = function (width) {
-            $('#search-ribbon').css('width', width + 'px').css('right', '-' + (width - BUTTON_WITH) + 'px');
-            $('#module-container').css('width', (width - 84) + 'px');
-            $('#info-modal').css('width', (width - 84) + 'px');
-            $('.navmenu').css('width', (width) + 'px');
-            $('.slide-right').css('right', '-' + (width - 84) + 'px');
-        };
-
-        const infoModalHide = function () {
-            $('#info-modal').css('right', '-' + (width - 84) + 'px');
-        }
-
-        const moduleContainerHide = function () {
-            $('#module-container.slide-right').css('right', '-' + (width - 84) + 'px');
-        }
-
-        const searchShow = function () {
-            backboneEvents.get().trigger('show:leftSlidePanel');
-        }
-
-        const searchShowFull = function () {
-            $('#search-ribbon').css('right', '0');
-            $('#pane').css('right', (width - BUTTON_WITH) + 'px');
-            $('#map').css('width', 'calc(100% - ' + (width / 2) + 'px');
-            searchPanelOpen = true;
-        }
-
-        const searchHide = function () {
-            backboneEvents.get().trigger('hide:leftSlidePanel');
-        };
-
-        const jRes = jrespond([
-            {
-                label: 'phone',
-                enter: 0,
-                exit: 500
-            },
-            {
-                label: 'tablet',
-                enter: 501,
-                exit: 1024
-            },
-            {
-                label: 'desktop',
-                enter: 1024,
-                exit: 10000
-            }
-        ]);
-
-        jRes.addFunc({
-            breakpoint: ['phone'],
-            enter: function () {
-                searchHide()
-                width = LEFT_SLIDE_WIDTHS[0];
-                setWidth(width)
-            },
-            exit: function () {
-                console.log('Exit phone');
-
-            }
-        });
-        jRes.addFunc({
-            breakpoint: ['tablet'],
-            enter: function () {
-                searchHide()
-                width = LEFT_SLIDE_WIDTHS[1];
-                setWidth(width)
-            },
-            exit: function () {
-                console.log('Exit tablet');
-            }
-        });
-        jRes.addFunc({
-            breakpoint: ['desktop'],
-            enter: function () {
-                searchHide()
-                width = LEFT_SLIDE_WIDTHS[2];
-                setWidth(width)
-            },
-            exit: function () {
-                console.log('Exit desktop');
-            }
-        });
-
-
-        $('#search-border').click(function () {
-            const id = $('#search-border i');
-            if (searchPanelOpen) {
-                searchHide();
-                infoModalHide();
-                moduleContainerHide();
-                id.css('padding-left', '12px')
-            } else {
-                searchShow();
-                $('.slide-collapsed').hide();
-                $('.slide-expanded').show();
-                id.css('padding-left', '14px')
-            }
-        });
-
-        // Bottom dialog
-        $('.close-hide').on('click touchstart', function () {
-            const id = ($(this)).parent().parent().attr('id');
-            // If print when deactivate
-            if ($(this).data('module') === 'print') {
-                backboneEvents.get().trigger(`off:print`);
-            }
-            // If legend when deactivate
-            if ($(this).data('module') === 'legend') {
-                $('#legend-content').append($('#legend'));
-                $('#btn-show-legend-in-map').prop('disabled', false);
-            }
-            $('#' + id).animate({
-                bottom: '-100%'
-            }, 500, function () {
-                $(id + ' .expand-less').show();
-                $(id + ' .expand-more').hide();
-            });
-        });
-
-        $('.expand-less').on('click touchstart', function () {
-            const id = '#' + ($(this)).parent().parent().attr('id');
-            $(id).animate({
-                bottom: (($(id).height() * -1) + 10) + 'px'
-            }, 500, function () {
-                $(id + ' .expand-less').hide();
-                $(id + ' .expand-more').show();
-            });
-        });
-
-        $('.expand-more').on('click touchstart', function () {
-            const id = ($(this)).parent().parent().attr('id');
-            $('#' + id).animate({
-                bottom: '0'
-            }, 500, function () {
-                $('#' + id + ' .expand-less').show();
-                $('#' + id + ' .expand-more').hide();
-            });
-        });
-
-        $('.map-tool-btn').on('click', function (e) {
-            e.preventDefault();
-            const id = ($(this)).attr('href');
-            if (id === '#full-screen') {
-                utils.toggleFullScreen();
-            }
-            // If print when activate
-            if ($(this).data('module') === 'print') {
-                backboneEvents.get().trigger(`on:print`);
-            }
-            // If legend when deactivate
-            if ($(this).data('module') === 'legend') {
-                $('#legend-dialog .modal-body').append($('#legend'));
-                $('#btn-show-legend-in-map').prop('disabled', true);
-            }
-            $(id).animate({
-                bottom: '0'
-            }, 500, function () {
-                $(id + ' .expand-less').show();
-                $(id + ' .expand-more').hide();
-            })
-        });
+        })
 
         // Hiding all panels with visible modules
         backboneEvents.get().on('hide:all', () => {
@@ -544,15 +360,11 @@ module.exports = {
             }
         });
 
-        $('.slide-right > .modal-header > button[class="close"]').click(() => {
-            backboneEvents.get().trigger('off:all');
-        });
-
         // Module icons
-        $('#side-panel ul li a').on('click', function () {
+        $('#main-tabs a').on('click', function () {
             backboneEvents.get().trigger('off:all');
             let moduleTitle = $(this).data('module-title');
-            let e = $('#module-container');
+            let e = $('#mainLayerOffcanvas');
             e.find('.js-module-title').text('');
             if (moduleTitle) {
                 e.find('.js-module-title').text(moduleTitle);
@@ -573,25 +385,18 @@ module.exports = {
                 }
             }, 100);
 
-            let id = ($(this));
-            $('#side-panel ul li').removeClass('active');
-            id.addClass('active');
-        });
-
-        $('#click-for-info-slide.slide-left .close').on('click', function () {
-            $('#click-for-info-slide.slide-left').animate({
-                left: '-100%'
-            }, 500)
-            sqlQuery.resetAll();
+            // let id = ($(this));
+            // $('#side-panel ul li').removeClass('active');
+            // id.addClass('active');
         });
 
         // Listen for extensions
-        $(document).arrive('#side-panel ul li a', function () {
+        $(document).arrive('#main-tabs a', function () {
             $(this).on('click', function () {
                 backboneEvents.get().trigger('off:all');
                 const moduleId = $(this).data('module-id');
                 const moduleTitle = $(this).data('module-title');
-                const e = $('#module-container');
+                const e = $('#mainLayerOffcanvas');
                 e.find('.js-module-title').text('');
                 if (moduleTitle) {
                     e.find('.js-module-title').text(moduleTitle);
@@ -610,14 +415,6 @@ module.exports = {
                 id.addClass('active');
             });
         })
-        // Listen for fullscreen changes
-        document.addEventListener('fullscreenchange', function () {
-            if (document.fullscreenElement) {
-                $('#full-screen-btn i').html('fullscreen_exit')
-            } else {
-                $('#full-screen-btn i').html('fullscreen')
-            }
-        });
 
         // Check if active vector layers have max/min zoom values
         let orginallayers = {};
@@ -627,7 +424,7 @@ module.exports = {
             for (let key in layers) {
                 if (layers.hasOwnProperty(key)) {
                     const layer = layers[key];
-                    if (layer?.id?.startsWith("v:")) {
+                    if (layer?.id?.startsWith("v:") || layer?.id?.startsWith("HL:")) {
                         orginallayers[layer.id] = jQuery.extend(true, {}, layer._layers);
                         if (typeof layer?.minZoom === 'number' || typeof layer?.maxZoom === 'number') {
                             if (map.getZoom() < layer.minZoom || map.getZoom() >= layer.maxZoom) {
@@ -649,5 +446,18 @@ module.exports = {
             }
         }
         map.on('moveend layeradd', moveEndEvent)
+    },
+    showOffcanvasLayers: () => {
+        mainLayerOffcanvas.show()
+    },
+    hideOffcanvasLayers: () => {
+        mainLayerOffcanvas.hide()
+    },
+    showOffcanvasInfo: () => {
+        offcanvasInfo.show();
+    },
+    hideOffcanvasInfo: () => {
+        offcanvasInfo.hide();
     }
-};
+
+}

@@ -30,6 +30,8 @@ var _self = false;
 
 var failedLayers = [];
 
+let utils;
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -41,11 +43,21 @@ module.exports = module.exports = {
         layers = o.layers;
         baseLayer = o.baseLayer;
         backboneEvents = o.backboneEvents;
+        utils = o.utils;
 
         _self = this;
         return this;
     },
     init: function (str) {
+        $.each(window.setBaseLayers, function (i, v) {
+                if (v.id === str) {
+                    if (v?.bounds?.length > 0) {
+                        baseLayer.setBounds(v.bounds);
+                    } else {
+                        baseLayer.setBounds(null);
+                    }
+                }
+        })
         let result = new Promise((resolve, reject) => {
             var u, l;
             layers.removeHidden();
@@ -139,12 +151,7 @@ module.exports = module.exports = {
 
                 // If 100 tiles fails within 10 secs the next base layer is chosen
                 if (numberOfErroredTiles > 100) {
-                    $.snackbar({
-                        content: `Base layer ${str} was loaded with errors (${numberOfErroredTiles} tiles failed to load), trying to load next layer`,
-                        htmlAllowed: true,
-                        timeout: 7000
-                    });
-
+                    utils.showInfoToast(`Base layer ${str} was loaded with errors (${numberOfErroredTiles} tiles failed to load), trying to load next layer`);
                     let alternativeLayer = false;
                     failedLayers.push(str);
                     window.setBaseLayers.map(item => {

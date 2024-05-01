@@ -42,7 +42,7 @@ class APIBridge {
 
         this._forcedOfflineLayers = {};
         this._queue = new Queue((queueItem, queue) => {
-            let result = new Promise((resolve, reject) => {
+            return new Promise((resolve, reject) => {
                 let schemaQualifiedName = queueItem.meta.f_table_schema + "." + queueItem.meta.f_table_name;
                 const pkey = (queueItem.meta && queueItem.meta.pkey ? queueItem.meta.pkey : QUEUE_DEFAULT_PKEY);
 
@@ -50,7 +50,7 @@ class APIBridge {
                     console.log('APIBridge: in queue processor', queueItem);
                     console.log('APIBridge: offline mode is enforced:', singletoneInstance.offlineModeIsEnforcedForLayer(schemaQualifiedName));
                 }
-                
+
                 let generalRequestParameters = {
                     dataType: 'json',
                     contentType: 'application/json',
@@ -111,9 +111,9 @@ class APIBridge {
                         delete queueItemCopy.feature.features[0].properties[pkey];
 
                         if (singletoneInstance.offlineModeIsEnforcedForLayer(schemaQualifiedName)) {
-                            
+
                             if (LOG) console.log('APIBridge: offline mode is enforced, add request was not performed');
-                            
+
                             reject();
                         } else {
                             $.ajax(Object.assign(generalRequestParameters, {
@@ -125,13 +125,13 @@ class APIBridge {
                         break;
                     case Queue.UPDATE_REQUEST:
                         if (queueItem.feature.features[0].properties[pkey] < 0) {
-                            
+
                             console.warn(`APIBridge: feature with virtual ${pkey} is not supposed to be commited to server (update), skipping`);
-                            
+
                             resolve();
                         } else {
                             if (singletoneInstance.offlineModeIsEnforcedForLayer(schemaQualifiedName)) {
-                                
+
                                 if (LOG) console.log('APIBridge: offline mode is enforced, update request was not performed');
 
                                 reject();
@@ -147,7 +147,7 @@ class APIBridge {
                         break;
                     case Queue.DELETE_REQUEST:
                         if (queueItem.feature.features[0].properties[pkey] < 0) {
-                            
+
                             if (LOG) console.warn(`APIBridge: feature with virtual ${pkey} is not supposed to be commited to server (delete), skipping`);
 
                             resolve();
@@ -168,8 +168,6 @@ class APIBridge {
                         break;
                 }
             });
-
-            return result;
         });
     }
 
@@ -233,7 +231,7 @@ class APIBridge {
      * @return {Boolean}
      */
     offlineModeIsEnforcedForLayer(layerKey) {
-        return (this._forcedOfflineLayers[layerKey] ? true : false);
+        return (!!this._forcedOfflineLayers[layerKey]);
     }
 
     /**
@@ -381,8 +379,10 @@ class APIBridge {
     /**
      * Updates feature from specific vector layer
      * Proxy method for Queue.pushAndProcess()
-     * 
-     * @param {Object} data Complete feature data
+     *
+     * @param feature
+     * @param db
+     * @param meta
      */
     updateFeature(feature, db, meta) {
         this._validateFeatureData(db, meta, feature);
@@ -392,8 +392,10 @@ class APIBridge {
     /**
      * Updates feature from specific vector layer
      * Proxy method for Queue.pushAndProcess()
-     * 
-     * @param {Object} data Complete feature data
+     *
+     * @param feature
+     * @param db
+     * @param meta
      */
     deleteFeature(feature, db, meta) {
         this._validateFeatureData(db, meta, feature);
@@ -428,7 +430,7 @@ class APIBridge {
 
     status() {}
 
-};
+}
 
 const APIBridgeSingletone = (onQueueUpdate) => {
     if (!singletoneInstance) {

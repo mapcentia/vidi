@@ -1,0 +1,249 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2023, MapCentia
+# This file is distributed under the same license as the Vidi package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Vidi 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-01-09 12:34+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.12.1\n"
+
+#: ../../_subs/README.rst:5 048f0b47a7ce4bf488fde0b997a37e03
+msgid "Readme"
+msgstr ""
+
+#: ../../../README.md:6 9b270fbe8a4942fbbbf41448be69037b
+msgid "What is Vidi?"
+msgstr ""
+
+#: ../../../README.md:8 58085de14adc4a72bb607e29522cbe47
+msgid ""
+"Vidi is a modern take on web GIS. It is the front-end for `GC2 "
+"<https://github.com/mapcentia/geocloud2>`_"
+msgstr ""
+
+#: ../../../README.md:10 707a85d00ae144c8a6c2e9964e354e4b
+msgid ""
+"Vidi is part of the `OSGeo Community Project GC2/Vidi "
+"<https://www.osgeo.org/projects/gc2-vidi/>`_"
+msgstr ""
+
+#: ../../../README.md:12 8de6545885784806bbc839cb63985bd6
+msgid ""
+":raw-html-m2r:`<img title=\"GC2 is a OSGeo Community Project\" "
+"src=\"https://github.com/OSGeo/osgeo/blob/master/incubation/community/OSGeo_community.png\""
+" alt=\"drawing\" width=\"200\"/>`"
+msgstr ""
+
+#: ../../../README.md:15 e8dfb617d3064cb6ae5af7f2c388ba3a
+msgid "What does Vidi?"
+msgstr ""
+
+#: ../../../README.md:17 ebb466f212fc46d4a362a3e9be4c6e4a
+msgid ""
+"Out-of-the-box Vidi is a web-GIS application with a lot of basic "
+"functionality. It is also a framework for building web-based "
+"applications."
+msgstr ""
+
+#: ../../../README.md:20 68045e40e6b04fba9226e071108785cb
+msgid "What is the goal for Vidi?"
+msgstr ""
+
+#: ../../../README.md:22 6d6983d1a67c41fca45f0d8f6a6fd93b
+msgid ""
+"The Vidi project aims to make it easy for organizations to use open "
+"source software for building geo-spatial applications."
+msgstr ""
+
+#: ../../../README.md:25 f7af23176e134fad9b8371d40d63ce08
+msgid "Vidi enables you to"
+msgstr ""
+
+#: ../../../README.md:28 84f5481572f945f6b4016ac70a10b329
+msgid "Display GC2 layers as either non-tiled, tiled or vector."
+msgstr ""
+
+#: ../../../README.md:29 88a878a58f16479da1e2f7867710979e
+msgid "Query data using geometry and buffers."
+msgstr ""
+
+#: ../../../README.md:30 822bb37e5720497abf239528aebb1fd6
+msgid "Add drawings with measurements, styles and labels."
+msgstr ""
+
+#: ../../../README.md:31 4dd9d0fc3fd44d669dfb7271d150a70d
+msgid "Print scaled PDF maps based on Mustache templates."
+msgstr ""
+
+#: ../../../README.md:32 cd2fd58fa3764590892059c6ca76baf5
+msgid ""
+"Filter vector layers. An arbitrary number of filter expressions can be "
+"applied."
+msgstr ""
+
+#: ../../../README.md:33 d37578ad86d44b27a2a3fcdad36593a1
+msgid ""
+"View table of vector layers. See the attributes and link to the geometry "
+"on the map."
+msgstr ""
+
+#: ../../../README.md:34 7f3c6ef1f49f4ff79eaee965f750efc5
+msgid "Customize the looks by adding your own Mustache templates."
+msgstr ""
+
+#: ../../../README.md:35 7fb0f7445e9f4826b2632b4970e6fbde
+msgid "Use side-by-side swipe base layers. Swipe between two base layers."
+msgstr ""
+
+#: ../../../README.md:36 279e5f7e7ab24783baebac7ba852f661
+msgid ""
+"Save, restore and share projects. A project comprises the extent of the "
+"map, which background map is visible and which layers are turned on, "
+"which filters are applied as well as your drawings."
+msgstr ""
+
+#: ../../../README.md:37 1caefb763f7c47c882b4e2b90ac9063f
+msgid ""
+"Select layers in Vidi and start Kepler.gl with them. Kepler.gl is "
+"embedded in Vidi."
+msgstr ""
+
+#: ../../../README.md:38 ecde6504d9ac422b82c24a4e6340c700
+msgid "Write your own modules with an extension mechanism. 1)"
+msgstr ""
+
+#: ../../../README.md:39 fd3ac85cdaf644baa9bb72dea0cb8350
+msgid "Use Vidi as a Progressive Web App (PWA)."
+msgstr ""
+
+#: ../../../README.md:41 625ef803d10a467e87beae6a95d77541
+msgid "Start Vidi without network."
+msgstr ""
+
+#: ../../../README.md:42 c8eb18549efa420dad3d7f5329a5f7d0
+msgid "Caches vector layers in browser, so they can be used without network."
+msgstr ""
+
+#: ../../../README.md:43 9dd86cfe88f7421482f498196f8d2144
+msgid "Partial caches tiled baselayers in browser for use without network."
+msgstr ""
+
+#: ../../../README.md:44 6782ea7e673a4dc88ae29aa41fee2d30
+msgid ""
+"Edits data without network. Transactions are queue and submitted when "
+"online again."
+msgstr ""
+
+#: ../../../README.md:46 794ecff312134f9fb79cc50872eb7ab3
+msgid ""
+"Vidi is written in Node.js and uses Browserify for the front-end. I.e. "
+"that both front- and back-end extensions are written in javascript with "
+"CommonJS Modules, which means that you need a minimum of skill sets to "
+"expand and customize Vidi."
+msgstr ""
+
+#: ../../../README.md:-1 915e5acc89b3425ebccafb1d52e16a2f
+msgid "Standard Vidi"
+msgstr ""
+
+#: ../../../README.md:55 dc4e04765b89419dbf99aeae5d26bb47
+msgid "How to try Vidi"
+msgstr ""
+
+#: ../../../README.md:57 c203504565e1421d9f20e4834aa13e5f
+msgid ""
+"Head over to gc2.mapcentia.com, create a PostGIS database and start "
+"uploading data. Then start Vidi from the dashboard."
+msgstr ""
+
+#: ../../../README.md:59 8cdea1240e3b430ea58cc6ecc0ed087d
+msgid "Or just try it `here <https://map.gc2.io/app/demo_c/public>`_"
+msgstr ""
+
+#: ../../../README.md:62 2e272b4538404b99b3f4c76524dae106
+msgid "How to install Vidi"
+msgstr ""
+
+#: ../../../README.md:64 d30f0ee779a045a59e465520bfa2535c
+msgid ""
+"Install both `GC2 and Vidi <https://github.com/mapcentia/geocloud2#how-"
+"to-install-gc2-and-vidi>`_"
+msgstr ""
+
+#: ../../../README.md:68 f79954a82b994446b5f5ad4f3384614f
+msgid ""
+"Testing .. image:: https://api.travis-"
+"ci.org/sashuk/vidi.svg?branch=develop"
+msgstr ""
+
+#: ../../../README.md 0557c65c989145ec8f424b780e0c73b7
+msgid "target"
+msgstr ""
+
+#: ../../../README.md:70 4d1d3b7dd38d4b2daa0e4d5d275ba2e6
+msgid "https://api.travis-ci.org/sashuk/vidi.svg?branch=develop"
+msgstr ""
+
+#: ../../../README.md 4ab59e07192a4f7daf720b43d6bbd00b
+msgid "alt"
+msgstr ""
+
+#: ../../../README.md:71 f6ded9fb91fa43d98fdd1823cb01aa5e
+msgid "alt text"
+msgstr ""
+
+#: ../../../README.md:75 0ffe4df7c6d24511b3a767ae2f3ca7a9
+msgid "The ``test`` folder contains"
+msgstr ""
+
+#: ../../../README.md:78 f0916df6f44a4a45af1b78705b1ba9a8
+msgid "unit tests (\\ ``tests/unit``\\ )"
+msgstr ""
+
+#: ../../../README.md:79 690a7556ab8c44ed8409ea95acf86a0f
+msgid ""
+"puppeteer tests (\\ ``tests/puppeteer``\\ , "
+"`https://github.com/GoogleChrome/puppeteer "
+"<https://github.com/GoogleChrome/puppeteer>`_\\ )"
+msgstr ""
+
+#: ../../../README.md:80 e2a6136716ba46e69506184f20f2727f
+msgid "API tests (\\ ``tests/api``\\ )"
+msgstr ""
+
+#: ../../../README.md:82 136147e362304fd5a8fea1d048ca350b
+msgid ""
+"In order to carry out the front-end testing the staging server was "
+"deployed at (\\ ``tests/helpers.js@8``\\ ). Whenever code changes are "
+"pushed to the Github, the ``push`` hook calls the ``POST "
+"http://vidi.alexshumilov.ru:8082/deploy`` URL and the application is "
+"built (\\ ``git pull && grunt``\\ ). So, when puppeteer tests are "
+"launched, the staging server is already updated."
+msgstr ""
+
+#: ../../../README.md:85 287b083ef88a40e28637e0aa9b53c9b4
+msgid "Ignoring certain URLs in Service Worker"
+msgstr ""
+
+#: ../../../README.md:87 7bd494a5c1af460f8c3e731ac5f5fecc
+msgid ""
+"The Vidi service worker now accepts the URL regexp that will allow "
+"certain URLs to be ignored. Please consider the demo script that first "
+"tells service worker to ignore all URLs that have "
+"``jsonplaceholder.typicode`` in it and then it actually requests the "
+"https://jsonplaceholder.typicode.com/todos/1 URL - the request is "
+"performed without service worker."
+msgstr ""
+

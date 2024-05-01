@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh
- * @copyright  2013-2022 MapCentia ApS
+ * @copyright  2013-2023 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -57,7 +57,7 @@ class MetaSettingForm extends React.Component {
         return (<div style={{display: 'flex', flexDirection: 'column'}}>
             <div className="form-group" style={{display: 'contents'}}>
                 <label>Style function
-                    <textarea style={{backgroundColor: '#f5f5f5'}} className="form-control" rows="7"
+                    <textarea style={{backgroundColor: '#f5f5f5'}} className="form-control form-control-sm" rows="7"
                               value={this.state.styleFn} onChange={this.handleStyleFnChange}></textarea>
                 </label>
             </div>

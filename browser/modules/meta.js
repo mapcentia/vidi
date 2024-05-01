@@ -18,11 +18,6 @@ const urlparser = require('./urlparser');
 const db = urlparser.db;
 
 /**
- * @type {string}
- */
-const urlVars = urlparser.urlVars;
-
-/**
  * The full meta data object
  * @type {{data: Array}}
  */
@@ -34,10 +29,6 @@ let metaData = {data: []};
  */
 let metaDataLatestLoaded;
 
-/**
- *
- * @type {Array}
- */
 let metaDataKeys = [];
 
 /**
@@ -60,7 +51,7 @@ let host;
 /**
  *
  */
-let backboneEvents, stateSnapshots;
+let backboneEvents, stateSnapshots, utils;
 
 let _self = false;
 
@@ -84,6 +75,7 @@ module.exports = {
     set: function (o) {
         backboneEvents = o.backboneEvents;
         stateSnapshots = o.stateSnapshots;
+        utils = o.utils;
 
         _self = this;
         return this;
@@ -97,16 +89,22 @@ module.exports = {
      * @returns {Promise<any>}
      */
     init: function (str, doNotLoadExisting, doNotReset) {
-        let me = this,
-            schemataStr = urlparser.schema;
-
+        let me = this;
+        let schemataStr = urlparser.schema;
+        let schemataArr = []; // Temp ver
+        if (str) {
+            schemataArr = str.split(",");
+        }
+        if (schemataStr !== "") {
+            schemataArr = schemataStr.split(",").concat(schemataArr);
+        }
+        // Meta from the url and dynamic added meta will be added to config.schemata array so it will get refreshed
+        window.vidiConfig.schemata = utils.removeDuplicates(window.vidiConfig.schemata.concat(schemataArr));
+        schemataStr = window.vidiConfig.schemata.join(",");
         // Reset
         ready = false;
-
-        /*
-            Reset, otherwise it gets duplicated via addMetaData() - adding same meta
-            to the array which already contains this meta
-        */
+        // Reset, otherwise it gets duplicated via addMetaData() -
+        // adding same meta to the array which already contains this meta
         if (!doNotReset) {
             metaData = {data: []};
         }
@@ -115,92 +113,56 @@ module.exports = {
 
             // Set load indicator
             $('#layer-filter-container').css('pointer-events', 'none').css('opacity', 0.2);
-            $('#layer-loading-indicator').show();
+            $('.layer-loading-indicator').show();
 
             try {
 
                 /**
                  * Loads meta objects from the backend Meta API
                  *
-                 * @param {String} schemataStr Schemata string
+                 * @param {String} schemata Schemata string
                  *
                  * @returns {void}
                  */
-                const loadMeta = (schemataStr) => {
+                const loadMeta = (schemata) => {
                     let startTime = new Date().getTime();
-                    $.ajax({
-                        url: '/api/meta/' + db + '/' + schemataStr,
-                        scriptCharset: "utf-8",
-                        success: function (response) {
-                            $('#layer-filter-container').css('pointer-events', 'auto').css('opacity', 1.0);
-                            $('#layer-loading-indicator').hide();
-                            if (response.data && response.data.length > 0) {
-                                
-                                me.addMetaData(response);
-                                ready = true;
-                                let endTime = new Date().getTime();
-                                console.info("Meta loaded in " + (endTime - startTime) + " ms");
-                                console.info("Cache info:", response.cache.hit)
-                                // if show the cache info
-
-                                resolve(schemataStr);
-                            } else {
-                                reject();
+                    fetch('/api/meta/' + db + '/' + schemata).then(
+                        response => {
+                            if (!response.ok) {
+                                throw new Error("Not 2xx response", {cause: response});
                             }
-                        },
-                        error: function (response) {
-                            reject();
-                            alert(JSON.parse(response.responseText).message);
+                            response.json().then(data => {
+                                $('#layer-filter-container').css('pointer-events', 'auto').css('opacity', 1.0);
+                                $('.layer-loading-indicator').hide();
+                                if (data.data && data.data.length > 0) {
+                                    me.addMetaData(data);
+                                    ready = true;
+                                    let endTime = new Date().getTime();
+                                    console.info("Meta loaded in " + (endTime - startTime) + " ms");
+                                    resolve(schemata);
+                                } else {
+                                    reject();
+                                }
+                            })
                         }
+                    ).catch((error) => {
+                        reject(error)
+                        console.error(error);
                     });
                 };
 
-                let schemata;
                 if (!doNotLoadExisting) {
-                    if (`snapshot` in window.vidiConfig && window.vidiConfig.snapshot && window.vidiConfig.snapshot.indexOf(`state_snapshot_`) === 0) {
-                        stateSnapshots.getSnapshotByID(window.vidiConfig.snapshot).then(snapshot => {
-                            if (snapshot && snapshot.schema) {
-                                loadMeta(snapshot.schema);
-                            } else {
-                                console.warn(`Unable to get "schema" from snapshot, loading the fallback schemata "${str}"`);
-                                loadMeta(str);
-                            }
-                        }).catch(error => {
-                            console.error(`Error occured when getting state snapshot ${window.vidiConfig.snapshot} instead of schemata`);
-                            console.error(error);
-                            loadMeta(str);
-                        });
-                    } else {
-                        if (str) {
-                            schemataStr = str;
-                        } else {
-                            schemataStr = (window.gc2Options.mergeSchemata === null ? "" : window.gc2Options.mergeSchemata.join(",") + ',') + (typeof urlVars.i === "undefined" ? "" : urlVars.i.split("#")[1] + ',') + schemataStr;
-                        }
-
-                        if (typeof window.vidiConfig.schemata === "object" && window.vidiConfig.schemata.length > 0) {
-                            if (schemataStr !== "") {
-                                schemata = schemataStr.split(",").concat(window.vidiConfig.schemata);
-                            } else {
-                                schemata = window.vidiConfig.schemata;
-                            }
-                            schemataStr = schemata.join(",")
-                        }
-
-                        if (!schemataStr) {
-                            reject(new Error('No schemata'));
-                            return;
-                        }
-
-                        loadMeta(schemataStr);
+                    if (!schemataStr) {
+                        reject('No schemata');
+                        return;
                     }
+                    loadMeta(schemataStr);
                 } else {
                     loadMeta(str);
                 }
-
             } catch (e) {
                 console.error(e);
             }
-
         });
     },
 

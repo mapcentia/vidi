@@ -209,7 +209,8 @@ module.exports = {
             });
             const po = $('.leaflet-draw-toolbar-top').popover({
                 content: __("Use these tools for querying the overlay maps."),
-                placement: "left"
+                placement: "left",
+                customClass: "d-none d-lg-inline"
             });
             po.popover("show");
             setTimeout(function () {

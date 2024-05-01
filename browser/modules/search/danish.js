@@ -76,7 +76,7 @@ module.exports = {
      * @param caller
      * @returns {function(): geocloud.sqlStore}
      */
-    init: function (onLoad, el, onlyAddress, getProperty, caller) {
+    init: function (onLoad, el = ".custom-search", onlyAddress, getProperty, caller) {
         var type1, type2, type3, type4, gids = {}, searchString, dslM, shouldA = [], shouldM = [], dsl1, dsl2,
             komKode = window.vidiConfig.searchConfig.komkode, placeStores = {}, maxZoom, searchTxt,
             esrSearchActive = typeof (window.vidiConfig.searchConfig.esrSearchActive) !== "undefined" ? window.vidiConfig.searchConfig.esrSearchActive : false,
@@ -89,18 +89,18 @@ module.exports = {
         let placeholder = window.vidiConfig?.searchConfig?.placeholderText;
         if (placeholder) {
             searchTxt = placeholder;
-            $("#custom-search, #conflict-custom-search").attr("placeholder",
+            $(".custom-search.tt-input").attr("placeholder",
                 searchTxt
             );
         } else {
             searchTxt = "Adresse, matr. nr.";
             if (sfeSearchActive) {
-                $("#custom-search").attr("placeholder",
+                $(".custom-search.tt-input").attr("placeholder",
                     searchTxt
                     + (esrSearchActive ? ", ESR nr. " : "")
                     + " eller SFE nr.");
             } else if (esrSearchActive) {
-                $("#custom-search").attr("placeholder",
+                $(".custom-search.tt-input").attr("placeholder",
                     searchTxt + " eller ESR nr.");
             }
         }
@@ -145,7 +145,7 @@ module.exports = {
             for (const property in placeStores) {
                 placeStores[property].reset();
             }
-            $("#custom-search").val("");
+            $(".typeahead").val("");
         });
 
 
@@ -198,12 +198,20 @@ module.exports = {
         // =========================
 
         if (!el) {
-            el = "custom-search";
+            el = ".custom-search";
+        }
+
+        if ($(el).data("vidi-address-only")) {
+            onlyAddress = true;
         }
 
         // Define GC2 SQL store
         // ====================
-
+        const iconOptions = {
+            icon: 'home',
+            markerColor: '#C31919',
+            prefix: 'fa'
+        }
         let getPlaceStore = () => {
             return new geocloud.sqlStore({
                 jsonp: false,
@@ -214,13 +222,14 @@ module.exports = {
                 // Make Awesome Markers
                 pointToLayer: function (feature, latlng) {
                     return L.marker(latlng, {
-                        icon: L.AwesomeMarkers.icon({
-                                icon: 'home',
-                                markerColor: '#C31919',
-                                prefix: 'fa'
-                            }
+                        icon: L.AwesomeMarkers.icon(iconOptions
                         )
                     });
+                },
+                onEachFeature: function (feature, layer) {
+                    layer._vidi_type = "query_draw";
+                    layer._vidi_marker = true;
+                    layer._vidi_awesomemarkers = iconOptions;
                 },
                 styleMap: {
                     weight: 3,
@@ -1186,10 +1195,10 @@ module.exports = {
         } else {
             fromVarsIsDone = true;
         }
-        $("#" + el).typeahead({
+        $(el).typeahead({
             highlight: false
         }, ...standardSearches);
-        $('#' + el).bind('typeahead:selected', function (obj, datum, name) {
+        $(el).bind('typeahead:selected', function (obj, datum, name) {
             if ((type1 === "adresse" && name === "adresse") || (type2 === "jordstykke" && name === "matrikel")
                 || (type3 === "esr_nr" && name === "esr_ejdnr") || (type4 === "sfe_nr" && name === "sfe_ejdnr")
                 || extraSearchesNames.indexOf(name) !== -1
@@ -1255,17 +1264,15 @@ module.exports = {
                         placeStores[key].db = extraSearchesObj[name].db;
                         placeStores[key].host = extraSearchesObj[name]?.host || '';
                         placeStores[key].sql = "SELECT *,ST_asgeojson(ST_transform(" + extraSearchesObj[name].relation.geom + ",4326)) as geojson FROM " + extraSearchesObj[name].relation.name + " WHERE " + extraSearchesObj[name].relation.key + "='" + gids[name][datum.value] + "'";
-                        
                         if (!extraSearchesObj[name]?.host) {
                             placeStores[key].uri = '/api/sql'
                         }
-                        
                         placeStores[key].load();
                         break;
                 }
             } else {
                 setTimeout(function () {
-                    $("#" + el).val(datum.value + " ").trigger("paste").trigger("input");
+                    $(el).val(datum.value + " ").trigger("paste").trigger("input");
                 }, 100)
             }
         });

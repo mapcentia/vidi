@@ -384,6 +384,9 @@ var _encoders = {
                     featureGeoJson = {_latlng: feature._latlng};
                     featureGeoJson.type = "Marker";
                     featureGeoJson.feature = feature.feature;
+                    if (feature?._vidi_awesomemarkers) {
+                        featureGeoJson._vidi_awesomemarkers = feature._vidi_awesomemarkers;
+                    }
                 } else {
                     featureGeoJson = feature.toGeoJSON(GEOJSON_PRECISION);
                     featureGeoJson.geometry.coordinates = _projectCoords(SRS, featureGeoJson.geometry.coordinates);
@@ -392,6 +395,7 @@ var _encoders = {
 
                 featureGeoJson.style = style;
                 featureGeoJson._vidi_type = feature._vidi_type;
+                featureGeoJson._vidi_id = feature._vidi_id;
                 if (feature._vidi_type === "draw" || feature._vidi_type === "measurements") {
                     featureGeoJson._vidi_extremities = feature._extremities || feature.feature._vidi_extremities;
                 }

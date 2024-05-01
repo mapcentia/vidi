@@ -38,7 +38,7 @@ module.exports = {
             iconRaw = icon;
         } else {
             icon = icon || "help";
-            iconRaw = `<i data-container="body" data-toggle="tooltip" data-placement="left" title="${name}" class="material-icons">${icon}</i>`;
+            iconRaw = `<i data-container="body" data-toggle="tooltip" data-bs-placement="left" title="${name}" class="bi ${icon}"></i>`;
         }
 
         if (moduleId === false) {
@@ -46,10 +46,10 @@ module.exports = {
         }
 
         $(`<li role="presentation">
-            <a data-module-id="${moduleId}" href="#${id}-content" aria-controls role="tab" data-toggle="tab" data-module-title="${name}">${iconRaw}${name}</a>
+            <a class="nav-link" data-bs-toggle="tab" data-module-id="${moduleId}" href="#${id}-content" aria-controls role="tab" data-toggle="tab" data-module-title="${name}">${iconRaw}</a>
         </li>`).appendTo("#main-tabs");
         $(`<div role="tabpanel" class="tab-pane fade" id="${id}-content"></div>`).appendTo(".tab-content.main-content");
-        $(`<div class="help-btn"><i class="material-icons help-btn">help_outline</i></div>`).appendTo(el).on("click", function () {
+        $(`<div class="help-btn"><i class="bi bi-question-circle help-btn"></i></div>`).appendTo(el).on("click", function () {
             createAlert($(this), info);
         });
         $(`<div></div>`).appendTo(el);
@@ -121,15 +121,15 @@ module.exports = {
 
     },
 
-    toggleFullScreen: function() {
+    toggleFullScreen: function () {
         let fullScreenMode = false;
         if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().then(()=>{
+            document.documentElement.requestFullscreen().then(() => {
                 fullScreenMode = true;
             });
         } else {
             if (document.exitFullscreen) {
-                document.exitFullscreen().then(()=>{
+                document.exitFullscreen().then(() => {
                     fullScreenMode = false;
                 });
             }
@@ -149,7 +149,7 @@ module.exports = {
             !isNaN(parseInt(arr[1])) &&
             !isNaN(parseInt(arr[2])) &&
             !isNaN(parseInt(arr[3]))
-        )   {
+        ) {
             return {
                 z: arr[1],
                 x: arr[2],
@@ -158,5 +158,57 @@ module.exports = {
         } else {
             return null;
         }
+    },
+
+    showInfoToast: (text, options = {delay: 1500, autohide: true}, elementId = "info-toast") => {
+        try {
+            document.querySelector(`#${elementId} .toast-body`).innerHTML = text;
+            const e = new bootstrap.Toast(document.getElementById(elementId), options);
+            e.show();
+        } catch (e) {
+            console.log("Info toast could not be shown");
+        }
+    },
+
+    hideInfoToast: (elementId = "info-toast") => {
+        try {
+            const e = new bootstrap.Toast(document.getElementById(elementId));
+            e.hide();
+        } catch (e) {
+            console.log("Info toast could not be hidden");
+        }
+    },
+
+    removeDuplicates: (inputArray) => {
+        let temp = {};
+        for (let i = 0; i < inputArray.length; i++) {
+            temp[inputArray[i]] = true;
+        }
+        let result = [];
+        for (let key in temp) {
+            result.push(key);
+        }
+        return result;
+    },
+
+    isEmbedEnabled: () => {
+        return $(`.embed.modal`).length > 0
+    },
+
+    splitBase64(str) {
+        const parts = str.split(';');
+        const contentType = parts[0].split(':')[1];
+        const raw = parts[1].split(',')[1];
+        return {
+            contentType,
+            raw
+        };
+    },
+    isPWA() {
+        return window.navigator.standalone === true || // iOS PWA Standalone
+            document.referrer.includes('android-app://') || // Android Trusted Web App
+            ["fullscreen", "standalone", "minimal-ui"].some(
+                (displayMode) => window.matchMedia('(display-mode: ' + displayMode + ')').matches
+            ) // Chrome PWA (supporting fullscreen, standalone, minimal-ui)
     }
 };

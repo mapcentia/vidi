@@ -13,7 +13,7 @@ const proxifyRequest = (req, response) => {
     let requestURL = config.host + encodeURI(decodeURIComponent(req.url.substr(4)));
 
     // Rewrite URL in case of subUser
-    if (req.session.subUser && !req.url.includes('/mapcache/')) {
+    if (req?.session?.subUser && !req.url.includes('/mapcache/')) {
         requestURL = requestURL.replace(`/${req.session.parentDb}/`, `/${req.session.screenName}@${req.session.parentDb}/`);
     }
 
@@ -22,7 +22,7 @@ const proxifyRequest = (req, response) => {
         uri: requestURL
     };
 
-    if (req.session.gc2SessionId) {
+    if (req?.session?.gc2SessionId) {
         options.headers = {Cookie: "PHPSESSID=" + req.session.gc2SessionId + ";"}
     }
 

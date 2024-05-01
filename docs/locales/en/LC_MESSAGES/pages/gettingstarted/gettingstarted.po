@@ -1,0 +1,158 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2023, MapCentia
+# This file is distributed under the same license as the Vidi package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Vidi 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-01-09 13:16+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.12.1\n"
+
+#: ../../pages/gettingstarted/gettingstarted.rst:9
+#: a3e2fe7216034fe295914711ecc6031a
+msgid "Kom godt i gang med Vidi"
+msgstr "Get started with the Vidi"
+
+#: ../../pages/gettingstarted/gettingstarted.rst:9
+#: c894927ac2f24b2d847863e2ae9ba293
+msgid "Overview"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst
+#: cae8b5011c0146be8877eb3533f0979e
+msgid "Date"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:13
+#: 2045ef9ac82043ff93a43d406543003a
+msgid "|today|"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst
+#: e2b8c93575514f888dc3a1b92e3b3c65
+msgid "Vidi-version"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:14
+#: a6e5bf481f0b49ce9b6050d9de29c16b
+msgid "2020.11.0"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst
+#: 34fddf59f9c94806a57751005f6b0f33
+msgid "Forfatter"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:15
+#: 3d384c1632e84b4689c32b1317fc6732
+msgid "`giovanniborella <https://github.com/giovanniborella>`_"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:19
+#: ca5c7f568de54c2689adc0980d25f14c
+msgid "Indhold"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:22
+#: 53010237a08f4eb992764e41be52b589
+msgid "Hvad er Vidi?"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:24
+#: b7f5ab26b9c9429c9ac6593f58a09fbc
+msgid ""
+"Vidi er en HTML5 applikation til at vise og forespørge på kortdata fra "
+"|gc2|. Klienten læser information fra GC2's meta-api, og viser en moderne"
+" kort-browser med lag for den specificerede PostGreSQL"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:26
+#: c4fd7948043c48269df8ab3646dd5394
+msgid "Her er et udpluk af nogle af funktionaliteterne."
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:28
+#: 22bdfdbbb2df49919e09aadf947cca7b
+msgid "Avanceret forespørgsler med buffer"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:29
+#: 98a75121928541ccbbb9c99229b0f1a1
+msgid "Print til PDF"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:30
+#: 74e4fa561bc04803b02c3cea419272ed
+msgid "Klar til udvidelser"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:32
+#: 00029f78b2d04e30898b42e59b161829
+msgid "Vidi er ikke bygget ind i GC2, men kræver sin egen installation."
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:34
+#: aab402574662416eaa0e9f382f867df9
+msgid "`Du kan prøve det live her <https://kort.geofyn.dk/>`_"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:39
+#: eb2195cada2e4e8b89fd9cd4784f783f
+msgid "Vidi ved et øjekast"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:41
+#: ../../pages/gettingstarted/gettingstarted.rst:46
+#: ../../pages/gettingstarted/gettingstarted.rst:51
+#: ../../pages/gettingstarted/gettingstarted.rst:56
+#: ../../pages/gettingstarted/gettingstarted.rst:61
+#: ../../pages/gettingstarted/gettingstarted.rst:66
+#: ../../pages/gettingstarted/gettingstarted.rst:71
+#: 51ac5c1dc8d14584b52dc8b14c966bca 5959bc90871844279d1d1a84b47d6e6b
+#: 9e9a6cd2cc124a6592478600ee494db5 a35351f3c94b4648b07c4be56bc21ddd
+#: e02893f1ebbc4b9f8aa62fe0160a7fc3 e9fe2b0791eb4d7eae2d1525a262443d
+#: ef45b1f428224c70af7317880d3351d8
+msgid "TBD"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:44
+#: 284dd279fec6442781d7942f4180f92b
+msgid "Kortvinduet"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:49
+#: 0ce29d29dd5e4abb8243e1e3bbc652b2
+msgid "Toolbar"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:54
+#: 2bd5296f6ae7479290220bc4948802e2
+msgid "Navigér"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:59
+#: 16c0f3eacf0d46dcb1ab80a2d2dd5489
+msgid "Sidebar"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:64
+#: f483d39545884c9aa2765ffc5c1cc0f2
+msgid "Skifte visning"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:69
+#: 3d279cf431fa4c018b924c2f2c7af64b
+msgid "Tool"
+msgstr ""
+
