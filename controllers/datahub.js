@@ -12,8 +12,8 @@ const config = require("../config/config.js");
 
 DATAHUB = {
   host: config.gc2.host,
-  user: "api@grunddata",
-  key: "c78646f7c717bf265f8e9e0a8a313785",
+  user: config.datahub.user,
+  key: config.datahub.key,
 };
 
 const queryDatahub = async (sql, options = null) => {
