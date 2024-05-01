@@ -179,19 +179,16 @@ var getExistingDocs = function (key, fileIdent = false) {
   // make list of existing cases
   var existingcases = documentGetExistingCasesFilter(key, fileIdent);
   $("#documentList-feature-content").html("");
-  $("#documentList-feature-content").append(
-    '<table style="width:100%" border="1">'
-  );
-  $("#documentList-feature-content").append("<thead><tr>");
-  $("#documentList-feature-content").append(
-    '<th style="padding-right:5px;">Dato</th>' +
-      '<th style="padding-right:5px;">Status</th>' +
-      '<th style="padding-right:5px;">Forsyningsart</th>' +
-      '<th style="padding-right:5px;">Prioritet</th>' +
-      '<th style="padding-right:5px;">Ansvarlig</th>' +
-      '<th style="padding-right:5px;">Problemtype</th>'
-  );
-  $("#documentList-feature-content").append("</tr></thead><tbody>");
+  let htmlcontent = "";
+  htmlcontent +=
+    '<table id="documentList-feature-table" class="table table-hover table-sm"><thead><tr>' +
+    '<th scope="col">Dato</th>' +
+    '<th scope="col">Status</th>' +
+    '<th scope="col">Forsyningsart</th>' +
+    '<th scope="col">Prioritet</th>' +
+    '<th scope="col">Ansvarlig</th>' +
+    '<th scope="col">Problemtype</th>' +
+    "</tr></thead><tbody>"
 
   if (existingcases) {
     for (let l in existingcases) {
@@ -204,44 +201,16 @@ var getExistingDocs = function (key, fileIdent = false) {
       }
       //caseNumber = (caseNumber.length == 0 ? existingcases[l].properties.casenumber : ", " + existingcases[l].properties.casenumber);
       //adress = existingcases[l].properties.sagsnavn;
-      $("#documentList-feature-content").append("<tr>");
-      $("#documentList-feature-content").append(
-        '<td style="padding-right:5px;"><a href=docunote:/casenumber=' +
-          existingcases[l].properties.casenumber +
-          ">" +
-          new moment(existingcases[l].properties.henvendelsesdato).format(
-            "DD-MM-YYYY"
-          ) +
-          "</a></td>" +
-          '<td style="padding-right:5px;"><a href=docunote:/casenumber=' +
-          existingcases[l].properties.casenumber +
-          ">" +
-          existingcases[l].properties.sagsstatus +
-          "</a></td>" +
-          '<td style="padding-right:5px;"><a href=docunote:/casenumber=' +
-          existingcases[l].properties.casenumber +
-          ">" +
-          existingcases[l].properties.forsyningstype +
-          "</a></td>" +
-          '<td style="padding-right:5px;"><a href=docunote:/casenumber=' +
-          existingcases[l].properties.casenumber +
-          ">" +
-          existingcases[l].properties.prioritet +
-          "</a></td>" +
-          '<td style="padding-right:5px;"><a href=docunote:/casenumber=' +
-          existingcases[l].properties.casenumber +
-          ">" +
-          (existingcases[l].properties.ansvarlig
-            ? existingcases[l].properties.ansvarlig
-            : "") +
-          "</a></td>" +
-          '<td style="padding-right:5px;"><a href=docunote:/casenumber=' +
-          existingcases[l].properties.casenumber +
-          ">" +
-          existingcases[l].properties.problemtype +
-          "</a></td>"
-      );
-      $("#documentList-feature-content").append("</tr>");
+
+      htmlcontent += 
+        '<tr data-href="docunote:/casenumber=' + existingcases[l].properties.casenumber +'">' +
+        '<td>' + new moment(existingcases[l].properties.henvendelsesdato).format("DD-MM-YYYY") +"</td>" +
+          '<td >' + existingcases[l].properties.sagsstatus + "</td>" +
+          '<td >' + existingcases[l].properties.forsyningstype + "</td>" +
+          '<td >' + existingcases[l].properties.prioritet + "</td>" +
+          '<td >' + (existingcases[l].properties.ansvarlig ? existingcases[l].properties.ansvarlig : "") + "</td>" +
+          '<td >' + existingcases[l].properties.problemtype + "</td>" +
+        '</tr>'
     }
 
     // If fileIdent is set, bu no cases are found, show snack
@@ -250,8 +219,16 @@ var getExistingDocs = function (key, fileIdent = false) {
       throw new Error("No existing cases found");
     }
   }
-  $("#documentList-feature-content").append("</tbody></table>");
+  htmlcontent += "</tbody></table>"
+  $("#documentList-feature-content").append(htmlcontent);
 
+  // Add a click event to the table rows
+  let table = document.getElementById("documentList-feature-table");
+  for (let row of table.rows) {
+    row.addEventListener("click", () => {
+      window.location.href = row.getAttribute("data-href");
+    });
+  }
   // console.log(existingcases, fileIdent, caseFound, layersToReload);
 
   // reload cosmetic layer (if layer ident is found and specified)
@@ -1616,7 +1593,7 @@ module.exports = {
         console.log("documentCreate - Mounted");
 
         //Initiate searchBar
-        search.init(onSearchLoad, id, true, false);
+        search.init(onSearchLoad, `.${id}`, true, false);
         cloud.get().map.addLayer(resultLayer);
 
         // Handle click events on map
@@ -1882,14 +1859,24 @@ module.exports = {
               </div>
               <div id="documentCreate-feature-content" className="collapse">
                 <h3>{__("Pick location")}</h3>
-                <div id="documentCreate-places" className="places">
-                  <input
-                    id={id}
-                    className={id + " typeahead"}
-                    type="text"
-                    placeholder="Adresse"
-                  />
+                <div id="documentCreate-places d-flex" className="places">
+                  <div class="input-group mb-3">
+                    <input
+                      id={id}
+                      className={id + " typeahead"}
+                      type="text"
+                      placeholder="Adresse"
+                    />
+                    <button
+                      class="btn btn-outline-secondary searchclear"
+                      type="button"
+                      onClick={() => $("#" + id).val("")}
+                    >
+                      <i class="bi bi-x-lg"></i>
+                    </button>
+                  </div>
                 </div>
+
                 <h3>{__("Choose service")}</h3>
                 <div>
                   <select
@@ -1948,8 +1935,8 @@ module.exports = {
               style={{
                 display: "none",
                 position: "absolute",
-                top: "5px",
-                left: "35px",
+                top: "100px",
+                left: "33px",
                 fontSize: "x-small",
               }}
             >
@@ -1970,7 +1957,7 @@ module.exports = {
       __("Ext name"),
       __("Help"),
       require("./../../../browser/modules/height")().max,
-      "flash_on",
+      "bi-lightning-fill",
       false,
       exId
     );
