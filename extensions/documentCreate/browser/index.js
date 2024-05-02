@@ -17,8 +17,8 @@ var moment = require("moment");
 // Set locale for date/time string
 moment.locale("da_DK");
 
-// Hardcode host
-var GC2_HOST = config.gc2.host;
+// Hardcode host TODO - migrate all these calls to the backend to improve security and performance!
+var GC2_HOST = 'https://mapgogc2.geopartner.dk';
 
 /**
  *
@@ -204,12 +204,12 @@ var getExistingDocs = function (key, fileIdent = false) {
 
       htmlcontent += 
         '<tr data-href="docunote:/casenumber=' + existingcases[l].properties.casenumber +'">' +
-        '<td>' + new moment(existingcases[l].properties.henvendelsesdato).format("DD-MM-YYYY") +"</td>" +
-          '<td >' + existingcases[l].properties.sagsstatus + "</td>" +
-          '<td >' + existingcases[l].properties.forsyningstype + "</td>" +
-          '<td >' + existingcases[l].properties.prioritet + "</td>" +
-          '<td >' + (existingcases[l].properties.ansvarlig ? existingcases[l].properties.ansvarlig : "") + "</td>" +
-          '<td >' + existingcases[l].properties.problemtype + "</td>" +
+          '<td ><small>' + new moment(existingcases[l].properties.henvendelsesdato).format("DD-MM-YYYY") +"</small></td>" +
+          '<td ><small>' + existingcases[l].properties.sagsstatus + "</small></td>" +
+          '<td ><small>' + existingcases[l].properties.forsyningstype + "</small></td>" +
+          '<td ><small>' + existingcases[l].properties.prioritet + "</small></td>" +
+          '<td ><small>' + (existingcases[l].properties.ansvarlig ? existingcases[l].properties.ansvarlig : "") + "</small></td>" +
+          '<td ><small>' + existingcases[l].properties.problemtype + "</small></td>" +
         '</tr>'
     }
 
@@ -1089,7 +1089,7 @@ var FeatureFormFactory = function (order) {
   $("#documentCreate-feature-meta").html("");
   //scaffold form
   $("#documentCreate-feature-meta").append(
-    "<h3>" + __("Henvendelse") + "</h3>"
+    "<h6>" + __("Henvendelse") + "</h6>"
   );
   $("#documentCreate-feature-meta").append(
     '<form action="javascript:void(0);" onsubmit="documentCreateFeatureAdd()" id="' +
@@ -1858,7 +1858,7 @@ module.exports = {
                 </button>
               </div>
               <div id="documentCreate-feature-content" className="collapse">
-                <h3>{__("Pick location")}</h3>
+                <h6>{__("Pick location")}</h6>
                 <div id="documentCreate-places d-flex" className="places">
                   <div class="input-group mb-3">
                     <input
@@ -1877,7 +1877,7 @@ module.exports = {
                   </div>
                 </div>
 
-                <h3>{__("Choose service")}</h3>
+                <h6>{__("Choose service")}</h6>
                 <div>
                   <select
                     id={select_id}
@@ -1892,7 +1892,7 @@ module.exports = {
                 </div>
               </div>
               <div id="documentCreate-feature-editcontent" className="collapse">
-                <h3>{__("Edit location")}</h3>
+                <h6>{__("Edit location")}</h6>
                 <button
                   type="button"
                   onClick={this.editButtonClicked}
@@ -1912,13 +1912,13 @@ module.exports = {
                 id="documentCreate-feature-filter-header-edit"
                 className="collapse list-group"
               >
-                <h3>{__("List selection edit")}</h3>
+                <h6>{__("List selection edit")}</h6>
               </div>
               <div
                 id="documentCreate-feature-filter-header-create"
                 className="collapse list-group"
               >
-                <h3>{__("List selection create")}</h3>
+                <h6>{__("List selection create")}</h6>
               </div>
               <div
                 id="documentCreate-feature-filter"

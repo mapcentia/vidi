@@ -50,7 +50,7 @@ let cowiUrl;
 
 let mapillaryUrl = "https://www.mapillary.com/app/?z=17";
 
-let ignorelist = []
+let ignorelist = new Set();
 
 let config = require('../../../config/config.js');
 
@@ -64,7 +64,7 @@ if (typeof config.extensionConfig !== "undefined" && typeof config.extensionConf
         cowiUrl = config.extensionConfig.streetView.cowi;
     }
     if (typeof config.extensionConfig.streetView.ignorelist !== "undefined") {
-        ignorelist = config.extensionConfig.streetView.ignorelist;
+        ignorelist = new Set(config.extensionConfig.streetView.ignorelist);
     }
 }
 
@@ -257,27 +257,31 @@ module.exports = {
                                     <input className="btn-check" type="radio" id="streetview-service-google"
                                            name="streetview-service"
                                            value="google" checked={this.state.selectedOption === 'google'}
-                                           onChange={this.onChange}/>
+                                           onChange={this.onChange}
+                                           disabled={ignorelist.has('google')} />
                                     <label className="btn btn-sm btn-outline-secondary"
                                            htmlFor="streetview-service-google">Google Street View</label>
 
                                     <input className="btn-check" type="radio" id="streetview-service-mapillary"
                                            name="streetview-service" value="mapillary"
                                            checked={this.state.selectedOption === 'mapillary'}
-                                           onChange={this.onChange}/>
+                                           onChange={this.onChange}
+                                           disabled={ignorelist.has('mapillary')}/>
                                     <label className="btn btn-sm btn-outline-secondary"
                                            htmlFor="streetview-service-mapillary">Mapillary</label>
 
                                     <input className="btn-check" type="radio" id="streetview-service-skraafoto"
                                            name="streetview-service" value="skraafoto"
                                            checked={this.state.selectedOption === 'skraafoto'}
-                                           onChange={this.onChange}/>
+                                           onChange={this.onChange}
+                                           disabled={ignorelist.has('skraafoto')} />
                                     <label className="btn btn-sm btn-outline-secondary" htmlFor="streetview-service-skraafoto">Skråfoto</label>
 
                                     <input className="btn-check" type="radio" id="streetview-service-cowi"
                                            name="streetview-service" value="cowi"
                                            checked={this.state.selectedOption === 'cowi'}
-                                           onChange={this.onChange}/>
+                                           onChange={this.onChange}
+                                           disabled={ignorelist.has('cowi')} />
                                     <label className="btn btn-sm btn-outline-secondary" htmlFor="streetview-service-cowi">COWI Gadefoto</label>
                                 </span>
                             </div>
