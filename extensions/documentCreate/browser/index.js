@@ -182,12 +182,12 @@ var getExistingDocs = function (key, fileIdent = false) {
   let htmlcontent = "";
   htmlcontent +=
     '<table id="documentList-feature-table" class="table table-hover table-sm"><thead><tr>' +
-    '<th scope="col">Dato</th>' +
-    '<th scope="col">Status</th>' +
-    '<th scope="col">Forsyningsart</th>' +
-    '<th scope="col">Prioritet</th>' +
-    '<th scope="col">Ansvarlig</th>' +
-    '<th scope="col">Problemtype</th>' +
+    '<th scope="col" class="small">Dato</th>' +
+    '<th scope="col" class="small">Status</th>' +
+    '<th scope="col" class="small">Forsyningsart</th>' +
+    '<th scope="col" class="small">Prioritet</th>' +
+    '<th scope="col" class="small">Ansvarlig</th>' +
+    '<th scope="col" class="small">Problemtype</th>' +
     "</tr></thead><tbody>"
 
   if (existingcases) {
@@ -204,12 +204,12 @@ var getExistingDocs = function (key, fileIdent = false) {
 
       htmlcontent += 
         '<tr data-href="docunote:/casenumber=' + existingcases[l].properties.casenumber +'">' +
-          '<td ><small>' + new moment(existingcases[l].properties.henvendelsesdato).format("DD-MM-YYYY") +"</small></td>" +
-          '<td ><small>' + existingcases[l].properties.sagsstatus + "</small></td>" +
-          '<td ><small>' + existingcases[l].properties.forsyningstype + "</small></td>" +
-          '<td ><small>' + existingcases[l].properties.prioritet + "</small></td>" +
-          '<td ><small>' + (existingcases[l].properties.ansvarlig ? existingcases[l].properties.ansvarlig : "") + "</small></td>" +
-          '<td ><small>' + existingcases[l].properties.problemtype + "</small></td>" +
+          '<td class="text-truncate"><span class="small">' + new moment(existingcases[l].properties.henvendelsesdato).format("DD.MM.YYYY") +"</span></td>" +
+          '<td class="text-truncate"><span class="small">' + existingcases[l].properties.sagsstatus + "</span></td>" +
+          '<td class="text-truncate"><span class="small">' + existingcases[l].properties.forsyningstype + "</span></td>" +
+          '<td class="text-truncate"><span class="small">' + existingcases[l].properties.prioritet + "</span></td>" +
+          '<td class="text-truncate" style="max-width: 10px;"><span class="small">' + (existingcases[l].properties.ansvarlig ? existingcases[l].properties.ansvarlig : "") + "</span></td>" +
+          '<td class="text-truncate" style="max-width: 10px;"><span class="small">' + existingcases[l].properties.problemtype + "</span></td>" +
         '</tr>'
     }
 
@@ -225,6 +225,10 @@ var getExistingDocs = function (key, fileIdent = false) {
   // Add a click event to the table rows
   let table = document.getElementById("documentList-feature-table");
   for (let row of table.rows) {
+    // if the row is the header, skip it
+    if (row.rowIndex === 0) {
+      continue;
+    }
     row.addEventListener("click", () => {
       window.location.href = row.getAttribute("data-href");
     });
