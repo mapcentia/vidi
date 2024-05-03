@@ -115,21 +115,23 @@ module.exports = {
                     <div class="row">
                         <div class="col-lg-6">
                             <label for="search-colorpicker-input" class="col-md-3 control-label">${__('Color')}</label>
-                            <div id="search-colorpicker" class="input-group colorpicker-component col-md-10">
-                                <input id="search-colorpicker-input" name="search-colorpicker-input"
-                                       type="text" value="#ff0000" class="form-control"
-                                       style="margin-left: 15px;"/>
-                                <span class="input-group-addon"><i style="margin-left: 10px;"/></span>
-                            </div>
+                            <div id="search-colorpicker" class="input-group col-md-10">
+                            <input
+                              id="search-colorpicker-input"
+                              name="search-colorpicker-input"
+                              type="color"
+                              value="#ff0000"
+                              class="form-control form-control-sm form-control-color"
+                              style="margin-left: 15px;"
+                            />
+                          </div>
                         </div>
+                        
                     </div>
                 </div>`;
 
         if (advanced) {
             $("#place-search").append(colorPicker)
-            $("#search-colorpicker").colorpicker({
-                container: $("#search-colorpicker")
-            });
         }
 
         // Set max zoom then zooming on target
