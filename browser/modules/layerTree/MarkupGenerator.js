@@ -85,7 +85,7 @@ class MarkupGenerator {
         </li>`);
     }
 
-    getLayerControlRecord(layerKeyWithGeom, layerKey, layerIsActive, layer, layerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo, isSubLayer, moduleState, disableCheckBox, parentLayerKeys, childLayerKeys) {
+    getLayerControlRecord(layerKeyWithGeom, layerKey, layerIsActive, layer, layerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo, isSubLayer, moduleState, disableCheckBox, parentLayerKeys, childLayerKeys, filterIsRequired) {
         let queueFailedButtonStyle = regularButtonStyle + ` color: orange;`;
         let queueRejectedByServerButtonStyle = regularButtonStyle + ` color: red;`;
         let tooltip = layer.f_table_abstract || ``;
@@ -121,6 +121,8 @@ class MarkupGenerator {
                                                                        title="${__("Parents")}: ${parentLayerKeys.length > 0 ? parentLayerKeys.join(", ") : ""}"><i class="bi bi-arrow-up"></i></span>
                                                                        <span class="js-layer-has-children info-icon" style="display: ${childLayerKeys.length > 0 ? "inline" : "none"};" data-toggle="tooltip" data-bs-placement="right"
                                                                        title="${__("Children")}: ${childLayerKeys.length > 0 ? childLayerKeys.join(", ") : ""}"><i class="bi bi-arrow-down"></i></span>
+                                                                       <span class="js-layer-filter-is-reqiered info-icon" style="display: ${filterIsRequired ? 'inline': 'none'}" data-toggle="tooltip" data-bs-placement="right"
+                                                                       title="${__("Filter is required for showing data")}"><i class="bi-exclamation-triangle-fill text-warning"></i></span>
                                                                        <span style="display: none" class="_gc2_layer_sort_id">(${layer.sort_id})</span>
                                                                        </div>
                                                                        </div>
