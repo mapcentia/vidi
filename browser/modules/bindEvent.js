@@ -135,7 +135,9 @@ module.exports = {
                     if (e.layergroup === groupName) {
                         let parsedMeta = layerTree.parseLayerMeta(e);
                         prefix = parsedMeta?.default_layer_type ? parsedMeta.default_layer_type + ':' : '';
-                        switchLayer.init(prefix + e.f_table_schema + "." + e.f_table_name, isChecked, false);
+                        setTimeout(()=> {
+                            switchLayer.init(prefix + e.f_table_schema + "." + e.f_table_name, isChecked, true, false);
+                        }, 1)
                         return true;
                     }
                 })
