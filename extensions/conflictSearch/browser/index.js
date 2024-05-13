@@ -143,7 +143,7 @@ var debounce = require('lodash/debounce');
 
 var _result = {};
 
-import {buffer as turfBuffer, dissolve as turDissolve, multiPolygon as turfMultiPolygon} from '@turf/turf'
+import {buffer as turfBuffer, dissolve as turDissolve, multiPolygon as turfMultiPolygon, combine as turfCombine} from '@turf/turf'
 
 const wicket = require('wicket');
 const TOAST_ID = "conflict-toast";
@@ -631,10 +631,10 @@ module.exports = module.exports = {
                         let buffer = l._mRadius;
                         let primitive = l.toGeoJSON(GEOJSON_PRECISION).geometry;
                         const bufferPolygon = turfBuffer(primitive, buffer, {units: 'meters'}).geometry;
-                        collection.geometries.push(bufferPolygon)
+                        collection.features.push(bufferPolygon)
                     } else {
                         let primitive = l.toGeoJSON(GEOJSON_PRECISION).geometry;
-                        collection.geometries.push(primitive);
+                        collection.features.push(primitive);
                     }
                 })
                 layer = L.geoJSON(collection);
@@ -665,12 +665,19 @@ module.exports = module.exports = {
 
         if (primitive) {
             let geom;
-            if (primitive.geometry.type === 'GeometryCollection') {
-                // We dissolve the buffer and turn the GeometryCollection into a MultiPolygon
-                geom = turfMultiPolygon(turDissolve(turfBuffer(primitive.geometry, buffer, {units: 'meters'})).features.map((e) => e.geometry.coordinates));
+            if (primitive.type === 'FeatureCollection') {
+                // Add the buffer to each feature
+                let features = primitive.features.map((f) => {
+                    return turfBuffer(f.geometry, buffer, {units: 'meters'});
+                });
+                // replace the features with the buffered ones
+                primitive.features = features;
+                // Then we dissolve the elements
+                geom = turDissolve(primitive);
             } else {
                 geom = turfBuffer(primitive.geometry, buffer, {units: 'meters'});
             }
+
             let l = L.geoJson(geom, {
                 "color": "#ff7800",
                 "weight": 1,
@@ -693,9 +700,15 @@ module.exports = module.exports = {
                 }
                 schemataStr = schemata.join(",");
             }
+
             preProcessor({
                 // "projWktWithBuffer": projWktWithBuffer
             }).then(function () {
+                // If the type is a feature collection, we need to dissolve the features to a single multi-polygon
+                if (geom.type === 'FeatureCollection') {
+                    geom = turfCombine(geom).features[0];
+                }
+
                 xhr = $.ajax({
                     method: "POST",
                     url: "/api/extension/conflictSearch",
