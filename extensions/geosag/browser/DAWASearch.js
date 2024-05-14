@@ -199,7 +199,7 @@ class DAWASearch extends React.Component {
         var s = this.state;
 
         return (
-            <div className='d-flex col-9 mx-auto position-relative'>
+            <div className='d-flex col-12 mx-auto position-relative'>
                 <div className="input-group">
                     <input type="text" className="form-control" placeholder={s.placeholder} value={s.searchTerm} onChange={this.dynamicSearch} />
                     {s.searchTerm.length > 0 && (
