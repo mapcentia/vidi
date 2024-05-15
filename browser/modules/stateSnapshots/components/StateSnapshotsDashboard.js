@@ -654,7 +654,17 @@ class StateSnapshotsDashboard extends React.Component {
         }
 
         const tagsCloud = (
-            <div className="d-flex flex-wrap gap-1 mb-3">{allTags.map(tag => createTagBadge(tag))}</div>
+            <div className="mb-3">
+                <div className="d-flex flex-wrap gap-1 mb-1">{allTags.map(tag => createTagBadge(tag))}</div>
+                <div className="d-flex gap-2">
+                    <button className="btn btn-outline-success btn-sm"
+                            onClick={() => this.setState({unCheckedTags: []})}>{__('All on')}
+                    </button>
+                    <button className="btn btn-outline-warning btn-sm"
+                            onClick={() => this.setState({unCheckedTags: allTags})}>{__('All off')}
+                    </button>
+                </div>
+            </div>
         )
 
         const filterSnapShots = (

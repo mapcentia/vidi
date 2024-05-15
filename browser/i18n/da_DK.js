@@ -339,6 +339,8 @@ module.exports = {
         "There is no tags in the list": "Der er ingen tags i listen",
         "Create tag": "Opret tag",
         "The filter returned no results": "Filteret gav ingen resultater",
+        "All on": "Tænd alle",
+        "All off": "Sluk alle",
 
         //Measurements
         "Measure distance": "Mål afstand",

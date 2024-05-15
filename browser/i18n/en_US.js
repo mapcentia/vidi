@@ -339,6 +339,8 @@ module.exports = {
         "There is no tags in the list": "There is no tags in the list",
         "Create tag": "Create tag",
         "The filter returned no results": "The filter returned no results",
+        "All on": "All on",
+        "All off": "All off",
 
         //Measurements
         "Expand measurements control": "Activate measurements control",
