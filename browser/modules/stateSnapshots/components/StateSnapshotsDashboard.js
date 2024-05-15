@@ -529,7 +529,8 @@ class StateSnapshotsDashboard extends React.Component {
                                 {selectSize}
                             </div>
                         </div>)}
-                    <TagComponent onAdd={tags => this.updateSnapshot(item, item.title, tags, false)} tags={item.tags} allTags={allTags}/>
+                    <TagComponent onAdd={tags => this.updateSnapshot(item, item.title, tags, false)} tags={item.tags}
+                                  allTags={allTags}/>
                 </div>
             </div>);
         };
@@ -546,10 +547,10 @@ class StateSnapshotsDashboard extends React.Component {
             this.tmp.push(tag)
             return (
                 <div key={tag}><input id={tag} name={tag}
-                                                                                    className="btn-check"
-                                                                                    type="checkbox"
-                                                                                    onChange={event => handleTagCheck(event)}
-                                                                                      checked={!this.state.unCheckedTags.includes(tag)}/>
+                                      className="btn-check"
+                                      type="checkbox"
+                                      onChange={event => handleTagCheck(event)}
+                                      checked={!this.state.unCheckedTags.includes(tag)}/>
                     <label className="btn btn-sm" htmlFor={tag}>
                         {tag}
                     </label>
@@ -565,22 +566,28 @@ class StateSnapshotsDashboard extends React.Component {
 
         // Get all tags
         let allTags = [];
-        this.state.browserOwnerSnapshots.forEach(item =>{
+        this.state.browserOwnerSnapshots.forEach(item => {
             if (item?.tags) {
                 allTags = [...allTags, ...item.tags.filter(tag => !allTags.includes(tag))];
             }
         })
-        this.state.userOwnerSnapshots.forEach(item =>{
+        this.state.userOwnerSnapshots.forEach(item => {
             if (item?.tags) {
                 allTags = [...allTags, ...item.tags.filter(tag => !allTags.includes(tag))];
             }
         })
 
-        let tags = [];
+        const filter = (item) => {
+            return (
+                (!item?.tags || (item.tags.filter(value => !this.state.unCheckedTags.includes(value)).length || item.tags.length === 0) > 0) &&
+                (!item?.title || this.state.filter === `` || item.title.toLowerCase().indexOf(this.state.filter.toLowerCase()) > -1)
+            )
+        }
+
         if (this.state.browserOwnerSnapshots && this.state.browserOwnerSnapshots.length > 0) {
             browserOwnerSnapshots = [];
             this.state.browserOwnerSnapshots.forEach((item, index) => {
-                if (!item?.tags || (item.tags.filter(value => !this.state.unCheckedTags.includes(value)).length || item.tags.length === 0) > 0 && (!item?.title || this.state.filter === `` || item.title.toLowerCase().indexOf(this.state.filter.toLowerCase()) > -1)) {
+                if (filter(item)) {
                     browserOwnerSnapshots.push(createSnapshotRecord(item, allTags, true));
                 }
             });
@@ -593,7 +600,7 @@ class StateSnapshotsDashboard extends React.Component {
         if (this.state.userOwnerSnapshots && this.state.userOwnerSnapshots.length > 0) {
             userOwnerSnapshots = [];
             this.state.userOwnerSnapshots.forEach((item, index) => {
-                if (!item?.tags || (item.tags.filter(value => !this.state.unCheckedTags.includes(value)).length || item.tags.length === 0) > 0 && (!item?.title || this.state.filter === `` || item.title.toLowerCase().indexOf(this.state.filter.toLowerCase()) > -1)) {
+                if (filter(item)) {
                     userOwnerSnapshots.push(createSnapshotRecord(item, allTags));
                 }
             });
