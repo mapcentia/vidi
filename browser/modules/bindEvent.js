@@ -398,7 +398,7 @@ module.exports = {
                 backboneEvents.get().trigger('off:all');
                 const moduleId = $(this).data('module-id');
                 const moduleTitle = $(this).data('module-title');
-                const e = $('#module-container');
+                const e = $('#mainLayerOffcanvas');
                 e.find('.js-module-title').text('');
                 if (moduleTitle) {
                     e.find('.js-module-title').text(moduleTitle);
