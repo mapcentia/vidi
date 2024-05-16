@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2024.5.0] - 2024-15-5
+### Added
+- Display filter for snapshots. Free test filtering of snapshots titles, so it becomes easier to manage long lists of snapshots
+- Tagging system for snapshots. A snapshot can be tagged and used for filtering snapshots.
+- New native API for getting configs from GC2 instead of using the requestProxy API.
+
+### Fixed
+- Module title is now set for extensions.
+
 ## [2024.2.2] - 2024-20-2
 ### Changed
 - Added the `dfi` url parameter, which if set, will disable fast init regardless other evaluated parameters.
