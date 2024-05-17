@@ -133,7 +133,7 @@ module.exports = {
             let mailHref = 'mailto:'+'?Subject='+ mailSubject + '&body=' + mailBody + encodeURIComponent("https://" + urlparser.urlObj.host + pathstring)
             $("#send-pdf").attr("href", mailHref);
 
-            $("#start-print-btn").button('reset');
+            // $("#start-print-btn").button('reset');
             $("#start-print-btn").find("span").hide();
             $(".dropdown-toggle.start-print-btn").prop("disabled", false);
             // GeoEnviron
