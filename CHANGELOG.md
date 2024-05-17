@@ -24,6 +24,8 @@ and this project adheres to [CalVer](https://calver.org/).
       }
     }
     ```
+- area unit is unified. km²/ ha. The same unit and rule is used in the table for drawing/uploaded shapes and in the measurement layer.
+- Factor 10 error corrected in the measurement layer when displaying area in the "ha" unit   
 ## [2024.2.2] - 2024-20-2
 ### Changed
 - Added the `dfi` url parameter, which if set, will disable fast init regardless other evaluated parameters.

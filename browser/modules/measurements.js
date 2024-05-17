@@ -84,7 +84,7 @@ module.exports = {
                     </a>`)[0];
 
                 container.onclick = function () {
-                    _self.toggleMeasurements((drawControl ? false : true));
+                    _self.toggleMeasurements((!drawControl));
                 }
 
                 return container;

@@ -260,7 +260,9 @@ module.exports = {
 
             else if (feature.geometry.type === 'Polygon') {
                 feature.properties.type = 'polygon';
-                feature.properties.area = drawTools.getFeatureArea(feature)
+                const area = drawTools.getFeatureArea(feature);
+                const formatArea = utils.formatArea(area);
+                feature.properties.area = formatArea;
             }
             else
                 feature.properties.type = 'marker';
@@ -512,7 +514,7 @@ module.exports = {
                 }
 
                 if (type === "polygon" || type === "rectangle") {
-                    area = drawTools.getArea(drawLayer);
+                    area = utils.formatArea( drawTools.getAreaValue(drawLayer));
                 }
                 if (type === 'polyline') {
                     distance = drawTools.getDistance(drawLayer);
@@ -520,7 +522,7 @@ module.exports = {
                 }
                 if (type === 'circle') {
                     distance = L.GeometryUtil.readableDistance(drawLayer.getRadius(), true);
-                    area = drawTools.getAreaOfCircle(drawLayer);
+                    area = utils.formatArea( drawTools.getAreaOfCircleValue(drawLayer));
                 }
 
                 drawLayer._vidi_type = "draw";
@@ -544,20 +546,22 @@ module.exports = {
             cloud.get().map.on('draw:edited', function (e) {
 
                 $.each(e.layers._layers, function (i, v) {
-
+                    let update = false;
                     if (typeof v._mRadius !== "undefined") {
                         v.feature.properties.distance = L.GeometryUtil.readableDistance(v._mRadius, true);
-                        v.updateMeasurements();
-
-                    } else if (typeof v._icon !== "undefined") {
-                    } else if (v.feature.properties.distance !== null) {
+                        v.feature.properties.area = utils.formatArea(drawTools.getAreaOfCircle(v));
+                        update = true;
+                    } 
+                    if (v.feature.properties.distance !== null && !update) {
                         v.feature.properties.distance = drawTools.getDistance(v);
+                        update = true;
+                    } 
+                    if (v.feature.properties.area !== null && !update) {
+                        v.feature.properties.area =  utils.formatArea(drawTools.getArea(v));
+                        update = true;
+                    }
+                    if (update) {
                         v.updateMeasurements();
-
-                    } else if (v.feature.properties.area !== null) {
-                        v.feature.properties.area = drawTools.getArea(v);
-                        v.updateMeasurements();
-
                     }
                 });
 
@@ -653,7 +657,7 @@ module.exports = {
 
         if (parr.length === 1) {
             $.each(v[0].geojson.features, function (n, m) {
-
+                let g;
                 // if vidi specific properties are not set, set them
                 if (!m._vidi_type) {m._vidi_type = "draw";}
                 if (!m._vidi_id) {m._vidi_id = createId();}
@@ -667,7 +671,7 @@ module.exports = {
                         }
                     });
 
-                    var g = json._layers[Object.keys(json._layers)[0]];
+                    g = json._layers[Object.keys(json._layers)[0]];
 
                     // Adding vidi-specific properties
                     g._vidi_type = m._vidi_type;
@@ -809,11 +813,9 @@ module.exports = {
                 showTotalPolylineLength: $("#draw-line-total-dist").is(":checked"),
                 formatArea: utils.formatArea
             });
-        } else {
-            if (type !== 'marker' && type !== 'circlemarker') {
+        } else if (type !== 'marker' && type !== 'circlemarker') {
                 l.hideMeasurements();
             }
-        }
 
         if (type !== 'marker' && type !== 'circlemarker') {
             l.setStyle({dashArray: $("#draw-line-type").val()});
@@ -1057,8 +1059,8 @@ module.exports = {
 
             // Copy the path apparence to the marker
             var styleProperties = ['class', 'stroke', 'stroke-opacity'];
-            for (var i = 0; i < styleProperties.length; i++) {
-                var styleProperty = styleProperties[i];
+            for (const element of styleProperties) {
+                var styleProperty = element;
                 var pathProperty = this._path.getAttribute(styleProperty);
                 markersNode.setAttribute(styleProperty, pathProperty);
             }

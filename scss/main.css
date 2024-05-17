@@ -12130,7 +12130,6 @@ textarea.form-control-lg {
 }
 
 [data-bs-theme=geopartner] .btn-check + .btn:hover {
-  color: var(--bs-primary);
   border-color: var(--bs-primary-shade-20);
 }
 
@@ -12140,7 +12139,17 @@ textarea.form-control-lg {
 
 [data-bs-theme=geopartner] .form-check-input:checked {
   background-color: var(--bs-primary-shade-20);
+  border-color: var(--bs-primary-shade-50);
+}
+
+[data-bs-theme=geopartner] .form-check-input:focus {
   border-color: var(--bs-primary-shade-20);
+  box-shadow: 0 0 0 0.25rem var(--bs-primary-tint-70);
+  outline: 0;
+}
+
+[data-bs-theme=geopartner] .form-switch .form-check-input:focus {
+  --bs-form-switch-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23b3e0db'/%3e%3c/svg%3e");
 }
 
 /* Leaflet */
@@ -12153,13 +12162,23 @@ textarea.form-control-lg {
   }
 }
 /* Change tool colors */
-[data-bs-theme=geopartner] .leaflet-control-locate a, .leaflet-control-zoom a, .leaflet-bar a, .leaflet-control a, .leaflet-draw-draw-circlemarker {
+[data-bs-theme=geopartner] .leaflet-control-locate a,
+.leaflet-control-zoom a,
+.leaflet-bar a,
+.leaflet-control a,
+.leaflet-draw-draw-circlemarker {
   color: var(--bs-primary-shade-30);
 }
 
 /* leaflet-draw */
 /* Color is hardcoded to --bs-primary-shade-30  - omit circlemarker, because it is an icon */
-[data-bs-theme=geopartner] .leaflet-draw-draw-marker, .leaflet-draw-draw-circle, .leaflet-draw-draw-rectangle, .leaflet-draw-draw-polygon, .leaflet-draw-draw-polyline, .leaflet-draw-edit-edit, .leaflet-draw-edit-remove {
+[data-bs-theme=geopartner] .leaflet-draw-draw-marker,
+.leaflet-draw-draw-circle,
+.leaflet-draw-draw-rectangle,
+.leaflet-draw-draw-polygon,
+.leaflet-draw-draw-polyline,
+.leaflet-draw-edit-edit,
+.leaflet-draw-edit-remove {
   background-image: linear-gradient(transparent, transparent), url(../../images/leaflet-draw-spritesheet-gp-light.svg) !important;
 }
 
@@ -12171,11 +12190,6 @@ textarea.form-control-lg {
 }
 
 /* Matrikelkort */
-[data-bs-theme=geopartner-dark] img.leaflet-tile[src^="/api/datafordeler/Matrikel/MatrikelGaeldendeOgForeloebigWMS/1.0.0/WMS"] {
-  filter: invert(1) hue-rotate(180deg) brightness(1.5);
-}
-
-/* skærmkort - dæmpet */
 [data-bs-theme=geopartner-dark] img.leaflet-tile[src^="/api/datafordeler/Matrikel/MatrikelGaeldendeOgForeloebigWMS/1.0.0/WMS"] {
   filter: invert(1) hue-rotate(180deg) brightness(1.5);
 }
@@ -12255,7 +12269,18 @@ textarea.form-control-lg {
   }
 }
 /* Change tool colors */
-[data-bs-theme=geopartner-dark] .leaflet-control-locate a, .leaflet-control-zoom a, .leaflet-bar a, .leaflet-control a, .leaflet-draw-draw-polyline, .leaflet-draw-draw-polygon, .leaflet-draw-draw-rectangle, .leaflet-draw-draw-circle, .leaflet-draw-draw-marker, .leaflet-draw-draw-circlemarker, .leaflet-draw-edit-edit, .leaflet-draw-edit-remove {
+[data-bs-theme=geopartner-dark] .leaflet-control-locate a,
+.leaflet-control-zoom a,
+.leaflet-bar a,
+.leaflet-control a,
+.leaflet-draw-draw-polyline,
+.leaflet-draw-draw-polygon,
+.leaflet-draw-draw-rectangle,
+.leaflet-draw-draw-circle,
+.leaflet-draw-draw-marker,
+.leaflet-draw-draw-circlemarker,
+.leaflet-draw-edit-edit,
+.leaflet-draw-edit-remove {
   color: var(--bs-primary-shade-30);
 }
 

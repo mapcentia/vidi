@@ -13,19 +13,26 @@ module.exports = {
     init: function () {
     },
     formatArea: (a) => {
-        let unit= 'm²';
-        const bigArea= 100000;
+        
+        const kmBigArea= 1000000;
+        const haBigArea =  10000;
+        const smallArea = 1;
 
-        if (a > bigArea) {
-          a = a / bigArea;
-          unit = 'km²';
+        if (a > kmBigArea) {
+          a = a / kmBigArea;
+          return a.toFixed(2) + ' ' + 'km²';
         }
-         
-        if (a < 100) {
-          return a.toFixed(1) + ' ' + unit;
-        } else {
-          return Math.round(a) + ' ' + unit;
+        if (a < kmBigArea && a > haBigArea) {
+            a = a / haBigArea;
+            return a.toFixed(2) + ' ' + 'ha';
         }
+        const unit= 'm²'; 
+        if (a < 100 && a > smallArea) {
+          return a.toFixed(2) + ' ' + unit;
+        }
+        const digits =  Math.floor(Math.abs(Math.log10(a))) +2;
+        return a.toFixed(digits) + ' ' + unit;
+
     },
     /**
      * @todo Remove deprecated "height" parameter
@@ -127,13 +134,11 @@ module.exports = {
             document.documentElement.requestFullscreen().then(() => {
                 fullScreenMode = true;
             });
-        } else {
-            if (document.exitFullscreen) {
+        } else if (document.exitFullscreen) {
                 document.exitFullscreen().then(() => {
                     fullScreenMode = false;
                 });
             }
-        }
         return fullScreenMode;
     },
 
@@ -181,8 +186,8 @@ module.exports = {
 
     removeDuplicates: (inputArray) => {
         let temp = {};
-        for (let i = 0; i < inputArray.length; i++) {
-            temp[inputArray[i]] = true;
+        for (const element of inputArray) {
+            temp[element] = true;
         }
         let result = [];
         for (let key in temp) {

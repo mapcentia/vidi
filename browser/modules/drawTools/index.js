@@ -61,7 +61,7 @@ const getFeatureArea = feature => {
     for (const latLng of feature.geometry.coordinates[0])
         latLngs.push(L.latLng(latLng[1], latLng[0]));
 
-    return L.GeometryUtil.readableArea(L.GeometryUtil.geodesicArea(latLngs), true);
+    return L.GeometryUtil.geodesicArea(latLngs);
 };
 
 /**
@@ -74,8 +74,15 @@ const getArea = e => {
     return L.GeometryUtil.readableArea(L.GeometryUtil.geodesicArea(e.getLatLngs()[0]), true);
 };
 
+const getAreaValue = e => {
+    return L.GeometryUtil.geodesicArea(e.getLatLngs()[0]);
+};
+
 const getAreaOfCircle = e => {
     return L.GeometryUtil.readableArea(Math.pow(e.getRadius(), 2) * Math.PI, true);
 };
+const getAreaOfCircleValue = e => {
+    return Math.pow(e.getRadius(), 2) * Math.PI;
+};
 
-module.exports = { getDistance, getFeatureDistance, getArea, getFeatureArea, getAreaOfCircle };
+module.exports = { getDistance, getFeatureDistance, getArea, getAreaValue, getFeatureArea, getAreaOfCircle, getAreaOfCircleValue };
