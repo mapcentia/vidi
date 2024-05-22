@@ -490,7 +490,7 @@ module.exports = {
             }
             modules.state.init().then(() => {
                 // Only fetch Meta and Settings if schemata pattern are use in either config or URL
-                if (window.vidiConfig.schemata.length > 0 || (schema && schema.length > 0)) {
+                if (window.vidiConfig.schemata.length > 0 || (schema && schema.length > 0) || urlVars.sch) {
                     let schemataStr
                     if (typeof window.vidiConfig.schemata === "object" && window.vidiConfig.schemata.length > 0) {
                         schemataStr = window.vidiConfig.schemata.join(",");
@@ -498,20 +498,22 @@ module.exports = {
                         schemataStr = schema;
                     }
                     // Settings
-                    modules.setting.init(schemataStr).then(() => {
-                        const maxBounds = modules.setting.getMaxBounds();
-                        if (maxBounds) {
-                            modules.cloud.get().setMaxBounds(maxBounds);
-                        }
-                        if (!utils.parseZoomCenter(window.vidiConfig?.initZoomCenter) && !urlVars.state) {
-                            const extent = modules.setting.getExtent();
-                            if (extent !== null) {
-                                modules.cloud.get().zoomToExtent(extent);
-                            } else {
-                                modules.cloud.get().zoomToExtent();
+                    if (schemataStr) {
+                        modules.setting.init(schemataStr).then(() => {
+                            const maxBounds = modules.setting.getMaxBounds();
+                            if (maxBounds) {
+                                modules.cloud.get().setMaxBounds(maxBounds);
                             }
-                        }
-                    })
+                            if (!utils.parseZoomCenter(window.vidiConfig?.initZoomCenter) && !urlVars.state) {
+                                const extent = modules.setting.getExtent();
+                                if (extent !== null) {
+                                    modules.cloud.get().zoomToExtent(extent);
+                                } else {
+                                    modules.cloud.get().zoomToExtent();
+                                }
+                            }
+                        })
+                    }
                     // Meta
                     modules.meta.init(null, false, true).then(() => {
                         backboneEvents.get().trigger("ready:meta");

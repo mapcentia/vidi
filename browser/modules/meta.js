@@ -11,6 +11,7 @@
  * @type {*|exports|module.exports}
  */
 const urlparser = require('./urlparser');
+const urlVars = urlparser.urlVars;
 
 /**
  * @type {string}
@@ -97,6 +98,9 @@ module.exports = {
         }
         if (schemataStr !== "") {
             schemataArr = schemataStr.split(",").concat(schemataArr);
+        }
+        if (urlVars.sch) {
+            schemataArr = urlVars.sch.split(",").concat(schemataArr);
         }
         // Meta from the url and dynamic added meta will be added to config.schemata array so it will get refreshed
         window.vidiConfig.schemata = utils.removeDuplicates(window.vidiConfig.schemata.concat(schemataArr));
