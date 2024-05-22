@@ -242,6 +242,7 @@ module.exports = {
         "Show labels": "Vis labels",
         "Filter": "Filter",
         "New block": "Ny blok",
+        "Filter is required for showing data": "Filter skal anvendes før data vises",
 
         // Base layers
         "Side-by-side mode": "Dobbelt baggrundskort",
