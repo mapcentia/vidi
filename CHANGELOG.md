@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2024.5.1] - 2024-22-5
+### Added
+- Support for 'data-vidi-schemata' attribute in embedded maps. When this attribute is set to a schemata text string, auto retrieval of matching layers alongside any specified in the config is enabled.
+
 ## [2024.5.0] - 2024-15-5
 ### Added
 - Display filter for snapshots. Free test filtering of snapshots titles, so it becomes easier to manage long lists of snapshots
