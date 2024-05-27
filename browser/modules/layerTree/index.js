@@ -2959,7 +2959,7 @@ module.exports = {
         let name = `${localItem.f_table_schema}.${localItem.f_table_name}`;
 
         // If activeLayers are set, then no need to sync with the map
-        if (forcedState && forcedState.activeLayers) {
+        if (forcedState?.activeLayers?.length > 0) {
             forcedState.activeLayers.map(key => {
                 if (layerTreeUtils.stripPrefix(key) === name) {
                     layerIsActive = true;

@@ -159,12 +159,12 @@ module.exports = {
                 let isChecked = $(e.target).prop(`checked`);
                 let subGroupName = $(this).data(`gc2-subgroup-name`);
                 let subGroupLevel = $(this).data(`gc2-subgroup-level`);
-                let layers = meta.getMetaData().data.filter((e) => {
+                let layerGroup = $(this).closest('.card-body').data('gc2-group-id');
+                meta.getMetaData().data.forEach(e => {
                     let parsedMeta = layerTree.parseLayerMeta(e);
-                    if (parsedMeta?.vidi_sub_group?.split("|")[subGroupLevel] === subGroupName) {
+                    if (parsedMeta?.vidi_sub_group?.split("|")[subGroupLevel] === subGroupName && e.layergroup === layerGroup) {
                         prefix = parsedMeta?.default_layer_type && parsedMeta.default_layer_type !=='t' ? parsedMeta.default_layer_type + ':' : '';
                         switchLayer.init(prefix + e.f_table_schema + "." + e.f_table_name, isChecked, false);
-                        return true;
                     }
                 })
                 e.stopPropagation();
