@@ -1531,7 +1531,7 @@ module.exports = {
         let fieldStr;
         let fieldNames = [];
         if (fields) {
-            Object.keys(fields).forEach(function(i) {
+            Object.keys(fields).forEach(function (i) {
                 let v = fields[i];
                 if (v.type === 'bytea') {
                     fieldNames.push(`encode("${i}",'escape') as "${i}"`);
@@ -2626,7 +2626,7 @@ module.exports = {
             let LOG_HIERARCHY_BUILDING = false;
             const LOG_LEVEL = '|  ';
             for (let u = 0; u < metaData.data.length; ++u) {
-                if (metaData.data[u].layergroup == groupName) {
+                if (metaData.data[u].layergroup === groupName) {
                     let layer = metaData.data[u];
                     let parsedMeta = _self.parseLayerMeta(layer);
                     if (parsedMeta && `vidi_sub_group` in parsedMeta && parsedMeta.vidi_sub_group.length > 0) {
@@ -2698,7 +2698,9 @@ module.exports = {
                             parent.push({
                                 id: name,
                                 type: GROUP_CHILD_TYPE_GROUP,
-                                children: []
+                                children: [],
+                                path: [...searchedLevelPath, name],
+                                group: groupName
                             });
 
                             groupIndex = (parent.length - 1);
@@ -2868,10 +2870,10 @@ module.exports = {
         // Setup active / added layers indicators
         layerTreeUtils.setupLayerNumberIndicator(base64GroupName, localNumberOfActiveLayers, localNumberOfAddedLayers);
 
-        $("#layer-panel-" + base64GroupName).find(`.js-toggle-layer-panel`).click(() => {
+        $("#layer-panel-" + base64GroupName).find(`.js-toggle-layer-panel`).click((e) => {
             if ($("#group-" + base64GroupName).find(`#collapse${base64GroupName}`).children().length === 0) {
                 let virtualLayerTreeNode = $('<div></div>');
-
+                const name = $("#layer-panel-" + base64GroupName).find('.card-body').data('gc2-group-id')
                 // Add layers and subgroups
                 for (var u = 0; u < layersAndSubgroupsForCurrentGroup.length; ++u) {
                     let localItem = layersAndSubgroupsForCurrentGroup[u];
@@ -2883,6 +2885,9 @@ module.exports = {
                         _self.createLayerRecord(localItem.layer, $(virtualLayerTreeNode), layerIsActive, activeLayerName, false, isVirtualGroup);
                     } else if (localItem.type === GROUP_CHILD_TYPE_GROUP) {
                         _self.createSubgroupRecord(localItem, forcedState, precheckedLayers, $(virtualLayerTreeNode), 0);
+                        setTimeout(() => {
+                            _self.toggleGroupCheckBoxes(name, localItem.id);
+                        }, 100);
                     } else {
                         console.error(localItem);
                         throw new Error(`Invalid sorting element type`);
@@ -2988,6 +2993,7 @@ module.exports = {
      * @returns {Object}
      */
     createSubgroupRecord: (subgroup, forcedState, precheckedLayers, parentNode, level = 0, initiallyClosed = true) => {
+        console.log(subgroup, parentNode)
         let base64SubgroupName = Base64.encode(`subgroup_${subgroup.id}_level_${level}_${uuidv4()}`).replace(/=/g, "");
         let markup = markupGeneratorInstance.getSubgroupControlRecord(base64SubgroupName, subgroup.id, level, window.vidiConfig.showLayerGroupCheckbox);
 
@@ -3050,6 +3056,10 @@ module.exports = {
                 layers.reorderLayers();
             }
         });
+
+        setTimeout(() => {
+            _self.toggleGroupCheckBoxes(subgroup.group, subgroup.path.join('|'));
+        }, 100);
     },
 
     /**
@@ -4095,7 +4105,38 @@ module.exports = {
     },
     getLatestFullTreeStructure: () => {
         return latestFullTreeStructure;
-    }
+    },
+
+    toggleGroupCheckBoxes: (layerGroup, layerSubGroup) => {
+        const metaDataKeys = meta.getMetaDataKeys();
+        let activeLayersInSubGroups = 0;
+        let layersInSubGroups = 0;
+        const metaData = meta.getMetaData();
+        const layersInGroup = metaData.data.filter(e => e.layergroup === layerGroup).length;
+        const activeLayers = _self.getActiveLayers().filter(e => metaDataKeys[e]?.layergroup === layerGroup);
+        const activeLayersInGroup = activeLayers.length;
+        if (layerSubGroup) {
+            let split = layerSubGroup.split('|');
+            const l = split.length;
+            for (let i = 0; i < l; i++) {
+                const sub = split.join('|').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                let re = new RegExp(String.raw`^${sub}(?=(\||$))`, "s");
+                layersInSubGroups += metaData.data.filter(e => JSON.parse(e.meta)?.vidi_sub_group.match(re) && e.layergroup === layerGroup).length;
+                activeLayersInSubGroups += activeLayers.filter(e => JSON.parse(metaDataKeys[e].meta)?.vidi_sub_group.match(re) && metaDataKeys[e].layergroup === layerGroup).length;
+                const searchPath = `[data-gc2-group-id="${layerGroup}"]` + ' ' + split.map(e => `[data-gc2-subgroup-id="${e}"]`).join(' ') + ` [data-gc2-subgroup-name="${split[split.length - 1]}"]`;
+                const el = document.querySelector(searchPath);
+                if (el) {
+                    el.indeterminate = activeLayersInSubGroups > 0 && !(activeLayersInSubGroups === layersInSubGroups);
+                    el.checked = activeLayersInSubGroups === layersInSubGroups;
+                }
+                split.pop();
+            }
+        }
+        // Top group
+        const el = document.querySelector(`[data-gc2-group-name="${layerGroup}"]`);
+        el.indeterminate = activeLayersInGroup > 0 && activeLayersInGroup < layersInGroup;
+        el.checked = activeLayersInGroup > 0 && activeLayersInGroup === layersInGroup;
+    },
 
 }
 

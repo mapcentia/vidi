@@ -460,11 +460,13 @@ module.exports = module.exports = {
             fullLayerKey: name
         };
 
-        let metaData = meta.getMetaData();
+        const metaData = meta.getMetaData();
+
         let sortId;
         for (let j = 0; j < metaData.data.length; j++) {
             let layerKey = (metaData.data[j].f_table_schema + '.' + metaData.data[j].f_table_name);
             if (layerKey === layerTreeUtils.stripPrefix(name)) {
+                layerTree.toggleGroupCheckBoxes( metaData.data[j].layergroup,  JSON.parse(metaData.data[j].meta)?.vidi_sub_group);
                 let layer = metaData.data[j];
                 let {isVectorLayer, isRasterTileLayer, isVectorTileLayer} = layerTreeUtils.getPossibleLayerTypes(layer);
                 let defaultLayerType = layerTreeUtils.getDefaultLayerType(layer);

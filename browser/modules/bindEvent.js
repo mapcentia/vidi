@@ -109,7 +109,8 @@ module.exports = {
                 let prefix = '';
                 let doNotLegend = false;
                 if ($(this).data(`gc2-layer-type`)) {
-                    prefix = $(e.target).data('gc2-layer-type') + `:`;
+                    const type = $(e.target).data('gc2-layer-type');
+                    prefix = type !=='t' ? type + ':' : '';
                     if (prefix === LAYER_TYPE_DEFAULT + `:`) {
                         prefix = ``;
                     }
@@ -134,7 +135,7 @@ module.exports = {
                 let layers = meta.getMetaData().data.filter((e) => {
                     if (e.layergroup === groupName) {
                         let parsedMeta = layerTree.parseLayerMeta(e);
-                        prefix = parsedMeta?.default_layer_type ? parsedMeta.default_layer_type + ':' : '';
+                        prefix = parsedMeta?.default_layer_type && parsedMeta.default_layer_type !=='t' ? parsedMeta.default_layer_type + ':' : '';
                         setTimeout(()=> {
                             switchLayer.init(prefix + e.f_table_schema + "." + e.f_table_name, isChecked, true, false);
                         }, 1)
@@ -161,7 +162,7 @@ module.exports = {
                 let layers = meta.getMetaData().data.filter((e) => {
                     let parsedMeta = layerTree.parseLayerMeta(e);
                     if (parsedMeta?.vidi_sub_group?.split("|")[subGroupLevel] === subGroupName) {
-                        prefix = parsedMeta?.default_layer_type ? parsedMeta.default_layer_type + ':' : '';
+                        prefix = parsedMeta?.default_layer_type && parsedMeta.default_layer_type !=='t' ? parsedMeta.default_layer_type + ':' : '';
                         switchLayer.init(prefix + e.f_table_schema + "." + e.f_table_name, isChecked, false);
                         return true;
                     }
