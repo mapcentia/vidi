@@ -144,12 +144,6 @@ module.exports = {
                 })
                 e.stopPropagation();
                 backboneEvents.get().trigger(`layerTree:activeLayersChange`);
-                let base64GroupName = Base64.encode(groupName).replace(/=/g, "");
-                if (isChecked) {
-                    layerTreeUtils.setupLayerNumberIndicator(base64GroupName, layers.length, layers.length);
-                } else {
-                    $("#layer-panel-" + base64GroupName + " .layer-count span:eq(0)").html(0);
-                }
             });
         });
 

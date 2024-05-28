@@ -2959,7 +2959,7 @@ module.exports = {
         let name = `${localItem.f_table_schema}.${localItem.f_table_name}`;
 
         // If activeLayers are set, then no need to sync with the map
-        if (forcedState?.activeLayers?.length > 0) {
+        if (forcedState?.activeLayers?.length > 0 && forcedState.activeLayers.includes(name)) {
             forcedState.activeLayers.map(key => {
                 if (layerTreeUtils.stripPrefix(key) === name) {
                     layerIsActive = true;
@@ -4120,22 +4120,34 @@ module.exports = {
             const l = split.length;
             for (let i = 0; i < l; i++) {
                 const sub = split.join('|').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                let re = new RegExp(String.raw`^${sub}(?=(\||$))`, "s");
+                const re = new RegExp(String.raw`^${sub}(?=(\||$))`, 's');
                 layersInSubGroups += metaData.data.filter(e => JSON.parse(e.meta)?.vidi_sub_group.match(re) && e.layergroup === layerGroup).length;
                 activeLayersInSubGroups += activeLayers.filter(e => JSON.parse(metaDataKeys[e].meta)?.vidi_sub_group.match(re) && metaDataKeys[e].layergroup === layerGroup).length;
                 const searchPath = `[data-gc2-group-id="${layerGroup}"]` + ' ' + split.map(e => `[data-gc2-subgroup-id="${e}"]`).join(' ') + ` [data-gc2-subgroup-name="${split[split.length - 1]}"]`;
                 const el = document.querySelector(searchPath);
                 if (el) {
                     el.indeterminate = activeLayersInSubGroups > 0 && !(activeLayersInSubGroups === layersInSubGroups);
-                    el.checked = activeLayersInSubGroups === layersInSubGroups;
+                    //el.checked = activeLayersInSubGroups === layersInSubGroups;
+                    el.checked = activeLayersInSubGroups > 0;
                 }
                 split.pop();
             }
         }
-        // Top group
-        const el = document.querySelector(`[data-gc2-group-name="${layerGroup}"]`);
-        el.indeterminate = activeLayersInGroup > 0 && activeLayersInGroup < layersInGroup;
-        el.checked = activeLayersInGroup > 0 && activeLayersInGroup === layersInGroup;
+
+        const poll = ()=> {
+            // Top group
+            const el = document.querySelector(`[data-gc2-group-name="${layerGroup}"]`);
+            if (el) {
+                el.indeterminate = activeLayersInGroup > 0 && activeLayersInGroup < layersInGroup;
+                //el.checked = activeLayersInGroup > 0 && activeLayersInGroup === layersInGroup;
+                el.checked = activeLayersInGroup > 0;
+                let base64GroupName = Base64.encode(layerGroup).replace(/=/g, "");
+                layerTreeUtils.setupLayerNumberIndicator(base64GroupName, activeLayersInGroup, layersInGroup);
+            } else {
+                setTimeout(poll, 30);
+            }
+        }
+        poll();
     },
 
 }
