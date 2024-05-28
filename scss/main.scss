@@ -1,3 +1,15 @@
+@use "../node_modules/react-widgets/scss/styles" with (
+  $input-height: 2em,
+
+  $components: (
+    'Listbox',
+    'DropdownList',
+    'Combobox',
+    'Multiselect',
+    'NumberPicker'
+  )
+);
+
 // Custom.scss
 // Option B: Include parts of Bootstrap
 
@@ -17,3 +29,4 @@ $enable-shadows: true;
 @import "./themes";
 
 
+;

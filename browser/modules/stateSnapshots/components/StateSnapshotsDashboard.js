@@ -6,7 +6,8 @@
 
 
 const React = require('react');
-import TitleFieldComponent from './../../shared/TitleFieldComponent';
+import TitleFieldComponent from './TitleFieldComponent';
+import TagComponent from './TagComponent';
 import LoadingOverlay from './../../shared/LoadingOverlay';
 
 const {v4: uuidv4} = require('uuid');
@@ -36,7 +37,9 @@ class StateSnapshotsDashboard extends React.Component {
             authenticated: props.initialAuthenticated ? props.initialAuthenticated : false,
             updatedItemId: false,
             stateApplyingIsBlocked: false,
-            imageLinkSizes: {}
+            imageLinkSizes: {},
+            filter: '',
+            unCheckedTags: [],
         };
 
         this.applySnapshot = this.applySnapshot.bind(this);
@@ -46,6 +49,8 @@ class StateSnapshotsDashboard extends React.Component {
         this.seizeAllSnapshots = this.seizeAllSnapshots.bind(this);
         this.setImageLinkSize = this.setImageLinkSize.bind(this);
         this.copyToClipboard = this.copyToClipboard.bind(this);
+
+        this.tmp = [];
 
         // Setting unique cookie if it have not been set yet
         if (!noTracking) {
@@ -63,9 +68,9 @@ class StateSnapshotsDashboard extends React.Component {
         }
     }
 
+
     componentDidMount() {
         this.mounted = true;
-
         let _self = this;
         this.props.backboneEvents.get().on(`session:authChange`, (authenticated) => {
             if (this.mounted && _self.state.authenticated !== authenticated) {
@@ -133,7 +138,6 @@ class StateSnapshotsDashboard extends React.Component {
      */
     createSnapshot(title, anonymous = false) {
         let _self = this;
-
         _self.setState({loading: true});
         this.props.state.getState().then(state => {
             state.map = this.props.anchor.getCurrentMapParameters();
@@ -144,9 +148,9 @@ class StateSnapshotsDashboard extends React.Component {
                 snapshot: state,
                 database: vidiConfig.appDatabase,
                 schema: vidiConfig.appSchema,
-                host: this.props.urlparser.hostname
+                host: this.props.urlparser.hostname,
+                tags: []
             };
-
             $.ajax({
                 url: this.state.apiUrl + '/' + vidiConfig.appDatabase,
                 method: 'POST',
@@ -192,7 +196,7 @@ class StateSnapshotsDashboard extends React.Component {
                 url: `${this.state.apiUrl}/${vidiConfig.appDatabase}/${id}`,
                 method: 'DELETE',
                 dataType: 'json'
-            }).then(data => {
+            }).then(() => {
                 _self.refreshSnapshotsList();
             });
         }
@@ -203,13 +207,16 @@ class StateSnapshotsDashboard extends React.Component {
      *
      * @param data
      * @param title
+     * @param tags
+     * @param refresh
      */
-    updateSnapshot(data, title) {
+    updateSnapshot(data, title, tags, refresh = true) {
         let _self = this;
         _self.setState({loading: true});
         this.props.state.getState().then(state => {
             state.map = this.props.anchor.getCurrentMapParameters();
             data.title = title;
+            data.tags = tags.filter((value, index, array) => array.indexOf(value) === index);
             data.snapshot = state;
             data.snapshot.meta = _self.getSnapshotMeta();
             $.ajax({
@@ -218,8 +225,10 @@ class StateSnapshotsDashboard extends React.Component {
                 contentType: 'text/plain; charset=utf-8',
                 dataType: 'text',
                 data: base64url(JSON.stringify(data))
-            }).then(data => {
-                _self.refreshSnapshotsList();
+            }).then(() => {
+                if (refresh) {
+                    _self.refreshSnapshotsList();
+                }
                 _self.setState({
                     updatedItemId: false,
                     loading: false
@@ -250,7 +259,7 @@ class StateSnapshotsDashboard extends React.Component {
                 method: 'PUT',
                 dataType: 'json',
                 contentType: 'application/json; charset=utf-8'
-            }).then(data => {
+            }).then(() => {
                 _self.refreshSnapshotsList();
             });
         }
@@ -284,7 +293,6 @@ class StateSnapshotsDashboard extends React.Component {
      */
     refreshSnapshotsList() {
         let _self = this;
-
         this.setState({loading: true});
         $.ajax({
             url: this.state.apiUrl + '/' + vidiConfig.appDatabase + '?ownerOnly=true',
@@ -304,7 +312,6 @@ class StateSnapshotsDashboard extends React.Component {
                         throw new Error(`Invalid state snapshot`);
                     }
                 });
-
                 _self.setState({browserOwnerSnapshots, userOwnerSnapshots, loading: false});
             }
         }, (jqXHR) => {
@@ -366,11 +373,6 @@ class StateSnapshotsDashboard extends React.Component {
             };
         }
 
-        let snapshotIdStyle = {
-            fontFamily: `"Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace`,
-            marginRight: `10px`
-        };
-
         const generateSizeSelector = (item, value) => {
             let options = [];
             [`600x600`, `800x600`, `1024x768`, `1080x1080`, `1280x720`, `1920x1080`].map(size => {
@@ -383,7 +385,7 @@ class StateSnapshotsDashboard extends React.Component {
                             }}>{options}</select>)
         };
 
-        const createSnapshotRecord = (item, index, local = false) => {
+        const createSnapshotRecord = (item, allTags, local = false) => {
             let date = new Date(item.updated_at || item.created_at); // updated_at is a newer property, which may not be present in older snapshots
             let dateFormatted = (`${date.getHours()}:${date.getMinutes()} ${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`);
 
@@ -448,7 +450,7 @@ class StateSnapshotsDashboard extends React.Component {
                 updateSnapshotControl = (<TitleFieldComponent
                     value={item.title}
                     onAdd={(newTitle) => {
-                        this.updateSnapshot(item, newTitle)
+                        this.updateSnapshot(item, newTitle, item.tags)
                     }}
                     onCancel={() => {
                         this.setState({updatedItemId: false})
@@ -487,7 +489,7 @@ class StateSnapshotsDashboard extends React.Component {
 
             let selectSize = generateSizeSelector(item, sizeValue);
             let imageLink = `${window.location.origin}/api/static/${vidiConfig.appDatabase}/${vidiConfig.appSchema}/?state=${item.id}&width=${sizeValue.split(`x`)[0]}&height=${sizeValue.split(`x`)[1]}${configParameter ? `&${configParameter}` : ``}`;
-            return (<div className="card mb-2" key={index}>
+            return (<div className="card mb-2" key={item.id}>
                 <div className="card-body">
                     {this.props.playOnly ? (
                         <div className="d-flex align-items-center gap-2">
@@ -515,7 +517,7 @@ class StateSnapshotsDashboard extends React.Component {
                         </div>
                     )}
                     {this.props.playOnly ? false : (
-                        <div className="d-flex align-items-center gap-2">
+                        <div className="d-flex align-items-center gap-2 mb-3">
                             <button className="btn btn-sm btn-outline-secondary" onClick={() => {
                                 this.copyToClipboard(permaLink)
                             }}>{__(`Link`)}</button>
@@ -527,9 +529,33 @@ class StateSnapshotsDashboard extends React.Component {
                                 {selectSize}
                             </div>
                         </div>)}
+                    <TagComponent onAdd={tags => this.updateSnapshot(item, item.title, tags, false)} tags={item.tags}
+                                  allTags={allTags}/>
                 </div>
             </div>);
         };
+
+        const handleTagCheck = (event) => {
+            if (!event.target.checked) {
+                this.setState({unCheckedTags: [...this.state.unCheckedTags, event.target.name]});
+            } else {
+                this.setState({unCheckedTags: this.state.unCheckedTags.filter(tag => tag !== event.target.name)});
+            }
+        }
+
+        const createTagBadge = (tag) => {
+            this.tmp.push(tag)
+            return (
+                <div key={tag}><input id={tag} name={tag}
+                                      className="btn-check"
+                                      type="checkbox"
+                                      onChange={event => handleTagCheck(event)}
+                                      checked={!this.state.unCheckedTags.includes(tag)}/>
+                    <label className="btn btn-sm" htmlFor={tag}>
+                        {tag}
+                    </label>
+                </div>)
+        }
 
         let browserOwnerSnapshots = false;
         if (!this.state.loading) {
@@ -538,13 +564,32 @@ class StateSnapshotsDashboard extends React.Component {
             </div>);
         }
 
-        let importAllIsDisabled = true;
-        if (this.state.browserOwnerSnapshots && this.state.browserOwnerSnapshots.length > 0) {
-            if (this.state.authenticated) importAllIsDisabled = false;
+        // Get all tags
+        let allTags = [];
+        this.state.browserOwnerSnapshots.forEach(item => {
+            if (item?.tags) {
+                allTags = [...allTags, ...item.tags.filter(tag => !allTags.includes(tag))];
+            }
+        })
+        this.state.userOwnerSnapshots.forEach(item => {
+            if (item?.tags) {
+                allTags = [...allTags, ...item.tags.filter(tag => !allTags.includes(tag))];
+            }
+        })
 
+        const filter = (item) => {
+            return (
+                (!item?.tags || (item.tags.filter(value => !this.state.unCheckedTags.includes(value)).length || item.tags.length === 0) > 0) &&
+                (!item?.title || this.state.filter === `` || item.title.toLowerCase().indexOf(this.state.filter.toLowerCase()) > -1)
+            )
+        }
+
+        if (this.state.browserOwnerSnapshots && this.state.browserOwnerSnapshots.length > 0) {
             browserOwnerSnapshots = [];
-            this.state.browserOwnerSnapshots.map((item, index) => {
-                browserOwnerSnapshots.push(createSnapshotRecord(item, index, true));
+            this.state.browserOwnerSnapshots.forEach((item, index) => {
+                if (filter(item)) {
+                    browserOwnerSnapshots.push(createSnapshotRecord(item, allTags, true));
+                }
             });
         }
 
@@ -554,8 +599,10 @@ class StateSnapshotsDashboard extends React.Component {
 
         if (this.state.userOwnerSnapshots && this.state.userOwnerSnapshots.length > 0) {
             userOwnerSnapshots = [];
-            this.state.userOwnerSnapshots.map((item, index) => {
-                userOwnerSnapshots.push(createSnapshotRecord(item, index));
+            this.state.userOwnerSnapshots.forEach((item, index) => {
+                if (filter(item)) {
+                    userOwnerSnapshots.push(createSnapshotRecord(item, allTags));
+                }
             });
         }
 
@@ -606,8 +653,39 @@ class StateSnapshotsDashboard extends React.Component {
             )
         }
 
+        const tagsCloud = (
+            <div className="mb-3">
+                <div className="d-flex flex-wrap gap-1 mb-1">{allTags.map(tag => createTagBadge(tag))}</div>
+                <div className="d-flex gap-2">
+                    <button className="btn btn-outline-success btn-sm"
+                            onClick={() => this.setState({unCheckedTags: []})}>{__('All on')}
+                    </button>
+                    <button className="btn btn-outline-warning btn-sm"
+                            onClick={() => this.setState({unCheckedTags: allTags})}>{__('All off')}
+                    </button>
+                </div>
+            </div>
+        )
+
+        const filterSnapShots = (
+            <div className="input-group mb-3">
+                <input placeholder={__('Filter')} className="form-control" type="text" value={this.state.filter}
+                       onChange={(event) => {
+                           this.setState({filter: event.target.value})
+                       }}
+                       autoComplete="off"/>
+                <button id="layers-filter-reset" className="btn btn-outline-secondary" type="button"
+                        onClick={event => this.setState({filter: ''})}
+                >
+                    <i className="bi bi-x-lg"></i>
+                </button>
+            </div>
+        )
+
         return (<div>
             {overlay}
+            {filterSnapShots}
+            {tagsCloud}
             <div className="js-browser-owned mb">
                 {createNewSnapshotControl}
                 {browserOwnerSnapshots}

@@ -276,7 +276,7 @@ module.exports = {
 
         return new Promise((resolve, reject) => {
             let layers = [], metaData = meta.getMetaData(), layerWasAdded = false;
-
+            const parsedMeta = layerTree.parseLayerMeta(meta.getMetaDataKeys()[layerKey]);
             $.each(metaData.data, function (i, layerDescription) {
                 let layer = layerDescription.f_table_schema + "." + layerDescription.f_table_name;
                 let {
@@ -315,6 +315,7 @@ module.exports = {
                         format: "image/png",
                         uri,
                         pane: layerDescription.f_table_schema + "-" + layerDescription.f_table_name,
+                        visibility: !(parsedMeta?.filter_required) || (parsedMeta?.filter_required && layerTree.getLayerFilterString(layerKey) !== ''),
                         loadEvent: function (e) {
                             let canvasHasData = false;
                             if (!tiled) {

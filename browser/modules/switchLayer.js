@@ -124,10 +124,13 @@ module.exports = module.exports = {
                     cloud.get().layerControl.addOverlay(vectorDataStores[vectorLayerId].layer, vectorLayerId);
                     let existingLayer = cloud.get().getLayersByName(vectorLayerId);
                     let existingLayerHL = cloud.get().getLayersByName('HL:' + vectorLayerId);
-                    cloud.get().map.addLayer(existingLayer);
-                    cloud.get().map.addLayer(existingLayerHL);
-                    vectorDataStores[vectorLayerId].load();
-                    backboneEvents.get().trigger("startLoading:layers", vectorLayerId);
+                    const parsedMeta = layerTree.parseLayerMeta(meta.getMetaDataKeys()[gc2Id]);
+                    if (!(parsedMeta?.filter_required) || (parsedMeta?.filter_required && layerTree.getLayerFilterString(gc2Id) !== '')) {
+                        cloud.get().map.addLayer(existingLayer);
+                        cloud.get().map.addLayer(existingLayerHL);
+                        vectorDataStores[vectorLayerId].load();
+                        backboneEvents.get().trigger("startLoading:layers", vectorLayerId);
+                    }
                     _self.checkLayerControl(vectorLayerId, doNotLegend, setupControls);
                     _self.enableCheckBoxesOnChildren(gc2Id);
                 } catch (e) {
@@ -663,10 +666,11 @@ module.exports = module.exports = {
             })
         }
         // Set has-filter visibility
+        const layerKeyDot = layerKey + '.';
         if (activeFilters.length > 0) {
-            $(`[data-gc2-layer-key^="${layerKey}"]`).find('.js-tiles-has-filter').show();
+            $(`[data-gc2-layer-key^="${layerKeyDot}"]`).find('.js-tiles-has-filter').show();
         }else {
-            $(`[data-gc2-layer-key^="${layerKey}"]`).find('.js-tiles-has-filter').hide();
+            $(`[data-gc2-layer-key^="${layerKeyDot}"]`).find('.js-tiles-has-filter').hide();
         }
         if (parsedMeta?.referenced_by && activeFilters.length === 0) {
             JSON.parse(parsedMeta.referenced_by).forEach((i) => {

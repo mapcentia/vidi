@@ -3170,7 +3170,7 @@ module.exports = {
             
             const hasFilter = _self.getActiveLayerFilters(layerKey).length > 0;
             let layerControlRecord = $(markupGeneratorInstance.getLayerControlRecord(layerKeyWithGeom, layerKey, layerIsActive,
-                layer, defaultLayerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo, subgroupId !== false, moduleState, disableCheckBox, parentLayerKeys, childLayerKeys,hasFilter));
+                layer, defaultLayerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo, subgroupId !== false, moduleState, disableCheckBox, parentLayerKeys, childLayerKeys,hasFilter, parsedMeta?.filter_required));
 
             // Callback for selecting specific layer type to enable (layer type dropdown)
             $(layerControlRecord).find('.js-layer-type-selector').on('click', (e, data) => {

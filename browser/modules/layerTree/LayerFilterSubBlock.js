@@ -465,7 +465,8 @@ VectorLayerFilterSubBlock.propTypes = {
     layerMeta: PropTypes.any.isRequired,
     presetFilters: PropTypes.array,
     arbitraryFilters: PropTypes.object.isRequired,
-    isFilterImmutable: PropTypes.bool.isRequired
+    isFilterImmutable: PropTypes.bool.isRequired,
+    db: PropTypes.string.isRequired,
 };
 
 export default VectorLayerFilterSubBlock;

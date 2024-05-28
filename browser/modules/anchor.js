@@ -130,7 +130,7 @@ module.exports = {
      * Get the URL anchor for current state
      * @returns {string}
      */
-    getUri: function (s) {
+    getUri: function (s = null) {
         schema = s || schema;
         return "/app/" + db + "/" + (schema !== "" ? schema + "/" : "");
     },

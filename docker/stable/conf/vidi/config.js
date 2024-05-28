@@ -11,6 +11,7 @@ module.exports = {
     // They can not be altered in run-time.
     // ===============================================
 
+    configSwitcher: true,
 
     // ==========================================
     // GC2 host. Both HTTP and HTTPS is supported
@@ -142,7 +143,6 @@ module.exports = {
             {"offlineMap": ["index"]},
             {"session": ["index"]},
             {"editor": ["index"]},
-            {"configSwitcher": ["index"]},
         ],
         "server": [
             {"conflictSearch": ["index"]},
@@ -248,13 +248,12 @@ module.exports = {
     // Extensions are enabled both browser and server side
     // ===================================================
     "enabledExtensions": [
-        // "conflictSearch",
+        "conflictSearch",
         "streetView",
         "session",
         "coordinates",
         "offlineMap",
         "editor",
-        // "configSwitcher",
     ],
 
     // ====================================
@@ -298,9 +297,7 @@ module.exports = {
     // its a good idea to put them inside this property
     // ==========================================================
     "extensionConfig": {
-        "layerSearch": {
-            "host": "localhost:9200"
-        }
+
     },
 
     // ===================================================
@@ -318,6 +315,9 @@ module.exports = {
     // ===================================================
     "baseLayers": [
         // Pre-defined base layers
-        {"id": "osm", "name": "Open Street Map"}
-    ]
+        {"id": "osm", "name": "Open Street Map"},
+        {"id": "stamenTonerLite", "name": "Stamen Toner Light"}
+    ],
+
+    autoUpdate: true,
 };

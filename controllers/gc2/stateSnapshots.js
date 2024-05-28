@@ -318,6 +318,7 @@ router.put('/api/state-snapshots/:dataBase/:stateSnapshotKey', (req, res, next) 
                     if (`browserId` in parsedSnapshotData && parsedSnapshotData.browserId === browserId ||
                         `userId` in parsedSnapshotData && parsedSnapshotData.userId === userId) {
                         parsedSnapshotData.snapshot = req.body.snapshot;
+                        parsedSnapshotData.tags = req.body.tags;
                         if (req.body.title) parsedSnapshotData.title = req.body.title;
 
                         let token = generateToken(parsedSnapshotData);
