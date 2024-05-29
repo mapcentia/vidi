@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2024.5.2] - 2024-29-5
+### Changed
+- Layer group checkboxes now reflects the state of the layer tree. An indeterminate state is shown when some layer but not all are active in a group. 
+
 ## [2024.5.1] - 2024-22-5
 ### Added
 - Support for 'data-vidi-schemata' attribute in embedded maps. When this attribute is set to a schemata text string, auto retrieval of matching layers alongside any specified in the config is enabled.
