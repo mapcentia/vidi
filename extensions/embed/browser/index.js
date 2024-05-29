@@ -148,10 +148,12 @@ module.exports = {
                 let groupsComps = []
                 for (let i = 0; i < l.length; i++) {
                     let layerControls = l[i].children.map((e) => {
-                            const title = metaData[e.id]?.f_table_title && metaData[e.id].f_table_title !== '' ? metaData[e.id].f_table_title : metaData[e.id]?.f_table_name;
-                            return <LayerControl key={e.id} id={e.id} url={metaData[e.id].legend_url}
-                                                 checked={activeLayers.includes(e.id)}
-                                                 title={title}></LayerControl>
+                            if (e) {
+                                const title = metaData[e.id]?.f_table_title && metaData[e.id].f_table_title !== '' ? metaData[e.id].f_table_title : metaData[e.id]?.f_table_name;
+                                return <LayerControl key={e.id} id={e.id} url={metaData[e.id].legend_url}
+                                                     checked={activeLayers.includes(e.id)}
+                                                     title={title}></LayerControl>
+                            }
                         }
                     )
                     groupsComps.push(<LayerGroup key={l[i].id} title={l[i].id}
