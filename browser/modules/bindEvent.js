@@ -175,6 +175,19 @@ module.exports = {
             });
         });
 
+        // Toggle top group checkboxes when layer tree is ready
+        backboneEvents.get().on("layerTree:ready", function (){
+            let groups = [];
+            meta.getMetaData().data.forEach(e => {
+                if (e.layergroup && !groups.includes(e.layergroup)) {
+                    groups.push(e.layergroup);
+                }
+            })
+            groups.forEach(e => {
+                layerTree.toggleGroupCheckBoxes(e, null)
+            })
+        });
+
         backboneEvents.get().on("allDoneLoading:layers", function () {
             const openFirtIfNotOpen = () => {
                 let e = document.querySelector('.js-toggle-layer-panel');

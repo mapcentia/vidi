@@ -1213,7 +1213,6 @@ module.exports = {
                                                 backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
 
                                                 if (LOG) console.log(`${MODULE_NAME}: finished building the tree`);
-
                                                 localResolve();
                                             });
                                         };
@@ -2875,7 +2874,7 @@ module.exports = {
                 let virtualLayerTreeNode = $('<div></div>');
                 const name = $("#layer-panel-" + base64GroupName).find('.card-body').data('gc2-group-id')
                 // Add layers and subgroups
-                for (var u = 0; u < layersAndSubgroupsForCurrentGroup.length; ++u) {
+                for (let u = 0; u < layersAndSubgroupsForCurrentGroup.length; ++u) {
                     let localItem = layersAndSubgroupsForCurrentGroup[u];
                     if (localItem.type === GROUP_CHILD_TYPE_LAYER) {
                         let {
@@ -2993,7 +2992,6 @@ module.exports = {
      * @returns {Object}
      */
     createSubgroupRecord: (subgroup, forcedState, precheckedLayers, parentNode, level = 0, initiallyClosed = true) => {
-        console.log(subgroup, parentNode)
         let base64SubgroupName = Base64.encode(`subgroup_${subgroup.id}_level_${level}_${uuidv4()}`).replace(/=/g, "");
         let markup = markupGeneratorInstance.getSubgroupControlRecord(base64SubgroupName, subgroup.id, level, window.vidiConfig.showLayerGroupCheckbox);
 
