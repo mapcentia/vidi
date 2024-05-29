@@ -28,8 +28,8 @@ class MarkupGenerator {
 
     getGroupPanel(base64GroupName, name, addGroupCheckbox = false) {
         return (`<div class="card panel-layertree" id="layer-panel-${base64GroupName}" xmlns="http://www.w3.org/1999/html">
-                <div class="card-body p-0">
-                    <div class="d-flex align-items-center p-3 js-toggle-layer-panel" data-parent="#layers" data-bs-toggle="collapse" href="#collapse${base64GroupName}" style="cursor: pointer;">
+                <div class="card-body p-0" data-gc2-group-id="${name}">
+                    <div class="d-flex align-items-center p-3">
                         <span style="display: ${addGroupCheckbox ? "flex" : "none"}" class="form-check align-items-center" id="group-check-box-${base64GroupName}">
                             <input class="form-check-input" type="checkbox" data-gc2-group-name="${name}">
                         </span>
@@ -73,7 +73,7 @@ class MarkupGenerator {
             <div class="d-flex align-items-center gap-1">
                 <span style="display: ${addGroupCheckbox ? "inline" : "none"};" class="togglebutton">
                     <label>
-                        <input type="checkbox" class="form-check-input" data-gc2-subgroup-name="${name}" data-gc2-subgroup-level="${level}">
+                        <input class="form-check-input" type="checkbox" data-gc2-subgroup-name="${name}" data-gc2-subgroup-level="${level}">
                     </label>
                 </span>
                 <button type="button" class="btn btn-light btn-sm js-subgroup-toggle-button">

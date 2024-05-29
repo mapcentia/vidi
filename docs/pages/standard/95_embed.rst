@@ -61,6 +61,9 @@ Der en række data attributer, som skal/kan sættes:
  * Navn på det indsatte kort. Dette er nødvendig hvis :ref:`embed_api` skal anvendes.
 * **data-vidi-no-tracking (valgfri)**
  * Kan sættes til "true" for at undgå at Vidi's tracking cookie bliver sat. Cookien anvendes bl.a til anonyme projekter og print, hvilket der typisk ikke er behov for på indlejrede kort.
+* **data-vidi-schemata (valgfri)**
+ * Kan sættes til en valid :ref:`configjs_schemata` tekststreng. Matchende lag bliver hentet ind sammen med hvad, der må være angivet i en evt. config.
+
 Følgende attributer styrer hvilke funktioner, der skal være synlige.
 
 Følgende funktioner er synlige, men kan sættes til "none" hvis funktionerne skal skjules:

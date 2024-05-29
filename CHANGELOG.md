@@ -26,6 +26,13 @@ and this project adheres to [CalVer](https://calver.org/).
     ```
 - area unit is unified. km²/ ha. The same unit and rule is used in the table for drawing/uploaded shapes and in the measurement layer.
 - Factor 10 error corrected in the measurement layer when displaying area in the "ha" unit   
+## [2024.5.2] - 2024-29-5
+### Changed
+- Layer group checkboxes now reflects the state of the layer tree. An indeterminate state is shown when some layer but not all are active in a group. 
+
+## [2024.5.1] - 2024-22-5
+### Added
+- Support for 'data-vidi-schemata' attribute in embedded maps. When this attribute is set to a schemata text string, auto retrieval of matching layers alongside any specified in the config is enabled.
 
 ## [2024.5.0] - 2024-15-5
 ### Added
