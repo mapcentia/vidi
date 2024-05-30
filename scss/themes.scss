@@ -136,6 +136,10 @@
     background-color: var(--bs-primary-shade-20);
     border-color: var(--bs-primary-shade-50);
 }
+[data-bs-theme="geopartner"] .form-check-input:indeterminate {
+    background-color: var(--bs-primary-shade-20);
+    border-color: var(--bs-primary-shade-50);
+}
 
 [data-bs-theme="geopartner"] .form-check-input:focus {
     border-color: var(--bs-primary-shade-20);
