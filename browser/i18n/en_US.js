@@ -242,6 +242,7 @@ module.exports = {
         "Show labels": "Show labels",
         "Layer filter": "Layer filter",
         "New block": "New block",
+        "Filter is required for showing data": "Filter is required for showing data",
 
         // Base layers
         "Side-by-side mode": "Side-by-side mode",

@@ -109,7 +109,8 @@ module.exports = {
                 let prefix = '';
                 let doNotLegend = false;
                 if ($(this).data(`gc2-layer-type`)) {
-                    prefix = $(e.target).data('gc2-layer-type') + `:`;
+                    const type = $(e.target).data('gc2-layer-type');
+                    prefix = type !=='t' ? type + ':' : '';
                     if (prefix === LAYER_TYPE_DEFAULT + `:`) {
                         prefix = ``;
                     }
@@ -134,7 +135,7 @@ module.exports = {
                 let layers = meta.getMetaData().data.filter((e) => {
                     if (e.layergroup === groupName) {
                         let parsedMeta = layerTree.parseLayerMeta(e);
-                        prefix = parsedMeta?.default_layer_type ? parsedMeta.default_layer_type + ':' : '';
+                        prefix = parsedMeta?.default_layer_type && parsedMeta.default_layer_type !=='t' ? parsedMeta.default_layer_type + ':' : '';
                         setTimeout(()=> {
                             switchLayer.init(prefix + e.f_table_schema + "." + e.f_table_name, isChecked, true, false);
                         }, 1)
@@ -143,12 +144,6 @@ module.exports = {
                 })
                 e.stopPropagation();
                 backboneEvents.get().trigger(`layerTree:activeLayersChange`);
-                let base64GroupName = Base64.encode(groupName).replace(/=/g, "");
-                if (isChecked) {
-                    layerTreeUtils.setupLayerNumberIndicator(base64GroupName, layers.length, layers.length);
-                } else {
-                    $("#layer-panel-" + base64GroupName + " .layer-count span:eq(0)").html(0);
-                }
             });
         });
 
@@ -158,12 +153,12 @@ module.exports = {
                 let isChecked = $(e.target).prop(`checked`);
                 let subGroupName = $(this).data(`gc2-subgroup-name`);
                 let subGroupLevel = $(this).data(`gc2-subgroup-level`);
-                let layers = meta.getMetaData().data.filter((e) => {
+                let layerGroup = $(this).closest('.card-body').data('gc2-group-id');
+                meta.getMetaData().data.forEach(e => {
                     let parsedMeta = layerTree.parseLayerMeta(e);
-                    if (parsedMeta?.vidi_sub_group?.split("|")[subGroupLevel] === subGroupName) {
-                        prefix = parsedMeta?.default_layer_type ? parsedMeta.default_layer_type + ':' : '';
+                    if (parsedMeta?.vidi_sub_group?.split("|")[subGroupLevel] === subGroupName && e.layergroup === layerGroup) {
+                        prefix = parsedMeta?.default_layer_type && parsedMeta.default_layer_type !=='t' ? parsedMeta.default_layer_type + ':' : '';
                         switchLayer.init(prefix + e.f_table_schema + "." + e.f_table_name, isChecked, false);
-                        return true;
                     }
                 })
                 e.stopPropagation();
@@ -178,6 +173,19 @@ module.exports = {
             $(this).on('click', function () {
                 backboneEvents.get().trigger('clear:search');
             });
+        });
+
+        // Toggle top group checkboxes when layer tree is ready
+        backboneEvents.get().on("layerTree:ready", function (){
+            let groups = [];
+            meta.getMetaData().data.forEach(e => {
+                if (e.layergroup && !groups.includes(e.layergroup)) {
+                    groups.push(e.layergroup);
+                }
+            })
+            groups.forEach(e => {
+                layerTree.toggleGroupCheckBoxes(e, null)
+            })
         });
 
         backboneEvents.get().on("allDoneLoading:layers", function () {

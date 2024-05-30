@@ -41,6 +41,7 @@
                 var screenshot = targetDiv.getAttribute("data-vidi-screenshot") || "none";
                 var brand = targetDiv.getAttribute("data-vidi-brand") || "";
                 var toggler = targetDiv.getAttribute("data-vidi-toggler") || "";
+                var schemata = targetDiv.getAttribute("data-vidi-schemata") || "";
 
                 try {
                     var obj = JSON.parse(atob(token));
@@ -72,6 +73,7 @@
                     "&scr=" + screenshot +
                     "&bra=" + brand +
                     "&tog=" + toggler +
+                    "&sch=" + schemata +
                     (frameName ? "&readyCallback=" + frameName : "") + "&notracking=" + noTracking +
                     "&dps=1";
                 var iframe = document.createElement("iframe");

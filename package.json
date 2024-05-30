@@ -54,7 +54,7 @@
     "grunt-contrib-less": "^1.4.0",
     "grunt-contrib-sass": "^2.0.0",
     "grunt-contrib-uglify": "^5.2.2",
-    "grunt-contrib-watch": "^1.0.0",
+    "grunt-contrib-watch": "^1.1.0",
     "grunt-env": "^0.4.4",
     "grunt-extract-sourcemap": "^0.1.19",
     "grunt-processhtml": "^0.4.2",
