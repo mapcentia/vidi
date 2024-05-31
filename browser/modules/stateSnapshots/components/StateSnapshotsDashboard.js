@@ -331,6 +331,10 @@ class StateSnapshotsDashboard extends React.Component {
             timeout: 1000
         });
     }
+    openDashBoardInNewTab(str) {
+        window.open(str, '_blank');
+
+    }
 
     setImageLinkSize(value, id) {
         let sizesCopy = JSON.parse(JSON.stringify(this.state.imageLinkSizes));
@@ -428,6 +432,7 @@ class StateSnapshotsDashboard extends React.Component {
             }
 
             let permaLink = `${window.location.origin}${this.props.anchor.getUri()}?${parameters.join(`&`)}`;
+            let staticLink = `https://watsonc.dk/calypso/dashboard/?dashboard=${item.id}`;
 
             let token = (item.token ? item.token : false);
 
@@ -510,25 +515,16 @@ class StateSnapshotsDashboard extends React.Component {
                     {this.props.playOnly ? false : (
                         <div style={{display: `flex`}}>
                             <div className="input-group form-group" style={{paddingTop: `8px`}}>
-                                <div style={{display: `flex`, width: `100%`}}>
-                                    <a className="input-group-addon" style={{cursor: `pointer`}} onClick={() => {
-                                        this.copyToClipboard(permaLink)
-                                    }}><i className="material-icons"
-                                          style={{fontSize: `18px`}}>content_copy</i>{__(`Copy Vidi link`)}</a>
-                                </div>
+                                <a title="Kopier link til interaktiv visning til udklipsholder" className="input-group-addon" style={{cursor: `pointer`}} onClick={() => {
+                                    this.copyToClipboard(permaLink)
+                                }}><i className="material-icons"
+                                      style={{fontSize: `18px`}}>content_copy</i>{__(`Kopier CALYPSO Desktop link`)}</a>
                             </div>
-                            {tokenField}
-                            <div className="input-group form-group snapshot-copy-png-link"
-                                 style={{width: `100%`, paddingTop: `8px`}}>
-                                <div style={{display: `flex`, width: `100%`}}>
-                                    <div>
-                                        <a className="input-group-addon" style={{cursor: `pointer`}} onClick={() => {
-                                            this.copyToClipboard(imageLink)
-                                        }}><i className="material-icons"
-                                              style={{fontSize: `18px`}}>content_copy</i>{__(`Copy PNG link`)}</a>
-                                    </div>
-                                    <div style={{paddingLeft: `10px`, paddingRight: `10px`}}>{selectSize}</div>
-                                </div>
+                            <div className="input-group form-group" style={{paddingTop: `8px`}}>
+                                <a title="Statisk visning af dashboard i CALYPSO Dashboard" className="input-group-addon" style={{cursor: `pointer`}} onClick={() => {
+                                    this.openDashBoardInNewTab(staticLink)
+                                }}><i className="material-icons"
+                                      style={{fontSize: `18px`}}>open_in_new</i>{__(`Åbn CALYPSO Dashboard`)}</a>
                             </div>
                         </div>)}
                 </div>
