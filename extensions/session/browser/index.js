@@ -4,7 +4,7 @@
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
-'use strict';
+"use strict";
 
 let utils;
 let backboneEvents;
@@ -12,6 +12,7 @@ let layerTree;
 let sessionInstance = false;
 let userName = null;
 let properties = null;
+let email = null;
 let isStatusChecked = false;
 let exId = `login-modal-body`;
 
@@ -28,16 +29,21 @@ module.exports = {
     },
     init: function () {
         let parent = this;
-        let React = require('react');
-        let ReactDOM = require('react-dom');
+        let React = require("react");
+        let ReactDOM = require("react-dom");
 
         // Check if signed in
         //===================
         class Status extends React.Component {
             render() {
-                return <div className={"alert alert-dismissible " + this.props.alertClass} role="alert">
-                    {this.props.statusText}
-                </div>
+                return (
+                    <div
+                        className={"alert alert-dismissible " + this.props.alertClass}
+                        role="alert"
+                    >
+                        {this.props.statusText}
+                    </div>
+                );
             }
         }
 
@@ -51,7 +57,7 @@ module.exports = {
                     statusText: "Type your user name and password",
                     alertClass: "alert-info",
                     btnText: "Sign in",
-                    auth: false
+                    auth: false,
                 };
 
                 this.validateForm = this.validateForm.bind(this);
@@ -59,21 +65,24 @@ module.exports = {
                 this.handleSubmit = this.handleSubmit.bind(this);
 
                 this.padding = {
-                    padding: "12px"
+                    padding: "12px",
                 };
                 this.sessionLoginBtn = {
-                    width: "100%"
+                    width: "100%",
                 };
-
             }
 
             validateForm() {
-                return this.state.sessionScreenName.length > 0 && this.state.sessionPassword.length > 0 || this.state.auth;
+                return (
+                    (this.state.sessionScreenName.length > 0 &&
+                        this.state.sessionPassword.length > 0) ||
+                    this.state.auth
+                );
             }
 
             handleChange(event) {
                 this.setState({
-                    [event.target.id]: event.target.value
+                    [event.target.id]: event.target.value,
                 });
             }
 
@@ -82,9 +91,9 @@ module.exports = {
                 event.preventDefault();
                 if (!me.state.auth) {
                     let dataToAuthorizeWith = {
-                        "user": me.state.sessionScreenName,
-                        "password": me.state.sessionPassword,
-                        "schema": "public"
+                        user: me.state.sessionScreenName,
+                        password: me.state.sessionPassword,
+                        schema: "public",
                     };
 
                     if (vidiConfig.appDatabase) {
@@ -92,7 +101,7 @@ module.exports = {
                     }
 
                     $.ajax({
-                        dataType: 'json',
+                        dataType: "json",
                         url: "/api/session/start",
                         type: "POST",
                         contentType: "application/json; charset=utf-8",
@@ -100,43 +109,47 @@ module.exports = {
                         data: JSON.stringify(dataToAuthorizeWith),
                         success: function (data) {
                             backboneEvents.get().trigger(`session:authChange`, true);
-                            me.setState({statusText: `Signed in as ${data.screen_name} (${data.email})`});
-                            me.setState({alertClass: "alert-success"});
-                            me.setState({btnText: "Log out"});
-                            me.setState({auth: true});
+                            me.setState({
+                                statusText: `Signed in as ${data.screen_name} (${data.email})`,
+                            });
+                            me.setState({ alertClass: "alert-success" });
+                            me.setState({ btnText: "Log out" });
+                            me.setState({ auth: true });
                             $(".gc2-session-lock").show();
                             $(".gc2-session-unlock").hide();
                             userName = data.screen_name;
                             properties = data.properties;
+                            email = data.email;
                             parent.update();
                         },
 
                         error: function () {
-                            me.setState({statusText: "Wrong user name or password"});
-                            me.setState({alertClass: "alert-danger"});
-                        }
+                            me.setState({ statusText: "Wrong user name or password" });
+                            me.setState({ alertClass: "alert-danger" });
+                        },
                     });
                 } else {
                     $.ajax({
-                        dataType: 'json',
+                        dataType: "json",
                         url: "/api/session/stop",
                         type: "GET",
                         success: function () {
                             backboneEvents.get().trigger(`session:authChange`, false);
 
-                            me.setState({statusText: "Not signed in"});
-                            me.setState({alertClass: "alert-info"});
-                            me.setState({btnText: "Sign in"});
-                            me.setState({auth: false});
+                            me.setState({ statusText: "Not signed in" });
+                            me.setState({ alertClass: "alert-info" });
+                            me.setState({ btnText: "Sign in" });
+                            me.setState({ auth: false });
                             $(".gc2-session-lock").hide();
                             $(".gc2-session-unlock").show();
                             userName = null;
                             properties = null;
+                            email = null;
                             parent.update();
                         },
                         error: function (error) {
                             console.error(error.responseJSON);
-                        }
+                        },
                     });
                 }
             }
@@ -145,21 +158,24 @@ module.exports = {
                 let me = this;
 
                 $.ajax({
-                    dataType: 'json',
+                    dataType: "json",
                     url: "/api/session/status",
                     type: "GET",
                     success: function (data) {
                         if (data.status.authenticated) {
                             backboneEvents.get().trigger(`session:authChange`, true);
-                            me.setState({sessionScreenName: data.status.screen_name});
-                            me.setState({statusText: `Signed in as ${data.status.screen_name} (${data.status.email})`});
-                            me.setState({alertClass: "alert-success"});
-                            me.setState({btnText: "Sign out"});
-                            me.setState({auth: true});
+                            me.setState({ sessionScreenName: data.status.screen_name });
+                            me.setState({
+                                statusText: `Signed in as ${data.status.screen_name} (${data.status.email})`,
+                            });
+                            me.setState({ alertClass: "alert-success" });
+                            me.setState({ btnText: "Sign out" });
+                            me.setState({ auth: true });
                             $(".gc2-session-lock").show();
                             $(".gc2-session-unlock").hide();
                             userName = data.status.screen_name;
                             properties = data.status.properties;
+                            email = data.status.email;
                             // True if auto login happens. When reload meta
                             if (data?.screen_name && data?.status?.authenticated) {
                                 // Wait for layer tree to be built before reloading
@@ -167,9 +183,9 @@ module.exports = {
                                     if (!layerTree.isBeingBuilt()) {
                                         backboneEvents.get().trigger("refresh:meta");
                                     } else {
-                                        setTimeout(() => poll(), 100)
+                                        setTimeout(() => poll(), 100);
                                     }
-                                }())
+                                })();
                             }
                         } else {
                             backboneEvents.get().trigger(`session:authChange`, false);
@@ -181,7 +197,7 @@ module.exports = {
                     },
                     error: function (error) {
                         console.error(error.responseJSON);
-                    }
+                    },
                 });
             }
 
@@ -190,49 +206,59 @@ module.exports = {
             }
 
             render() {
-                return (<div style={this.padding}>
-                    <Status statusText={this.state.statusText} alertClass={this.state.alertClass}/>
-                    <div className="login">
-                        <form onSubmit={this.handleSubmit}>
-                            <div style={{display: this.state.auth ? 'none' : 'inline'}}>
-                                <div className="form-group">
-                                    <label htmlFor="session-email">User name</label>
-                                    <input
-                                        id="sessionScreenName"
-                                        className="form-control"
-                                        defaultValue={this.state.sessionScreenName}
-                                        onChange={this.handleChange}
-                                    />
+                return (
+                    <div style={this.padding}>
+                        <Status
+                            statusText={this.state.statusText}
+                            alertClass={this.state.alertClass}
+                        />
+                        <div className="login">
+                            <form onSubmit={this.handleSubmit}>
+                                <div style={{ display: this.state.auth ? "none" : "inline" }}>
+                                    <div className="form-group">
+                                        <label htmlFor="session-email">User name</label>
+                                        <input
+                                            id="sessionScreenName"
+                                            className="form-control"
+                                            defaultValue={this.state.sessionScreenName}
+                                            onChange={this.handleChange}
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="session-password">Password</label>
+                                        <input
+                                            id="sessionPassword"
+                                            className="form-control"
+                                            defaultValue={this.state.sessionPassword}
+                                            onChange={this.handleChange}
+                                            type="password"
+                                        />
+                                    </div>
                                 </div>
-                                <div className="form-group">
-                                    <label htmlFor="session-password">Password</label>
-                                    <input
-                                        id="sessionPassword"
-                                        className="form-control"
-                                        defaultValue={this.state.sessionPassword}
-                                        onChange={this.handleChange}
-                                        type="password"
-                                    />
-                                </div>
-                            </div>
-                            <button
-                                type="submit"
-                                disabled={!this.validateForm()}
-                                className="btn btn-raised"
-                                style={this.sessionLoginBtn}
-                            >
-                                {this.state.btnText}
-                            </button>
-                        </form>
+                                <button
+                                    type="submit"
+                                    disabled={!this.validateForm()}
+                                    className="btn btn-raised"
+                                    style={this.sessionLoginBtn}
+                                >
+                                    {this.state.btnText}
+                                </button>
+                            </form>
+                        </div>
                     </div>
-                </div>);
+                );
             }
         }
 
         if (document.getElementById(exId)) {
-            sessionInstance = ReactDOM.render(<Session/>, document.getElementById(exId));
+            sessionInstance = ReactDOM.render(
+                <Session />,
+                document.getElementById(exId)
+            );
         } else {
-            console.warn(`Unable to find the container for session extension (element id: ${exId})`);
+            console.warn(
+                `Unable to find the container for session extension (element id: ${exId})`
+            );
         }
     },
 
@@ -259,7 +285,9 @@ module.exports = {
 
     isStatusChecked: () => {
         return isStatusChecked;
-    }
+    },
 
+    getEmail: function () {
+        return email;
+    },
 };
-
