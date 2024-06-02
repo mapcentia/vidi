@@ -4112,7 +4112,13 @@ module.exports = {
         let layersInSubGroups = 0;
         const metaData = meta.getMetaData();
         const layersInGroup = metaData.data.filter(e => e.layergroup === layerGroup).length;
-        const activeLayers = _self.getActiveLayers().filter(e => metaDataKeys[e]?.layergroup === layerGroup);
+        const activeLayers = _self.getActiveLayers().filter(e => {
+            // If the activeLayer has prefix, strip it
+            // split string on first ':' and keep only the second part
+            e = e.split(':').slice(1).join(':');
+            console.log(e);
+            return metaDataKeys[e]?.layergroup === layerGroup
+    });
         const activeLayersInGroup = activeLayers.length;
         if (layerSubGroup) {
             let split = layerSubGroup.split('|');
