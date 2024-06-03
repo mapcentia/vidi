@@ -4115,10 +4115,10 @@ module.exports = {
         const activeLayers = _self.getActiveLayers().filter(e => {
             // If the activeLayer has prefix, strip it
             // split string on first ':' and keep only the second part
-            e = e.split(':').slice(1).join(':');
+            e = (e.startsWith('v:')) ? e.split(':').slice(1).join(':'): e;
             console.log(e);
             return metaDataKeys[e]?.layergroup === layerGroup
-    });
+        });
         const activeLayersInGroup = activeLayers.length;
         if (layerSubGroup) {
             let split = layerSubGroup.split('|');
