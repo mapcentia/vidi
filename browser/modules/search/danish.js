@@ -20,6 +20,11 @@ var backboneEvents;
 var draw;
 
 /**
+ * Pull the createId function from drawTools
+ */
+const createId = () => (+new Date * (Math.random() + 1)).toString(36).substr(2, 5);
+
+/**
  *
  * @type {string}
  */
@@ -161,8 +166,8 @@ module.exports = {
                 if (advanced) {
                     this.layer._vidi_type = "draw"
                     this.layer.eachLayer((l) => {
-                        console.log(l)
                         l._vidi_type = "draw";
+                        l._vidi_id = createId();
 
                         if (typeof l._latlng !== "undefined") {
                             l.feature = {
@@ -182,7 +187,6 @@ module.exports = {
                                 }
                             };
                         }
-
                         draw.getDrawItems().addLayer(l);
                     })
                     draw.getTable().loadDataInTable(false, true);

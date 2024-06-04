@@ -653,7 +653,7 @@ module.exports = module.exports = {
             }
         }
         primitive = layer.toGeoJSON(GEOJSON_PRECISION);
-        const isArea =  primitive.geometry.type==='Polygon';
+        const isArea = primitive.geometry && primitive.geometry.type === "Polygon";
         // Handle edge case where buffer is 0 and matrikel-geomtri is flawed
         if (buffer === 0 && isArea) {
             buffer =-0.1 ;
