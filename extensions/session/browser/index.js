@@ -48,7 +48,10 @@ module.exports = {
         let React = require('react');
         let ReactDOM = require('react-dom');
 
+        // When turning the session extension on, the sign in button should be visible
+        // also remove the dropdown-menu-end class from the dropdown next to it, to make it align to the right
         document.querySelector(".sign-in-btn")?.classList.remove("d-none");
+        document.querySelector("#navbarSupportedContent > div.nav-item.dropdown > ul")?.classList.remove("dropdown-menu-end");
 
         // Check if signed in
         // sign in if autoLogin is set to true
