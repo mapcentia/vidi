@@ -171,7 +171,7 @@ module.exports = {
     init: function (qstore, wkt, proj, callBack, num, infoClickPoint, whereClause, includes, zoomToResult, onPopupCloseButtonClick, selectCallBack = () => {
     }, prefix = "", simple = false, infoText = null, layerTag = "query_result") {
         let layers, count = {index: 0, hits: 0}, hit = false, distance, editor = false,
-            metaDataKeys = meta.getMetaDataKeys(), firstLoop = true;
+            metaDataKeys = meta.getMetaDataKeys(), firstLoop = true, layersWithHits = [];
         elementPrefix = prefix;
 
         if (window.vidiConfig.enabledExtensions.includes('editor')) {
@@ -312,7 +312,7 @@ module.exports = {
                     }
 
                     if (!isEmpty && !not_querable) {
-
+                        layersWithHits.push(value);
                         if (firstLoop) { // Only add html once
                             firstLoop = false;
                             let popUpInner = `<div id="modal-info-body">
@@ -519,6 +519,15 @@ module.exports = {
                             _self.closeInfoSlidePanel();
                             $(`#${elementPrefix}modal-info-body`).hide();
                             utils.showInfoToast(__("Didn't find anything"))
+                            if (window.vidiConfig.emptyInfoCallback) {
+                                let func = Function('"use strict";return (' + window.vidiConfig.emptyInfoCallback + ')')();
+                                try {
+                                    func(layerTree.getActiveLayers());
+                                } catch (e) {
+                                    console.error("Error in emptyInfoCallback:", e.message)
+                                }
+
+                            }
                         } else {
                             if (forceOffCanvasInfo) {
                                 _self.openInfoSlidePanel();
@@ -539,6 +548,14 @@ module.exports = {
                                     $(".show-when-multiple-hits").hide();
                                 }
                             }, 100);
+                            if (window.vidiConfig.infoCallback) {
+                                let func = Function('"use strict";return (' + window.vidiConfig.infoCallback + ')')();
+                                try {
+                                    func(layersWithHits);
+                                } catch (e) {
+                                    console.error("Error in emptyInfoCallback:", e.message)
+                                }
+                            }
                         }
                     }
                 };
@@ -644,6 +661,27 @@ module.exports = {
             qstore[index].sql = sql;
             qstore[index].load();
         });
+        if (layers.length === 0) {
+            utils.showInfoToast(__("Didn't find anything"));
+            if (window.vidiConfig.emptyInfoCallback) {
+                let func = Function('"use strict";return (' + window.vidiConfig.emptyInfoCallback + ')')();
+                try {
+                    func(layerTree.getActiveLayers());
+                } catch (e) {
+                    console.error("Error in emptyInfoCallback:", e.message)
+                }
+            }
+        }
+        if (layersWithHits.length > 0) {
+            if (window.vidiConfig.infoCallback) {
+                let func = Function('"use strict";return (' + window.vidiConfig.infoCallback + ')')();
+                try {
+                    func(layersWithHits);
+                } catch (e) {
+                    console.error("Error in emptyInfoCallback:", e.message)
+                }
+            }
+        }
     },
 
     /**

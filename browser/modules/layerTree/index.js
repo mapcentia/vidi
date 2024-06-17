@@ -2315,9 +2315,27 @@ module.exports = {
                 $('#vector-feature-info-panel .accordion-button').trigger('click');
             }, 200);
         }
-        // if (count === 0) {
-        //     utils.showInfoToast(__("Didn't find anything"));
-        // }
+        if (count === 0) {
+            utils.showInfoToast(__("Didn't find anything"));
+            if (window.vidiConfig.emptyInfoCallback) {
+                let func = Function('"use strict";return (' + window.vidiConfig.emptyInfoCallback + ')')();
+                try {
+                    func(_self.getActiveLayers());
+                } catch (e) {
+                    console.error("Error in emptyInfoCallback:", e.message)
+                }
+
+            }
+        } else {
+            if (window.vidiConfig.infoCallback) {
+                let func = Function('"use strict";return (' + window.vidiConfig.infoCallback + ')')();
+                try {
+                    func(features.map(f => f.layerKey));
+                } catch (e) {
+                    console.error("Error in emptyInfoCallback:", e.message)
+                }
+            }
+        }
     },
 
     /**
@@ -4132,7 +4150,7 @@ module.exports = {
             }
         }
 
-        const poll = ()=> {
+        const poll = () => {
             // Top group
             const el = document.querySelector(`[data-gc2-group-name="${layerGroup}"]`);
             if (el) {

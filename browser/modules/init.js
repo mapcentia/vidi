@@ -89,7 +89,9 @@ module.exports = {
             autoUpdate: false,
             configSwitcher: false, // Use this only in build time configs,
             baselayerDrawer: false,
-            theme: 'light'
+            theme: 'light',
+            emptyInfoCallback: null,
+            infoCallback: null,
         };
         // Set session from URL
         if (typeof urlVars.session === "string") {

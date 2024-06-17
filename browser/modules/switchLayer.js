@@ -68,6 +68,12 @@ module.exports = module.exports = {
                 _self.init(l, true);
             }
         }
+        api.turnOff = (l) => {
+            const status = _self.getLayersEnabledStatus();
+            if (status[l].enabled) {
+                _self.init(l, false);
+            }
+        }
 
         return this;
     },
