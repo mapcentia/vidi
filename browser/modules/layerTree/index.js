@@ -2125,6 +2125,11 @@ module.exports = {
     },
 
     displayAttributesPopup(features, event, additionalControls = ``, multi = true) {
+        let metaDataKeys = meta.getMetaDataKeys();
+        // Sort according to sort_id
+        features.sort((a, b) => {
+            return metaDataKeys[b.layerKey].sort_id - metaDataKeys[a.layerKey].sort_id;
+        });
         if (window.vidiConfig.crossMultiSelect) {
             // _self.resetAllVectorLayerStyles();
         }
@@ -2147,7 +2152,7 @@ module.exports = {
             let parsedMeta = _self.parseLayerMeta(meta.getMetaByKey(layerKey, false));
             let editDisplay = parsedMeta.vidi_layer_editable ? 'inline' : 'none';
             let properties = JSON.parse(JSON.stringify(feature.properties));
-            for (var key in properties) {
+            for (const key in properties) {
                 if (properties.hasOwnProperty(key)) {
                     if (key.indexOf(SYSTEM_FIELD_PREFIX) === 0) {
                         // delete properties[key];
