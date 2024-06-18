@@ -16,6 +16,9 @@ let layersAlternationHistory = {};
 
 let layersEnabledStatus = {};
 
+const urlparser = require('./../modules/urlparser');
+const urlVars = urlparser.urlVars;
+
 /**
  *
  * @type {*|exports|module.exports}
@@ -218,7 +221,8 @@ module.exports = module.exports = {
             } else {
                 labelsEnabled = "true";
             }
-            layers.addLayer(gc2Id, [layerTree.getLayerFilterString(gc2Id), `labels=${labelsEnabled}`]).then(() => {
+
+            layers.addLayer(gc2Id, [layerTree.getLayerFilterString(gc2Id), `labels=${labelsEnabled}`, `config=${urlVars['config']||''}`]).then(() => {
                 _self.checkLayerControl(gc2Id, doNotLegend, setupControls);
                 let cacheBuster = ``;
                 if (forceReload) {
