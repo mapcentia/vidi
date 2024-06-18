@@ -78,6 +78,7 @@ var queryMatrs = new L.FeatureGroup();
 var queryVentils = new L.FeatureGroup();
 var selectedPoint = new L.FeatureGroup();
 var seletedLedninger = new L.FeatureGroup();
+var alarmPositions = new L.FeatureGroup();
 
 var _clearBuffer = function () {
   bufferItems.clearLayers();
@@ -94,6 +95,9 @@ var _clearSelectedPoint = function () {
 var _clearSeletedLedninger = function () {
   seletedLedninger.clearLayers();
 };
+var _clearAlarmPositions = function () {
+  alarmPositions.clearLayers();
+};
 
 var _clearAll = function () {
   _clearBuffer();
@@ -101,6 +105,7 @@ var _clearAll = function () {
   _clearVentil();
   _clearSelectedPoint();
   _clearSeletedLedninger();
+  _clearAlarmPositions();
 };
 
 const MAXFEATURES = 500;
@@ -115,6 +120,9 @@ const resetObj = {
   user_udpeg_layer: null,
   user_ventil_layer_key: null,
   user_ventil_export: null,
+  selected_profileid: null,
+  user_alarmkabel: false,
+  user_alarmkabel_distance: 0,
 };
 
 // This element contains the styling for the module
@@ -141,12 +149,7 @@ var styleObject = {
   },
   selectedPoint: {
     html: `
-  <svg
-  width="24"
-  height="24"
-  xmlns="http://www.w3.org/2000/svg" 
-  fill-rule="evenodd"
-  clip-rule="evenodd">
+  <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd">
   <path d="M12 11.293l10.293-10.293.707.707-10.293 10.293 10.293 10.293-.707.707-10.293-10.293-10.293 10.293-.707-.707 10.293-10.293-10.293-10.293.707-.707 10.293 10.293z"/>
   </svg>
   `,
@@ -167,6 +170,16 @@ var styleObject = {
     opacity: 1,
     fillOpacity: 0.1,
     dashArray: "5,3",
+  },
+  alarmPosition: {
+    html: `
+  <svg fill="#000000" width="24px" height="24px" viewBox="0 0 57.6 57.6" xmlns="http://www.w3.org/2000/svg">
+  <path d="M28.709 0c-10.872 0 -19.71 8.838 -19.71 19.706 0 5.418 2.408 10.436 7.362 15.347 7.193 7.139 10.548 13.73 10.548 20.747v1.8h3.6v-1.8c0 -6.984 3.308 -13.385 10.728 -20.743 4.954 -4.914 7.362 -9.932 7.362 -15.35 0 -10.868 -8.838 -19.706 -19.89 -19.706" fill-rule="evenodd"/>
+  </svg>
+  `,
+    className: "",
+    iconSize: [24, 24], // size of the icon
+    iconAnchor: [12, 24], // point of the icon which will correspond to marker's location
   },
 };
 
@@ -269,6 +282,7 @@ module.exports = {
     mapObj.addLayer(queryVentils);
     mapObj.addLayer(selectedPoint);
     mapObj.addLayer(seletedLedninger);
+    mapObj.addLayer(alarmPositions);
 
     /**
      *
@@ -308,6 +322,10 @@ module.exports = {
       "Select point on map": {
         da_DK: "Udpeg punkt på ledningsnet",
         en_US: "Select point on map",
+      },
+      "Select point for alarmkabel": {
+        da_DK: "Beregn alarm",
+        en_US: "Calculate alarm",
       },
       "Found parcels": {
         da_DK: "Fundne matrikler i område",
@@ -362,12 +380,40 @@ module.exports = {
         en_US: "You are not allowed to use BlueIdea",
       },
       "Starting analysis": {
-        da_DK: "Starter analyse",
-        en_US: "Starting analysis",
+        da_DK: "Analyserer",
+        en_US: "Analyzing",
       },
       "modify parcels": {
         da_DK: "Tilføj eller fjern matrikler",
         en_US: "Add or remove parcels",
+      },
+      "Select profile": {
+        da_DK: "Vælg profil",
+        en_US: "Select profile",
+      },
+      "Alarm cable": {
+        da_DK: "Alarmkabel",
+        en_US: "Alarm cable",
+      },
+      "Distance": {
+        da_DK: "Afstand",
+        en_US: "Distance",
+      },
+      "Distance not set": {
+        da_DK: "Ugyldig afstand",
+        en_US: "Invalid distance",
+      },
+      "Alarm found": {
+        da_DK: "Mulige placeringer fundet",
+        en_US: "Possible alarms found",
+      },
+      "Lukkeliste is ready": {
+        da_DK: "Lukkeliste klar",
+        en_US: "Valve list ready",
+      },
+      "Lukkeliste not ready": {
+        da_DK: "Lukkeliste ikke klar",
+        en_US: "Valve list not ready",
       },
     };
 
@@ -389,30 +435,6 @@ module.exports = {
       }
     };
 
-    var pushStatus = function (obj, statusKey) {
-      let postData = {
-        Ledningsejerliste: obj,
-        statusKey: statusKey,
-      };
-      let opts = {
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        method: "POST",
-        body: JSON.stringify(postData),
-      };
-
-      return new Promise(function (resolve, reject) {
-        // Do async job and resolve
-        fetch("/api/extension/upsertStatus", opts)
-          .then((r) => {
-            const data = r.json();
-            resolve(data);
-          })
-          .catch((e) => reject(e));
-      });
-    };
 
     var blocked = true;
 
@@ -441,6 +463,10 @@ module.exports = {
           user_udpeg_layer: null,
           user_ventil_export: null,
           edit_matr: false,
+          user_alarmkabel: null,
+          user_alarmkabel_distance: config.extensionConfig.blueidea.alarmkabel_distance || 100,
+          selected_profileid: '',
+          lukkeliste_ready: false,
         };
       }
 
@@ -567,7 +593,14 @@ module.exports = {
                 config.extensionConfig.blueidea.userid,
               type: "GET",
               success: function (data) {
-                console.log("Got user", data);
+                console.log("[Lukkeliste] Got user", data);
+
+                // If data.profileid has values, set the first key as the selected
+                let userProfiles = [];
+                if (data.profileid) {
+                  userProfiles = Object.keys(data.profileid);
+                }
+
                 me.setState({
                   user_lukkeliste: data.lukkeliste,
                   user_blueidea: data.blueidea,
@@ -578,6 +611,9 @@ module.exports = {
                   user_ventil_layer: data.ventil_layer || null,
                   user_ventil_layer_key: data.ventil_layer_key || null,
                   user_ventil_export: data.ventil_export || null,
+                  selected_profileid: userProfiles[0] || '',
+                  user_alarmkabel: data.alarmkabel,
+                  lukkeliste_ready: data.lukkestatus.views_exists || false,
                 });
                 resolve(data);
               },
@@ -616,6 +652,31 @@ module.exports = {
       };
 
       /**
+       * This function queries database for information related to alarmkabel
+       * @returns uuid string representing the query
+       */
+      queryPointAlarmkabel = (point, distance) => {
+        let me = this;
+        let body = point;
+        body.distance = distance;  //append distance to body
+
+        return new Promise(function (resolve, reject) {
+          $.ajax({
+            url: "/api/extension/alarmkabel/" + me.state.user_id + "/query",
+            type: "POST",
+            data: JSON.stringify(body),
+            contentType: "application/json",
+            success: function (data) {
+              resolve(data);
+            },
+            error: function (e) {
+              reject(e);
+            },
+          });
+        });
+      }
+
+      /**
        * This function is what starts the process of finding relevant addresses, returns array with kvhx
        * @param {*} geojson
        * @returns array with kvhx
@@ -652,7 +713,7 @@ module.exports = {
           this.addBufferToMap(geom);
 
           // Let user know we are starting
-          me.createSnack(__("Waiting to start"));
+          me.createSnack(__("Waiting to start"), true);
 
           // For each flattened element, start a query for matrikels intersected
           let promises = [];
@@ -697,7 +758,11 @@ module.exports = {
                 });
 
                 return;
-              });
+              })
+            })
+            .then(() => {
+              // show last snackbar;
+              me.createSnack(__("Show results"));
             })
             .catch((error) => {
               console.debug(error);
@@ -924,11 +989,35 @@ module.exports = {
       }
 
       /**
+       * Styles and adds the alarm positions to the map
+       */
+      addAlarmPositionToMap(geojson) {
+        try {
+          var myIcon = new L.DivIcon(styleObject.alarmPosition);
+          var l = L.geoJSON(geojson, {
+            pointToLayer: function (feature, latlng) {
+              return new L.Marker(latlng, { icon: myIcon, interactive: false });
+            },
+          }).addTo(alarmPositions);
+        } catch (error) {
+          console.warn(error, geojson);
+        }
+      }
+
+      /**
        * Creates a new snackbar
        * @param {*} text
        */
-      createSnack(text) {
-        utils.showInfoToast("<span id='blueidea-progress'>" + text + "</span>", { timeout: 5000, autohide: false})
+      createSnack(text, loading = false) {
+        let html = "";
+        // if loading is true, show a loading spinner in the snackbar
+        if (loading) {
+          html = "<span class='spinner-border spinner-border-sm'></span><span id='blueidea-progress'> " + text + "</span>";
+        } else {
+          html = "<span id='blueidea-progress'>" + text + "</span>"
+        }
+
+        utils.showInfoToast(html, { timeout: 5000, autohide: false})
       }
 
 
@@ -959,7 +1048,7 @@ module.exports = {
        */
       sendToBlueIdea = () => {
         let body = {
-          profileId: this.state.user_profileid || null,
+          profileId: parseInt(this.state.selected_profileid) || null,
         };
 
         // if blueidea is false, return
@@ -1059,12 +1148,16 @@ module.exports = {
         utils.cursorStyle().crosshair();
 
         cloud.get().on("click", function (e) {
+
+          // remove event listener
+          cloud.get().map.off("click");
+
           // if the click is blocked, return
           if (blocked) {
             return;
           }
 
-          me.createSnack(__("Starting analysis"))
+          me.createSnack(__("Starting analysis"), true)
 
           // get the clicked point
           point = e.latlng;
@@ -1111,12 +1204,80 @@ module.exports = {
               }
             })
             .catch((error) => {
+              me.createSnack(__("Error in seach") + ": " + error);
               console.warn(error);
               return
             });
         });
         return
       };
+
+      /**
+       * This function selects a point in the map for alarmkabel
+       * @returns Point
+       */
+      selectPointAlarmkabel = () => {
+        let me = this;
+        let point = null;
+        blocked = false;
+        _clearAll();
+
+        // if udpeg_layer is set, make sure it is turned on
+        if (me.state.user_udpeg_layer) {
+          me.turnOnLayer(me.state.user_udpeg_layer);
+        }
+
+        // If distance is not set, or is 0, return
+        if (!me.state.user_alarmkabel_distance || me.state.user_alarmkabel_distance == 0) {
+          me.createSnack(__("Distance not set"));
+          return;
+        }
+        // change the cursor to crosshair and wait for a click
+        utils.cursorStyle().crosshair();
+
+        cloud.get().on("click", function (e) {
+
+          // remove event listener
+          cloud.get().map.off("click");
+
+          // if the click is blocked, return
+          if (blocked) {
+            return;
+          }
+
+          me.createSnack(__("Starting analysis"), true)
+
+          // get the clicked point
+          point = e.latlng;
+          utils.cursorStyle().reset();
+          blocked = true;
+
+          // send the point to the server + the distance
+          me.queryPointAlarmkabel(point, me.state.user_alarmkabel_distance)
+            .then((data) => {
+
+              me.createSnack(__("Alarm found"))
+              // if the server returns a result, show it
+              if (data) {
+                // console.debug(data);                
+                me.addAlarmPositionToMap(data.alarm);
+              }
+
+              // Add the clicked point to the map
+              if (data.log) {
+                //console.debug("Got log:", data.log);
+                me.addSelectedPointToMap(data.log);
+              }
+              return
+            })
+            .catch((error) => {
+              me.createSnack(__("Error in seach") + ": " + error);
+              console.warn(error);
+              return
+            });
+        });
+        return
+      }; 
 
       toggleEdit = () => {
         let me = this;
@@ -1206,7 +1367,7 @@ module.exports = {
           ejerlav = sublayer.feature.properties.ejerlavkode;
         });
 
-        console.log(matrikel, ejerlav)
+        //console.log(matrikel, ejerlav)
 
         // Remove adresse from list
         let newAdresser = Object.assign({}, this.state.results_adresser);
@@ -1304,6 +1465,17 @@ module.exports = {
           return false;
         }
       };
+
+      /**
+       * Determines if alarmkabel is allowed
+       */
+      allowAlarmkabel = () => {
+        if (this.state.user_alarmkabel == true && this.state.user_db == true) {
+          return true;
+        } else {
+          return false;
+        }
+      }
 
       /**
        * Determines if blueidea is allowed
@@ -1413,7 +1585,7 @@ module.exports = {
       downloadVentiler = () => {
         let me = this;
 
-        console.log(me.state.results_ventiler, me.state.user_ventil_export);
+        //console.log(me.state.results_ventiler, me.state.user_ventil_export);
 
         // Use keys as headers
         let csvRows = [];
@@ -1439,6 +1611,25 @@ module.exports = {
         this.downloadBlob(rows, "ventiler.csv", "text/csv;");
       };
 
+      profileidOptions = () => {
+        let options = [];
+
+        // if user_profileid is set, create options.
+        if (this.state.user_profileid) {
+          for (let key in this.state.user_profileid) {
+            options.push({
+              value: key,
+              label: this.state.user_profileid[key],
+            });
+          }
+        }
+        return options;
+      }
+
+      setSelectedProfileid = (e) => {
+        this.setState({ selected_profileid: e.target.value });
+      }
+
       /**
        * Renders component
        */
@@ -1453,7 +1644,17 @@ module.exports = {
             <div role="tabpanel">
               <div className="form-group p-3">
                 <div style={{ alignSelf: "center" }}>
-                  <h4>{__("Select area")}</h4>
+                  <h6>
+                    {__("Select area")} 
+                    {
+                    s.lukkeliste_ready && this.allowLukkeliste() &&
+                      <span class="mx-2 badge bg-success">{__("Lukkeliste is ready")}</span>
+                    }
+                    {
+                    !s.lukkeliste_ready && this.allowLukkeliste() &&
+                      <span class="mx-2 badge bg-danger">{__("Lukkeliste not ready")}</span>
+                    }
+                  </h6>
                   <div className="d-grid mx-auto gap-3">
                     <button
                       onClick={() => this.clickDraw()}
@@ -1474,7 +1675,7 @@ module.exports = {
 
                 <div className="row">
                   <div className="col">
-                    <h4>{__("Show results")}</h4>
+                    <h6>{__("Show results")}</h6>
                     <div className="d-flex align-items-center justify-content-between">
                       <span>Der blev fundet {Object.keys(s.results_adresser).length} adresser i området.</span>                            
                       <button 
@@ -1497,6 +1698,21 @@ module.exports = {
                     {__("Download addresses")}
                   </button>
 
+                  {s.user_profileid && this.profileidOptions().length > 1 &&
+                    <select
+                      onChange={this.setSelectedProfileid}
+                      value={s.selected_profileid}
+                      placeholder={__("Select profile")}
+                      disabled={!this.readyToBlueIdea()}
+                    >
+                      {this.profileidOptions().map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  }
+
                   <button
                     onClick={() => this.sendToBlueIdea()}
                     className="btn btn-light"
@@ -1510,7 +1726,7 @@ module.exports = {
                   style={{ alignSelf: "center" }}
                   hidden={!s.user_lukkeliste}
                 >
-                  <h4>{__("Valve list")}</h4>
+                  <h6>{__("Valve list")}</h6>
                   <div className="d-grid mx-auto gap-3">
                     <button
                       onClick={() => this.downloadVentiler()}
@@ -1518,6 +1734,31 @@ module.exports = {
                       disabled={!this.allowVentilDownload()}
                     >
                       {__("Download valves")}
+                    </button>
+                  </div>
+                </div>
+
+                <div
+                  style={{ alignSelf: "center" }}
+                  hidden={!s.user_alarmkabel}
+                >
+                  <h6>{__("Alarm cable")}</h6>
+                  <div className="row mx-auto gap-3">
+                    <input
+                      type="number"
+                      className="form-control"
+                      value={s.user_alarmkabel_distance}
+                      onChange={(e) => this.setState({ user_alarmkabel_distance: e.target.value })}
+                      min={0}
+                      max={2000}
+                      style={{ width: "35%" }}
+                    />
+                    <button
+                      onClick={() => this.selectPointAlarmkabel()}
+                      className="btn btn-primary col-auto"
+                      disabled={!this.allowAlarmkabel()}
+                    >
+                      {__("Select point for alarmkabel")}
                     </button>
                   </div>
                 </div>

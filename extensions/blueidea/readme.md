@@ -41,12 +41,15 @@ module.exports = {
     "d7a12844-5fc9-4316-9af7-b841fcc3d399": {
       username: "superuser",
       password: "supersecret",
-      profileid: 3793,
+      profileid: {
+        3793: "profilnavn i selection",
+      },
       lukkeliste: true,
       blueidea: true,
       ventil_layer: "ledningsplan_fjv.ventil",
       ventil_layer_key: "ventilid",
       udpeg_layer: "ledningsplan_fjv.vw_centerlinje",
+      alarmkabel: true,
     },
   },
 };
@@ -62,12 +65,13 @@ module.exports = {
 | debug            | boolean |         | styrer om beskeder i blueidea sættes som testmode              |
 | username         | string  |         | blueidea brugernavn                                            |
 | password         | string  |         | blueidea adgangskode                                           |
-| blueidea         | boolean | `True`  | om brugeren skal have adgang til blueidea-værktøjerne          |
+| blueidea         | boolean | `False` | om brugeren skal have adgang til blueidea-værktøjerne          |
 | lukkeliste       | boolean | `False` | om brugeren skal have adgang til lukkeliste-værktøjerne        |
-| profileid        | int     |         | blueidea profil id                                             |
+| profileid        | obj     |         | objekt med profilid & alias                                    |
 | ventil_layer     | string  |         | navnet på layeret hvor ventil-lukkeliste skal findes           |
 | ventil_layer_key | string  |         | navnet på kolonnen som skal filtreres på                       |
 | udpeg_layer      | string  |         | navnet på lag som skal tændes når man vil udpegde i lukkeliste |
+| alarmkabel       | boolean | `False` | om brugeren skal have adgang til alarmkabel-værktøjerne        |
 
 Der skal ligeledes laves en opsætning af extension i kørselsmiljøet. Se nedenfor.
 
@@ -79,13 +83,17 @@ Denne extension afhænger af `session` extensionen, så den skal også være loa
   "enabledExtensions": ["session", "blueidea"],
   "extensionConfig": {
     "blueidea": {
-      "userid": "d7a12844-5fc9-4316-9af7-b841fcc3d399"
+      "userid": "d7a12844-5fc9-4316-9af7-b841fcc3d399",
+      "alarmkabel_distance": 75
     }
   }
 }
 ```
 
-Det noteres at `userid` er en reference til en bruger i `users` konfigurationen.
+| Property            | Type | Default | Description                                        |
+| ------------------- | ---- | ------- | -------------------------------------------------- |
+| user                | guid |         | direkte reference til server-konfiguration         |
+| alarmkabel_distance | int  | 100     | afstand i meter fra udpeget punkt til alarmvisning |
 
 ### GC2
 
@@ -95,3 +103,4 @@ Den bruger der tænkes at bruge lukkeliste-værktøjerne skal have en rolle med 
 - `lukkeliste.beregn_afskaaretmatrikler`
 - `lukkeliste.beregn_afskaaretnet`
 - `lukkeliste.beregnlog`
+- `lukkeliste.lukkestatus`
