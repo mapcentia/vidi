@@ -553,7 +553,7 @@ module.exports = {
                                 try {
                                     func(layersWithHits);
                                 } catch (e) {
-                                    console.error("Error in emptyInfoCallback:", e.message)
+                                    console.error("Error in infoCallback:", e.message)
                                 }
                             }
                         }
@@ -678,7 +678,7 @@ module.exports = {
                 try {
                     func(layersWithHits);
                 } catch (e) {
-                    console.error("Error in emptyInfoCallback:", e.message)
+                    console.error("Error in infoCallback:", e.message)
                 }
             }
         }

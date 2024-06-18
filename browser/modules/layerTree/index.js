@@ -2337,7 +2337,7 @@ module.exports = {
                 try {
                     func(features.map(f => f.layerKey));
                 } catch (e) {
-                    console.error("Error in emptyInfoCallback:", e.message)
+                    console.error("Error in infoCallback:", e.message)
                 }
             }
         }
