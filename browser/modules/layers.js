@@ -237,13 +237,13 @@ module.exports = {
                 } else {
                     template = defaultTemplate;
                 }
-                const filters =layerTree.getLayerFilterString(layerKey);
+                const filters = layerTree.getLayerFilterString(layerKey);
                 let utfGrid = cloud.get().addUTFGridLayers({
                     layers: [layerKey],
                     db: db,
                     cache: parsedMeta?.cache_utf_grid,
                     loading: currentlyLoadedLayers,
-                   additionalURLParameters:[filters]
+                    additionalURLParameters: [filters]
                 })[0];
                 layerTree.mouseOver(utfGrid, fieldConf, template)
                 console.info(`${layerKey} UTFgrid was added to the map`);
