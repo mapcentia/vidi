@@ -1648,11 +1648,11 @@ module.exports = {
                     {__("Select area")} 
                     {
                     s.lukkeliste_ready && this.allowLukkeliste() &&
-                      <span class="mx-2 badge bg-success">{__("Lukkeliste is ready")}</span>
+                      <span className="mx-2 badge bg-success">{__("Lukkeliste is ready")}</span>
                     }
                     {
                     !s.lukkeliste_ready && this.allowLukkeliste() &&
-                      <span class="mx-2 badge bg-danger">{__("Lukkeliste not ready")}</span>
+                      <span className="mx-2 badge bg-danger">{__("Lukkeliste not ready")}</span>
                     }
                   </h6>
                   <div className="d-grid mx-auto gap-3">
