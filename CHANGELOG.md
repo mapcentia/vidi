@@ -13,6 +13,7 @@ and this project adheres to [CalVer](https://calver.org/).
 }
 ```
 - The parameter `config=...` is added to WMS url, so better analytics can be performed on the usages of configs and layers.
+- A new api method `api.turOff('schema.layer')` which turns the parsed layer off.  
 
 ### Changed
 - Snapshot tags are now sorted
