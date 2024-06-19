@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2024.6.0] - 2024-29-5
+### Added
+- `infoCallback` and `emptyInfoCallback` can be used in configs. The value should be a stringified function. The former callback is fired when feature info hits and an array of layers with hits is passed to th callback. The latter callback is fired when feature info hits nothing.
+```json
+{
+  "infoCallback": "function(layers){console.log('You hit:', layers)}"
+}
+```
+- The parameter `config=...` is added to WMS url, so better analytics can be performed on the usages of configs and layers.
+
+### Changed
+- Snapshot tags are now sorted
+- Hits in accordion popup are now sorted according to layer 'sort id'.
+
+### Fixed
+- UTFgrids are now requested with filter, so mouseover doesn't catch filtered features (require GC2 2024.6.1 or later)
+
 ## [2024.5.2] - 2024-29-5
 ### Changed
 - Layer group checkboxes now reflects the state of the layer tree. An indeterminate state is shown when some layer but not all are active in a group. 
