@@ -256,8 +256,8 @@
             this.updateMeasurements();
         }),
 
-        formatDistance: formatDistance,
-        formatArea: formatArea,
+         formatDistance: formatDistance,
+         formatArea: formatArea,
 
         updateMeasurements: function() {
             if (!this._measurementLayer) return;
@@ -313,9 +313,9 @@
 
             if (isPolygon && options.showArea && latLngs.length > 2) {
                 formatter = options.formatArea || L.bind(this.formatArea, this);
-                var area = ringArea(latLngs);
+                let area = ringArea(latLngs);
                 L.marker.measurement(this.getBounds().getCenter(),
-                    formatter(area), options.lang.totalArea, 0, options)
+                formatter(area), options.lang.totalArea, 0, options)
                     .addTo(this._measurementLayer);
             }
         },
