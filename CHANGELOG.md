@@ -6,21 +6,27 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ## [2024.6.0] - 2024-29-5
 ### Added
-- `infoCallback` and `emptyInfoCallback` can be used in configs. The value should be a stringified function. The former callback is fired when feature info hits and an array of layers with hits is passed to th callback. The latter callback is fired when feature info hits nothing.
+- `infoCallback` and `emptyInfoCallback` can be used in configs. The value should be a stringified function. The former callback is fired when feature info hits and an array of layers with hits is passed to the callback. The latter callback is fired when feature info hits nothing.
 ```json
 {
   "infoCallback": "function(layers){console.log('You hit:', layers)}"
 }
 ```
+```json
+{
+  "emptyInfoCallback": "function(){console.log('You hit nothing')}"
+}
+```
 - The parameter `config=...` is added to WMS url, so better analytics can be performed on the usages of configs and layers.
-- A new api method `api.turOff('schema.layer')` which turns the parsed layer off.  
+- A new api method `api.turOff('schema.layer')` which turns the passed layer off.  
 
 ### Changed
-- Snapshot tags are now sorted
+- The snapshot tag list is now sorted alphanumeric.
 - Hits in accordion popup are now sorted according to layer 'sort id'.
 
 ### Fixed
-- UTFgrids are now requested with filter, so mouseover doesn't catch filtered features (require GC2 2024.6.1 or later)
+- UTFgrids are now requested with filter, so mouseover doesn't catch filtered features (require GC2 2024.6.1 or later).
+- The dropdown menu (three vertical dots) now align to left.
 
 ## [2024.5.2] - 2024-29-5
 ### Changed
