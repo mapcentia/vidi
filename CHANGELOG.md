@@ -26,7 +26,7 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ### Fixed
 - UTFgrids are now requested with filter, so mouseover doesn't catch filtered features (require GC2 2024.6.1 or later).
-- The dropdown menu (three vertical dots) now align to left.
+- The dropdown menu (three vertical dots) now aligned to left.
 
 ## [2024.5.2] - 2024-29-5
 ### Changed
