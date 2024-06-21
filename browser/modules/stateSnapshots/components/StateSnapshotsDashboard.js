@@ -216,7 +216,7 @@ class StateSnapshotsDashboard extends React.Component {
         this.props.state.getState().then(state => {
             state.map = this.props.anchor.getCurrentMapParameters();
             data.title = title;
-            data.tags = tags.filter((value, index, array) => array.indexOf(value) === index);
+            data.tags = tags ? tags.filter((value, index, array) => array.indexOf(value) === index) : [];
             data.snapshot = state;
             data.snapshot.meta = _self.getSnapshotMeta();
             $.ajax({
