@@ -23,6 +23,7 @@ and this project adheres to [CalVer](https://calver.org/).
 ### Changed
 - The snapshot tag list is now sorted alphanumeric.
 - Hits in accordion popup are now sorted according to layer 'sort id'.
+- A class attribute `vidi-draw-tooltip` is added to the label tool in Draw. This kan be used to change the style of the content in e.g. print.
 
 ### Fixed
 - UTFgrids are now requested with filter, so mouseover doesn't catch filtered features (require GC2 2024.6.1 or later).
