@@ -291,11 +291,7 @@ module.exports = {
     getMetaData: function (filter = null, clone = false) {
         let data;
         let filteredData = {}
-        if (clone) {
-            data = $.extend(true, {}, metaData);
-        } else {
-            data = metaData;
-        }
+        data = clone ? $.extend(true, {}, metaData) : metaData;
         if (filter) {
             filteredData.data = data.data.filter((e) => {
                 if (e.f_table_title && e.f_table_title !== "") {
