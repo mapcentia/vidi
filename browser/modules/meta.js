@@ -288,10 +288,16 @@ module.exports = {
      * Get a clone of the full meta data object
      * @returns {Object}
      */
-    getMetaData: function (filter = null) {
-        const clone = $.extend(true, {}, metaData)
+    getMetaData: function (filter = null, clone = false) {
+        let data;
+        let filteredData = {}
+        if (clone) {
+            data = $.extend(true, {}, metaData);
+        } else {
+            data = metaData;
+        }
         if (filter) {
-            clone.data = clone.data.filter((e) => {
+            filteredData.data = data.data.filter((e) => {
                 if (e.f_table_title && e.f_table_title !== "") {
                     if (e.f_table_title.toLowerCase().includes(filter.toLowerCase())) return true;
                 } else {
@@ -299,15 +305,15 @@ module.exports = {
                 }
             })
         }
-        return clone;
+        return filteredData?.data || data;
     },
 
     /**
      * Get a clone of meta data from latest loaded
      * @returns {Object}
      */
-    getMetaDataLatestLoaded: function () {
-        return $.extend(true, {}, metaDataLatestLoaded);
+    getMetaDataLatestLoaded: function (clone = false) {
+        return clone ? $.extend(true, {}, metaDataLatestLoaded) : metaDataLatestLoaded;
     }
 };
 

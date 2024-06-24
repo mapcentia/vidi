@@ -613,7 +613,7 @@ module.exports = {
                     // Open filter dialog.
                     if (desiredSetupType === LAYER.RASTER_TILE || desiredSetupType === LAYER.VECTOR_TILE || desiredSetupType === LAYER.VECTOR) {
                         if (layerIsEnabled) {
-                            if (parsedMeta.default_open_tools) {
+                            if (parsedMeta?.default_open_tools) {
                                 try {
                                     let arr = JSON.parse(parsedMeta.default_open_tools);
                                     arr.forEach((i) => {
