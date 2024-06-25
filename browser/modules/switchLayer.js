@@ -16,6 +16,9 @@ let layersAlternationHistory = {};
 
 let layersEnabledStatus = {};
 
+const urlparser = require('./../modules/urlparser');
+const urlVars = urlparser.urlVars;
+
 /**
  *
  * @type {*|exports|module.exports}
@@ -66,6 +69,12 @@ module.exports = module.exports = {
             const status = _self.getLayersEnabledStatus();
             if (!status?.[l] || !status[l].enabled) {
                 _self.init(l, true);
+            }
+        }
+        api.turnOff = (l) => {
+            const status = _self.getLayersEnabledStatus();
+            if (status[l].enabled) {
+                _self.init(l, false);
             }
         }
 
@@ -212,7 +221,8 @@ module.exports = module.exports = {
             } else {
                 labelsEnabled = "true";
             }
-            layers.addLayer(gc2Id, [layerTree.getLayerFilterString(gc2Id), `labels=${labelsEnabled}`]).then(() => {
+
+            layers.addLayer(gc2Id, [layerTree.getLayerFilterString(gc2Id), `labels=${labelsEnabled}`, `config=${urlVars['config']||''}`]).then(() => {
                 _self.checkLayerControl(gc2Id, doNotLegend, setupControls);
                 let cacheBuster = ``;
                 if (forceReload) {
@@ -504,11 +514,7 @@ module.exports = module.exports = {
             let vectorTileLayer = cloud.get().getLayersByName(vectorTileLayerId, false);
             let webGLLayer = cloud.get().getLayersByName(webGLLayerId, false);
 
-            if (rasterTileLayer) cloud.get().map.removeLayer(rasterTileLayer);
-            if (vectorLayer) cloud.get().map.removeLayer(vectorLayer);
-            if (vectorLayerHL) cloud.get().map.removeLayer(vectorLayerHL);
-            if (vectorTileLayer) cloud.get().map.removeLayer(vectorTileLayer);
-            if (webGLLayer) cloud.get().map.removeLayer(webGLLayer);
+
 
             if (vectorDataStores[vectorLayerId]) {
                 vectorDataStores[vectorLayerId].abort();
@@ -540,6 +546,21 @@ module.exports = module.exports = {
                 cloud.get().map.getPane(pane).style.zIndex = sortId + 10000;
                 layers.reorderLayers();
             } else {
+                if (rasterTileLayer) cloud.get().removeLayer(rasterTileLayer);
+                if (rasterTileLayer) cloud.get().map.removeLayer(rasterTileLayer);
+
+                if (vectorLayer) cloud.get().removeLayer(vectorLayer);
+                if (vectorLayer) cloud.get().map.removeLayer(vectorLayer);
+
+                if (vectorLayerHL) cloud.get().removeLayer(vectorLayerHL);
+                if (vectorLayerHL) cloud.get().map.removeLayer(vectorLayerHL);
+
+                if (vectorTileLayer) cloud.get().removeLayer(vectorTileLayer);
+                if (vectorTileLayer) cloud.get().map.removeLayer(vectorTileLayer);
+
+                if (webGLLayer) cloud.get().removeLayer(webGLLayer);
+                if (webGLLayer) cloud.get().map.removeLayer(webGLLayer);
+
                 if (name.startsWith(LAYER.VECTOR + ':')) {
                     let tables = layerTree.getTables();
                     let stores = layerTree.getStores();

@@ -24,6 +24,10 @@ const db = urlparser.db;
  */
 let metaData = {data: []};
 
+let metaDataClone;
+
+let metaDataCloneTimer;
+
 /**
  * Object that holds the latest loaded meta data
  * @type {{data: Array}}
@@ -139,6 +143,7 @@ module.exports = {
                                 $('#layer-filter-container').css('pointer-events', 'auto').css('opacity', 1.0);
                                 $('.layer-loading-indicator').hide();
                                 if (data.data && data.data.length > 0) {
+                                    data.data = data.data.filter(d => d.layergroup !== null)
                                     me.addMetaData(data);
                                     ready = true;
                                     let endTime = new Date().getTime();
@@ -288,13 +293,19 @@ module.exports = {
     },
 
     /**
-     * Get a clone of the full meta data object
+     * Get a clone of the full metadata object
      * @returns {Object}
      */
     getMetaData: function (filter = null) {
-        const clone = $.extend(true, {}, metaData)
+        if (!metaDataCloneTimer) {
+            metaDataClone = $.extend(true, {}, metaData);
+            metaDataCloneTimer = setTimeout(function () {
+                metaDataCloneTimer = undefined;
+            }, 0);
+        }
+        let tmp = {};
         if (filter) {
-            clone.data = clone.data.filter((e) => {
+            tmp.data = metaDataClone.data.filter((e) => {
                 if (e.f_table_title && e.f_table_title !== "") {
                     if (e.f_table_title.toLowerCase().includes(filter.toLowerCase())) return true;
                 } else {
@@ -302,11 +313,11 @@ module.exports = {
                 }
             })
         }
-        return clone;
+        return tmp?.data || metaDataClone;
     },
 
     /**
-     * Get a clone of meta data from latest loaded
+     * Get a clone of metadata from latest loaded
      * @returns {Object}
      */
     getMetaDataLatestLoaded: function () {

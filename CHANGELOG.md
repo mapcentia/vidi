@@ -5,27 +5,57 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [GEOPARTNER]
+## [2024.6.0] - 2024-29-5
 ### Added
-- Filter Icon added in layer tree next to the eye icon. Indicates the present of a filter on the current layer 
-- The "Sign out" in the Session dialog,  deletes the autoconnect.gc2 cookie. 
-- Graveassistent:
-  - Added support for "empty" packages.
-  - Added support for schema override in config.json. Makes it possible to use the same graveassistent across the same database.
-  
-    Enable schema override in config.json. Set privileges for the layers accordingly, and add to schemata:
-    ```json
-    {
-      "schemata": ["schema to use"],
-      "extensionConfig": {
-        "graveAssistent": {
-          "schema": "schema to use"
-        }
-      }
-    }
-    ```
-- area unit is unified. km²/ ha. The same unit and rule is used in the table for drawing/uploaded shapes and in the measurement layer.
-- Factor 10 error corrected in the measurement layer when displaying area in the "ha" unit   
+- `infoCallback` and `emptyInfoCallback` can be used in configs. The value should be a stringified function. The former callback is fired when feature info hits and an array of layers with hits is passed to the callback. The latter callback is fired when feature info hits nothing.
+```json
+{
+  "infoCallback": "function(layers){console.log('You hit:', layers)}"
+}
+```
+```json
+{
+  "emptyInfoCallback": "function(){console.log('You hit nothing')}"
+}
+```
+- The parameter `config=...` is added to WMS url, so better analytics can be performed on the usages of configs and layers.
+- A new api method `api.turOff('schema.layer')` which turns the passed layer off.  
+
+### Changed
+- The snapshot tag list is now sorted alphanumeric.
+- Hits in accordion popup are now sorted according to layer 'sort id'.
+- A class attribute `vidi-draw-tooltip` is added to the label tool in Draw. This kan be used to change the style of the content in e.g. print.
+
+### Fixed
+- UTFgrids are now requested with filter, so mouseover doesn't catch filtered features (require GC2 2024.6.1 or later).
+- The dropdown menu (three vertical dots) now aligned to left.
+
+## [2024.6.0] - 2024-29-5
+### Added
+- `infoCallback` and `emptyInfoCallback` can be used in configs. The value should be a stringified function. The former callback is fired when feature info hits and an array of layers with hits is passed to the callback. The latter callback is fired when feature info hits nothing.
+```json
+{
+  "infoCallback": "function(layers){console.log('You hit:', layers)}"
+}
+```
+```json
+{
+  "emptyInfoCallback": "function(){console.log('You hit nothing')}"
+}
+```
+- The parameter `config=...` is added to WMS url, so better analytics can be performed on the usages of configs and layers.
+- A new api method `api.turOff('schema.layer')` which turns the passed layer off.  
+
+### Changed
+- The snapshot tag list is now sorted alphanumeric.
+- Hits in accordion popup are now sorted according to layer 'sort id'.
+- A class attribute `vidi-draw-tooltip` is added to the label tool in Draw. This kan be used to change the style of the content in e.g. print.
+
+### Fixed
+- UTFgrids are now requested with filter, so mouseover doesn't catch filtered features (require GC2 2024.6.1 or later).
+- The dropdown menu (three vertical dots) now aligned to left.
+
+
 ## [2024.5.2] - 2024-29-5
 ### Changed
 - Layer group checkboxes now reflects the state of the layer tree. An indeterminate state is shown when some layer but not all are active in a group. 

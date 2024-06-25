@@ -764,13 +764,13 @@ geocloud = (function () {
      * @returns {*}
      */
     createUTFGridLayer = function (layer, defaults) {
-        var uri;
+        let uri;
         // if (defaults.cache) {
         //     uri = "/api/mapcache/" + defaults.db + "/gmaps/" + layer + ".json@g20/{z}/{x}/{y}.json";
         // } else {
         uri = "/api/wms/" + defaults.db + "/" + layer.split(".")[0] + "";
         // }
-        var utfGrid = new L.NonTiledUTFGrid.WMS(uri, {
+        const utfGrid = new L.NonTiledUTFGrid.WMS(uri, {
             layers: layer,
             format: 'json',
             transparent: true,
@@ -782,6 +782,10 @@ geocloud = (function () {
             loading: defaults.loading
         });
         utfGrid.id = "__hidden.utfgrid." + layer; // Hide it
+        defaults.additionalURLParameters.forEach(p => {
+            const split = p.split("=");
+            utfGrid.wmsParams[split[0]] = split[1];
+        })
         return utfGrid;
     };
 
@@ -1275,6 +1279,9 @@ geocloud = (function () {
             } else {
                 lControl.addOverlay(layer, name);
             }
+        }
+        this.removeLayer = function (layer) {
+                lControl.removeLayer(layer);
         }
         //ol2, ol3 and leaflet
         // MapQuest OSM doesn't work anymore. Switching to OSM.
@@ -2121,7 +2128,7 @@ geocloud = (function () {
          * @returns {Array}
          */
         this.addUTFGridLayers = function (config) {
-            var layers, layersArr = [],
+            let layers, layersArr = [],
                 defaults = {
                     host: host,
                     layerId: false,
@@ -2136,7 +2143,8 @@ geocloud = (function () {
                     uri: null,
                     fieldConf: {},
                     cache: false,
-                    loading: null
+                    loading: null,
+                    additionalURLParameters: []
                 };
 
             if (config) {
@@ -2147,7 +2155,7 @@ geocloud = (function () {
             layers = defaults.layers;
 
             for (var i = 0; i < layers.length; i++) {
-                var l = createUTFGridLayer(layers[i], defaults);
+                const l = createUTFGridLayer(layers[i], defaults);
                 this.map.addLayer(l, defaults.name || defaults.names[i] || layers[i]);
                 layersArr.push(l);
             }
