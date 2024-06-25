@@ -72,7 +72,9 @@ module.exports = {
             $("#offcanvasLayerControlBtn").on("click", () => {
                 mainLayerOffcanvas.toggle()
             });
-            if (window.vidiConfig.showOffcanvas === true) {
+            if (window.vidiConfig.showOffcanvas === true ||
+                (window.vidiConfig.showOffcanvas === 'mobile' && window.screen.width > 700)
+            ) {
                 mainLayerOffcanvas.show();
             }
         } catch (e) {
