@@ -24,6 +24,7 @@
         key: '',
         _cache: null, // {<tileKey>: <utfgrid>}
         _map: null,
+        _prevCursor: '',
 
         _throttleMove: null, // holds throttled mousemove handler
         // override this method in the inherited class
@@ -38,8 +39,11 @@
             this._map = map;
 
             this._updateCursor = function (cursor) {
-                //console.log(this)
-            }; //no-op, overridden below
+                const split = this.id.split('.');
+                const el = document.querySelector(`#map`);
+                this._prevCursor = el.style.cursor
+                el.style.cursor = cursor;
+            };
             this._throttleMove = L.Util.throttle(this._move, 66, this);
             this._currentImage = this._initImage();
             this._update();
@@ -239,7 +243,7 @@
                         _tile: this._mouseOnTile,
                         _tileCharCode: this._tileCharCode
                     });
-                    this._updateCursor('');
+                    this._updateCursor(this._prevCursor);
                 }
                 if (on.data) {
                     this.fire('mouseover', on);
