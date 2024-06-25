@@ -613,7 +613,7 @@ module.exports = {
                     // Open filter dialog.
                     if (desiredSetupType === LAYER.RASTER_TILE || desiredSetupType === LAYER.VECTOR_TILE || desiredSetupType === LAYER.VECTOR) {
                         if (layerIsEnabled) {
-                            if (parsedMeta.default_open_tools) {
+                            if (parsedMeta?.default_open_tools) {
                                 try {
                                     let arr = JSON.parse(parsedMeta.default_open_tools);
                                     arr.forEach((i) => {
@@ -2125,6 +2125,11 @@ module.exports = {
     },
 
     displayAttributesPopup(features, event, additionalControls = ``, multi = true) {
+        let metaDataKeys = meta.getMetaDataKeys();
+        // Sort according to sort_id
+        features.sort((a, b) => {
+            return metaDataKeys[b.layerKey].sort_id - metaDataKeys[a.layerKey].sort_id;
+        });
         if (window.vidiConfig.crossMultiSelect) {
             // _self.resetAllVectorLayerStyles();
         }
@@ -2147,7 +2152,7 @@ module.exports = {
             let parsedMeta = _self.parseLayerMeta(meta.getMetaByKey(layerKey, false));
             let editDisplay = parsedMeta.vidi_layer_editable ? 'inline' : 'none';
             let properties = JSON.parse(JSON.stringify(feature.properties));
-            for (var key in properties) {
+            for (const key in properties) {
                 if (properties.hasOwnProperty(key)) {
                     if (key.indexOf(SYSTEM_FIELD_PREFIX) === 0) {
                         // delete properties[key];
@@ -2315,9 +2320,27 @@ module.exports = {
                 $('#vector-feature-info-panel .accordion-button').trigger('click');
             }, 200);
         }
-        // if (count === 0) {
-        //     utils.showInfoToast(__("Didn't find anything"));
-        // }
+        if (count === 0) {
+            utils.showInfoToast(__("Didn't find anything"));
+            if (window.vidiConfig.emptyInfoCallback) {
+                let func = Function('"use strict";return (' + window.vidiConfig.emptyInfoCallback + ')')();
+                try {
+                    func(_self.getActiveLayers());
+                } catch (e) {
+                    console.error("Error in emptyInfoCallback:", e.message)
+                }
+
+            }
+        } else {
+            if (window.vidiConfig.infoCallback) {
+                let func = Function('"use strict";return (' + window.vidiConfig.infoCallback + ')')();
+                try {
+                    func(features.map(f => f.layerKey));
+                } catch (e) {
+                    console.error("Error in infoCallback:", e.message)
+                }
+            }
+        }
     },
 
     /**
@@ -3175,10 +3198,9 @@ module.exports = {
             if (moduleState.editingIsEnabled && layerIsEditable) {
                 addButton = markupGeneratorInstance.getAddButton(layerKeyWithGeom);
             }
-            
-            const hasFilter = _self.getActiveLayerFilters(layerKey).length > 0;
+
             let layerControlRecord = $(markupGeneratorInstance.getLayerControlRecord(layerKeyWithGeom, layerKey, layerIsActive,
-                layer, defaultLayerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo, subgroupId !== false, moduleState, disableCheckBox, parentLayerKeys, childLayerKeys, hasFilter, parsedMeta?.filter_required));
+                layer, defaultLayerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo, subgroupId !== false, moduleState, disableCheckBox, parentLayerKeys, childLayerKeys, parsedMeta?.filter_required));
 
             // Callback for selecting specific layer type to enable (layer type dropdown)
             $(layerControlRecord).find('.js-layer-type-selector').on('click', (e, data) => {
@@ -4112,14 +4134,7 @@ module.exports = {
         let layersInSubGroups = 0;
         const metaData = meta.getMetaData();
         const layersInGroup = metaData.data.filter(e => e.layergroup === layerGroup).length;
-        const activeLayers = _self.getActiveLayers().filter(e => {
-            // If the activeLayer has prefix, strip it
-            // split string on first ':' and keep only the second part
-            if (e.includes(':')) {
-                e = e.split(':').slice(1).join(':');
-            }
-            return metaDataKeys[e]?.layergroup === layerGroup
-        });
+        const activeLayers = _self.getActiveLayers().filter(e => metaDataKeys[e]?.layergroup === layerGroup);
         const activeLayersInGroup = activeLayers.length;
         if (layerSubGroup) {
             let split = layerSubGroup.split('|');
@@ -4127,13 +4142,7 @@ module.exports = {
             for (let i = 0; i < l; i++) {
                 const sub = split.join('|').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
                 const re = new RegExp(String.raw`^${sub}(?=(\||$))`, 's');
-                layersInSubGroups += metaData.data.filter(e => {
-                    let subgroup = JSON.parse(e.meta)?.vidi_sub_group;
-                    if (subgroup) {
-                        return subgroup.match(re) && e.layergroup === layerGroup
-                    }
-                    return false;
-                }).length;
+                layersInSubGroups += metaData.data.filter(e => JSON.parse(e.meta)?.vidi_sub_group.match(re) && e.layergroup === layerGroup).length;
                 activeLayersInSubGroups += activeLayers.filter(e => JSON.parse(metaDataKeys[e].meta)?.vidi_sub_group.match(re) && metaDataKeys[e].layergroup === layerGroup).length;
                 const searchPath = `[data-gc2-group-id="${layerGroup}"]` + ' ' + split.map(e => `[data-gc2-subgroup-id="${e}"]`).join(' ') + ` [data-gc2-subgroup-name="${split[split.length - 1]}"]`;
                 const el = document.querySelector(searchPath);
@@ -4146,7 +4155,7 @@ module.exports = {
             }
         }
 
-        const poll = ()=> {
+        const poll = () => {
             // Top group
             const el = document.querySelector(`[data-gc2-group-name="${layerGroup}"]`);
             if (el) {

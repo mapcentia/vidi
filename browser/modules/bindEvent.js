@@ -69,7 +69,9 @@ module.exports = {
                 document.querySelector("#offcanvasLayerControlBtn .bi-arrow-bar-right").classList.remove("d-none");
                 document.querySelector("#offcanvasLayerControlBtn .bi-arrow-bar-left").classList.add("d-none");
             })
-            $("#offcanvasLayerControlBtn").on("click", () => { mainLayerOffcanvas.toggle()});
+            $("#offcanvasLayerControlBtn").on("click", () => {
+                mainLayerOffcanvas.toggle()
+            });
             if (window.vidiConfig.showOffcanvas === true) {
                 mainLayerOffcanvas.show();
             }
@@ -105,12 +107,13 @@ module.exports = {
          * Triggered when the layer control is changed in any module
          */
         $(document).arrive('[data-gc2-id]', function (e, data) {
+            $(this).off('change');
             $(this).on('change', function (e) {
                 let prefix = '';
                 let doNotLegend = false;
                 if ($(this).data(`gc2-layer-type`)) {
                     const type = $(e.target).data('gc2-layer-type');
-                    prefix = type !=='t' ? type + ':' : '';
+                    prefix = type !== 't' ? type + ':' : '';
                     if (prefix === LAYER_TYPE_DEFAULT + `:`) {
                         prefix = ``;
                     }
@@ -135,8 +138,8 @@ module.exports = {
                 let layers = meta.getMetaData().data.filter((e) => {
                     if (e.layergroup === groupName) {
                         let parsedMeta = layerTree.parseLayerMeta(e);
-                        prefix = parsedMeta?.default_layer_type && parsedMeta.default_layer_type !=='t' ? parsedMeta.default_layer_type + ':' : '';
-                        setTimeout(()=> {
+                        prefix = parsedMeta?.default_layer_type && parsedMeta.default_layer_type !== 't' ? parsedMeta.default_layer_type + ':' : '';
+                        setTimeout(() => {
                             switchLayer.init(prefix + e.f_table_schema + "." + e.f_table_name, isChecked, true, false);
                         }, 1)
                         return true;
@@ -157,7 +160,7 @@ module.exports = {
                 meta.getMetaData().data.forEach(e => {
                     let parsedMeta = layerTree.parseLayerMeta(e);
                     if (parsedMeta?.vidi_sub_group?.split("|")[subGroupLevel] === subGroupName && e.layergroup === layerGroup) {
-                        prefix = parsedMeta?.default_layer_type && parsedMeta.default_layer_type !=='t' ? parsedMeta.default_layer_type + ':' : '';
+                        prefix = parsedMeta?.default_layer_type && parsedMeta.default_layer_type !== 't' ? parsedMeta.default_layer_type + ':' : '';
                         switchLayer.init(prefix + e.f_table_schema + "." + e.f_table_name, isChecked, false);
                     }
                 })
@@ -176,7 +179,7 @@ module.exports = {
         });
 
         // Toggle top group checkboxes when layer tree is ready
-        backboneEvents.get().on("layerTree:ready", function (){
+        backboneEvents.get().on("layerTree:ready", function () {
             let groups = [];
             meta.getMetaData().data.forEach(e => {
                 if (e.layergroup && !groups.includes(e.layergroup)) {
@@ -322,7 +325,7 @@ module.exports = {
                 const e = document.querySelector('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]');
                 if (e) {
                     bootstrap.Tab.getInstance(e).show();
-                    setTimeout(()=>{
+                    setTimeout(() => {
                         e.click();
                     }, 100)
                 } else {

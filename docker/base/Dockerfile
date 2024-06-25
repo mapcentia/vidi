@@ -16,7 +16,7 @@ RUN curl -sL https://deb.nodesource.com/setup_18.x -o nodesource_setup.sh &&\
 RUN npm install -g sass grunt-cli
 
 HEALTHCHECK --interval=30s --timeout=20s --start-period=30s --retries=2 \
-    CMD curl --fail http://localhost:3000 || exit 1
+    CMD curl --fail http://127.0.0.1:3000 || exit 1
 
 # Add Supervisor config and run the deamon
 ADD conf/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
