@@ -4,7 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [2024.6.0] - 2024-29-5
+## [2024.6.1] - 2024-25-6
+### Changed
+- The config `showOffcanvas` now has a third option `"mobile"` (besides `true` and `false`), which means that the off canvas menu is only shown if the screen is wider than 720px.
+
+### Fixed
+- Huge performance increase in the layer switcher. Switching a layer on now takes ~20ms comparing to ~500ms before. This is gained by caching the cloned metadata object during a single event.
+- Layers are removed from the Leaflet layer control when turned off. Turning on/off a lot of layers could hog down performance before.
+
+## [2024.6.0] - 2024-21-6
 ### Added
 - `infoCallback` and `emptyInfoCallback` can be used in configs. The value should be a stringified function. The former callback is fired when feature info hits and an array of layers with hits is passed to the callback. The latter callback is fired when feature info hits nothing.
 ```json
