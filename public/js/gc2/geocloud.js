@@ -1280,6 +1280,9 @@ geocloud = (function () {
                 lControl.addOverlay(layer, name);
             }
         }
+        this.removeLayer = function (layer) {
+                lControl.removeLayer(layer);
+        }
         //ol2, ol3 and leaflet
         // MapQuest OSM doesn't work anymore. Switching to OSM.
         this.addMapQuestOSM = function () {
