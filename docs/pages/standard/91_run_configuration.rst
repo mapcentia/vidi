@@ -93,10 +93,6 @@ Her følger hvordan de enkelte extensions kan opsættes (Pt. omfatter denne del 
         "streetView": {
             "cowi": "https://cmv.cowi.com/?...",
             "mapillary": "https://mapillary.com/app/?..."
-        "embed": {
-            "slideOutLayerTree": true,
-            "expandFirstInLayerTree": true
-        },
         "symbols": {
             "files": [
                 {"file": "symbolset1.json", "title": "Symbolsæt 1"},
@@ -618,6 +614,30 @@ Anvend baggrundskort "skuffe" i stedet for toggle knappen. Skuffen kan indeholde
 .. note::
     Template ``default.tmpl`` viser hverken skuffe eller toggle knap. Anvendes på ``embed.tmpl`` og lign., som ikke har den store baggrundskortsvælger.
 
+.. _configjs_showoffcanvas:
+
+showOffcanvas
+*****************************************************************
+
+Her kan angives, om menuen skal være vist fra starten. Værdierne kan være ``true``, ``false`` eller ``"mobile"``. Den sidste viser menuen, hvis skærmen er bred men ikke på fx en smal telefonskærm.
+
+
+.. code-block:: json
+
+    "showOffcanvas": false
+
+
+.. _configjs_expandfirstinlayertree:
+
+expandFirstInLayerTree
+*****************************************************************
+
+Angiver om den første/øverste gruppe i lagtræet skal være foldet ud fra starten.
+
+.. code-block:: json
+
+    "expandFirstInLayerTree": false
+
 
 #################################################################
 Referencer
@@ -683,7 +703,7 @@ URL'en til konfigurationen fås ved at anvende knappen KOPIER LINK:
     :figclass: align-center
 
 .. note::
-    Henvisninger virker kun for konfigurationer lavet i GC2 Kontrolcenter. Konfigurationer, som anvendes i henvisninger, skal være udgivet. Hvis en henvises ikke virker (fx hvis url'en er forkert) vises "$ref" egenskaben uforandret.
+    Henvisninger virker kun for konfigurationer lavet i GC2 Kontrolcenter. Konfigurationer, som anvendes i henvisninger, skal være udgivet. Hvis en henvisning ikke virker (fx hvis url'en er forkert) vises "$ref" egenskaben uforandret.
 
 .. rubric:: Fodnoter
 
