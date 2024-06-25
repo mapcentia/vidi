@@ -2458,6 +2458,12 @@ module.exports = {
         "editor"
     ],
 
+    // ===========================================================
+    // configSwitcher will allow Vidi stated with database url, 
+    // and access to config switcher screen
+    // ===========================================================
+    "configSwitcher": true,
+
 
     // ====================================
     // Set which template Vidi should use
