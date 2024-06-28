@@ -107,10 +107,10 @@ class OfflineModeControlsManager {
         });
     }
 
-    _getAvailableLayersKeys() {
+    _getAvailableLayersKeys(filter) {
         return new Promise((resolve, reject) => {
             let layerKeys = [];
-            let existingMeta = meta.getMetaData();
+            let existingMeta = meta.getMetaData(filter);
             existingMeta.data.map(layer => {
                 if (layer && layer.meta) {
                     let parsedMeta = JSON.parse(layer.meta);
@@ -193,8 +193,8 @@ class OfflineModeControlsManager {
                 $('.js-app-is-online-badge').removeClass('d-none');
                 $('.js-app-is-offline-badge').addClass('d-none');
             }
-
-            this._getAvailableLayersKeys().then(layerKeys => {
+            const filterValue = $('#layers-filter').val();
+            this._getAvailableLayersKeys(filterValue).then(layerKeys => {
                 layerKeys.map(({layerKey, geomColumn }) => {
                     let layerRecord = $(`[data-gc2-layer-key="${layerKey}.${geomColumn}"]`);
                     if ($(layerRecord).length === 1) {

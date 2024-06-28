@@ -137,7 +137,8 @@ module.exports = {
                 let prefix;
                 let isChecked = $(e.target).prop(`checked`);
                 let groupName = $(this).data(`gc2-group-name`);
-                let layers = meta.getMetaData().data.filter((e) => {
+                const filterValue = $('#layers-filter').val();
+                let layers = meta.getMetaData(filterValue).data.filter((e) => {
                     if (e.layergroup === groupName) {
                         let parsedMeta = layerTree.parseLayerMeta(e);
                         prefix = parsedMeta?.default_layer_type && parsedMeta.default_layer_type !== 't' ? parsedMeta.default_layer_type + ':' : '';
