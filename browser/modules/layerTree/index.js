@@ -4132,7 +4132,8 @@ module.exports = {
         const metaDataKeys = meta.getMetaDataKeys();
         let activeLayersInSubGroups = 0;
         let layersInSubGroups = 0;
-        const metaData = meta.getMetaData();
+        const filterValue = $('#layers-filter').val();
+        const metaData = meta.getMetaData(filterValue);
         const layersInGroup = metaData.data.filter(e => e.layergroup === layerGroup).length;
         const activeLayers = _self.getActiveLayers().filter(e => {
             if (e.includes(':')) {
