@@ -3,6 +3,8 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
+### Fixed
+- Filtering layers in the layertree result in a never ending spinning progress and no filtering
 
 ## [2024.6.1] - 2024-25-6
 ### Changed
