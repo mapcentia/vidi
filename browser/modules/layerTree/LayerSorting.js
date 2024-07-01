@@ -55,6 +55,9 @@ class LayerSorting {
      */
     sortLayers(order, notSortedLayersAndSubgroupsForCurrentGroup, groupName) {
         if (!order) {
+            // reverse the order of elements in notSortedLayersAndSubgroupsForCurrentGroup
+            notSortedLayersAndSubgroupsForCurrentGroup.reverse();
+
             return notSortedLayersAndSubgroupsForCurrentGroup;
         } else if (this.validateOrderObject(order) === false) {
             console.error(`Invalid order object`, order);
