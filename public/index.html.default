@@ -91,8 +91,6 @@
         console.info("Using pre-processed load screen template: " + tmpl);
     }
 </script>
-<!-- Polyfill for IE -->
-<script src="https://cdn.polyfill.io/v2/polyfill.min.js"></script>
 <!-- Dynamic js -->
 <script src="/locale"></script>
 <script src="/api/baselayer"></script>
