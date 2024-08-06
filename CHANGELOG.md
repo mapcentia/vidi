@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
+## [2024.08.06]
+## IN PIPE LINE 
+- When using a custom dialog for feature info in gc2, the BACK buttom is added like in the default dialog
+
 
 ## [2024.6.0] - 2024-29-5
 ### Added
