@@ -313,7 +313,7 @@ module.exports = {
                 }
             })
         }
-        return tmp?.data || metaDataClone;
+        return tmp.data  ? tmp : metaDataClone;
     },
 
     /**

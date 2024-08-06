@@ -316,7 +316,7 @@ const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file, gro
         markers[id].dragging.disable();
         map.dragging.disable();
         map.touchZoom.disable();
-        $(document).on("touchmove mousemove", (e) => {
+        $(document).on("touchmove.symbol mousemove.symbol", (e) => {
             rotate(e, img, id, classStr);
         });
     });
@@ -327,7 +327,7 @@ const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file, gro
         markers[id].dragging.disable();
         map.dragging.disable();
         map.touchZoom.disable();
-        $(document).on("touchmove mousemove", (e) => {
+        $(document).on("touchmove.symbol mousemove.symbol", (e) => {
             scale(e, img, id, classStr);
         });
     });
@@ -522,7 +522,7 @@ module.exports = {
             if (idBeingChanged) {
                 setState();
             }
-            $(document).off("mousemove touchmove");
+            $(document).off("mousemove.symbol touchmove.symbol");
             mouseDown = false;
             idBeingChanged = false;
         });

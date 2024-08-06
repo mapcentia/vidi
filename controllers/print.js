@@ -269,6 +269,11 @@ function print(key, q, req, response, outputPng = false, frame = 0, count, retur
                                     height = 1500;
                                     break;
                             }
+                            
+                            // Make sure width and height are integers
+                            width = Math.round(width);
+                            height = Math.round(height);
+
                             page.emulate({
                                 viewport: {width, height},
                                 userAgent: 'Puppeteer'
