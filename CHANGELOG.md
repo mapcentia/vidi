@@ -3,9 +3,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
-## [2024.08.06]
-## IN PIPE LINE 
-- When using a custom dialog for feature info in gc2, the BACK buttom is added like in the default dialog
+
+## [Unreleased]
+### Fixed
+## [2024.08.06] When using a custom dialog for feature info in gc2, the BACK buttom is added like in the default dialog
+## [2024.08.07] Legend updated when the layer group check is toggled instead of only when a layer item is toggled 
+
 
 ### Fixed
 - Filtering layers in the layertree result in a never ending spinning progress and no filtering
