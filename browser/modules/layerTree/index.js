@@ -4134,7 +4134,9 @@ module.exports = {
         let layersInSubGroups = 0;
         const metaData = meta.getMetaData();
         const layersInGroup = metaData.data.filter(e => e.layergroup === layerGroup).length;
-        const activeLayers = _self.getActiveLayers().filter(e => metaDataKeys[e]?.layergroup === layerGroup);
+        const activeLayers = _self.getActiveLayers().filter(e => {
+            return metaDataKeys[layerTreeUtils.stripPrefix(e)]?.layergroup === layerGroup
+        });
         const activeLayersInGroup = activeLayers.length;
         if (layerSubGroup) {
             let split = layerSubGroup.split('|');
@@ -4142,7 +4144,13 @@ module.exports = {
             for (let i = 0; i < l; i++) {
                 const sub = split.join('|').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
                 const re = new RegExp(String.raw`^${sub}(?=(\||$))`, 's');
-                layersInSubGroups += metaData.data.filter(e => JSON.parse(e.meta)?.vidi_sub_group.match(re) && e.layergroup === layerGroup).length;
+                layersInSubGroups += metaData.data.filter(e => {
+                    let subgroup = JSON.parse(e.meta)?.vidi_sub_group;
+                    if (subgroup) {
+                        return subgroup.match(re) && e.layergroup === layerGroup
+                    }
+                    return false;
+                }).length;
                 activeLayersInSubGroups += activeLayers.filter(e => JSON.parse(metaDataKeys[e].meta)?.vidi_sub_group.match(re) && metaDataKeys[e].layergroup === layerGroup).length;
                 const searchPath = `[data-gc2-group-id="${layerGroup}"]` + ' ' + split.map(e => `[data-gc2-subgroup-id="${e}"]`).join(' ') + ` [data-gc2-subgroup-name="${split[split.length - 1]}"]`;
                 const el = document.querySelector(searchPath);
