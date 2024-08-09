@@ -1140,7 +1140,6 @@ module.exports = {
                                 }
 
                                 let notSortedGroupsArray = array_unique(groups.reverse());
-                                metaData.data.reverse();
 
                                 let arr = notSortedGroupsArray;
 
