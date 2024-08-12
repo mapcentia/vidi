@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2024.8.0] - 2024-12-8
+### Fixed
+- Group check boxes now works with vector layers.
+- Reverse sorting in groups. This was a regression from last version.
+- Multi select tag widgets will now close on blur.
+
 ## [2024.6.1] - 2024-25-6
 ### Changed
 - The config `showOffcanvas` now has a third option `"mobile"` (besides `true` and `false`), which means that the off canvas menu is only shown if the screen is wider than 720px.
