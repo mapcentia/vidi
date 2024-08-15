@@ -19,7 +19,6 @@ let urlsToCache = [
     '/js/lib/Leaflet.awesome-markers/images/markers-shadow@2x.png',
     'https://netdna.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css',
     'https://netdna.bootstrapcdn.com/font-awesome/4.5.0/fonts/fontawesome-webfont.woff2?v=4.5.0',
-    'https://cdn.polyfill.io/v2/polyfill.min.js?features=Element.prototype.classList,WeakMap,MutationObserver,URL,Array.from',
     '/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.js',
     '/js/lib/es5-shim/es5-shim.js',
     '/js/lib/d3/d3.js',

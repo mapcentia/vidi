@@ -12,7 +12,6 @@ let urlsToCache = [
     '/index.html',
     'https://netdna.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css',
     'https://netdna.bootstrapcdn.com/font-awesome/4.5.0/fonts/fontawesome-webfont.woff2?v=4.5.0',
-    'https://cdn.polyfill.io/v2/polyfill.min.js?features=Element.prototype.classList,WeakMap,MutationObserver,URL,Array.from',
     '/fonts/roboto-v18-latin-italic.ttf',
     '/fonts/roboto-v18-latin-regular.ttf',
     '/fonts/roboto-v18-latin-500.ttf',
