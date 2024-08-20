@@ -324,8 +324,8 @@ module.exports = {
         en_US: "Select point on map",
       },
       "Select point for alarmkabel": {
-        da_DK: "Beregn alarm",
-        en_US: "Calculate alarm",
+        da_DK: "Beregn afstand",
+        en_US: "Calculate distance",
       },
       "Found parcels": {
         da_DK: "Fundne matrikler i område",
@@ -415,6 +415,30 @@ module.exports = {
         da_DK: "Lukkeliste ikke klar",
         en_US: "Valve list not ready",
       },
+      "Distance from point": {
+        da_DK: "Beregn ved hjælp af afstand fra punkt",
+        en_US: "Calculate using distance from point",
+      },
+      "Distance from cabinet": {
+        da_DK: "Beregn ved hjælp af afstand fra skab",
+        en_US: "Calculate using distance from cabinet",
+      },
+      "Select point for cabinet": {
+        da_DK: "Udpeg punkt",
+        en_US: "Select point",
+      },
+      "From-To": {
+        da_DK: "Fra-Til",
+        en_US: "From-To",
+      },
+      "Both": {
+        da_DK: "Begge",
+        en_US: "Both",
+      },
+      "To-From": {
+        da_DK: "Til-Fra",
+        en_US: "To-From",
+      },
     };
 
     /**
@@ -467,6 +491,8 @@ module.exports = {
           user_alarmkabel_distance: config.extensionConfig.blueidea.alarmkabel_distance || 100,
           selected_profileid: '',
           lukkeliste_ready: false,
+          alarm_direction_selected: 'Both',
+          alarm_skab: null,
         };
       }
 
@@ -1743,7 +1769,12 @@ module.exports = {
                   hidden={!s.user_alarmkabel}
                 >
                   <h6>{__("Alarm cable")}</h6>
-                  <div className="row mx-auto gap-3">
+                  
+                  <div className="vertical-center col-auto">
+                    {__("Distance from point")}
+                  </div>
+                  
+                  <div className="input-group">
                     <input
                       type="number"
                       className="form-control"
@@ -1761,7 +1792,38 @@ module.exports = {
                       {__("Select point for alarmkabel")}
                     </button>
                   </div>
+                  <div className="form-text">Angiv antal meter, og udpeg punkt.</div>
                 </div>
+
+                <div
+                  style={{ alignSelf: "center" }}
+                  hidden={!s.user_alarmkabel}
+                >
+                  <div className="vertical-center col-auto">
+                  {__("Distance from cabinet")}
+                  </div>
+                  
+                  <div className="input-group">
+                    <select
+                      className="form-select"
+                      value={s.alarm_direction_selected}
+                      onChange={(e) => this.setState({ alarm_direction_selected: e.target.value })}
+                    >
+                      <option value="FT">{__('From-To')}</option>
+                      <option value="TF">{__('To-From')}</option>
+                      <option value="Both">{__('Both')}</option>
+                    </select>
+                    <button
+                      onClick={() => this.selectPointAlarmkabel()}
+                      className="btn btn-primary col-auto"
+                      disabled={!this.allowAlarmkabel()}
+                    >
+                      {__("Select point for cabinet")}
+                    </button>
+                  </div>
+                  <div className="form-text">Vælg alarmskab, retning, og udpeg punkt</div>
+                </div>
+
               </div>
             </div>
 

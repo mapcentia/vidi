@@ -99,6 +99,7 @@ router.get("/api/extension/blueidea/:userid", function (req, response) {
     udpeg_layer: user.udpeg_layer ? user.udpeg_layer : null,
     ventil_export: user.ventil_export ? user.ventil_export : null,
     debug: user.debug ? user.debug : null,
+    alarm_skab: null,
   };
 
   // Check if the database is correctly setup, and the session is allowed to access it
@@ -109,10 +110,24 @@ router.get("/api/extension/blueidea/:userid", function (req, response) {
     SQLAPI("select * from lukkeliste.beregnlog limit 1", req),
     SQLAPI("select * from lukkeliste.lukkestatus limit 1", req),
   ];
+
+  // if alarm_skab is set, test and build a list
+  if (user.hasOwnProperty("alarm_skab")) {
+    let alarm_skab = user.alarm_skab;
+    let query = `SELECT ${alarm_skab.key} as value, ${alarm_skab.name} as text, ${alarm_skab.geom} from ${alarm_skab.layer}`;
+    validate.push(SQLAPI(query, req, { format: "geojson", srs: 4326 }));
+  }
+
+  
   Promise.all(validate)
     .then((res) => {
       returnobj.db = true;
       returnobj.lukkestatus = res[4].features[0].properties;
+
+      // if alarm_skab is set, add to return object
+      if (user.hasOwnProperty("alarm_skab")) {
+        returnobj.alarm_skab = res[5].features;
+      }
     })
     .catch((err) => {
       returnobj.db = false;
@@ -124,7 +139,8 @@ router.get("/api/extension/blueidea/:userid", function (req, response) {
 });
 
 // Get the list of sms templates
-router.get("/api/extension/blueidea/:userid/GetSmSTemplates/",
+router.get(
+  "/api/extension/blueidea/:userid/GetSmSTemplates/",
   function (req, response) {
     guard(req, response);
 
@@ -161,7 +177,8 @@ router.get("/api/extension/blueidea/:userid/GetSmSTemplates/",
 );
 
 // Create message in BlueIdeas system, and return the smsGroupId
-router.post("/api/extension/blueidea/:userid/CreateMessage",
+router.post(
+  "/api/extension/blueidea/:userid/CreateMessage",
   function (req, response) {
     guard(req, response);
 
@@ -203,7 +220,8 @@ router.post("/api/extension/blueidea/:userid/CreateMessage",
 );
 
 // Query alarmkabel-plugin in database
-router.post("/api/extension/alarmkabel/:userid/query",
+router.post(
+  "/api/extension/alarmkabel/:userid/query",
   function (req, response) {
     guard(req, response);
 
@@ -271,7 +289,8 @@ router.post("/api/extension/alarmkabel/:userid/query",
 );
 
 // Query lukkeliste-plugin in database
-router.post("/api/extension/lukkeliste/:userid/query",
+router.post(
+  "/api/extension/lukkeliste/:userid/query",
   function (req, response) {
     guard(req, response);
 
@@ -422,9 +441,7 @@ function SQLAPI(q, req, options = null) {
 // Check if user has setup username and password
 function hasUserSetup(uuid) {
   // check if uuid in in config, and if user object has username and password
-  if (
-    bi.users.hasOwnProperty(uuid) 
-  ) {
+  if (bi.users.hasOwnProperty(uuid)) {
     // if blueidea is set, and is true, check for username and password
     if (bi.users[uuid].hasOwnProperty("blueidea") && bi.users[uuid].blueidea) {
       if (
