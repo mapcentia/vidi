@@ -741,6 +741,7 @@ module.exports = {
                     });
                 } else {
                     $.each(sortObject(fieldConf), (name, property) => {
+                        let metaDataForField = metaDataKeys[keyWithOutPrefix].fields[property.key] ? metaDataKeys[keyWithOutPrefix].fields[property.key] : null;
                         if (property.value.querable) {
                             let value = feature.properties[property.key];
                             if (property.value.template && feature.properties[property.key] && feature.properties[property.key] !== '') {
@@ -835,7 +836,16 @@ module.exports = {
                                     `
                                     }
                                 }
+                            } 
+                            // If metaDataForField.restrictions has an array, we get the related values
+                            else if (metaDataForField && metaDataForField.restriction && Array.isArray(metaDataForField.restriction)) {
+                                let restrictions = metaDataForField.restriction;
+                                let restriction = restrictions.find(restriction => restriction.value === value);
+                                if (restriction) {
+                                    value = restriction.alias;
+                                }
                             }
+
                             fields.push({title: property.value.alias || property.key, value});
                             fieldLabel = (property.value.alias !== null && property.value.alias !== "") ? property.value.alias : property.key;
                             if (feature.properties[property.key] !== undefined) {
