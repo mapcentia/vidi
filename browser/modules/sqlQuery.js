@@ -57,8 +57,7 @@ let defaultSelectedStyle = {
 let backArrowIsAdded = false;
 
 let editToolsHtml = `
-        <div class="form-group gc2-edit-tools" data-edi
-        t-layer-id="{{_vidi_edit_layer_id}}" data-edit-layer-name="{{_vidi_edit_layer_name}}" data-edit-vector="{{_vidi_edit_vector}}" style="display: {{_vidi_edit_display}};">
+        <div class="form-group gc2-edit-tools" data-edit-layer-id="{{_vidi_edit_layer_id}}" data-edit-layer-name="{{_vidi_edit_layer_name}}" data-edit-vector="{{_vidi_edit_vector}}" style="display: {{_vidi_edit_display}};">
             <div class="btn-group mt-1 w-100 mb-2">
                 <button class='btn btn-sm btn-outline-secondary show-when-multiple-hits'>
                   <i class='bi bi-arrow-left'></i> ${__("Back")}
