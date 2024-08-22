@@ -26,6 +26,9 @@ Der er flere dele i opsætningen af denne extension. Da den både skal håndtere
 - BlueIdea og Lukkeliste
   - lukkeliste er `true`, samt `ventil_layer`, `ventil_layer_key` og `udpeg_layer`
   - blueidea er `true`, samt username + password
+- Lukkeliste med alarm-funktionalitet
+  - lukkeliste er `true`
+  - alarmkabel er `true`, samt `alarm_skab`
 
 ### Vidi
 
@@ -54,6 +57,7 @@ module.exports = {
   },
 };
 ```
+### config.blueidea.js:
 
 | Property | Type   | Description                       |
 | -------- | ------ | --------------------------------- |
@@ -75,7 +79,7 @@ module.exports = {
 | alarmkabel       | boolean | `False` | om brugeren skal have adgang til alarmkabel-værktøjerne                                                                    |
 | alarm_skab       | obj     |         | objekt med opsætning af alarmskabe                                                                                         |
 
-Alarm_skab:
+### Alarm_skab:
 
 | Property | Type   | Default | Description                                                                     |
 | -------- | ------ | ------- | ------------------------------------------------------------------------------- |
@@ -83,6 +87,8 @@ Alarm_skab:
 | key      | string |         | kolonnenavn på `layer` som skal bruges til at finde alarmkablerne               |
 | name     | string |         | SQL udtryk der bruges til at finde teksten til dropdown                         |
 | geom     | string |         | kolonnenavn på `layer` som indeholder geometrien                                |
+
+### ?config=*.json:
 
 Der skal ligeledes laves en opsætning af extension i kørselsmiljøet. Se nedenfor.
 
@@ -115,4 +121,4 @@ Den bruger der tænkes at bruge lukkeliste-værktøjerne skal have en rolle med 
 - `lukkeliste.beregn_afskaaretnet`
 - `lukkeliste.beregnlog`
 - `lukkeliste.lukkestatus`
-- _*Lag der er defineret i `alarm_skab`_
+- _*Lag der er defineret i `alarm_skab` hvis denne er relevant_
