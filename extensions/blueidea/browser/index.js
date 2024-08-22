@@ -1999,7 +1999,7 @@ module.exports = {
                   <div className='list-group'>
                     {s.results_alarmskabe.map((item, index) => (
                       <div className='list-group-item' key={index}>
-                        <div className='d-flex w-100 justify-content-between mb-1'>
+                        <div className='d-flex w-100 justify-content-between'>
                           <small>{item.direction}</small>
                           <small>{item.distance}m</small>
                         </div>
