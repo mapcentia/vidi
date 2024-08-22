@@ -651,6 +651,8 @@ module.exports = {
                   userProfiles = Object.keys(data.profileid);
                 }
 
+                alarmskabe = me.createAlarmskabeOptions(data.alarm_skabe);
+
                 me.setState({
                   user_lukkeliste: data.lukkeliste,
                   user_blueidea: data.blueidea,
@@ -663,7 +665,8 @@ module.exports = {
                   user_ventil_export: data.ventil_export || null,
                   selected_profileid: userProfiles[0] || '',
                   user_alarmkabel: data.alarmkabel,
-                  alarm_skabe: me.createAlarmskabeOptions(data.alarm_skabe),
+                  alarm_skabe: alarmskabe,
+                  alarm_skab_selected: alarmskabe[0].value || '',
                   lukkeliste_ready: data.lukkestatus.views_exists || false,
                 });
                 resolve(data);
