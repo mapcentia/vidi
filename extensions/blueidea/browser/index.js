@@ -651,7 +651,7 @@ module.exports = {
                   userProfiles = Object.keys(data.profileid);
                 }
 
-                alarmskabe = me.createAlarmskabeOptions(data.alarm_skabe);
+                let alarmskabe = me.createAlarmskabeOptions(data.alarm_skabe);
 
                 me.setState({
                   user_lukkeliste: data.lukkeliste,
