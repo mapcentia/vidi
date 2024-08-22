@@ -15,6 +15,7 @@ import {
   featureCollection as turfFeatureCollection,
   applyFilter,
 } from "@turf/turf";
+import c from "express-cluster";
 
 /**
  *
@@ -494,6 +495,7 @@ module.exports = {
           alarm_direction_selected: 'Both',
           alarm_skab_selected: '',
           alarm_skabe: null,
+          results_alarmskabe: [],
         };
       }
 
@@ -1354,6 +1356,33 @@ module.exports = {
         });
         return
       };
+
+      /**
+       * This function parses the alarmskabe results into a list of objects
+       * @returns List of objects
+       * 
+       */
+      parseAlarmskabeResults = (features) => {
+        let results = [];
+        features.forEach((feature) => {
+          let obj = {
+            direction: feature.properties.dir,
+            distance: feature.properties.afstand,
+          };
+
+          // Translate the direction to human readable
+          if (feature.properties.dir == "FT") {
+            obj.direction = __("From-To");
+          } else if (feature.properties.dir == "TF") {
+            obj.direction = __("To-From");
+          }
+
+          // Round the distance to 2 decimals
+          obj.distance = Math.round(obj.distance * 100) / 100;
+          results.push(obj);
+        });
+        return results;
+      };
       
       /**
        * This function selects a point in the map for alarmkabel, based on a specific alarmskab
@@ -1364,6 +1393,11 @@ module.exports = {
         let point = null;
         blocked = false;
         _clearAll();
+        
+        // Reset the results
+        me.setState({
+          results_alarmskabe: [],
+        });
 
         // if udpeg_layer is set, make sure it is turned on
         if (me.state.user_udpeg_layer) {
@@ -1399,6 +1433,11 @@ module.exports = {
               if (data) {
                 // console.debug(data);                
                 me.addAlarmPositionToMap(data.alarm);
+
+                // Add the results to the list in state
+                me.setState({
+                  results_alarmskabe: me.parseAlarmskabeResults(data.alarm.features),
+                });
               }
 
               // Add the clicked point to the map
@@ -1949,6 +1988,23 @@ module.exports = {
                   </div>
                   <div className="form-text mb-3">Vælg alarmskab, og udpeg punkt</div>
                 </div>
+              
+                <div
+                  style={{ alignSelf: "center" }}
+                  hidden={s.results_alarmskabe.length == 0}
+                >
+                  <div className='list-group'>
+                    {s.results_alarmskabe.map((item, index) => (
+                      <div className='list-group-item' key={index}>
+                        <div className='d-flex w-100 justify-content-between mb-1'>
+                          <small>{item.direction}</small>
+                          <small>{item.distance}m</small>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              
               </div>
             </div>
 
