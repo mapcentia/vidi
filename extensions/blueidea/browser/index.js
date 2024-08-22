@@ -614,7 +614,6 @@ module.exports = {
         if (list) {
           for (let i = 0; i < list.length; i++) {
             let feature = list[i];
-            console.log(feature)
             let option = {
               value: feature.properties.value,
               label: feature.properties.text,
@@ -705,14 +704,41 @@ module.exports = {
        * This function queries database for information related to alarmkabel
        * @returns uuid string representing the query
        */
-      queryPointAlarmkabel = (point, distance) => {
+      queryPointAlarmkabel = (point, distance, direction) => {
         let me = this;
         let body = point;
-        body.distance = distance;  //append distance to body //append direction to body
+        body.distance = distance;  //append distance to body
+        body.direction = direction; //append direction to body
 
         return new Promise(function (resolve, reject) {
           $.ajax({
             url: "/api/extension/alarmkabel/" + me.state.user_id + "/query",
+            type: "POST",
+            data: JSON.stringify(body),
+            contentType: "application/json",
+            success: function (data) {
+              resolve(data);
+            },
+            error: function (e) {
+              reject(e);
+            },
+          });
+        });
+      }
+
+            /**
+       * This function queries database for information related to alarmkabel
+       * @returns uuid string representing the query
+       */
+      queryPointAlarmskab = (point, direction, alarmskab_gid) => {
+        let me = this;
+        let body = point;
+        body.direction = direction;  //append distance to body
+        body.alarmskab = alarmskab_gid; //append alarmskab to body
+
+        return new Promise(function (resolve, reject) {
+          $.ajax({
+            url: "/api/extension/alarmskab/" + me.state.user_id + "/query",
             type: "POST",
             data: JSON.stringify(body),
             contentType: "application/json",
@@ -1303,7 +1329,7 @@ module.exports = {
           blocked = true;
 
           // send the point to the server + the distance
-          me.queryPointAlarmkabel(point, me.state.user_alarmkabel_distance)
+          me.queryPointAlarmkabel(point, me.state.user_alarmkabel_distance, me.state.alarm_direction_selected)
             .then((data) => {
 
               me.createSnack(__("Alarm found"))
@@ -1327,7 +1353,69 @@ module.exports = {
             });
         });
         return
-      }; 
+      };
+      
+      /**
+       * This function selects a point in the map for alarmkabel, based on a specific alarmskab
+       * @returns Point
+       */
+      selectPointAlarmskab = () => {
+        let me = this;
+        let point = null;
+        blocked = false;
+        _clearAll();
+
+        // if udpeg_layer is set, make sure it is turned on
+        if (me.state.user_udpeg_layer) {
+          me.turnOnLayer(me.state.user_udpeg_layer);
+        }
+
+        // change the cursor to crosshair and wait for a click
+        utils.cursorStyle().crosshair();
+
+        cloud.get().on("click", function (e) {
+
+          // remove event listener
+          cloud.get().map.off("click");
+
+          // if the click is blocked, return
+          if (blocked) {
+            return;
+          }
+
+          me.createSnack(__("Starting analysis"), true)
+
+          // get the clicked point
+          point = e.latlng;
+          utils.cursorStyle().reset();
+          blocked = true;
+
+          // send the point to the server + the direction and alarm_skab
+          me.queryPointAlarmskab(point, me.state.alarm_direction_selected, me.state.alarm_skab_selected)
+            .then((data) => {
+
+              me.createSnack(__("Alarm found"))
+              // if the server returns a result, show it
+              if (data) {
+                // console.debug(data);                
+                me.addAlarmPositionToMap(data.alarm);
+              }
+
+              // Add the clicked point to the map
+              if (data.log) {
+                //console.debug("Got log:", data.log);
+                me.addSelectedPointToMap(data.log);
+              }
+              return
+            })
+            .catch((error) => {
+              me.createSnack(__("Error in seach") + ": " + error);
+              console.warn(error);
+              return
+            });
+        });
+        return
+      };
 
       toggleEdit = () => {
         let me = this;
@@ -1852,16 +1940,15 @@ module.exports = {
                     ))}
                     </select>
                     <button
-                      onClick={() => this.selectPointAlarmkabel()}
+                      onClick={() => this.selectPointAlarmskab()}
                       className="btn btn-primary col-auto"
                       disabled={!this.allowAlarmkabel()}
                     >
                       {__("Select point for cabinet")}
                     </button>
                   </div>
-                  <div className="form-text mb-3">Vælg alarmskab, retning, og udpeg punkt</div>
+                  <div className="form-text mb-3">Vælg alarmskab, og udpeg punkt</div>
                 </div>
-
               </div>
             </div>
 

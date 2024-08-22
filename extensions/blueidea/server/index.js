@@ -241,7 +241,7 @@ router.post(
     req.setTimeout(TIMEOUT);
 
     // create the string we need to query the database
-    q = `SELECT lukkeliste.fnc_dan_alarm(ST_Transform(ST_GeomFromEWKT('SRID=4326;Point(${req.body.lng} ${req.body.lat})'),25832)::geometry, ${req.body.distance}, '${req.session.screenName}')`;
+    q = `SELECT lukkeliste.fnc_dan_alarm(ST_Transform(ST_GeomFromEWKT('SRID=4326;Point(${req.body.lng} ${req.body.lat})'),25832)::geometry, ${req.body.distance}, '${req.session.screenName}', '${req.body.direction}')`;
 
     SQLAPI(q, req)
       .then((uuid) => {
@@ -254,6 +254,75 @@ router.post(
         promises.push(
           SQLAPI(
             `SELECT * from lukkeliste.vw_alarmpkt where beregnuuid = '${beregnuuid}'`,
+            req,
+            { format: "geojson", srs: 4326 }
+          )
+        );
+
+        // get log
+        promises.push(
+          SQLAPI(
+            `SELECT * from lukkeliste.beregnlog where beregnuuid = '${beregnuuid}'`,
+            req,
+            { format: "geojson", srs: 4326 }
+          )
+        );
+
+        // when promises are complete, return the result
+        Promise.all(promises)
+          .then((res) => {
+            response.status(200).json({
+              alarm: res[0],
+              log: res[1],
+            });
+          })
+          .catch((err) => {
+            console.error(err);
+            response.status(500).json(err);
+          });
+      })
+      .catch((err) => {
+        console.error(err);
+        response.status(500).json(err);
+      });
+  }
+);
+
+// Query alarmkabel-plugin in database
+router.post(
+  "/api/extension/alarmskab/:userid/query",
+  function (req, response) {
+    guard(req, response);
+
+    // guard against missing lat and lng in body
+    if (!req.body.hasOwnProperty("lat") || !req.body.hasOwnProperty("lng")) {
+      response.status(401).send("Missing lat or lng");
+      return;
+    }
+
+    // guard against missing alarmskab
+    if (!req.body.hasOwnProperty("alarmskab")) {
+      response.status(401).send("Missing alarmskab id");
+      return;
+    }
+
+    // set timeout to 30s
+    req.setTimeout(TIMEOUT);
+
+    // create the string we need to query the database
+    q = `SELECT lukkeliste.fnc_beregn_afstand_alarmnet('${req.body.alarmskab}'::int, ST_Transform(ST_GeomFromEWKT('SRID=4326;Point(${req.body.lng} ${req.body.lat})'),25832)::geometry, '${req.body.direction}', '${req.session.screenName}')`;
+    console.log(q);
+    SQLAPI(q, req)
+      .then((uuid) => {
+        let beregnuuid = uuid.features[0].properties.fnc_beregn_afstand_alarmnet;
+        let promises = [];
+
+        console.log(q, " -> ", beregnuuid);
+
+        // get points
+        promises.push(
+          SQLAPI(
+            `SELECT * from lukkeliste.vw_alarm_afstand where beregnuuid = '${beregnuuid}'`,
             req,
             { format: "geojson", srs: 4326 }
           )
