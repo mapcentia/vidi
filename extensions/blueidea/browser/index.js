@@ -428,16 +428,16 @@ module.exports = {
         en_US: "Select point",
       },
       "From-To": {
-        da_DK: "Fra-Til",
-        en_US: "From-To",
+        da_DK: "Fremad",
+        en_US: "Forward",
       },
       "Both": {
         da_DK: "Begge",
         en_US: "Both",
       },
       "To-From": {
-        da_DK: "Til-Fra",
-        en_US: "To-From",
+        da_DK: "Bagud",
+        en_US: "Backwards",
       },
     };
 
@@ -492,7 +492,8 @@ module.exports = {
           selected_profileid: '',
           lukkeliste_ready: false,
           alarm_direction_selected: 'Both',
-          alarm_skab: null,
+          alarm_skab_selected: '',
+          alarm_skabe: null,
         };
       }
 
@@ -604,6 +605,28 @@ module.exports = {
       }
 
       /**
+       * Get select options from alarmskabe
+       */
+      createAlarmskabeOptions(list) {
+        // This function parses the geojson list of alarmskabe from state, into a select option lis
+        let me = this;
+        let options = [];
+        if (list) {
+          for (let i = 0; i < list.length; i++) {
+            let feature = list[i];
+            console.log(feature)
+            let option = {
+              value: feature.properties.value,
+              label: feature.properties.text,
+            };
+
+            options.push(option);
+          }
+        }
+        return options;
+      }
+
+      /**
        * Get user from backend
        * @returns {Promise<void>}
        * @private
@@ -639,6 +662,7 @@ module.exports = {
                   user_ventil_export: data.ventil_export || null,
                   selected_profileid: userProfiles[0] || '',
                   user_alarmkabel: data.alarmkabel,
+                  alarm_skabe: me.createAlarmskabeOptions(data.alarm_skabe),
                   lukkeliste_ready: data.lukkestatus.views_exists || false,
                 });
                 resolve(data);
@@ -684,7 +708,7 @@ module.exports = {
       queryPointAlarmkabel = (point, distance) => {
         let me = this;
         let body = point;
-        body.distance = distance;  //append distance to body
+        body.distance = distance;  //append distance to body //append direction to body
 
         return new Promise(function (resolve, reject) {
           $.ajax({
@@ -1769,6 +1793,17 @@ module.exports = {
                   hidden={!s.user_alarmkabel}
                 >
                   <h6>{__("Alarm cable")}</h6>
+
+                  <select
+                      className="form-select"
+                      value={s.alarm_direction_selected}
+                      onChange={(e) => this.setState({ alarm_direction_selected: e.target.value })}
+                    >
+                      <option value="FT">{__('From-To')}</option>
+                      <option value="TF">{__('To-From')}</option>
+                      <option value="Both">{__('Both')}</option>
+                    </select>
+                    <div className="form-text mb-3">Angiv søgeretning</div>
                   
                   <div className="vertical-center col-auto">
                     {__("Distance from point")}
@@ -1792,7 +1827,7 @@ module.exports = {
                       {__("Select point for alarmkabel")}
                     </button>
                   </div>
-                  <div className="form-text">Angiv antal meter, og udpeg punkt.</div>
+                  <div className="form-text mb-3">Angiv antal meter, og udpeg punkt.</div>
                 </div>
 
                 <div
@@ -1806,12 +1841,15 @@ module.exports = {
                   <div className="input-group">
                     <select
                       className="form-select"
-                      value={s.alarm_direction_selected}
-                      onChange={(e) => this.setState({ alarm_direction_selected: e.target.value })}
+                      value={s.alarm_skab_selected}
+                      onChange={(e) => this.setState({ alarm_skab_selected: e.target.value })}
                     >
-                      <option value="FT">{__('From-To')}</option>
-                      <option value="TF">{__('To-From')}</option>
-                      <option value="Both">{__('Both')}</option>
+                    // for each option in s.alarm_skabe, create an option
+                    {s.alarm_skabe.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
                     </select>
                     <button
                       onClick={() => this.selectPointAlarmkabel()}
@@ -1821,7 +1859,7 @@ module.exports = {
                       {__("Select point for cabinet")}
                     </button>
                   </div>
-                  <div className="form-text">Vælg alarmskab, retning, og udpeg punkt</div>
+                  <div className="form-text mb-3">Vælg alarmskab, retning, og udpeg punkt</div>
                 </div>
 
               </div>

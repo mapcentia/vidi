@@ -99,7 +99,7 @@ router.get("/api/extension/blueidea/:userid", function (req, response) {
     udpeg_layer: user.udpeg_layer ? user.udpeg_layer : null,
     ventil_export: user.ventil_export ? user.ventil_export : null,
     debug: user.debug ? user.debug : null,
-    alarm_skab: null,
+    alarm_skabe: null,
   };
 
   // Check if the database is correctly setup, and the session is allowed to access it
@@ -126,7 +126,7 @@ router.get("/api/extension/blueidea/:userid", function (req, response) {
 
       // if alarm_skab is set, add to return object
       if (user.hasOwnProperty("alarm_skab")) {
-        returnobj.alarm_skab = res[5].features;
+        returnobj.alarm_skabe = res[5].features;
       }
     })
     .catch((err) => {
