@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
 ## [Unreleased]
+## [2024.08.29] BaseLayer can be grouped. The structure in "baseLayerGroups": [ {groupName: "string", layers[string]}...]
+##  string in the layers array correspond to the attribute "id" in the baseLayers object.
+
 ### Fixed
 ## [2024.08.06] When using a custom dialog for feature info in gc2, the BACK buttom is added like in the default dialog
 ## [2024.08.07] Legend updated when the layer group check is toggled instead of only when a layer item is toggled 
