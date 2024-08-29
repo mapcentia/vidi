@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2024.8.1] - 2024-29-8
+### Fixed
+- Remove Polyfill.js from Service Worker cache
+- Fixes in Conflict search: If response from GC2 is not JSON, the search will proceed and the raw body text is shown in errors dialog. 
+
 ## [2024.8.0] - 2024-12-8
 ### Fixed
 - Group check boxes now works with vector layers.
