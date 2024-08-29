@@ -193,22 +193,14 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                 };
             return new Promise((resolve, reject) => {
                 request.post(options, function (err, res, body) {
-                    let jsfile, message = null, result, time, data = [], tmp = [];
+                    let result, time, data = [], tmp = [], parseErr;
                     try {
-                        jsfile = JSON.parse(body);
+                        result = JSON.parse(body);
                     } catch (e) {
-                        response.status(500).send({
-                            success: false,
-                            message: "Could not parse response from GC2 SQL API",
-                            data: body,
-                            query: postData
-                        });
-                        return;
+                        parseErr = body;
                     }
-                    result = jsfile;
-                    message = result.message;
                     time = new Date().getTime() - startTime;
-                    if (result.features) {
+                    if (result?.features) {
                         for (let i = 0; i < result.features.length; i++) {
                             for (let prop in queryables) {
                                 if (queryables.hasOwnProperty(prop)) {
@@ -243,13 +235,13 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                         table: table,
                         title: metaDataKeys[table].f_table_title || metaDataKeys[table].f_table_name,
                         group: metaDataKeys[table].layergroup,
-                        hits: (typeof result.features !== "undefined" && result.features !== null) ? result.features.length : 0,
+                        hits: result?.features?.length || 0,
                         data: data,
                         num: ++count + "/" + metaDataFinal.data.length,
                         time: time,
                         id: socketId,
-                        error: res.statusCode !== 200 ? JSON.parse(body).message : null,
-                        message: message,
+                        error: parseErr || (res.statusCode !== 200 ? result.message : null),
+                        message: result?.message,
                         sql: meta.sql,
                         meta: {
                             meta: meta.meta,
