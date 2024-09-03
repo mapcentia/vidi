@@ -92,7 +92,12 @@ module.exports = {
         if (caller !== 'init') advanced = false;
         // adjust search text
         let placeholder = window.vidiConfig?.searchConfig?.placeholderText;
-        if (placeholder) {
+        const value = $(".custom-search").val();
+        if (value) {
+            $(".custom-search").attr("placeholder",'');
+            $(".custom-search.typeahead. tt-hint").hide();
+        } 
+        else if (placeholder ) {
             searchTxt = placeholder;
             $(".custom-search.typeahead").attr("placeholder",searchTxt);
            
