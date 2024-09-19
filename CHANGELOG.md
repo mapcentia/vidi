@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2024.9.0] - 2024-19-9
+### Changed
+- Incorporated handling for `text` type fields with a new `textarea` UI widget in Editor.
+- Updated the js/embed.js script to handle 'data-vidi-title' attribute, which will set the 'title' attribute for iframes.
+
 ## [2024.8.1] - 2024-29-8
 ### Fixed
 - Remove Polyfill.js from Service Worker cache
