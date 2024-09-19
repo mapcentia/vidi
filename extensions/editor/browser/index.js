@@ -56,9 +56,9 @@ let nonCommitedEditedFeature = false;
 
 let switchLayer;
 
-const ImageUploadWidget = require('./FileUploadWidget');
+const FileUploadWidget = require('./FileUploadWidget');
 
-const widgets = {'imageupload': ImageUploadWidget, 'time': TimeWidget};
+const widgets = {'fileupload': FileUploadWidget, 'time': TimeWidget};
 
 const MODULE_NAME = `editor`;
 const PLACEMENT = window.screen.width >= 768 ? "start" : "bottom"
@@ -382,6 +382,7 @@ module.exports = {
 
                 if (fields[key]) {
                     uiSchema[key] = {};
+                    console.log(fields[key].type)
                     switch (fields[key].type) {
                         case `smallint`:
                         case `integer`:
@@ -423,7 +424,12 @@ module.exports = {
                             break;
                         case `bytea`:
                             uiSchema[key] = {
-                                'ui:widget': 'imageupload'
+                                'ui:widget': 'fileupload'
+                            };
+                            break;
+                        case `text`:
+                            uiSchema[key] = {
+                                'ui:widget': 'textarea'
                             };
                             break;
                     }
