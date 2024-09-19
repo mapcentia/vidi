@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2022 MapCentia ApS
+ * @copyright  2013-2024 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -43,6 +43,8 @@
                 var toggler = targetDiv.getAttribute("data-vidi-toggler") || "";
                 var schemata = targetDiv.getAttribute("data-vidi-schemata") || "";
 
+                var title = targetDiv.getAttribute("data-vidi-title") || "";
+
                 try {
                     var obj = JSON.parse(atob(token));
                 } catch (e) {
@@ -80,6 +82,7 @@
                 iframe.setAttribute("style", "width:" + width + ";height:" + height + ";border: 1px solid rgba(0,0,0,0.1)");
                 iframe.setAttribute("allow", "fullscreen;geolocation");
                 iframe.setAttribute("src", src);
+                iframe.setAttribute("title", title);
                 if (frameName) {
                     iframe.setAttribute("name", frameName);
                 }
