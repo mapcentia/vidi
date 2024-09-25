@@ -108,7 +108,8 @@ var _clearAll = function () {
   _clearAlarmPositions();
 };
 
-const MAXFEATURES = 500;
+const MAXFEATURES = 10;
+var TooManyFeatures = false;
 
 const resetObj = {
   authed: false,
@@ -221,8 +222,8 @@ const findMatriklerInPolygon = function (feature, is_wkb = false) {
  * async function to query addresses inside a single parcel
  * @param {*} feature
  */
-const findAddressesInMatrikel = function (feature) {
-  return new Promise((resolve, reject) => {
+const findAddressesInMatrikel = async function (feature) {
+  try {
     // Create a query
     let query = {
       ejerlavkode: feature.properties.ejerlavkode,
@@ -231,18 +232,16 @@ const findAddressesInMatrikel = function (feature) {
     };
 
     // Send the query to the server
-    $.ajax({
+    let response = await $.ajax({
       url: "https://api.dataforsyningen.dk/adresser",
       type: "GET",
       data: query,
-      success: function (data) {
-        resolve(data);
-      },
-      error: function (data) {
-        reject(data);
-      },
     });
-  });
+
+    return response;
+  } catch (error) {
+    throw error;
+  }
 };
 
 /**
@@ -375,6 +374,10 @@ module.exports = {
       "Download addresses": {
         da_DK: "Download adresser",
         en_US: "Download addresses",
+      },
+      "Get addresses": {
+        da_DK: "Hent adresser",
+        en_US: "Get addresses",
       },
       "Download valves": {
         da_DK: "Download ventil-liste",
@@ -694,12 +697,6 @@ module.exports = {
           return;
         }
 
-        // if more than 500 features, return
-        if (geojson.features.length > MAXFEATURES) {
-          me.createSnack(__("Too many features selected"));
-          return;
-        }
-
         try {
           let promises = [];
           // if the geometry is not wkb, act as if it is geojson
@@ -744,25 +741,27 @@ module.exports = {
             .then((matrikler) => {
               // For each matrikel, find the relevant addresses
               let promises2 = [];
-              for (let i = 0; i < matrikler.features.length; i++) {
-                let feature = matrikler.features[i];
-                promises2.push(findAddressesInMatrikel(feature));
-              }
 
-              Promise.all(promises2).then((results) => {
-                let adresser = this.mergeAdresser(results);
-                me.createSnack(__("Found addresses"));
+              // if the number is too high, dont get addresses aswell.
+              if (matrikler.features.length > MAXFEATURES) {
+                me.createSnack(__("Too many features selected"));
+                TooManyFeatures = true;
 
-                //console.debug("Got addresses", adresser);
-                // Set results
                 me.setState({
-                  results_adresser: adresser,
                   results_matrikler: matrikler,
                   edit_matr: false,
                 });
-
                 return;
-              })
+
+              } else {
+                // Set results
+                me.setState({
+                  results_adresser: this.getAdresser(matrikler),
+                  results_matrikler: matrikler,
+                  edit_matr: false,
+                });
+                return;
+              }
             })
             .catch((error) => {
               console.debug(error);
@@ -966,7 +965,6 @@ module.exports = {
        */
       addSelectedLedningerToMap(geojson) {
         try {
-          console.debug(geojson);
           var l = L.geoJSON(geojson, {...styleObject.selectedLedning, interactive: false}).addTo(seletedLedninger);
         } catch (error) {
           console.warn(error, geojson);
@@ -1167,6 +1165,7 @@ module.exports = {
             results_matrikler: [],
             results_ventiler: [],
           });
+          TooManyFeatures = false;
 
           // get the clicked point
           point = e.latlng;
@@ -1555,6 +1554,36 @@ module.exports = {
       };
 
       /**
+       * Gets adresser when there is too many features
+       */
+      getAdresser = async (matrikler) => {
+        let me = this;
+
+        let results = [];
+
+        for (let i = 0; i < matrikler.features.length; i++) {
+          let feature = matrikler.features[i];
+          results.push(await findAddressesInMatrikel(feature));
+          me.createSnack(__("Found addresses") + " " + i + "/" + matrikler.features.length);
+        }
+
+        let adresser = this.mergeAdresser(results);
+        me.createSnack(__("Found addresses"));
+
+        // Set results
+        me.setState({
+          results_adresser: adresser,
+          edit_matr: false,
+        });
+      
+        if (TooManyFeatures) {
+          TooManyFeatures = false;
+        }
+        
+        return;
+      };
+
+      /**
        * downloads a csv file with the results from adresser
        * @param {*} object kvhx af key/value pairs
        */
@@ -1702,8 +1731,17 @@ module.exports = {
                     onClick={() => this.downloadAdresser()}
                     className="btn btn-light"
                     disabled={!this.readyToSend()}
+                    hidden={TooManyFeatures}
                   >
                     {__("Download addresses")}
+                  </button>
+
+                  <button
+                    onClick={() => this.getAdresser()}
+                    className="btn btn-light"
+                    hidden={!TooManyFeatures}
+                  >
+                    {__("Get addresses")}
                   </button>
 
                   {s.user_profileid && this.profileidOptions().length > 1 &&
