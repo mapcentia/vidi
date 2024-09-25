@@ -26,9 +26,6 @@ const DAYSSINCE = 25569;
 // milisecs pr. day
 const MILISECSDAY = 86400000;
 
-var MAXFEATURES = 10;
-MAXFEATURES = bi.maxfeatures;
-
 const TIMEOUT = 30000;
 
 /**
@@ -345,15 +342,6 @@ router.post("/api/extension/lukkeliste/:userid/query",
         // when promises are complete, return the result
         Promise.all(promises)
           .then((res) => {
-            // if afskaaretmatrikler is over 500, count it as an error
-            //get the count from the first element in the array
-            let matr_count = res[1].features[0].properties.count;
-            if (matr_count > MAXFEATURES) {
-              res[0] = {
-                error: `Der er fundet mere end ${MAXFEATURES} matrikler (${matr_count}), der skal lukkes. Kontakt venligst en af vores medarbejdere.`,
-              };
-            }
-
             response.status(200).json({
               ventiler: res[0],
               matrikler: res[1],
