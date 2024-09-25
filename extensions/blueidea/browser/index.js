@@ -187,15 +187,20 @@ var styleObject = {
  * async function to query matrikel inside a single buffer
  * @param {*} feature
  */
-const findMatriklerInPolygon = function (feature) {
+const findMatriklerInPolygon = function (feature, is_wkb = false) {
   return new Promise((resolve, reject) => {
     // Create a query
     let query = {
       srid: 4326,
-      polygon: JSON.stringify(feature.geometry.coordinates),
       format: "geojson",
       struktur: "flad",
     };
+
+    if (!is_wkb) {
+      query.polygon = JSON.stringify(feature.geometry.coordinates)
+    } else {
+      query.wkb = feature;
+    }
 
     // Send the query to the server
     $.ajax({
@@ -335,9 +340,9 @@ module.exports = {
         da_DK: "Fundet adresser i matrikler",
         en_US: "Found addresses in parcels",
       },
-      "Error in seach": {
+      "Error in search": {
         da_DK: "Fejl i søgning",
-        en_US: "Error in seach",
+        en_US: "Error in search",
       },
       "Draw area": {
         da_DK: "Tegn områder",
@@ -632,23 +637,21 @@ module.exports = {
        * This function queries database for related matrikler and ventiler
        * @returns uuid string representing the query
        */
-      queryPointLukkeliste = (point) => {
+      queryPointLukkeliste = async (point) => {
         let me = this;
 
-        return new Promise(function (resolve, reject) {
-          $.ajax({
+        try {
+          let response = await $.ajax({
             url: "/api/extension/lukkeliste/" + me.state.user_id + "/query",
             type: "POST",
             data: JSON.stringify(point),
             contentType: "application/json",
-            success: function (data) {
-              resolve(data);
-            },
-            error: function (e) {
-              reject(e);
-            },
           });
-        });
+          return response;
+        } catch (error) {
+          console.log(error);
+          throw error;
+        }
       };
 
       /**
@@ -681,12 +684,13 @@ module.exports = {
        * @param {*} geojson
        * @returns array with kvhx
        */
-      queryAddresses(geojson) {
+      queryAddresses(geojson, is_wkb = false) {
         let me = this;
         //console.debug("queryAddresses: ", geojson);
 
         // if no features in featurecollection, return
         if (!geojson.features.length) {
+          console.log("No features in geojson");
           return;
         }
 
@@ -696,30 +700,30 @@ module.exports = {
           return;
         }
 
-        //clear last geometries + results
-        _clearAll();
-
-        me.setState({
-          results_adresser: {},
-          results_matrikler: [],
-          results_ventiler: [],
-        });
-
         try {
-          // Disolve geometry
-          let geom = this.geometryDisolver(geojson);
-
-          // show buffers on map
-          this.addBufferToMap(geom);
-
-          // Let user know we are starting
-          me.createSnack(__("Waiting to start"), true);
-
-          // For each flattened element, start a query for matrikels intersected
           let promises = [];
-          for (let i = 0; i < geom.features.length; i++) {
-            let feature = geom.features[i];
-            promises.push(findMatriklerInPolygon(feature));
+          // if the geometry is not wkb, act as if it is geojson
+          if (!is_wkb) {
+            // Disolve geometry
+            let geom = this.geometryDisolver(geojson);
+
+            // show buffers on map
+            this.addBufferToMap(geom);
+
+            // Let user know we are starting
+            me.createSnack(__("Waiting to start"), true);
+
+            // For each flattened element, start a query for matrikels intersected
+            for (let i = 0; i < geom.features.length; i++) {
+              let feature = geom.features[i];
+              promises.push(findMatriklerInPolygon(feature));
+            }
+
+          } else {
+            // if the geometry is wkb, we pass the geometry directly to the query
+            //console.debug("WKB", geojson);
+            let aggr = geojson.features[0].properties.aggregated_geom;
+            promises.push(findMatriklerInPolygon(aggr, true));
           }
 
           // When all queries are done, we can find the relevant addresses
@@ -760,16 +764,12 @@ module.exports = {
                 return;
               })
             })
-            .then(() => {
-              // show last snackbar;
-              me.createSnack(__("Show results"));
-            })
             .catch((error) => {
               console.debug(error);
 
               // If error has a message, display it
               if (error.message) {
-                me.createSnack(__("Error in seach") + ": " + error);
+                me.createSnack(__("Error in search") + ": " + error);
               } else {
                 console.error(error);
                 _clearAll();
@@ -966,6 +966,7 @@ module.exports = {
        */
       addSelectedLedningerToMap(geojson) {
         try {
+          console.debug(geojson);
           var l = L.geoJSON(geojson, {...styleObject.selectedLedning, interactive: false}).addTo(seletedLedninger);
         } catch (error) {
           console.warn(error, geojson);
@@ -1147,7 +1148,7 @@ module.exports = {
         // change the cursor to crosshair and wait for a click
         utils.cursorStyle().crosshair();
 
-        cloud.get().on("click", function (e) {
+        cloud.get().on("click", async function (e) {
 
           // remove event listener
           cloud.get().map.off("click");
@@ -1159,52 +1160,62 @@ module.exports = {
 
           me.createSnack(__("Starting analysis"), true)
 
+          //clear last geometries + results
+          _clearAll();
+          me.setState({
+            results_adresser: {},
+            results_matrikler: [],
+            results_ventiler: [],
+          });
+
           // get the clicked point
           point = e.latlng;
           utils.cursorStyle().reset();
           blocked = true;
 
           // send the point to the server
-          me.queryPointLukkeliste(point)
-            .then((data) => {
-              // if the server returns a result, show it
-              if (data) {
-                console.debug(data);
+          let data = {}
+          try {
+            data = await me.queryPointLukkeliste(point)
+          }
+          catch (error) {
+            me.createSnack(__("Error in search") + ": " + error);
+            console.warn(error);
+            return
+          }
 
-                // if the results contains a list of matrikler, run them through the queryAdresser function
-                if (data.matrikler) {
-                  me.queryAddresses(data.matrikler);
-                }
+          //console.debug(data);
 
-                if (data.ledninger) {
-                  //console.debug("Got ledninger:", data.ledninger);
-                  me.addSelectedLedningerToMap(data.ledninger);
-                  me.setState({
-                    results_ledninger: data.ledninger.features,
-                  });
-                }
-
-                // Add the clicked point to the map
-                if (data.log) {
-                  //console.debug("Got log:", data.log);
-                  me.addSelectedPointToMap(data.log);
-                }
-
-                if (data.ventiler) {
-                  //console.debug("Got ventiler:", data.ventiler);
-                  me.addVentilerToMap(data.ventiler);
-                  me.setState({
-                    results_ventiler: data.ventiler.features,
-                  });
-                }
-                return
-              }
-            })
-            .catch((error) => {
-              me.createSnack(__("Error in seach") + ": " + error);
-              console.warn(error);
-              return
+          if (data.ledninger) {
+            //console.debug("Got ledninger:", data.ledninger);
+            me.addSelectedLedningerToMap(data.ledninger);
+            me.setState({
+              results_ledninger: data.ledninger.features,
             });
+          }
+          // Add the clicked point to the map
+          if (data.log) {
+            //console.debug("Got log:", data.log);
+            me.addSelectedPointToMap(data.log);
+          }
+          if (data.ventiler) {
+            //console.debug("Got ventiler:", data.ventiler);
+            me.addVentilerToMap(data.ventiler);
+            me.setState({
+              results_ventiler: data.ventiler.features,
+            });
+          }
+
+          // Getting matrikler is another task, so we seperate it here in a try-catch to get errors to the frontend
+          try {
+            if (data.matrikler) {
+              me.queryAddresses(data.matrikler, true);
+            }
+          } catch (error) {
+            me.createSnack(__("Error in search") + ": " + error);
+            console.warn(error);
+            return
+          }
         });
         return
       };
@@ -1268,7 +1279,7 @@ module.exports = {
               return
             })
             .catch((error) => {
-              me.createSnack(__("Error in seach") + ": " + error);
+              me.createSnack(__("Error in search") + ": " + error);
               console.warn(error);
               return
             });

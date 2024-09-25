@@ -2557,6 +2557,10 @@ module.exports = {
         {
             "regExp": true,
             "requested": "services.hxgncontent.com"
+        },
+        {
+            "regExp": true,
+            "requested": "extension/lukkeliste"
         }
     ],
 

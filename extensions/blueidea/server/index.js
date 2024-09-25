@@ -26,7 +26,7 @@ const DAYSSINCE = 25569;
 // milisecs pr. day
 const MILISECSDAY = 86400000;
 
-var MAXFEATURES = 500;
+var MAXFEATURES = 10;
 MAXFEATURES = bi.maxfeatures;
 
 const TIMEOUT = 30000;
@@ -316,12 +316,11 @@ router.post("/api/extension/lukkeliste/:userid/query",
           );
         }
 
-        // get matrikler
+        // get matrikler as a multipoint, to run as few queries as possible - make sure the geometry is returned as WKB::text
         promises.push(
           SQLAPI(
-            `SELECT * from lukkeliste.beregn_afskaaretmatrikler where beregnuuid = '${beregnuuid}'`,
-            req,
-            { format: "geojson", srs: 4326 }
+            `SELECT count(*) as count, ST_AsEWKB(ST_Union(ST_MakeValid(the_geom)))::text AS aggregated_geom FROM lukkeliste.beregn_afskaaretmatrikler WHERE beregnuuid = '${beregnuuid}'`,
+            req
           )
         );
 
@@ -347,9 +346,11 @@ router.post("/api/extension/lukkeliste/:userid/query",
         Promise.all(promises)
           .then((res) => {
             // if afskaaretmatrikler is over 500, count it as an error
-            if (res[1].features.length > MAXFEATURES) {
+            //get the count from the first element in the array
+            let matr_count = res[1].features[0].properties.count;
+            if (matr_count > MAXFEATURES) {
               res[0] = {
-                error: `Der er fundet mere end ${MAXFEATURES} matrikler (${res[1].features.length}), der skal lukkes. Kontakt venligst en af vores medarbejdere.`,
+                error: `Der er fundet mere end ${MAXFEATURES} matrikler (${matr_count}), der skal lukkes. Kontakt venligst en af vores medarbejdere.`,
               };
             }
 

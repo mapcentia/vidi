@@ -108,8 +108,12 @@ router.get("/api/datahub/jordstykker", async (req, res, next) => {
     var coords = JSON.parse(req.query.polygon);
     var srid = req.query.srid;
 
-    sql +=
-      " WHERE ST_Intersects(the_geom, " + coordsToGeom(coords, srid) + ") ";
+    sql += " WHERE ST_Intersects(the_geom, " + coordsToGeom(coords, srid) + ") ";
+  }
+
+  // if wkb is given in query, use it as instersection filter
+  if (req.query.wkb) {
+    sql += " WHERE ST_Intersects(the_geom, ST_GeomFromWKB('" + req.query.wkb + "')) ";
   }
 
   // Return the result of the query from datahub
@@ -118,7 +122,7 @@ router.get("/api/datahub/jordstykker", async (req, res, next) => {
 
     // if no result, or result.success is false, return error
     if (!result || !result._success) {
-      return res.status(500).json({ error: result._message });
+      return res.status(500).json({ error: result._message, q: sql });
     }
     res.json(result);
   } catch (error) {
