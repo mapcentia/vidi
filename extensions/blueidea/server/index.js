@@ -316,24 +316,53 @@ router.post("/api/extension/lukkeliste/:userid/query",
         // get matrikler as a multipoint, to run as few queries as possible - make sure the geometry is returned as WKB::text
         promises.push(
           SQLAPI(
-            `SELECT count(*) as count, ST_AsEWKB(ST_Union(ST_MakeValid(the_geom)))::text AS aggregated_geom FROM lukkeliste.beregn_afskaaretmatrikler WHERE beregnuuid = '${beregnuuid}'`,
-            req
-          )
-        );
-
-        // get ledninger
-        promises.push(
-          SQLAPI(
-            `SELECT * from lukkeliste.beregn_afskaaretnet where beregnuuid = '${beregnuuid}'`,
-            req,
-            { format: "geojson", srs: 4326 }
-          )
-        );
-
-        // get log
-        promises.push(
-          SQLAPI(
-            `SELECT * from lukkeliste.beregnlog where beregnuuid = '${beregnuuid}'`,
+            `SELECT 
+                gid,
+                funktion,
+                parameter,
+                beregnuuid,
+                start,
+                status,
+                username,
+                the_geom,
+                "end",
+                duration,
+                matr_count,
+                null as aggregated_geom
+            FROM lukkeliste.vw_beregn_result 
+            WHERE beregnuuid = '${beregnuuid}'
+            UNION ALL
+            SELECT 
+                null,
+                null,
+                null,
+                beregnuuid,
+                null,
+                null,
+                null,
+                ST_GeomFromEWKB(ledn_aggregated_geom::bytea) AS the_geom,
+                null,
+                null,
+                null,
+              null
+            FROM lukkeliste.vw_beregn_result 
+            WHERE beregnuuid = '${beregnuuid}'
+            UNION ALL
+            SELECT 
+                null,
+                null,
+                null,
+                beregnuuid,
+                null,
+                null,
+                null,
+                the_geom,
+                null,
+                null,
+                matr_count as count,
+                matr_aggregated_geom::text
+            FROM lukkeliste.vw_beregn_result 
+            WHERE beregnuuid = '${beregnuuid}'`,
             req,
             { format: "geojson", srs: 4326 }
           )
@@ -342,11 +371,17 @@ router.post("/api/extension/lukkeliste/:userid/query",
         // when promises are complete, return the result
         Promise.all(promises)
           .then((res) => {
+            // here we need to split the result of the second promise into multiple featurecollections
+            let matrikler = { type: "FeatureCollection", features: [res[1].features[2]] }
+            let ledninger = { type: "FeatureCollection", features: [res[1].features[1]] }
+            // keep only the first feature in the list from the second promise
+            res[1].features = [res[1].features[0]]
+
             response.status(200).json({
               ventiler: res[0],
-              matrikler: res[1],
-              ledninger: res[2],
-              log: res[3],
+              matrikler: matrikler,
+              ledninger: ledninger,
+              log: res[1],
             });
           })
           .catch((err) => {

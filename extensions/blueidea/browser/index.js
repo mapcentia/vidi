@@ -476,8 +476,7 @@ module.exports = {
           });
           return response;
         } catch (error) {
-          console.log(error);
-          throw error;
+          throw error.responseJSON;
         }
       };
 
@@ -994,7 +993,7 @@ module.exports = {
             data = await me.queryPointLukkeliste(point)
           }
           catch (error) {
-            me.createSnack(__("Error in search") + ": " + error);
+            me.createSnack(__("Error in search") + ": " + error.message);
             console.warn(error);
             return
           }
