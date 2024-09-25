@@ -109,7 +109,6 @@ var _clearAll = function () {
 };
 
 const MAXFEATURES = 10;
-var TooManyFeatures = false;
 
 const resetObj = {
   authed: false,
@@ -475,6 +474,7 @@ module.exports = {
           user_alarmkabel_distance: config.extensionConfig.blueidea.alarmkabel_distance || 100,
           selected_profileid: '',
           lukkeliste_ready: false,
+          TooManyFeatures: false,
         };
       }
 
@@ -745,11 +745,11 @@ module.exports = {
               // if the number is too high, dont get addresses aswell.
               if (matrikler.features.length > MAXFEATURES) {
                 me.createSnack(__("Too many features selected"));
-                TooManyFeatures = true;
-
+                
                 me.setState({
                   results_matrikler: matrikler,
                   edit_matr: false,
+                  TooManyFeatures: true,
                 });
                 return;
 
@@ -1131,11 +1131,12 @@ module.exports = {
         let point = null;
         blocked = false;
         _clearAll();
-
+        
         me.setState({
           results_adresser: {},
           results_matrikler: [],
           edit_matr: false,
+          TooManyFeatures: false,
         });
 
         // if udpeg_layer is set, make sure it is turned on
@@ -1157,15 +1158,6 @@ module.exports = {
           }
 
           me.createSnack(__("Starting analysis"), true)
-
-          //clear last geometries + results
-          _clearAll();
-          me.setState({
-            results_adresser: {},
-            results_matrikler: [],
-            results_ventiler: [],
-          });
-          TooManyFeatures = false;
 
           // get the clicked point
           point = e.latlng;
@@ -1574,12 +1566,9 @@ module.exports = {
         me.setState({
           results_adresser: adresser,
           edit_matr: false,
+          TooManyFeatures: false,
         });
-      
-        if (TooManyFeatures) {
-          TooManyFeatures = false;
-        }
-        
+
         return;
       };
 
@@ -1731,15 +1720,15 @@ module.exports = {
                     onClick={() => this.downloadAdresser()}
                     className="btn btn-light"
                     disabled={!this.readyToSend()}
-                    hidden={TooManyFeatures}
+                    hidden={s.TooManyFeatures}
                   >
                     {__("Download addresses")}
                   </button>
 
                   <button
-                    onClick={() => this.getAdresser()}
+                    onClick={() => this.getAdresser(s.results_matrikler)}
                     className="btn btn-light"
-                    hidden={!TooManyFeatures}
+                    hidden={!s.TooManyFeatures}
                   >
                     {__("Get addresses")}
                   </button>
