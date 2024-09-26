@@ -32,12 +32,12 @@ var dict = {
       en_US: "Found parcels in area",
     },
     "Found addresses": {
-      da_DK: "Fundet adresser i matrikler",
-      en_US: "Found addresses in parcels",
+      da_DK: "Alle adresser fundet",
+      en_US: "All addresses found",
     },
     "Error in search": {
-      da_DK: "Fejl i søgning",
-      en_US: "Error in search",
+      da_DK: "Fejl i søgning af matrikler",
+      en_US: "Error in search for parcels",
     },
     "Draw area": {
       da_DK: "Tegn områder",
@@ -62,10 +62,6 @@ var dict = {
     "Valve list": {
       da_DK: "Lukkeliste",
       en_US: "Valve list",
-    },
-    "Too many features selected": {
-      da_DK: "For mange steder at lede efter adresser!",
-      en_US: "Too many places to look for addresses!",
     },
     "Download addresses": {
       da_DK: "Download adresser",

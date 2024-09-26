@@ -108,8 +108,7 @@ var _clearAll = function () {
   _clearAlarmPositions();
 };
 
-const MAXFEATURES = 10;
-const MAXPARCELS = 100;
+const MAXPARCELS = 250;
 
 
 const resetObj = {
@@ -143,24 +142,42 @@ const findMatriklerInPolygon = function (feature, is_wkb = false) {
       struktur: "flad",
     };
 
-    if (!is_wkb) {
-      query.polygon = JSON.stringify(feature.geometry.coordinates)
-    } else {
-      query.wkb = feature;
-    }
+    try {
+      if (!is_wkb) {
+        query.polygon = JSON.stringify(feature.geometry.coordinates)
 
-    // Send the query to the server
-    $.ajax({
-      url: "/api/datahub/jordstykker",
-      type: "GET",
-      data: query,
-      success: function (data) {
-        resolve(data);
-      },
-      error: function (data) {
-        reject(data);
-      },
-    });
+      // Send the query to the server
+      $.ajax({
+        url: "/api/datahub/jordstykker",
+        type: "GET",
+        data: query,
+        success: function (data) {
+          resolve(data);
+        },
+        error: function (data) {
+          reject(data);
+        },
+      });
+
+      } else {
+        query.wkb = feature;
+
+        // Send the query to the server, but using post - as the wkb is too large for a get request
+        $.ajax({
+          url: "/api/datahub/jordstykker",
+          type: "POST",
+          body: query,
+          success: function (data) {
+            resolve(data);
+          },
+          error: function (data) {
+            reject(data);
+          },
+        });
+      }
+    } catch (error) {
+      throw error;
+    }
   });
 };
 
@@ -553,24 +570,23 @@ module.exports = {
             .then((results) => {
               //console.debug("Got matrikler", results);
               // Merge all results into one array
-              try {
-                let merged = this.mergeMatrikler(results);
+              let merged = this.mergeMatrikler(results);
+              
+              // if the number of matrs is larger than maxparcels, dont add to map
+              if (merged.features.length < MAXPARCELS) {
                 this.addMatrsToMap(merged);
-                me.createSnack(__("Found parcels"));
-
-                return merged;
-              } catch (error) {
-                console.warn(error);
               }
+
+              //me.createSnack(__("Found parcels"));
+
+              return merged;
             })
             .then((matrikler) => {
               // For each matrikel, find the relevant addresses
               let promises2 = [];
 
               // if the number is too high, dont get addresses aswell.
-              if (matrikler.features.length > MAXFEATURES) {
-                me.createSnack(__("Too many features selected"));
-                
+              if (matrikler.features.length > MAXPARCELS) {
                 me.setState({
                   results_matrikler: matrikler,
                   edit_matr: false,
@@ -589,19 +605,12 @@ module.exports = {
               }
             })
             .catch((error) => {
-              console.debug(error);
-
-              // If error has a message, display it
-              if (error.message) {
-                me.createSnack(__("Error in search") + ": " + error);
-              } else {
-                console.error(error);
-                _clearAll();
-              }
-              return;
+              console.warn('findMatriklerInPolygon:', error);
+              me.createSnack(__("Error in search"));
+              throw error;
             });
         } catch (error) {
-          console.warn(error);
+          console.warn('queryAddresses:', error);
           me.createSnack(error);
           return;
         }
@@ -1025,17 +1034,13 @@ module.exports = {
           // Getting matrikler is another task, so we seperate it here in a try-catch to get errors to the frontend
           try {
             if (data.matrikler) {
-              console.log(data.matrikler)
               let parcelcount = data.matrikler.features[0].properties.matr_count;
-
               if (parcelcount > MAXPARCELS) {
                 me.createSnack(__("Large number of parcels found") + " (" + parcelcount + "/" + MAXPARCELS + ")");
-              } else {
-                me.queryAddresses(data.matrikler, true);
-              }
+              } 
+              me.queryAddresses(data.matrikler, true);
             }
           } catch (error) {
-            me.createSnack(__("Error in search") + ": " + error);
             console.warn(error);
             return
           }
