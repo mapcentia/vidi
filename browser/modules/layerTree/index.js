@@ -4157,9 +4157,11 @@ module.exports = {
                 }).length;
                 activeLayersInSubGroups += 
                 activeLayers.filter(e => 
+                    JSON.parse(metaDataKeys[layerTreeUtils.stripPrefix(e)]?.meta)?.vidi_sub_group && 
                     JSON.parse(metaDataKeys[layerTreeUtils.stripPrefix(e)]?.meta)?.vidi_sub_group.match(re) && 
                     metaDataKeys[layerTreeUtils.stripPrefix(e)].layergroup === layerGroup).length;
                 const searchPath = `[data-gc2-group-id="${layerGroup}"]` + ' ' + split.map(e => `[data-gc2-subgroup-id="${e}"]`).join(' ') + ` [data-gc2-subgroup-name="${split[split.length - 1]}"]`;
+                
                 const el = document.querySelector(searchPath);
                 if (el) {
                     el.indeterminate = activeLayersInSubGroups > 0 && activeLayersInSubGroups !== layersInSubGroups;
