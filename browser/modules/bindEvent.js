@@ -157,14 +157,20 @@ module.exports = {
             $(this).on('change', function (e) {
                 let prefix = '';
                 let isChecked = $(e.target).prop(`checked`);
-                let subGroupName = $(this).data(`gc2-subgroup-name`);
-                let subGroupLevel = $(this).data(`gc2-subgroup-level`);
-                let layerGroup = $(this).closest('.card-body').data('gc2-group-id');
+                let subGroupName = $(this).data(`gc2-subgroup-name`).toString();
+                const subGroupLevel = $(this).data(`gc2-subgroup-level`).toString();
+                let layerGroup = $(this).closest('.card-body').data('gc2-group-id').toString();
                 meta.getMetaData().data.forEach(e => {
                     let parsedMeta = layerTree.parseLayerMeta(e);
-                    if (parsedMeta?.vidi_sub_group?.split("|")[subGroupLevel] === subGroupName && e.layergroup === layerGroup) {
-                        prefix = parsedMeta?.default_layer_type && parsedMeta.default_layer_type !== 't' ? parsedMeta.default_layer_type + ':' : '';
-                        switchLayer.init(prefix + e.f_table_schema + "." + e.f_table_name, isChecked, false);
+                    if (e.layergroup === layerGroup) { 
+                        const glIndex1 = parsedMeta?.vidi_sub_group?.split("|").indexOf(subGroupName);
+                        const glIndex2 = parsedMeta?.vidi_sub_group?.split("|").indexOf(subGroupLevel);
+                        const glIndex = glIndex1 === -1 ? glIndex2 : glIndex1;
+                        if (glIndex > -1 && 
+                            parsedMeta?.vidi_sub_group?.split("|")[glIndex] === subGroupName) {
+                            prefix = parsedMeta?.default_layer_type && parsedMeta.default_layer_type !== 't' ? parsedMeta.default_layer_type + ':' : '';
+                            switchLayer.init(prefix + e.f_table_schema + "." + e.f_table_name, isChecked, false);
+                        }
                     }
                 })
                 e.stopPropagation();
