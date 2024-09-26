@@ -166,7 +166,10 @@ const findMatriklerInPolygon = function (feature, is_wkb = false) {
         $.ajax({
           url: "/api/datahub/jordstykker",
           type: "POST",
-          body: query,
+          headers: {
+            "Content-Type": "application/json",
+          },
+          data: JSON.stringify(query),
           success: function (data) {
             resolve(data);
           },
@@ -588,9 +591,11 @@ module.exports = {
               // if the number is too high, dont get addresses aswell.
               if (matrikler.features.length > MAXPARCELS) {
                 me.setState({
-                  results_matrikler: matrikler,
                   edit_matr: false,
                   TooManyFeatures: true,
+                });
+                me.setState({
+                  results_matrikler: matrikler,
                 });
                 return;
 
@@ -1567,7 +1572,7 @@ module.exports = {
 
                   <button
                     onClick={() => this.getAdresser(s.results_matrikler)}
-                    className="btn btn-light"
+                    className="btn btn-primary"
                     hidden={!s.TooManyFeatures}
                   >
                     {__("Get addresses")}

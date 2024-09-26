@@ -116,8 +116,8 @@ var dict = {
       en_US: "Valve list not ready",
     },
     "Large number of parcels found": {
-      da_DK: "Der er fundet for mange matrikler. Matrikler vil ikke blive vist.",
-      en_US: "Too many parcels found. Parcels will not be shown.",
+      da_DK: "Der er fundet for mange matrikler. Matrikler vil ikke blive vist. Der kan gå tid før vi er klar til at hente adresser",
+      en_US: "Too many parcels found. Parcels will not be shown. It may take some time before we are ready to fetch addresses",
     },
   };
 
