@@ -109,6 +109,8 @@ var _clearAll = function () {
 };
 
 const MAXFEATURES = 10;
+const MAXPARCELS = 100;
+
 
 const resetObj = {
   authed: false,
@@ -1023,7 +1025,14 @@ module.exports = {
           // Getting matrikler is another task, so we seperate it here in a try-catch to get errors to the frontend
           try {
             if (data.matrikler) {
-              me.queryAddresses(data.matrikler, true);
+              console.log(data.matrikler)
+              let parcelcount = data.matrikler.features[0].properties.matr_count;
+
+              if (parcelcount > MAXPARCELS) {
+                me.createSnack(__("Large number of parcels found") + " (" + parcelcount + "/" + MAXPARCELS + ")");
+              } else {
+                me.queryAddresses(data.matrikler, true);
+              }
             }
           } catch (error) {
             me.createSnack(__("Error in search") + ": " + error);

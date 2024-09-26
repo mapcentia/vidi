@@ -119,6 +119,10 @@ var dict = {
       da_DK: "Lukkeliste ikke klar",
       en_US: "Valve list not ready",
     },
+    "Large number of parcels found": {
+      da_DK: "Der er fundet for mange matrikler. Matrikler vil ikke blive vist.",
+      en_US: "Too many parcels found. Parcels will not be shown.",
+    },
   };
 
   module.exports = dict;
