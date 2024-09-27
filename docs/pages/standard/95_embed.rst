@@ -87,7 +87,11 @@ Følgende funktioner er synlige, men kan sættes til "none" hvis funktionerne sk
 * **data-vidi-location (valgfri)**
  * Find-mig-knappen.
 * **data-vidi-signin (valgfri)**
- * Login-knappen.
+ * Login-knappen.*
+* **data-vidi-burger (valgfri)**
+ * Menu knappen (burgeren).
+* **data-vidi-toggler (valgfri)**
+ * Navbar toggle-knappen, som vises i på smal skærm.
 
 Følgende funktioner er skjulte, men kan sættes til "inline" hvis funktionerne skal være synlige:
 
