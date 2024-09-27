@@ -37,7 +37,6 @@
                 var clear = targetDiv.getAttribute("data-vidi-clear") || "none";
                 var boxzoom = targetDiv.getAttribute("data-vidi-boxzoom") || "none";
                 var signin = targetDiv.getAttribute("data-vidi-signin") || "";
-                var burger = targetDiv.getAttribute("data-vidi-burger") || "";
                 var screenshot = targetDiv.getAttribute("data-vidi-screenshot") || "none";
                 var brand = targetDiv.getAttribute("data-vidi-brand") || "";
                 var toggler = targetDiv.getAttribute("data-vidi-toggler") || "";
@@ -71,7 +70,6 @@
                     "&cle=" + clear +
                     "&box=" + boxzoom +
                     "&sig=" + signin +
-                    "&bur=" + burger +
                     "&scr=" + screenshot +
                     "&bra=" + brand +
                     "&tog=" + toggler +
