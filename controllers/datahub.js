@@ -80,7 +80,7 @@ function coordsToGeom(coords, srid) {
   return geom;
 }
 
-router.get("/api/datahub/jordstykker", async (req, res, next) => {
+const queryJordstykker = async (req, res, next) => {
   // This endpoint tries to mimics the DAWA endpoint, but uses the datahub instead
 
   // build the query
@@ -103,13 +103,29 @@ router.get("/api/datahub/jordstykker", async (req, res, next) => {
 
   sql += " FROM matrikel_datahub.vw_jordstykke";
 
-  // if polygon and srid is given in query, use it as instersection filter
-  if (req.query.polygon && req.query.srid) {
-    var coords = JSON.parse(req.query.polygon);
-    var srid = req.query.srid;
+  // Get the method from the request
+  var method = req.method;
 
-    sql +=
-      " WHERE ST_Intersects(the_geom, " + coordsToGeom(coords, srid) + ") ";
+  //place parameters in a common variable
+  var parameters
+  if (method == "GET") {
+    parameters = req.query;
+  } else {
+    parameters = req.body;
+  }
+
+  //console.log(parameters);
+
+  // if polygon and srid is given in query, use it as instersection filter
+  if (parameters.polygon && parameters.srid) {
+    var coords = JSON.parse(parameters.polygon);
+    var srid = parameters.srid;
+    sql += " WHERE ST_Intersects(the_geom, " + coordsToGeom(coords, srid) + ") ";
+  }
+
+  // if wkb is given in query, use it as instersection filter
+  if (parameters.wkb) {
+    sql += " WHERE ST_Intersects(the_geom, ST_GeomFromWKB('" + parameters.wkb + "')) ";
   }
 
   // Return the result of the query from datahub
@@ -118,13 +134,16 @@ router.get("/api/datahub/jordstykker", async (req, res, next) => {
 
     // if no result, or result.success is false, return error
     if (!result || !result._success) {
-      return res.status(500).json({ error: result._message });
+      return res.status(500).json({ error: result._message, q: sql });
     }
     res.json(result);
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: error });
   }
-});
+};
+
+router.get("/api/datahub/jordstykker", queryJordstykker);
+router.post("/api/datahub/jordstykker", queryJordstykker);
 
 module.exports = router;
