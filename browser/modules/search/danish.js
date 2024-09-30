@@ -94,17 +94,18 @@ module.exports = {
         let placeholder = window.vidiConfig?.searchConfig?.placeholderText;
         if (placeholder) {
             searchTxt = placeholder;
-            $(".custom-search.typeahead").attr("placeholder",searchTxt);
-           
+            $(".custom-search.tt-input").attr("placeholder",
+                searchTxt
+            );
         } else {
             searchTxt = "Adresse, matr. nr.";
             if (sfeSearchActive) {
-                $(".custom-search.typeahead").attr("placeholder",
+                $(".custom-search.tt-input").attr("placeholder",
                     searchTxt
                     + (esrSearchActive ? ", ESR nr. " : "")
                     + " eller SFE nr.");
             } else if (esrSearchActive) {
-                $(".custom-search.typeahead").attr("placeholder",
+                $(".custom-search.tt-input").attr("placeholder",
                     searchTxt + " eller ESR nr.");
             }
         }
