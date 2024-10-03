@@ -216,7 +216,7 @@ class VectorLayerFilter extends React.Component {
                                 onClick={this.onRulesApply.bind(this)}>
                             <i className="bi bi-check"></i><span className="d-none d-lg-inline"> {__(`Apply`)}</span>
                         </button>
-                        <button className="btn btn-light btn-sm" type="button" onClick={this.onRulesClear.bind(this)}>
+                        <button className="btn btn-outline-secondary btn-sm" type="button" onClick={this.onRulesClear.bind(this)}>
                             <i className="bi bi-eraser"></i><span className="d-none d-lg-inline"> {__(`Disable`)}</span>
                         </button>
                         {buildResetButton()}

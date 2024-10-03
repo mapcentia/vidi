@@ -72,11 +72,16 @@
 .leaflet-popup-close-button {
   top: -11px !important;
   right: -11px !important;
-  color: var(--bs-black) !important;
-  background: var(--bs-white) !important;
+  color: var(--bs-body-color) !important;
+  background: var(--bs-body-bg) !important;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.leaflet-popup-content-wrapper,.leaflet-popup-tip {
+  background: var(--bs-tertiary-bg);
+  color: #333
 }
 
 .leaflet-popup-content-wrapper, .leaflet-popup-tip, .leaflet-popup-close-button {

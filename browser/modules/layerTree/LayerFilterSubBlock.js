@@ -387,7 +387,7 @@ class VectorLayerFilterSubBlock extends React.Component {
             if (!isSubBlock) {
                 filterControls.push(<div key={`column_` + index} className="d-flex align-items-center gap-1">
                     <div className="form-group">
-                        <button className="btn btn-light btn-sm" type="button"
+                        <button className="btn btn-outline-secondary btn-sm" type="button"
                                 onClick={this.onRuleDelete.bind(this, index)}
                                 style={{display: this.props.isFilterImmutable ? "none" : "inline"}}>
                             <i className="bi bi-dash"></i>
@@ -403,7 +403,7 @@ class VectorLayerFilterSubBlock extends React.Component {
                     <div key={`column_` + index}
                          className="d-flex align-items-center gap-1">
                         <div className="form-group align-self-start">
-                            <button className="btn btn-light btn-sm" type="button"
+                            <button className="btn btn-outline-secondary btn-sm" type="button"
                                     onClick={this.onRuleDelete.bind(this, index)}
                                     style={{display: this.props.isFilterImmutable ? "none" : "inline"}}>
                                 <i className="bi bi-dash"></i>
@@ -433,10 +433,10 @@ class VectorLayerFilterSubBlock extends React.Component {
                     <div className="d-flex flex-column gap-1">{filterControls}</div>
                     <div className="d-flex gap-1">
                         <div className="btn-group" style={{display: this.props.isFilterImmutable ? "none" : "inline"}}>
-                            <button className="btn btn-light btn-sm" data-bs-toggle="dropdown" type="button" onClick={this.onRuleAdd.bind(this)}>
+                            <button className="btn btn-outline-secondary btn-sm" data-bs-toggle="dropdown" type="button" onClick={this.onRuleAdd.bind(this)}>
                                 <i className="bi bi-plus"></i>
                             </button>
-                            <button className="btn btn-light btn-sm dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" type="button">
+                            <button className="btn btn-outline-secondary btn-sm dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" type="button">
                                 <span className="visually-hidden">Toggle Dropdown</span>
                             </button>
                             <ul className="dropdown-menu">

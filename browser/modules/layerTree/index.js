@@ -2017,10 +2017,10 @@ module.exports = {
             window.operateFormatter = (value, row, index) => {
                 return `
                     <div class="d-flex justify-content-around">
-                    <a class="btn btn-light btn-sm filter" href="javascript:void(0)" title="Filter">
+                    <a class="btn btn-outline-secondary btn-sm filter" href="javascript:void(0)" title="Filter">
                         <i class="bi bi-filter-square text-primary"></i>
                     </a>
-                    <a class="btn btn-light btn-sm unfilter" href="javascript:void(0)" title="Unfilter">
+                    <a class="btn btn-outline-secondary btn-sm unfilter" href="javascript:void(0)" title="Unfilter">
                         <i class="bi bi-x-lg text-danger"></i>
                     </a>
                     </div>
