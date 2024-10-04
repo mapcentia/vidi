@@ -192,69 +192,94 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                 },
                 uri = config.gc2.host + "/api/v2/sql/" + (req.session.subUser ? req.session.screenName + "@" + req.session.parentDb : db);
             return new Promise((resolve, reject) => {
-                fetch(uri, options)
-                    .then(response => response.json())
-                    .then(result => {
-                        let time, data = [], tmp = [], error;
-                        if (result.code !== 200) {
-                            error = result.message;
-                        }
-                        time = new Date().getTime() - startTime;
-                        if (result?.features) {
-                            for (let i = 0; i < result.features.length; i++) {
-                                for (let prop in queryables) {
-                                    if (queryables.hasOwnProperty(prop)) {
-                                        if (queryables[prop].conflict) {
-                                            tmp.push({
-                                                name: prop,
-                                                alias: queryables[prop].alias || prop,
-                                                value: result.features[i].properties[prop],
-                                                sort_id: queryables[prop].sort_id,
-                                                link: queryables[prop].link,
-                                                linkprefix: queryables[prop].linkprefix,
-                                                key: false
-                                            })
+                try {
+                    fetch(uri, options)
+                        .then(response => response.json())
+                        .then(result => {
+                            let time, data = [], tmp = [], error;
+                            if (result.code !== 200) {
+                                error = result.message;
+                            }
+                            time = new Date().getTime() - startTime;
+                            if (result?.features) {
+                                for (let i = 0; i < result.features.length; i++) {
+                                    for (let prop in queryables) {
+                                        if (queryables.hasOwnProperty(prop)) {
+                                            if (queryables[prop].conflict) {
+                                                tmp.push({
+                                                    name: prop,
+                                                    alias: queryables[prop].alias || prop,
+                                                    value: result.features[i].properties[prop],
+                                                    sort_id: queryables[prop].sort_id,
+                                                    link: queryables[prop].link,
+                                                    linkprefix: queryables[prop].linkprefix,
+                                                    key: false
+                                                })
+                                            }
                                         }
                                     }
+                                    if (tmp.length > 0) {
+                                        tmp.push({
+                                            name: metaDataKeys[table].pkey,
+                                            alias: null,
+                                            value: result.features[i].properties[metaDataKeys[table].pkey],
+                                            sort_id: null,
+                                            key: true
+                                        });
+                                        data.push(tmp);
+                                    }
+                                    tmp = [];
                                 }
-                                if (tmp.length > 0) {
-                                    tmp.push({
-                                        name: metaDataKeys[table].pkey,
-                                        alias: null,
-                                        value: result.features[i].properties[metaDataKeys[table].pkey],
-                                        sort_id: null,
-                                        key: true
-                                    });
-                                    data.push(tmp);
-                                }
-                                tmp = [];
                             }
+                            let meta = metaDataKeys[table];
+                            let hit = {
+                                table: table,
+                                title: metaDataKeys[table].f_table_title || metaDataKeys[table].f_table_name,
+                                group: metaDataKeys[table].layergroup,
+                                hits: result?.features?.length || 0,
+                                data: data,
+                                num: ++count + "/" + metaDataFinal.data.length,
+                                time: time,
+                                id: socketId,
+                                error: error || (res.statusCode !== 200 ? result.message : null),
+                                message: result?.message,
+                                sql: meta.sql,
+                                meta: {
+                                    meta: meta.meta,
+                                    layergroup: meta.layergroup,
+                                    f_table_name: meta.f_table_name,
+                                    f_table_title: meta.f_table_title || meta.f_table_name,
+                                    meta_url: meta.meta_url,
+                                }
+                            };
+                            io.emit(socketId, hit);
+                            resolve(hit)
+                        });
+                } catch (e) {
+                    let meta = metaDataKeys[table];
+                    let hit = {
+                        table: table,
+                        title: metaDataKeys[table].f_table_title || metaDataKeys[table].f_table_name,
+                        group: metaDataKeys[table].layergroup,
+                        hits: 0,
+                        data: data,
+                        num: ++count + "/" + metaDataFinal.data.length,
+                        time: time,
+                        id: socketId,
+                        error: "Network connection error",
+                        message: "Network connection error",
+                        sql: meta.sql,
+                        meta: {
+                            meta: meta.meta,
+                            layergroup: meta.layergroup,
+                            f_table_name: meta.f_table_name,
+                            f_table_title: meta.f_table_title || meta.f_table_name,
+                            meta_url: meta.meta_url,
                         }
-                        let meta = metaDataKeys[table];
-                        let hit = {
-                            table: table,
-                            title: metaDataKeys[table].f_table_title || metaDataKeys[table].f_table_name,
-                            group: metaDataKeys[table].layergroup,
-                            hits: result?.features?.length || 0,
-                            data: data,
-                            num: ++count + "/" + metaDataFinal.data.length,
-                            time: time,
-                            id: socketId,
-                            error: error || (res.statusCode !== 200 ? result.message : null),
-                            message: result?.message,
-                            sql: meta.sql,
-                            meta: {
-                                meta: meta.meta,
-                                layergroup: meta.layergroup,
-                                f_table_name: meta.f_table_name,
-                                f_table_title: meta.f_table_title || meta.f_table_name,
-                                meta_url: meta.meta_url,
-                            }
-                        };
-                        io.emit(socketId, hit);
-                        resolve(hit)
-                    });
-
+                    };
+                    io.emit(socketId, hit);
+                    resolve(hit)
+                }
             });
         }
         createPool().then(r => {
