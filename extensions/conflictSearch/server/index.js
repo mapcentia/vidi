@@ -16,6 +16,7 @@ const POOL_SIZE = config?.extensionConfig?.conflictSearch?.poolSize || 30;
 const utf8 = require('utf8');
 // Set locale for date/time string
 dayjs.locale("da_DK");
+const base64url = require('base64url');
 
 router.post('/api/extension/conflictSearch', function (req, response) {
     req.setTimeout(0); // no timeout
@@ -181,7 +182,7 @@ router.post('/api/extension/conflictSearch', function (req, response) {
 
             const sql = "SELECT " + fieldStr + " FROM " + quotedTableName + " WHERE  ST_intersects(" + geomField + ", ST_Transform(ST_geomfromtext('" + wkt + "',4326)," + srid + "))";
             const queryables = JSON.parse(metaDataKeys[table].fieldconf);
-            let postData = "client_encoding=UTF8&srs=4326&lifetime=0&q=" + sql + "&key=" + "&key=" + (typeof req.session.gc2ApiKey !== "undefined" ? req.session.gc2ApiKey : "xxxxx" /*Dummy key is sent to prevent start of session*/),
+            let postData = "client_encoding=UTF8&srs=4326&lifetime=0&base64=true&q=" +  base64url.encode(sql) + "&key=" + "&key=" + (typeof req.session.gc2ApiKey !== "undefined" ? req.session.gc2ApiKey : "xxxxx" /*Dummy key is sent to prevent start of session*/),
                 options = {
                     method: 'POST',
                     body: postData,
@@ -264,7 +265,7 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                         hits: 0,
                         data: data,
                         num: ++count + "/" + metaDataFinal.data.length,
-                        time: time,
+                        time: null,
                         id: socketId,
                         error: "Network connection error",
                         message: "Network connection error",
