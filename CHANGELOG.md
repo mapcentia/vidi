@@ -6,7 +6,7 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ## [2024.10.0] - 2024-4-10
 ### Fixed
-- Conflict search module: Non ascii characters in SELECT statements caused a low level un-catchable error. Now statements are base64url encoded   
+- Conflict search module: Non ascii characters in SELECT statements caused a low level un-catchable error. Now statements are base64url encoded.   
 
 ## [2024.9.0] - 2024-19-9
 ### Changed
