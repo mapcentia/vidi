@@ -1082,7 +1082,7 @@ module.exports = {
           cloud.get().map.off("click");
 
           // if the click is blocked, return
-          if (blocked) {
+          if (blocked || !me.state.active) {
             return;
           }
 
