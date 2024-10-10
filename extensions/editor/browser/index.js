@@ -900,6 +900,7 @@ module.exports = {
             // Transform field values according to their types
             Object.keys(fields).map(key => {
                 switch (fields[key].type) {
+                    case `numeric`:
                     case `double precision`:
                         if (eventFeatureCopy.properties[key]) {
                             eventFeatureCopy.properties[key] = parseFloat(eventFeatureCopy.properties[key]);
