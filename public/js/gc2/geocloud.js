@@ -1281,7 +1281,7 @@ geocloud = (function () {
             }
         }
         this.removeLayer = function (layer) {
-                lControl.removeLayer(layer);
+            lControl.removeLayer(layer);
         }
         //ol2, ol3 and leaflet
         // MapQuest OSM doesn't work anymore. Switching to OSM.
@@ -1943,11 +1943,6 @@ geocloud = (function () {
                                         if (layers[key].layer.id === baseLayerName) {
                                             layerWasFound = true;
 
-                                            // Move all others than Google maps back
-                                            if (baseLayerName.search("google") === -1 && baseLayerName.search("yandex") === -1) {
-                                                layers[key].layer.setZIndex(1);
-                                            }
-
                                             if (!loadEvent) {
                                                 loadEvent = function () {
                                                 }
@@ -1972,7 +1967,29 @@ geocloud = (function () {
                                             layers[key].layer.off("tileerror");
                                             layers[key].layer.on("tileerror", tileErrorEvent);
 
-                                            me.map.addLayer(layers[key].layer);
+                                             me.map.addLayer(layers[key].layer);
+
+                                            if (layers[key]?.layer?._glMap) {
+                                                let libreMap = layers[key].layer.getMaplibreMap();
+                                                console.log("TEST", layers[key].layer.getBounds())
+                                                console.log("TEST", libreMap)
+                                                setTimeout(()=> {
+                                                    me.map.fitBounds(me.map.getBounds());
+                                                    libreMap.resize();
+                                                }, 0);
+                                                if (libreMap) {
+                                                    libreMap.off("sourcedata");
+                                                    libreMap.on("sourcedata", (e) => {
+                                                            if (e.isSourceLoaded) {
+                                                                loadEvent();
+                                                            } else {
+                                                                // console.log('LOADING');
+                                                                // loadingEvent();
+                                                            }
+                                                        }
+                                                    )
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -1988,6 +2005,16 @@ geocloud = (function () {
                     setTimeout(poll, 200);
                 }
             }());
+        };
+        this.addMVTBaselayer = function (style, conf) {
+            var l = new L.maplibreGL({
+                style
+            });
+            l.id = conf.name;
+            l.baseLayer = true;
+            lControl.addBaseLayer(l, conf.name);
+            this.showLayer(conf.name)
+            return [l];
         };
 
         this.addXYZBaselayer = function (url, conf) {
