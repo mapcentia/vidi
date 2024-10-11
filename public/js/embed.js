@@ -84,7 +84,7 @@
                 if (frameName) {
                     iframe.setAttribute("name", frameName);
                 }
-                targetDiv.appendChild(iframe);
+                targetDiv.replaceWith(iframe);
             } else {
                 setTimeout(poll, 100);
             }
