@@ -149,7 +149,6 @@
                     <i class="bi bi-slash-circle"></i> <span class="d-none d-md-inline">{{Cancel}}</span>
                 </button>
             </div>
-
         </div>
         <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse"
                 data-bs-target="#navbarSupportedContent"
@@ -159,6 +158,42 @@
 
         <div class="collapse navbar-collapse justify-content-end flex-grow-0 pe-auto mt-2 mt-sm-0 gap-2"
              id="navbarSupportedContent">
+            <div class="nav-item dropdown mb-2 mb-sm-0">
+                <button class="btn btn-link nav-link py-2 px-0 px-lg-2 dropdown-toggle d-flex align-items-center" id="bd-theme" type="button" aria-expanded="false"
+                        data-bs-toggle="dropdown" data-bs-display="static" aria-label="Toggle theme (auto)">
+                    <svg width="16" height="16" fill="currentColor" class="bi my-1 theme-icon-active">
+                        <use href="fonts/bootstrap-icons.svg#circle-half"></use>
+                    </svg>
+                    <span class="d-lg-none ms-2" id="bd-theme-text">Toggle theme</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="bd-theme-text">
+                    <li>
+                        <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="light" aria-pressed="false">
+                            <svg class="bi me-2 opacity-50" width="16" height="16" fill="currentColor">
+                                <use href="fonts/bootstrap-icons.svg#sun-fill"></use>
+                            </svg>
+                            Light
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="dark" aria-pressed="false">
+                            <svg class="bi me-2 opacity-50" width="16" height="16" fill="currentColor">
+                                <use href="fonts/bootstrap-icons.svg#moon-stars-fill"></use>
+                            </svg>
+                            Dark
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="auto" aria-pressed="true">
+                            <svg class="bi me-2 opacity-50" width="16" height="16" fill="currentColor">
+                                <use href="fonts/bootstrap-icons.svg#circle-half"></use>
+                            </svg>
+                            Auto
+                        </button>
+                    </li>
+                </ul>
+
+            </div>
             <div class="nav-item dropdown mb-2 mb-sm-0">
                 <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="bi bi-three-dots-vertical"></i>
