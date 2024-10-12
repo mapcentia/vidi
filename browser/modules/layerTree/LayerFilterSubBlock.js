@@ -409,8 +409,7 @@ class VectorLayerFilterSubBlock extends React.Component {
                                 <i className="bi bi-dash"></i>
                             </button>
                         </div>
-                        <div className="p-2 w-100"
-                             style={{"borderRadius": "0.375rem", "border": "1px solid #ced4da"}}>{control}</div>
+                        <div className="p-2 w-100 filter-sub-block">{control}</div>
                         <div className="d-flex align-items-center invisible">{ruleValidityIndicator}</div>
                     </div>
                 );

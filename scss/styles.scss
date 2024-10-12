@@ -185,3 +185,8 @@
   background-color: var(--bs-secondary-bg) !important;
   border: var(--bs-border-width) solid var(--bs-secondary-bg) !important;
 }
+
+.filter-sub-block {
+  border-radius: 0.375rem;
+  border: var(--bs-border-width) solid var(--bs-border-color);
+}

@@ -440,7 +440,7 @@ class StateSnapshotsDashboard extends React.Component {
 
             let updateSnapshotControl = (<button
                 type="button"
-                className="btn btn-sm btn-light"
+                className="btn btn-sm btn-outline-secondary"
                 onClick={() => this.enableUpdateSnapshotForm(item.id)}
                 title={titles.refresh}>
                 <i className="bi bi-arrow-clockwise"></i>
