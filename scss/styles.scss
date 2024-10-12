@@ -81,7 +81,7 @@
 
 .leaflet-popup-content-wrapper,.leaflet-popup-tip {
   background: var(--bs-tertiary-bg);
-  color: #333
+  color: var(--bs-body-color);
 }
 
 .leaflet-popup-content-wrapper, .leaflet-popup-tip, .leaflet-popup-close-button {
