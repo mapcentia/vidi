@@ -157,3 +157,31 @@
   padding: .375rem .75rem !important;
   line-height: inherit !important;
 }
+
+.rw-widget-input {
+  background-color: var(--bs-body-bg) !important;
+  color: var(--bs-body-color) !important;
+  border: var(--bs-border-width) solid var(--bs-border-color) !important;
+  box-shadow: none !important;
+}
+
+.rw-list-option {
+  color: var(--bs-body-color) !important;
+}
+
+.rw-popup {
+  background-color: var(--bs-body-bg) !important;
+  color: var(--bs-body-color) !important;
+  border: var(--bs-border-width) solid var(--bs-border-color) !important;
+}
+
+.rw-multiselect-tag {
+  box-shadow: none !important;
+  color: var(--bs-body-color) !important;
+  background-color: var(--bs-secondary-bg) !important;
+  border: none !important;
+}
+.rw-list-option-create:hover, .rw-list-option:hover {
+  background-color: var(--bs-secondary-bg) !important;
+  border: var(--bs-border-width) solid var(--bs-secondary-bg) !important;
+}
