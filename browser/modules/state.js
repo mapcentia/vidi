@@ -316,7 +316,6 @@ module.exports = {
                                         response.data = response.data.data;
                                     }
                                 }
-
                                 if (response.data.bounds !== null) {
                                     var frame = urlVars.frame || 0;
                                     var bounds = response.data.bounds[frame];
@@ -365,15 +364,14 @@ module.exports = {
                                                     angle = Math.round(radians * (180 / Math.PI));
                                                     return [angle, scale];
                                                 }
+                                                const zoom = cloud.get().map.getZoom();
+                                                const orgZoom = parseInt(response.data.anchor.split('/')[1]);
                                                 document.querySelectorAll('.drag-marker').forEach(marker => {
                                                     const tr = getCurrenTransform(marker);
                                                     const rotate = tr[0];
-                                                    const scale = tr[1] * (1/scaleFactor);
+                                                    const scale = tr[1] * Math.pow(2, (zoom - orgZoom));
                                                     marker.style.transform = `rotate(${rotate}deg) scale(${scale})`;
                                                 })
-
-                                                console.log(scaleFactor)
-
                                                 $("#container1").css("transform", "scale(" + scaleFactor + ")");
                                                 $(".leaflet-control-scale-line").prependTo("#scalebar").css("transform", "scale(" + scaleFactor + ")");
                                                 $(".leaflet-control-scale-line").prependTo("#scalebar").css("transform-origin", "left bottom 0px");
