@@ -586,8 +586,18 @@ module.exports = module.exports = {
         for (var i = 0; i < window.setBaseLayers.length; i = i + 1) {
             bl = window.setBaseLayers[i];
             if (bl.id === id) {
-                // Base layer can be a MVT layer
-                if (bl?.type === "MVT") {
+                if (bl?.type === "WMTS") {
+                    result = cloud.get().addWMTSBaselayer(bl.url, {
+                        name: bl.id,
+                        attribution: bl.attribution,
+                        minZoom: typeof bl.minZoom !== "undefined" ? bl.minZoom : 0,
+                        maxZoom: typeof bl.maxZoom !== "undefined" ? bl.maxZoom : 20,
+                        maxNativeZoom: typeof bl.maxNativeZoom !== "undefined" ? bl.maxNativeZoom : 18,
+                        baseLayer: true,
+                        layer: bl.layer,
+                        tileMatrixSet: bl.tileMatrixSet,
+                    });
+                } else if (bl?.type === "MVT") {
                     result = cloud.get().addMVTBaselayer(bl.url, {
                         name: bl.id,
                         attribution: bl.attribution,

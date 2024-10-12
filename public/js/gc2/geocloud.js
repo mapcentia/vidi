@@ -562,7 +562,6 @@ geocloud = (function () {
                 reader.read().then(read = (result) => {
                     if (result.done) {
                         if (me.onLoad) me.onLoad();
-                       // me.onLoad(me);
                         if (onLoadCallback) onLoadCallback();
                         layer.update(geoJSON)
                         return;
@@ -1967,16 +1966,10 @@ geocloud = (function () {
                                             layers[key].layer.off("tileerror");
                                             layers[key].layer.on("tileerror", tileErrorEvent);
 
-                                             me.map.addLayer(layers[key].layer);
+                                            me.map.addLayer(layers[key].layer);
 
                                             if (layers[key]?.layer?._glMap) {
                                                 let libreMap = layers[key].layer.getMaplibreMap();
-                                                console.log("TEST", layers[key].layer.getBounds())
-                                                console.log("TEST", libreMap)
-                                                setTimeout(()=> {
-                                                    me.map.fitBounds(me.map.getBounds());
-                                                    libreMap.resize();
-                                                }, 0);
                                                 if (libreMap) {
                                                     libreMap.off("sourcedata");
                                                     libreMap.on("sourcedata", (e) => {
@@ -2010,6 +2003,19 @@ geocloud = (function () {
             var l = new L.maplibreGL({
                 style
             });
+            l.id = conf.name;
+            l.baseLayer = true;
+            lControl.addBaseLayer(l, conf.name);
+            this.showLayer(conf.name)
+            return [l];
+        };
+
+        this.addWMTSBaselayer = function (url, conf) {
+            var l = L.tileLayer.wmts(url, {
+                tileMatrixSet: conf.tileMatrixSet,
+                layer: conf.layer
+            });
+
             l.id = conf.name;
             l.baseLayer = true;
             lControl.addBaseLayer(l, conf.name);
@@ -2232,6 +2238,9 @@ geocloud = (function () {
                         break;
                     case "mvt":
                         l = createMVTLayer(layers[i], defaults);
+                        break;
+                    case "wmts":
+                        l = createWMTSLayer(layers[i], defaults);
                         break;
                     default:
                         l = createTileLayer(layers[i], defaults);
