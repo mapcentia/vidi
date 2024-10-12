@@ -66,6 +66,8 @@ var p, hashArr = hash.replace("#", "").split("/");
 
 let activeLayersInSnapshot = false;
 
+let isApplyingState = false;
+
 /**
  * Returns internaly stored global state
  *
@@ -673,10 +675,11 @@ module.exports = {
      * Applies state
      *
      * @param {Object} state Applied state
-     *
+     * @param ignoreInitZoomCenter
      * @returns {Promise}
      */
     applyState: (state, ignoreInitZoomCenter = false) => {
+        isApplyingState = true;
         if (LOG) console.log(`${MODULE_NAME}: applying state`, state);
         if (!urlVars.dps) {
             history.pushState(``, document.title, window.location.pathname + window.location.search);
@@ -718,9 +721,11 @@ module.exports = {
                 }
 
                 Promise.all(promises).then(() => {
+                    isApplyingState = false
                     resolve();
                 }).catch(errors => {
                     console.error(errors);
+                    isApplyingState = false
                     reject(errors);
                 });
             };
@@ -871,5 +876,7 @@ module.exports = {
             l = hashArr[4].split(",");
         }
         return l;
-    }
+    },
+
+    isApplyingState: () => isApplyingState
 };
