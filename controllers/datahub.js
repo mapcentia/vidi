@@ -80,28 +80,30 @@ function coordsToGeom(coords, srid) {
   return geom;
 }
 
+const jordstykkeQuery = `
+  SELECT 
+    gid as featureid, 
+    matrikelnummer as matrikelnr, 
+    ejerlavskode as ejerlavkode, 
+    ejerlavsnavn, 
+    sognekode, 
+    sognenavn, 
+    kommunekode, 
+    kommunenavn, 
+    registreretareal, 
+    vejareal, 
+    regionskode,
+    samletfastejendomlokalid as bfenummer, 
+    the_geom 
+  FROM 
+    matrikel_datahub.vw_jordstykke
+`;
+
 const queryJordstykker = async (req, res, next) => {
   // This endpoint tries to mimics the DAWA endpoint, but uses the datahub instead
 
   // build the query
-
-  var sql = "SELECT";
-
-  // Define the fields to return
-  sql += " gid as featureid";
-  sql += ", matrikelnummer as matrikelnr";
-  sql += ", ejerlavskode as ejerlavkode";
-  sql += ", ejerlavsnavn";
-  sql += ", sognekode";
-  sql += ", sognenavn";
-  sql += ", kommunekode";
-  sql += ", kommunenavn";
-  sql += ", registreretareal";
-  sql += ", vejareal";
-  sql += ", regionskode";
-  sql += ", the_geom";
-
-  sql += " FROM matrikel_datahub.vw_jordstykke";
+  var sql = jordstykkeQuery
 
   // Get the method from the request
   var method = req.method;
@@ -123,7 +125,17 @@ const queryJordstykker = async (req, res, next) => {
     sql += " WHERE ST_Intersects(the_geom, " + coordsToGeom(coords, srid) + ") ";
   }
 
-  // if wkb is given in query, use it as instersection filter
+  // if bfenr is given in query, use it as filter
+  if (parameters.bfenummer) {
+    sql += " WHERE samletfastejendomlokalid = '" + parameters.bfenummer + "'";
+  }
+
+  // if x and y is given in query, use it as instersection filter
+  if (parameters.x && parameters.y && parameters.srid) {
+    sql += " WHERE ST_Contains(the_geom, ST_Transform(ST_GeomFromText('POINT(" + parameters.x + " " + parameters.y + ")', " + parameters.srid + "), 25832)) ";
+  }
+
+  // if wkb is given in query, use it as instersection filter. in this case, the srid is contained in the wkb
   if (parameters.wkb) {
     sql += " WHERE ST_Intersects(the_geom, ST_GeomFromWKB('" + parameters.wkb + "')) ";
   }
@@ -143,7 +155,42 @@ const queryJordstykker = async (req, res, next) => {
   }
 };
 
+const queryJordstykkeByMatrAndElav = async (req, res, next) => {
+  // This endpoint tries to mimics the DAWA endpoint with matr and ejerlavkode, but uses the datahub instead
+
+  // build the query
+  var sql = jordstykkeQuery
+
+  //console.log(req.params);
+
+  // Get the path parameters from the request
+  var matr = req.params.matr;
+  var ejerlavkode = req.params.ejerlavkode;
+
+  // if matr and ejerlavkode is given in path, use it as filter
+  if (matr && ejerlavkode) {
+    sql += " WHERE matrikelnummer = '" + matr + "' AND ejerlavskode = " + ejerlavkode + " ";
+  }
+
+  // Return the result of the query from datahub
+  try {
+    const result = await queryDatahub(sql);
+
+    // if no result, or result.success is false, return error
+    if (!result || !result._success) {
+      return res.status(500).json({ error: result._message, q: sql });
+    }
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error });
+  }
+}
+
+
 router.get("/api/datahub/jordstykker", queryJordstykker);
 router.post("/api/datahub/jordstykker", queryJordstykker);
+
+router.get("/api/datahub/jordstykker/:ejerlavkode/:matr", queryJordstykkeByMatrAndElav);
 
 module.exports = router;
