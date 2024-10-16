@@ -242,7 +242,7 @@ const autocompleteSpoofer = async (req, res, next) => {
   
   // handle jordstykke autocomplete
   if (service == "jordstykker") {
-    var sql = "SELECT result from api.mw_jordstykke_dawa";
+    var sql = "SELECT result from api.mw_jordstykke_autocomplete";
 
     // search by term, if term is given
     if (term) {
@@ -251,6 +251,14 @@ const autocompleteSpoofer = async (req, res, next) => {
     // search by bfenummer, if bfenummer is given and term is not
     else if (bfenummer) {
       sql += " WHERE tsvector_bfe like '" + bfenummer + "%'";
+    }
+  } else if (service == "adresser") {
+    // handle adresse autocomplete
+    var sql = "SELECT result from api.mw_adresse_autocomplete";
+
+    // search by term, if term is given
+    if (term) {
+      sql += " WHERE tsvector_adr @@ to_tsquery('" + term + "')";
     }
   } else {
     return res.status(500).json({ error: "Service not found" });
