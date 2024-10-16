@@ -39,7 +39,8 @@ class DAWASearch extends React.Component {
       enableMatrikel:
         props.enableMatrikel === undefined ? true : props.enableMatrikel,
       enableBFE: props.enableBFE === undefined ? true : props.enableBFE,
-      enableSFE: props.enableSFE === undefined ? true : props.enableSFE,
+      //enableSFE: props.enableSFE === undefined ? true : props.enableSFE,
+      enableSFE: props.enableSFE === false,
       placeholder: this.buildPlaceholder(),
       triggerAtChar:
         props.triggerAtChar === undefined ? 0 : parseInt(props.triggerAtChar),
@@ -69,7 +70,7 @@ class DAWASearch extends React.Component {
   }
 
   buildPlaceholder() {
-    return "Adresse, matr.nr, ESR nr. eller SFE nr.";
+    return "Adresse, matr.nr eller BFE nr.";
   }
 
   _handleResult = (id) => {
@@ -177,7 +178,8 @@ class DAWASearch extends React.Component {
 
   callDawa = (service, term, specific = undefined) => {
     var s = this.state;
-    var hostName = "https://dawa.aws.dk/" + service + "/autocomplete?";
+    var hostName = "/api/datahub/" + service + "/autocomplete?";
+    //var hostName = "https://dawa.aws.dk/" + service + "/autocomplete?";
     var params = {};
 
     params.per_side = s.resultsPerSource;
