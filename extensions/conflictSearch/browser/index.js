@@ -900,7 +900,7 @@ module.exports = module.exports = {
                                         }
                                     });
                                     td.append(table2);
-                                    tr.append("<td style='width: 60px'><button type='button' class='btn btn-light btn-sm zoom-to-feature' data-gc2-sf-table='" + v.table + "' data-gc2-sf-key='" + key + "' data-gc2-sf-fid='" + fid + "'>#" + (u + 1) + " <i class='bi bi-search'></i></button></td>");
+                                    tr.append("<td style='width: 60px'><button type='button' class='btn btn-outline-secondary btn-sm zoom-to-feature' data-gc2-sf-table='" + v.table + "' data-gc2-sf-key='" + key + "' data-gc2-sf-fid='" + fid + "'>#" + (u + 1) + " <i class='bi bi-search'></i></button></td>");
                                     tr.append(td);
                                     table1.append(tr);
                                 });
@@ -1050,7 +1050,7 @@ let dom = `
                                           role="status" aria-hidden="true" style="display: none">
                                 </span> Print rapport
                             </button>
-                            <button disabled class="btn btn-sm btn-light" id="conflict-set-print-area-btn"><i class='bi bi-fullscreen'></i></button>
+                            <button disabled class="btn btn-sm btn-outline-secondary" id="conflict-set-print-area-btn"><i class='bi bi-fullscreen'></i></button>
                             <fieldset disabled id="conflict-get-print-fieldset">
                                 <div class="input-group">
                                     <a target="_blank" href="javascript:void(0)" class="btn btn-sm btn-outline-success" id="conflict-open-pdf">Åben PDF</a>

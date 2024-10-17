@@ -392,7 +392,7 @@ class StateSnapshotsDashboard extends React.Component {
             let importButton = false;
             if (local && this.state.authenticated) {
                 importButton = (
-                    <button type="button" className="btn btn-sm btn-light" onClick={() => this.seizeSnapshot(item)}>
+                    <button type="button" className="btn btn-sm btn-outline-secondary" onClick={() => this.seizeSnapshot(item)}>
                         <i title={titles.seize} className="bi bi-person-add"></i>
                     </button>);
             }

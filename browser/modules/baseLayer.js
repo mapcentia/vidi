@@ -303,7 +303,7 @@ module.exports = module.exports = {
                             style="visibility: ${displayInfo};"
                             data-baselayer-name="${layerName}"
                             data-baselayer-info="${bl.abstract}"
-                            class="info-label btn btn-sm btn-light"><i class="bi bi-info-square pe-none"></i></button>
+                            class="info-label btn btn-sm btn-outline-secondary"><i class="bi bi-info-square pe-none"></i></button>
                     </div>
                 </li>`;
 
