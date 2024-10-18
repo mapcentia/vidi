@@ -44,9 +44,10 @@ class DAWASearch extends React.Component {
       placeholder: this.buildPlaceholder(),
       triggerAtChar:
         props.triggerAtChar === undefined ? 0 : parseInt(props.triggerAtChar),
+      loading: false,
     };
 
-    this.autocompleteSearchDebounced = debounce(this.autocompleteSearch, 1200);
+    this.autocompleteSearchDebounced = debounce(this.autocompleteSearch, 800);
     this.autocompleteSearchThrottled = throttle(this.autocompleteSearch, 1200);
     this.escFunction = this.escFunction.bind(this);
   }
@@ -111,6 +112,11 @@ class DAWASearch extends React.Component {
     // run promises here to return stuff from somewhere
     var calls = [];
 
+    //set loading
+    this.setState({
+      loading: true,
+    });
+
     // Anything
     if (s.enableAdresse) {
       calls.push(this.callDawa("adresser", term));
@@ -156,12 +162,18 @@ class DAWASearch extends React.Component {
           //console.log(term)
           if (term === this.waitingFor) {
             _self.setState({
+              loading: false,
               searchTerm: term,
               searchResults: uniqBy(cleaned, JSON.stringify).slice(
                 0,
                 s.resultsMax
               ),
             });
+
+            // focus on the search input
+            if (document.getElementById("searchInput")) {
+              document.getElementById("searchInput").focus();
+            }
           }
         } catch (e) {
           _self.setState({
@@ -228,10 +240,12 @@ class DAWASearch extends React.Component {
         <div className="input-group">
           <input
             type="text"
+            id="searchInput"
             className="form-control"
             placeholder={s.placeholder}
             value={s.searchTerm}
             onChange={this.dynamicSearch}
+            disabled={s.loading}
           />
           {s.searchTerm.length > 0 && (
             <button
