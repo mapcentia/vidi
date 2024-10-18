@@ -216,7 +216,7 @@ const queryJordstykkeByMatrAndElav = async (req, res, next) => {
 
 const autocompleteSpoofer = async (req, res, next) => {
   // we anticipate a service, and a search term in the q parameter. there might be a paramter per_side for number of results
-  
+
   const handleTerm = (term) => {
     // if term is empty, return an empty string
     if (!term) {
@@ -228,10 +228,10 @@ const autocompleteSpoofer = async (req, res, next) => {
     // make sure the term is valid for tsquery. when there is a space interpret it as an AND
     t = t.replace(/ /g, " & ") + ":*";
     return t;
-  }
+  };
 
   var service = req.params.service;
-  var term = handleTerm(req.query.q); 
+  var term = handleTerm(req.query.q);
   var limit = req.query.per_side ? req.query.per_side : 10;
   var bfenummer = req.query.bfenummer;
 
@@ -239,7 +239,7 @@ const autocompleteSpoofer = async (req, res, next) => {
   if (bfenummer && isNaN(bfenummer)) {
     return res.json([]);
   }
-  
+
   // handle jordstykke autocomplete
   if (service == "jordstykker") {
     var sql = "SELECT result from api.mw_jordstykke_autocomplete";
