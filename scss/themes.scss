@@ -1,5 +1,5 @@
 /* Parameters */
-[data-bs-theme="geopartner"] {
+[data-bs-theme="light"] {
     --bs-primary: #009688;
     --bs-primary-rgb: 0, 150, 136;
     --bs-primary-shade-10: #00877a;
@@ -26,7 +26,7 @@
     --tool-border-radius: 5px;
 }
 
-[data-bs-theme="geopartner-dark"] {
+[data-bs-theme="dark"] {
     --bs-body-bg: #212529;
     --bs-body-bg-rgb: 33, 37, 41;
     --bs-secondary-bg: #343a40;
@@ -75,86 +75,86 @@
 
 /* Light mode */
 /* Værktøjslinje */
-[data-bs-theme="geopartner"] .nav-pills .nav-link.active {
+[data-bs-theme="light"] .nav-pills .nav-link.active {
     color: --bs-white;
     background-color: var(--bs-primary);
 }
 
-[data-bs-theme="geopartner"] .nav-link.active:hover {
+[data-bs-theme="light"] .nav-link.active:hover {
     filter: brightness(var(--hover-brightness));
 }
 
-[data-bs-theme="geopartner"] .nav-link {
+[data-bs-theme="light"] .nav-link {
     color: var(--bs-primary);
 }
 
 /* Komponenter */
-[data-bs-theme="geopartner"] .btn-primary {
+[data-bs-theme="light"] .btn-primary {
     background-color: var(--bs-primary);
     border-color: var(--bs-primary-shade-20);
 }
 
-[data-bs-theme="geopartner"] .btn-primary:active {
+[data-bs-theme="light"] .btn-primary:active {
     background-color: var(--bs-primary);
     filter: brightness(var(--active-brightness));
     border-color: var(--bs-primary-shade-20);
 }
 
-[data-bs-theme="geopartner"] .btn-primary:hover {
+[data-bs-theme="light"] .btn-primary:hover {
     background-color: var(--bs-primary);
     filter: brightness(var(--hover-brightness));
 }
 
-[data-bs-theme="geopartner"] .btn-outline-primary {
+[data-bs-theme="light"] .btn-outline-primary {
     color: var(--bs-primary);
     border-color: var(--bs-primary-shade-20);
 }
-[data-bs-theme="geopartner"] .btn-outline-primary:hover {
+[data-bs-theme="light"] .btn-outline-primary:hover {
     color: var(--bs-white);
     background-color: var(--bs-primary);
     border-color: var(--bs-primary-shade-20);
 }
 
-[data-bs-theme="geopartner"] .btn-check:checked + .btn {
+[data-bs-theme="light"] .btn-check:checked + .btn {
     background-color: var(--bs-primary);
     border-color: var(--bs-primary-shade-20);
 }
-[data-bs-theme="geopartner"] .btn-check:checked + .btn:hover {
+[data-bs-theme="light"] .btn-check:checked + .btn:hover {
     background-color: var(--bs-primary);
     color: var(--bs-white);
     border-color: var(--bs-primary-shade-20);
 }
-[data-bs-theme="geopartner"] .btn-check + .btn:hover {
+[data-bs-theme="light"] .btn-check + .btn:hover {
     border-color: var(--bs-primary-shade-20);
 }
 
-[data-bs-theme="geopartner"] .dropdown-item:active {
+[data-bs-theme="light"] .dropdown-item:active {
     background-color: var(--bs-primary-shade-20);
 }
 
-[data-bs-theme="geopartner"] .form-check-input:checked {
+[data-bs-theme="light"] .form-check-input:checked {
     background-color: var(--bs-primary-shade-20);
     border-color: var(--bs-primary-shade-50);
 }
-[data-bs-theme="geopartner"] .form-check-input:indeterminate {
+[data-bs-theme="light"] .form-check-input:indeterminate {
     background-color: var(--bs-primary-shade-20);
     border-color: var(--bs-primary-shade-50);
 }
 
-[data-bs-theme="geopartner"] .form-check-input:focus {
+[data-bs-theme="light"] .form-check-input:focus {
     border-color: var(--bs-primary-shade-20);
     box-shadow: 0 0 0 0.25rem var(--bs-primary-tint-70);
     outline: 0;
 }
 
-[data-bs-theme="geopartner"] .form-switch .form-check-input:focus {
+[data-bs-theme="light"] .form-switch .form-check-input:focus {
     --bs-form-switch-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23b3e0db'/%3e%3c/svg%3e");
 }
 
 /* Leaflet */
 /* Align leaflet-draw */
 @media (max-height: 700px) {
-    [data-bs-theme="geopartner"] .leaflet-draw.leaflet-control {
+    [data-bs-theme="light"] .leaflet-draw.leaflet-control {
         margin-right: 54px !important;
         top: -384px;
         position: relative;
@@ -162,7 +162,7 @@
 }
 
 /* Change tool colors */
-[data-bs-theme="geopartner"] .leaflet-control-locate a,
+[data-bs-theme="light"] .leaflet-control-locate a,
 .leaflet-control-zoom a,
 .leaflet-bar a,
 .leaflet-control a,
@@ -172,7 +172,7 @@
 
 /* leaflet-draw */
 /* Color is hardcoded to --bs-primary-shade-30  - omit circlemarker, because it is an icon */
-[data-bs-theme="geopartner"] .leaflet-draw-draw-marker,
+[data-bs-theme="light"] .leaflet-draw-draw-marker,
 .leaflet-draw-draw-circle,
 .leaflet-draw-draw-rectangle,
 .leaflet-draw-draw-polygon,
@@ -187,90 +187,90 @@
 /* Dark mode */
 
 /* Forvaltningskort */
-[data-bs-theme="geopartner-dark"] img.leaflet-tile[src^="/api/dataforsyningen/forvaltning2"] {
+[data-bs-theme="dark"] img.leaflet-tile[src^="/api/dataforsyningen/forvaltning2"] {
     filter: invert(1) hue-rotate(180deg) brightness(1.5);
 }
 
 /* Matrikelkort */
-[data-bs-theme="geopartner-dark"]
+[data-bs-theme="dark"]
     img.leaflet-tile[src^="/api/datafordeler/Matrikel/MatrikelGaeldendeOgForeloebigWMS/1.0.0/WMS"] {
     filter: invert(1) hue-rotate(180deg) brightness(1.5);
 }
 
 /* Topografisk kort */
-[data-bs-theme="geopartner-dark"] img.leaflet-tile[src^="https://dk.gc2.io/mapcache/baselayers/tms/1.0.0/geodk.bright"]
+[data-bs-theme="dark"] img.leaflet-tile[src^="https://dk.gc2.io/mapcache/baselayers/tms/1.0.0/geodk.bright"]
 {
     filter: invert(1) hue-rotate(180deg) brightness(1.5);
 }
 
-[data-bs-theme="geopartner-dark"] .nav-pills .nav-link.active {
+[data-bs-theme="dark"] .nav-pills .nav-link.active {
     color: --bs-white;
     background-color: var(--bs-primary);
 }
 
-[data-bs-theme="geopartner-dark"] .nav-link.active:hover {
+[data-bs-theme="dark"] .nav-link.active:hover {
     filter: brightness(var(--hover-brightness));
 }
 
-[data-bs-theme="geopartner-dark"] .nav-link {
+[data-bs-theme="dark"] .nav-link {
     color: var(--bs-primary);
 }
 
 /* Komponenter */
-[data-bs-theme="geopartner-dark"] .btn-primary {
+[data-bs-theme="dark"] .btn-primary {
     background-color: var(--bs-primary);
     border-color: var(--bs-primary-shade-20);
 }
 
-[data-bs-theme="geopartner-dark"] .btn-primary:active {
+[data-bs-theme="dark"] .btn-primary:active {
     background-color: var(--bs-primary);
     filter: brightness(var(--active-brightness));
     border-color: var(--bs-primary-shade-20);
 }
 
-[data-bs-theme="geopartner-dark"] .btn-primary:hover {
+[data-bs-theme="dark"] .btn-primary:hover {
     background-color: var(--bs-primary);
     filter: brightness(var(--hover-brightness));
 }
 
-[data-bs-theme="geopartner-dark"] .btn-outline-primary {
+[data-bs-theme="dark"] .btn-outline-primary {
     color: var(--bs-primary);
     border-color: var(--bs-primary-shade-20);
 }
-[data-bs-theme="geopartner-dark"] .btn-outline-primary:hover {
+[data-bs-theme="dark"] .btn-outline-primary:hover {
     color: var(--bs-white);
     background-color: var(--bs-primary);
     border-color: var(--bs-primary-shade-20);
 }
 
-[data-bs-theme="geopartner-dark"] .btn-check:checked + .btn {
+[data-bs-theme="dark"] .btn-check:checked + .btn {
     background-color: var(--bs-primary);
     border-color: var(--bs-primary-shade-20);
 }
-[data-bs-theme="geopartner-dark"] .btn-check:checked + .btn:hover {
+[data-bs-theme="dark"] .btn-check:checked + .btn:hover {
     background-color: var(--bs-primary);
     color: var(--bs-white);
     border-color: var(--bs-primary-shade-20);
 }
-[data-bs-theme="geopartner-dark"] .btn-check + .btn:hover {
+[data-bs-theme="dark"] .btn-check + .btn:hover {
     color: var(--bs-primary);
     border-color: var(--bs-primary-shade-20);
 }
-[data-bs-theme="geopartner-dark"] .dropdown-item:active {
+[data-bs-theme="dark"] .dropdown-item:active {
     background-color: var(--bs-primary-shade-20);
 }
 
 /* Leaflet */
 /* Align leaflet-draw */
 @media (max-height: 700px) {
-    [data-bs-theme="geopartner"] .leaflet-draw .leaflet-control {
+    [data-bs-theme="light"] .leaflet-draw .leaflet-control {
         margin-right: 2px !important;
         position: relative;
     }
 }
 
 /* Change tool colors */
-[data-bs-theme="geopartner-dark"] .leaflet-control-locate a,
+[data-bs-theme="dark"] .leaflet-control-locate a,
 .leaflet-control-zoom a,
 .leaflet-bar a,
 .leaflet-control a,
