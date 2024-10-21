@@ -1140,7 +1140,6 @@ module.exports = {
                                 }
 
                                 let notSortedGroupsArray = array_unique(groups.reverse());
-                                metaData.data.reverse();
 
                                 let arr = notSortedGroupsArray;
 
@@ -2018,10 +2017,10 @@ module.exports = {
             window.operateFormatter = (value, row, index) => {
                 return `
                     <div class="d-flex justify-content-around">
-                    <a class="btn btn-light btn-sm filter" href="javascript:void(0)" title="Filter">
+                    <a class="btn btn-outline-secondary btn-sm filter" href="javascript:void(0)" title="Filter">
                         <i class="bi bi-filter-square text-primary"></i>
                     </a>
-                    <a class="btn btn-light btn-sm unfilter" href="javascript:void(0)" title="Unfilter">
+                    <a class="btn btn-outline-secondary btn-sm unfilter" href="javascript:void(0)" title="Unfilter">
                         <i class="bi bi-x-lg text-danger"></i>
                     </a>
                     </div>
@@ -4136,10 +4135,7 @@ module.exports = {
         const metaData = meta.getMetaData(filterValue);
         const layersInGroup = metaData.data.filter(e => e.layergroup === layerGroup).length;
         const activeLayers = _self.getActiveLayers().filter(e => {
-            if (e.includes(':')) {
-                e = e.split(':').slice(1).join(':');
-            }            
-            return metaDataKeys[e]?.layergroup === layerGroup
+            return metaDataKeys[layerTreeUtils.stripPrefix(e)]?.layergroup === layerGroup
         });
         const activeLayersInGroup = activeLayers.length;
         if (layerSubGroup) {

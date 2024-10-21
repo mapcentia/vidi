@@ -1,1150 +1,705 @@
 <style>
-  .history-control {
-      display: {{_displayHistory}};
-  }
+    .history-control {
+        display: {{_displayHistory}};
+    }
 
-  .leaflet-control-locate {
-      display: {{_displayLocation}};
-  }
+    .leaflet-control-locate {
+        display: {{_displayLocation}};
+    }
 
-  #offcanvasLayerControlBtn {
-      display: {{_displayLayer}};
-  }
+    #offcanvasLayerControlBtn {
+        display: {{_displayLayer}};
+    }
 
-  .place-search {
-      display: {{_displaySearch}};
-  }
+    .place-search {
+        display: {{_displaySearch}};
+    }
 
-  .legend-btn {
-      display: {{_displayLegend}};
-  }
+    .legend-btn {
+        display: {{_displayLegend}};
+    }
 
-  .baselayer-toggle {
-      display: {{_displayBackground}};
-  }
+    .baselayer-toggle {
+        display: {{_displayBackground}};
+    }
 
-  .full-screen-btn {
-      display: {{_displayFullscreen}};
-  }
+    .full-screen-btn {
+        display: {{_displayFullscreen}};
+    }
 
-  .about-btn {
-      display: {{_displayAbout}};
-  }
+    .about-btn {
+        display: {{_displayAbout}};
+    }
 
-  .reset-btn {
-      display: {{_displayReset}};
-  }
+    .reset-btn {
+        display: {{_displayReset}};
+    }
 
-  .leaflet-control-measurements {
-      display: {{_displayMeasurement}};
-  }
+    .leaflet-control-measurements {
+        display: {{_displayMeasurement}};
+    }
 
-  .leaflet-clear-map {
-      display: {{_displayClear}};
-  }
+    .leaflet-clear-map {
+        display: {{_displayClear}};
+    }
 
-  .leaflet-control-boxzoom {
-      display: {{_displayBox}};
-  }
+    .leaflet-control-boxzoom {
+        display: {{_displayBox}};
+    }
 
-  .sign-in-btn {
-      display: {{_displaySignin}};
-  }
+    .sign-in-btn {
+        display: {{_displaySignin}};
+    }
 
-  .navbar-toggler {
-      display: {{_displayBurger}};
+    .leaflet-control-simpleMapScreenshoter {
+        display: {{_displayScreenshot}};
+    }
 
-  }
+    .navbar-brand {
+        display: {{_displayBrand}} !important;
+    }
 
-  .leaflet-control-simpleMapScreenshoter {
-      display: {{_displayScreenshot}};
-  }
+    .navbar-toggler {
+        display: {{_displayToggler}};
+    }
 
-  .navbar-brand {
-      display: {{_displayBrand}} !important;
-  }
+    .baselayer-tool {
+        display: none !important;
+    }
 
-  .navbar-toggler {
-      display: {{_displayToggler}};
-  }
+    .configuration {
+        display: {{_displayConfigSwitcher}};
+    }
 
-  .btn-outline-secondary {
-      --bs-btn-bg: rgba(255, 255, 255, 0.7) !important;
-  }
-  .baselayer-tool {
-      display: none !important;
-  }
-
-  .configuration {
-      display: {{_displayConfigSwitcher}};
-  }
 </style>
 <style>
-  .leaflet-control-custom,
-  .history-control,
-  .leaflet-control-boxzoom {
-    display: inline;
-  }
+    .leaflet-control-custom, .history-control, .leaflet-control-boxzoom {
+        display: inline;
+    }
 </style>
-<script>
-    const toggleButton = document.getElementById('gp-themeToggle');
-    const htmlElement = document.documentElement;
-
-    toggleButton.addEventListener('click', function() {
-        const currentTheme = htmlElement.getAttribute('data-bs-theme');
-        
-        if (currentTheme === 'geopartner') {
-            htmlElement.setAttribute('data-bs-theme', 'geopartner-dark');
-            toggleButton.innerHTML = '<i class="bi bi-sun"></i>'; // Crescent moon icon
-        } else {
-            htmlElement.setAttribute('data-bs-theme', 'geopartner');
-            toggleButton.innerHTML = '<i class="bi bi-moon"></i>'; // Sun icon
-        }
-    });
-</script>
 <!-- map -->
 <div id="pane">
-  <div id="container">
-    <div id="map">
-      <div
-        class="toast-container position-fixed bottom-0 end-0 p-3 pb-5 me-sm-5"
-      >
-        <div
-          id="legend-toast"
-          class="toast"
-          role="alert"
-          aria-live="assertive"
-          aria-atomic="true"
-        >
-          <div class="toast-header">
-            <strong class="me-auto">{{Legend}}</strong>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="toast"
-              aria-label="Close"
-            ></button>
-          </div>
-          <div class="toast-body overflow-auto" id="legend-toast-body"></div>
+    <div id="container">
+        <div id="map">
+            <div class="toast-container position-fixed bottom-0 end-0 p-3 pb-5 me-sm-5">
+                <div id="legend-toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="toast-header">
+                        <strong class="me-auto">{{Legend}}</strong>
+                        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                    <div class="toast-body overflow-auto" id="legend-toast-body">
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
 </div>
 
 <!-- About Modal -->
-<div
-  class="modal fade"
-  id="about-modal"
-  tabindex="-1"
-  role="dialog"
-  aria-labelledby="about-modalLabel"
->
-  <div class="modal-dialog modal-lg" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5" id="about-modalLabel">{{About}}</h1>
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="modal"
-          aria-label="{{Close}}"
-        ></button>
-      </div>
-      <div class="modal-body">{{{aboutBox}}}</div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-          {{Close}}
-        </button>
-      </div>
+<div class="modal fade" id="about-modal" tabindex="-1" role="dialog" aria-labelledby="about-modalLabel">
+    <div class="modal-dialog modal-fullscreen" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="about-modalLabel">{{About}}</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{Close}}"></button>
+            </div>
+            <div class="modal-body">
+                {{{aboutBox}}}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{Close}}</button>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
-<div
-  class="offcanvas offcanvas-top"
-  style="z-index: 1101; height: max-content"
-  tabindex="-1"
-  id="login-modal"
-  aria-labelledby="offcanvasLabel"
->
-  <div class="offcanvas-header">
-    <h5 class="offcanvas-title" id="offcanvasLabel">{{Sign in}}</h5>
-    <button
-      type="button"
-      class="btn-close"
-      data-bs-dismiss="offcanvas"
-      aria-label="Close"
-    ></button>
-  </div>
-  <div class="offcanvas-body" id="login-modal-body"></div>
+<div class="offcanvas offcanvas-top" style="z-index: 1101; height: max-content" tabindex="-1" id="login-modal" aria-labelledby="offcanvasLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasLabel">{{Sign in}}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body" id="login-modal-body">
+    </div>
 </div>
 
 <nav class="navbar navbar-expand-sm bg-body-tertiary main-navbar">
-  <div class="container-fluid">
-    <div class="navbar-nav flex-row gap-1 flex-grow-1 me-2">
-      <button
-        id="offcanvasLayerControlBtn"
-        class="btn btn-primary text-nowrap"
-        type="button"
-      >
-        <i class="bi bi-list d-md-none"></i
-        ><span class="d-none d-md-inline">Menu</span>
-        <i class="bi bi-arrow-bar-right"></i
-        ><i class="bi bi-arrow-bar-left d-none"></i>
-      </button>
-      <a class="navbar-brand d-none d-md-inline">
-        <span>{{{brandName}}}</span>
-      </a>
-      <div
-        class="input-group d-none justify-content-end me-2"
-        id="edit-tool-group"
-      >
-        <span class="input-group-text"><i class="bi bi-pencil"></i></span>
-        <button
-          id="offcanvasEditBtn"
-          class="btn btn-secondary nav-edit-btn edit-attr-btn"
-          type="button"
-        >
-          <span class="d-none d-md-inline">Form</span>
-          <i class="bi bi-arrow-bar-right"></i
-          ><i class="bi bi-arrow-bar-left d-none"></i>
-        </button>
-        <button
-          id="editStopBtn"
-          class="btn btn-danger nav-edit-btn"
-          type="button"
-        >
-          <i class="bi bi-slash-circle"></i>
-          <span class="d-none d-md-inline">{{Cancel}}</span>
-        </button>
-      </div>
-    </div>
-    <button
-      class="navbar-toggler ms-auto"
-      type="button"
-      data-bs-toggle="collapse"
-      data-bs-target="#navbarSupportedContent"
-      aria-controls="navbarSupportedContent"
-      aria-expanded="false"
-      aria-label="Toggle navigation"
-    >
-      <span class="navbar-toggler-icon"></span>
-    </button>
-
-    <div
-      class="collapse navbar-collapse justify-content-end flex-grow-0 pe-auto mt-2 mt-sm-0 gap-2"
-      id="navbarSupportedContent"
-    >
-    <div class="nav-item">
-      <button id="gp-themeToggle" class="gp-themeToggle" style="display: none;">
-        <i class="bi bi-moon"></i>
-      </button>
-    </div>
-      <div class="nav-item dropdown mb-2 mb-sm-0">
-        <a
-          class="nav-link dropdown-toggle"
-          href="#"
-          role="button"
-          data-bs-toggle="dropdown"
-          aria-expanded="false"
-        >
-          <i class="bi bi-three-dots-vertical"></i>
+    <div class="container-fluid">
+        <a class="navbar-brand d-none d-md-inline">
+            <span>{{{brandName}}}</span>
         </a>
-        <ul class="dropdown-menu dropdown-menu-end">
-          <li>
-            <a
-              class="dropdown-item"
-              href="#"
-              data-bs-toggle="modal"
-              data-bs-target="#about-modal"
-              >{{About}}</a
+        <div class="navbar-nav flex-row gap-1 flex-grow-1 me-2">
+            <button id="offcanvasLayerControlBtn"
+                    class="btn btn-primary text-nowrap" type="button"
             >
-          </li>
-          <li>
-            <a class="dropdown-item" href="#" id="btn-reset">{{Reset}}</a>
-          </li>
-          <li>
-            <a
-              class="dropdown-item configuration"
-              href="#"
-              data-bs-toggle="modal"
-              data-bs-target="#config-switcher-modal"
-              >{{Configurations}}</a
-            >
-          </li>
-        </ul>
-      </div>
-      <div class="nav-item sign-in-btn d-none">
-        <button
-          class="btn btn-primary"
-          data-bs-toggle="offcanvas"
-          data-bs-target="#login-modal"
-        >
-          <i class="bi bi-person"></i
-          ><span class="gc2-session-btn-text d-none d-lg-inline">
-            {{Sign in}}</span
-          >
+                <i class="bi bi-list d-md-none"></i><span class="d-none d-md-inline">Menu</span> <i
+                    class="bi bi-arrow-bar-right"></i><i class="bi bi-arrow-bar-left d-none"></i>
+
+            </button>
+            <div class="input-group d-none justify-content-end me-2" id="edit-tool-group">
+                <span class="input-group-text"><i class="bi bi-pencil"></i></span>
+                <button id="offcanvasEditBtn"
+                        class="btn btn-secondary nav-edit-btn edit-attr-btn" type="button"
+                >
+                    <span class="d-none d-md-inline">Form</span> <i class="bi bi-arrow-bar-right"></i><i
+                        class="bi bi-arrow-bar-left d-none"></i>
+                </button>
+                <button id="editStopBtn"
+                        class="btn btn-danger nav-edit-btn" type="button"
+                >
+                    <i class="bi bi-slash-circle"></i> <span class="d-none d-md-inline">{{Cancel}}</span>
+                </button>
+            </div>
+        </div>
+        <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
         </button>
-      </div>
+
+        <div class="collapse navbar-collapse justify-content-end flex-grow-0 pe-auto mt-2 mt-sm-0 gap-2"
+             id="navbarSupportedContent">
+            <div class="nav-item dropdown mb-2 mb-sm-0">
+                <button class="btn btn-link nav-link py-2 px-0 px-lg-2 dropdown-toggle d-flex align-items-center" id="bd-theme" type="button" aria-expanded="false"
+                        data-bs-toggle="dropdown" data-bs-display="static" aria-label="Toggle theme (auto)">
+                    <svg width="16" height="16" fill="currentColor" class="bi my-1 theme-icon-active">
+                        <use href="fonts/bootstrap-icons.svg#circle-half"></use>
+                    </svg>
+                    <span class="d-lg-none ms-2" id="bd-theme-text">Toggle theme</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="bd-theme-text">
+                    <li>
+                        <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="light" aria-pressed="false">
+                            <svg class="bi me-2 opacity-50" width="16" height="16" fill="currentColor">
+                                <use href="fonts/bootstrap-icons.svg#sun-fill"></use>
+                            </svg>
+                            Light
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="dark" aria-pressed="false">
+                            <svg class="bi me-2 opacity-50" width="16" height="16" fill="currentColor">
+                                <use href="fonts/bootstrap-icons.svg#moon-stars-fill"></use>
+                            </svg>
+                            Dark
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="auto" aria-pressed="false">
+                            <svg class="bi me-2 opacity-50" width="16" height="16" fill="currentColor">
+                                <use href="fonts/bootstrap-icons.svg#circle-half"></use>
+                            </svg>
+                            Auto
+                        </button>
+                    </li>
+                </ul>
+
+            </div>
+            <div class="nav-item dropdown mb-2 mb-sm-0">
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-three-dots-vertical"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#about-modal">{{About}}</a></li>
+                    <li><a class="dropdown-item" href="#" id="btn-reset">{{Reset}}</a></li>
+                    <li><a class="dropdown-item configuration" href="#" data-bs-toggle="modal" data-bs-target="#config-switcher-modal">{{Configurations}}</a></li>
+                </ul>
+            </div>
+            <div class="nav-item sign-in-btn d-none">
+                <button class="btn btn-primary" data-bs-toggle="offcanvas"
+                        data-bs-target="#login-modal">
+                    <i class="bi bi-person"></i><span class="gc2-session-btn-text d-none d-lg-inline"> {{Sign in}}</span>
+                </button>
+            </div>
+        </div>
     </div>
-  </div>
 </nav>
 
 <div class="fade-then-dragging">
-  <div
-    class="offcanvas offcanvas-start"
-    data-bs-backdrop="false"
-    tabindex="-1"
-    id="offcanvasLayerControl"
-  >
-    <div class="offcanvas-header mt-5">
-      <h5 class="offcanvas-title" id="offcanvasLayerControlLabel">
-        Find faciliteter på kort
-      </h5>
-      <button
-        type="button"
-        class="btn-close"
-        data-bs-dismiss="offcanvas"
-        aria-label="Close"
-      ></button>
-    </div>
-    <div class="offcanvas-body" id="layer-control"></div>
-  </div>
-
-  <div
-    class="offcanvas offcanvas-start"
-    data-bs-backdrop="false"
-    tabindex="-1"
-    id="mainLayerOffcanvas"
-  >
-    <div class="offcanvas-header mt-5">
-      <h5
-        class="offcanvas-title js-module-title"
-        id="mainLayerOffcanvasLabel"
-      ></h5>
-      <button
-        type="button"
-        class="btn-close"
-        data-bs-dismiss="offcanvas"
-        aria-label="Close"
-      ></button>
-    </div>
-    <div class="offcanvas-body" style="scrollbar-gutter: stable">
-      <div class="d-flex align-items-start flex-row-reverse">
-        <!-- Nav tabs -->
-        <div class="sticky-top">
-          <ul class="nav flex-column nav-pills" role="tablist" id="main-tabs">
-            <li role="presentation" class="nav-item">
-              <a
-                class="nav-link"
-                data-bs-toggle="tab"
-                data-module-id="layerTree"
-                href="#layer-content"
-                data-module-title="{{Layers}}"
-                aria-controls=""
-                role="tab"
-                data-toggle="tab"
-              >
-                <i
-                  data-container="body"
-                  data-toggle="tooltip"
-                  data-placement="left"
-                  title="{{Layers}}"
-                  class="bi bi-layers"
-                ></i>
-              </a>
-            </li>
-
-            <li role="presentation" class="nav-item">
-              <a
-                class="nav-link"
-                data-bs-toggle="tab"
-                data-module-id="infoClick"
-                href="#info-content"
-                data-module-title="{{Info}}"
-                aria-controls="info-content"
-                role="tab"
-                data-toggle="tab"
-              >
-                <i
-                  data-container="body"
-                  data-toggle="tooltip"
-                  data-placement="left"
-                  title="{{Info}}"
-                  class="bi bi-info-square"
-                ></i>
-              </a>
-            </li>
-
-            <li role="presentation" class="nav-item">
-              <a
-                class="nav-link"
-                data-bs-toggle="tab"
-                href="#search-content"
-                aria-controls="search-content"
-                data-module-title="{{Search}}"
-                role="tab"
-                data-toggle="tab"
-              >
-                <i
-                  data-container="body"
-                  data-toggle="tooltip"
-                  data-placement="left"
-                  title="{{Search}}"
-                  class="bi bi-search"
-                ></i>
-              </a>
-            </li>
-
-            <li role="presentation" class="nav-item">
-              <a
-                class="nav-link"
-                data-bs-toggle="tab"
-                data-module-id="baseLayer"
-                href="#baselayer-content"
-                data-module-title="{{Baselayers}}"
-                aria-controls=""
-                role="tab"
-                data-toggle="tab"
-              >
-                <i
-                  data-container="body"
-                  data-toggle="tooltip"
-                  data-placement="left"
-                  title="{{Baselayers}}"
-                  class="bi bi-map"
-                ></i>
-              </a>
-            </li>
-
-            <li role="presentation">
-              <a
-                class="nav-link"
-                data-bs-toggle="tab"
-                data-module-id="legend"
-                href="#legend-content"
-                aria-controls=""
-                data-module-title="{{Legend}}"
-                role="tab"
-                data-toggle="tab"
-              >
-                <i
-                  data-container="body"
-                  data-toggle="tooltip"
-                  data-placement="left"
-                  title="{{Legend}}"
-                  class="bi bi-card-text"
-                ></i>
-              </a>
-            </li>
-
-            <li role="presentation">
-              <a
-                class="nav-link"
-                data-bs-toggle="tab"
-                data-module-id="draw"
-                href="#draw-content"
-                aria-controls=""
-                data-module-title="{{Draw}}"
-                role="tab"
-                data-toggle="tab"
-              >
-                <i
-                  data-container="body"
-                  data-toggle="tooltip"
-                  data-placement="left"
-                  title="{{Draw}}"
-                  class="bi bi-pencil"
-                ></i>
-              </a>
-            </li>
-
-            <li role="presentation">
-              <a
-                class="nav-link"
-                data-bs-toggle="tab"
-                data-module-id="stateSnapshots"
-                href="#state-snapshots-content"
-                aria-controls=""
-                data-module-title="{{State snapshots}}"
-                role="tab"
-                data-toggle="tab"
-              >
-                <i
-                  data-container="body"
-                  data-toggle="tooltip"
-                  data-placement="left"
-                  title="{{State snapshots}}"
-                  class="bi bi-folder"
-                ></i>
-              </a>
-            </li>
-
-            <li role="presentation">
-              <a
-                class="nav-link"
-                data-bs-toggle="tab"
-                data-module-id="print"
-                href="#print-content"
-                aria-controls=""
-                data-module-title="{{Print}}"
-                role="tab"
-                data-toggle="tab"
-              >
-                <i
-                  data-container="body"
-                  data-toggle="tooltip"
-                  data-placement="left"
-                  title="{{Print}}"
-                  class="bi bi-file-pdf"
-                ></i>
-              </a>
-            </li>
-
-            <hr />
-          </ul>
+    <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="offcanvasLayerControl">
+        <div class="offcanvas-header mt-5">
+            <h5 class="offcanvas-title" id="offcanvasLayerControlLabel">Find faciliteter på kort</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
-        <!-- Tab panes -->
-        <div class="tab-content main-content w-100">
-          <div role="tabpanel" class="tab-pane fade" id="search-content">
-            <div
-              class="help-btn"
-              onclick="javascript:createAlert($(this), '{{Search places}}')"
-            >
-              <i class="bi bi-question-circle help-btn"></i>
-            </div>
-            <div></div>
-            <div id="place-search">
-              <div class="places d-flex">
-                <div class="input-group mb-3">
-                  <input
-                    class="custom-search typeahead form-control"
-                    type="text"
-                    placeholder="{{Address}}"
-                  />
-                  <button
-                    class="btn btn-outline-secondary searchclear"
-                    type="button"
-                  >
-                    <i class="bi bi-x-lg"></i>
-                  </button>
+        <div class="offcanvas-body" id="layer-control"></div>
+    </div>
+
+    <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="mainLayerOffcanvas">
+        <div class="offcanvas-header mt-5">
+            <h5 class="offcanvas-title js-module-title" id="mainLayerOffcanvasLabel"></h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body" style="scrollbar-gutter: stable">
+            <div class="d-flex align-items-start flex-row-reverse">
+                <!-- Nav tabs -->
+                <div class="sticky-top">
+                    <ul class="nav flex-column nav-pills" role="tablist" id="main-tabs">
+                        <li role="presentation" class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" data-module-id="layerTree" href="#layer-content"
+                               data-module-title="{{Layers}}" aria-controls="" role="tab" data-toggle="tab">
+                                <i data-container="body" data-toggle="tooltip" data-placement="left"
+                                   title="{{Layers}}" class="bi bi-layers"></i>
+                            </a>
+                        </li>
+
+                        <li role="presentation" class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" data-module-id="infoClick" href="#info-content"
+                               data-module-title="{{Info}}" aria-controls="info-content" role="tab" data-toggle="tab">
+                                <i data-container="body" data-toggle="tooltip" data-placement="left"
+                                   title="{{Info}}" class="bi bi-info-square"></i>
+                            </a>
+                        </li>
+
+                        <li role="presentation" class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#search-content"
+                               aria-controls="search-content"
+                               data-module-title="{{Search}}" role="tab" data-toggle="tab">
+                                <i data-container="body" data-toggle="tooltip" data-placement="left"
+                                   title="{{Search}}" class="bi bi-search"></i>
+                            </a>
+                        </li>
+
+                        <li role="presentation" class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" data-module-id="baseLayer"
+                               href="#baselayer-content"
+                               data-module-title="{{Baselayers}}" aria-controls="" role="tab" data-toggle="tab">
+                                <i data-container="body" data-toggle="tooltip" data-placement="left"
+                                   title="{{Baselayers}}" class="bi bi-map"></i>
+                            </a>
+                        </li>
+
+                        <li role="presentation">
+                            <a class="nav-link" data-bs-toggle="tab" data-module-id="legend" href="#legend-content"
+                               aria-controls=""
+                               data-module-title="{{Legend}}" role="tab" data-toggle="tab">
+                                <i data-container="body" data-toggle="tooltip" data-placement="left"
+                                   title="{{Legend}}" class="bi bi-card-text"></i>
+                            </a>
+                        </li>
+
+                        <li role="presentation">
+                            <a class="nav-link" data-bs-toggle="tab" data-module-id="draw" href="#draw-content"
+                               aria-controls=""
+                               data-module-title="{{Draw}}" role="tab" data-toggle="tab">
+                                <i data-container="body" data-toggle="tooltip" data-placement="left"
+                                   title="{{Draw}}" class="bi bi-pencil"></i>
+                            </a>
+                        </li>
+
+                        <li role="presentation">
+                            <a class="nav-link" data-bs-toggle="tab" data-module-id="stateSnapshots"
+                               href="#state-snapshots-content"
+                               aria-controls=""
+                               data-module-title="{{State snapshots}}" role="tab" data-toggle="tab">
+                                <i data-container="body" data-toggle="tooltip" data-placement="left"
+                                   title="{{State snapshots}}" class="bi bi-folder"></i>
+                            </a>
+                        </li>
+
+                        <li role="presentation">
+                            <a class="nav-link" data-bs-toggle="tab" data-module-id="print" href="#print-content"
+                               aria-controls=""
+                               data-module-title="{{Print}}" role="tab" data-toggle="tab">
+                                <i data-container="body" data-toggle="tooltip" data-placement="left"
+                                   title="{{Print}}" class="bi bi-file-pdf"></i>
+                            </a>
+                        </li>
+
+                        <hr>
+                    </ul>
                 </div>
-              </div>
-            </div>
-          </div>
-          <div role="tabpanel" class="tab-pane fade" id="info-content">
-            <div
-              class="help-btn"
-              onclick="javascript:createAlert($(this), '{{Info text}}')"
-            >
-              <i class="bi bi-question-circle help-btn"></i>
-            </div>
-            <div></div>
-            <div class="d-grid gap-2">
-              <input class="btn-check" id="advanced-info-btn" type="checkbox" />
-              <label
-                class="btn btn-outline-primary btn-block mb-3"
-                for="advanced-info-btn"
-                >{{Activate advanced query}}</label
-              >
-            </div>
-            <div id="buffer" style="display: none" class="mb-3">
-              <div class="input-group mb-3">
-                <span class="input-group-text" id="basic-addon1">Buffer</span>
-                <input type="text" id="buffer-value" class="form-control" />
-              </div>
-              <div id="buffer-slider"></div>
-            </div>
-            <div id="info-box"></div>
-            <table id="dtable" data-show-toggle="true"></table>
-          </div>
-          <div role="tabpanel" class="tab-pane fade" id="layer-content">
-            <div
-              class="help-btn"
-              onclick="javascript:createAlert($(this), '{{Help text overlays}}')"
-            >
-              <i class="bi bi-question-circle help-btn"></i>
-            </div>
-            <div></div>
-            <div
-              style="display: flex"
-              class="layer-loading-indicator w-100 justify-content-center"
-            >
-              <div style="width: 150px" class="d-inline-block">
-                <div class="text-center">{{Loading data}}</div>
-                <div class="progress">
-                  <div
-                    class="progress-bar progress-bar-striped progress-bar-animated w-100"
-                  ></div>
-                </div>
-              </div>
-            </div>
-            <div id="layer-filter-container">
-              <div id="layers" role="tablist"></div>
-            </div>
-          </div>
-          <div role="tabpanel" class="tab-pane fade" id="baselayer-content">
-            <div
-              class="help-btn"
-              onclick="javascript:createAlert($(this), '{{Help text baselayers}}')"
-            >
-              <i class="bi bi-question-circle help-btn"></i>
-            </div>
-            <div></div>
-            <ul class="list-group" id="base-layer-list"></ul>
-          </div>
-          <div role="tabpanel" class="tab-pane fade" id="legend-content">
-            <div
-              class="help-btn"
-              onclick="javascript:createAlert($(this), '{{Help text legend}}')"
-            >
-              <i class="bi bi-question-circle help-btn"></i>
-            </div>
-            <div></div>
-            <button
-              id="btn-show-legend-in-map"
-              data-module="legend"
-              class="btn btn btn-outline-secondary w-100 mb-3"
-            >
-              {{Show legend on top the map}}
-            </button>
-            <div id="legend" class="legend"></div>
-          </div>
-          <div role="tabpanel" class="tab-pane fade" id="draw-content">
-            <div
-              class="help-btn"
-              onclick="javascript:createAlert($(this), '{{Help text draw}}')"
-            >
-              <i class="bi bi-question-circle help-btn"></i>
-            </div>
-            <div></div>
-            <div class="accordion mb-3">
-              <div class="accordion-item">
-                <h2 class="accordion-header">
-                  <button
-                    type="button"
-                    class="accordion-button collapsed"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#draw-collapse"
-                  >
-                    {{Line style}}
-                  </button>
-                </h2>
-                <div id="draw-collapse" class="accordion-collapse collapse">
-                  <div class="accordion-body">
-                    <div class="row row-cols-2 gy-3">
-                      <div class="col">
-                        <label for="draw-colorpicker-input" class=""
-                          >{{Color}}</label
-                        >
-
-                        <div id="draw-colorpicker" class="input-group">
-                          <input
-                            id="draw-colorpicker-input"
-                            name="draw-colorpicker-input"
-                            type="color"
-                            value="#ff0000"
-                            class="form-control form-control-sm form-control-color"
-                          />
+                <!-- Tab panes -->
+                <div class="tab-content main-content w-100">
+                    <div role="tabpanel" class="tab-pane fade" id="search-content">
+                        <div class="help-btn" onclick="javascript:createAlert($(this), '{{Search places}}')">
+                            <i class="bi bi-question-circle help-btn"></i></div>
+                        <div></div>
+                        <div id="place-search">
+                            <div class="places d-flex">
+                                <div class="input-group mb-3">
+                                    <input class="custom-search typeahead form-control" type="text"
+                                           placeholder="{{Address}}">
+                                    <button class="btn btn-outline-secondary searchclear" type="button">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                      </div>
-
-                      <div class="col">
-                        <label for="draw-line-type" class="">{{Type}}</label>
-
-                        <select
-                          id="draw-line-type"
-                          name="draw-line-type"
-                          class="form-select form-select-sm"
-                        >
-                          <option value="none">{{Solid}}</option>
-                          <option value="7, 7">{{Dashed, short}}</option>
-                          <option value="12, 7">{{Dashed, medium}}</option>
-                          <option value="17, 7">{{Dashed, long}}</option>
-                        </select>
-                      </div>
-
-                      <div class="col">
-                        <label for="draw-line-weight" class=""
-                          >{{Weight}}</label
-                        >
-
-                        <select
-                          id="draw-line-weight"
-                          name="draw-line-weight"
-                          class="form-select form-select-sm"
-                        >
-                          <option value="2">{{X-thin}}</option>
-                          <option value="3">{{Thin}}</option>
-                          <option value="4" selected>{{Medium}}</option>
-                          <option value="5">{{Thick}}</option>
-                          <option value="6">{{X-Thick}}</option>
-                        </select>
-                      </div>
-
-                      <div class="col">
-                        <label for="draw-line-cap" class="">{{Cap}}</label>
-                        <select
-                          id="draw-line-cap"
-                          name="draw-line-cap"
-                          class="form-select form-select-sm"
-                        >
-                          <option value="butt">{{Butt}}</option>
-                          <option value="round">{{Round}}</option>
-                        </select>
-                      </div>
-
-                      <div class="col">
-                        <div class="form-check">
-                          <input
-                            class="form-check-input"
-                            id="draw-measure"
-                            name="draw-measure"
-                            type="checkbox"
-                          />
-                          <label for="draw-measure" class="form-check-label"
-                            >{{Measure}}</label
-                          >
-                        </div>
-                      </div>
-
-                      <div class="col">
-                        <label for="draw-line-extremity" class=""
-                          >{{Extremities}}</label
-                        >
-                        <select
-                          id="draw-line-extremity"
-                          name="draw-line-extremity"
-                          class="form-select form-select-sm"
-                        >
-                          <option value="none">{{None}}</option>
-                          <option value="arrowM">{{Arrow}}</option>
-                          <option value="stopM">{{Stop}}</option>
-                          <option value="squareM">{{Square}}</option>
-                          <option value="dotM">{{Dot}}</option>
-                        </select>
-                      </div>
-
-                      <div class="col">
-                        <label for="draw-line-extremity-size" class=""
-                          >{{Extremity size}}</label
-                        >
-                        <select
-                          id="draw-line-extremity-size"
-                          name="draw-line-extremity-size"
-                          class="form-select form-select-sm"
-                          disabled
-                        >
-                          <option value="2">{{X-Small}}</option>
-                          <option value="3">{{Small}}</option>
-                          <option value="4" selected>{{Medium}}</option>
-                          <option value="5">{{Large}}</option>
-                          <option value="6">{{X-Large}}</option>
-                        </select>
-                      </div>
-
-                      <div class="col">
-                        <label for="draw-line-extremity-where" class=""
-                          >{{Extremity ends}}</label
-                        >
-                        <select
-                          id="draw-line-extremity-where"
-                          name="draw-line-extremity-where"
-                          class="form-select form-select-sm"
-                          disabled
-                        >
-                          <option value="1">{{End}}</option>
-                          <option value="2">{{Start}}</option>
-                          <option value="3">{{Both}}</option>
-                        </select>
-                      </div>
-
-                      <div class="col">
-                        <div class="form-check">
-                          <label
-                            for="draw-line-total-dist"
-                            class="form-check-label"
-                            >{{Total distance}}</label
-                          >
-                          <input
-                            class="form-check-input"
-                            id="draw-line-total-dist"
-                            name="draw-line-total-dist"
-                            type="checkbox"
-                            disabled
-                          />
-                        </div>
-                      </div>
                     </div>
-                  </div>
+                    <div role="tabpanel" class="tab-pane fade" id="info-content">
+                        <div class="help-btn" onclick="javascript:createAlert($(this), '{{Info text}}')">
+                            <i class="bi bi-question-circle help-btn"></i></div>
+                        <div></div>
+                        <div class="d-grid gap-2">
+                            <input class="btn-check" id="advanced-info-btn" type="checkbox">
+                            <label class="btn btn-outline-primary btn-block mb-3"
+                                   for="advanced-info-btn">{{Activate advanced query}}</label>
+                        </div>
+                        <div id="buffer" style="display: none" class="mb-3">
+                            <div class="input-group mb-3">
+                                <span class="input-group-text" id="basic-addon1">Buffer</span>
+                                <input type="text" id="buffer-value" class="form-control">
+                            </div>
+                            <div id="buffer-slider"></div>
+                        </div>
+                        <div id="info-box"></div>
+                        <table id="dtable" data-show-toggle="true"></table>
+
+                    </div>
+                    <div role="tabpanel" class="tab-pane fade" id="layer-content">
+                        <div class="help-btn" onclick="javascript:createAlert($(this), '{{Help text overlays}}')">
+                            <i class="bi bi-question-circle help-btn"></i></div>
+                        <div></div>
+                        <div style="display: flex" class="layer-loading-indicator w-100 justify-content-center">
+                            <div style="width: 150px;" class="d-inline-block">
+                                <div class="text-center">{{Loading data}}</div>
+                                <div class="progress">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated w-100"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="layer-filter-container">
+                            <div id="layers" role="tablist"></div>
+                        </div>
+                    </div>
+                    <div role="tabpanel" class="tab-pane fade" id="baselayer-content">
+                        <div class="help-btn" onclick="javascript:createAlert($(this), '{{Help text baselayers}}')">
+                            <i class="bi bi-question-circle help-btn"></i></div>
+                        <div></div>
+                        <ul class="list-group" id="base-layer-list"></ul>
+                    </div>
+                    <div role="tabpanel" class="tab-pane fade" id="legend-content">
+                        <div class="help-btn" onclick="javascript:createAlert($(this), '{{Help text legend}}')">
+                            <i class="bi bi-question-circle help-btn"></i></div>
+                        <div></div>
+                        <button id="btn-show-legend-in-map" data-module="legend"
+                                class="btn btn btn-outline-secondary w-100 mb-3">{{Show legend on top the map}}</button>
+                        <div id="legend" class="legend"></div>
+                    </div>
+                    <div role="tabpanel" class="tab-pane fade" id="draw-content">
+                        <div class="help-btn" onclick="javascript:createAlert($(this), '{{Help text draw}}')">
+                            <i class="bi bi-question-circle help-btn"></i>
+                        </div>
+                        <div></div>
+                        <div class="accordion mb-3">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button type="button" class="accordion-button collapsed" data-bs-toggle="collapse"
+                                            data-bs-target="#draw-collapse">
+                                        {{Line style}}
+                                    </button>
+                                </h2>
+                                <div id="draw-collapse" class="accordion-collapse collapse">
+                                    <div class="accordion-body">
+                                        <div class="row row-cols-2 gy-3">
+                                            <div class="col">
+                                                <label for="draw-colorpicker-input"
+                                                       class="">{{Color}}</label>
+
+                                                <div id="draw-colorpicker"
+                                                     class="input-group">
+                                                    <input id="draw-colorpicker-input" name="draw-colorpicker-input"
+                                                           type="color" value="#ff0000"
+                                                           class="form-control form-control-sm form-control-color"/>
+                                                </div>
+                                            </div>
+
+                                            <div class="col">
+                                                <label for="draw-line-type"
+                                                       class="">{{Type}}</label>
+
+                                                <select id="draw-line-type" name="draw-line-type"
+                                                        class="form-select form-select-sm">
+                                                    <option value="none">{{Solid}}</option>
+                                                    <option value="7, 7">{{Dashed, short}}</option>
+                                                    <option value="12, 7">{{Dashed, medium}}</option>
+                                                    <option value="17, 7">{{Dashed, long}}</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="col">
+                                                <label for="draw-line-weight"
+                                                       class="">{{Weight}}</label>
+
+                                                <select id="draw-line-weight" name="draw-line-weight"
+                                                        class="form-select form-select-sm">
+                                                    <option value="2">{{X-thin}}</option>
+                                                    <option value="3">{{Thin}}</option>
+                                                    <option value="4" selected>{{Medium}}</option>
+                                                    <option value="5">{{Thick}}</option>
+                                                    <option value="6">{{X-Thick}}</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="col">
+                                                <label for="draw-line-cap"
+                                                       class="">{{Cap}}</label>
+                                                <select id="draw-line-cap" name="draw-line-cap"
+                                                        class="form-select form-select-sm">
+                                                    <option value="butt">{{Butt}}</option>
+                                                    <option value="round">{{Round}}</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="col">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" id="draw-measure"
+                                                           name="draw-measure"
+                                                           type="checkbox">
+                                                    <label for="draw-measure"
+                                                           class="form-check-label">{{Measure}}</label>
+                                                </div>
+                                            </div>
+
+                                            <div class="col">
+                                                <label for="draw-line-extremity"
+                                                       class="">{{Extremities}}</label>
+                                                <select id="draw-line-extremity" name="draw-line-extremity"
+                                                        class="form-select form-select-sm">
+                                                    <option value="none">{{None}}</option>
+                                                    <option value="arrowM">{{Arrow}}</option>
+                                                    <option value="stopM">{{Stop}}</option>
+                                                    <option value="squareM">{{Square}}</option>
+                                                    <option value="dotM">{{Dot}}</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="col">
+                                                <label for="draw-line-extremity-size"
+                                                       class="">{{Extremity size}}</label>
+                                                <select id="draw-line-extremity-size"
+                                                        name="draw-line-extremity-size"
+                                                        class="form-select form-select-sm"
+                                                        disabled>
+                                                    <option value="2">{{X-Small}}</option>
+                                                    <option value="3">{{Small}}</option>
+                                                    <option value="4" selected>{{Medium}}</option>
+                                                    <option value="5">{{Large}}</option>
+                                                    <option value="6">{{X-Large}}</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="col">
+                                                <label for="draw-line-extremity-where"
+                                                       class="">{{Extremity ends}}</label>
+                                                <select id="draw-line-extremity-where"
+                                                        name="draw-line-extremity-where"
+                                                        class="form-select form-select-sm"
+                                                        disabled>
+                                                    <option value="1">{{End}}</option>
+                                                    <option value="2">{{Start}}</option>
+                                                    <option value="3">{{Both}}</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="col">
+                                                <div class="form-check">
+                                                    <label for="draw-line-total-dist"
+                                                           class="form-check-label">{{Total distance}}</label>
+                                                    <input class="form-check-input" id="draw-line-total-dist"
+                                                           name="draw-line-total-dist"
+                                                           type="checkbox" disabled>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-around mb-3">
+                            <button class="btn btn-sm btn-light" id="_draw_download_geojson"
+                                    href="javascript:void(0)">
+                                <i class="bi bi-download" aria-hidden="true"></i> GeoJson
+                            </button>
+                            <button class="btn btn-sm btn-light" style="display: none"
+                                    id="_draw_make_conflict_with_selected"
+                                    target="_blank" href="javascript:void(0)">
+                                <i class="bi bi-download" aria-hidden="true"></i> {{Conflict with selected}}
+                            </button>
+                            <button class="btn btn-sm btn-light" style="display: none" id="_draw_make_conflict_with_all"
+                                    target="_blank" href="javascript:void(0)">
+                                <i class="bi bi-download" aria-hidden="true"></i> {{Conflict with all}}
+                            </button>
+                        </div>
+                        <div id="draw-table"></div>
+
+                    </div>
+                    <div role="tabpanel" class="tab-pane fade" id="state-snapshots-content">
+                        <div class="help-btn"
+                             onclick="javascript:createAlert($(this), '{{StateSnapshots description}}')">
+                            <i class="bi bi-question-circle help-btn"></i></div>
+                        <div></div>
+                        <div id="state-snapshots" role="tablist"></div>
+                    </div>
+                    <div role="tabpanel" class="tab-pane fade" id="print-content">
+                        <div class="help-btn" onclick="javascript:createAlert($(this), '{{Help text print}}')">
+                            <i class="bi bi-question-circle help-btn"></i></div>
+                        <div></div>
+                        <div class="btn-toolbar">
+                            <div class="input-group mb-3">
+                                <button id="start-print-btn" class="btn btn-primary start-print-btn"
+                                        disabled>
+                                    <span class="spinner-border spinner-border-sm"
+                                          role="status" aria-hidden="true" style="display: none">
+                                    </span>
+                                    {{Print}}
+                                </button>
+
+                                <select class="form-select" id="start-print-png-btn">
+                                    <option selected value="pdf">PDF</option>
+                                    <option value="png">PNG</option>
+                                </select>
+                                <a target="_blank" href="javascript:void(0)"
+                                   class="btn btn-primary get-print-btn"
+                                   id="open-pdf">{{Open}}</a>
+                                <a href="javascript:void(0)"
+                                   class="btn btn-primary dropdown-toggle get-print-btn"
+                                   data-bs-toggle="dropdown"
+                                   id="open-pdf-toggle"
+                                ></a>
+                                <ul class="dropdown-menu get-print-btn">
+                                    <li><a class="dropdown-item" href="javascript:void(0)"
+                                           id="download-pdf">{{Download}}</a></li>
+                                    <li>
+                                        <a class="dropdown-item" target="_blank" href="javascript:void(0)"
+                                           id="open-html">{{Open HTML page}}</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="d-flex flex-column gap-3 mb-3">
+                            <div class="form-check">
+                                <div class="togglebutton">
+                                    <input class="form-check-input" id="print-sticky" type="checkbox">
+                                    <label for="print-sticky" class="form-check-label">{{Sticky}}</label>
+                                </div>
+                            </div>
+                            <div class="btn-group d-flex">
+                                <button id="add-print-box-btn" class="btn btn-outline-secondary btn-sm">
+                                    {{Add new box}}
+                                </button>
+                                <button id="remove-print-box-btn" class="btn btn-outline-secondary btn-sm">
+                                    {{Remove last box}}
+                                </button>
+                            </div>
+                        </div>
+
+                        <form class="d-flex flex-column gap-4" id="print-form" role="form" data-bs-toggle="validator">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">1:</span>
+                                <button type="button"
+                                        class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
+                                        data-bs-toggle="dropdown"
+                                        aria-expanded="false">
+                                    <span class="visually-hidden">Toggle Dropdown</span>
+                                </button>
+                                <ul id="ul-scale" class="dropdown-menu"></ul>
+                                <input type="number" min="200" id="select-scale" class="form-control">
+                            </div>
+
+                            <div id="print-tmpl" class="btn-group" style="display: none"></div>
+
+                            <div class="btn-group" id="print-size"></div>
+
+                            <div class="btn-group" id="print-orientation"></div>
+
+                            <div>
+                                <label for="print-title">{{Title}}</label>
+                                <input type="text" class="form-control" id="print-title" disabled>
+                            </div>
+                            <div>
+                                <label for="print-comment">{{Comment}}</label>
+                                <textarea class="form-control" rows="3" id="print-comment"
+                                          disabled></textarea>
+                            </div>
+
+                            <div class="form-check">
+                                <input class="form-check-input" id="add-legend-btn" type="checkbox" checked
+                                       disabled>
+                                <label for="add-legend-btn" class="form-check-label">{{Show legend on print}}</label>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-              </div>
             </div>
-            <div class="d-flex mb-3 btn-group col-7 mx-auto">
-              <button
-                class="btn btn-sm btn-light "
-                id="_draw_download_geojson"
-                href="javascript:void(0)"
-              >
-                <i class="bi bi-download" aria-hidden="true"></i> GeoJson
-              </button>
-              <button id="_draw_upload_shape_btn" class="btn btn-sm btn-light" for="_draw_upload_shape_file" title="Upload shape zip file" target="_blank" href="javascript:void(0)">
-                <i class="bi bi-upload" aria-hidden="true"></i> Shape
-                <input id="_draw_upload_shape_file"  style="display:none;" type="file"  accept-language  accept="zip,application/octet-stream,application/zip,application/x-zip,application/x-zip-compressed" >                                
-              </button>
-            </div>
-            <div class="d-flex mb-3 col-7 mx-auto">
-              <div id="_draw_conflict_group" class="" role="group" style="display: none;">
-                <button type="button" class="btn btn-sm btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                  Konflikt
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="_draw_conflict_group">
-                  <li><a class="dropdown-item" href="javascript:void(0)" id="_draw_make_conflict_with_selected">{{Conflict with selected}}</a></li>
-                  <li><a class="dropdown-item" href="javascript:void(0)" id="_draw_make_conflict_with_all">{{Conflict with all}}</a></li>
-                </ul>
-              </div>
-              <div id="_draw_blueidea_group" class="" role="group" style="display: none;">
-                <button type="button" class="btn btn-sm btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                  BlueIdea
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="_draw_blueidea_group">
-                  <li><a class="dropdown-item" href="javascript:void(0)" id="_draw_make_blueidea_with_selected">{{Send selected to Blueidea}}</a></li>
-                  <li><a class="dropdown-item" href="javascript:void(0)" id="_draw_make_blueidea_with_all">{{Send all to Blueidea}}</a></li>
-                </ul>
-              </div>
-            </div>
-            <div id="draw-table"></div>
-          </div>
-          <div
-            role="tabpanel"
-            class="tab-pane fade"
-            id="state-snapshots-content"
-          >
-            <div
-              class="help-btn"
-              onclick="javascript:createAlert($(this), '{{StateSnapshots description}}')"
-            >
-              <i class="bi bi-question-circle help-btn"></i>
-            </div>
-            <div></div>
-            <div id="state-snapshots" role="tablist"></div>
-          </div>
-          <div role="tabpanel" class="tab-pane fade" id="print-content">
-            <div
-              class="help-btn"
-              onclick="javascript:createAlert($(this), '{{Help text print}}')"
-            >
-              <i class="bi bi-question-circle help-btn"></i>
-            </div>
-            <div></div>
-            <div class="btn-toolbar">
-              <div class="input-group mb-3">
-                <button
-                  id="start-print-btn"
-                  class="btn btn-primary start-print-btn"
-                  disabled
-                >
-                  <span
-                    class="spinner-border spinner-border-sm"
-                    role="status"
-                    aria-hidden="true"
-                    style="display: none"
-                  >
-                  </span>
-                  {{Print}}
-                </button>
-
-                <select class="form-select" id="start-print-png-btn">
-                  <option selected value="pdf">PDF</option>
-                  <option value="png">PNG</option>
-                </select>
-                <a
-                  target="_blank"
-                  href="javascript:void(0)"
-                  class="btn btn-primary get-print-btn"
-                  id="open-pdf"
-                  >{{Open}}</a
-                >
-                <a
-                  href="javascript:void(0)"
-                  class="btn btn-primary dropdown-toggle get-print-btn"
-                  data-bs-toggle="dropdown"
-                  id="open-pdf-toggle"
-                ></a>
-                <ul class="dropdown-menu get-print-btn">
-                  <li>
-                    <a
-                      class="dropdown-item"
-                      href="javascript:void(0)"
-                      id="download-pdf"
-                      >{{Download}}</a
-                    >
-                  </li>
-                  <li>
-                    <a
-                      class="dropdown-item"
-                      target="_blank"
-                      href="javascript:void(0)"
-                      id="open-html"
-                      >{{Open HTML page}}</a
-                    >
-                  </li>
-                </ul>
-              </div>
-            </div>
-
-            <div class="d-flex flex-column gap-3 mb-3">
-              <div class="form-check">
-                <div class="togglebutton">
-                  <input
-                    class="form-check-input"
-                    id="print-sticky"
-                    type="checkbox"
-                  />
-                  <label for="print-sticky" class="form-check-label"
-                    >{{Sticky}}</label
-                  >
-                </div>
-              </div>
-              <div class="btn-group d-flex">
-                <button
-                  id="add-print-box-btn"
-                  class="btn btn-outline-secondary btn-sm"
-                >
-                  {{Add new box}}
-                </button>
-                <button
-                  id="remove-print-box-btn"
-                  class="btn btn-outline-secondary btn-sm"
-                >
-                  {{Remove last box}}
-                </button>
-              </div>
-            </div>
-
-            <form
-              class="d-flex flex-column gap-4"
-              id="print-form"
-              role="form"
-              data-bs-toggle="validator"
-            >
-              <div class="input-group input-group-sm">
-                <span class="input-group-text">1:</span>
-                <button
-                  type="button"
-                  class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
-                >
-                  <span class="visually-hidden">Toggle Dropdown</span>
-                </button>
-                <ul id="ul-scale" class="dropdown-menu"></ul>
-                <input
-                  type="number"
-                  min="200"
-                  id="select-scale"
-                  class="form-control"
-                />
-              </div>
-
-              <div
-                id="print-tmpl"
-                class="btn-group"
-                style="display: none"
-              ></div>
-
-              <div class="btn-group" id="print-size"></div>
-
-              <div class="btn-group" id="print-orientation"></div>
-
-              <div>
-                <label for="print-title">{{Title}}</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="print-title"
-                  disabled
-                />
-              </div>
-              <div>
-                <label for="print-comment">{{Comment}}</label>
-                <textarea
-                  class="form-control"
-                  rows="3"
-                  id="print-comment"
-                  disabled
-                ></textarea>
-              </div>
-
-              <div class="form-check">
-                <input
-                  class="form-check-input"
-                  id="add-legend-btn"
-                  type="checkbox"
-                  checked
-                  disabled
-                />
-                <label for="add-legend-btn" class="form-check-label"
-                  >{{Show legend on print}}</label
-                >
-              </div>
-            </form>
-          </div>
         </div>
-      </div>
     </div>
-  </div>
 
-  <div
-    class="offcanvas offcanvas-start"
-    data-bs-backdrop="false"
-    tabindex="-1"
-    id="offcanvasInfo"
-  >
-    <div class="offcanvas-header mt-5">
-      <h5 class="offcanvas-title">Info</h5>
-      <button
-        type="button"
-        class="btn-close"
-        data-bs-dismiss="offcanvas"
-        aria-label="Close"
-      ></button>
-    </div>
-    <div class="offcanvas-body" id="offcanvas-info-container"></div>
-  </div>
 
-  <div
-    class="offcanvas offcanvas-start"
-    data-bs-backdrop="false"
-    tabindex="-1"
-    id="offcanvasInfo"
-  >
-    <div class="offcanvas-header mt-5">
-      <h5 class="offcanvas-title">Info</h5>
-      <button
-        type="button"
-        class="btn-close"
-        data-bs-dismiss="offcanvas"
-        aria-label="Close"
-      ></button>
+    <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="offcanvasInfo">
+        <div class="offcanvas-header mt-5">
+            <h5 class="offcanvas-title">Info</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body" id="offcanvas-info-container"></div>
     </div>
-    <div class="offcanvas-body" id="offcanvas-info-container"></div>
-  </div>
 
-  <div
-    class="offcanvas offcanvas-start"
-    data-bs-backdrop="false"
-    tabindex="-1"
-    id="offcanvasLayerDesc"
-  >
-    <div class="offcanvas-header mt-5">
-      <h5 class="offcanvas-title">Info</h5>
-      <button
-        type="button"
-        class="btn-close"
-        data-bs-dismiss="offcanvas"
-        aria-label="Close"
-      ></button>
+    <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="offcanvasInfo">
+        <div class="offcanvas-header mt-5">
+            <h5 class="offcanvas-title">Info</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body" id="offcanvas-info-container"></div>
     </div>
-    <div class="offcanvas-body" id="offcanvas-layer-desc-container"></div>
-  </div>
 
-  <div
-    class="offcanvas offcanvas-start"
-    data-bs-backdrop="false"
-    tabindex="-1"
-    id="offcanvas-edit-start"
-  >
-    <div class="offcanvas-header mt-5">
-      <h5 class="offcanvas-title">Edit</h5>
-      <button
-        type="button"
-        class="btn-close"
-        data-bs-dismiss="offcanvas"
-        aria-label="Close"
-      ></button>
+    <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="offcanvasLayerDesc">
+        <div class="offcanvas-header mt-5">
+            <h5 class="offcanvas-title">Info</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body" id="offcanvas-layer-desc-container"></div>
     </div>
-    <div class="offcanvas-body"></div>
-  </div>
 
-  <div
-    class="offcanvas offcanvas-bottom"
-    data-bs-backdrop="false"
-    tabindex="-1"
-    id="offcanvas-edit-bottom"
-    style="height: 50vh"
-  >
-    <div class="offcanvas-header">
-      <button
-        type="button"
-        class="btn-close"
-        data-bs-dismiss="offcanvas"
-        aria-label="Close"
-      ></button>
+    <div class="offcanvas offcanvas-start" data-bs-backdrop="false" tabindex="-1" id="offcanvas-edit-start">
+        <div class="offcanvas-header mt-5">
+            <h5 class="offcanvas-title">Edit</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body"></div>
     </div>
-    <div class="offcanvas-body"></div>
-  </div>
+
+    <div class="offcanvas offcanvas-bottom" data-bs-backdrop="false" tabindex="-1" id="offcanvas-edit-bottom"
+         style="height: 50vh">
+        <div class="offcanvas-header">
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body"></div>
+    </div>
+
 </div>
 
 <div class="fade-then-dragging">
-  <button
-    id="offcanvasLayerControlBtn"
-    style="
-      position: absolute;
-      left: 10px;
-      top: 10px;
-      text-transform: uppercase;
-      display: none;
-    "
-    class="btn btn-light"
-    type="button"
-    data-bs-toggle="offcanvas"
-    data-bs-target="#offcanvasLayerControl"
-    aria-controls="offcanvasLayerControl"
-  >
-    <i class="bi bi-geo-alt"></i> Find faciliteter på kort
-  </button>
+    <button id="offcanvasLayerControlBtn"
+            style="position: absolute; left: 10px; top: 10px; text-transform: uppercase; display: none"
+            class="btn btn-light" type="button"
+            data-bs-toggle="offcanvas"
+            data-bs-target="#offcanvasLayerControl" aria-controls="offcanvasLayerControl">
+        <i class="bi bi-geo-alt"></i> Find faciliteter på kort
+    </button>
+
 </div>
 
 <div class="toast-container position-fixed bottom-0 end-0 p-3 me-sm-5">
-  <div
-    id="info-toast"
-    class="toast align-items-center text-bg-primary border-0"
-    role="alert"
-    aria-live="assertive"
-    aria-atomic="true"
-  >
-    <div class="d-flex">
-      <div class="toast-body" id="info-toast-body"></div>
+    <div id="info-toast" class="toast align-items-center text-bg-primary border-0" role="alert" aria-live="assertive"
+         aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body" id="info-toast-body"></div>
+        </div>
     </div>
-  </div>
 </div>
 
-<div
-  class="toast-container position-fixed bottom-0 start-0 p-3"
-  style="z-index: 999999999"
->
-  <div
-    id="update-toast"
-    class="toast"
-    role="alert"
-    aria-live="assertive"
-    aria-atomic="true"
-  >
-    <div class="toast-header">
-      <strong class="me-auto">{{New version available}}</strong>
-      <button
-        type="button"
-        class="btn-close"
-        data-bs-dismiss="toast"
-        aria-label="Close"
-      ></button>
+<div class="toast-container position-fixed bottom-0 start-0 p-3" style="z-index: 999999999">
+    <div id="update-toast" class="toast" role="alert" aria-live="assertive"
+         aria-atomic="true">
+        <div class="toast-header">
+            <strong class="me-auto">{{New version available}}</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="d-flex">
+            <div class="toast-body">
+                <button class='btn btn-primary' id='update-app-btn'>{{Update}}</button>
+            </div>
+        </div>
     </div>
-    <div class="d-flex">
-      <div class="toast-body">
-        <button class="btn btn-primary" id="update-app-btn">{{Update}}</button>
-      </div>
-    </div>
-  </div>
 </div>

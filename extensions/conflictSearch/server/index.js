@@ -16,6 +16,7 @@ const POOL_SIZE = config?.extensionConfig?.conflictSearch?.poolSize || 30;
 const utf8 = require('utf8');
 // Set locale for date/time string
 dayjs.locale("da_DK");
+const base64url = require('base64url');
 
 router.post('/api/extension/conflictSearch', function (req, response) {
     req.setTimeout(0); // no timeout
@@ -182,75 +183,93 @@ router.post('/api/extension/conflictSearch', function (req, response) {
 
             const sql = "SELECT " + fieldStr + " FROM " + quotedTableName + " WHERE  ST_intersects(" + geomField + ", ST_Transform(ST_geomfromtext('" + wkt + "',4326)," + srid + "))";
             const queryables = JSON.parse(metaDataKeys[table].fieldconf);
-            let postData = "client_encoding=UTF8&srs=4326&lifetime=0&q=" + sql + "&key=" + "&key=" + (typeof req.session.gc2ApiKey !== "undefined" ? req.session.gc2ApiKey : "xxxxx" /*Dummy key is sent to prevent start of session*/),
+            let postData = "client_encoding=UTF8&srs=4326&lifetime=0&base64=true&q=" +  base64url.encode(sql) + "&key=" + "&key=" + (typeof req.session.gc2ApiKey !== "undefined" ? req.session.gc2ApiKey : "xxxxx" /*Dummy key is sent to prevent start of session*/),
                 options = {
-                    uri: config.gc2.host + "/api/v2/sql/" + (req.session.subUser ? req.session.screenName + "@" + req.session.parentDb : db),
-                    encoding: 'utf8',
+                    method: 'POST',
                     body: postData,
                     headers: {
                         "Content-Type": 'application/x-www-form-urlencoded',
                         'Content-Length': postData.length,
                     }
-                };
+                },
+                uri = config.gc2.host + "/api/v2/sql/" + (req.session.subUser ? req.session.screenName + "@" + req.session.parentDb : db);
             return new Promise((resolve, reject) => {
-                request.post(options, function (err, res, body) {
-                    let jsfile, message = null, result, time, data = [], tmp = [];
-                    try {
-                        jsfile = JSON.parse(body);
-                    } catch (e) {
-                        response.status(500).send({
-                            success: false,
-                            message: "Could not parse response from GC2 SQL API",
-                            data: body,
-                            query: postData
-                        });
-                        return;
-                    }
-                    result = jsfile;
-                    message = result.message;
-                    time = new Date().getTime() - startTime;
-                    if (result.features) {
-                        for (let i = 0; i < result.features.length; i++) {
-                            for (let prop in queryables) {
-                                if (queryables.hasOwnProperty(prop)) {
-                                    if (queryables[prop].conflict) {
-                                        tmp.push({
-                                            name: prop,
-                                            alias: queryables[prop].alias || prop,
-                                            value: result.features[i].properties[prop],
-                                            sort_id: queryables[prop].sort_id,
-                                            link: queryables[prop].link,
-                                            linkprefix: queryables[prop].linkprefix,
-                                            key: false
-                                        })
+                try {
+                    fetch(uri, options)
+                        .then(response => response.json())
+                        .then(result => {
+                            let time, data = [], tmp = [], error;
+                            if (result.code !== 200) {
+                                error = result.message;
+                            }
+                            time = new Date().getTime() - startTime;
+                            if (result?.features) {
+                                for (let i = 0; i < result.features.length; i++) {
+                                    for (let prop in queryables) {
+                                        if (queryables.hasOwnProperty(prop)) {
+                                            if (queryables[prop].conflict) {
+                                                tmp.push({
+                                                    name: prop,
+                                                    alias: queryables[prop].alias || prop,
+                                                    value: result.features[i].properties[prop],
+                                                    sort_id: queryables[prop].sort_id,
+                                                    link: queryables[prop].link,
+                                                    linkprefix: queryables[prop].linkprefix,
+                                                    key: false
+                                                })
+                                            }
+                                        }
                                     }
+                                    if (tmp.length > 0) {
+                                        tmp.push({
+                                            name: metaDataKeys[table].pkey,
+                                            alias: null,
+                                            value: result.features[i].properties[metaDataKeys[table].pkey],
+                                            sort_id: null,
+                                            key: true
+                                        });
+                                        data.push(tmp);
+                                    }
+                                    tmp = [];
                                 }
                             }
-                            if (tmp.length > 0) {
-                                tmp.push({
-                                    name: metaDataKeys[table].pkey,
-                                    alias: null,
-                                    value: result.features[i].properties[metaDataKeys[table].pkey],
-                                    sort_id: null,
-                                    key: true
-                                });
-                                data.push(tmp);
-                            }
-                            tmp = [];
-                        }
-                    }
+                            let meta = metaDataKeys[table];
+                            let hit = {
+                                table: table,
+                                title: metaDataKeys[table].f_table_title || metaDataKeys[table].f_table_name,
+                                group: metaDataKeys[table].layergroup,
+                                hits: result?.features?.length || 0,
+                                data: data,
+                                num: ++count + "/" + metaDataFinal.data.length,
+                                time: time,
+                                id: socketId,
+                                error: error || (res.statusCode !== 200 ? result.message : null),
+                                message: result?.message,
+                                sql: meta.sql,
+                                meta: {
+                                    meta: meta.meta,
+                                    layergroup: meta.layergroup,
+                                    f_table_name: meta.f_table_name,
+                                    f_table_title: meta.f_table_title || meta.f_table_name,
+                                    meta_url: meta.meta_url,
+                                }
+                            };
+                            io.emit(socketId, hit);
+                            resolve(hit)
+                        });
+                } catch (e) {
                     let meta = metaDataKeys[table];
                     let hit = {
                         table: table,
                         title: metaDataKeys[table].f_table_title || metaDataKeys[table].f_table_name,
                         group: metaDataKeys[table].layergroup,
-                        hits: (typeof result.features !== "undefined" && result.features !== null) ? result.features.length : 0,
+                        hits: 0,
                         data: data,
                         num: ++count + "/" + metaDataFinal.data.length,
-                        time: time,
+                        time: null,
                         id: socketId,
-                        error: res.statusCode !== 200 ? JSON.parse(body).message : null,
-                        message: message,
+                        error: "Network connection error",
+                        message: "Network connection error",
                         sql: meta.sql,
                         meta: {
                             meta: meta.meta,
@@ -262,10 +281,11 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                     };
                     io.emit(socketId, hit);
                     resolve(hit)
-                });
+                }
             });
         }
-        createPool().then(r => {});
+        createPool().then(r => {
+        });
     });
 });
 module.exports = router;
