@@ -73,7 +73,7 @@ module.exports = {
                 mainLayerOffcanvas.toggle()
             });
             if (window.vidiConfig.showOffcanvas === true ||
-                (window.vidiConfig.showOffcanvas === 'mobile' && window.screen.width > 700)
+                ((window.vidiConfig.showOffcanvas === 'mobile' || window.vidiConfig.showOffcanvas === 'mobil')  && window.screen.width > 700)
             ) {
                 mainLayerOffcanvas.show();
             }
@@ -520,18 +520,16 @@ module.exports = {
                     setTheme(getPreferredTheme())
                 }
             })
-            window.addEventListener('DOMContentLoaded', () => {
-                showActiveTheme(getPreferredTheme())
-                document.querySelectorAll('[data-bs-theme-value]')
-                    .forEach(toggle => {
-                        toggle.addEventListener('click', () => {
-                            const theme = toggle.getAttribute('data-bs-theme-value')
-                            setStoredTheme(theme)
-                            setTheme(theme)
-                            showActiveTheme(theme, true)
-                        })
+            showActiveTheme(getPreferredTheme())
+            document.querySelectorAll('[data-bs-theme-value]')
+                .forEach(toggle => {
+                    toggle.addEventListener('click', () => {
+                        const theme = toggle.getAttribute('data-bs-theme-value')
+                        setStoredTheme(theme)
+                        setTheme(theme)
+                        showActiveTheme(theme, true)
                     })
-            })
+                })
         })()
     },
     showOffcanvasLayers: () => {
