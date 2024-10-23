@@ -2319,7 +2319,7 @@ module.exports = {
                 $('#vector-feature-info-panel .accordion-button').trigger('click');
             }, 200);
         }
-        if (count === 0) {
+        if (count === 0 && !window.vidiConfig?.vectorTable) {
             utils.showInfoToast(__("Didn't find anything"));
             if (window.vidiConfig.emptyInfoCallback) {
                 let func = Function('"use strict";return (' + window.vidiConfig.emptyInfoCallback + ')')();
