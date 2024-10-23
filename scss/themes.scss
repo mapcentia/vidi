@@ -40,11 +40,13 @@
 [data-bs-theme="dark"] .leaflet-draw-draw-marker,
 [data-bs-theme="dark"] .leaflet-draw-draw-circlemarker,
 [data-bs-theme="dark"] .leaflet-draw-edit-edit,
+[data-bs-theme="dark"] .leaflet-control-attribution,
 [data-bs-theme="dark"] .leaflet-draw-edit-remove {
-    background-color: var(--bs-secondary-bg-subtle);
+    background-color: var(--bs-tertiary-bg);
+    color: var(--bs-dark-text-emphasis);
 }
 
 [data-bs-theme="dark"] a.leaflet-disabled {
-    background-color: var(--bs-light-bg-subtle);
+    background-color: var(--bs-light-border-subtle);
 }
 
