@@ -506,21 +506,40 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="d-flex justify-content-around mb-3">
-                            <button class="btn btn-sm btn-outline-secondary" id="_draw_download_geojson"
-                                    href="javascript:void(0)">
+                        <div class="d-flex mb-3 btn-group col-7 mx-auto">
+                            <button
+                                class="btn btn-sm btn-outline-secondary "
+                                id="_draw_download_geojson"
+                                href="javascript:void(0)"
+                            >
                                 <i class="bi bi-download" aria-hidden="true"></i> GeoJson
                             </button>
-                            <button class="btn btn-sm btn-outline-secondary" style="display: none"
-                                    id="_draw_make_conflict_with_selected"
-                                    target="_blank" href="javascript:void(0)">
-                                <i class="bi bi-download" aria-hidden="true"></i> {{Conflict with selected}}
+                            <button id="_draw_upload_shape_btn" class="btn btn-sm btn-outline-secondary" for="_draw_upload_shape_file" title="Upload shape zip file" target="_blank" href="javascript:void(0)">
+                                <i class="bi bi-upload" aria-hidden="true"></i> Shape
+                                <input id="_draw_upload_shape_file"  style="display:none;" type="file"  accept-language  accept="zip,application/octet-stream,application/zip,application/x-zip,application/x-zip-compressed" >                                
                             </button>
-                            <button class="btn btn-sm btn-outline-secondary" style="display: none" id="_draw_make_conflict_with_all"
-                                    target="_blank" href="javascript:void(0)">
-                                <i class="bi bi-download" aria-hidden="true"></i> {{Conflict with all}}
-                            </button>
+                            </div>
+                            <div class="d-flex mb-3 col-7 mx-auto">
+                            <div id="_draw_conflict_group" class="" role="group" style="display: none;">
+                                <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                Konflikt
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="_draw_conflict_group">
+                                <li><a class="dropdown-item" href="javascript:void(0)" id="_draw_make_conflict_with_selected">{{Conflict with selected}}</a></li>
+                                <li><a class="dropdown-item" href="javascript:void(0)" id="_draw_make_conflict_with_all">{{Conflict with all}}</a></li>
+                                </ul>
+                            </div>
+                            <div id="_draw_blueidea_group" class="" role="group" style="display: none;">
+                                <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                BlueIdea
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="_draw_blueidea_group">
+                                <li><a class="dropdown-item" href="javascript:void(0)" id="_draw_make_blueidea_with_selected">{{Send selected to Blueidea}}</a></li>
+                                <li><a class="dropdown-item" href="javascript:void(0)" id="_draw_make_blueidea_with_all">{{Send all to Blueidea}}</a></li>
+                                </ul>
+                            </div>
                         </div>
+                            
                         <div id="draw-table"></div>
 
                     </div>

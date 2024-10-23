@@ -50,3 +50,7 @@
     background-color: var(--bs-light-border-subtle);
 }
 
+[data-bs-theme="dark"] .toast-body span {
+    color: var(--bs-white);
+}
+
