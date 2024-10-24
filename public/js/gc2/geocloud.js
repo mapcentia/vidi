@@ -2023,18 +2023,6 @@ geocloud = (function () {
             return [l];
         };
 
-        this.addWMTSBaselayer = function (url, conf) {
-            var l = L.tileLayer.wmts(url, {
-                tileMatrixSet: conf.tileMatrixSet,
-                layer: conf.layer
-            });
-            l.id = conf.name;
-            l.baseLayer = true;
-            lControl.addBaseLayer(l, conf.name);
-            this.showLayer(conf.name)
-            return [l];
-        };
-
         this.addXYZBaselayer = function (url, conf) {
             var l = new L.TileLayer(url, conf);
             l.id = conf.name;

@@ -2726,6 +2726,17 @@ module.exports = {
       maxNativeZoom: 19,
     },
     {
+      type: "MVT",
+      url: "https://api.dataforsyningen.dk/rest/skaermkort_vector_tiles/v1.0/EPSG:25832/EPSG:25832:{z}/{y}/{x}?token=4aacd5977eb46ca012c260ecb608c65c&f=application/vnd.mapbox-vector-tile",
+      id: "mvt",
+      name: "mvt",
+      description: "Kort fra mvt",
+      attribution: "mvt",
+      minZoom: 8,
+      maxZoom: 20,
+      maxNativeZoom: 19,
+    },
+    {
       type: "wms",
       url: "/api/dataforsyningen/forvaltning2",
       layers: [
