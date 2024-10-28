@@ -7,7 +7,6 @@
     color: var(--bs-whitewhite);
 }
 
-
 /* Dark mode for maps */
 
 /* Forvaltningskort */
@@ -16,8 +15,7 @@
 }
 
 /* Matrikelkort */
-[data-bs-theme="dark"]
-    img.leaflet-tile[src^="/api/datafordeler/Matrikel/MatrikelGaeldendeOgForeloebigWMS/1.0.0/WMS"] {
+[data-bs-theme="dark"] img.leaflet-tile[src^="/api/datafordeler/Matrikel/MatrikelGaeldendeOgForeloebigWMS/1.0.0/WMS"] {
     filter: invert(1) hue-rotate(180deg) brightness(1.5);
 }
 
@@ -26,7 +24,6 @@
 {
     filter: invert(1) hue-rotate(180deg) brightness(1.5);
 }
-
 
 /* leaflet*/
 [data-bs-theme="dark"] .leaflet-control-locate a,
@@ -41,9 +38,15 @@
 [data-bs-theme="dark"] .leaflet-draw-draw-circlemarker,
 [data-bs-theme="dark"] .leaflet-draw-edit-edit,
 [data-bs-theme="dark"] .leaflet-control-attribution,
+[data-bs-theme="dark"] .leaflet-control-scale-line,
 [data-bs-theme="dark"] .leaflet-draw-edit-remove {
     background-color: var(--bs-tertiary-bg);
     color: var(--bs-dark-text-emphasis);
+}
+
+[data-bs-theme="dark"] .leaflet-draw-toolbar a {
+    /* background-image: url(../images/spritesheet.png); not created yet */
+    background-image: linear-gradient(transparent, transparent), url(../../../../images/spritesheet-dark.svg);
 }
 
 [data-bs-theme="dark"] a.leaflet-disabled {
@@ -53,4 +56,3 @@
 [data-bs-theme="dark"] .toast-body span {
     color: var(--bs-white);
 }
-
