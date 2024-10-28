@@ -4,7 +4,7 @@
 }
 
 [data-bs-theme="dark"] .btn-primary {
-    color: var(--bs-whitewhite);
+    color: var(--bs-white);
 }
 
 /* Dark mode for maps */
@@ -53,6 +53,6 @@
     background-color: var(--bs-light-border-subtle);
 }
 
-[data-bs-theme="dark"] .toast-body span {
+[data-bs-theme="dark"] .toast-body {
     color: var(--bs-white);
 }
