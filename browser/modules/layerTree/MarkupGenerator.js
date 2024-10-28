@@ -21,7 +21,7 @@ class MarkupGenerator {
 
     getAddButton(layerKeyWithGeom) {
         return (`<button type="button" data-gc2-key="${layerKeyWithGeom}" style="display: none;" 
-            data-toggle="tooltip" data-bs-placement="left" title="Add new feature to layer" data-layer-type="tile" class="btn btn-secondary btn-sm gc2-add-feature gc2-edit-tools">
+            data-toggle="tooltip" data-bs-placement="left" title="Add new feature to layer" data-layer-type="tile" class="btn btn-secondary-outline btn-sm gc2-add-feature gc2-edit-tools">
             <i class="bi bi-plus-square"></i>
         </button>`);
     }
@@ -131,7 +131,7 @@ class MarkupGenerator {
                     <div class="d-flex align-items-center gap-1"> 
                                                                         <div>${layerTypeSelector}</div>
                                                                         ${addButton}
-                                                                        <button data-toggle="tooltip" data-bs-placement="left" title="${tooltip}" style="display: ${displayInfo};" class="btn btn-secondary btn-sm info-label" data-gc2-id="${layerKey}"><i class="bi bi-info-square"></i></a></button>
+                                                                        <button data-toggle="tooltip" data-bs-placement="left" title="${tooltip}" style="display: ${displayInfo};" class="btn btn-secondary-outline btn-sm info-label" data-gc2-id="${layerKey}"><i class="bi bi-info-square"></i></a></button>
                                                     </div>
      
                 </div>
