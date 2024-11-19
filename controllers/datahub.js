@@ -63,8 +63,10 @@ const queryDatahub = async (sql, onlyProperties = false) => {
   } else {
     // only return the properties of each feature
     data = [];
-    for (var i = 0; i < json.features.length; i++) {
-      data.push(JSON.parse(json.features[i].properties.result));
+    if (json.features && json.features.length) {
+      for (var i = 0; i < json.features.length; i++) {
+        data.push(JSON.parse(json.features[i].properties.result));
+      }
     }
   }
 
@@ -269,7 +271,7 @@ const autocompleteSpoofer = async (req, res, next) => {
 
   // Return the result of the query from datahub
   try {
-    console.log(sql);
+    //console.log(sql);
     const result = await queryDatahub(sql, true);
 
     res.json(result);

@@ -753,14 +753,14 @@ module.exports = {
         const _self = this;
         // Add matrikel to map
 
-        console.log(id);
+        //console.log(id);
 
         // We don't have information, get it
         return new Promise(function (resolve, reject) {
           _self
             .resolveMatrikel(id)
             .then((feat) => {
-              console.log(feat);
+              //console.log(feat);
               feat.properties.key =
                 feat.properties.ejerlavkode + feat.properties.matrikelnr;
               feat.properties.hasGeometry = feat.hasOwnProperty("geometry");

@@ -1,2366 +1,70 @@
 /*
- * Test config file for mapgoviditest.geopartner.dk
+ * test config file for mapgovidi.geopartner.dk
+ * Please be mindfull of edits.
  */
 
 module.exports = {
-    // ===============================================
-    // Following settings are set under build/startup.
-    // They can not be altered in run-time.
-    // ===============================================
+  // ===============================================
+  // Following settings are set under build/startup.
+  // They can not be altered in run-time.
+  // ===============================================
 
+  // ========================================
+  // Which back-end is used. "gc2" or "carto"
+  // ========================================
 
-    // ========================================
-    // Which back-end is used. "gc2" or "carto"
-    // ========================================
+  backend: "gc2",
 
-    "backend": "gc2",
+  // ==========================================
+  // GC2 host. Both HTTP and HTTPS is supported
+  // Carto is hardcoded to carto.com
+  // ==========================================
 
+  gc2: {
+    host: "https://mapgogc2.geopartner.dk",
+  },
 
-    // ==========================================
-    // GC2 host. Both HTTP and HTTPS is supported
-    // Carto is hardcoded to carto.com
-    // ==========================================
+  // ===============================================================
+  // Limits for puppeteer processes
+  // numbers work on a per thread basis.
+  // ===============================================================
 
-    "gc2": {
-        "host": "https://mapgogc2.geopartner.dk"
-    },
+  puppeteerProcesses: {
+    min: 0,
+    max: 8,
+  },
+  
+  // ===============================================================
+  // Setup the connection to use stuff in grunddata globally
+  // ===============================================================
 
-    // ===============================================================
-    // Limits for puppeteer processes
-    // numbers work on a per thread basis.
-    // ===============================================================
+  "datahub": {
+    "user": "api@grunddata",
+    "key": "c78646f7c717bf265f8e9e0a8a313785"
+  },
+  // ===============================================================
+  // Configuration of print templates.
+  // Print templates must be enabled - look further down.
+  // mapsizePx ~ is the pixel dimension of the map view
+  // mapsizeMm ~ is actual size of the map view on the resulting PDF
+  // ===============================================================
 
-    "puppeteerProcesses": {
-        "min": 0,
-        "max": 2
-    },
+  print: {
+    templates: {
+      // ================================
+      // The "print" template is build-in
+      // ================================
 
-    // ===============================================================
-    // Setup the connection to use stuff in grunddata globally
-    // ===============================================================
-
-    "datahub": {
-        "user": "api@grunddata",
-        "key": "c78646f7c717bf265f8e9e0a8a313785"
-    },
-
-    // ===============================================================
-    // Configuration of print templates.
-    // Print templates must be enabled - look further down.
-    // mapsizePx ~ is the pixel dimension of the map view
-    // mapsizeMm ~ is actual size of the map view on the resulting PDF
-    // ===============================================================
-
-    "print": {
-        "templates": {
-
-
-            // ================================
-            // The "print" template is build-in
-            // ================================
-
-            "print": {
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                },
-                A2: {
-                    l: {
-                        mapsizePx: [2185, 1525],
-                        mapsizeMm: [576, 400]
-                    },
-                    p: {
-                        mapsizePx: [1525, 2185],
-                        mapsizeMm: [400, 576]
-                    }
-                },
-                A1: {
-                    l: {
-                        mapsizePx: [3120, 2185],
-                        mapsizeMm: [820, 576]
-                    },
-                    p: {
-                        mapsizePx: [2185, 3120],
-                        mapsizeMm: [576, 820]
-                    }
-                },
-                A0: {
-                    l: {
-                        mapsizePx: [4430, 3120],
-                        mapsizeMm: [1173, 825]
-                    },
-                    p: {
-                        mapsizePx: [3120, 4430],
-                        mapsizeMm: [825, 1173]
-                    }
-                }
-            },
-            "segesprint": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "portofaalborgprint": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                },
-                A2: {
-                    l: {
-                        mapsizePx: [2185, 1525],
-                        mapsizeMm: [576, 400]
-                    },
-                    p: {
-                        mapsizePx: [1525, 2185],
-                        mapsizeMm: [400, 576]
-                    }
-                },
-                A1: {
-                    l: {
-                        mapsizePx: [3120, 2185],
-                        mapsizeMm: [820, 576]
-                    },
-                    p: {
-                        mapsizePx: [2185, 3120],
-                        mapsizeMm: [576, 820]
-                    }
-                },
-                A0: {
-                    l: {
-                        mapsizePx: [4430, 3120],
-                        mapsizeMm: [1173, 825]
-                    },
-                    p: {
-                        mapsizePx: [3120, 4430],
-                        mapsizeMm: [825, 1173]
-                    }
-                }
-            },
-            "grundfosprint": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                },
-                A2: {
-                    l: {
-                        mapsizePx: [2185, 1525],
-                        mapsizeMm: [576, 400]
-                    },
-                    p: {
-                        mapsizePx: [1525, 2185],
-                        mapsizeMm: [400, 576]
-                    }
-                },
-                A1: {
-                    l: {
-                        mapsizePx: [3120, 2185],
-                        mapsizeMm: [820, 576]
-                    },
-                    p: {
-                        mapsizePx: [2185, 3120],
-                        mapsizeMm: [576, 820]
-                    }
-                },
-                A0: {
-                    l: {
-                        mapsizePx: [4430, 3120],
-                        mapsizeMm: [1173, 825]
-                    },
-                    p: {
-                        mapsizePx: [3120, 4430],
-                        mapsizeMm: [825, 1173]
-                    }
-                }
-            },
-            "andelsnet": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "skarupfjv": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "kertemindeforsyningprint": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                },
-                A2: {
-                    l: {
-                        mapsizePx: [2185, 1525],
-                        mapsizeMm: [576, 400]
-                    },
-                    p: {
-                        mapsizePx: [1525, 2185],
-                        mapsizeMm: [400, 576]
-                    }
-                },
-                A1: {
-                    l: {
-                        mapsizePx: [3120, 2185],
-                        mapsizeMm: [820, 576]
-                    },
-                    p: {
-                        mapsizePx: [2185, 3120],
-                        mapsizeMm: [576, 820]
-                    }
-                },
-                A0: {
-                    l: {
-                        mapsizePx: [4430, 3120],
-                        mapsizeMm: [1173, 825]
-                    },
-                    p: {
-                        mapsizePx: [3120, 4430],
-                        mapsizeMm: [825, 1173]
-                    }
-                }
-            },
-            "ibspildprint": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vandvaerk_loenstrupvand2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "stoholmvarme": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vandvaerk2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vandvaerk_bordingvand2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vandvaerk_brobyvaerk2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vandvaerk_gudme2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vandvaerk_durupvand2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vandvaerk_poulstrupvand2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vandvaerk_haderupvand2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vandvaerk_loekkenvand2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vandvaerk_timvand2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "bomiva2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vandvaerk_hvamvandaalestrup2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vandvaerk_herrestedmaare2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vandvaerk_lundoenordrevand2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vandvaerk_halskovvand2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vandvaerk_skaerumvand2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vandvaerk_svindingevand2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vandvaerk_harerendenvand2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vandvaerk_stoholm2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vandvaerk_soendervig2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vandvaerk_vesteraaby2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "tvedvand": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "tvedvandvaerk": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vandvaerk_oesterengevand2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "jndata": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "atea_beumergroup": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "engesvangvand": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vandvaerk_nrlyngbyvand2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vandvaerk_gudbjergvand2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vandvaerk_vittrupvand2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vandvaerk_hesselagerkirkebyvand2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vandvaerk_knudstrandvand2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vandvaerk_jellingvand2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vandvaerk_haurumvand2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vandvaerk_baadsgaardsmarksvand2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "varmevaerk_loekkensvejensvarme2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vandvaerk_bardevand2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vandvaerk_knudbyvand2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vandvaerk_vorgodvand2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vandvaerk_hvidstenvand2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "varmevaerk_stoholmvarme2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-
-            },
-            "Agriteam_Varde": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1060],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1060, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-
-            },
-            "Agriteam_Brorup": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1060],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1060, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-
-            },
-            "Agriteam_Randers": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1060],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1060, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-
-            },
-            "vestforbraending_print": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                },
-                A2: {
-                    l: {
-                        mapsizePx: [2185, 1525],
-                        mapsizeMm: [576, 400]
-                    },
-                    p: {
-                        mapsizePx: [1525, 2185],
-                        mapsizeMm: [400, 576]
-                    }
-                },
-                A1: {
-                    l: {
-                        mapsizePx: [3120, 2185],
-                        mapsizeMm: [820, 576]
-                    },
-                    p: {
-                        mapsizePx: [2185, 3120],
-                        mapsizeMm: [576, 820]
-                    }
-                },
-                A0: {
-                    l: {
-                        mapsizePx: [4430, 3120],
-                        mapsizeMm: [1173, 825]
-                    },
-                    p: {
-                        mapsizePx: [3120, 4430],
-                        mapsizeMm: [825, 1173]
-                    }
-                }
-            },
-            "skagenhavn_print": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "hoejslevkirkeby_print": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vejbysmidstrup_print": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "nimvand_print": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "nibevarme": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "harridslevvand_print": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vandvaerk_svenstrup_hammel": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vandvaerk_farstrupvand2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vandvaerk_fjelsoevand2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vandvaerk_sjoerupvand2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "edcvidebaekgprint": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "novi": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "varmevaerk_loenstrupvarme2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vandvaerk_feldborgvand2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vandvaerk_lundoebysvand2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "varmevaerk_lendumvarme": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "antenne_lendumantenne": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vandvaerk_lendumvand2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vandvaerk_laastrupnrrindvand2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vandvaerk_kjeldbjergvand2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "hvidkildegods_print": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "atlanticsapphire": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vandvaerk_hammerumvand2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "begreen": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-			"vandvaerk_gammelstrup2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },			
-			"vandvaerk_ulboellevand2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-			"vandvaerk_vestkystvand2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },			
-			"vandvaerk_givevand2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-			"vandvaerk_aastruplundvand2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-			"vandvaerk_soeftenvand2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-			"vandvaerk_faarupnordrevand2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-			"vandvaerk_kvorningvand2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-			"vandvaerk_markvangvand2": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-			"vestjyllands_andel": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-			"bestseller": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },				
-            "rsforsyning": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vhforsyning": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "sdu": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "hrbioenergi": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "dansksalt": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "rsk": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "hspv": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            "vspv": { // Your print templates. "print" is the default
-                A4: {
-                    l: {
-                        mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
-                    },
-                    p: {
-                        mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
-                    }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
-                    },
-                    p: {
-                        mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
-                    }
-                }
-            },
-            // ========================================================
-            // Names starting with "_" will not appear in the Print tab
-            // But can be used by other extensions.
-            // Must not be enabled.
-            // ========================================================
-
-            "_conflictPrint": {
-                "A4": {
-                    "p": {
-                        "mapsizePx": [700, 500],
-                        "mapsizeMm": [190, 120]
-                    }
-                }
-            }
+      print: {
+        A4: {
+          l: {
+            mapsizePx: [1060, 730],
+            mapsizeMm: [280, 192],
+          },
+          p: {
+            mapsizePx: [730, 1060],
+            mapsizeMm: [192, 280],
+          },
         },
         A3: {
           l: {
@@ -2400,6 +104,609 @@ module.exports = {
           p: {
             mapsizePx: [3120, 4430],
             mapsizeMm: [825, 1173],
+          },
+        },
+      },
+      skovgaardenergy: {
+        // Your print templates. "print" is the default
+        A4: {
+          l: {
+            mapsizePx: [1060, 730],
+            mapsizeMm: [280, 192],
+          },
+          p: {
+            mapsizePx: [730, 1060],
+            mapsizeMm: [192, 280],
+          },
+        },
+        A3: {
+          l: {
+            mapsizePx: [1525, 1065],
+            mapsizeMm: [401, 282],
+          },
+          p: {
+            mapsizePx: [1065, 1525],
+            mapsizeMm: [282, 401],
+          },
+        },
+        A2: {
+          l: {
+            mapsizePx: [2185, 1525],
+            mapsizeMm: [576, 400],
+          },
+          p: {
+            mapsizePx: [1525, 2185],
+            mapsizeMm: [400, 576],
+          },
+        },
+        A1: {
+          l: {
+            mapsizePx: [3120, 2185],
+            mapsizeMm: [820, 576],
+          },
+          p: {
+            mapsizePx: [2185, 3120],
+            mapsizeMm: [576, 820],
+          },
+        },
+        A0: {
+          l: {
+            mapsizePx: [4430, 3120],
+            mapsizeMm: [1173, 825],
+          },
+          p: {
+            mapsizePx: [3120, 4430],
+            mapsizeMm: [825, 1173],
+          },
+        },
+      },
+      rsforsyning: {
+        // Your print templates. "print" is the default
+        A4: {
+          l: {
+            mapsizePx: [1060, 730],
+            mapsizeMm: [280, 192],
+          },
+          p: {
+            mapsizePx: [730, 1060],
+            mapsizeMm: [192, 280],
+          },
+        },
+        A3: {
+          l: {
+            mapsizePx: [1525, 1065],
+            mapsizeMm: [401, 282],
+          },
+          p: {
+            mapsizePx: [1065, 1525],
+            mapsizeMm: [282, 401],
+          },
+        },
+        A2: {
+          l: {
+            mapsizePx: [2185, 1525],
+            mapsizeMm: [576, 400],
+          },
+          p: {
+            mapsizePx: [1525, 2185],
+            mapsizeMm: [400, 576],
+          },
+        },
+        A1: {
+          l: {
+            mapsizePx: [3120, 2185],
+            mapsizeMm: [820, 576],
+          },
+          p: {
+            mapsizePx: [2185, 3120],
+            mapsizeMm: [576, 820],
+          },
+        },
+        A0: {
+          l: {
+            mapsizePx: [4430, 3120],
+            mapsizeMm: [1173, 825],
+          },
+          p: {
+            mapsizePx: [3120, 4430],
+            mapsizeMm: [825, 1173],
+          },
+        },
+      },
+      vhforsyning: {
+        // Your print templates. "print" is the default
+        A4: {
+          l: {
+            mapsizePx: [1060, 730],
+            mapsizeMm: [280, 192],
+          },
+          p: {
+            mapsizePx: [730, 1060],
+            mapsizeMm: [192, 280],
+          },
+        },
+        A3: {
+          l: {
+            mapsizePx: [1525, 1065],
+            mapsizeMm: [401, 282],
+          },
+          p: {
+            mapsizePx: [1065, 1525],
+            mapsizeMm: [282, 401],
+          },
+        },
+      },
+      dansksalt: {
+        // Your print templates. "print" is the default
+        A4: {
+          l: {
+            mapsizePx: [1060, 730],
+            mapsizeMm: [280, 192],
+          },
+          p: {
+            mapsizePx: [730, 1060],
+            mapsizeMm: [192, 280],
+          },
+        },
+        A3: {
+          l: {
+            mapsizePx: [1525, 1065],
+            mapsizeMm: [401, 282],
+          },
+          p: {
+            mapsizePx: [1065, 1525],
+            mapsizeMm: [282, 401],
+          },
+        },
+      },
+      vandvaerk_hellevestvand2: {
+        // Your print templates. "print" is the default
+        A4: {
+          l: {
+            mapsizePx: [1060, 730],
+            mapsizeMm: [280, 192],
+          },
+          p: {
+            mapsizePx: [730, 1060],
+            mapsizeMm: [192, 280],
+          },
+        },
+        A3: {
+          l: {
+            mapsizePx: [1525, 1065],
+            mapsizeMm: [401, 282],
+          },
+          p: {
+            mapsizePx: [1065, 1525],
+            mapsizeMm: [282, 401],
+          },
+        },
+      },
+      vandvaerk_baadsgaardsmarksvand2: {
+        // Your print templates. "print" is the default
+        A4: {
+          l: {
+            mapsizePx: [1060, 730],
+            mapsizeMm: [280, 192],
+          },
+          p: {
+            mapsizePx: [730, 1060],
+            mapsizeMm: [192, 280],
+          },
+        },
+        A3: {
+          l: {
+            mapsizePx: [1525, 1065],
+            mapsizeMm: [401, 282],
+          },
+          p: {
+            mapsizePx: [1065, 1525],
+            mapsizeMm: [282, 401],
+          },
+        },
+      },
+      vandvaerk_finderuphanningvand2: {
+        // Your print templates. "print" is the default
+        A4: {
+          l: {
+            mapsizePx: [1060, 730],
+            mapsizeMm: [280, 192],
+          },
+          p: {
+            mapsizePx: [730, 1060],
+            mapsizeMm: [192, 280],
+          },
+        },
+        A3: {
+          l: {
+            mapsizePx: [1525, 1065],
+            mapsizeMm: [401, 282],
+          },
+          p: {
+            mapsizePx: [1065, 1525],
+            mapsizeMm: [282, 401],
+          },
+        },
+      },
+      vandvaerk_givevand2: {
+        // Your print templates. "print" is the default
+        A4: {
+          l: {
+            mapsizePx: [1060, 730],
+            mapsizeMm: [280, 192],
+          },
+          p: {
+            mapsizePx: [730, 1060],
+            mapsizeMm: [192, 280],
+          },
+        },
+        A3: {
+          l: {
+            mapsizePx: [1525, 1065],
+            mapsizeMm: [401, 282],
+          },
+          p: {
+            mapsizePx: [1065, 1525],
+            mapsizeMm: [282, 401],
+          },
+        },
+      },
+      vandvaerk_soeftenvand2: {
+        // Your print templates. "print" is the default
+        A4: {
+          l: {
+            mapsizePx: [1060, 730],
+            mapsizeMm: [280, 192],
+          },
+          p: {
+            mapsizePx: [730, 1060],
+            mapsizeMm: [192, 280],
+          },
+        },
+        A3: {
+          l: {
+            mapsizePx: [1525, 1065],
+            mapsizeMm: [401, 282],
+          },
+          p: {
+            mapsizePx: [1065, 1525],
+            mapsizeMm: [282, 401],
+          },
+        },
+      },
+      vandvaerk_faarupnordrevand2: {
+        // Your print templates. "print" is the default
+        A4: {
+          l: {
+            mapsizePx: [1060, 730],
+            mapsizeMm: [280, 192],
+          },
+          p: {
+            mapsizePx: [730, 1060],
+            mapsizeMm: [192, 280],
+          },
+        },
+        A3: {
+          l: {
+            mapsizePx: [1525, 1065],
+            mapsizeMm: [401, 282],
+          },
+          p: {
+            mapsizePx: [1065, 1525],
+            mapsizeMm: [282, 401],
+          },
+        },
+      },
+      vandvaerk_kvorningvand2: {
+        // Your print templates. "print" is the default
+        A4: {
+          l: {
+            mapsizePx: [1060, 730],
+            mapsizeMm: [280, 192],
+          },
+          p: {
+            mapsizePx: [730, 1060],
+            mapsizeMm: [192, 280],
+          },
+        },
+        A3: {
+          l: {
+            mapsizePx: [1525, 1065],
+            mapsizeMm: [401, 282],
+          },
+          p: {
+            mapsizePx: [1065, 1525],
+            mapsizeMm: [282, 401],
+          },
+        },
+      },
+      vandvaerk_ulboellevand2: {
+        // Your print templates. "print" is the default
+        A4: {
+          l: {
+            mapsizePx: [1060, 730],
+            mapsizeMm: [280, 192],
+          },
+          p: {
+            mapsizePx: [730, 1060],
+            mapsizeMm: [192, 280],
+          },
+        },
+        A3: {
+          l: {
+            mapsizePx: [1525, 1065],
+            mapsizeMm: [401, 282],
+          },
+          p: {
+            mapsizePx: [1065, 1525],
+            mapsizeMm: [282, 401],
+          },
+        },
+      },
+      begreen: {
+        // Your print templates. "print" is the default
+        A4: {
+          l: {
+            mapsizePx: [1060, 730],
+            mapsizeMm: [280, 192],
+          },
+          p: {
+            mapsizePx: [730, 1060],
+            mapsizeMm: [192, 280],
+          },
+        },
+        A3: {
+          l: {
+            mapsizePx: [1525, 1065],
+            mapsizeMm: [401, 282],
+          },
+          p: {
+            mapsizePx: [1065, 1525],
+            mapsizeMm: [282, 401],
+          },
+        },
+      },
+      brforsyning: {
+        // Your print templates. "print" is the default
+        A4: {
+          l: {
+            mapsizePx: [1060, 730],
+            mapsizeMm: [280, 192],
+          },
+          p: {
+            mapsizePx: [730, 1060],
+            mapsizeMm: [192, 280],
+          },
+        },
+        A3: {
+          l: {
+            mapsizePx: [1525, 1065],
+            mapsizeMm: [401, 282],
+          },
+          p: {
+            mapsizePx: [1065, 1525],
+            mapsizeMm: [282, 401],
+          },
+        },
+        A2: {
+          l: {
+            mapsizePx: [2185, 1525],
+            mapsizeMm: [576, 400],
+          },
+          p: {
+            mapsizePx: [1525, 2185],
+            mapsizeMm: [400, 576],
+          },
+        },
+        A1: {
+          l: {
+            mapsizePx: [3120, 2185],
+            mapsizeMm: [820, 576],
+          },
+          p: {
+            mapsizePx: [2185, 3120],
+            mapsizeMm: [576, 820],
+          },
+        },
+        A0: {
+          l: {
+            mapsizePx: [4430, 3120],
+            mapsizeMm: [1173, 825],
+          },
+          p: {
+            mapsizePx: [3120, 4430],
+            mapsizeMm: [825, 1173],
+          },
+        },
+      },
+      vandvaerk_bislevvand2: {
+        // Your print templates. "print" is the default
+        A4: {
+          l: {
+            mapsizePx: [1060, 730],
+            mapsizeMm: [280, 192],
+          },
+          p: {
+            mapsizePx: [730, 1060],
+            mapsizeMm: [192, 280],
+          },
+        },
+        A3: {
+          l: {
+            mapsizePx: [1525, 1065],
+            mapsizeMm: [401, 282],
+          },
+          p: {
+            mapsizePx: [1065, 1525],
+            mapsizeMm: [282, 401],
+          },
+        },
+      },
+      vandvaerk_sebbersundvand2: {
+        // Your print templates. "print" is the default
+        A4: {
+          l: {
+            mapsizePx: [1060, 730],
+            mapsizeMm: [280, 192],
+          },
+          p: {
+            mapsizePx: [730, 1060],
+            mapsizeMm: [192, 280],
+          },
+        },
+        A3: {
+          l: {
+            mapsizePx: [1525, 1065],
+            mapsizeMm: [401, 282],
+          },
+          p: {
+            mapsizePx: [1065, 1525],
+            mapsizeMm: [282, 401],
+          },
+        },
+      },
+      vandvaerk_nyrupvand2: {
+        // Your print templates. "print" is the default
+        A4: {
+          l: {
+            mapsizePx: [1060, 730],
+            mapsizeMm: [280, 192],
+          },
+          p: {
+            mapsizePx: [730, 1060],
+            mapsizeMm: [192, 280],
+          },
+        },
+        A3: {
+          l: {
+            mapsizePx: [1525, 1065],
+            mapsizeMm: [401, 282],
+          },
+          p: {
+            mapsizePx: [1065, 1525],
+            mapsizeMm: [282, 401],
+          },
+        },
+      },
+      vandvaerk_gammelstrup2: {
+        // Your print templates. "print" is the default
+        A4: {
+          l: {
+            mapsizePx: [1060, 730],
+            mapsizeMm: [280, 192],
+          },
+          p: {
+            mapsizePx: [730, 1060],
+            mapsizeMm: [192, 280],
+          },
+        },
+        A3: {
+          l: {
+            mapsizePx: [1525, 1065],
+            mapsizeMm: [401, 282],
+          },
+          p: {
+            mapsizePx: [1065, 1525],
+            mapsizeMm: [282, 401],
+          },
+        },
+      },
+      vandvaerk_givskudvand2: {
+        // Your print templates. "print" is the default
+        A4: {
+          l: {
+            mapsizePx: [1060, 730],
+            mapsizeMm: [280, 192],
+          },
+          p: {
+            mapsizePx: [730, 1060],
+            mapsizeMm: [192, 280],
+          },
+        },
+        A3: {
+          l: {
+            mapsizePx: [1525, 1065],
+            mapsizeMm: [401, 282],
+          },
+          p: {
+            mapsizePx: [1065, 1525],
+            mapsizeMm: [282, 401],
+          },
+        },
+      },
+      provas: {
+        // Your print templates. "print" is the default
+        A4: {
+          l: {
+            mapsizePx: [1060, 730],
+            mapsizeMm: [280, 192],
+          },
+          p: {
+            mapsizePx: [730, 1060],
+            mapsizeMm: [192, 280],
+          },
+        },
+        A3: {
+          l: {
+            mapsizePx: [1525, 1065],
+            mapsizeMm: [401, 282],
+          },
+          p: {
+            mapsizePx: [1065, 1525],
+            mapsizeMm: [282, 401],
+          },
+        },
+        A2: {
+          l: {
+            mapsizePx: [2185, 1525],
+            mapsizeMm: [576, 400],
+          },
+          p: {
+            mapsizePx: [1525, 2185],
+            mapsizeMm: [400, 576],
+          },
+        },
+        A1: {
+          l: {
+            mapsizePx: [3120, 2185],
+            mapsizeMm: [820, 576],
+          },
+          p: {
+            mapsizePx: [2185, 3120],
+            mapsizeMm: [576, 820],
+          },
+        },
+        A0: {
+          l: {
+            mapsizePx: [4430, 3120],
+            mapsizeMm: [1173, 825],
+          },
+          p: {
+            mapsizePx: [3120, 4430],
+            mapsizeMm: [825, 1173],
+          },
+        },
+      },
+      vandvaerk_loenstrupvand2: {
+        // Your print templates. "print" is the default
+        A4: {
+          l: {
+            mapsizePx: [1060, 730],
+            mapsizeMm: [280, 192],
+          },
+          p: {
+            mapsizePx: [730, 1060],
+            mapsizeMm: [192, 280],
+          },
+        },
+        A3: {
+          l: {
+            mapsizePx: [1525, 1065],
+            mapsizeMm: [401, 282],
+          },
+          p: {
+            mapsizePx: [1065, 1525],
+            mapsizeMm: [282, 401],
           },
         },
       },
@@ -2578,6 +885,29 @@ module.exports = {
           },
         },
       },
+      novi: {
+        // Your print templates. "print" is the default
+        A4: {
+          l: {
+            mapsizePx: [1060, 730],
+            mapsizeMm: [280, 192],
+          },
+          p: {
+            mapsizePx: [730, 1060],
+            mapsizeMm: [192, 280],
+          },
+        },
+        A3: {
+          l: {
+            mapsizePx: [1525, 1065],
+            mapsizeMm: [401, 282],
+          },
+          p: {
+            mapsizePx: [1065, 1525],
+            mapsizeMm: [282, 401],
+          },
+        },
+      },
       kertemindeforsyningprint: {
         // Your print templates. "print" is the default
         A4: {
@@ -2632,29 +962,6 @@ module.exports = {
         },
       },
       ibspildprint: {
-        // Your print templates. "print" is the default
-        A4: {
-          l: {
-            mapsizePx: [1060, 730],
-            mapsizeMm: [280, 192],
-          },
-          p: {
-            mapsizePx: [730, 1060],
-            mapsizeMm: [192, 280],
-          },
-        },
-        A3: {
-          l: {
-            mapsizePx: [1525, 1065],
-            mapsizeMm: [401, 282],
-          },
-          p: {
-            mapsizePx: [1065, 1525],
-            mapsizeMm: [282, 401],
-          },
-        },
-      },
-      vandvaerk_loenstrupvand2: {
         // Your print templates. "print" is the default
         A4: {
           l: {
@@ -3160,6 +1467,29 @@ module.exports = {
           },
         },
       },
+      vandvaerk_oesterengevand2: {
+        // Your print templates. "print" is the default
+        A4: {
+          l: {
+            mapsizePx: [1060, 730],
+            mapsizeMm: [280, 192],
+          },
+          p: {
+            mapsizePx: [730, 1060],
+            mapsizeMm: [192, 280],
+          },
+        },
+        A3: {
+          l: {
+            mapsizePx: [1525, 1065],
+            mapsizeMm: [401, 282],
+          },
+          p: {
+            mapsizePx: [1065, 1525],
+            mapsizeMm: [282, 401],
+          },
+        },
+      },
       tvedvand: {
         // Your print templates. "print" is the default
         A4: {
@@ -3184,29 +1514,6 @@ module.exports = {
         },
       },
       tvedvandvaerk: {
-        // Your print templates. "print" is the default
-        A4: {
-          l: {
-            mapsizePx: [1060, 730],
-            mapsizeMm: [280, 192],
-          },
-          p: {
-            mapsizePx: [730, 1060],
-            mapsizeMm: [192, 280],
-          },
-        },
-        A3: {
-          l: {
-            mapsizePx: [1525, 1065],
-            mapsizeMm: [401, 282],
-          },
-          p: {
-            mapsizePx: [1065, 1525],
-            mapsizeMm: [282, 401],
-          },
-        },
-      },
-      vandvaerk_oesterengevand2: {
         // Your print templates. "print" is the default
         A4: {
           l: {
@@ -3299,29 +1606,6 @@ module.exports = {
         },
       },
       vandvaerk_nrlyngbyvand2: {
-        // Your print templates. "print" is the default
-        A4: {
-          l: {
-            mapsizePx: [1060, 730],
-            mapsizeMm: [280, 192],
-          },
-          p: {
-            mapsizePx: [730, 1060],
-            mapsizeMm: [192, 280],
-          },
-        },
-        A3: {
-          l: {
-            mapsizePx: [1525, 1065],
-            mapsizeMm: [401, 282],
-          },
-          p: {
-            mapsizePx: [1065, 1525],
-            mapsizeMm: [282, 401],
-          },
-        },
-      },
-      vandvaerk_gudbjergvand2: {
         // Your print templates. "print" is the default
         A4: {
           l: {
@@ -3437,29 +1721,6 @@ module.exports = {
         },
       },
       vandvaerk_haurumvand2: {
-        // Your print templates. "print" is the default
-        A4: {
-          l: {
-            mapsizePx: [1060, 730],
-            mapsizeMm: [280, 192],
-          },
-          p: {
-            mapsizePx: [730, 1060],
-            mapsizeMm: [192, 280],
-          },
-        },
-        A3: {
-          l: {
-            mapsizePx: [1525, 1065],
-            mapsizeMm: [401, 282],
-          },
-          p: {
-            mapsizePx: [1065, 1525],
-            mapsizeMm: [282, 401],
-          },
-        },
-      },
-      vandvaerk_baadsgaardsmarksvand2: {
         // Your print templates. "print" is the default
         A4: {
           l: {
@@ -3620,6 +1881,29 @@ module.exports = {
           },
         },
       },
+      bestseller: {
+        // Your print templates. "print" is the default
+        A4: {
+          l: {
+            mapsizePx: [1060, 730],
+            mapsizeMm: [280, 192],
+          },
+          p: {
+            mapsizePx: [730, 1060],
+            mapsizeMm: [192, 280],
+          },
+        },
+        A3: {
+          l: {
+            mapsizePx: [1525, 1065],
+            mapsizeMm: [401, 282],
+          },
+          p: {
+            mapsizePx: [1065, 1525],
+            mapsizeMm: [282, 401],
+          },
+        },
+      },
       Agriteam_Varde: {
         // Your print templates. "print" is the default
         A4: {
@@ -3691,56 +1975,56 @@ module.exports = {
       },
       vestforbraending_print: {
         // Your print templates. "print" is the default
-        A4: {
-          l: {
-            mapsizePx: [1060, 730],
-            mapsizeMm: [280, 192],
-          },
-          p: {
-            mapsizePx: [730, 1060],
-            mapsizeMm: [192, 280],
-          },
-        },
-        A3: {
-          l: {
-            mapsizePx: [1525, 1065],
-            mapsizeMm: [401, 282],
-          },
-          p: {
-            mapsizePx: [1065, 1525],
-            mapsizeMm: [282, 401],
-          },
-        },
-        A2: {
-          l: {
-            mapsizePx: [2185, 1525],
-            mapsizeMm: [576, 400],
-          },
-          p: {
-            mapsizePx: [1525, 2185],
-            mapsizeMm: [400, 576],
-          },
-        },
-        A1: {
-          l: {
-            mapsizePx: [3120, 2185],
-            mapsizeMm: [820, 576],
-          },
-          p: {
-            mapsizePx: [2185, 3120],
-            mapsizeMm: [576, 820],
-          },
-        },
-        A0: {
-          l: {
-            mapsizePx: [4430, 3120],
-            mapsizeMm: [1173, 825],
-          },
-          p: {
-            mapsizePx: [3120, 4430],
-            mapsizeMm: [825, 1173],
-          },
-        },
+                A4: {
+                    l: {
+                        mapsizePx: [1060, 730],
+                        mapsizeMm: [280, 192]
+                    },
+                    p: {
+                        mapsizePx: [730, 1060],
+                        mapsizeMm: [192, 280]
+                    }
+                },
+                A3: {
+                    l: {
+                        mapsizePx: [1525, 1065],
+                        mapsizeMm: [401, 282]
+                    },
+                    p: {
+                        mapsizePx: [1065, 1525],
+                        mapsizeMm: [282, 401]
+                    }
+                },
+                A2: {
+                    l: {
+                        mapsizePx: [2185, 1525],
+                        mapsizeMm: [576, 400]
+                    },
+                    p: {
+                        mapsizePx: [1525, 2185],
+                        mapsizeMm: [400, 576]
+                    }
+                },
+                A1: {
+                    l: {
+                        mapsizePx: [3120, 2185],
+                        mapsizeMm: [820, 576]
+                    },
+                    p: {
+                        mapsizePx: [2185, 3120],
+                        mapsizeMm: [576, 820]
+                    }
+                },
+                A0: {
+                    l: {
+                        mapsizePx: [4430, 3120],
+                        mapsizeMm: [1173, 825]
+                    },
+                    p: {
+                        mapsizePx: [3120, 4430],
+                        mapsizeMm: [825, 1173]
+                    }
+                }
       },
       skagenhavn_print: {
         // Your print templates. "print" is the default
@@ -3995,29 +2279,6 @@ module.exports = {
           },
         },
       },
-      novi: {
-        // Your print templates. "print" is the default
-        A4: {
-          l: {
-            mapsizePx: [1060, 730],
-            mapsizeMm: [280, 192],
-          },
-          p: {
-            mapsizePx: [730, 1060],
-            mapsizeMm: [192, 280],
-          },
-        },
-        A3: {
-          l: {
-            mapsizePx: [1525, 1065],
-            mapsizeMm: [401, 282],
-          },
-          p: {
-            mapsizePx: [1065, 1525],
-            mapsizeMm: [282, 401],
-          },
-        },
-      },
       varmevaerk_loenstrupvarme2: {
         // Your print templates. "print" is the default
         A4: {
@@ -4038,6 +2299,36 @@ module.exports = {
           p: {
             mapsizePx: [1065, 1525],
             mapsizeMm: [282, 401],
+          },
+        },
+        A2: {
+          l: {
+            mapsizePx: [2185, 1525],
+            mapsizeMm: [576, 400],
+          },
+          p: {
+            mapsizePx: [1525, 2185],
+            mapsizeMm: [400, 576],
+          },
+        },
+        A1: {
+          l: {
+            mapsizePx: [3120, 2185],
+            mapsizeMm: [820, 576],
+          },
+          p: {
+            mapsizePx: [2185, 3120],
+            mapsizeMm: [576, 820],
+          },
+        },
+        A0: {
+          l: {
+            mapsizePx: [4430, 3120],
+            mapsizeMm: [1173, 825],
+          },
+          p: {
+            mapsizePx: [3120, 4430],
+            mapsizeMm: [825, 1173],
           },
         },
       },
@@ -4202,6 +2493,29 @@ module.exports = {
           },
         },
       },
+      vandvaerk_gudbjergvand2: {
+        // Your print templates. "print" is the default
+        A4: {
+          l: {
+            mapsizePx: [1060, 730],
+            mapsizeMm: [280, 192],
+          },
+          p: {
+            mapsizePx: [730, 1060],
+            mapsizeMm: [192, 280],
+          },
+        },
+        A3: {
+          l: {
+            mapsizePx: [1525, 1065],
+            mapsizeMm: [401, 282],
+          },
+          p: {
+            mapsizePx: [1065, 1525],
+            mapsizeMm: [282, 401],
+          },
+        },
+      },
       hvidkildegods_print: {
         // Your print templates. "print" is the default
         A4: {
@@ -4248,122 +2562,30 @@ module.exports = {
           },
         },
       },
+      vandvaerk_taebring2: {
+        // Your print templates. "print" is the default
+        A4: {
+          l: {
+            mapsizePx: [1060, 730],
+            mapsizeMm: [280, 192],
+          },
+          p: {
+            mapsizePx: [730, 1060],
+            mapsizeMm: [192, 280],
+          },
+        },
+        A3: {
+          l: {
+            mapsizePx: [1525, 1065],
+            mapsizeMm: [401, 282],
+          },
+          p: {
+            mapsizePx: [1065, 1525],
+            mapsizeMm: [282, 401],
+          },
+        },
+      },
       vandvaerk_hammerumvand2: {
-        // Your print templates. "print" is the default
-        A4: {
-          l: {
-            mapsizePx: [1060, 730],
-            mapsizeMm: [280, 192],
-          },
-          p: {
-            mapsizePx: [730, 1060],
-            mapsizeMm: [192, 280],
-          },
-        },
-        A3: {
-          l: {
-            mapsizePx: [1525, 1065],
-            mapsizeMm: [401, 282],
-          },
-          p: {
-            mapsizePx: [1065, 1525],
-            mapsizeMm: [282, 401],
-          },
-        },
-      },
-      begreen: {
-        // Your print templates. "print" is the default
-        A4: {
-          l: {
-            mapsizePx: [1060, 730],
-            mapsizeMm: [280, 192],
-          },
-          p: {
-            mapsizePx: [730, 1060],
-            mapsizeMm: [192, 280],
-          },
-        },
-        A3: {
-          l: {
-            mapsizePx: [1525, 1065],
-            mapsizeMm: [401, 282],
-          },
-          p: {
-            mapsizePx: [1065, 1525],
-            mapsizeMm: [282, 401],
-          },
-        },
-      },
-      vandvaerk_gammelstrup2: {
-        // Your print templates. "print" is the default
-        A4: {
-          l: {
-            mapsizePx: [1060, 730],
-            mapsizeMm: [280, 192],
-          },
-          p: {
-            mapsizePx: [730, 1060],
-            mapsizeMm: [192, 280],
-          },
-        },
-        A3: {
-          l: {
-            mapsizePx: [1525, 1065],
-            mapsizeMm: [401, 282],
-          },
-          p: {
-            mapsizePx: [1065, 1525],
-            mapsizeMm: [282, 401],
-          },
-        },
-      },
-      vandvaerk_ulboellevand2: {
-        // Your print templates. "print" is the default
-        A4: {
-          l: {
-            mapsizePx: [1060, 730],
-            mapsizeMm: [280, 192],
-          },
-          p: {
-            mapsizePx: [730, 1060],
-            mapsizeMm: [192, 280],
-          },
-        },
-        A3: {
-          l: {
-            mapsizePx: [1525, 1065],
-            mapsizeMm: [401, 282],
-          },
-          p: {
-            mapsizePx: [1065, 1525],
-            mapsizeMm: [282, 401],
-          },
-        },
-      },
-      vandvaerk_vestkystvand2: {
-        // Your print templates. "print" is the default
-        A4: {
-          l: {
-            mapsizePx: [1060, 730],
-            mapsizeMm: [280, 192],
-          },
-          p: {
-            mapsizePx: [730, 1060],
-            mapsizeMm: [192, 280],
-          },
-        },
-        A3: {
-          l: {
-            mapsizePx: [1525, 1065],
-            mapsizeMm: [401, 282],
-          },
-          p: {
-            mapsizePx: [1065, 1525],
-            mapsizeMm: [282, 401],
-          },
-        },
-      },
-      vandvaerk_givevand2: {
         // Your print templates. "print" is the default
         A4: {
           l: {
@@ -4409,7 +2631,7 @@ module.exports = {
           },
         },
       },
-      vandvaerk_soeftenvand2: {
+      hrbioenergi: {
         // Your print templates. "print" is the default
         A4: {
           l: {
@@ -4432,145 +2654,7 @@ module.exports = {
           },
         },
       },
-      vandvaerk_faarupnordrevand2: {
-        // Your print templates. "print" is the default
-        A4: {
-          l: {
-            mapsizePx: [1060, 730],
-            mapsizeMm: [280, 192],
-          },
-          p: {
-            mapsizePx: [730, 1060],
-            mapsizeMm: [192, 280],
-          },
-        },
-        A3: {
-          l: {
-            mapsizePx: [1525, 1065],
-            mapsizeMm: [401, 282],
-          },
-          p: {
-            mapsizePx: [1065, 1525],
-            mapsizeMm: [282, 401],
-          },
-        },
-      },
-      vandvaerk_kvorningvand2: {
-        // Your print templates. "print" is the default
-        A4: {
-          l: {
-            mapsizePx: [1060, 730],
-            mapsizeMm: [280, 192],
-          },
-          p: {
-            mapsizePx: [730, 1060],
-            mapsizeMm: [192, 280],
-          },
-        },
-        A3: {
-          l: {
-            mapsizePx: [1525, 1065],
-            mapsizeMm: [401, 282],
-          },
-          p: {
-            mapsizePx: [1065, 1525],
-            mapsizeMm: [282, 401],
-          },
-        },
-      },
-      vandvaerk_markvangvand2: {
-        // Your print templates. "print" is the default
-        A4: {
-          l: {
-            mapsizePx: [1060, 730],
-            mapsizeMm: [280, 192],
-          },
-          p: {
-            mapsizePx: [730, 1060],
-            mapsizeMm: [192, 280],
-          },
-        },
-        A3: {
-          l: {
-            mapsizePx: [1525, 1065],
-            mapsizeMm: [401, 282],
-          },
-          p: {
-            mapsizePx: [1065, 1525],
-            mapsizeMm: [282, 401],
-          },
-        },
-      },
-      vestjyllands_andel: {
-        // Your print templates. "print" is the default
-        A4: {
-          l: {
-            mapsizePx: [1060, 730],
-            mapsizeMm: [280, 192],
-          },
-          p: {
-            mapsizePx: [730, 1060],
-            mapsizeMm: [192, 280],
-          },
-        },
-        A3: {
-          l: {
-            mapsizePx: [1525, 1065],
-            mapsizeMm: [401, 282],
-          },
-          p: {
-            mapsizePx: [1065, 1525],
-            mapsizeMm: [282, 401],
-          },
-        },
-      },
-      bestseller: {
-        // Your print templates. "print" is the default
-        A4: {
-          l: {
-            mapsizePx: [1060, 730],
-            mapsizeMm: [280, 192],
-          },
-          p: {
-            mapsizePx: [730, 1060],
-            mapsizeMm: [192, 280],
-          },
-        },
-        A3: {
-          l: {
-            mapsizePx: [1525, 1065],
-            mapsizeMm: [401, 282],
-          },
-          p: {
-            mapsizePx: [1065, 1525],
-            mapsizeMm: [282, 401],
-          },
-        },
-      },
-      rsforsyning: {
-        // Your print templates. "print" is the default
-        A4: {
-          l: {
-            mapsizePx: [1060, 730],
-            mapsizeMm: [280, 192],
-          },
-          p: {
-            mapsizePx: [730, 1060],
-            mapsizeMm: [192, 280],
-          },
-        },
-        A3: {
-          l: {
-            mapsizePx: [1525, 1065],
-            mapsizeMm: [401, 282],
-          },
-          p: {
-            mapsizePx: [1065, 1525],
-            mapsizeMm: [282, 401],
-          },
-        },
-      },
-      vhforsyning: {
+      vandvaerk_vestkystvand2: {
         // Your print templates. "print" is the default
         A4: {
           l: {
@@ -4616,7 +2700,7 @@ module.exports = {
           },
         },
       },
-      hrbioenergi: {
+      vandvaerk_tastumvand2: {
         // Your print templates. "print" is the default
         A4: {
           l: {
@@ -4639,7 +2723,7 @@ module.exports = {
           },
         },
       },
-      dansksalt: {
+      vandvaerk_markvangvand2: {
         // Your print templates. "print" is the default
         A4: {
           l: {
@@ -4662,52 +2746,72 @@ module.exports = {
           },
         },
       },
-      rsk: {
-        // Your print templates. "print" is the default
-        A4: {
-          l: {
-            mapsizePx: [1060, 730],
-            mapsizeMm: [280, 192],
-          },
-          p: {
-            mapsizePx: [730, 1060],
-            mapsizeMm: [192, 280],
-          },
-        },
-        A3: {
-          l: {
-            mapsizePx: [1525, 1065],
-            mapsizeMm: [401, 282],
-          },
-          p: {
-            mapsizePx: [1065, 1525],
-            mapsizeMm: [282, 401],
-          },
-        },
-      },
-      hspv: {
-        // Your print templates. "print" is the default
-        A4: {
-          l: {
-            mapsizePx: [1060, 730],
-            mapsizeMm: [280, 192],
-          },
-          p: {
-            mapsizePx: [730, 1060],
-            mapsizeMm: [192, 280],
-          },
-        },
-        A3: {
-          l: {
-            mapsizePx: [1525, 1065],
-            mapsizeMm: [401, 282],
-          },
-          p: {
-            mapsizePx: [1065, 1525],
-            mapsizeMm: [282, 401],
-          },
-        },
-      },
+	"rsk": { // Your print templates. "print" is the default
+		A4: {
+			l: {
+				mapsizePx: [1060, 730],
+				mapsizeMm: [280, 192]
+			},
+			p: {
+				mapsizePx: [730, 1060],
+				mapsizeMm: [192, 280]
+			}
+		},
+		A3: {
+			l: {
+				mapsizePx: [1525, 1065],
+				mapsizeMm: [401, 282]
+			},
+			p: {
+				mapsizePx: [1065, 1525],
+				mapsizeMm: [282, 401]
+			}
+		}
+	},
+	"hspv": { // Your print templates. "print" is the default
+		A4: {
+			l: {
+				mapsizePx: [1060, 730],
+				mapsizeMm: [280, 192]
+			},
+			p: {
+				mapsizePx: [730, 1060],
+				mapsizeMm: [192, 280]
+			}
+		},
+		A3: {
+			l: {
+				mapsizePx: [1525, 1065],
+				mapsizeMm: [401, 282]
+			},
+			p: {
+				mapsizePx: [1065, 1525],
+				mapsizeMm: [282, 401]
+			}
+		}
+	},
+	"vspv": { // Your print templates. "print" is the default
+		A4: {
+			l: {
+				mapsizePx: [1060, 730],
+				mapsizeMm: [280, 192]
+			},
+			p: {
+				mapsizePx: [730, 1060],
+				mapsizeMm: [192, 280]
+			}
+		},
+		A3: {
+			l: {
+				mapsizePx: [1525, 1065],
+				mapsizeMm: [401, 282]
+			},
+			p: {
+				mapsizePx: [1065, 1525],
+				mapsizeMm: [282, 401]
+			}
+		}
+	},
       // ========================================================
       // Names starting with "_" will not appear in the Print tab
       // But can be used by other extensions.
@@ -4721,7 +2825,15 @@ module.exports = {
             mapsizeMm: [190, 120],
           },
         },
-      },
+      } /*,
+            "_mapGoPrint": {
+                "A4": {
+                    "p": {
+                        "mapsizePx": [700, 500],
+                        "mapsizeMm": [190, 120]
+                    }
+                }
+            },*/,
     },
 
     // =====================
@@ -4783,6 +2895,12 @@ module.exports = {
       {
         blueidea: ["index"],
       },
+      {
+        symbols: ["index"],
+      } /*,
+            {
+                "MapGOMenu": ["index", "reportRender", "infoClick", "controller"]
+            }*/,
     ],
     server: [
       {
@@ -4804,12 +2922,20 @@ module.exports = {
       {
         blueidea: ["index"],
       },
-      /*,
+      {
+        symbols: ["index"],
+      } /*,
             {
                 "MapGOMenu": ["index"]
-            }*/
+            }*/,
     ],
   },
+	
+  // ===========================================================
+  // configSwitcher will allow Vidi stated with database url, 
+  // and access to config switcher screen
+  // ===========================================================
+  configSwitcher: true,
 
   // ===========================================================
   // Search modules are required in build-time, but not enabled.
@@ -4859,10 +2985,8 @@ module.exports = {
   // About text and modal box at startup
   // for the default template
   // ===================================
-  aboutBox:
-    "<p>Dette er Geopartners Map Connct webgis platform. Her kan du se de korttemaer du har fået opsat i Map Connect. Det er derudover muligt at se forskellige baggrundskort, som topografiske kort og luftfoto-serier, tilføje en række korttemaer, læse informationer om disse, samt tegne, tage mål, udskrive kort, mv.</p><p>Geopartner A/S er ikke ansvarlig for misbrug af oplysninger eller for fejl i de oplysninger, der stilles til rådighed.</p><p>For yderligere oplysninger og kontaktinformationer besøg <a href='https://www.geopartner.dk' target='_blank'>www.geopartner.dk</a></p>",
-  startUpModal:
-    "<p>Dette er Geopartners Map Connct webgis platform. Her kan du se de korttemaer du har fået opsat i Map Connect. Det er derudover muligt at se forskellige baggrundskort, som topografiske kort og luftfoto-serier, tilføje en række korttemaer, læse informationer om disse, samt tegne, tage mål, udskrive kort, mv.</p><p>Geopartner A/S er ikke ansvarlig for misbrug af oplysninger eller for fejl i de oplysninger, der stilles til rådighed.</p><p>For yderligere oplysninger og kontaktinformationer besøg <a href='https://www.geopartner.dk' target='_blank'>www.geopartner.dk</a></p>",
+    "aboutBox": "<p>Dette er Geopartners Map Connct webgis platform. Her kan du se de korttemaer du har fået opsat i Map Connect. Det er derudover muligt at se forskellige baggrundskort, som topografiske kort og luftfoto-serier, tilføje en række korttemaer, læse informationer om disse, samt tegne, tage mål, udskrive kort, mv.</p><p>Geopartner A/S er ikke ansvarlig for misbrug af oplysninger eller for fejl i de oplysninger, der stilles til rådighed.</p><p>For yderligere oplysninger og kontaktinformationer besøg <a href='https://www.geopartner.dk' target='_blank'>www.geopartner.dk</a></p>",
+    "startUpModal": "<p>Dette er Geopartners Map Connct webgis platform. Her kan du se de korttemaer du har fået opsat i Map Connect. Det er derudover muligt at se forskellige baggrundskort, som topografiske kort og luftfoto-serier, tilføje en række korttemaer, læse informationer om disse, samt tegne, tage mål, udskrive kort, mv.</p><p>Geopartner A/S er ikke ansvarlig for misbrug af oplysninger eller for fejl i de oplysninger, der stilles til rådighed.</p><p>For yderligere oplysninger og kontaktinformationer besøg <a href='https://www.geopartner.dk' target='_blank'>www.geopartner.dk</a></p>",
 
   // ========================================
   // Make pop-ups draggable - defaults to 'false'
@@ -4904,12 +3028,6 @@ module.exports = {
     "session",
     "editor",
   ],
-
-  // ===========================================================
-  // configSwitcher will allow Vidi stated with database url,
-  // and access to config switcher screen
-  // ===========================================================
-  configSwitcher: true,
 
   // ====================================
   // Set which template Vidi should use
@@ -4981,7 +3099,11 @@ module.exports = {
     },
     {
       regExp: true,
-      requested: "extension/lukkeliste",
+      requested: "extension/lukkeliste"
+    },
+    {
+      regExp: true,
+      requested: "cloudconnectapi.geopartner.dk",
     },
   ],
 
@@ -5390,4 +3512,3 @@ module.exports = {
     },
   ],
 };
-
