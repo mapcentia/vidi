@@ -1818,7 +1818,8 @@ module.exports = {
 
                 <div
                   style={{ alignSelf: "center" }}
-                  hidden={!s.user_alarmkabel}
+                  //hidden={!s.user_alarmkabel}
+                  hidden
                 >
                   <div className="vertical-center col-auto">
                   {__("Distance from cabinet")}
