@@ -128,7 +128,7 @@ class QueueStatisticsWatcher {
 
                             let errorRecord = $(`
                             <div class="d-flex align-items-center gap-2">
-                                <button data-feature-geometry='${JSON.stringify(copiedItem.geometry)}' class="btn btn-sm btn-light js-center-map-on-item" type="button">
+                                <button data-feature-geometry='${JSON.stringify(copiedItem.geometry)}' class="btn btn-sm btn-outline-secondary js-center-map-on-item" type="button">
                                     <i class="bi bi-pin-map text-danger"></i>
                                 </button>
                                 <div class="text-danger">${errorMessage}</div>

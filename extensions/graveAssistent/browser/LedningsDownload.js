@@ -97,7 +97,7 @@ class LedningsDownload extends React.Component {
 
         return (
             <div>
-                <button type="button" className="btn btn-sm btn-light" onClick={this.handleShow}>
+                <button type="button" className="btn btn-sm btn-outline-secondary" onClick={this.handleShow}>
                     Download
                 </button>
 

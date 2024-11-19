@@ -1140,7 +1140,6 @@ module.exports = {
                                 }
 
                                 let notSortedGroupsArray = array_unique(groups.reverse());
-                                metaData.data.reverse();
 
                                 let arr = notSortedGroupsArray;
 
@@ -2018,10 +2017,10 @@ module.exports = {
             window.operateFormatter = (value, row, index) => {
                 return `
                     <div class="d-flex justify-content-around">
-                    <a class="btn btn-light btn-sm filter" href="javascript:void(0)" title="Filter">
+                    <a class="btn btn-outline-secondary btn-sm filter" href="javascript:void(0)" title="Filter">
                         <i class="bi bi-filter-square text-primary"></i>
                     </a>
-                    <a class="btn btn-light btn-sm unfilter" href="javascript:void(0)" title="Unfilter">
+                    <a class="btn btn-outline-secondary btn-sm unfilter" href="javascript:void(0)" title="Unfilter">
                         <i class="bi bi-x-lg text-danger"></i>
                     </a>
                     </div>
@@ -2320,7 +2319,7 @@ module.exports = {
                 $('#vector-feature-info-panel .accordion-button').trigger('click');
             }, 200);
         }
-        if (count === 0) {
+        if (count === 0 && !window.vidiConfig?.vectorTable) {
             utils.showInfoToast(__("Didn't find anything"));
             if (window.vidiConfig.emptyInfoCallback) {
                 let func = Function('"use strict";return (' + window.vidiConfig.emptyInfoCallback + ')')();
@@ -4132,14 +4131,10 @@ module.exports = {
         const metaDataKeys = meta.getMetaDataKeys();
         let activeLayersInSubGroups = 0;
         let layersInSubGroups = 0;
-        const filterValue = $('#layers-filter').val();
-        const metaData = meta.getMetaData(filterValue);
+        const metaData = meta.getMetaData();
         const layersInGroup = metaData.data.filter(e => e.layergroup === layerGroup).length;
         const activeLayers = _self.getActiveLayers().filter(e => {
-            if (e.includes(':')) {
-                e = e.split(':').slice(1).join(':');
-            }            
-            return metaDataKeys[e]?.layergroup === layerGroup
+            return metaDataKeys[layerTreeUtils.stripPrefix(e)]?.layergroup === layerGroup
         });
         const activeLayersInGroup = activeLayers.length;
         if (layerSubGroup) {
@@ -4155,16 +4150,11 @@ module.exports = {
                     }
                     return false;
                 }).length;
-                activeLayersInSubGroups += 
-                activeLayers.filter(e => 
-                    JSON.parse(metaDataKeys[layerTreeUtils.stripPrefix(e)]?.meta)?.vidi_sub_group && 
-                    JSON.parse(metaDataKeys[layerTreeUtils.stripPrefix(e)]?.meta)?.vidi_sub_group.match(re) && 
-                    metaDataKeys[layerTreeUtils.stripPrefix(e)].layergroup === layerGroup).length;
+                activeLayersInSubGroups += activeLayers.filter(e => JSON.parse(metaDataKeys[e].meta)?.vidi_sub_group.match(re) && metaDataKeys[e].layergroup === layerGroup).length;
                 const searchPath = `[data-gc2-group-id="${layerGroup}"]` + ' ' + split.map(e => `[data-gc2-subgroup-id="${e}"]`).join(' ') + ` [data-gc2-subgroup-name="${split[split.length - 1]}"]`;
-                
                 const el = document.querySelector(searchPath);
                 if (el) {
-                    el.indeterminate = activeLayersInSubGroups > 0 && activeLayersInSubGroups !== layersInSubGroups;
+                    el.indeterminate = activeLayersInSubGroups > 0 && !(activeLayersInSubGroups === layersInSubGroups);
                     //el.checked = activeLayersInSubGroups === layersInSubGroups;
                     el.checked = activeLayersInSubGroups > 0;
                 }

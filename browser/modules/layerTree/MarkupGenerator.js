@@ -21,7 +21,7 @@ class MarkupGenerator {
 
     getAddButton(layerKeyWithGeom) {
         return (`<button type="button" data-gc2-key="${layerKeyWithGeom}" style="display: none;" 
-            data-toggle="tooltip" data-bs-placement="left" title="Add new feature to layer" data-layer-type="tile" class="btn btn-light btn-sm gc2-add-feature gc2-edit-tools">
+            data-toggle="tooltip" data-bs-placement="left" title="Add new feature to layer" data-layer-type="tile" class="btn btn-secondary-outline btn-sm gc2-add-feature gc2-edit-tools">
             <i class="bi bi-plus-square"></i>
         </button>`);
     }
@@ -76,7 +76,7 @@ class MarkupGenerator {
                         <input class="form-check-input" type="checkbox" data-gc2-subgroup-name="${name}" data-gc2-subgroup-level="${level}">
                     </label>
                 </span>
-                <button type="button" class="btn btn-light btn-sm js-subgroup-toggle-button">
+                <button type="button" class="btn btn-outline-secondary btn-sm js-subgroup-toggle-button">
                     <i class="bi bi-arrow-down"></i>
                 </button>
                 <div class="js-subgroup-id d-flex align-items-center flex-grow-1"></div>
@@ -85,11 +85,11 @@ class MarkupGenerator {
         </li>`);
     }
 
-    getLayerControlRecord(layerKeyWithGeom, layerKey, layerIsActive, layer, layerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo, isSubLayer, moduleState, disableCheckBox, parentLayerKeys, childLayerKeys, hasFilter, filterIsRequired) {
+    getLayerControlRecord(layerKeyWithGeom, layerKey, layerIsActive, layer, layerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo, isSubLayer, moduleState, disableCheckBox, parentLayerKeys, childLayerKeys, filterIsRequired) {
         let queueFailedButtonStyle = regularButtonStyle + ` color: orange;`;
         let queueRejectedByServerButtonStyle = regularButtonStyle + ` color: red;`;
         let tooltip = layer.f_table_abstract || ``;
-        const toolBtnClass = `btn btn-light btn-sm`
+        const toolBtnClass = `btn btn-outline-secondary btn-sm`
 
         return (`
         <li class="layer-item list-group-item d-flex flex-column gap-1" data-gc2-layer-key="${layerKeyWithGeom}">
@@ -115,10 +115,10 @@ class MarkupGenerator {
                                                                        ${lockedLayer}
                                                                        <span class="js-tiles-contain-data" style="display: ${moduleState.tileContentCache[layerKey] ? "inline" : "none"};" data-toggle="tooltip" data-bs-placement="right"
                                                                        title="${__("Layer is visible")}"><i class="bi bi-eye info-icon text-success"></i></span>
-                                                                       <span class="js-tiles-has-filter" style="display: ${hasFilter ? "inline" : "none"};" data-toggle="tooltip" data-placement="right"
-                                                                        title="${__("Layer has filter")}"><i class="bi bi-filter text-success"></i></span>
                                                                        <span class="js-layer-is-disabled" style="display: ${disableCheckBox ? "inline" : "none"};" data-toggle="tooltip" data-bs-placement="right"
                                                                        title="${__("Locked")}"><i class="bi bi-lock text-danger"></i></span>
+                                                                       <span class="js-tiles-has-filter" style="display: none"};" data-toggle="tooltip" data-placement="right"
+                                                                        title="${__("Layer has filter")}"><i class="bi bi-filter text-success"></i></span>
                                                                        <span class="js-layer-has-parents info-icon" style="display: ${parentLayerKeys.length > 0 ? "inline" : "none"};" data-toggle="tooltip" data-bs-placement="right"
                                                                        title="${__("Parents")}: ${parentLayerKeys.length > 0 ? parentLayerKeys.join(", ") : ""}"><i class="bi bi-arrow-up"></i></span>
                                                                        <span class="js-layer-has-children info-icon" style="display: ${childLayerKeys.length > 0 ? "inline" : "none"};" data-toggle="tooltip" data-bs-placement="right"
@@ -133,12 +133,12 @@ class MarkupGenerator {
                     <div class="d-flex align-items-center gap-1"> 
                                                                         <div>${layerTypeSelector}</div>
                                                                         ${addButton}
-                                                                        <button data-toggle="tooltip" data-bs-placement="left" title="${tooltip}" style="display: ${displayInfo};" class="btn btn-light btn-sm info-label" data-gc2-id="${layerKey}"><i class="bi bi-info-square"></i></a></button>
+                                                                        <button data-toggle="tooltip" data-bs-placement="left" title="${tooltip}" style="display: ${displayInfo};" class="btn btn-secondary-outline btn-sm info-label" data-gc2-id="${layerKey}"><i class="bi bi-info-square"></i></a></button>
                                                     </div>
      
                 </div>
                 <div class="d-flex align-items-center align-self-baseline ms-1">
-                    <button data-bs-animation="0" disabled class="btn btn-light btn-sm js-settings-panel-btn" role="button" data-bs-toggle="collapse" id="settings-${layer.f_table_schema}-${layer.f_table_name}-btn" data-bs-target="#settings-${layer.f_table_schema}-${layer.f_table_name}" aria-expanded="false" aria-controls="collapseExample"><i class="bi bi-three-dots"></i></button>
+                    <button data-bs-animation="0" disabled class="btn btn-outline-secondary btn-sm js-settings-panel-btn" role="button" data-bs-toggle="collapse" id="settings-${layer.f_table_schema}-${layer.f_table_name}-btn" data-bs-target="#settings-${layer.f_table_schema}-${layer.f_table_name}" aria-expanded="false" aria-controls="collapseExample"><i class="bi bi-three-dots"></i></button>
                     <i class="bi-grip-vertical ms-auto layer-move-vert"></i>
                 </div>
             </div>  
@@ -193,16 +193,16 @@ class MarkupGenerator {
                                                                                                   </div>
                                                                                                   <div class="js-toggle-layer-offline-mode-container" style="display: none;">
                                                                                                   <div class="d-flex align-items-center" role="group" id="layer-tools-offline">
-                                                                                                  <button type="button" data-layer-key="${layerKey}" class="btn btn-light btn-sm js-set-online" title="${__(`Fetch layer data from server`)}" disabled>
+                                                                                                  <button type="button" data-layer-key="${layerKey}" class="btn btn-outline-secondary btn-sm js-set-online" title="${__(`Fetch layer data from server`)}" disabled>
                                                                                                   <i class="bi bi-wifi"></i>
                                                                                                   </button>
-                                                                                                  <button type="button" data-layer-key="${layerKey}" class="btn btn-light btn-sm js-set-offline" title="${__(`Fetch layer data from cache`)}" disabled>
+                                                                                                  <button type="button" data-layer-key="${layerKey}" class="btn btn-outline-secondary btn-sm js-set-offline" title="${__(`Fetch layer data from cache`)}" disabled>
                                                                                                   <i class="bi bi-database"></i>
                                                                                                   </button>
-                                                                                                  <button type="button" data-layer-key="${layerKey}" class="btn btn-light btn-sm js-refresh" title="${__(`Refresh existing cache for layer`)}" disabled>
+                                                                                                  <button type="button" data-layer-key="${layerKey}" class="btn btn-outline-secondary btn-sm js-refresh" title="${__(`Refresh existing cache for layer`)}" disabled>
                                                                                                   <i class="bi bi-arrow-clockwise"></i>
                                                                                                   </button>
-                                                                                                  <button type="button" data-layer-key="${layerKey}" class="btn btn-light btn-sm js-bbox" title="${__(`Dynamic layer is cached only within the last requested bounding box`)}" style="padding: 4px; display: none;">
+                                                                                                  <button type="button" data-layer-key="${layerKey}" class="btn btn-outline-secondary btn-sm js-bbox" title="${__(`Dynamic layer is cached only within the last requested bounding box`)}" style="padding: 4px; display: none;">
                                                                                                   <i class="bi bi-exclamation"></i>
                                                                                                   </button>
                                                                                                   </div>
@@ -220,25 +220,25 @@ class MarkupGenerator {
         
             <!-- queue -->
            <div class="d-none align-items-center gap-1 js-failed-container">
-                                           <button type="button" class="d-none btn btn-sm btn-light js-statistics-field js-failed-add" style="${queueFailedButtonStyle}" disabled>
+                                           <button type="button" class="d-none btn btn-sm btn-outline-secondary js-statistics-field js-failed-add" style="${queueFailedButtonStyle}" disabled>
                                            <i class="bi bi-plus-square"></i> <span class="js-value"></span>
                                            </button>
-                                           <button type="button" class="d-none btn btn-sm btn-light js-statistics-field js-failed-update" style="${queueFailedButtonStyle}" disabled>
+                                           <button type="button" class="d-none btn btn-sm btn-outline-secondary js-statistics-field js-failed-update" style="${queueFailedButtonStyle}" disabled>
                                            <i class="bi bi-pencil"></i> <span class="js-value"></span>
                                            </button>
-                                           <button type="button" class="d-none btn btn-sm btn-light js-statistics-field js-failed-delete" style="${queueFailedButtonStyle}" disabled>
+                                           <button type="button" class="d-none btn btn-sm btn-outline-secondary js-statistics-field js-failed-delete" style="${queueFailedButtonStyle}" disabled>
                                            <i class="fa bi-dash-square"></i> <span class="js-value"></span>
                                            </button>
-                                           <button type="button" class="d-none btn btn-sm btn-light js-statistics-field js-rejectedByServer-add" style="${queueRejectedByServerButtonStyle}" disabled>
+                                           <button type="button" class="d-none btn btn-sm btn-outline-secondary js-statistics-field js-rejectedByServer-add" style="${queueRejectedByServerButtonStyle}" disabled>
                                            <i class="bi bi-plus-square"></i> <span class="js-value"></span>
                                            </button>
-                                           <button type="button" class="d-none btn btn-sm btn-light js-statistics-field js-rejectedByServer-update" style="${queueRejectedByServerButtonStyle}" disabled>
+                                           <button type="button" class="d-none btn btn-sm btn-outline-secondary js-statistics-field js-rejectedByServer-update" style="${queueRejectedByServerButtonStyle}" disabled>
                                            <i class="bi bi-pencil"></i> <span class="js-value"></span>
                                            </button>
-                                           <button type="button" class="d-none btn btn-sm btn-light js-statistics-field js-rejectedByServer-delete" style="${queueRejectedByServerButtonStyle}" disabled>
+                                           <button type="button" class="d-none btn btn-sm btn-outline-secondary js-statistics-field js-rejectedByServer-delete" style="${queueRejectedByServerButtonStyle}" disabled>
                                            <i class="bi bi-dash-square"></i> <span class="js-value"></span>
                                            </button>
-                                           <button type="button" data-gc2-id="${layerKey}" class="d-none btn btn-sm btn-light js-clear" style="${regularButtonStyle}">
+                                           <button type="button" data-gc2-id="${layerKey}" class="d-none btn btn-sm btn-outline-secondary js-clear" style="${regularButtonStyle}">
                                            <i class="bi bi-arrow-counterclockwise"></i>
                                            </button>
                                            </div>
@@ -265,7 +265,7 @@ class MarkupGenerator {
         }
 
         return (`<div class="dropdown">
-            <button class="btn btn-light btn-sm dropdown-toggle" type="button"
+            <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button"
                 data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                 <span class="js-dropdown-label">${selectorLabel}</span>
             </button>

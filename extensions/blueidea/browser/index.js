@@ -1529,7 +1529,7 @@ module.exports = {
                   <div className="d-grid mx-auto gap-3">
                     <button
                       onClick={() => this.clickDraw()}
-                      className="btn btn-light"
+                      className="btn btn-outline-secondary"
                       disabled={!this.allowBlueIdea()}
                     >
                       {__("Draw area")}
@@ -1552,7 +1552,7 @@ module.exports = {
                       <button 
                         disabled={Object.keys(s.results_adresser).length == 0}
                         title={__("modify parcels")}
-                        className="btn btn-light"
+                        className="btn btn-outline-secondary"
                         onClick={() => this.toggleEdit()}>
                           {s.edit_matr ? <i className="bi bi-x"></i> : <i className="bi bi-pencil"></i>}
                       </button>
@@ -1563,7 +1563,7 @@ module.exports = {
                 <div className="d-grid mx-auto gap-3">
                   <button
                     onClick={() => this.downloadAdresser()}
-                    className="btn btn-light"
+                    className="btn btn-outline-secondary"
                     disabled={!this.readyToSend()}
                     hidden={s.TooManyFeatures}
                   >
@@ -1595,7 +1595,7 @@ module.exports = {
 
                   <button
                     onClick={() => this.sendToBlueIdea()}
-                    className="btn btn-light"
+                    className="btn btn-outline-secondary"
                     disabled={!this.readyToBlueIdea()}
                   >
                     {__("Go to blueidea")}
@@ -1610,7 +1610,7 @@ module.exports = {
                   <div className="d-grid mx-auto gap-3">
                     <button
                       onClick={() => this.downloadVentiler()}
-                      className="btn btn-light"
+                      className="btn btn-outline-secondary"
                       disabled={!this.allowVentilDownload()}
                     >
                       {__("Download valves")}

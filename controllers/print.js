@@ -201,6 +201,18 @@ function print(key, q, req, response, outputPng = false, frame = 0, count, retur
                     } else {
                         let width, height;
                         browser.newPage().then(page => {
+                            const check = async () => {
+                                const isWebGLSupported = await page.evaluate(() => {
+                                    const canvas = document.createElement('canvas');
+                                    return !!(window.WebGLRenderingContext && canvas.getContext('webgl'));
+                                });
+
+                                if (!isWebGLSupported) {
+                                    console.error('WebGL is not supported in this environment.');
+                                }
+                            }
+                            //check();
+
                             const pxWidth = 795;
                             const pxHeight = 1125;
                             switch (q.pageSize) {
