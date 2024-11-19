@@ -562,7 +562,6 @@ geocloud = (function () {
                 reader.read().then(read = (result) => {
                     if (result.done) {
                         if (me.onLoad) me.onLoad();
-                       // me.onLoad(me);
                         if (onLoadCallback) onLoadCallback();
                         layer.update(geoJSON)
                         return;
@@ -1281,7 +1280,7 @@ geocloud = (function () {
             }
         }
         this.removeLayer = function (layer) {
-                lControl.removeLayer(layer);
+            lControl.removeLayer(layer);
         }
         //ol2, ol3 and leaflet
         // MapQuest OSM doesn't work anymore. Switching to OSM.
@@ -1943,11 +1942,6 @@ geocloud = (function () {
                                         if (layers[key].layer.id === baseLayerName) {
                                             layerWasFound = true;
 
-                                            // Move all others than Google maps back
-                                            if (baseLayerName.search("google") === -1 && baseLayerName.search("yandex") === -1) {
-                                                layers[key].layer.setZIndex(1);
-                                            }
-
                                             if (!loadEvent) {
                                                 loadEvent = function () {
                                                 }
@@ -1973,6 +1967,22 @@ geocloud = (function () {
                                             layers[key].layer.on("tileerror", tileErrorEvent);
 
                                             me.map.addLayer(layers[key].layer);
+
+                                            if (layers[key]?.layer?._glMap) {
+                                                let libreMap = layers[key].layer.getMaplibreMap();
+                                                if (libreMap) {
+                                                    libreMap.off("sourcedata");
+                                                    libreMap.on("sourcedata", (e) => {
+                                                            if (e.isSourceLoaded) {
+                                                                loadEvent();
+                                                            } else {
+                                                                // console.log('LOADING');
+                                                                // loadingEvent();
+                                                            }
+                                                        }
+                                                    )
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -1988,6 +1998,29 @@ geocloud = (function () {
                     setTimeout(poll, 200);
                 }
             }());
+        };
+        this.addMVTBaselayer = function (style, conf) {
+            var l = new L.maplibreGL({
+                style
+            });
+            l.id = conf.name;
+            l.baseLayer = true;
+            lControl.addBaseLayer(l, conf.name);
+            this.showLayer(conf.name)
+            return [l];
+        };
+
+        this.addWMTSBaselayer = function (url, conf) {
+            var l = L.tileLayer.wmts(url, {
+                tileMatrixSet: conf.tileMatrixSet,
+                layer: conf.layer
+            });
+
+            l.id = conf.name;
+            l.baseLayer = true;
+            lControl.addBaseLayer(l, conf.name);
+            this.showLayer(conf.name)
+            return [l];
         };
 
         this.addXYZBaselayer = function (url, conf) {
@@ -2205,6 +2238,9 @@ geocloud = (function () {
                         break;
                     case "mvt":
                         l = createMVTLayer(layers[i], defaults);
+                        break;
+                    case "wmts":
+                        l = createWMTSLayer(layers[i], defaults);
                         break;
                     default:
                         l = createTileLayer(layers[i], defaults);

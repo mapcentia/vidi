@@ -10,7 +10,7 @@ Kørselskonfiguration (configs)
     :Vidi-version: 2020.11.0
     :Forfattere: `giovanniborella <https://github.com/giovanniborella>`_ | `mapcentia <https://github.com/mapcentia>`_
 
-.. contents:: 
+.. contents::
     :depth: 4
 
 Når vidi startes i browseren læses værdier ind fra :ref:`configjs`. I flere tilfælde kan denne konfiguration ændres til eksempelvis at inkludere bestemte extensions, eller print-templates.
@@ -638,6 +638,28 @@ Angiver om den første/øverste gruppe i lagtræet skal være foldet ud fra star
 
     "expandFirstInLayerTree": false
 
+
+.. _configjs_infocallback:
+
+infoCallback
+*****************************************************************
+
+En funktion som køres, når feature info rammer et eller flere lag. En liste af med de ramte lag sendes med.
+
+.. code-block:: json
+
+    "infoCallback": "function(layers){console.log('You hit:', layers)}"
+
+.. _configjs_emptyinfocallback:
+
+emptyInfoCallback
+*****************************************************************
+
+En funktion som køres, når feature info IKKE rammer noget.
+
+.. code-block:: json
+
+    "emptyInfoCallback": "function(){console.log('You hit nothing')}"
 
 #################################################################
 Referencer

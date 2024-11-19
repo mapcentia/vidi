@@ -224,8 +224,8 @@ module.exports = function (grunt) {
                     sourceMap: true,
                     sourceMapIncludeSources: true,
                     compress: {
-                        dead_code: true,
-                        drop_debugger: true,
+                        dead_code: false,
+                        drop_debugger: false,
                         global_defs: {
                             "DEBUG": false
                         },
@@ -251,6 +251,7 @@ module.exports = function (grunt) {
                         'public/js/lib/Leaflet.extra-markers/leaflet.extra-markers.js',
                         'public/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.js',
                         'public/js/lib/leaflet-simple-map-screenshoter/dist/leaflet-simple-map-screenshoter.js',
+                        'public/js/lib/leaflet.tilelayer.wmts/leaflet.tilelayer.wmts.src.js',
 
                         'public/js/lib/jquery.canvasResize.js/jquery.canvasResize.js',
                         'public/js/lib/jquery.canvasResize.js/jquery.exif.js',
@@ -271,6 +272,8 @@ module.exports = function (grunt) {
                         //'node_modules/bootstrap/dist/js/bootstrap.bundle.js',
 
                         'node_modules/leaflet.glify/dist/glify-browser.js',
+                        'node_modules/maplibre-gl/dist/maplibre-gl.js',
+                        'node_modules/@maplibre/maplibre-gl-leaflet/leaflet-maplibre-gl.js',
                         'node_modules/bootstrap-table/dist/bootstrap-table.js',
                         'node_modules/bootstrap-table/dist/bootstrap-table-locale-all.js',
                         'node_modules/bootstrap-table/dist/extensions/export/bootstrap-table-export.js',

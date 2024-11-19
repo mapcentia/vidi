@@ -57,8 +57,7 @@ let defaultSelectedStyle = {
 let backArrowIsAdded = false;
 
 let editToolsHtml = `
-        <div class="form-group gc2-edit-tools" data-edi
-        t-layer-id="{{_vidi_edit_layer_id}}" data-edit-layer-name="{{_vidi_edit_layer_name}}" data-edit-vector="{{_vidi_edit_vector}}" style="display: {{_vidi_edit_display}};">
+        <div class="form-group gc2-edit-tools" data-edit-layer-id="{{_vidi_edit_layer_id}}" data-edit-layer-name="{{_vidi_edit_layer_name}}" data-edit-vector="{{_vidi_edit_vector}}" style="display: {{_vidi_edit_display}};">
             <div class="btn-group mt-1 w-100 mb-2">
                 <button class='btn btn-sm btn-outline-secondary show-when-multiple-hits'>
                   <i class='bi bi-arrow-left'></i> ${__("Back")}
@@ -71,6 +70,19 @@ let editToolsHtml = `
                 </button>
             </div>
         </div>
+`;
+
+let editToolsHtmlNoBack = `
+<div class="form-group gc2-edit-tools" data-edit-layer-id="{{_vidi_edit_layer_id}}" data-edit-layer-name="{{_vidi_edit_layer_name}}" data-edit-vector="{{_vidi_edit_vector}}" style="display: {{_vidi_edit_display}};">
+    <div class="btn-group mt-1 w-100 mb-2">
+        <button class="btn btn-outline-secondary btn-sm popup-edit-btn">
+            <i class="bi bi-pencil" aria-hidden="true"></i>
+        </button>
+        <button class="btn btn-outline-danger btn-sm popup-delete-btn">
+            <i class="bi bi-trash" aria-hidden="true"></i>
+        </button>
+    </div>
+</div>
 `;
 
 /**
@@ -310,8 +322,11 @@ module.exports = {
 
                     template = metaDataKeys[value].type === "RASTER" ? defaultTemplateRaster : defaultTemplateWithBackBtn ? defaultTemplateWithBackBtn : defaultTemplate;
                     template = parsedMeta.info_template && parsedMeta.info_template !== "" ? parsedMeta.info_template : template;
-                    if (editingIsEnabled && layerIsEditable) {
+                    if (editingIsEnabled && layerIsEditable && featureInfoTableOnMap) {
                         template = editToolsHtml + template;
+                    }
+                    if (editingIsEnabled && layerIsEditable && !featureInfoTableOnMap) {
+                        template = editToolsHtmlNoBack + template;
                     }
 
                     if (!isEmpty && !not_querable) {
@@ -363,13 +378,13 @@ module.exports = {
                                                                </li>`);
                         $(`#${elementPrefix}info-pane`).append(`<div class="tab-pane _sql_query" id="_${storeId}">
                             <div style="display: ${display}" class="justify-content-around mt-3 mb-3">
-                                <a class="btn btn-sm btn-light" id="_download_geojson_${storeId}" target="_blank" href="javascript:void(0)">
+                                <a class="btn btn-sm btn-outline-secondary" id="_download_geojson_${storeId}" target="_blank" href="javascript:void(0)">
                                     <i class="bi bi-download" aria-hidden="true"></i> GeoJson
                                 </a> 
-                                <a class="btn btn-sm btn-light" id="_download_excel_${storeId}" target="_blank" href="javascript:void(0)">
+                                <a class="btn btn-sm btn-outline-secondary" id="_download_excel_${storeId}" target="_blank" href="javascript:void(0)">
                                     <i class="bi bi-download" aria-hidden="true"></i> Excel
                                 </a>
-                                <button class="btn btn-sm btn-light" id="_create_layer_${storeId}" target="_blank" href="javascript:void(0)">
+                                <button class="btn btn-sm btn-outline-secondary" id="_create_layer_${storeId}" target="_blank" href="javascript:void(0)">
                                     <i class="bi bi-plus" aria-hidden="true"></i> ${__(`Create virtual layer`)}
                                 </button>
                             </div>
@@ -741,6 +756,7 @@ module.exports = {
                     });
                 } else {
                     $.each(sortObject(fieldConf), (name, property) => {
+                        let metaDataForField = metaDataKeys[keyWithOutPrefix].fields[property.key] ? metaDataKeys[keyWithOutPrefix].fields[property.key] : null;
                         if (property.value.querable) {
                             let value = feature.properties[property.key];
                             if (property.value.template && feature.properties[property.key] && feature.properties[property.key] !== '') {
@@ -835,7 +851,16 @@ module.exports = {
                                     `
                                     }
                                 }
+                            } 
+                            // If metaDataForField.restrictions has an array, we get the related values
+                            else if (metaDataForField && metaDataForField.restriction && Array.isArray(metaDataForField.restriction)) {
+                                let restrictions = metaDataForField.restriction;
+                                let restriction = restrictions.find(restriction => restriction.value === value);
+                                if (restriction) {
+                                    value = restriction.alias;
+                                }
                             }
+
                             fields.push({title: property.value.alias || property.key, value});
                             fieldLabel = (property.value.alias !== null && property.value.alias !== "") ? property.value.alias : property.key;
                             if (feature.properties[property.key] !== undefined) {

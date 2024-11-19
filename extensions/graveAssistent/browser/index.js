@@ -1283,7 +1283,7 @@ module.exports = {
                                             <div>
                                                 <div>
                                                     <LedningsProgress progress={s.progress} text={s.progressText} isError={s.isError} errorList={[]} />
-                                                    {s.isError === true ? <button className="btn btn-sm btn-light" id="_draw_download_geojson" onClick={_self.onBackClickHandler.bind(this)}><i className="bi bi-arrow-left-short" aria-hidden="true"></i> Tilbage</button> : ''}
+                                                    {s.isError === true ? <button className="btn btn-sm btn-outline-secondary" id="_draw_download_geojson" onClick={_self.onBackClickHandler.bind(this)}><i className="bi bi-arrow-left-short" aria-hidden="true"></i> Tilbage</button> : ''}
                                                 </div>
                                             </div>
                                         </div>
@@ -1296,7 +1296,7 @@ module.exports = {
                                             <div className = "form-group p-2">
                                                 <p>{__("uploadtime") + ': ' + this.humanTime(s.svarUploadTime)}</p>
                                                 <div className="p-2" style = {{display: 'flex'}}>
-                                                    <button className="btn btn-sm btn-light" id="_draw_download_geojson" onClick={_self.onBackClickHandler.bind(this)}>
+                                                    <button className="btn btn-sm btn-outline-secondary" id="_draw_download_geojson" onClick={_self.onBackClickHandler.bind(this)}>
                                                         <i className="bi bi-arrow-left-short" aria-hidden="true"></i> Tilbage
                                                     </button>
                                                     <LedningsDownload size = "large" color = "default" variant = "contained" endpoint = "/api/extension/downloadForespoergsel" forespnummer = {s.foresp} schema={schema_override} />

@@ -530,11 +530,12 @@ module.exports = {
         map.on("zoomend", () => {
             let currZoom = map.getZoom();
             // Auto scale
-            if (autoScale) {
+            if (autoScale && !state.isApplyingState()) {
                 for (const id in symbolState) {
                     if (id && symbolState.hasOwnProperty(id)) {
                         let scale = symbolState[id].scale;
                         let diff = prevZoom - currZoom;
+                        console.log(prevZoom, currZoom)
                         for (let i = 0; i < Math.abs(diff); i++) {
                             scale = diff < 0 ? symbolState[id].scale * 2 : symbolState[id].scale / 2;
                             symbolState[id].scale = scale;

@@ -17,6 +17,12 @@ const proxifyRequest = (req, response) => {
         requestURL = requestURL.replace(`/${req.session.parentDb}/`, `/${req.session.screenName}@${req.session.parentDb}/`);
     }
 
+    // Remove all ? but the first from the url
+    if (req.url.split('?').length > 2) {
+        let [baseUrl, ...params] = req.url.split('?');
+        requestURL = config.host + encodeURI(decodeURIComponent(`${baseUrl}?${params.join('&')}`.substr(4)));
+    }
+    
     let options = {
         method: 'GET',
         uri: requestURL

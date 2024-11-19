@@ -36,6 +36,7 @@ var urlVars = urlparser.urlVars;
  * @type {LZString|exports|module.exports}
  */
 var lz = require('lz-string');
+const {rotation} = require("plotly.js/src/traces/pie/attributes");
 
 /**
  *
@@ -64,6 +65,8 @@ var listened = {};
 var p, hashArr = hash.replace("#", "").split("/");
 
 let activeLayersInSnapshot = false;
+
+let isApplyingState = false;
 
 /**
  * Returns internaly stored global state
@@ -315,7 +318,6 @@ module.exports = {
                                         response.data = response.data.data;
                                     }
                                 }
-
                                 if (response.data.bounds !== null) {
                                     var frame = urlVars.frame || 0;
                                     var bounds = response.data.bounds[frame];
@@ -343,14 +345,35 @@ module.exports = {
                                             g.feature = m.feature;
                                             cloud.get().map.addLayer(g);
                                             setTimeout(function () {
-                                                var bounds = g.getBounds(),
+                                                const bounds = g.getBounds(),
                                                     sw = bounds.getSouthWest(),
                                                     ne = bounds.getNorthEast(),
                                                     halfLat = (sw.lat + ne.lat) / 2,
                                                     midLeft = L.latLng(halfLat, sw.lng),
                                                     midRight = L.latLng(halfLat, ne.lng),
                                                     scaleFactor = ($("#pane1").width() / (cloud.get().map.project(midRight).x - cloud.get().map.project(midLeft).x));
-
+                                                const getCurrenTransform = (el) => {
+                                                    const st = window.getComputedStyle(el, null);
+                                                    const tr = st.getPropertyValue("transform");
+                                                    let scale, angle;
+                                                    let values = tr.split('(')[1];
+                                                    values = values.split(')')[0];
+                                                    values = values.split(',');
+                                                    const a = values[0];
+                                                    const b = values[1];
+                                                    scale = Math.sqrt(a * a + b * b);
+                                                    const radians = Math.atan2(b, a);
+                                                    angle = Math.round(radians * (180 / Math.PI));
+                                                    return [angle, scale];
+                                                }
+                                                const zoom = cloud.get().map.getZoom();
+                                                const orgZoom = parseInt(response.data.anchor.split('/')[1]);
+                                                document.querySelectorAll('.drag-marker').forEach(marker => {
+                                                    const tr = getCurrenTransform(marker);
+                                                    const rotate = tr[0];
+                                                    const scale = tr[1] * Math.pow(2, (zoom - orgZoom));
+                                                    marker.style.transform = `rotate(${rotate}deg) scale(${scale})`;
+                                                })
                                                 $("#container1").css("transform", "scale(" + scaleFactor + ")");
                                                 $(".leaflet-control-scale-line").prependTo("#scalebar").css("transform", "scale(" + scaleFactor + ")");
                                                 $(".leaflet-control-scale-line").prependTo("#scalebar").css("transform-origin", "left bottom 0px");
@@ -652,10 +675,11 @@ module.exports = {
      * Applies state
      *
      * @param {Object} state Applied state
-     *
+     * @param ignoreInitZoomCenter
      * @returns {Promise}
      */
     applyState: (state, ignoreInitZoomCenter = false) => {
+        isApplyingState = true;
         if (LOG) console.log(`${MODULE_NAME}: applying state`, state);
         if (!urlVars.dps) {
             history.pushState(``, document.title, window.location.pathname + window.location.search);
@@ -697,9 +721,11 @@ module.exports = {
                 }
 
                 Promise.all(promises).then(() => {
+                    isApplyingState = false
                     resolve();
                 }).catch(errors => {
                     console.error(errors);
+                    isApplyingState = false
                     reject(errors);
                 });
             };
@@ -850,5 +876,7 @@ module.exports = {
             l = hashArr[4].split(",");
         }
         return l;
-    }
+    },
+
+    isApplyingState: () => isApplyingState
 };

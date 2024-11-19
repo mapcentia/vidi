@@ -3,12 +3,26 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
-## [2024.08.06]
-## IN PIPE LINE 
-- When using a custom dialog for feature info in gc2, the BACK buttom is added like in the default dialog
 
+## [2024.10.0] - 2024-4-10
 ### Fixed
-- Filtering layers in the layertree result in a never ending spinning progress and no filtering
+- Conflict search module: Non ascii characters in SELECT statements caused a low level un-catchable error. Now statements are base64url encoded.   
+
+## [2024.9.0] - 2024-19-9
+### Changed
+- Incorporated handling for `text` type fields with a new `textarea` UI widget in Editor.
+- Updated the js/embed.js script to handle 'data-vidi-title' attribute, which will set the 'title' attribute for iframes.
+
+## [2024.8.1] - 2024-29-8
+### Fixed
+- Remove Polyfill.js from Service Worker cache
+- Fixes in Conflict search: If response from GC2 is not JSON, the search will proceed and the raw body text is shown in errors dialog. 
+
+## [2024.8.0] - 2024-12-8
+### Fixed
+- Group check boxes now works with vector layers.
+- Reverse sorting in groups. This was a regression from last version.
+- Multi select tag widgets will now close on blur.
 
 ## [2024.6.1] - 2024-25-6
 ### Changed

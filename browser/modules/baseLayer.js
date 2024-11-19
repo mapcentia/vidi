@@ -249,46 +249,48 @@ module.exports = module.exports = {
         activeBaseLayer = newBaseLayerName;
         _self.drawBaseLayersControl();
     },
+    /* handling the baseLayerGroups  from config Ex.
+       "baseLayerGroups": [ {groupName: "string", layers[string]}...]
+        layer in the layers array correspond to the attribute "id" in the baseLayers object
+		
+    */
+    
+     // get the baseLayerGroup object.
+     getBaseLayerGruop() {
+        return  window.vidiConfig.baseLayerGroups;
+    },
+    // true: baseLayerGroups exists
+    hasBaseLayerGroup() {
+        return _self.getBaseLayerGruop() !== undefined;
+    }, 
+       
 
-    drawBaseLayersControl: () => {
-        return new Promise((resolve, reject) => {
-            // Resetting the side-by-side mode
-            currentTwoLayersAtOnceMode = TWO_LAYERS_AT_ONCE_MODES[defaultMode - 1];
 
-            // Delete current layers
-            $(`.js-base-layer-control`).remove();
-            baseLayers = [];
-
-            // Add base layers controls
-            let appendedCode = ``;
-            for (var i = 0; i < window.setBaseLayers.length; i = i + 1) {
-                let bl = window.setBaseLayers[i];
-
-                let layerId = false;
-                let layerName = false;
-                if (typeof bl.type !== "undefined" && bl.type === "XYZ") {
-                    baseLayers.push(bl.id);
-                    layerId = bl.id;
-                    layerName = bl.name;
-                } else if (typeof window.setBaseLayers[i].restrictTo === "undefined"
-                    || window.setBaseLayers[i].restrictTo.filter((n) => {
-                        return schemas.indexOf(n) !== -1;
-                    }).length > 0) {
-                    baseLayers.push(window.setBaseLayers[i].id);
-                    layerId = window.setBaseLayers[i].id;
-                    layerName = window.setBaseLayers[i].name;
-                }
-
-                let sideBySideLayerControl = ``;
-                if (twoLayersAtOnceEnabled) {
-                    sideBySideLayerControl = `<div class='base-layer-item' data-gc2-side-by-side-base-id='${layerId}' style='float: left;'>
-                            <input type='radio' class="form-check-input" name='side-by-side-baselayers' value='${layerId}' ${layerId === activeTwoLayersModeLayer ? `checked=""` : ``}>
-                    </div>`;
-                }
-
-                let displayInfo = (bl.abstract ? `visible` : `hidden`);
-                let tooltip = (bl.abstract ? $(bl.abstract).text() : ``);
-                appendedCode += `<li class="list-group-item js-base-layer-control d-flex align-items-center">
+    // returns a array of groupName from 
+    baseLayerGroupNames() {
+        if (!_self.hasBaseLayerGroup()) 
+            return [];
+        return  _self.getBaseLayerGruop().map(group => group.groupName);
+    }, 
+    // returns array of layerIds for a group 
+    baseLayerGetLayersFromGroup(groupName) {
+        const group = _self.getBaseLayerGruop().find(group => group.groupName === groupName);
+        return group ? group.layers : null;
+    },
+    //  true: layerId is in a baseLayerGroup
+    baseLayerIsInGroup(layerId) {
+        if (!_self.hasBaseLayerGroup()) 
+            return false;
+        for (const group of  _self.getBaseLayerGruop()) {
+            if (group.layers.includes(layerId)) {
+                return true; //group.groupName;
+            }
+        }
+        return false;
+    },
+    buildLayerHtmlNode(layerId, layerName, tooltip, displayInfo, abstract ) {
+        const sideBySideLayerControl = _self.getSideBySideLayerControl(layerId) ;
+        return `<li class="list-group-item js-base-layer-control d-flex align-items-center">
                     <div class="d-flex align-items-center gap-1 me-auto">
                         <div class='base-layer-item' data-gc2-base-id='${layerId}'>
                             <input type='radio' class="form-check-input" name='baselayers' value='${layerId}' ${layerId === activeBaseLayer ? `checked=""` : ``}> 
@@ -303,12 +305,97 @@ module.exports = module.exports = {
                             title="${tooltip}"
                             style="visibility: ${displayInfo};"
                             data-baselayer-name="${layerName}"
-                            data-baselayer-info="${bl.abstract}"
-                            class="info-label btn btn-sm btn-light"><i class="bi bi-info-square pe-none"></i></button>
+                            data-baselayer-info="${abstract}"
+                            class="info-label btn btn-sm btn-outline-secondary"><i class="bi bi-info-square pe-none"></i></button>
                     </div>
                 </li>`;
+    
+    },
+     
+    getBaseLayerById(layerId) {
+         const bl =  window.setBaseLayers.find(bl => bl.id === layerId); 
+         return bl;
+    },
+    buildLayerHtmlGroupStart(groupName, open){
+        const isOpen =  open ?"open='open'" :''
+        return `<li class="list-group-item js-base-layer-control d-flex align-items-center"> <details ${isOpen}><summary>${groupName}</summary>`;
+    }, 
+    buildLayerHtmlGroupEnd() {
+        return '</details></li>';
+    },
+
+    buildLayerHtmlInGroup(){
+
+        let result = '';
+
+        for (const groupName of _self.baseLayerGroupNames()) {
+            const bls = _self.baseLayerGetLayersFromGroup(groupName);
+            if (!bls) 
+                continue;
+            const isOpen = bls.includes(activeBaseLayer);
+            result += _self.buildLayerHtmlGroupStart(groupName, isOpen);
+            
+            for(const layerId of bls) {
+               const bl = _self.getBaseLayerById(layerId);
+               if (!bl) continue;
+               
+               let displayInfo = (bl.abstract ? `visible` : `hidden`);
+               let tooltip = (bl.abstract ? $(bl.abstract).text() : ``);
+               result += _self.buildLayerHtmlNode(bl.id, bl.name, tooltip, displayInfo, bl.abstract )
+            }
+            result += _self.buildLayerHtmlGroupEnd();
+        }
+        return result;
+    },
+
+    getSideBySideLayerControl (layerId) {
+        const valueContent= layerId === activeTwoLayersModeLayer ? `checked=""` : ``;
+        return (twoLayersAtOnceEnabled) ?
+            `<div class='base-layer-item' data-gc2-side-by-side-base-id='${layerId}' style='float: left;'>
+                    <input type='radio' class="form-check-input" name='side-by-side-baselayers' value='${layerId}' ${valueContent}>
+            </div>`:
+        ``;
+    },
+    
+    drawBaseLayersControl: () => {
+        return new Promise((resolve, reject) => {
+            // Resetting the side-by-side mode
+            currentTwoLayersAtOnceMode = TWO_LAYERS_AT_ONCE_MODES[defaultMode - 1];
+
+            // Delete current layers
+            $(`.js-base-layer-control`).remove();
+            baseLayers = [];
+
+            // Add base layers controls, not in group
+            let appendedCode = ``;
+            for (const bl of window.setBaseLayers) {
+                
+                 
+                let layerId = false;
+                let layerName = false;
+                if (typeof bl.type !== "undefined" && bl.type === "XYZ") {
+                    baseLayers.push(bl.id);
+                    layerId = bl.id;
+                    layerName = bl.name;
+                } else if (typeof bl.restrictTo === "undefined"
+                    || bl.restrictTo.filter((n) => {
+                        return schemas.indexOf(n) !== -1;
+                    }).length > 0) {
+                    baseLayers.push(bl.id);
+                    layerId = bl.id;
+                    layerName = bl.name;
+                }
+                if (_self.baseLayerIsInGroup(layerId)) {
+                    continue;
+                }
+                let displayInfo = (bl.abstract ? `visible` : `hidden`);
+                let tooltip = (bl.abstract ? $(bl.abstract).text() : ``);
+              
+                appendedCode += _self.buildLayerHtmlNode(layerId, layerName, tooltip, displayInfo, bl.abstract);
 
             }
+            appendedCode += _self.buildLayerHtmlInGroup();
+
 
             const disableInputs = () => {
                 // Disabling inputs of side-by-side base layers
@@ -588,20 +675,26 @@ module.exports = module.exports = {
             bl = window.setBaseLayers[i];
             if (bl.id === id) {
                 // Base layer can be a MVT layer
-                if (bl.id.indexOf(LAYER.VECTOR_TILE + `:`) === 0) {
-                    let addedLayers = cloud.get().addTileLayers($.extend({
-                        layerId: bl.id,
-                        layers: [layerTreeUtils.stripPrefix(bl.id)],
-                        db: bl.db,
-                        host: bl.host,
-                        type: "mvt",
-                        isBaseLayer: true,
-                    }, bl.config));
-
-                    result = addedLayers[0];
-                    result.baseLayer = true;
-                    result.id = bl.id;
-
+                if (bl?.type === "WMTS") {
+                    result = cloud.get().addWMTSBaselayer(bl.url, {
+                        name: bl.id,
+                        attribution: bl.attribution,
+                        minZoom: typeof bl.minZoom !== "undefined" ? bl.minZoom : 0,
+                        maxZoom: typeof bl.maxZoom !== "undefined" ? bl.maxZoom : 20,
+                        maxNativeZoom: typeof bl.maxNativeZoom !== "undefined" ? bl.maxNativeZoom : 18,
+                        baseLayer: true,
+                        layer: bl.layer,
+                        tileMatrixSet: bl.tileMatrixSet,
+                    });
+                } else if (bl?.type === "MVT") {
+                    result = cloud.get().addMVTBaselayer(bl.url, {
+                        name: bl.id,
+                        attribution: bl.attribution,
+                        minZoom: typeof bl.minZoom !== "undefined" ? bl.minZoom : 0,
+                        maxZoom: typeof bl.maxZoom !== "undefined" ? bl.maxZoom : 20,
+                        maxNativeZoom: typeof bl.maxNativeZoom !== "undefined" ? bl.maxNativeZoom : 18,
+                        baseLayer: true,
+                    });
                 } else if (typeof bl.type !== "undefined" && bl.type === "XYZ") {
                     result = cloud.get().addXYZBaselayer(bl.url, {
                         name: bl.id,

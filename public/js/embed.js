@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2022 MapCentia ApS
+ * @copyright  2013-2024 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -37,11 +37,12 @@
                 var clear = targetDiv.getAttribute("data-vidi-clear") || "none";
                 var boxzoom = targetDiv.getAttribute("data-vidi-boxzoom") || "none";
                 var signin = targetDiv.getAttribute("data-vidi-signin") || "";
-                var burger = targetDiv.getAttribute("data-vidi-burger") || "";
                 var screenshot = targetDiv.getAttribute("data-vidi-screenshot") || "none";
                 var brand = targetDiv.getAttribute("data-vidi-brand") || "";
                 var toggler = targetDiv.getAttribute("data-vidi-toggler") || "";
                 var schemata = targetDiv.getAttribute("data-vidi-schemata") || "";
+
+                var title = targetDiv.getAttribute("data-vidi-title") || "";
 
                 try {
                     var obj = JSON.parse(atob(token));
@@ -69,7 +70,6 @@
                     "&cle=" + clear +
                     "&box=" + boxzoom +
                     "&sig=" + signin +
-                    "&bur=" + burger +
                     "&scr=" + screenshot +
                     "&bra=" + brand +
                     "&tog=" + toggler +
@@ -80,10 +80,11 @@
                 iframe.setAttribute("style", "width:" + width + ";height:" + height + ";border: 1px solid rgba(0,0,0,0.1)");
                 iframe.setAttribute("allow", "fullscreen;geolocation");
                 iframe.setAttribute("src", src);
+                iframe.setAttribute("title", title);
                 if (frameName) {
                     iframe.setAttribute("name", frameName);
                 }
-                targetDiv.appendChild(iframe);
+                targetDiv.replaceWith(iframe);
             } else {
                 setTimeout(poll, 100);
             }

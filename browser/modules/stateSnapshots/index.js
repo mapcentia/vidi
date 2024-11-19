@@ -60,6 +60,24 @@ module.exports = {
         } else {
             console.warn(`Unable to find the container for state snapshots extension (element id: ${exId})`);
         }
+
+        // Dirty hack so Bootstrap doesn't add focusin listners.
+        // The focusin will focus the first input element when clicking the map.
+        // It's placed here, so the MultiSelect tag widgets not are effected by the hack
+        const current = document.addEventListener;
+        document.addEventListener = function (type, listener) {
+            if(type === "focusin")
+            {
+                //do nothing
+            }
+            else
+            {
+                let args = [];
+                args[0] = type;
+                args[1] = listener;
+                current.apply(this, args);
+            }
+        };
     },
 
     /**

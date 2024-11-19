@@ -724,7 +724,7 @@ var onSearchLoad = function () {
 // kristrupvej 1, https://dawa.aws.dk/adgangsadresser/0a3f5094-b7b0-32b8-e044-0003ba298018
 
 var getEjdNr = function (adgangsadresseid) {
-  var esr, bfenr;
+  var bfenr;
   $.ajax({
     url: "https://dawa.aws.dk/adgangsadresser/" + adgangsadresseid,
     type: "get",
@@ -735,38 +735,32 @@ var getEjdNr = function (adgangsadresseid) {
         //nothing.. return null
         return null;
       } else {
-        //danner esr ejendomsnummer
-        var komkode = data.kommune.kode.replace(/^0+/, "");
-        esr =
-          new Array(7 - data.esrejendomsnr.length + 1).join(
-            "0"
-          ) + data.esrejendomsnr;
-        esr = komkode.concat(esr);
 
         var bfe = $.ajax({
           url: data.jordstykke.href,
           type: "get",
           async: false,
           success: function (data, status) {
-            if (data.resultater == null) {
+            if (data.matrikelnr == null) {
               //nothing.. return null
               return null;
             } else {
-              var bfe = data.bfenummer;
+              var bfe = data;
               return bfe;
             }
           },
         });
 
-        bfenr = bfe.responseJSON.bfenummer.toString();
+        bfenr = bfe.responseJSON.sfeejendomsnr.toString();
+        console.log("bfenr: ", bfenr);
 
         // Move information out into config
         for (let l in config.extensionConfig.documentCreate.tables) {
-          config.extensionConfig.documentCreate.tables[l].defaults.esrnr = esr;
           config.extensionConfig.documentCreate.tables[l].defaults.adgangsadresseid =
             adgangsadresseid;
           config.extensionConfig.documentCreate.tables[l].defaults.bfenr =
             bfenr;
+            console.log("adgangsadresseid: ", adgangsadresseid);
         }
 
         return 1;

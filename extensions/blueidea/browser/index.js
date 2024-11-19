@@ -109,7 +109,8 @@ var _clearAll = function () {
   _clearAlarmPositions();
 };
 
-const MAXFEATURES = 500;
+const MAXPARCELS = 250;
+
 
 const resetObj = {
   authed: false,
@@ -127,89 +128,60 @@ const resetObj = {
 };
 
 // This element contains the styling for the module
-var styleObject = {
-  ventil_forbundet: {
-    radius: 8,
-    fillColor: "#00ff00",
-    color: "#000",
-    weight: 1,
-    opacity: 1,
-    fillOpacity: 0.8,
-  },
-  ventil: {
-    radius: 5,
-    fillColor: "#ff7800",
-    color: "#000",
-    weight: 1,
-    opacity: 1,
-    fillOpacity: 0.8,
-  },
-  selectedLedning: {
-    color: "#AA4A44",
-    weight: 8,
-  },
-  selectedPoint: {
-    html: `
-  <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd">
-  <path d="M12 11.293l10.293-10.293.707.707-10.293 10.293 10.293 10.293-.707.707-10.293-10.293-10.293 10.293-.707-.707 10.293-10.293-10.293-10.293.707-.707 10.293 10.293z"/>
-  </svg>
-  `,
-    className: "",
-    iconSize: [24, 24], // size of the icon
-    //iconAnchor: [-10, -10], // point of the icon which will correspond to marker's location
-  },
-  matrikel: {
-    color: "#000000",
-    weight: 1,
-    opacity: 1,
-    fillOpacity: 0.2,
-    dashArray: "5,3",
-  },
-  buffer: {
-    color: "#ff7800",
-    weight: 1,
-    opacity: 1,
-    fillOpacity: 0.1,
-    dashArray: "5,3",
-  },
-  alarmPosition: {
-    html: `
-  <svg fill="#000000" width="24px" height="24px" viewBox="0 0 57.6 57.6" xmlns="http://www.w3.org/2000/svg">
-  <path d="M28.709 0c-10.872 0 -19.71 8.838 -19.71 19.706 0 5.418 2.408 10.436 7.362 15.347 7.193 7.139 10.548 13.73 10.548 20.747v1.8h3.6v-1.8c0 -6.984 3.308 -13.385 10.728 -20.743 4.954 -4.914 7.362 -9.932 7.362 -15.35 0 -10.868 -8.838 -19.706 -19.89 -19.706" fill-rule="evenodd"/>
-  </svg>
-  `,
-    className: "",
-    iconSize: [24, 24], // size of the icon
-    iconAnchor: [12, 24], // point of the icon which will correspond to marker's location
-  },
-};
+require("./style.js");
 
 /**
  * async function to query matrikel inside a single buffer
  * @param {*} feature
  */
-const findMatriklerInPolygon = function (feature) {
+const findMatriklerInPolygon = function (feature, is_wkb = false) {
   return new Promise((resolve, reject) => {
     // Create a query
     let query = {
       srid: 4326,
-      polygon: JSON.stringify(feature.geometry.coordinates),
       format: "geojson",
       struktur: "flad",
     };
 
-    // Send the query to the server
-    $.ajax({
-      url: "/api/datahub/jordstykker",
-      type: "GET",
-      data: query,
-      success: function (data) {
-        resolve(data);
-      },
-      error: function (data) {
-        reject(data);
-      },
-    });
+    try {
+      if (!is_wkb) {
+        query.polygon = JSON.stringify(feature.geometry.coordinates)
+
+      // Send the query to the server
+      $.ajax({
+        url: "/api/datahub/jordstykker",
+        type: "GET",
+        data: query,
+        success: function (data) {
+          resolve(data);
+        },
+        error: function (data) {
+          reject(data);
+        },
+      });
+
+      } else {
+        query.wkb = feature;
+
+        // Send the query to the server, but using post - as the wkb is too large for a get request
+        $.ajax({
+          url: "/api/datahub/jordstykker",
+          type: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          data: JSON.stringify(query),
+          success: function (data) {
+            resolve(data);
+          },
+          error: function (data) {
+            reject(data);
+          },
+        });
+      }
+    } catch (error) {
+      throw error;
+    }
   });
 };
 
@@ -217,8 +189,8 @@ const findMatriklerInPolygon = function (feature) {
  * async function to query addresses inside a single parcel
  * @param {*} feature
  */
-const findAddressesInMatrikel = function (feature) {
-  return new Promise((resolve, reject) => {
+const findAddressesInMatrikel = async function (feature) {
+  try {
     // Create a query
     let query = {
       ejerlavkode: feature.properties.ejerlavkode,
@@ -227,18 +199,16 @@ const findAddressesInMatrikel = function (feature) {
     };
 
     // Send the query to the server
-    $.ajax({
+    let response = await $.ajax({
       url: "https://api.dataforsyningen.dk/adresser",
       type: "GET",
       data: query,
-      success: function (data) {
-        resolve(data);
-      },
-      error: function (data) {
-        reject(data);
-      },
     });
-  });
+
+    return response;
+  } catch (error) {
+    throw error;
+  }
 };
 
 /**
@@ -299,148 +269,7 @@ module.exports = {
      *
      * @type {*|exports|module.exports}
      */
-    var dict = {
-      Info: {
-        da_DK:
-          "BlueIdea / Lukkeliste er et modul der hjælper med at finde relevante adresser til en lukning. Du kan tegne et område på kortet, og få en liste over adresser i området. Du kan også udpege et punkt på ledningsnettet, og få en liste af adresser der er forbundet til det punkt. Listerne med adresser kan derefter bruges til at sende beskeder ud med BlueIdea (Kræver aftale med BlueIdea).",
-        en_US:
-          "BlueIdea / Valve list is a module that helps to find relevant addressess for a valve closure. You can draw an area on the map, and get a list of addresses in the area. You can also select a point on the network, and get a list of addresses connected to that point. The lists of addresses can then be used to send messages with BlueIdea (Requires agreement with BlueIdea).",
-      },
-      "Plugin Tooltip": {
-        da_DK: "BlueIdea / Lukkeliste",
-        en_US: "BlueIdea / Valve list",
-      },
-      MissingLogin: {
-        da_DK:
-          "NB: Du skal være logget ind for at kunne bruge funktionen, og din konfiguration skal indeholde et brugerid.",
-        en_US:
-          "Please log in and set a user id in the configuration file to use this function",
-      },
-      Login: {
-        da_DK: "Log ind",
-        en_US: "Log in",
-      },
-      "Select point on map": {
-        da_DK: "Udpeg punkt på ledningsnet",
-        en_US: "Select point on map",
-      },
-      "Select point for alarmkabel": {
-        da_DK: "Beregn afstand",
-        en_US: "Calculate distance",
-      },
-      "Found parcels": {
-        da_DK: "Fundne matrikler i område",
-        en_US: "Found parcels in area",
-      },
-      "Found addresses": {
-        da_DK: "Fundet adresser i matrikler",
-        en_US: "Found addresses in parcels",
-      },
-      "Error in seach": {
-        da_DK: "Fejl i søgning",
-        en_US: "Error in seach",
-      },
-      "Draw area": {
-        da_DK: "Tegn områder",
-        en_US: "Draw area",
-      },
-      "Select area": {
-        da_DK: "Udpeg",
-        en_US: "Select",
-      },
-      "Show results": {
-        da_DK: "Resultater",
-        en_US: "Results",
-      },
-      "Waiting to start": {
-        da_DK: "Henter jordstykker",
-        en_US: "Fetching parcels",
-      },
-      "Go to blueidea": {
-        da_DK: "Opret, og gå til blueidea",
-        en_US: "Create and go to blueidea",
-      },
-      "Valve list": {
-        da_DK: "Lukkeliste",
-        en_US: "Valve list",
-      },
-      "Too many features selected": {
-        da_DK: "For mange steder at lede efter adresser!",
-        en_US: "Too many places to look for addresses!",
-      },
-      "Download addresses": {
-        da_DK: "Download adresser",
-        en_US: "Download addresses",
-      },
-      "Download valves": {
-        da_DK: "Download ventil-liste",
-        en_US: "Download valve list",
-      },
-      NotAllowedBlueIdea: {
-        da_DK: "Du har ikke adgang til BlueIdea",
-        en_US: "You are not allowed to use BlueIdea",
-      },
-      "Starting analysis": {
-        da_DK: "Analyserer",
-        en_US: "Analyzing",
-      },
-      "modify parcels": {
-        da_DK: "Tilføj eller fjern matrikler",
-        en_US: "Add or remove parcels",
-      },
-      "Select profile": {
-        da_DK: "Vælg profil",
-        en_US: "Select profile",
-      },
-      "Alarm cable": {
-        da_DK: "Alarmkabel",
-        en_US: "Alarm cable",
-      },
-      "Distance": {
-        da_DK: "Afstand",
-        en_US: "Distance",
-      },
-      "Distance not set": {
-        da_DK: "Ugyldig afstand",
-        en_US: "Invalid distance",
-      },
-      "Alarm found": {
-        da_DK: "Mulige placeringer fundet",
-        en_US: "Possible alarms found",
-      },
-      "Lukkeliste is ready": {
-        da_DK: "Lukkeliste klar",
-        en_US: "Valve list ready",
-      },
-      "Lukkeliste not ready": {
-        da_DK: "Lukkeliste ikke klar",
-        en_US: "Valve list not ready",
-      },
-      "Distance from point": {
-        da_DK: "Beregn ved hjælp af afstand fra punkt",
-        en_US: "Calculate using distance from point",
-      },
-      "Distance from cabinet": {
-        da_DK: "Beregn ved hjælp af afstand fra skab",
-        en_US: "Calculate using distance from cabinet",
-      },
-      "Select point for cabinet": {
-        da_DK: "Udpeg punkt",
-        en_US: "Select point",
-      },
-      "From-To": {
-        da_DK: "Fremad",
-        en_US: "Forward",
-      },
-      "Both": {
-        da_DK: "Begge",
-        en_US: "Both",
-      },
-      "To-From": {
-        da_DK: "Bagud",
-        en_US: "Backwards",
-      },
-    };
+    require("./i8n.js");
 
     /**
      *
@@ -492,6 +321,7 @@ module.exports = {
           user_alarmkabel_distance: config.extensionConfig.blueidea.alarmkabel_distance || 100,
           selected_profileid: '',
           lukkeliste_ready: false,
+          TooManyFeatures: false,
           alarm_direction_selected: 'Both',
           alarm_skab_selected: '',
           alarm_skabe: null,
@@ -686,23 +516,20 @@ module.exports = {
        * This function queries database for related matrikler and ventiler
        * @returns uuid string representing the query
        */
-      queryPointLukkeliste = (point) => {
+      queryPointLukkeliste = async (point) => {
         let me = this;
 
-        return new Promise(function (resolve, reject) {
-          $.ajax({
+        try {
+          let response = await $.ajax({
             url: "/api/extension/lukkeliste/" + me.state.user_id + "/query",
             type: "POST",
             data: JSON.stringify(point),
             contentType: "application/json",
-            success: function (data) {
-              resolve(data);
-            },
-            error: function (e) {
-              reject(e);
-            },
           });
-        });
+          return response;
+        } catch (error) {
+          throw error.responseJSON;
+        }
       };
 
       /**
@@ -762,45 +589,40 @@ module.exports = {
        * @param {*} geojson
        * @returns array with kvhx
        */
-      queryAddresses(geojson) {
+      queryAddresses(geojson, is_wkb = false) {
         let me = this;
         //console.debug("queryAddresses: ", geojson);
 
         // if no features in featurecollection, return
         if (!geojson.features.length) {
+          console.log("No features in geojson");
           return;
         }
-
-        // if more than 500 features, return
-        if (geojson.features.length > MAXFEATURES) {
-          me.createSnack(__("Too many features selected"));
-          return;
-        }
-
-        //clear last geometries + results
-        _clearAll();
-
-        me.setState({
-          results_adresser: {},
-          results_matrikler: [],
-          results_ventiler: [],
-        });
 
         try {
-          // Disolve geometry
-          let geom = this.geometryDisolver(geojson);
-
-          // show buffers on map
-          this.addBufferToMap(geom);
-
-          // Let user know we are starting
-          me.createSnack(__("Waiting to start"), true);
-
-          // For each flattened element, start a query for matrikels intersected
           let promises = [];
-          for (let i = 0; i < geom.features.length; i++) {
-            let feature = geom.features[i];
-            promises.push(findMatriklerInPolygon(feature));
+          // if the geometry is not wkb, act as if it is geojson
+          if (!is_wkb) {
+            // Disolve geometry
+            let geom = this.geometryDisolver(geojson);
+
+            // show buffers on map
+            this.addBufferToMap(geom);
+
+            // Let user know we are starting
+            me.createSnack(__("Waiting to start"), true);
+
+            // For each flattened element, start a query for matrikels intersected
+            for (let i = 0; i < geom.features.length; i++) {
+              let feature = geom.features[i];
+              promises.push(findMatriklerInPolygon(feature));
+            }
+
+          } else {
+            // if the geometry is wkb, we pass the geometry directly to the query
+            //console.debug("WKB", geojson);
+            let aggr = geojson.features[0].properties.aggregated_geom;
+            promises.push(findMatriklerInPolygon(aggr, true));
           }
 
           // When all queries are done, we can find the relevant addresses
@@ -808,57 +630,49 @@ module.exports = {
             .then((results) => {
               //console.debug("Got matrikler", results);
               // Merge all results into one array
-              try {
-                let merged = this.mergeMatrikler(results);
+              let merged = this.mergeMatrikler(results);
+              
+              // if the number of matrs is larger than maxparcels, dont add to map
+              if (merged.features.length < MAXPARCELS) {
                 this.addMatrsToMap(merged);
-                me.createSnack(__("Found parcels"));
-
-                return merged;
-              } catch (error) {
-                console.warn(error);
               }
+
+              //me.createSnack(__("Found parcels"));
+
+              return merged;
             })
             .then((matrikler) => {
               // For each matrikel, find the relevant addresses
               let promises2 = [];
-              for (let i = 0; i < matrikler.features.length; i++) {
-                let feature = matrikler.features[i];
-                promises2.push(findAddressesInMatrikel(feature));
-              }
 
-              Promise.all(promises2).then((results) => {
-                let adresser = this.mergeAdresser(results);
-                me.createSnack(__("Found addresses"));
+              // if the number is too high, dont get addresses aswell.
+              if (matrikler.features.length > MAXPARCELS) {
+                me.setState({
+                  edit_matr: false,
+                  TooManyFeatures: true,
+                });
+                me.setState({
+                  results_matrikler: matrikler,
+                });
+                return;
 
-                //console.debug("Got addresses", adresser);
+              } else {
                 // Set results
                 me.setState({
-                  results_adresser: adresser,
+                  results_adresser: this.getAdresser(matrikler),
                   results_matrikler: matrikler,
                   edit_matr: false,
                 });
-
                 return;
-              })
-            })
-            .then(() => {
-              // show last snackbar;
-              me.createSnack(__("Show results"));
+              }
             })
             .catch((error) => {
-              console.debug(error);
-
-              // If error has a message, display it
-              if (error.message) {
-                me.createSnack(__("Error in seach") + ": " + error);
-              } else {
-                console.error(error);
-                _clearAll();
-              }
-              return;
+              console.warn('findMatriklerInPolygon:', error);
+              me.createSnack(__("Error in search"));
+              throw error;
             });
         } catch (error) {
-          console.warn(error);
+          console.warn('queryAddresses:', error);
           me.createSnack(error);
           return;
         }
@@ -1213,11 +1027,12 @@ module.exports = {
         let point = null;
         blocked = false;
         _clearAll();
-
+        
         me.setState({
           results_adresser: {},
           results_matrikler: [],
           edit_matr: false,
+          TooManyFeatures: false,
         });
 
         // if udpeg_layer is set, make sure it is turned on
@@ -1228,7 +1043,7 @@ module.exports = {
         // change the cursor to crosshair and wait for a click
         utils.cursorStyle().crosshair();
 
-        cloud.get().on("click", function (e) {
+        cloud.get().on("click", async function (e) {
 
           // remove event listener
           cloud.get().map.off("click");
@@ -1246,49 +1061,51 @@ module.exports = {
           blocked = true;
 
           // send the point to the server
-          me.queryPointLukkeliste(point)
-            .then((data) => {
-              // if the server returns a result, show it
-              if (data) {
-                console.debug(data);
+          let data = {}
+          try {
+            data = await me.queryPointLukkeliste(point)
+          }
+          catch (error) {
+            me.createSnack(__("Error in search") + ": " + error.message);
+            console.warn(error);
+            return
+          }
 
-                // if the results contains a list of matrikler, run them through the queryAdresser function
-                if (data.matrikler) {
-                  // only if blueidea is allowed
-                  if (me.allowBlueIdea()) {
-                    me.queryAddresses(data.matrikler);
-                  }
-                }
+          //console.debug(data);
 
-                if (data.ledninger) {
-                  //console.debug("Got ledninger:", data.ledninger);
-                  me.addSelectedLedningerToMap(data.ledninger);
-                  me.setState({
-                    results_ledninger: data.ledninger.features,
-                  });
-                }
-
-                // Add the clicked point to the map
-                if (data.log) {
-                  //console.debug("Got log:", data.log);
-                  me.addSelectedPointToMap(data.log);
-                }
-
-                if (data.ventiler) {
-                  //console.debug("Got ventiler:", data.ventiler);
-                  me.addVentilerToMap(data.ventiler);
-                  me.setState({
-                    results_ventiler: data.ventiler.features,
-                  });
-                }
-                return
-              }
-            })
-            .catch((error) => {
-              me.createSnack(__("Error in seach") + ": " + error);
-              console.warn(error);
-              return
+          if (data.ledninger) {
+            //console.debug("Got ledninger:", data.ledninger);
+            me.addSelectedLedningerToMap(data.ledninger);
+            me.setState({
+              results_ledninger: data.ledninger.features,
             });
+          }
+          // Add the clicked point to the map
+          if (data.log) {
+            //console.debug("Got log:", data.log);
+            me.addSelectedPointToMap(data.log);
+          }
+          if (data.ventiler) {
+            //console.debug("Got ventiler:", data.ventiler);
+            me.addVentilerToMap(data.ventiler);
+            me.setState({
+              results_ventiler: data.ventiler.features,
+            });
+          }
+
+          // Getting matrikler is another task, so we seperate it here in a try-catch to get errors to the frontend
+          try {
+            if (data.matrikler) {
+              let parcelcount = data.matrikler.features[0].properties.matr_count;
+              if (parcelcount > MAXPARCELS) {
+                me.createSnack(__("Large number of parcels found") + " (" + parcelcount + "/" + MAXPARCELS + ")");
+              } 
+              me.queryAddresses(data.matrikler, true);
+            }
+          } catch (error) {
+            console.warn(error);
+            return
+          }
         });
         return
       };
@@ -1322,7 +1139,7 @@ module.exports = {
           cloud.get().map.off("click");
 
           // if the click is blocked, return
-          if (blocked) {
+          if (blocked || !me.state.active) {
             return;
           }
 
@@ -1352,7 +1169,7 @@ module.exports = {
               return
             })
             .catch((error) => {
-              me.createSnack(__("Error in seach") + ": " + error);
+              me.createSnack(__("Error in search") + ": " + error);
               console.warn(error);
               return
             });
@@ -1727,6 +1544,36 @@ module.exports = {
       };
 
       /**
+       * Gets adresser when there is too many features
+       */
+      getAdresser = async (matrikler) => {
+        let me = this;
+
+        let results = [];
+
+        for (let i = 0; i < matrikler.features.length; i++) {
+          let feature = matrikler.features[i];
+          results.push(await findAddressesInMatrikel(feature));
+          // Show progress per 25 features
+          if (i % 25 == 0) {
+            me.createSnack(__("Found addresses") + " " + i + "/" + matrikler.features.length);
+          }
+        }
+
+        let adresser = this.mergeAdresser(results);
+        me.createSnack(__("Found addresses"));
+
+        // Set results
+        me.setState({
+          results_adresser: adresser,
+          edit_matr: false,
+          TooManyFeatures: false,
+        });
+
+        return;
+      };
+
+      /**
        * downloads a csv file with the results from adresser
        * @param {*} object kvhx af key/value pairs
        */
@@ -1838,7 +1685,7 @@ module.exports = {
                   <div className="d-grid mx-auto gap-3">
                     <button
                       onClick={() => this.clickDraw()}
-                      className="btn btn-light"
+                      className="btn btn-outline-secondary"
                       disabled={!this.allowBlueIdea()}
                     >
                       {__("Draw area")}
@@ -1861,7 +1708,7 @@ module.exports = {
                       <button 
                         disabled={Object.keys(s.results_adresser).length == 0}
                         title={__("modify parcels")}
-                        className="btn btn-light"
+                        className="btn btn-outline-secondary"
                         onClick={() => this.toggleEdit()}>
                           {s.edit_matr ? <i className="bi bi-x"></i> : <i className="bi bi-pencil"></i>}
                       </button>
@@ -1872,10 +1719,19 @@ module.exports = {
                 <div className="d-grid mx-auto gap-3">
                   <button
                     onClick={() => this.downloadAdresser()}
-                    className="btn btn-light"
+                    className="btn btn-outline-secondary"
                     disabled={!this.readyToSend()}
+                    hidden={s.TooManyFeatures}
                   >
                     {__("Download addresses")}
+                  </button>
+
+                  <button
+                    onClick={() => this.getAdresser(s.results_matrikler)}
+                    className="btn btn-primary"
+                    hidden={!s.TooManyFeatures}
+                  >
+                    {__("Get addresses")}
                   </button>
 
                   {s.user_profileid && this.profileidOptions().length > 1 &&
@@ -1895,7 +1751,7 @@ module.exports = {
 
                   <button
                     onClick={() => this.sendToBlueIdea()}
-                    className="btn btn-light"
+                    className="btn btn-outline-secondary"
                     disabled={!this.readyToBlueIdea()}
                   >
                     {__("Go to blueidea")}
@@ -1910,7 +1766,7 @@ module.exports = {
                   <div className="d-grid mx-auto gap-3">
                     <button
                       onClick={() => this.downloadVentiler()}
-                      className="btn btn-light"
+                      className="btn btn-outline-secondary"
                       disabled={!this.allowVentilDownload()}
                     >
                       {__("Download valves")}
