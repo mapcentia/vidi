@@ -26,6 +26,9 @@ Der er flere dele i opsætningen af denne extension. Da den både skal håndtere
 - BlueIdea og Lukkeliste
   - lukkeliste er `true`, samt `ventil_layer`, `ventil_layer_key` og `udpeg_layer`
   - blueidea er `true`, samt username + password
+- Lukkeliste med alarm-funktionalitet
+  - lukkeliste er `true`
+  - alarmkabel er `true`, samt `alarm_skab`
 
 ### Vidi
 
@@ -54,24 +57,38 @@ module.exports = {
   },
 };
 ```
+### config.blueidea.js:
 
 | Property | Type   | Description                       |
 | -------- | ------ | --------------------------------- |
 | hostname | string | blueidea hostname                 |
 | users    | object | bruger konfiguration, se herunder |
 
-| Property         | Type    | Default | Description                                                    |
-| ---------------- | ------- | ------- | -------------------------------------------------------------- |
-| debug            | boolean |         | styrer om beskeder i blueidea sættes som testmode              |
-| username         | string  |         | blueidea brugernavn                                            |
-| password         | string  |         | blueidea adgangskode                                           |
-| blueidea         | boolean | `False` | om brugeren skal have adgang til blueidea-værktøjerne          |
-| lukkeliste       | boolean | `False` | om brugeren skal have adgang til lukkeliste-værktøjerne        |
-| profileid        | obj     |         | objekt med profilid & alias                                    |
-| ventil_layer     | string  |         | navnet på layeret hvor ventil-lukkeliste skal findes           |
-| ventil_layer_key | string  |         | navnet på kolonnen som skal filtreres på                       |
-| udpeg_layer      | string  |         | navnet på lag som skal tændes når man vil udpegde i lukkeliste |
-| alarmkabel       | boolean | `False` | om brugeren skal have adgang til alarmkabel-værktøjerne        |
+| Property         | Type    | Default | Description                                                                                                                |
+| ---------------- | ------- | ------- | -------------------------------------------------------------------------------------------------------------------------- |
+| debug            | boolean |         | styrer om beskeder i blueidea sættes som testmode                                                                          |
+| username         | string  |         | blueidea brugernavn                                                                                                        |
+| password         | string  |         | blueidea adgangskode                                                                                                       |
+| blueidea         | boolean | `False` | om brugeren skal have adgang til blueidea-værktøjerne                                                                      |
+| lukkeliste       | boolean | `False` | om brugeren skal have adgang til lukkeliste-værktøjerne                                                                    |
+| profileid        | obj     |         | objekt med profilid & alias                                                                                                |
+| ventil_layer     | string  |         | navnet på layeret hvor ventil-lukkeliste skal findes                                                                       |
+| ventil_layer_key | string  |         | navnet på kolonnen som skal filtreres på                                                                                   |
+| udpeg_layer      | string  |         | navnet på lag som skal tændes når man vil udpegde i lukkeliste                                                             |
+| ventil_export    | obj     |         | objekt med opsætning af ventil-eksport. key er kolonnenavnet og value er hvilken kolonne der trækkes fra på `ventil_layer` |
+| alarmkabel       | boolean | `False` | om brugeren skal have adgang til alarmkabel-værktøjerne                                                                    |
+| alarm_skab       | obj     |         | objekt med opsætning af alarmskabe                                                                                         |
+
+### Alarm_skab:
+
+| Property | Type   | Default | Description                                                                     |
+| -------- | ------ | ------- | ------------------------------------------------------------------------------- |
+| layer    | string |         | navnet på laget der benyttes til alarm-beregning hvor alarmkablerne skal findes |
+| key      | string |         | kolonnenavn på `layer` som skal bruges til at finde alarmkablerne               |
+| name     | string |         | SQL udtryk der bruges til at finde teksten til dropdown                         |
+| geom     | string |         | kolonnenavn på `layer` som indeholder geometrien                                |
+
+### ?config=*.json:
 
 Der skal ligeledes laves en opsætning af extension i kørselsmiljøet. Se nedenfor.
 
@@ -104,3 +121,4 @@ Den bruger der tænkes at bruge lukkeliste-værktøjerne skal have en rolle med 
 - `lukkeliste.beregn_afskaaretnet`
 - `lukkeliste.beregnlog`
 - `lukkeliste.lukkestatus`
+- _*Lag der er defineret i `alarm_skab` hvis denne er relevant_

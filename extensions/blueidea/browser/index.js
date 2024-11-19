@@ -15,6 +15,7 @@ import {
   featureCollection as turfFeatureCollection,
   applyFilter,
 } from "@turf/turf";
+import c from "express-cluster";
 
 /**
  *
@@ -268,7 +269,7 @@ module.exports = {
      *
      * @type {*|exports|module.exports}
      */
-    require("./i8n.js");
+    var dict = require("./i8n.js");
 
     /**
      *
@@ -321,6 +322,10 @@ module.exports = {
           selected_profileid: '',
           lukkeliste_ready: false,
           TooManyFeatures: false,
+          alarm_direction_selected: 'Both',
+          alarm_skab_selected: '',
+          alarm_skabe: null,
+          results_alarmskabe: [],
         };
       }
 
@@ -432,6 +437,27 @@ module.exports = {
       }
 
       /**
+       * Get select options from alarmskabe
+       */
+      createAlarmskabeOptions(list) {
+        // This function parses the geojson list of alarmskabe from state, into a select option lis
+        let me = this;
+        let options = [];
+        if (list) {
+          for (let i = 0; i < list.length; i++) {
+            let feature = list[i];
+            let option = {
+              value: feature.properties.value,
+              label: feature.properties.text,
+            };
+
+            options.push(option);
+          }
+        }
+        return options;
+      }
+
+      /**
        * Get user from backend
        * @returns {Promise<void>}
        * @private
@@ -455,6 +481,8 @@ module.exports = {
                   userProfiles = Object.keys(data.profileid);
                 }
 
+                let alarmskabe = me.createAlarmskabeOptions(data.alarm_skabe);
+
                 me.setState({
                   user_lukkeliste: data.lukkeliste,
                   user_blueidea: data.blueidea,
@@ -467,6 +495,8 @@ module.exports = {
                   user_ventil_export: data.ventil_export || null,
                   selected_profileid: userProfiles[0] || '',
                   user_alarmkabel: data.alarmkabel,
+                  alarm_skabe: alarmskabe,
+                  alarm_skab_selected: alarmskabe[0].value || '',
                   lukkeliste_ready: data.lukkestatus.views_exists || false,
                 });
                 resolve(data);
@@ -506,14 +536,41 @@ module.exports = {
        * This function queries database for information related to alarmkabel
        * @returns uuid string representing the query
        */
-      queryPointAlarmkabel = (point, distance) => {
+      queryPointAlarmkabel = (point, distance, direction) => {
         let me = this;
         let body = point;
         body.distance = distance;  //append distance to body
+        body.direction = direction; //append direction to body
 
         return new Promise(function (resolve, reject) {
           $.ajax({
             url: "/api/extension/alarmkabel/" + me.state.user_id + "/query",
+            type: "POST",
+            data: JSON.stringify(body),
+            contentType: "application/json",
+            success: function (data) {
+              resolve(data);
+            },
+            error: function (e) {
+              reject(e);
+            },
+          });
+        });
+      }
+
+            /**
+       * This function queries database for information related to alarmkabel
+       * @returns uuid string representing the query
+       */
+      queryPointAlarmskab = (point, direction, alarmskab_gid) => {
+        let me = this;
+        let body = point;
+        body.direction = direction;  //append distance to body
+        body.alarmskab = alarmskab_gid; //append alarmskab to body
+
+        return new Promise(function (resolve, reject) {
+          $.ajax({
+            url: "/api/extension/alarmskab/" + me.state.user_id + "/query",
             type: "POST",
             data: JSON.stringify(body),
             contentType: "application/json",
@@ -1094,7 +1151,7 @@ module.exports = {
           blocked = true;
 
           // send the point to the server + the distance
-          me.queryPointAlarmkabel(point, me.state.user_alarmkabel_distance)
+          me.queryPointAlarmkabel(point, me.state.user_alarmkabel_distance, me.state.alarm_direction_selected)
             .then((data) => {
 
               me.createSnack(__("Alarm found"))
@@ -1118,7 +1175,106 @@ module.exports = {
             });
         });
         return
-      }; 
+      };
+
+      /**
+       * This function parses the alarmskabe results into a list of objects
+       * @returns List of objects
+       * 
+       */
+      parseAlarmskabeResults = (features) => {
+        let results = [];
+        features.forEach((feature) => {
+          let obj = {
+            direction: feature.properties.dir,
+            distance: feature.properties.afstand,
+          };
+
+          // Translate the direction to human readable
+          if (feature.properties.dir == "FT") {
+            obj.direction = __("From-To");
+          } else if (feature.properties.dir == "TF") {
+            obj.direction = __("To-From");
+          }
+
+          // Round the distance to 2 decimals
+          obj.distance = Math.round(obj.distance * 100) / 100;
+          results.push(obj);
+        });
+        return results;
+      };
+      
+      /**
+       * This function selects a point in the map for alarmkabel, based on a specific alarmskab
+       * @returns Point
+       */
+      selectPointAlarmskab = () => {
+        let me = this;
+        let point = null;
+        blocked = false;
+        _clearAll();
+        
+        // Reset the results
+        me.setState({
+          results_alarmskabe: [],
+        });
+
+        // if udpeg_layer is set, make sure it is turned on
+        if (me.state.user_udpeg_layer) {
+          me.turnOnLayer(me.state.user_udpeg_layer);
+        }
+
+        // change the cursor to crosshair and wait for a click
+        utils.cursorStyle().crosshair();
+
+        cloud.get().on("click", function (e) {
+
+          // remove event listener
+          cloud.get().map.off("click");
+
+          // if the click is blocked, return
+          if (blocked) {
+            return;
+          }
+
+          me.createSnack(__("Starting analysis"), true)
+
+          // get the clicked point
+          point = e.latlng;
+          utils.cursorStyle().reset();
+          blocked = true;
+
+          // send the point to the server + the direction and alarm_skab
+          me.queryPointAlarmskab(point, me.state.alarm_direction_selected, me.state.alarm_skab_selected)
+            .then((data) => {
+
+              me.createSnack(__("Alarm found"))
+              // if the server returns a result, show it
+              if (data) {
+                // console.debug(data);                
+                me.addAlarmPositionToMap(data.alarm);
+
+                // Add the results to the list in state
+                me.setState({
+                  results_alarmskabe: me.parseAlarmskabeResults(data.alarm.features),
+                });
+              }
+
+              // Add the clicked point to the map
+              if (data.log) {
+                //console.debug("Got log:", data.log);
+                me.addSelectedPointToMap(data.log);
+              }
+              return
+            })
+            .catch((error) => {
+              me.createSnack(__("Error in seach") + ": " + error);
+              console.warn(error);
+              return
+            });
+        });
+        return
+      };
 
       toggleEdit = () => {
         let me = this;
@@ -1623,7 +1779,23 @@ module.exports = {
                   hidden={!s.user_alarmkabel}
                 >
                   <h6>{__("Alarm cable")}</h6>
-                  <div className="row mx-auto gap-3">
+
+                  <select
+                      className="form-select"
+                      value={s.alarm_direction_selected}
+                      onChange={(e) => this.setState({ alarm_direction_selected: e.target.value })}
+                    >
+                      <option value="FT">{__('From-To')}</option>
+                      <option value="TF">{__('To-From')}</option>
+                      <option value="Both">{__('Both')}</option>
+                    </select>
+                    <div className="form-text mb-3">Angiv søgeretning</div>
+                  
+                  <div className="vertical-center col-auto">
+                    {__("Distance from point")}
+                  </div>
+                  
+                  <div className="input-group">
                     <input
                       type="number"
                       className="form-control"
@@ -1641,7 +1813,58 @@ module.exports = {
                       {__("Select point for alarmkabel")}
                     </button>
                   </div>
+                  <div className="form-text mb-3">Angiv antal meter, og udpeg punkt.</div>
                 </div>
+
+                <div
+                  style={{ alignSelf: "center" }}
+                  //hidden={!s.user_alarmkabel}
+                  hidden
+                >
+                  <div className="vertical-center col-auto">
+                  {__("Distance from cabinet")}
+                  </div>
+                  
+                  <div className="input-group">
+                    <select
+                      className="form-select"
+                      value={s.alarm_skab_selected}
+                      onChange={(e) => this.setState({ alarm_skab_selected: e.target.value })}
+                    >
+                    // for each option in s.alarm_skabe, create an option
+                    {s.alarm_skabe.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                    </select>
+                    <button
+                      onClick={() => this.selectPointAlarmskab()}
+                      className="btn btn-primary col-auto"
+                      disabled={!this.allowAlarmkabel()}
+                    >
+                      {__("Select point for cabinet")}
+                    </button>
+                  </div>
+                  <div className="form-text mb-3">Vælg alarmskab, og udpeg punkt</div>
+                </div>
+              
+                <div
+                  style={{ alignSelf: "center" }}
+                  hidden={s.results_alarmskabe.length == 0}
+                >
+                  <div className='list-group'>
+                    {s.results_alarmskabe.map((item, index) => (
+                      <div className='list-group-item' key={index}>
+                        <div className='d-flex w-100 justify-content-between'>
+                          <small>{item.direction}</small>
+                          <small>{item.distance}m</small>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              
               </div>
             </div>
 

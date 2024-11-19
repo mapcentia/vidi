@@ -119,6 +119,30 @@ var dict = {
       da_DK: "Der er fundet for mange matrikler. Matrikler vil ikke blive vist. Der kan gå tid før vi er klar til at hente adresser",
       en_US: "Too many parcels found. Parcels will not be shown. It may take some time before we are ready to fetch addresses",
     },
+    "From-To": {
+      da_DK: "Fra-Til",
+      en_US: "From-To",
+    },
+    "To-From": {
+      da_DK: "Til-Fra",
+      en_US: "To-From",
+    },
+    "Both": {
+      da_DK: "Begge",
+      en_US: "Both",
+    },
+    "Distance from point": {
+      da_DK: "Afstand fra punkt",
+      en_US: "Distance from point",
+    },
+    "Distance from cabinet": {
+      da_DK: "Afstand fra skab",
+      en_US: "Distance from cabinet",
+    },
+    "Select point for cabinet": {
+      da_DK: "Udpeg skab",
+      en_US: "Select cabinet",
+    },
   };
 
   module.exports = dict;
