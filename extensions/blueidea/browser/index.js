@@ -269,7 +269,7 @@ module.exports = {
      *
      * @type {*|exports|module.exports}
      */
-    require("./i8n.js");
+    var dict = require("./i8n.js");
 
     /**
      *
