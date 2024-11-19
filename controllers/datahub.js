@@ -9,6 +9,7 @@ const request = require("request");
 const router = express.Router();
 const fetch = require("node-fetch");
 const config = require("../config/config.js");
+const { trimEnd } = require("lodash");
 
 DATAHUB = {
   host: config.gc2.host,
@@ -16,7 +17,7 @@ DATAHUB = {
   key: config.datahub.key,
 };
 
-const queryDatahub = async (sql, options = null) => {
+const queryDatahub = async (sql, onlyProperties = false) => {
   var userstr = DATAHUB.user;
   var postData = {
     key: DATAHUB.key,
@@ -41,21 +42,31 @@ const queryDatahub = async (sql, options = null) => {
   //console.log(json);
 
   // We something that looks very much like DAWA, so we remove the GC2 wrapper
-  let data = {
-    _mem: json.peak_memory_usage,
-    _time: json._execution_time,
-    _success: json.success,
-    _message: json.message,
-    _rows: json.features.length ? json.features.length : 0,
-    crs: {
-      type: "name",
-      properties: {
-        name: "EPSG:4326",
+  let data = {};
+
+  if (!onlyProperties) {
+    data = {
+      _mem: json.peak_memory_usage,
+      _time: json._execution_time,
+      _success: json.success,
+      _message: json.message,
+      _rows: json.features.length ? json.features.length : 0,
+      crs: {
+        type: "name",
+        properties: {
+          name: "EPSG:4326",
+        },
       },
-    },
-    type: "FeatureCollection",
-    features: json.features,
-  };
+      type: "FeatureCollection",
+      features: json.features,
+    };
+  } else {
+    // only return the properties of each feature
+    data = [];
+    for (var i = 0; i < json.features.length; i++) {
+      data.push(JSON.parse(json.features[i].properties.result));
+    }
+  }
 
   return data;
 };
@@ -80,34 +91,36 @@ function coordsToGeom(coords, srid) {
   return geom;
 }
 
+const jordstykkeQuery = `
+  SELECT 
+    gid as featureid, 
+    matrikelnummer as matrikelnr, 
+    ejerlavskode as ejerlavkode, 
+    ejerlavsnavn, 
+    sognekode, 
+    sognenavn, 
+    kommunekode, 
+    kommunenavn, 
+    registreretareal, 
+    vejareal, 
+    regionskode,
+    samletfastejendomlokalid as bfenummer, 
+    the_geom 
+  FROM 
+    matrikel_datahub.vw_jordstykke
+`;
+
 const queryJordstykker = async (req, res, next) => {
   // This endpoint tries to mimics the DAWA endpoint, but uses the datahub instead
 
   // build the query
-
-  var sql = "SELECT";
-
-  // Define the fields to return
-  sql += " gid as featureid";
-  sql += ", matrikelnummer as matrikelnr";
-  sql += ", ejerlavskode as ejerlavkode";
-  sql += ", ejerlavsnavn";
-  sql += ", sognekode";
-  sql += ", sognenavn";
-  sql += ", kommunekode";
-  sql += ", kommunenavn";
-  sql += ", registreretareal";
-  sql += ", vejareal";
-  sql += ", regionskode";
-  sql += ", the_geom";
-
-  sql += " FROM matrikel_datahub.vw_jordstykke";
+  var sql = jordstykkeQuery;
 
   // Get the method from the request
   var method = req.method;
 
   //place parameters in a common variable
-  var parameters
+  var parameters;
   if (method == "GET") {
     parameters = req.query;
   } else {
@@ -120,12 +133,33 @@ const queryJordstykker = async (req, res, next) => {
   if (parameters.polygon && parameters.srid) {
     var coords = JSON.parse(parameters.polygon);
     var srid = parameters.srid;
-    sql += " WHERE ST_Intersects(the_geom, " + coordsToGeom(coords, srid) + ") ";
+    sql +=
+      " WHERE ST_Intersects(the_geom, " + coordsToGeom(coords, srid) + ") ";
   }
 
-  // if wkb is given in query, use it as instersection filter
+  // if bfenr is given in query, use it as filter
+  if (parameters.bfenummer) {
+    sql += " WHERE samletfastejendomlokalid = '" + parameters.bfenummer + "'";
+  }
+
+  // if x and y is given in query, use it as instersection filter
+  if (parameters.x && parameters.y && parameters.srid) {
+    sql +=
+      " WHERE ST_Contains(the_geom, ST_Transform(ST_GeomFromText('POINT(" +
+      parameters.x +
+      " " +
+      parameters.y +
+      ")', " +
+      parameters.srid +
+      "), 25832)) ";
+  }
+
+  // if wkb is given in query, use it as instersection filter. in this case, the srid is contained in the wkb
   if (parameters.wkb) {
-    sql += " WHERE ST_Intersects(the_geom, ST_GeomFromWKB('" + parameters.wkb + "')) ";
+    sql +=
+      " WHERE ST_Intersects(the_geom, ST_GeomFromWKB('" +
+      parameters.wkb +
+      "')) ";
   }
 
   // Return the result of the query from datahub
@@ -143,7 +177,116 @@ const queryJordstykker = async (req, res, next) => {
   }
 };
 
+const queryJordstykkeByMatrAndElav = async (req, res, next) => {
+  // This endpoint tries to mimics the DAWA endpoint with matr and ejerlavkode, but uses the datahub instead
+
+  // build the query
+  var sql = jordstykkeQuery;
+
+  //console.log(req.params);
+
+  // Get the path parameters from the request
+  var matr = req.params.matr;
+  var ejerlavkode = req.params.ejerlavkode;
+
+  // if matr and ejerlavkode is given in path, use it as filter
+  if (matr && ejerlavkode) {
+    sql +=
+      " WHERE matrikelnummer = '" +
+      matr +
+      "' AND ejerlavskode = " +
+      ejerlavkode +
+      " ";
+  }
+
+  // Return the result of the query from datahub
+  try {
+    const result = await queryDatahub(sql);
+
+    // if no result, or result.success is false, return error
+    if (!result || !result._success) {
+      return res.status(500).json({ error: result._message, q: sql });
+    }
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error });
+  }
+};
+
+const autocompleteSpoofer = async (req, res, next) => {
+  // we anticipate a service, and a search term in the q parameter. there might be a paramter per_side for number of results
+
+  const handleTerm = (term) => {
+    // if term is empty, return an empty string
+    if (!term) {
+      return "";
+    }
+
+    // remove trailing space
+    let t = term.trimEnd();
+    // make sure the term is valid for tsquery. when there is a space interpret it as an AND
+    t = t.replace(/ /g, " & ") + ":*";
+    return t;
+  };
+
+  var service = req.params.service;
+  var term = handleTerm(req.query.q);
+  var limit = req.query.per_side ? req.query.per_side : 10;
+  var bfenummer = req.query.bfenummer;
+
+  // guard against bfenummer existing as not a number
+  if (bfenummer && isNaN(bfenummer)) {
+    return res.json([]);
+  }
+
+  // handle jordstykke autocomplete
+  if (service == "jordstykker") {
+    var sql = "SELECT result from api.mw_jordstykke_autocomplete";
+
+    // search by term, if term is given
+    if (term) {
+      sql += " WHERE tsvector_matr @@ to_tsquery('" + term + "')";
+    }
+    // search by bfenummer, if bfenummer is given and term is not
+    else if (bfenummer) {
+      sql += " WHERE tsvector_bfe like '" + bfenummer + "%'";
+    }
+  } else if (service == "adresser") {
+    // handle adresse autocomplete
+    var sql = "SELECT result from api.mw_adresse_autocomplete";
+
+    // search by term, if term is given
+    if (term) {
+      sql += " WHERE tsvector_adr @@ to_tsquery('" + term + "')";
+    }
+  } else {
+    return res.status(500).json({ error: "Service not found" });
+  }
+
+  // Add limit to the query
+  sql += " LIMIT " + limit;
+
+  // Return the result of the query from datahub
+  try {
+    console.log(sql);
+    const result = await queryDatahub(sql, true);
+
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error });
+  }
+};
+
 router.get("/api/datahub/jordstykker", queryJordstykker);
 router.post("/api/datahub/jordstykker", queryJordstykker);
+
+router.get("/api/datahub/:service/autocomplete", autocompleteSpoofer);
+
+router.get(
+  "/api/datahub/jordstykker/:ejerlavkode/:matr",
+  queryJordstykkeByMatrAndElav
+);
 
 module.exports = router;

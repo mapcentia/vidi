@@ -29,8 +29,6 @@ class Download extends React.Component {
                            onClick={this.handleDownload.bind(this)}>GeoJSON</a></li>
                     <li><a data-format="csv" className="dropdown-item" href="#"
                            onClick={this.handleDownload.bind(this)}>CSV</a></li>
-                    <li><a data-format="excel" className="dropdown-item" href="#"
-                           onClick={this.handleDownload.bind(this)}>Excel</a></li>
                     <li>
                         <hr className="dropdown-divider"/>
                     </li>

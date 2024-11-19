@@ -63,6 +63,8 @@ Der en række data attributer, som skal/kan sættes:
  * Kan sættes til "true" for at undgå at Vidi's tracking cookie bliver sat. Cookien anvendes bl.a til anonyme projekter og print, hvilket der typisk ikke er behov for på indlejrede kort.
 * **data-vidi-schemata (valgfri)**
  * Kan sættes til en valid :ref:`configjs_schemata` tekststreng. Matchende lag bliver hentet ind sammen med hvad, der må være angivet i en evt. config.
+* **data-vidi-title (valgfri)**
+ * Sætter `title` attributen på iframen.
 
 Følgende attributer styrer hvilke funktioner, der skal være synlige.
 
@@ -85,7 +87,9 @@ Følgende funktioner er synlige, men kan sættes til "none" hvis funktionerne sk
 * **data-vidi-location (valgfri)**
  * Find-mig-knappen.
 * **data-vidi-signin (valgfri)**
- * Login-knappen.
+ * Login-knappen.*
+* **data-vidi-toggler (valgfri)**
+ * Navbar toggle-knappen, som vises i på smal skærm.
 
 Følgende funktioner er skjulte, men kan sættes til "inline" hvis funktionerne skal være synlige:
 

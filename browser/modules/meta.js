@@ -133,7 +133,6 @@ module.exports = {
                  * @returns {void}
                  */
                 const loadMeta = (schemata) => {
-                    let startTime = new Date().getTime();
                     fetch('/api/meta/' + db + '/' + schemata).then(
                         response => {
                             if (!response.ok) {
@@ -146,8 +145,6 @@ module.exports = {
                                     data.data = data.data.filter(d => d.layergroup !== null)
                                     me.addMetaData(data);
                                     ready = true;
-                                    let endTime = new Date().getTime();
-                                    console.info("Meta loaded in " + (endTime - startTime) + " ms");
                                     resolve(schemata);
                                 } else {
                                     reject();
@@ -313,7 +310,7 @@ module.exports = {
                 }
             })
         }
-        return tmp.data  ? tmp : metaDataClone;
+        return tmp?.data ? tmp : metaDataClone;
     },
 
     /**

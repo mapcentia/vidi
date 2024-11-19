@@ -306,7 +306,7 @@ module.exports = module.exports = {
                             style="visibility: ${displayInfo};"
                             data-baselayer-name="${layerName}"
                             data-baselayer-info="${abstract}"
-                            class="info-label btn btn-sm btn-light"><i class="bi bi-info-square pe-none"></i></button>
+                            class="info-label btn btn-sm btn-outline-secondary"><i class="bi bi-info-square pe-none"></i></button>
                     </div>
                 </li>`;
     
@@ -675,20 +675,26 @@ module.exports = module.exports = {
             bl = window.setBaseLayers[i];
             if (bl.id === id) {
                 // Base layer can be a MVT layer
-                if (bl.id.indexOf(LAYER.VECTOR_TILE + `:`) === 0) {
-                    let addedLayers = cloud.get().addTileLayers($.extend({
-                        layerId: bl.id,
-                        layers: [layerTreeUtils.stripPrefix(bl.id)],
-                        db: bl.db,
-                        host: bl.host,
-                        type: "mvt",
-                        isBaseLayer: true,
-                    }, bl.config));
-
-                    result = addedLayers[0];
-                    result.baseLayer = true;
-                    result.id = bl.id;
-
+                if (bl?.type === "WMTS") {
+                    result = cloud.get().addWMTSBaselayer(bl.url, {
+                        name: bl.id,
+                        attribution: bl.attribution,
+                        minZoom: typeof bl.minZoom !== "undefined" ? bl.minZoom : 0,
+                        maxZoom: typeof bl.maxZoom !== "undefined" ? bl.maxZoom : 20,
+                        maxNativeZoom: typeof bl.maxNativeZoom !== "undefined" ? bl.maxNativeZoom : 18,
+                        baseLayer: true,
+                        layer: bl.layer,
+                        tileMatrixSet: bl.tileMatrixSet,
+                    });
+                } else if (bl?.type === "MVT") {
+                    result = cloud.get().addMVTBaselayer(bl.url, {
+                        name: bl.id,
+                        attribution: bl.attribution,
+                        minZoom: typeof bl.minZoom !== "undefined" ? bl.minZoom : 0,
+                        maxZoom: typeof bl.maxZoom !== "undefined" ? bl.maxZoom : 20,
+                        maxNativeZoom: typeof bl.maxNativeZoom !== "undefined" ? bl.maxNativeZoom : 18,
+                        baseLayer: true,
+                    });
                 } else if (typeof bl.type !== "undefined" && bl.type === "XYZ") {
                     result = cloud.get().addXYZBaselayer(bl.url, {
                         name: bl.id,
