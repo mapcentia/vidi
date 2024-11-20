@@ -481,7 +481,17 @@ module.exports = {
                   userProfiles = Object.keys(data.profileid);
                 }
 
-                let alarmskabe = me.createAlarmskabeOptions(data.alarm_skabe);
+                let alarmskabe = [];
+                let alarm_skab_selected = '';
+                if (data.alarmskabe) {
+                  alarmskabe = me.createAlarmskabeOptions(data.alarmskabe);
+                  alarm_skab_selected = alarmskabe[0].value || '';
+                }
+
+                let lukkestatus = false;
+                if (data.lukkestatus && data.lukkestatus.views_exists) {
+                  lukkestatus = data.lukkestatus.views_exists;
+                }
 
                 me.setState({
                   user_lukkeliste: data.lukkeliste,
@@ -496,8 +506,8 @@ module.exports = {
                   selected_profileid: userProfiles[0] || '',
                   user_alarmkabel: data.alarmkabel,
                   alarm_skabe: alarmskabe,
-                  alarm_skab_selected: alarmskabe[0].value || '',
-                  lukkeliste_ready: data.lukkestatus.views_exists || false,
+                  alarm_skab_selected: alarm_skab_selected,
+                  lukkeliste_ready: lukkestatus,
                 });
                 resolve(data);
               },
