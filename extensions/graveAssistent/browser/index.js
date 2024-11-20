@@ -25,7 +25,7 @@ if (window.config?.extensionConfig?.graveAssistent) {
     }
 }
 
-console.log('Schema override:', schema_override)
+console.log('[Graveassistent] Schema override:', schema_override)
 
 
 /**
