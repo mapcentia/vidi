@@ -4,6 +4,48 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2024.11.0] - 2024-21-11
+### Added
+- Themes selector in default template. Choose between Dark, Light or Auto. Is set to the same theme as the OS (if supported). Auto will change the theme according to the OS.
+- It's now possible to set up MapLibre layers as base layers (overlays will come later). Setup like this:
+```json
+{
+  "type": "MVT",
+  "url": "https://api.maptiler.com/maps/topo/style.json?key=xxx",
+  "id": "mvt",
+  "name": "Open Street Map (Vektor)",
+  "description": "Kort fra mvt",
+  "attribution": "mvt",
+  "minZoom": 8,
+  "maxZoom": 20,
+  "maxNativeZoom": 19
+}
+```
+- Also WMTS layer support is added for base layers:
+```json
+{
+  "type": "WMTS",
+  "url": "https://api.dataforsyningen.dk/orto_foraar_webm_DAF?token=xxx&",
+  "tileMatrixSet": 'DFD_GoogleMapsCompatible',
+  "layer": 'orto_foraar_webm',
+  "id": "wmts",
+  "name": "Ortofoto (wmts)",
+  "description": "Kort fra wmts",
+  "attribution": "wmts",
+  "minZoom": 8,
+  "maxZoom": 20,
+  "maxNativeZoom": 19
+}
+```
+
+###
+- Leaflet is updated to latest: 1.9.4
+
+### Fixed
+- Symbols (Symbol extension) is now up-scaled in print to counter the down-scale of the actual map.
+- Fixed issue with JSON types in Editor.
+- Session cookies set through the URL is now Secure and sameSite: none.
+
 ## [2024.10.0] - 2024-4-10
 ### Fixed
 - Conflict search module: Non ascii characters in SELECT statements caused a low level un-catchable error. Now statements are base64url encoded.   
