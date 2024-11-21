@@ -560,6 +560,7 @@ module.exports = {
                             fields[key].type.startsWith("time") ||
                             fields[key].type.startsWith("time") ||
                             fields[key].type.startsWith("character") ||
+                            fields[key].type.startsWith("json") ||
                             fields[key].type.startsWith("text")) &&
                         geoJson.properties[key] !== null) {
                         geoJson.properties[key] = geoJson.properties[key].replace(/\\([\s\S])|(["])/ig, "\\$1$2");
@@ -903,6 +904,8 @@ module.exports = {
                         break;
                     case `text`:
                     case `character varying`:
+                    case `json`:
+                    case `jsonb`:
                         if (eventFeatureCopy.properties[key]) {
                             try { // If string is not
                                 eventFeatureCopy.properties[key] = decodeURIComponent(eventFeatureCopy.properties[key]);
@@ -961,6 +964,7 @@ module.exports = {
                                 fields[key].type.startsWith("time") ||
                                 fields[key].type.startsWith("time") ||
                                 fields[key].type.startsWith("character") ||
+                                fields[key].type.startsWith("json") ||
                                 fields[key].type.startsWith("text")) &&
                             GeoJSON.properties[key] !== null) {
                             GeoJSON.properties[key] = GeoJSON.properties[key].replace(/\\([\s\S])|(["])/ig, "\\$1$2");
