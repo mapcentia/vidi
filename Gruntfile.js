@@ -233,7 +233,7 @@ module.exports = function (grunt) {
                 },
                 files: {
                     'public/js/build/all.min.js': [
-                        '/node_modules/leaflet/dist/leaflet-src.js',
+                        'node_modules/leaflet/dist/leaflet-src.js',
                         'public/js/bundle.js',
                     ],
                     'public/js/build/all.async.min.js': [
