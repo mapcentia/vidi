@@ -9,20 +9,34 @@ const router = express.Router();
 const config = require('../../config/config.js').gc2;
 const request = require('request');
 
-router.get('/api/config/:db/', function (req, response) {
-    let db = req.params.db, url;
-    url = config.host + "/api/v2/configuration/" + db;
+router.get('/api/gc2/config/:db/:id?', function (req, response) {
+    let url;
+    const db = req.params.db;
+    const id = req.params.id?.replace('.json', '');
 
-    request.get(url, function (err, res, body) {
-        if (err) {
+    url = config.host + "/api/v2/configuration/" + db + (id ? "/" + id : "");
+
+    let headers = {
+        Cookie: "PHPSESSID=" + req?.session?.gc2SessionId
+    }
+    let options = {
+        uri: url,
+        encoding: 'utf8',
+        headers
+    };
+
+    request.get(options, function (err, res, body) {
+        if (res.statusCode !== 200) {
             response.header('content-type', 'application/json');
-            response.status(400).send({
+            response.status(403).send({
                 success: false,
                 message: "Could not get the configs"
             });
             return;
         }
-        response.send(JSON.parse(body));
+        const data = JSON.parse(body);
+
+        response.send(id ? JSON.parse(JSON.parse(data.data.value).body) : data);
     })
 });
 module.exports = router;

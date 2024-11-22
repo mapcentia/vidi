@@ -151,7 +151,7 @@ module.exports = {
                 let loadConfig = function () {
                     let configParam;
                     if (configFile.startsWith("/")) {
-                        configParam = "/api/localconfig?file=" + configFile
+                        configParam = "/api/gc2/config/" + urlparser.db + "/" + configFile.split('/')[5]
                     } else {
                         configParam = "/api/config/" + urlparser.db + "/" + configFile;
                     }

@@ -23,7 +23,6 @@ router.use(require('./gc2/config'));
 router.use(require('./print'));
 router.use(require('./locale'));
 router.use(require('./config'));
-router.use(require('./localConfig'));
 router.use(require('./static'));
 router.use(require('./template'));
 router.use(require('./css'));
