@@ -18,7 +18,7 @@
   ~ @author     Martin Høgh <mh@mapcentia.com>
   ~ @copyright  2013-2024 MapCentia ApS
   ~ @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
-  ~ @version    2024.10.0
+  ~ @version    2024.11.0
 
   -->
 <html lang="en">
@@ -78,7 +78,7 @@
 <script src="/api/baselayer"></script>
 <!-- Build -->
 <!-- build:js /js/build/all.min.js -->
-<script src="/js/lib/leaflet/leaflet-src.js"></script>
+<script src="/node_modules/leaflet/dist/leaflet-src.js"></script>
 <script src="/js/bundle.js"></script>
 <!-- /build -->
 <!-- Async load Javascript -->

@@ -95,7 +95,7 @@ module.exports = {
             autoUpdate: false,
             configSwitcher: false, // Use this only in build time configs,
             baselayerDrawer: false,
-            theme: 'geopartner',
+            theme: 'light',
             emptyInfoCallback: null,
             infoCallback: null,
         };
@@ -104,7 +104,11 @@ module.exports = {
             const MAXAGE = (config?.sessionMaxAge || 86400) / 86400; // In days
             // Try to remove existing cookie
             document.cookie = 'connect.gc2=; Max-Age=0; path=/; domain=' + location.host;
-            cookie.set("connect.gc2", urlVars.session, {expires: MAXAGE});
+            cookie.set("connect.gc2", urlVars.session, {
+                expires: MAXAGE,
+                secure: true,
+                sameSite: 'none'
+            });
         }
         // Set default for unset props
         for (let prop in defaults) {
@@ -265,7 +269,6 @@ module.exports = {
         gc2i18n.dict._displayClear = urlVars?.cle || "inline";
         gc2i18n.dict._displayBox = urlVars?.box || "inline";
         gc2i18n.dict._displaySignin = urlVars?.sig ? urlVars.sig : !window.vidiConfig?.enabledExtensions.includes("session") ? "none" : "inline";
-        gc2i18n.dict._displayBurger = urlVars?.bur || "initial";
         gc2i18n.dict._displayScreenshot = urlVars?.scr || "inline";
         gc2i18n.dict._displayBrand = urlVars?.bra || "inline";
         gc2i18n.dict._displayToggler = urlVars?.tog || "inline";

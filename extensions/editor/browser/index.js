@@ -357,29 +357,6 @@ module.exports = {
     },
 
     /**
-     * 
-     * @param  jsonFields 
-     * @param  fieldConf 
-     * @returns   sorted jsonFields, so they matches sort_id in gc2 
-     */ 
-    sortByConf: function(jsonFields, fieldConf) {
-  
-        for (const [key, value] of Object.entries(fieldConf)) {
-          jsonFields[key].sort_id = value.sort_id;
-        }
-        const arr = Object.entries(jsonFields).map(([key, value]) => ({ key, ...value }));
-        arr.sort((a, b) => a.sort_id - b.sort_id);
-
-        const result = arr.reduce((acc, curr) => {
-          const { key, ...rest } = curr;
-          delete rest["sort_id"];
-          acc[key] = rest;
-          return acc;
-        }, {});
-        return result;
-    },
-
-    /**
      * Create the attribute form
      * @param fields
      * @param fieldConf
@@ -391,7 +368,7 @@ module.exports = {
         let required = [];
         let properties = {};
         let uiSchema = {};
-        fields = this.sortByConf (fields,fieldConf );
+
         Object.keys(fields).map(function (key) {
             if (key !== pkey && key !== f_geometry_column && (key.indexOf(SYSTEM_FIELD_PREFIX) !== 0 && !fieldConf[key]?.filter)) {
                 let title = key;
@@ -583,6 +560,7 @@ module.exports = {
                             fields[key].type.startsWith("time") ||
                             fields[key].type.startsWith("time") ||
                             fields[key].type.startsWith("character") ||
+                            fields[key].type.startsWith("json") ||
                             fields[key].type.startsWith("text")) &&
                         geoJson.properties[key] !== null) {
                         geoJson.properties[key] = geoJson.properties[key].replace(/\\([\s\S])|(["])/ig, "\\$1$2");
@@ -926,6 +904,8 @@ module.exports = {
                         break;
                     case `text`:
                     case `character varying`:
+                    case `json`:
+                    case `jsonb`:
                         if (eventFeatureCopy.properties[key]) {
                             try { // If string is not
                                 eventFeatureCopy.properties[key] = decodeURIComponent(eventFeatureCopy.properties[key]);
@@ -984,6 +964,7 @@ module.exports = {
                                 fields[key].type.startsWith("time") ||
                                 fields[key].type.startsWith("time") ||
                                 fields[key].type.startsWith("character") ||
+                                fields[key].type.startsWith("json") ||
                                 fields[key].type.startsWith("text")) &&
                             GeoJSON.properties[key] !== null) {
                             GeoJSON.properties[key] = GeoJSON.properties[key].replace(/\\([\s\S])|(["])/ig, "\\$1$2");
