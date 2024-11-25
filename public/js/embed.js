@@ -43,6 +43,7 @@
                 var schemata = targetDiv.getAttribute("data-vidi-schemata") || "";
 
                 var title = targetDiv.getAttribute("data-vidi-title") || "";
+                var session = targetDiv.getAttribute("data-vidi-session") || "";
 
                 try {
                     var obj = JSON.parse(atob(token));
@@ -74,7 +75,9 @@
                     "&bra=" + brand +
                     "&tog=" + toggler +
                     "&sch=" + schemata +
-                    (frameName ? "&readyCallback=" + frameName : "") + "&notracking=" + noTracking +
+                    (frameName ? "&readyCallback=" + frameName : "") +
+                    "&notracking=" + noTracking +
+                    (session ? "&session=" + session : "") +
                     "&dps=1";
                 var iframe = document.createElement("iframe");
                 iframe.setAttribute("style", "width:" + width + ";height:" + height + ";border: 1px solid rgba(0,0,0,0.1)");
