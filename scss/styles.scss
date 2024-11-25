@@ -190,3 +190,7 @@
   border-radius: 0.375rem;
   border: var(--bs-border-width) solid var(--bs-border-color);
 }
+
+.navbar-toggler {
+  background-color: rgba(var(--bs-tertiary-bg-rgb), var(--bs-bg-opacity)) !important;
+}
