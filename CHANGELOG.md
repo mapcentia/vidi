@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2024.11.1] - 2024-21-11
+### Fixed
+- Editor now handles JSON fields, which before rendered an syntax error in the decoding. 
+
 ## [2024.11.0] - 2024-21-11
 ### Added
 - Themes selector in default template. Choose between Dark, Light or Auto. Is set to the same theme as the OS (if supported). Auto will change the theme according to the OS.
