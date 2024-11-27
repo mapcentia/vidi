@@ -194,3 +194,7 @@
 .navbar-toggler {
   background-color: rgba(var(--bs-tertiary-bg-rgb), var(--bs-bg-opacity)) !important;
 }
+
+form.feature-attribute-editing-form img {
+  max-width: 100%;
+}
