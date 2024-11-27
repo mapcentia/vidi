@@ -98,11 +98,13 @@ module.exports = {
             const MAXAGE = (config?.sessionMaxAge || 86400) / 86400; // In days
             // Try to remove existing cookie
             document.cookie = 'connect.gc2=; Max-Age=0; path=/; domain=' + location.host;
-            cookie.set("connect.gc2", urlVars.session, {
-                expires: MAXAGE,
-                secure: true,
-                sameSite: 'none'
-            });
+            let options = {expires: MAXAGE};
+            // if we are using https, set the secure and sameSite flags
+            if (location.protocol === 'https:') {
+                options.secure = true;
+                options.sameSite = 'None';
+            }
+            cookie.set("connect.gc2", urlVars.session, options);
         }
         // Set default for unset props
         for (let prop in defaults) {
