@@ -382,7 +382,6 @@ module.exports = {
 
                 if (fields[key]) {
                     uiSchema[key] = {};
-                    console.log(fields[key].type)
                     switch (fields[key].type) {
                         case `smallint`:
                         case `integer`:
@@ -503,7 +502,7 @@ module.exports = {
 
             me.stopEdit();
 
-            if (drawTooltip) {
+            if (drawTooltip && !utils.isTouchEnabled()) {
                 $("#editor-tooltip").show();
             }
 

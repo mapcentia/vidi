@@ -212,5 +212,11 @@ module.exports = {
             ["fullscreen", "standalone", "minimal-ui"].some(
                 (displayMode) => window.matchMedia('(display-mode: ' + displayMode + ')').matches
             ) // Chrome PWA (supporting fullscreen, standalone, minimal-ui)
+    },
+
+    isTouchEnabled() {
+        return ('ontouchstart' in window) ||
+            (navigator.maxTouchPoints > 0) ||
+            (navigator.msMaxTouchPoints > 0)
     }
 };
