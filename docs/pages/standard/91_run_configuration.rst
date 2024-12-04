@@ -7,7 +7,7 @@ Kørselskonfiguration (configs)
 .. topic:: Overview
 
     :Date: |today|
-    :Vidi-version: 2020.11.0
+    :Vidi-version: 2024.11.0
     :Forfattere: `giovanniborella <https://github.com/giovanniborella>`_ | `mapcentia <https://github.com/mapcentia>`_
 
 .. contents::
@@ -155,6 +155,7 @@ Her kan det valgte søgemodul konfigureres.
 * ``sfeSearchActive`` Aktiver søgning på sfe ejendomsnummer
 * ``placeholderText`` Udskift standard-teksten med en anden
 * ``google`` Google API key.
+* ``extraSearches`` Liste af ekstra søgninger.
 
 .. code-block:: json
 
@@ -169,6 +170,32 @@ Her kan det valgte søgemodul konfigureres.
 
 .. note::
     Indstillerne har kun indflydelse på "danish" søgemodulet Kun "google" vedrører Google Place Search og behøver ikke udfyldes, hvis det ikke bruges. Google API kan også sættes i GC2.
+
+Det er muligt at opsætte flere søgemoduler, blandt andet ved at udstille et eller flere lag i en elasticsearch. For at implementere lagene i søgefeltet, skal lagene tilføjes til konfigurationen.
+
+De ekstra søgemoduler kan opsættes således:
+
+.. code-block:: json
+
+    searchConfig: {
+        extraSearches: [,{
+            name: "stednavne_search",
+            db: "dk",
+            host: "https://dk.gc2.io",
+            heading: "Stednavne",
+            zoom: 20, // Zoomniveau, når der klikkes på et søgeresultat
+            index: {
+                name: "stednavne/navne_samlet",
+                field: "string",
+                key: "gid",
+            },
+            relation: {
+                name: "stednavne.navne_samlet_geom",
+                key: "gid",
+                geom: "the_geom"
+            }
+        }]
+    },
 
 .. _configjs_template:
 
