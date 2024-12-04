@@ -437,6 +437,17 @@ module.exports = {
 
                 // Properties have priority over default types
                 if (fields[key]?.restriction?.length > 0) {
+
+                    // If there is a restriction, then convert the field to a select
+                    uiSchema[key] = {
+                        'ui:widget': 'select'
+                    };
+
+                    // if the type is text, change the field to string to get a select
+                    if (fields[key].type === `text`) {
+                        properties[key].type = `string`;
+                    }
+
                     let restrictions = fields[key].restriction;
                     let enumNames = [];
                     let enumValues = [];
