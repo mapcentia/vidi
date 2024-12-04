@@ -155,7 +155,7 @@ module.exports = {
 
         if (!onLoad) {
             onLoad = function () {
-                cloud.get().zoomToExtentOfgeoJsonStore(this, maxZoom);
+                cloud.get().zoomToExtentOfgeoJsonStore(this, this?.zoom || maxZoom);
                 if (advanced) {
                     this.layer._vidi_type = "draw"
                     this.layer.eachLayer((l) => {
@@ -1263,6 +1263,7 @@ module.exports = {
                         placeStores[key] = getPlaceStore();
                         placeStores[key].db = extraSearchesObj[name].db;
                         placeStores[key].host = extraSearchesObj[name]?.host || '';
+                        placeStores[key].zoom = extraSearchesObj[name]?.zoom || maxZoom;
                         placeStores[key].sql = "SELECT *,ST_asgeojson(ST_transform(" + extraSearchesObj[name].relation.geom + ",4326)) as geojson FROM " + extraSearchesObj[name].relation.name + " WHERE " + extraSearchesObj[name].relation.key + "='" + gids[name][datum.value] + "'";
                         if (!extraSearchesObj[name]?.host) {
                             placeStores[key].uri = '/api/sql'
