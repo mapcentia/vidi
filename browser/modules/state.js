@@ -33,13 +33,6 @@ var urlVars = urlparser.urlVars;
 
 /**
  *
- * @type {LZString|exports|module.exports}
- */
-var lz = require('lz-string');
-const {rotation} = require("plotly.js/src/traces/pie/attributes");
-
-/**
- *
  * @type {string}
  */
 var BACKEND = require('../../config/config.js').backend;
