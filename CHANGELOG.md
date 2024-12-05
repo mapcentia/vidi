@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [unreleased]
+### Fixed
+- On mobile, it was possible for the menu to get into a stuck transparent state. This has been fixed.
+
 ## [2024.11.1] - 2024-21-11
 ### Fixed
 - Editor now handles JSON fields, which before rendered an syntax error in the decoding. 
