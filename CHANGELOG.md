@@ -5,6 +5,37 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
 ## [unreleased]
+### Added
+- New option for setting the zoom-level of custom searches. default is level 18. The value can be set in the config, using the key `zoom`:
+```javascript
+{
+    searchConfig: {
+        size: 4,
+        komkode: "*",
+        esrSearchActive: true,
+        sfeSearchActive: true, // Example of config for danish search
+        extraSearches: [,{
+            name: "stednavne_search",
+            db: "dk",
+            host: "https://dk.gc2.io",
+            heading: "Stednavne",
+            zoom: 20,
+            index: {
+                name: "stednavne/navne_samlet",
+                field: "string",
+                key: "gid",
+
+            },
+            relation: {
+                name: "stednavne.navne_samlet_geom",
+                key: "gid",
+                geom: "the_geom"
+            }
+        }]
+    }
+}
+```
+
 ### Fixed
 - Bug in editor caused layers with restrictions to be output as textareas. Now the editor will correctly output a select with the values setup in GC2.
 - On mobile, it was possible for the menu to get into a stuck transparent state. This has been fixed.
