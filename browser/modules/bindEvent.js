@@ -94,15 +94,32 @@ module.exports = {
             $('#tail').fadeOut(100);
         });
 
-        cloud.get().on('dragstart', function () {
+        // Define how we want the menu to fade out
+        let fadeOutMenu = function (fadeWhenDraggingClass) {
             fadeWhenDraggingClass.animate({opacity: '0.3'}, 200);
             fadeWhenDraggingClass.css('pointer-events', 'none');
+        }
+         
+        // Define how we want the menu to fade in
+        let fadeInMenu = function (fadeWhenDraggingClass) {
+            fadeWhenDraggingClass.animate({opacity: '1'}, 200);
+            fadeWhenDraggingClass.css('pointer-events', 'all');
+        }
+
+        cloud.get().on('dragstart', function () {
+            fadeOutMenu(fadeWhenDraggingClass);
         });
 
         cloud.get().on('dragend', function () {
-            fadeWhenDraggingClass.animate({opacity: '1'}, 200);
-            fadeWhenDraggingClass.css('pointer-events', 'all');
+            fadeInMenu(fadeWhenDraggingClass);
+        });
 
+        cloud.get().on('zoomstart', function () {
+            fadeOutMenu(fadeWhenDraggingClass);
+        });
+
+        cloud.get().on('zoomend', function () {
+            fadeInMenu(fadeWhenDraggingClass);
         });
 
         /**
