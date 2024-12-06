@@ -36,6 +36,10 @@ and this project adheres to [CalVer](https://calver.org/).
 }
 ```
 
+### Fixed
+- Bug in editor caused layers with restrictions to be output as textareas. Now the editor will correctly output a select with the values setup in GC2.
+- On mobile, it was possible for the menu to get into a stuck transparent state. This has been fixed.
+
 ## [2024.11.1] - 2024-21-11
 ### Fixed
 - Editor now handles JSON fields, which before rendered an syntax error in the decoding. 
