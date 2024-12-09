@@ -586,13 +586,21 @@ module.exports = module.exports = {
         for (var i = 0; i < window.setBaseLayers.length; i = i + 1) {
             bl = window.setBaseLayers[i];
             if (bl.id === id) {
+
+                // Set defaults for base layers
+                let BLattribution = bl.attribution? bl.attribution : "";
+                let BLminZoom = bl.minZoom? bl.minZoom : 0;
+                let BLmaxZoom = bl.maxZoom? bl.maxZoom : 20;
+                let BLmaxNativeZoom = bl.maxNativeZoom? bl.maxNativeZoom : 18;
+
+                
                 if (bl?.type === "WMTS") {
                     result = cloud.get().addWMTSBaselayer(bl.url, {
                         name: bl.id,
-                        attribution: bl.attribution,
-                        minZoom: typeof bl.minZoom !== "undefined" ? bl.minZoom : 0,
-                        maxZoom: typeof bl.maxZoom !== "undefined" ? bl.maxZoom : 20,
-                        maxNativeZoom: typeof bl.maxNativeZoom !== "undefined" ? bl.maxNativeZoom : 18,
+                        attribution: BLattribution,
+                        minZoom: BLminZoom,
+                        maxZoom: BLmaxZoom,
+                        maxNativeZoom: BLmaxNativeZoom,
                         baseLayer: true,
                         layer: bl.layer,
                         tileMatrixSet: bl.tileMatrixSet,
@@ -600,31 +608,31 @@ module.exports = module.exports = {
                 } else if (bl?.type === "MVT") {
                     result = cloud.get().addMVTBaselayer(bl.url, {
                         name: bl.id,
-                        attribution: bl.attribution,
-                        minZoom: typeof bl.minZoom !== "undefined" ? bl.minZoom : 0,
-                        maxZoom: typeof bl.maxZoom !== "undefined" ? bl.maxZoom : 20,
-                        maxNativeZoom: typeof bl.maxNativeZoom !== "undefined" ? bl.maxNativeZoom : 18,
+                        attribution: BLattribution,
+                        minZoom: BLminZoom,
+                        maxZoom: BLmaxZoom,
+                        maxNativeZoom: BLmaxNativeZoom,
                         baseLayer: true,
                     });
                 } else if (typeof bl.type !== "undefined" && bl.type === "XYZ") {
                     result = cloud.get().addXYZBaselayer(bl.url, {
                         name: bl.id,
-                        attribution: bl.attribution,
-                        minZoom: typeof bl.minZoom !== "undefined" ? bl.minZoom : 0,
-                        maxZoom: typeof bl.maxZoom !== "undefined" ? bl.maxZoom : 20,
-                        maxNativeZoom: typeof bl.maxNativeZoom !== "undefined" ? bl.maxNativeZoom : 18,
+                        attribution: BLattribution,
+                        minZoom: BLminZoom,
+                        maxZoom: BLmaxZoom,
+                        maxNativeZoom: BLmaxNativeZoom,
                         baseLayer: true,
                     });
                 } else if (typeof bl.type !== "undefined" && bl.type === "wms") {
                     result = cloud.get().addWmsBaseLayer(bl.url, {
                         name: bl.id,
                         layers: bl.layers,
-                        attribution: bl.attribution,
                         format: 'image/png',
                         transparent: false,
-                        minZoom: typeof bl.minZoom !== "undefined" ? bl.minZoom : 0,
-                        maxZoom: typeof bl.maxZoom !== "undefined" ? bl.maxZoom : 20,
-                        maxNativeZoom: typeof bl.maxNativeZoom !== "undefined" ? bl.maxNativeZoom : 18,
+                        attribution: BLattribution,
+                        minZoom: BLminZoom,
+                        maxZoom: BLmaxZoom,
+                        maxNativeZoom: BLmaxNativeZoom,
                     });
                 } else {
                     result = cloud.get().addBaseLayer(bl.id, bl.db, bl.config, bl.host || null);

@@ -40,6 +40,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - Bug in editor caused layers with restrictions to be output as textareas. Now the editor will correctly output a select with the values setup in GC2.
 - On mobile, it was possible for the menu to get into a stuck transparent state. This has been fixed.
 - A bug caused the defaults not to load in the `conflictSearch` module. This has been fixed.
+- Attributions and zoom-settings are now correctly passed onto WMTS layers.
 
 ## [2024.11.1] - 2024-21-11
 ### Fixed
