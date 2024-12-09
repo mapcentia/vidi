@@ -2011,11 +2011,7 @@ geocloud = (function () {
         };
 
         this.addWMTSBaselayer = function (url, conf) {
-            var l = L.tileLayer.wmts(url, {
-                tileMatrixSet: conf.tileMatrixSet,
-                layer: conf.layer
-            });
-
+            var l = L.tileLayer.wmts(url, conf);
             l.id = conf.name;
             l.baseLayer = true;
             lControl.addBaseLayer(l, conf.name);
