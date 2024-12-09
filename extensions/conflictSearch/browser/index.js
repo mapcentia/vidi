@@ -277,36 +277,12 @@ module.exports = module.exports = {
     init: function () {
         var metaData, me = this, startBuffer, getProperty;
 
-        try {
-            startBuffer = config.extensionConfig.conflictSearch.startBuffer;
-        } catch (e) {
-            startBuffer = 40;
-        }
-
-        try {
-            getProperty = config.extensionConfig.conflictSearch.getProperty;
-        } catch (e) {
-            getProperty = false;
-        }
-
-        try {
-            searchStr = config.extensionConfig.conflictSearch.searchString;
-            if (searchStr === undefined) {
-                searchStr = "";
-            }
-        } catch (e) {
-            searchStr = "";
-        }
-
-        try {
-            searchLoadedLayers = config.extensionConfig.conflictSearch.searchLoadedLayers;
-            if (searchLoadedLayers === undefined) {
-                searchLoadedLayers = true;
-            }
-        } catch (e) {
-            searchLoadedLayers = true;
-        }
-
+        // Set Defaults
+        startBuffer = config.extensionConfig?.conflictSearch?.startBuffer || 40;
+        getProperty = config.extensionConfig?.conflictSearch?.getProperty || false;
+        searchStr = config.extensionConfig?.conflictSearch?.searchString || "";
+        searchLoadedLayers = config.extensionConfig?.conflictSearch?.searchLoadedLayers || true;
+          
         // Set up draw module for conflict
         draw.setConflictSearch(this);
         $("#_draw_make_conflict_with_selected").show();
