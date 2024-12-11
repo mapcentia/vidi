@@ -4,32 +4,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [unreleased]
+## [2024.12.0]
 ### Added
 - New option for setting the zoom-level of custom searches. default is level 18. The value can be set in the config, using the key `zoom`:
-```javascript
+```json
 {
-    searchConfig: {
-        size: 4,
-        komkode: "*",
-        esrSearchActive: true,
-        sfeSearchActive: true, // Example of config for danish search
-        extraSearches: [,{
-            name: "stednavne_search",
-            db: "dk",
-            host: "https://dk.gc2.io",
-            heading: "Stednavne",
-            zoom: 20,
-            index: {
-                name: "stednavne/navne_samlet",
-                field: "string",
-                key: "gid",
+    "searchConfig": {
+        "size": 4,
+        "komkode": "*",
+        "esrSearchActive": true,
+        "sfeSearchActive": true,
+        "extraSearches": [{
+            "name": "stednavne_search",
+            "db": "dk",
+            "host": "https://dk.gc2.io",
+            "heading": "Stednavne",
+            "zoom": 20,
+            "index": {
+                "name": "stednavne/navne_samlet",
+                "field": "string",
+                "key": "gid"
 
             },
-            relation: {
-                name: "stednavne.navne_samlet_geom",
-                key: "gid",
-                geom: "the_geom"
+            "relation": {
+                "name": "stednavne.navne_samlet_geom",
+                "key": "gid",
+                "geom": "the_geom"
             }
         }]
     }
