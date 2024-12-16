@@ -105,6 +105,12 @@ module.exports = {
                 options.sameSite = 'None';
             }
             cookie.set("connect.gc2", urlVars.session, options);
+            // Remove session from the URL
+            const params = new URLSearchParams(window.location.search);
+            params.delete('session')
+            const loc = window.location
+            const newUrl = loc.origin + loc.pathname + (params.size >= 1 ? '?' + params.toString() : '')
+            history.pushState(null, '', newUrl);
         }
         // Set default for unset props
         for (let prop in defaults) {
