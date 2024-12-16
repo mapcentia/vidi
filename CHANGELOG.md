@@ -4,7 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [2024.12.0]
+## [2024.12.1] - 2024-16-12
+### Changed
+- Use a button instead of a link for layer panel toggle
+
+### Security
+- Remove session parameter from URL after setting cookie. This change ensures the session parameter is removed from the URL after it is used to set the cookie. It improves user privacy by preventing sensitive session data from lingering in the URL.
+
+## [2024.12.0] - 2024-11-12
 ### Added
 - New option for setting the zoom-level of custom searches. default is level 18. The value can be set in the config, using the key `zoom`:
 ```json
