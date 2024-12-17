@@ -322,19 +322,24 @@ class StateSnapshotsDashboard extends React.Component {
     }
 
     copyToClipboard(text) {
-        const type = "text/plain";
-        const blob = new Blob([text], {type});
-        const data = [new ClipboardItem({[type]: blob})];
 
-        navigator.clipboard.write(data).then(
-            () => {
-                utils.showInfoToast(__('Copied'))
-            },
-            () => {
-                /* failure */
-            }
-        );
+        if (navigator.clipboard) {
+            const type = "text/plain";
+            const blob = new Blob([text], {type});
+            const data = [new ClipboardItem({[type]: blob})];
 
+            navigator.clipboard.write(data).then(
+                () => {
+                    utils.showInfoToast(__('Copied'))
+                },
+                () => {
+                    /* failure */
+                }
+            );
+        } else {
+            utils.unsecuredCopyToClipboard(text);
+            utils.showInfoToast(__('Copied'))
+        }
     }
 
     setImageLinkSize(value, id) {
