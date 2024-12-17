@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2024.12.2] - 2024-17-12
+### Fixed
+- If `navigator.clipboard` is not available (e.g. on an unsecure connection), the Snapshot module will fall back to a
+  hacky method with `document.execCommand` for copying to the clipboard.
+
 ## [2024.12.1] - 2024-16-12
 ### Changed
 - Use a button instead of a link for layer panel toggle
