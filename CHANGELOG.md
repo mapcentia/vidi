@@ -56,7 +56,7 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ## [2024.11.1] - 2024-21-11
 ### Fixed
-- Editor now handles JSON fields, which before rendered an syntax error in the decoding. 
+- Editor now handles JSON fields, which before rendered a syntax error in the decoding. 
 
 ## [2024.11.0] - 2024-21-11
 ### Added
