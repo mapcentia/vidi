@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2025.1.0] - 2024-8-1
+### Fixed
+- The removal of tke session parameter from URL after setting cookie caused an error in print. This is now fixed.
+
 ## [2024.12.2] - 2024-17-12
 ### Fixed
 - If `navigator.clipboard` is not available (e.g. on an unsecure connection), the Snapshot module will fall back to a
