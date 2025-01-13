@@ -998,8 +998,7 @@ module.exports = {
                 };
 
                 const featureIsUpdated = () => {
-                    console.log('Editor: featureIsUpdated, isVectorLayer:', isVectorLayer);
-                    switchLayer.registerLayerDataAlternation(schemaQualifiedName);
+                    // switchLayer.registerLayerDataAlternation(schemaQualifiedName);
                     me.stopEdit();
 
                     // Reloading only vector layers, as uncommited changes can be displayed only for vector layers
@@ -1168,10 +1167,6 @@ module.exports = {
             // No need to reload layer if point feature was edited, as markers are destroyed anyway
             if (editedFeature.feature.geometry.type !== `Point` && editedFeature.feature.geometry.type !== `MultiPoint`) {
                 editedFeature.disableEdit();
-                if (featureWasEdited) {
-                    // switchLayer.init(editedFeature.id, false);
-                    switchLayer.init(editedFeature.id, true);
-                }
             }
         }
 
