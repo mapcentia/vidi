@@ -227,6 +227,12 @@ module.exports = {
                                     break;
 
                                 case "cowi":
+                                    const params = new URLSearchParams(cowiUrl.split('?')[1]);
+                                    console.log(params.has('u'));
+                                    console.log(params.has('p'));
+                                    if (!params.has('u') || !params.has('p')) {
+
+                                    }
                                     url = cowiUrl + "&srid=4326&x=" + p.x + "&y=" + p.y;
                                     break;
                             }
@@ -265,13 +271,15 @@ module.exports = {
                                            name="streetview-service" value="skraafoto"
                                            checked={this.state.selectedOption === 'skraafoto'}
                                            onChange={this.onChange}/>
-                                    <label className="btn btn-sm btn-outline-secondary" htmlFor="streetview-service-skraafoto">Skråfoto</label>
+                                    <label className="btn btn-sm btn-outline-secondary"
+                                           htmlFor="streetview-service-skraafoto">Skråfoto</label>
 
                                     <input className="btn-check" type="radio" id="streetview-service-cowi"
                                            name="streetview-service" value="cowi"
                                            checked={this.state.selectedOption === 'cowi'}
                                            onChange={this.onChange}/>
-                                    <label className="btn btn-sm btn-outline-secondary" htmlFor="streetview-service-cowi">COWI Gadefoto</label>
+                                    <label className="btn btn-sm btn-outline-secondary"
+                                           htmlFor="streetview-service-cowi">COWI Gadefoto</label>
                                 </span>
                             </div>
                         </div>

@@ -11,7 +11,6 @@ router.use(require('./gc2/meta'));
 router.use(require('./gc2/stateSnapshots'));
 router.use(require('./gc2/setting'));
 router.use(require('./gc2/baseLayer'));
-router.use(require('./gc2/requestProxy'));
 router.use(require('./gc2/wms'));
 router.use(require('./gc2/keyValue'));
 router.use(require('./gc2/legend'));

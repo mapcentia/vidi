@@ -88,8 +88,8 @@ and this project adheres to [CalVer](https://calver.org/).
 {
   "type": "WMTS",
   "url": "https://api.dataforsyningen.dk/orto_foraar_webm_DAF?token=xxx&",
-  "tileMatrixSet": 'DFD_GoogleMapsCompatible',
-  "layer": 'orto_foraar_webm',
+  "tileMatrixSet": "DFD_GoogleMapsCompatible",
+  "layer": "orto_foraar_webm",
   "id": "wmts",
   "name": "Ortofoto (wmts)",
   "description": "Kort fra wmts",
@@ -994,28 +994,27 @@ function(store, map) {
 - Custom searches can now be added to danish search module.
 - `embed.js` will wait with loading Vidi until target element is visible in the DOM. This way, Vidi can be embedded in a element with `display:none`.
 - Its now possible to add custom extra searches to `danish.js`. A search needs an Elasticsearch index, which must have an id and string property. The latter is the search string. Also a look-up table/view with geometries is required. An example of a setup:
-```javascript
+```json
 {
-    searchConfig: {
-        size: 4,
-        komkode: "*",
-        esrSearchActive: true,
-        sfeSearchActive: true, // Example of config for danish search
-        extraSearches: [,{
-            name: "stednavne_search",
-            db: "dk",
-            host: "https://dk.gc2.io",
-            heading: "Stednavne",
-            index: {
-                name: "stednavne/navne_samlet",
-                field: "string",
-                key: "gid",
-
+    "searchConfig": {
+        "size": 4,
+        "komkode": "*",
+        "esrSearchActive": true,
+        "sfeSearchActive": true,
+        "extraSearches": [{
+            "name": "stednavne_search",
+            "db": "dk",
+            "host": "https://dk.gc2.io",
+            "heading": "Stednavne",
+            "index": {
+                "name": "stednavne/navne_samlet",
+                "field": "string",
+                "key": "gid"
             },
-            relation: {
-                name: "stednavne.navne_samlet_geom",
-                key: "gid",
-                geom: "the_geom"
+            "relation": {
+                "name": "stednavne.navne_samlet_geom",
+                "key": "gid",
+                "geom": "the_geom"
             }
         }]
     }

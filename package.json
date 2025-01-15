@@ -153,6 +153,7 @@
     "pg-escape": "^0.2.0",
     "pretty-units": "^0.1.0",
     "proj4": "^2.6.3",
+    "proj4leaflet": "^1.0.2",
     "prop-types": "^15.7.2",
     "puppeteer": "^2.0.0",
     "rc-slider": "^8.7.1",
