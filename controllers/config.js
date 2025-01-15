@@ -1,46 +1,40 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2020 MapCentia ApS
+ * @copyright  2013-2025 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
-var express = require('express');
-var router = express.Router();
-var configUrl = require('../config/config.js').configUrl;
-var request = require('request');
+const express = require('express');
+const router = express.Router();
+const configUrl = require('../config/config.js').configUrl;
+const JsonRefs = require('json-refs');
 
 router.get('/api/config/:db/:file', function (req, response) {
-    var file = req.params.file, db = req.params.db, url, json;
+    let file = req.params.file, db = req.params.db, url;
 
     if (typeof configUrl === "object") {
         url = configUrl[db] || configUrl._default;
     } else {
         url = configUrl;
     }
+    url = url + "/" + file;
+    console.log(url);
 
-    console.log(url + "/" + file);
-
-    request.get(url + "/" + file, function (err, res, body) {
-
-        if (err || res.statusCode !== 200) {
-            response.header('content-type', 'application/json');
-            response.status(400).send({
-                success: false,
-                message: "Could not get the requested config JSON file."
-            });
-            return;
-        }
-
-        try {
-            json = JSON.parse(body);
-        } catch (e) {
-            response.status(400).send({
-                success: false,
-                message: e.message
-            });
-            return;
-        }
-        response.send(JSON.parse(body));
+    JsonRefs.clearCache()
+    JsonRefs.resolveRefsAt(url, {
+        loaderOptions: {
+            prepareRequest: function (req2, callback) {
+                callback(undefined, req2);
+            }
+        },
+    }).then(r => {
+        response.send(r.resolved);
+    }).catch(e => {
+        response.header('content-type', 'application/json');
+        response.status(e.status).send({
+            success: false,
+            message: "Could not get the requested config JSON file."
+        });
     })
 });
 module.exports = router;
