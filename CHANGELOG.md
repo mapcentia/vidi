@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2025.1.2] - 2025-15-1
+### Fixed
+- Refs in configs now works again. And they also works in external configs.
+
 ## [2025.1.1] - 2025-13-1
 ### Fixed
 - After editing raster layer, the layer was added again. Now it's only reloaded.

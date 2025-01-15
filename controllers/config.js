@@ -18,7 +18,6 @@ router.get('/api/config/:db/:file', function (req, response) {
         url = configUrl;
     }
     url = url + "/" + file;
-    console.log(url);
 
     JsonRefs.clearCache()
     JsonRefs.resolveRefsAt(url, {

@@ -31,7 +31,7 @@ router.get('/api/gc2/config/:db/:id?', function (req, response) {
             response.header('content-type', 'application/json');
             response.status(403).send({
                 success: false,
-                message: "Could not get the configs"
+                message: "Could not get the requested config JSON file."
             });
             return;
         }
@@ -41,9 +41,12 @@ router.get('/api/gc2/config/:db/:id?', function (req, response) {
         JsonRefs.resolveRefs(parsedData).then(r => {
             response.send(r.resolved);
         }).catch(e => {
-            console.log(e);
+            response.header('content-type', 'application/json');
+            response.status(e.status).send({
+                success: false,
+                message: "Could not get the requested config JSON file."
+            });
         })
-
     })
 });
 module.exports = router;
