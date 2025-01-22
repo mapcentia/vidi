@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2025.1.4] - 2025-22-1
+### Fixed
+- The "Show table" table widget was on reload of layer duplicated in the DOM.
+- When disabling layer the table was not removed in other templates than embed.tmpl.
+- Styles regarding tables were adjusted.
+
 ## [2025.1.3] - 2025-16-1
 ### Fixed
 - Update Leaflet CSS path to use node_modules source. It was using an old CSS sheet. 

@@ -577,10 +577,11 @@ module.exports = module.exports = {
                     stores[name].geoJSON = null;
                     // If vector table is enabled for layer the remove and set pane with back to 100%
                     const vectorTableEl = $(`*[data-vidi-vector-table-id="${name}"]`);
-                    if (vectorTableEl.length && window.vidiConfig.template === "embed.tmpl") {
+                    if (vectorTableEl.length) {
                         vectorTableEl.remove();
-                        $("#pane").css("width", "100%");
-                        $("#pane").css("height", "100%");
+                        const e = $("#pane");
+                        e.css("width", "100%");
+                        e.css("height", "100%");
                         cloud.get().map.invalidateSize();
                     }
                 }

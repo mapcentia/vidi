@@ -50,7 +50,8 @@ import Download from './Download';
 
 let _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEvents,
     onEachFeature = [], pointToLayer = {}, onSelectedStyle = [], onLoad = [], onSelect = [],
-    onMouseOver = [], cm = [], styles = {}, tables = {}, childLayersThatShouldBeEnabled = [];
+    onMouseOver = [], cm = [], styles = {}, tables = {}, childLayersThatShouldBeEnabled = [],
+    table;
 
 const {v4: uuidv4} = require('uuid');
 const React = require('react');
@@ -1652,9 +1653,14 @@ module.exports = {
                 hl,
                 onLoad: (l) => {
                     let reloadInterval = meta.parseLayerMeta(layerKey)?.reload_interval;
-                    let tableElement = meta.parseLayerMeta(layerKey)?.show_table_on_side;
+                    let showTable = meta.parseLayerMeta(layerKey)?.show_table_on_side;
                     // Create side table once
-                    if (tableElement) {
+                    if (showTable) {
+                        const existingTable = document.getElementById(VECTOR_SIDE_TABLE_EL);
+                        if (existingTable) {
+                            existingTable.remove();
+                            table = null;
+                        }
                         let styles;
                         let height = null;
                         let tableBodyHeight;
@@ -1676,7 +1682,7 @@ module.exports = {
                         }
                         if (position === 'right' || position === 'bottom') {
                             e.before(`<div id="${VECTOR_SIDE_TABLE_EL}" style="${styles}; background-color: white; " data-vidi-vector-table-id="${trackingLayerKey}"></div>`)
-                            _self.createTable(layerKey, true, "#" + VECTOR_SIDE_TABLE_EL, {
+                            table = _self.createTable(layerKey, true, "#" + VECTOR_SIDE_TABLE_EL, {
                                 showToggle: false,
                                 showExport: false,
                                 showColumns: false,
@@ -3560,18 +3566,15 @@ module.exports = {
                     $(layerContainer).find(`.js-toggle-table`).click(() => {
                         let tableContainerId = `#table_view-${layerKey.replace(".", "_")}`;
                         // If table is open, then destroy it so it doesn't leak
-                        if ($(tableContainerId + ` .bootstrap-table`).length > 0) {
-                            tables[LAYER.VECTOR + ':' + layerKey].destroy();
+                        const existingTable = document.getElementById(tableContainerId);
+                        if (existingTable) {
+                            existingTable.remove();
                             delete tables[LAYER.VECTOR + ':' + layerKey];
-                            $(tableContainerId + ` .bootstrap-table`).remove();
-                        } else {
-                            _self.createTable(layerKey, true);
                         }
+                        _self.createTable(layerKey, true);
                         _self._selectIcon($(layerContainer).find('.js-toggle-table'));
                         $(layerContainer).find('.js-layer-settings-table').toggle();
-
                         if ($(tableContainerId).length !== 1) throw new Error(`Unable to find the table view container`);
-
                         // Refresh all tables when opening one panel, because DOM changes can make the tables un-aligned
                         $(`.js-layer-settings-table table`).bootstrapTable('resetView');
                     });

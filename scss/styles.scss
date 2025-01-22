@@ -198,3 +198,25 @@
 form.feature-attribute-editing-form img {
   max-width: 100%;
 }
+
+.bootstrap-table .fixed-table-container.fixed-height .fixed-table-border {
+  border-left: 1px solid rgba(var(--bs-tertiary-bg-rgb), var(--bs-bg-opacity)) !important;
+  border-right: 1px solid rgba(var(--bs-tertiary-bg-rgb), var(--bs-bg-opacity)) !important;
+}
+
+.bootstrap-table .fixed-table-container.fixed-height .table thead th {
+  border-bottom: 1px solid rgba(var(--bs-tertiary-bg-rgb), var(--bs-bg-opacity)) !important;
+}
+
+.bootstrap-table .fixed-table-container.fixed-height:not(.has-footer) {
+  border-bottom: 1px solid rgba(var(--bs-tertiary-bg-rgb), var(--bs-bg-opacity)) !important;
+}
+
+.table>:not(caption)>*>* {
+  color: var(--bs-body-color) !important;
+  font-weight: normal;
+}
+
+.bootstrap-table {
+  background-color: var(--bs-body-bg) !important;
+}
