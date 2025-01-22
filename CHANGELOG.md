@@ -6,11 +6,11 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ## [2025.1.3] - 2025-16-1
 ### Fixed
-- Update Leaflet CSS path to use node_modules source. It was using a old CSS sheet. 
+- Update Leaflet CSS path to use node_modules source. It was using an old CSS sheet. 
 
-_## [2025.1.2] - 2025-15-1
+## [2025.1.2] - 2025-15-1
 ### Fixed
-- Refs in configs now works again. And they also works in external configs._
+- Refs in configs now works again. And they also works in external configs.
 
 ## [2025.1.1] - 2025-13-1
 ### Fixed
@@ -91,13 +91,13 @@ _## [2025.1.2] - 2025-15-1
   "maxNativeZoom": 19
 }
 ```
-- Also WMTS layer support is added for base layers:
+- Also, WMTS layer support is added for base layers:
 ```json
 {
   "type": "WMTS",
   "url": "https://api.dataforsyningen.dk/orto_foraar_webm_DAF?token=xxx&",
-  "tileMatrixSet": 'DFD_GoogleMapsCompatible',
-  "layer": 'orto_foraar_webm',
+  "tileMatrixSet": "DFD_GoogleMapsCompatible",
+  "layer": "orto_foraar_webm",
   "id": "wmts",
   "name": "Ortofoto (wmts)",
   "description": "Kort fra wmts",
