@@ -11,7 +11,7 @@ import {GEOJSON_PRECISION} from './constants';
 
 const drawTools = require(`./drawTools`);
 const fileSaver = require(`file-saver`);
-const marked = require('marked');
+const marked = require('marked').parse;
 let cloud, utils, state, serializeLayers;
 let drawOn = false;
 let drawnItems = new L.FeatureGroup();
