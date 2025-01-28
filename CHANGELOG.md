@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2025.1.5] - 2025-28-1
+### Fixed
+- The annotation tool in Draw is fixed. After upgrading 'marked' module, the code had to be adjusted.
+
 ## [2025.1.4] - 2025-22-1
 ### Fixed
 - The "Show table" table widget was on reload of layer duplicated in the DOM.
