@@ -1681,7 +1681,7 @@ module.exports = {
                             tableBodyHeight = (height - 34) + "px"
                         }
                         if (position === 'right' || position === 'bottom') {
-                            e.before(`<div id="${VECTOR_SIDE_TABLE_EL}" style="${styles}; background-color: white; " data-vidi-vector-table-id="${trackingLayerKey}"></div>`)
+                            e.before(`<div id="${VECTOR_SIDE_TABLE_EL}" style="${styles}; background-color: white; z-index: 9999999" data-vidi-vector-table-id="${trackingLayerKey}"></div>`)
                             table = _self.createTable(layerKey, true, "#" + VECTOR_SIDE_TABLE_EL, {
                                 showToggle: false,
                                 showExport: false,
@@ -2020,7 +2020,7 @@ module.exports = {
             let tableHeaders = sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + layerKey,
                 JSON.parse(JSON.stringify(layerWithData[0].toGeoJSON(GEOJSON_PRECISION).features)));
 
-            window.operateFormatter = (value, row, index) => {
+            window.filterFormatter = (value, row, index) => {
                 return `
                     <div class="d-flex justify-content-around">
                     <a class="btn btn-outline-secondary btn-sm filter" href="javascript:void(0)" title="Filter">
@@ -2032,8 +2032,20 @@ module.exports = {
                     </div>
                     `;
             }
+
+            window.editFormatter = (value, row, index) => {
+                return `
+                    <div class="d-flex justify-content-center gap-1">
+                    <a class="btn btn-outline-secondary btn-sm edit" href="javascript:void(0)" title="Edit">
+                        <i class="bi bi-pencil text-primary"></i>
+                    </a>
+                    <a class="btn btn-outline-secondary btn-sm delete" href="javascript:void(0)" title="Delete">
+                        <i class="bi bi-trash text-danger"></i>
+                    </a>
+                    </div>
+                    `;
+            }
             const filter = (row) => {
-                console.log(row)
                 _self.onApplyArbitraryFiltersHandler({
                     layerKey,
                     filters: {
@@ -2049,7 +2061,7 @@ module.exports = {
                     }
                 }, LAYER.VECTOR);
             }
-            const unfilter = () => {
+            const unFilter = () => {
                 _self.onDisableArbitraryFiltersHandler(layerKey)
                 _self.onApplyArbitraryFiltersHandler({
                     layerKey,
@@ -2059,19 +2071,46 @@ module.exports = {
                     }
                 }, LAYER.VECTOR)
             }
-            window.operateEvents = {
-                'click .filter': (e, value, row, index) => filter(row),
-                'click .unfilter': (e, value, row, index) => unfilter()
+
+            const edit = (row) => {
+                console.log(layerKey, row._id.toString());
+                backboneEvents.get().trigger("edit:editor", row._id, layerKey, true);
+            }
+            const _delete = (row) => {
+                if (window.confirm(__(`Are you sure you want to delete the feature?`))) {
+                    backboneEvents.get().trigger("delete:editor", row._id, layerKey, true);
+                }
             }
 
-            /*
-                        tableHeaders.push({
-                            header: "Filter",
-                            dataIndex: "filter",
-                            formatter: "operateFormatter",
-                            events: "operateEvents"
-                        })
-            */
+            window.filterEvents = {
+                'click .filter': (e, value, row, index) => filter(row),
+                'click .unfilter': (e, value, row, index) => unFilter()
+            }
+
+            window.editEvents = {
+                'click .edit': (e, value, row, index) => edit(row),
+                'click .delete': (e, value, row, index) => {
+
+                    _delete(row)
+                }
+            }
+
+            // tableHeaders.push({
+            //     header: "Filter",
+            //     dataIndex: "filter",
+            //     formatter: "filterFormatter",
+            //     events: "filterEvents"
+            // })
+            let parsedMeta = _self.parseLayerMeta(meta.getMetaByKey(layerKey, false));
+
+            if (parsedMeta?.vidi_layer_editable && window.vidiConfig.enabledExtensions.includes('editor')) {
+                tableHeaders.push({
+                    header: "Editor",
+                    dataIndex: "editor",
+                    formatter: "editFormatter",
+                    events: "editEvents"
+                })
+            }
 
             let styleSelected = (onSelectedStyle[LAYER.VECTOR + ':' + layerKey] ? onSelectedStyle[LAYER.VECTOR + ':' + layerKey] : {
                 weight: 5,
@@ -2079,8 +2118,6 @@ module.exports = {
                 dashArray: '',
                 fillOpacity: 0.2
             });
-
-            let parsedMeta = _self.parseLayerMeta(meta.getMetaByKey(layerKey, false));
 
             let selectCallBack = () => {
             };

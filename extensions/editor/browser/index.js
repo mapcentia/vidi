@@ -243,6 +243,14 @@ module.exports = {
             });
         });
 
+        backboneEvents.get().on("edit:editor", function (id, layerKey, isVector) {
+            _self.edit(getLayerById(parseInt(id)), layerKey, isVector);
+        });
+
+        backboneEvents.get().on("delete:editor", function (id, layerKey, isVector) {
+            _self.delete(getLayerById(parseInt(id)), layerKey, isVector);
+        });
+
         backboneEvents.get().on("ready:meta", function () {
             _self.setHandlersForVectorLayers();
             if (config?.extensionConfig?.editor?.addOnStart) {
@@ -255,7 +263,6 @@ module.exports = {
                         }, 200)
                     }
                 }
-
                 poll();
             }
         });
