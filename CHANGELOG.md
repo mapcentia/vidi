@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2025.2.0] - 2025-4-2
+### Added
+- Editor 'Edit' and 'Delete' buttons in feature table, so editing can be started without pop-up.
+
+### Fixed
+- The "Show table" is now given space, so it doesn't overlap other elements like off canvases.
+
 ## [2025.1.5] - 2025-28-1
 ### Fixed
 - The annotation tool in Draw is fixed. After upgrading 'marked' module, the code had to be adjusted.
