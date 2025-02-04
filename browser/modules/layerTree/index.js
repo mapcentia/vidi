@@ -1693,6 +1693,11 @@ module.exports = {
                             });
                         }
                     }
+                    // Reload table in layer tree if shown
+                    if (document.getElementById('table_view-' + layerKey.replace(".", "_")).offsetParent !== null) {
+                        _self.createTable(layerKey, true);
+                    }
+
                     if (reloadInterval && reloadInterval !== "") {
                         let reloadCallback = meta.parseLayerMeta(layerKey)?.reload_callback;
                         let func = reloadCallback && reloadCallback !== "" ? Function('"use strict";return (' + reloadCallback + ')')() : () => {
