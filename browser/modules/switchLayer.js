@@ -580,8 +580,10 @@ module.exports = module.exports = {
                     if (vectorTableEl.length) {
                         vectorTableEl.remove();
                         const e = $("#pane");
+                        const o = $('.offcanvas')
                         e.css("width", "100%");
                         e.css("height", "100%");
+                        o.css("height", "100%");
                         cloud.get().map.invalidateSize();
                     }
                 }

@@ -1668,6 +1668,7 @@ module.exports = {
                         const w = window.vidiConfig.vectorTable.width;
                         const position = window.vidiConfig.vectorTable.position;
                         const e = $('#pane');
+                        const o = $('.offcanvas');
                         if (position === 'right') {
                             styles = `width: ${w}; float: right;`;
                             e.css("width", `calc(100vw - ${w})`);
@@ -1677,11 +1678,12 @@ module.exports = {
                         } else if (position === 'bottom') {
                             styles = `width: 100%; height: ${h}; bottom: 0; position: fixed;`;
                             e.css("height", `calc(100vh - ${h})`);
+                            o.css("height", `calc(100vh - ${h})`);
                             height = parseInt(h);
                             tableBodyHeight = (height - 34) + "px"
                         }
                         if (position === 'right' || position === 'bottom') {
-                            e.before(`<div id="${VECTOR_SIDE_TABLE_EL}" style="${styles}; background-color: white; z-index: 9999999" data-vidi-vector-table-id="${trackingLayerKey}"></div>`)
+                            e.before(`<div id="${VECTOR_SIDE_TABLE_EL}" style="${styles}; background-color: white;" data-vidi-vector-table-id="${trackingLayerKey}"></div>`)
                             table = _self.createTable(layerKey, true, "#" + VECTOR_SIDE_TABLE_EL, {
                                 showToggle: false,
                                 showExport: false,
@@ -1694,7 +1696,7 @@ module.exports = {
                         }
                     }
                     // Reload table in layer tree if shown
-                    if (document.getElementById('table_view-' + layerKey.replace(".", "_")).offsetParent !== null) {
+                    if (document.getElementById('table_view-' + layerKey.replace(".", "_"))?.offsetParent !== null) {
                         _self.createTable(layerKey, true);
                     }
 
