@@ -810,7 +810,7 @@ module.exports = module.exports = {
                     }
                     if (metaData.layergroup === groups[i]) {
                         count++;
-                        row = "<tr><td>" + v.title + "</td><td>" + v.hits + "</td><td>" + bufferValue  + "</td><td><span class='text-secondary'>Total</span> " + (v.totalLength > 0 ? L.GeometryUtil.readableDistance(v.totalLength, true, false, false, {m: 1}) : v.totalArea > 0 ? L.GeometryUtil.readableArea(v.totalArea, true) : '') +"</td><td><div class='form-check form-switch text-end'><label class='form-check-label'><input class='form-check-input' type='checkbox' data-gc2-id='" + v.table + "' " + (visibleLayers.includes(v.table) ? "checked" : "") + "></label></div></td></tr>";
+                        row = "<tr><td>" + v.title + "</td><td>" + v.hits + "</td><td>" + bufferValue  + "</td><td>" + (v.totalLength > 0 ? "<span class='text-secondary'>Total</span> " + L.GeometryUtil.readableDistance(v.totalLength, true, false, false, {m: 1}) : v.totalArea > 0 ? "<span class='text-secondary'>Total</span> " + L.GeometryUtil.readableArea(v.totalArea, true) : '') +"</td><td><div class='form-check form-switch text-end'><label class='form-check-label'><input class='form-check-input' type='checkbox' data-gc2-id='" + v.table + "' " + (visibleLayers.includes(v.table) ? "checked" : "") + "></label></div></td></tr>";
                         hitsTable.append(row);
                     }
                 }
