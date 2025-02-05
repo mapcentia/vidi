@@ -180,7 +180,7 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                 quotedTableName = `"${table}"`;
             }
 
-            const sql = "SELECT " + fieldStr + " FROM " + quotedTableName + " WHERE  ST_intersects(" + geomField + ", ST_Transform(ST_geomfromtext('" + wkt + "',4326)," + srid + "))";
+            const sql = "SELECT " + fieldStr + ", ST_LENGTH(ST_Intersection(" + geomField + ", ST_Transform(ST_geomfromtext('" + wkt + "',4326)," + srid + "))) as _length, ST_AREA(ST_Intersection(" + geomField + ", ST_Transform(ST_geomfromtext('" + wkt + "',4326)," + srid + "))) as _area FROM " + quotedTableName + " WHERE  ST_intersects(" + geomField + ", ST_Transform(ST_geomfromtext('" + wkt + "',4326)," + srid + "))";
             const queryables = JSON.parse(metaDataKeys[table].fieldconf);
             let postData = "client_encoding=UTF8&srs=4326&lifetime=0&base64=true&q=" +  base64url.encode(sql) + "&key=" + "&key=" + (typeof req.session.gc2ApiKey !== "undefined" ? req.session.gc2ApiKey : "xxxxx" /*Dummy key is sent to prevent start of session*/),
                 options = {
@@ -202,6 +202,8 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                                 error = result.message;
                             }
                             time = new Date().getTime() - startTime;
+                            let totalLength = 0;
+                            let totalArea = 0;
                             if (result?.features) {
                                 for (let i = 0; i < result.features.length; i++) {
                                     for (let prop in queryables) {
@@ -219,6 +221,9 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                                             }
                                         }
                                     }
+                                    totalLength += parseFloat(result.features[i].properties._length);
+                                    totalArea += parseFloat(result.features[i].properties._area);
+
                                     if (tmp.length > 0) {
                                         tmp.push({
                                             name: metaDataKeys[table].pkey,
@@ -251,7 +256,9 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                                     f_table_name: meta.f_table_name,
                                     f_table_title: meta.f_table_title || meta.f_table_name,
                                     meta_url: meta.meta_url,
-                                }
+                                },
+                                totalLength,
+                                totalArea,
                             };
                             io.emit(socketId, hit);
                             resolve(hit)
