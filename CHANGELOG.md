@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2025.2.1] - 2025-5-2
+### Added
+- In ConflictSearch modul the total length and area is calculated for intersections with lines and polygons and reported.
+- Individual buffer for layers. The buffer for a layer is set with the GC2 Meta option `buffer_conflict`, which is added to the buffer on the search polygon. In the result report the Individual set buffers are shown. 
+
 ## [2025.2.0] - 2025-4-2
 ### Added
 - Editor 'Edit' and 'Delete' buttons in feature table, so editing can be started without pop-up.
