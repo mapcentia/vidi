@@ -213,10 +213,10 @@ form.feature-attribute-editing-form img {
 }
 
 .table>:not(caption)>*>* {
-  color: var(--bs-body-color) !important;
+  color: var(--bs-body-color);
   font-weight: normal;
 }
 
 .bootstrap-table {
-  background-color: var(--bs-body-bg) !important;
+  background-color: var(--bs-body-bg);
 }
