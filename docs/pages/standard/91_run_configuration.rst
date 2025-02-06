@@ -688,6 +688,31 @@ En funktion som køres, når feature info IKKE rammer noget.
 
     "emptyInfoCallback": "function(){console.log('You hit nothing')}"
 
+dateFormats
+*****************************************************************
+
+Det er muligt at formatere datoer i templates (både popup- og felt-templates). Det gøres ved at kalde en template "helper" og angive et defineret datoformat.
+
+Først skal man definere et eller flere mulige datoformater i config'en:
+
+.. code-block:: json
+
+    "dateFormats": {
+        "kort": "D MMMM - YYYY",
+        "lang": "dddd DD.MM.YYYY HH:mm"
+    }
+
+Derefter kan formaterne anvendes således i templates:
+
+.. code-block:: handlebars
+
+    {{formatDate dato "lang"}}
+
+Hvor ``formatDate`` er helper funktionen, ``dato`` er feltet med dato og ``"lang"`` er henvisningen til et af de definerede formater.
+
+.. note::
+    Se `mulige datoformateringer <https://day.js.org/docs/en/display/format>`_
+
 #################################################################
 Referencer
 #################################################################

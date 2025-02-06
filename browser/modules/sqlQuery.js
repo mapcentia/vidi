@@ -6,9 +6,9 @@
 
 'use strict';
 
-import mustache from "mustache";
 import {LAYER, MAP_RESOLUTIONS, SYSTEM_FIELD_PREFIX} from './layerTree/constants';
 import {GEOJSON_PRECISION, MIME_TYPES_APPS, MIME_TYPES_IMAGES} from './constants';
+import dayjs from 'dayjs';
 
 const layerTreeUtils = require('./layerTree/utils');
 
@@ -742,7 +742,7 @@ module.exports = {
                             let value = feature.properties[property.key];
                             if (property.value.template && feature.properties[property.key] && feature.properties[property.key] !== '') {
                                 const fieldTmpl = property.value.template;
-                                value = mustache.render(fieldTmpl, feature.properties);
+                                value = Handlebars.compile(fieldTmpl)(feature.properties);
                             } else if (property.value.link && feature.properties[property.key] && feature.properties[property.key] !== '') {
                                 value = "<a target='_blank' rel='noopener' href='" + (property.value.linkprefix ? property.value.linkprefix : "") + feature.properties[property.key] + (property.value.linksuffix ? property.value.linksuffix : "") + "'>Link</a>";
                             } else if (property.value.content && property.value.content === "image") {
@@ -778,11 +778,7 @@ module.exports = {
                                                         <span class="sr-only">Next</span>
                                                     </a>
                                                 </div>`;
-                                        Handlebars.registerHelper('breaklines', function (text) {
-                                            text = Handlebars.Utils.escapeExpression(text);
-                                            text = text.replace(/(\r\n|\n|\r)/gm, '<br>');
-                                            return new Handlebars.SafeString(text);
-                                        });
+
                                         value = Handlebars.compile(tmpl)(feature.properties[property.key]);
                                     } else {
                                         let subValue = decodeURIComponent(feature.properties[property.key]);

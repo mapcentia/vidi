@@ -22,6 +22,7 @@ const cookie = require('js-cookie');
 const config = require('../../config/config.js');
 
 import mustache from 'mustache';
+import dayjs from "dayjs";
 
 module.exports = {
 
@@ -92,6 +93,7 @@ module.exports = {
             theme: 'light',
             emptyInfoCallback: null,
             infoCallback: null,
+            dateFormats: {},
         };
         // Set session from URL
         if (typeof urlVars.session === "string") {
@@ -194,6 +196,21 @@ module.exports = {
                 } else if (window.vidiConfig.defaultConfig) {
                     configFile = window.vidiConfig.defaultConfig;
                 }
+
+                // Register Handlebars helpers
+                Handlebars.registerHelper("formatDate", function(datetime, format = null) {
+                    const dateFormats = window.vidiConfig.dateFormats;
+                    if (format === null || !dateFormats.hasOwnProperty(format)) {
+                        return datetime;
+                    }
+                    return dayjs(datetime).format(dateFormats[format]);
+                });
+
+                Handlebars.registerHelper('breaklines', function (text) {
+                    text = Handlebars.Utils.escapeExpression(text);
+                    text = text.replace(/(\r\n|\n|\r)/gm, '<br>');
+                    return new Handlebars.SafeString(text);
+                });
 
                 if (configFile) {
                     loadConfig();
