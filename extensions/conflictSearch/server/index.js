@@ -224,6 +224,7 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                                                     sort_id: queryables[prop].sort_id,
                                                     link: queryables[prop].link,
                                                     linkprefix: queryables[prop].linkprefix,
+                                                    template: queryables[prop].template,
                                                     key: false
                                                 })
                                             }

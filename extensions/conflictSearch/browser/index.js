@@ -864,13 +864,18 @@ module.exports = module.exports = {
                                     table2 = $("<table style='margin-bottom: 5px; margin-top: 5px;' class='table'/>");
                                     row.sort((a, b) => (a.sort_id > b.sort_id) ? 1 : ((b.sort_id > a.sort_id) ? -1 : 0));
                                     $.each(row, function (n, field) {
+                                        let value = field.value;
+                                        if (field.template) {
+                                            const fieldTmpl = field.template;
+                                            value = Handlebars.compile(fieldTmpl)(value);
+                                        }
                                         if (!field.key) {
                                             if (!field.link) {
-                                                table2.append("<tr><td class='conflict-heading-cell' '>" + field.alias + "</td><td class='conflict-value-cell'>" + (field.value !== null ? field.value : "&nbsp;") + "</td></tr>");
+                                                table2.append("<tr><td class='conflict-heading-cell' '>" + field.alias + "</td><td class='conflict-value-cell'>" + (value !== null ? value : "&nbsp;") + "</td></tr>");
                                             } else {
                                                 let link = "&nbsp;";
-                                                if (field.value && field !== "") {
-                                                    link = "<a target='_blank' rel='noopener' href='" + (field.linkprefix ? field.linkprefix : "") + field.value + "'>Link</a>"
+                                                if (value && field !== "") {
+                                                    link = "<a target='_blank' rel='noopener' href='" + (field.linkprefix ? field.linkprefix : "") + value + "'>Link</a>"
                                                 }
                                                 table2.append("<tr><td class='conflict-heading-cell'>" + field.alias + "</td><td class='conflict-value-cell'>" + link + "</td></tr>")
                                             }
