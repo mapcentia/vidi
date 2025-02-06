@@ -708,7 +708,13 @@ Derefter kan formaterne anvendes således i templates:
 
     {{formatDate dato "lang"}}
 
-Hvor ``formatDate`` er helper funktionen, ``dato`` er feltet med dato og ``"lang"`` er henvisningen til et af de definerede formater.
+Hvor ``formatDate`` er helper funktionen, ``dato`` er feltet med datoer og ``"lang"`` er henvisningen til et af de definerede formater i config'en.
+
+Hvis ens datoer ikke er et standardformat, men fx Plandata's, hvor datoer bliver angivet som fx `20250206` (6. februar 2025), kan man tilføje et inputformat som her:
+
+.. code-block:: handlebars
+
+    {{formatDate dato "lang" "YYYYMMDD"}}
 
 .. note::
     Se `mulige datoformateringer <https://day.js.org/docs/en/display/format>`_
