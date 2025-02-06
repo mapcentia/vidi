@@ -23,6 +23,8 @@ const config = require('../../config/config.js');
 
 import mustache from 'mustache';
 import dayjs from "dayjs";
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(customParseFormat);
 
 module.exports = {
 
@@ -196,16 +198,15 @@ module.exports = {
                 } else if (window.vidiConfig.defaultConfig) {
                     configFile = window.vidiConfig.defaultConfig;
                 }
-
                 // Register Handlebars helpers
-                Handlebars.registerHelper("formatDate", function(datetime, format = null) {
+                Handlebars.registerHelper("formatDate", function(datetime, format = null, inFormat = null) {
                     const dateFormats = window.vidiConfig.dateFormats;
-                    if (format === null || !dateFormats.hasOwnProperty(format)) {
-                        return datetime;
+                    if (format !== null && dateFormats.hasOwnProperty(format)) {
+                        return dayjs(datetime.toString(), inFormat).format(dateFormats[format]);
+                    } else {
+                        return dayjs(datetime.toString(), inFormat).format(format);
                     }
-                    return dayjs(datetime).format(dateFormats[format]);
                 });
-
                 Handlebars.registerHelper('breaklines', function (text) {
                     text = Handlebars.Utils.escapeExpression(text);
                     text = text.replace(/(\r\n|\n|\r)/gm, '<br>');
