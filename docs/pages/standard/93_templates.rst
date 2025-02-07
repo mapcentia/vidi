@@ -72,7 +72,7 @@ F.eks. anvender Plandata et talfelt med formatet `YYYYMMDD` ~ f.eks. `20250204`.
 
 .. code-block:: handlebars
 
-    {{formatDate vedtagetdato "d. MMMM YYYY" "YYYYMMDD"}}
+    {{formatDate vedtagetdato "D. MMMM YYYY" "YYYYMMDD"}}
 
 Som vil resultere i "4. februar 2025".
 
