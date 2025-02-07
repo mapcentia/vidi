@@ -62,7 +62,7 @@ Denne funktion kan formatere en dato til et andet format. Som første argument s
 
 .. code-block:: handlebars
 
-    {{formatDate vedtagetdato "d. MMM YYYY"}}
+    {{formatDate vedtagetdato "D. MMM YYYY"}}
 
 Her vil datofeltet ``vedtagetdato`` blive omdannet til formatet `4. feb. 2025`.
 
@@ -99,7 +99,7 @@ Det gør det muligt at anvende en funktion i opfølgende placeholder:
 
 .. code-block:: handlebars
 
-    {{replaceNull vedtagetdato "Ingen dato"}}{{formatDate vedtagetdato "d. MMMM YYYY" "YYYYMMDD"}}
+    {{replaceNull vedtagetdato "Ingen dato"}}{{formatDate vedtagetdato "D. MMMM YYYY" "YYYYMMDD"}}
 
 Her bliver i tilfældet `null` udskrevet "Ingen dato" ellers bliver værdien formateret til det ønskede datoformat.
 
