@@ -200,6 +200,9 @@ module.exports = {
                 }
                 // Register Handlebars helpers
                 Handlebars.registerHelper("formatDate", function(datetime, format = null, inFormat = null) {
+                    if (datetime == null) {
+                        return null;
+                    }
                     const dateFormats = window.vidiConfig.dateFormats;
                     if (format !== null && dateFormats.hasOwnProperty(format)) {
                         return dayjs(datetime.toString(), inFormat).format(dateFormats[format]);
@@ -207,10 +210,19 @@ module.exports = {
                         return dayjs(datetime.toString(), inFormat).format(format);
                     }
                 });
-                Handlebars.registerHelper('breaklines', function (text) {
+                Handlebars.registerHelper('breakLines', function (text) {
+                    if (text == null) {
+                        return null;
+                    }
                     text = Handlebars.Utils.escapeExpression(text);
                     text = text.replace(/(\r\n|\n|\r)/gm, '<br>');
                     return new Handlebars.SafeString(text);
+                });
+                Handlebars.registerHelper('replaceNull', function (value, text) {
+                    if (value === null) {
+                        return text;
+                    }
+                    return null;
                 });
 
                 if (configFile) {

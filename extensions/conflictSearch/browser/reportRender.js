@@ -46,7 +46,7 @@ module.exports = {
             tr = $("<tr class='print-report-group-heading' style='border-top: 1px solid; '><td style='padding-bottom: 4px;'><h3>" + groups[x] + "</h3></td></tr>");
             table.append(tr);
             let count = 0;
-            $.each(e.hits, function (i, v) {
+            e.hits.forEach((v, i) => {
                 let metaData = v.meta;
                 if (metaData.layergroup === groups[x]) {
                     let flag = false;
@@ -79,6 +79,8 @@ module.exports = {
                             }
 
                             for (u = 0; u < v.data.length; u++) {
+                                const properties = {};
+                                v.data[u].forEach(r => properties[r.name] = r.value);
                                 dataTr = $("<tr></tr>");
                                 if (v.data[u].length > 2) {
                                     flag = false;
@@ -91,7 +93,7 @@ module.exports = {
                                         let value = v.data[u][m].value;
                                         if (v.data[u][m].template) {
                                             const fieldTmpl = v.data[u][m].template;
-                                            value = Handlebars.compile(fieldTmpl)(value);
+                                            value = Handlebars.compile(fieldTmpl)(properties);
                                         }
                                         if (!v.data[u][m].key) {
                                             if (!v.data[u][m].link) {
@@ -114,7 +116,7 @@ module.exports = {
                                             let value = v.data[u][m].value;
                                             if (v.data[u][m].template) {
                                                 const fieldTmpl = v.data[u][m].template;
-                                                value = Handlebars.compile(fieldTmpl)(value);
+                                                value = Handlebars.compile(fieldTmpl)(properties);
                                             }
                                             if (!v.data[u][m].link) {
                                                 arr.push(value);

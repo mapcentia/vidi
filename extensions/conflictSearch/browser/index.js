@@ -792,7 +792,7 @@ module.exports = module.exports = {
 
         resultOrigin = response.text || "Na";
 
-        $.each(response.hits, function (i, v) {
+        response.hits.forEach(function (v, i) {
             v.meta.layergroup = v.meta.layergroup != null ? v.meta.layergroup : "Ungrouped";
             groups.push(v.meta.layergroup);
         });
@@ -825,7 +825,7 @@ module.exports = module.exports = {
             let row = "<h4 style='font-weight: 400'>" + groups[u] + "</h4><hr style='margin-top: 2px; border-top: 1px solid #aaa'>";
             hitsData.append(row);
             let count = 0;
-            $.each(response.hits, function (i, v) {
+            response.hits.forEach(function (v, i) {
                 let table = v.table, table1, table2, tr, td, title, metaData = v.meta;
                 if (metaData.layergroup === groups[u]) {
                     title = (typeof metaData.f_table_title !== "undefined" && metaData.f_table_title !== "" && metaData.f_table_title !== null) ? metaData.f_table_title : table;
@@ -857,17 +857,18 @@ module.exports = module.exports = {
                                 $(`<div></div>`).appendTo(hitsData);
                             }
                             if (v.data.length > 0) {
-                                $.each(v.data, function (u, row) {
+                                v.data.forEach((row, u) => {
+                                    const properties = {};
+                                    row.forEach(r => properties[r.name] = r.value);
                                     let key = null, fid = null;
                                     tr = $("<tr style='border-top: 0 solid #eee'/>");
                                     td = $("<td/>");
                                     table2 = $("<table style='margin-bottom: 5px; margin-top: 5px;' class='table'/>");
                                     row.sort((a, b) => (a.sort_id > b.sort_id) ? 1 : ((b.sort_id > a.sort_id) ? -1 : 0));
-                                    $.each(row, function (n, field) {
+                                    row.forEach(field => {
                                         let value = field.value;
                                         if (field.template) {
-                                            const fieldTmpl = field.template;
-                                            value = Handlebars.compile(fieldTmpl)(value);
+                                            value = Handlebars.compile(field.template)(properties);
                                         }
                                         if (!field.key) {
                                             if (!field.link) {

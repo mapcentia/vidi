@@ -91,6 +91,10 @@ const defaultTemplateForCrossMultiSelect =
                 <h4>{{title}}</h4>
                 <p {{#if type}}class="{{type}}"{{/if}}>{{{value}}}</p>
             {{/if}}
+            {{#if template}}
+                <h4>{{title}}</h4>
+                <p {{#if type}}class="{{type}}"{{/if}}>{{{value}}}</p>
+            {{/if}}
         {{/_vidi_content.fields}}
     </div>`;
 
@@ -740,7 +744,8 @@ module.exports = {
                     $.each(sortObject(fieldConf), (name, property) => {
                         if (property.value.querable) {
                             let value = feature.properties[property.key];
-                            if (property.value.template && feature.properties[property.key] && feature.properties[property.key] !== '') {
+                            // Only set field template if property is set or not empty string OR if 'replaceNull' helper is used, which will replace nulls
+                            if ((property.value.template && feature.properties[property.key] && feature.properties[property.key] !== '') || property.value?.template?.includes('replaceNull')) {
                                 const fieldTmpl = property.value.template;
                                 value = Handlebars.compile(fieldTmpl)(feature.properties);
                             } else if (property.value.link && feature.properties[property.key] && feature.properties[property.key] !== '') {
@@ -822,7 +827,7 @@ module.exports = {
                                         value = `
                                         <div>
                                             <div class="alert alert-warning" role="alert">
-                                            <i class="bi bi-exclamation-triangle-fill"></i> ${__("The file type can't be shown but you can download it") + ": <a download href=" + subValue + "/>" + type + ""}
+                                            <i class="bi bi-exclamation-triangle-fill"></i> ${__("The file type can't be shown but you can download it")}: <a download href="${subValue}"/>${type}</a>
                                             </div>
                                         </div>
                                     `

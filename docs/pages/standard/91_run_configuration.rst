@@ -688,12 +688,14 @@ En funktion som køres, når feature info IKKE rammer noget.
 
     "emptyInfoCallback": "function(){console.log('You hit nothing')}"
 
+.. _configjs_dateformats:
+
 dateFormats
 *****************************************************************
 
 Det er muligt at formatere datoer i templates (både popup- og felt-templates). Det gøres ved at kalde en template "helper" og angive et defineret datoformat.
 
-Først skal man definere et eller flere mulige datoformater i config'en:
+Man kan definere et eller flere mulige datoformater i config'en:
 
 .. code-block:: json
 
@@ -718,6 +720,8 @@ Hvis ens datoer ikke er et standardformat, men fx Plandata's, hvor datoer bliver
 
 .. note::
     Se `mulige datoformateringer <https://day.js.org/docs/en/display/format>`_
+
+    Læs mere om :ref:`templates`
 
 #################################################################
 Referencer

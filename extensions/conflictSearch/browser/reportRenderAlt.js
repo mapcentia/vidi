@@ -45,7 +45,7 @@ module.exports = {
             tr = $("<tr class='print-report-group-heading' style='border-top: 1px solid; '><td style='padding-bottom: 4px;'><h3>" + groups[x] + "</h3></td></tr>");
             table.append(tr);
             let count = 0;
-            $.each(e.hits, function (i, v) {
+            e.hits.forEach((v, i) => {
                 let metaData = v.meta;
                 if (metaData.layergroup === groups[x]) {
                     if (v.hits > 0) {
@@ -61,18 +61,20 @@ module.exports = {
 
                         if (v.data.length > 0) {
                             dataTable = $("<table class='table table-data'></table>");
-                            $.each(v.data, function (u, row) {
+                            v.data.forEach(row => {
+                                const properties = {};
+                                row.forEach(r => properties[r.name] = r.value);
                                 let key = null, fid = null;
                                 let tr = $("<tr style='border-top: 0 solid #eee'/>");
                                 let td = $("<td/>");
                                 let table2 = $("<table style='margin-bottom: 5px; margin-top: 5px;' class='table'/>");
                                 row.sort((a, b) => (a.sort_id > b.sort_id) ? 1 : ((b.sort_id > a.sort_id) ? -1 : 0));
-                                $.each(row, function (n, field) {
+                                row.forEach(field => {
                                     let value = field.value;
                                     if (!field.key) {
                                         if (field.template) {
                                             const fieldTmpl = field.template;
-                                            value = Handlebars.compile(fieldTmpl)(value);
+                                            value = Handlebars.compile(fieldTmpl)(properties);
                                         }
                                         if (!field.link) {
                                             table2.append("<tr><td style='max-width: 150px' class='conflict-heading-cell' '>" + field.alias + "</td><td class='conflict-value-cell'>" + (value !== null ? value : "&nbsp;") + "</td></tr>");
