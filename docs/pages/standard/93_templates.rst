@@ -89,13 +89,13 @@ Denne funktion tjekker om værdien er `null` og i så fald udskifter den med en 
 
     {{replaceNull vedtagetdato "Ingen dato"}}
 
-Hvis værdien IKKE er `null` returner funktionen ingen værdien. Derfor skal den typisk anvendes med en opfølgende placeholder:
+Hvis værdien `IKKE` er `null` returner funktionen `INGEN` værdi. Derfor skal den typisk anvendes med en opfølgende placeholder:
 
 .. code-block:: handlebars
 
     {{replaceNull vedtagetdato "Ingen dato"}}{{vedtagetdato}}
 
-Det gør det muligt at anvende en funktion i opfølgende placeholder:
+Det gør det muligt at anvende en funktion i den opfølgende placeholder:
 
 .. code-block:: handlebars
 
