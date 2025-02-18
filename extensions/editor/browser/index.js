@@ -383,7 +383,7 @@ module.exports = {
                     title = fieldConf[key].alias;
                 }
                 properties[key] = {title, type: `string`};
-                if (fields[key].is_nullable !== true) {
+                if (fields[key]?.is_nullable === false) {
                     required.push(key);
                 }
 
