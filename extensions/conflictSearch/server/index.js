@@ -238,7 +238,7 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                                     if (tmp.length > 0) {
                                         tmp.push({
                                             name: metaDataKeys[table].pkey,
-                                            alias: queryables[metaDataKeys[table].pkey].alias || metaDataKeys[table].pkey,
+                                            alias: queryables[metaDataKeys[table].pkey]?.alias || metaDataKeys[table].pkey,
                                             value: result.features[i].properties[metaDataKeys[table].pkey],
                                             sort_id: null,
                                             key: true

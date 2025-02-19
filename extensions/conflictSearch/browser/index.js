@@ -798,7 +798,7 @@ module.exports = module.exports = {
         });
         groups = array_unique(groups.reverse());
         for (let i = 0; i < groups.length; ++i) {
-            let row = "<tr><td><h4 style='font-weight: 400'>" + groups[i] + "</h4></td><td></td><td></td><td></td><td></td></tr>";
+            let row = "<tr><td><h5>" + groups[i] + "</h5></td><td></td><td></td><td></td><td></td></tr>";
             hitsTable.append(row);
             let count = 0;
             $.each(response.hits, function (u, v) {
@@ -822,7 +822,7 @@ module.exports = module.exports = {
         }
 
         for (let u = 0; u < groups.length; ++u) {
-            let row = "<h4 style='font-weight: 400'>" + groups[u] + "</h4><hr style='margin-top: 2px; border-top: 1px solid #aaa'>";
+            let row = "<h5>" + groups[u] + "</h5><hr class='mt-1 border-top'>";
             hitsData.append(row);
             let count = 0;
             response.hits.forEach(function (v, i) {
@@ -841,14 +841,14 @@ module.exports = module.exports = {
                             hitsData.append("<div class='d-flex align-items-center'><h5 class='flex-grow-1'>" + title + " (" + v.hits + ")</h5><div class='form-check form-switch text-end float-end'><label class='form-check-label'><input class='form-check-input' type='checkbox' data-gc2-id='" + v.table + "' " + (visibleLayers.includes(v.table) ? "checked" : "") + "></label></div></div>");
                             let conflictForLayer = metaData.meta !== null ? JSON.parse(metaData.meta) : null;
                             if (conflictForLayer !== null && 'short_conflict_meta_desc' in conflictForLayer) {
-                                hitsData.append("<p style='margin: 0'>" + conflictForLayer.short_conflict_meta_desc + "</p>");
+                                hitsData.append("<p>" + conflictForLayer.short_conflict_meta_desc + "</p>");
                             }
                             if (conflictForLayer !== null && 'long_conflict_meta_desc' in conflictForLayer && conflictForLayer.long_conflict_meta_desc !== '') {
-                                $(`<i style="cursor: pointer; color: #999999">Lagbeskrivelse - klik her</i>`).appendTo(hitsData).on("click", function () {
+                                $(`<div class="mb-2"><i style="cursor: pointer" class="text-info">Lagbeskrivelse - klik her</i></div>`).appendTo(hitsData).on("click", function () {
                                     let me = this;
                                     if ($(me).next().children().length === 0) {
-                                        $(me).next().html(`<div class="alert alert-dismissible alert-info" role="alert" style="background-color: #d4d4d4; color: #333; padding: 7px 30px 7px 7px">
-                                                                            <button type="button" class="close" data-dismiss="alert">×</button>${conflictForLayer.long_conflict_meta_desc}
+                                        $(me).next().html(`<div class="alert alert-info alert-dismissible fade show" role="alert">
+                                                                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>${conflictForLayer.long_conflict_meta_desc}
                                                                         </div>`);
                                     } else {
                                         $(me).next().find(".alert").alert('close');
@@ -861,9 +861,9 @@ module.exports = module.exports = {
                                     const properties = {};
                                     row.forEach(r => properties[r.name] = r.value);
                                     let key = null, fid = null;
-                                    tr = $("<tr style='border-top: 0 solid #eee'/>");
+                                    tr = $("<tr class='border-top'/>");
                                     td = $("<td/>");
-                                    table2 = $("<table style='margin-bottom: 5px; margin-top: 5px;' class='table'/>");
+                                    table2 = $("<table class='table mt-1 mb-1'/>");
                                     row.sort((a, b) => (a.sort_id > b.sort_id) ? 1 : ((b.sort_id > a.sort_id) ? -1 : 0));
                                     row.forEach(field => {
                                         let value = field.value;
