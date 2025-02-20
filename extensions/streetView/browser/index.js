@@ -46,20 +46,12 @@ let clicktimer;
  */
 let mapObj;
 
-let cowiUrl;
 
-let mapillaryUrl = "https://www.mapillary.com/app/?z=17";
 
 let config = require('../../../config/config.js');
 
-if (typeof config.extensionConfig !== "undefined" && typeof config.extensionConfig.streetView !== "undefined") {
-    if (typeof config.extensionConfig.streetView.mapillary !== "undefined") {
-        mapillaryUrl = config.extensionConfig.streetView.mapillary;
-    }
-    if (typeof config.extensionConfig.streetView.cowi !== "undefined") {
-        cowiUrl = config.extensionConfig.streetView.cowi;
-    }
-}
+let cowiUrl = config?.extensionConfig?.streetView?.cowi;
+let mapillaryUrl = config?.extensionConfig?.streetView?.mapillary ||"https://www.mapillary.com/app/?z=17";
 
 /**
  *
@@ -153,7 +145,7 @@ module.exports = {
 
                 this.state = {
                     active: false,
-                    selectedOption: "google"
+                    selectedOption: config?.extensionConfig?.streetView?.default || "google"
                 };
 
                 this.onChange = this.onChange.bind(this);
@@ -226,7 +218,7 @@ module.exports = {
                                     url = `https://skraafoto.dataforsyningen.dk/viewer.html?center=${pUtm.x},${pUtm.y}&orientation=north`;
                                     break;
                                 case "maps":
-                                    url = `https://www.google.dk/maps/@${p.y},${p.x},14z`;
+                                    url = `https://www.google.dk/maps/@${p.y},${p.x},17z`;
                                     break;
 
                                 case "cowi":
