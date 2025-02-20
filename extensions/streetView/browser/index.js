@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2019 MapCentia ApS
+ * @copyright  2013-2025 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -225,6 +225,9 @@ module.exports = {
                                 case "skraafoto":
                                     url = `https://skraafoto.dataforsyningen.dk/viewer.html?center=${pUtm.x},${pUtm.y}&orientation=north`;
                                     break;
+                                case "maps":
+                                    url = `https://www.google.dk/maps/@${p.y},${p.x},14z`;
+                                    break;
 
                                 case "cowi":
                                     url = cowiUrl + "&srid=4326&x=" + p.x + "&y=" + p.y;
@@ -252,7 +255,7 @@ module.exports = {
                                            value="google" checked={this.state.selectedOption === 'google'}
                                            onChange={this.onChange}/>
                                     <label className="btn btn-sm btn-outline-secondary"
-                                           htmlFor="streetview-service-google">Google Street View</label>
+                                           htmlFor="streetview-service-google">Street View</label>
 
                                     <input className="btn-check" type="radio" id="streetview-service-mapillary"
                                            name="streetview-service" value="mapillary"
@@ -265,13 +268,24 @@ module.exports = {
                                            name="streetview-service" value="skraafoto"
                                            checked={this.state.selectedOption === 'skraafoto'}
                                            onChange={this.onChange}/>
-                                    <label className="btn btn-sm btn-outline-secondary" htmlFor="streetview-service-skraafoto">Skråfoto</label>
-
-                                    <input className="btn-check" type="radio" id="streetview-service-cowi"
-                                           name="streetview-service" value="cowi"
-                                           checked={this.state.selectedOption === 'cowi'}
+                                    <label className="btn btn-sm btn-outline-secondary"
+                                           htmlFor="streetview-service-skraafoto">Skråfoto</label>
+                                    <input className="btn-check" type="radio" id="streetview-service-maps"
+                                           name="streetview-service" value="maps"
+                                           checked={this.state.selectedOption === 'maps'}
                                            onChange={this.onChange}/>
-                                    <label className="btn btn-sm btn-outline-secondary" htmlFor="streetview-service-cowi">COWI Gadefoto</label>
+                                    <label className="btn btn-sm btn-outline-secondary"
+                                           htmlFor="streetview-service-maps">Maps</label>
+                                    {cowiUrl !== undefined ?
+                                        <input className="btn-check" type="radio" id="streetview-service-cowi"
+                                               name="streetview-service" value="cowi"
+                                               checked={this.state.selectedOption === 'cowi'}
+                                               onChange={this.onChange}/> : null
+                                    }
+                                    {cowiUrl !== undefined ?
+                                        <label className="btn btn-sm btn-outline-secondary"
+                                               htmlFor="streetview-service-cowi">COWI Gadefoto</label> : null
+                                    }
                                 </span>
                             </div>
                         </div>
