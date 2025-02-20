@@ -232,5 +232,27 @@ module.exports = {
             console.error('Unable to copy to clipboard', err);
         }
         document.body.removeChild(textArea);
+    },
+
+    geoFindMe() {
+        return new Promise((resolve, reject) => {
+            function success(position) {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                return resolve([lat, lng]);
+            }
+            function error(e) {
+                return reject(e);
+            }
+            const options = {
+                enableHighAccuracy: true,
+                maximumAge: 30000,
+                timeout: 27000,
+            };
+            if (!navigator.geolocation) {
+            } else {
+                navigator.geolocation.getCurrentPosition(success, error, options);
+            }
+        })
     }
 };
