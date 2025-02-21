@@ -331,8 +331,7 @@ module.exports = {
                                 } else {
                                     const popup = L.popup({
                                         minWidth: 350
-                                    })
-                                        .setLatLng(infoClickPoint)
+                                    }).setLatLng(infoClickPoint)
                                         .setContent(`<div id="info-box-pop-up"></div>`)
                                         .openOn(cloud.get().map)
                                         .on('remove', () => {
@@ -340,11 +339,12 @@ module.exports = {
                                                 _self.resetAll();
                                             }
                                         });
-
                                     if (draggableEnabled) {
                                         _self.makeDraggable(popup);
                                     }
-
+                                    popup.on('remove', function () {
+                                        backboneEvents.get().trigger("sqlQuery:clear");
+                                    });
                                     $("#info-box-pop-up").html(popUpInner);
                                 }
 
