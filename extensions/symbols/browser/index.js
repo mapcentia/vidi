@@ -24,6 +24,7 @@ let creatingFromState = false;
 let filesAreLoaded = false;
 let autoScale = false;
 let locked = false;
+let popup;
 const exId = "symbols";
 const urlparser = require('./../../../browser/modules/urlparser');
 const db = urlparser.db;
@@ -155,10 +156,10 @@ const scale = (e, img, id, classStr) => {
     }
 }
 
-/**
- *
- * @param e
- */
+const closePopup = () => {
+    popup?.remove();
+}
+
 const handleDragEnd = (e) => {
     // const svg = e.target.querySelector("svg-container").shadowRoot.innerHTML;
     const svg = e.target.querySelector("svg-container").innerHTML;
@@ -206,7 +207,7 @@ const handleDragEnd = (e) => {
             }
         }
     }
-    createSymbol(svg, id, coord, 0, 1, map.getZoom(), file, group);
+    createSymbol(svg, id, coord, 0, 1, map.getZoom(), file, group, true);
 }
 
 /**
@@ -219,15 +220,17 @@ const handleDragEnd = (e) => {
  * @param zoomLevel
  * @param file
  * @param group
+ * @param attension
  */
-const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file, group) => {
+const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file, group, attension = false) => {
     let map = cloud.get().map;
     let func;
     let classStr = "dm_" + id;
     let rotateHandleStr = "r_" + id;
     let deleteHandleStr = "d_" + id;
     let scaleHandleStr = "s_" + id;
-    let html = `<div class="drag-marker symbols-map ${classStr}" draggable="false">`;
+    let extraHandleStr = "e_" + id;
+    let html = `<div class="drag-marker symbols-map ${attension ? 'target': ''} ${classStr}" draggable="false">`;
     let callback = config?.extensionConfig?.symbols?.symbolOptions?.[file]?.callback;
     if (callback === undefined) {
         callback = config?.extensionConfig?.symbols?.options?.callback;
@@ -236,12 +239,14 @@ const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file, gro
         try {
             func = Function('"use strict";return (' + callback + ')')();
         } catch (e) {
-            console.error("Error in callback for " + file, e.message)
+            console.error("Error in callback for " + file, e.message);
         }
     }
-    let doRotate = config?.extensionConfig?.symbols?.symbolOptions?.[file]?.rotate
-    let doScale = config?.extensionConfig?.symbols?.symbolOptions?.[file]?.scale
-    let doDelete = config?.extensionConfig?.symbols?.symbolOptions?.[file]?.delete
+    let doRotate = config?.extensionConfig?.symbols?.symbolOptions?.[file]?.rotate;
+    let doScale = config?.extensionConfig?.symbols?.symbolOptions?.[file]?.scale;
+    let doDelete = config?.extensionConfig?.symbols?.symbolOptions?.[file]?.delete;
+    let doExtra = config?.extensionConfig?.symbols?.symbolOptions?.[file]?.extra;
+
     if (doRotate === undefined) {
         doRotate = config?.extensionConfig?.symbols?.options?.rotate;
     }
@@ -250,6 +255,9 @@ const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file, gro
     }
     if (doDelete === undefined) {
         doDelete = config?.extensionConfig?.symbols?.options?.delete;
+    }
+    if (doExtra === undefined) {
+        doExtra = config?.extensionConfig?.symbols?.options?.extra;
     }
 
     if (doRotate || doRotate === undefined) {
@@ -261,6 +269,10 @@ const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file, gro
     if (doDelete || doDelete === undefined) {
         html += `<div class="symbols-handles symbols-delete ${deleteHandleStr}" id="${id}"></div>`;
     }
+    if (doExtra || doExtra === undefined) {
+        html += `<div class="symbols-handles symbols-extra ${extraHandleStr}"></div>`;
+    }
+
     html += `<svg-container>${innerHtml}</svg-container>`;
     html += `</div>`;
     let icon = L.divIcon({
@@ -278,6 +290,7 @@ const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file, gro
     symbolState[id].group = group;
     markers[id].on("movestart", () => {
         idBeingChanged = id;
+        closePopup();
     })
     markers[id].on("moveend", () => {
         symbolState[id].coord = markers[id].getLatLng();
@@ -292,6 +305,7 @@ const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file, gro
     let rotateHandle = $(`.${rotateHandleStr}`);
     let deleteHandle = $(`.${deleteHandleStr}`);
     let scaleHandle = $(`.${scaleHandleStr}`);
+    let extraHandle = $(`.${extraHandleStr}`);
 
     // Init scale and rotation
     img.css('transform', 'rotate(' + symbolState[id].rotation.toString() + 'deg) scale(' + symbolState[id].scale.toString() + ')');
@@ -319,6 +333,7 @@ const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file, gro
         $(document).on("touchmove.symbol mousemove.symbol", (e) => {
             rotate(e, img, id, classStr);
         });
+        closePopup();
     });
     scaleHandle.on("touchstart mousedown", function (e) {
         e.preventDefault();
@@ -330,6 +345,23 @@ const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file, gro
         $(document).on("touchmove.symbol mousemove.symbol", (e) => {
             scale(e, img, id, classStr);
         });
+        closePopup();
+    });
+
+    extraHandle.on("touch click", function (e) {
+        e.stopPropagation()
+        const copyId = `copy_${id}`;
+        popup = L.popup();
+        popup.setLatLng(map.mouseEventToLatLng(e)).setContent(`<a href="javascript:void(0)" id="${copyId}">${__('Copy symbol')}</a>`);
+        popup.on('add', () => {
+            document.getElementById(copyId).addEventListener('click', () => {
+                createSymbol(
+                    innerHtml, createId(), symbolState[id].coord, symbolState[id].rotation, symbolState[id].scale, symbolState[id].zoomLevel, file, group, true
+                )
+                popup.remove();
+            })
+        })
+        popup.openOn(map);
     });
 
     if (callback) {
@@ -352,8 +384,10 @@ class SVGContainer extends HTMLElement {
         shadowRoot.append(...this.childNodes);
     }
 }
+
 //customElements.define('svg-container', SVGContainer);
-customElements.define("svg-container", ()=>{}, { extends: "div" });
+customElements.define("svg-container", () => {
+}, {extends: "div"});
 
 
 module.exports = {
@@ -507,9 +541,6 @@ module.exports = {
                 })
             }())
         }
-        // }
-        // );
-
 
         $(document).on("touchend mouseup", function () {
             for (const id in symbolState) {

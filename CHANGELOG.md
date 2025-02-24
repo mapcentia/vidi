@@ -10,6 +10,7 @@ and this project adheres to [CalVer](https://calver.org/).
 ### Added
 
 - The default coordinate system can now be set in Coordinates module:
+
 ```json
 {
   "extensionConfig": {
@@ -20,11 +21,35 @@ and this project adheres to [CalVer](https://calver.org/).
   }
 }
 ```
+
 - Google Maps added to Coordinates module and COWI Gadefoto will not be shown if not configured.
-- New module `directions`, which adds a map control button. After activating the control the user can click in map and 
-Google Maps with directions to that point will start. The geolocation control must be active for to use the directions control.
+- New module `directions`, which adds a map control button. After activating the control the user can click in map and
+  Google Maps with directions to that point will start. The geolocation control must be active for to use the directions
+  control.
+- New "More" handle on symbols with a Copy function, which clones the symbol to a new one. It can be configured like the
+  other handles and is called `extra`. Here it's disabled:
+```json
+{
+  "extensionConfig": {
+    "symbols": {
+      "files": [
+        {
+          "file": "symbol_set.json",
+          "title": "My symbols"
+        }
+      ],
+      "options": {
+        "extra": false
+      }
+    }
+  }
+}
+```
+- 
+- Symbol handles are now using Bootstrap icons.
 
 ## Changed
+
 - Auto hide login modal after successful login.
 - When using `featureInfoTableOnMap` closing the popup wil clear selected features in the map.
 
@@ -1169,7 +1194,7 @@ This is a label for feature <b>{{gid}}</b>
 
 - A new build configuration for setting widths for the left slide-out panel in default template.
     - ```json
-    "leftSlideWidths": [300, 400, 550]
+  "leftSlideWidths": [300, 400, 550]
     ```
 - Under filters in the layer tree it's now possible to download the layer as either: GeoJSON, Excel or CSV
 
