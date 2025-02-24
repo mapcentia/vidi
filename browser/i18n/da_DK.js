@@ -481,6 +481,7 @@ module.exports = {
         "Find me": "Find mig",
 
         "Symbols": "Symboler",
+        "Copy symbol": "Kopiere symbol",
 
         // Sign in
         "User name": "Brugernavn",
