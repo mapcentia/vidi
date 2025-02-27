@@ -397,6 +397,28 @@ Ved brug af "avanceret forespørgelse" vises tabellerne dog stadig i sidepanelet
 
 .. _configjs_crossmultiselect:
 
+showNoValueInInfo
+*****************************************************************
+
+Når denne er sat til ``true`` vises alle attributter i  feature-info dialogen, selv om der ikke er registreret en værdi. 
+Det giver et mere ensartet indhold af dialogen. At en attribut ikke er tildelt en værdi kan også være en nyttig information.
+I eksempelet nedenfor viser at "Fysisk indeks" på den udpegede ledning, ikke har en værdi.
+
+.. code-block:: json
+
+    "showNoValueInInfo": true,
+
+.. figure:: ../../_media/infobox-novalue.png
+    :width: 400px
+    :align: center
+    :name: no-value-in-info
+    :figclass: align-center
+|
+
+
+
+.. _configjs_crossmultiselect:
+
 crossMultiSelect
 *****************************************************************
 

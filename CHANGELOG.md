@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
 ## [UNRELEASED] - 2025-724-2
-
+-  showNoValueInInfo config for displaying all attributes in feature-info. Default attributes with missing values is not in the dialog.
 ### Added
 
 - The default coordinate system can now be set in Coordinates module:
