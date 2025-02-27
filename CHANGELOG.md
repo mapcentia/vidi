@@ -38,7 +38,7 @@ and this project adheres to [CalVer](https://calver.org/).
           "title": "My symbols"
         }
       ],
-      "options": {
+      "symbolOptions": {
         "extra": false
       }
     }
