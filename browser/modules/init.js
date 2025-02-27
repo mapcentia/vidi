@@ -96,6 +96,7 @@ module.exports = {
             emptyInfoCallback: null,
             infoCallback: null,
             dateFormats: {},
+            showNoValueInInfo: false,
         };
         // Set session from URL
         if (typeof urlVars.session === "string") {

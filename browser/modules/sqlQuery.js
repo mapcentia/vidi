@@ -84,6 +84,15 @@ let defaultTemplate =
         {{/_vidi_content.fields}}
     </div>`;
 
+let defaultTemplateWithNoValue =
+    `<div class="vidi-popup-content">
+        <h3 class="popup-title">{{_vidi_content.title}}</h3>
+         {{#_vidi_content.fields}}
+            <h4>{{title}}</h4>
+            <p {{#if type}}class="{{type}}"{{/if}}>{{{value}}}</p>
+        {{/_vidi_content.fields}}
+     </div>`;
+
 const defaultTemplateForCrossMultiSelect =
     `<div class="vidi-popup-content">
         {{#_vidi_content.fields}}
@@ -262,10 +271,11 @@ module.exports = {
 
             // Back arrow to template if featureInfoTableOnMap is true
             if ((featureInfoTableOnMap || forceOffCanvasInfo) && !backArrowIsAdded) {
+                const useTemplate = window.vidiConfig.showNoValueInInfo ? defaultTemplateWithNoValue : defaultTemplate;
                 defaultTemplateWithBackBtn = `
                                 <button class='btn btn-sm btn-outline-secondary mb-2 show-when-multiple-hits'>
                                     <i class='bi bi-arrow-left'></i> ${__("Back")}
-                                </button>` + defaultTemplate;
+                                </button>` + useTemplate;
                 $(document).arrive('.show-when-multiple-hits', function (e, data) {
                     $(this).on('click', function (e) {
                         $("#modal-info-body").show();
@@ -936,7 +946,7 @@ module.exports = {
         const map = cloud.get().map
         const draggable = new L.Draggable(popup._container, popup._wrapper);
         // change cursor class
-        $(".leaflet-popup-content-wrapper").css('cursor', 'move');
+        $(".leaflet-popup-content-wrapper").css('cursor', 'move');    
         draggable.on('dragstart', function (e) {
             //on first drag, remove the pop-up tip
             $(".leaflet-popup-tip-container").hide();
