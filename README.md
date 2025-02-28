@@ -76,3 +76,11 @@ setTimeout(() => {
     }
 }, 3000);
 ```
+
+## Documentation
+
+The documentation in the `docs` folder is built using [https://www.sphinx-doc.org/en/master/](sphinx)). The documentation is regularly built and accessible on https://vidi.readthedocs.io/
+
+Getting started with the documentation is easy - all you need is python:
+* Start by installing the required packages with `pip install -r .\docs\requirements.txt`
+* Then run the autobuild using a command like: `sphinx-autobuild docs docs/_build/html`

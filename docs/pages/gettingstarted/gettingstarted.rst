@@ -21,7 +21,9 @@ Kom godt i gang med Vidi
 Hvad er Vidi?
 ================================================================= 
 
-Vidi er en HTML5 applikation til at vise og forespørge på kortdata fra |gc2|. Klienten læser information fra GC2's meta-api, og viser en moderne kort-browser med lag for den specificerede PostGreSQL 
+Vidi er en HTML5 applikation til at vise og forespørge på kortdata fra |gc2|. 
+
+Klienten læser information fra GC2's meta-api, og viser en moderne kort-browser med lag for den specificerede PostGreSQL 
 
 Her er et udpluk af nogle af funktionaliteterne.
 
@@ -33,40 +35,79 @@ Vidi er ikke bygget ind i GC2, men kræver sin egen installation.
 
 `Du kan prøve det live her <https://kort.geofyn.dk/>`_
 
-
-
-Vidi ved et øjekast
-=================================================================
-
-TBD
-
 Kortvinduet
 -----------------------------------------------------------------
 
-TBD
+.. figure:: ../../_media/gettingstarted-main.png
+    :width: 400px
+    :align: center
+    :name: sidebar-expanded
+    :figclass: align-center
 
-Toolbar
+    Startskærmen i Vidi
+
+.. _gettingstarted_menu:
+
+Menu
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-TBD
+.. figure:: ../../_media/gettingstarted-menu.png
+    :width: 400px
+    :align: center
+    :name: sidebar-expanded
+    :figclass: align-center
+
+    Menuen i Vidi
+
+Menuen indholder de fleste funktionalitet til kortet, og indeholder lagstyring, søgeværktøjer, info-værktøj, print og meget mere.
+
+Menuen gemmer sig selv hvis kortvinduet er for smalt, men kan bringes frem igen ved hjælp af ``Menu``-knappen.
+
+.. _gettingstarted_navigate:
 
 Navigér
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-TBD
+Panorer i kortet ved at klikke og trække med musen. Det er også muligt at bruge piletasterne på tastaturet.
 
-Sidebar
+Zoom ind og ud ved at bruge scrollhjulet på musen eller ved at klikke på plus- og minusknapperne i værktøjslinjen. Det er også muligt at bruge ``+`` og ``-`` på tastaturet. 
+
+.. note::
+  Der kan være begrænsninger på zoomniveauet, afhængigt af datakilden.
+
+Zoom ind på et bestemt område ved at holde ``Shift`` nede, klikke og trække en boks i kortet. Eller kan man bruge ``Zoom til udsnit``-knappen i værktøjslinjen.
+
+Det er muligt at komme tilbage til det oprindelige kortudsnit ved at klikke på ``Hjem``-knappen i værktøjslinjen.
+
+Man kan gå tilbage i kortudsnit ved at bruge ``Forrige udsnit``-knappen i værktøjslinjen, her kan man også gå frem igen ved at bruge ``Næste udsnit``-knappen.
+
+
+.. _gettingstarted_controls:
+
+Værktøjslinjen
 -----------------------------------------------------------------
 
-TBD
+.. figure:: ../../_media/gettingstarted-controls.png
+    :align: center
+    :name: sidebar-expanded
+    :figclass: align-center
 
-Skifte visning
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    Værktøjslinjen i Vidi
 
-TBD
+Værktøjslinjen indeholder en række værktøjer til at interagere med kortet. Værktøjerne vil altid være tilgængelige i toppen af kortet.
 
-Tool
------------------------------------------------------------------
+Værktøjerne i billedet er (oppefra):
 
-TBD
+* ``Hjem``
+* ``Zoom ind``
+* ``Zoom ud``
+* ``Geolokation``
+* ``Måleværktøj``
+* ``Fuldskærm``
+* ``Ryd kort``
+* ``screenshot``  
+* ``Forrige udsnit``
+* ``Næste udsnit``
+* ``Zoom til udsnit``
+
 

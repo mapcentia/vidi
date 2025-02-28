@@ -121,6 +121,26 @@ Det er kun nødvendig at angive enten username/password eller token. Token har f
 
 Se i Kørselskonfigurationen :ref:`configjs_baselayers` hvordan WMS'er fra Datafordeler og Dataforsyningen kan anvendes
 
+.. _configjs_extensions:
+
+extensions
+*****************************************************************
+
+For at tilføje en extension til Vidi, skal der tilføjes en blok i ``extensions``. Der skal angives hvilke filer der skal bygges ind i vidi.
+
+Da alle extensions er forskellige i opbygning, kan det være nødvendigt at tilføje den til både ``browser`` og ``server``. Når den enkelte extension er bygget, kan den aktiveres i :ref:`configjs_enabledExtensions`. 
+
+.. code-block:: json
+
+    "extensions": {
+        "browser": [
+            {"directions": ["index"]},
+        ],
+        "server": [
+            {"directions": ["index"]},
+        ]
+    },
+
 Komplet eksempel
 *****************************************************************
 
