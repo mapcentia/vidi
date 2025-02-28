@@ -51,6 +51,14 @@ Kortvinduet
 Menu
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+.. figure:: ../../_media/gettingstarted-menu.png
+    :width: 400px
+    :align: center
+    :name: sidebar-expanded
+    :figclass: align-center
+
+    Menuen i Vidi
+
 Menuen indholder de fleste funktionalitet til kortet, og indeholder lagstyring, søgeværktøjer, info-værktøj, print og meget mere.
 
 Menuen gemmer sig selv hvis kortvinduet er for smalt, men kan bringes frem igen ved hjælp af ``Menu``-knappen.
@@ -79,5 +87,27 @@ Man kan gå tilbage i kortudsnit ved at bruge ``Forrige udsnit``-knappen i værk
 Værktøjslinjen
 -----------------------------------------------------------------
 
+.. figure:: ../../_media/gettingstarted-controls.png
+    :align: center
+    :name: sidebar-expanded
+    :figclass: align-center
+
+    Værktøjslinjen i Vidi
+
 Værktøjslinjen indeholder en række værktøjer til at interagere med kortet. Værktøjerne vil altid være tilgængelige i toppen af kortet.
+
+Værktøjerne i billedet er (oppefra):
+
+* ``Hjem``
+* ``Zoom ind``
+* ``Zoom ud``
+* ``Geolokation``
+* ``Måleværktøj``
+* ``Fuldskærm``
+* ``Ryd kort``
+* ``screenshot``  
+* ``Forrige udsnit``
+* ``Næste udsnit``
+* ``Zoom til udsnit``
+
 
