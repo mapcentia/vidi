@@ -806,11 +806,11 @@ module.exports = module.exports = {
                     let metaData = v.meta;
                     let bufferValue = '';
                     if(v.bufferValue > 0) {
-                        bufferValue = "<span class='text-secondary'>Buffer</span> " + L.GeometryUtil.readableDistance(v.bufferValue, true, false, false, {m: 1})
+                        bufferValue = "<span class='text-secondary'>Buffer</span> " + L.GeometryUtil.readableDistance(v.bufferValue, true, false, false, {m: 1}).replace('.', decimalSeparator);
                     }
                     if (metaData.layergroup === groups[i]) {
                         count++;
-                        row = "<tr><td>" + v.title + "</td><td>" + v.hits + "</td><td>" + bufferValue  + "</td><td>" + (v.totalLength > 0 ? "<span class='text-secondary'>Total</span> " + L.GeometryUtil.readableDistance(v.totalLength, true, false, false, {m: 1}) : v.totalArea > 0 ? "<span class='text-secondary'>Total</span> " + L.GeometryUtil.readableArea(v.totalArea, true) : '') +"</td><td><div class='form-check form-switch text-end'><label class='form-check-label'><input class='form-check-input' type='checkbox' data-gc2-id='" + v.table + "' " + (visibleLayers.includes(v.table) ? "checked" : "") + "></label></div></td></tr>";
+                        row = "<tr><td>" + v.title + "</td><td>" + v.hits + "</td><td>" + bufferValue  + "</td><td>" + (v.totalLength > 0 ? "<span class='text-secondary'>Total</span> " + L.GeometryUtil.readableDistance(v.totalLength, true, false, false, {m: 1}).replace('.', decimalSeparator) : v.totalArea > 0 ? "<span class='text-secondary'>Total</span> " + L.GeometryUtil.readableArea(v.totalArea, true) : '') +"</td><td><div class='form-check form-switch text-end'><label class='form-check-label'><input class='form-check-input' type='checkbox' data-gc2-id='" + v.table + "' " + (visibleLayers.includes(v.table) ? "checked" : "") + "></label></div></td></tr>";
                         hitsTable.append(row);
                     }
                 }
@@ -822,7 +822,7 @@ module.exports = module.exports = {
         }
 
         for (let u = 0; u < groups.length; ++u) {
-            let row = "<h5>" + groups[u] + "</h5><hr class='mt-1 border-top'>";
+            let row = "<h5 class='hits-data-h'>" + groups[u] + "</h5><hr class='mt-1 border-top'>";
             hitsData.append(row);
             let count = 0;
             response.hits.forEach(function (v, i) {
@@ -838,7 +838,7 @@ module.exports = module.exports = {
                             count++;
                             hitsCount++;
                             table1 = $("<table class='table table-data'/>");
-                            hitsData.append("<div class='d-flex align-items-center'><h5 class='flex-grow-1'>" + title + " (" + v.hits + ")</h5><div class='form-check form-switch text-end float-end'><label class='form-check-label'><input class='form-check-input' type='checkbox' data-gc2-id='" + v.table + "' " + (visibleLayers.includes(v.table) ? "checked" : "") + "></label></div></div>");
+                            hitsData.append("<div class='d-flex align-items-center'><div class='flex-grow-1'>" + title + " (" + v.hits + ")</div><div class='form-check form-switch text-end float-end'><label class='form-check-label'><input class='form-check-input' type='checkbox' data-gc2-id='" + v.table + "' " + (visibleLayers.includes(v.table) ? "checked" : "") + "></label></div></div>");
                             let conflictForLayer = metaData.meta !== null ? JSON.parse(metaData.meta) : null;
                             if (conflictForLayer !== null && 'short_conflict_meta_desc' in conflictForLayer) {
                                 hitsData.append("<p>" + conflictForLayer.short_conflict_meta_desc + "</p>");
@@ -912,7 +912,7 @@ module.exports = module.exports = {
 
             // Remove empty groups
             if (count === 0) {
-                hitsData.find("h4").last().remove();
+                hitsData.find(".hits-data-h").last().remove();
                 hitsData.find("hr").last().remove();
             }
 
