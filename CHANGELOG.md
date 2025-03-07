@@ -46,6 +46,8 @@ and this project adheres to [CalVer](https://calver.org/).
 }
 ```
 - Symbol handles are now using Bootstrap icons.
+- Config option 'activateLayers' can now be set to the same kind of values as 'schemata' (including tag: and schema name).
+  A new method meta::getLayerNamesFromSchemata will convert the schemata to an array of layer names.
 
 ## Changed
 

@@ -24,6 +24,7 @@ const config = require('../../config/config.js');
 import mustache from 'mustache';
 import dayjs from "dayjs";
 import customParseFormat from 'dayjs/plugin/customParseFormat';
+import {meta} from "@turf/turf";
 dayjs.extend(customParseFormat);
 
 module.exports = {
@@ -576,8 +577,16 @@ module.exports = {
                                 modules.layerTree.setRecreateStores(true);
                                 // Switch on activeLayers from config if not snapshot
                                 if (!urlVars.state) {
-                                    st.modules.layerTree.activeLayers.forEach((l) => {
-                                        modules.switchLayer.init(l, true)
+                                    modules.meta.getLayerNamesFromSchemata(window.vidiConfig.activeLayers).then(layers => {
+                                        window.vidiConfig.activeLayers.forEach(i => {
+                                            if (i.startsWith('v:')) {
+                                                layers.push(i);
+                                            }
+                                        })
+                                        console.info('Activating layers:', layers)
+                                        layers.forEach((l) => {
+                                            modules.switchLayer.init(l, true)
+                                        })
                                     })
                                 }
                             });

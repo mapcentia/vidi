@@ -327,12 +327,18 @@ module.exports = {
                                 });
                             }
                         })
-                        // If config option 'activeLayers' is set then defer activation of protected layers
                         if (!urlVars.state) {
-                            window.vidiConfig.activeLayers.forEach((l) => {
-                                switchLayer.init(l, false).then(() => {
-                                    switchLayer.init(l, true);
-                                });
+                            meta.getLayerNamesFromSchemata(window.vidiConfig.activeLayers).then(layers => {
+                                window.vidiConfig.activeLayers.forEach(i => {
+                                    if (i.startsWith('v:')) {
+                                        layers.push(i);
+                                    }
+                                })
+                                layers.forEach((l) => {
+                                    switchLayer.init(l, false).then(() => {
+                                        switchLayer.init(l, true);
+                                    });
+                                })
                             })
                         }
                     });

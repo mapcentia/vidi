@@ -319,6 +319,29 @@ module.exports = {
      */
     getMetaDataLatestLoaded: function () {
         return $.extend(true, {}, metaDataLatestLoaded);
+    },
+
+    getLayerNamesFromSchemata: function (schemata) {
+        return new Promise(function (resolve, reject) {
+            fetch('/api/meta/' + db + '/' + schemata).then(
+                response => {
+                    if (!response.ok) {
+                        throw new Error("Not 2xx response", {cause: response});
+                    }
+                    response.json().then(data => {
+                        if (data.data && data.data.length > 0) {
+                            const layerNames = data.data.map((l) => l.f_table_schema + '.' + l.f_table_name  );
+                            resolve(layerNames);
+                        } else {
+                            reject();
+                        }
+                    })
+                }
+            ).catch((error) => {
+                reject(error)
+                console.error(error);
+            })
+        })
     }
 };
 
