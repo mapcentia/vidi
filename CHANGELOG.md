@@ -48,6 +48,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - Symbol handles are now using Bootstrap icons.
 - Config option 'activateLayers' can now be set to the same kind of values as 'schemata' (including tag: and schema name).
   A new method meta::getLayerNamesFromSchemata will convert the schemata to an array of layer names.
+- A global variable `decimalSeparator` is now set from current locale. It's used in conflictSearch.
 
 ## Changed
 
@@ -57,7 +58,8 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ### Fixed
 
-- When signin out active layers will be toggled so protected layers are efficient removed from the map. 
+- When signin out active layers will be toggled so protected layers are efficient removed from the map.
+- Bug regrading removal of empty groups in conflictSearch.
 
 ## [2025.2.1] - 2025-7-2
 
