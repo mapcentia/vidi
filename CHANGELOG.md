@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [UNRELEASED] - 2025-724-2
+## [UNRELEASED] - 2025-4-2
 
 ### Added
 
@@ -45,13 +45,17 @@ and this project adheres to [CalVer](https://calver.org/).
   }
 }
 ```
-- 
 - Symbol handles are now using Bootstrap icons.
 
 ## Changed
 
 - Auto hide login modal after successful login.
 - When using `featureInfoTableOnMap` closing the popup wil clear selected features in the map.
+- Config option 'activeLayers' will now be evaluated when signing in, so protected layers will be switched on.
+
+### Fixed
+
+- When signin out active layers will be toggled so protected layers are efficient removed from the map. 
 
 ## [2025.2.1] - 2025-7-2
 

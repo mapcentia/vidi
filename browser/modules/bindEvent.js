@@ -73,7 +73,7 @@ module.exports = {
                 mainLayerOffcanvas.toggle()
             });
             if (window.vidiConfig.showOffcanvas === true ||
-                ((window.vidiConfig.showOffcanvas === 'mobile' || window.vidiConfig.showOffcanvas === 'mobil')  && window.screen.width > 700)
+                ((window.vidiConfig.showOffcanvas === 'mobile' || window.vidiConfig.showOffcanvas === 'mobil') && window.screen.width > 700)
             ) {
                 mainLayerOffcanvas.show();
             }
@@ -99,7 +99,7 @@ module.exports = {
             fadeWhenDraggingClass.animate({opacity: '0.3'}, 200);
             fadeWhenDraggingClass.css('pointer-events', 'none');
         }
-         
+
         // Define how we want the menu to fade in
         let fadeInMenu = function (fadeWhenDraggingClass) {
             fadeWhenDraggingClass.animate({opacity: '1'}, 200);
@@ -317,7 +317,25 @@ module.exports = {
         backboneEvents.get().on('refresh:meta', function () {
             meta.init(null, false, false).then(() => {
                     backboneEvents.get().trigger('ready:meta');
-                    layerTree.create(false, [], true);
+                    layerTree.create(false, [], true).then(() => {
+                        // Toggle active layers, so protected layers will be reevaluated
+                        // Skip 'activeLayers' from config
+                        layerTree.getActiveLayers().forEach(l => {
+                            if (!window.vidiConfig.activeLayers.includes(l)) {
+                                switchLayer.init(l, false).then(() => {
+                                    switchLayer.init(l, true);
+                                });
+                            }
+                        })
+                        // If config option 'activeLayers' is set then defer activation of protected layers
+                        if (!urlVars.state) {
+                            window.vidiConfig.activeLayers.forEach((l) => {
+                                switchLayer.init(l, false).then(() => {
+                                    switchLayer.init(l, true);
+                                });
+                            })
+                        }
+                    });
                 }
             );
         });
