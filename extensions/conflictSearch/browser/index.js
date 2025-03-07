@@ -1013,23 +1013,10 @@ let dom = `
         <!-- Tab panes -->
         <div class="tab-content" style="display: none">
             <div role="tabpanel" class="tab-pane active" id="conflict-result-content">
-                <div id="conflict-result" class="d-flex flex-column gap-4">
-                    <div class="d-flex flex-column gap-4">
+                <div id="conflict-result" class="d-flex flex-column gap-2">
+                    <div class="d-flex flex-column gap-4 form-control mt-2">
                         <span id="conflict-result-origin" class="mt-2"></span>
-                        <span class="btn-group">
-                            <input class="btn-check" type="radio" name="conflict-report-type" id="conflict-report-type-1" value="1" checked>
-                            <label for="conflict-report-type-1" class="btn btn-sm btn-outline-secondary">
-                                Kompakt
-                            </label>
-                            <input class="btn-check" type="radio" name="conflict-report-type" id="conflict-report-type-2" value="2">
-                            <label for="conflict-report-type-2" class="btn btn-sm btn-outline-secondary">
-                                Lang, kun hits
-                            </label>
-                            <input class="btn-check" type="radio" name="conflict-report-type" id="conflict-report-type-3" value="3">
-                            <label for="conflict-report-type-3" class="btn btn-sm btn-outline-secondary">
-                                Lang, alle
-                            </label>
-                        </span>
+           
                         <div class="d-flex gap-2 justify-content-start">
                             <button disabled class="btn btn-sm btn-outline-success start-print-btn" id="conflict-print-btn">
                                 <span class="spinner-border spinner-border-sm"
@@ -1053,6 +1040,20 @@ let dom = `
                             </fieldset>
                             <a href="" target="_blank" class="btn btn-sm btn-outline-secondary" id="conflict-excel-btn">Excel</a>
                         </div>
+                          <span class="btn-group">
+                            <input class="btn-check" type="radio" name="conflict-report-type" id="conflict-report-type-1" value="1" checked>
+                            <label for="conflict-report-type-1" class="btn btn-sm btn-outline-secondary">
+                                Kompakt
+                            </label>
+                            <input class="btn-check" type="radio" name="conflict-report-type" id="conflict-report-type-2" value="2">
+                            <label for="conflict-report-type-2" class="btn btn-sm btn-outline-secondary">
+                                Lang, kun hits
+                            </label>
+                            <input class="btn-check" type="radio" name="conflict-report-type" id="conflict-report-type-3" value="3">
+                            <label for="conflict-report-type-3" class="btn btn-sm btn-outline-secondary">
+                                Lang, alle
+                            </label>
+                        </span>
                     </div>
 
                     <div role="tabpanel">
