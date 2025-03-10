@@ -121,4 +121,4 @@ Denne funktion formaterer et decimaltal til det satte sprogs decimal-separator. 
 
     {{formatDecimalNumber tal}}
 
-Her bliver decimal-separatoren i ``tal`` udskiftet med ',' tags, hvis sproget dansk er valgt.
+Her bliver decimal-separatoren i ``tal`` udskiftet med ',', hvis sproget dansk er valgt.
