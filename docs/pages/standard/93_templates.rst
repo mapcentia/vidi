@@ -112,3 +112,13 @@ Denne funktion udskifter linjeskrift med HTML `breaks` ~ <br>. Den kan anvendes,
     {{breakLines beskrivelse}}
 
 Her bliver linjeskrift i den længere tekst ``beskrivelse`` udskiftet med <br> tags.
+
+**formatDecimalNumber**
+
+Denne funktion formaterer et decimaltal til det satte sprogs decimal-separator. Hvis dansk er valgt, vil punktum (.) blive erstattet med komma (,) :
+
+.. code-block:: handlebars
+
+    {{formatDecimalNumber tal}}
+
+Her bliver decimal-separatoren i ``tal`` udskiftet med ',' tags, hvis sproget dansk er valgt.

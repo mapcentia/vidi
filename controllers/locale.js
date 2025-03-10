@@ -12,10 +12,10 @@ router.get('/locale', function(request, response) {
     const ip = ipaddr.process(request.ip).toString();
     let decimalSeparator;
     let lang = request.acceptsLanguages('en', 'en-US', 'da', 'da-DK');
+    decimalSeparator = "."
     if (lang) {
         if (lang === "en") {
             lang = "en-US";
-            decimalSeparator = "."
         }
         if (lang === "da") {
             lang = "da-DK";

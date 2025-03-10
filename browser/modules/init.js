@@ -225,6 +225,12 @@ module.exports = {
                     }
                     return null;
                 });
+                Handlebars.registerHelper('formatDecimalNumber', function (value) {
+                    if (value === null) {
+                        return null;
+                    }
+                    return value.toString().replace('.', window.decimalSeparator);
+                });
 
                 if (configFile) {
                     loadConfig();
