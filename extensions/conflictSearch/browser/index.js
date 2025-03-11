@@ -838,7 +838,7 @@ module.exports = module.exports = {
                             count++;
                             hitsCount++;
                             table1 = $("<table class='table table-data'/>");
-                            hitsData.append("<div class='d-flex align-items-center'><div class='flex-grow-1'>" + title + " (" + v.hits + ")</div><div class='form-check form-switch text-end float-end'><label class='form-check-label'><input class='form-check-input' type='checkbox' data-gc2-id='" + v.table + "' " + (visibleLayers.includes(v.table) ? "checked" : "") + "></label></div></div>");
+                            hitsData.append("<div class='d-flex align-items-center'><div class='flex-grow-1 fw-bold'>" + title + " (" + v.hits + ")</div><div class='form-check form-switch text-end float-end'><label class='form-check-label'><input class='form-check-input' type='checkbox' data-gc2-id='" + v.table + "' " + (visibleLayers.includes(v.table) ? "checked" : "") + "></label></div></div>");
                             let conflictForLayer = metaData.meta !== null ? JSON.parse(metaData.meta) : null;
                             if (conflictForLayer !== null && 'short_conflict_meta_desc' in conflictForLayer) {
                                 hitsData.append("<p>" + conflictForLayer.short_conflict_meta_desc + "</p>");
