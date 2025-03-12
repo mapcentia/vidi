@@ -127,10 +127,14 @@ module.exports = {
                 </div>`;
 
         if (advanced) {
-            $("#place-search").append(colorPicker)
-            $("#search-colorpicker").colorpicker({
-                container: $("#search-colorpicker")
-            });
+            try {
+                $("#place-search").append(colorPicker)
+                $("#search-colorpicker").colorpicker({
+                    container: $("#search-colorpicker")
+                });
+            } catch (e) {
+                console.error(e)
+            }
         }
 
         // Set max zoom then zooming on target
