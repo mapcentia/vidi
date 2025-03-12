@@ -117,9 +117,10 @@ module.exports = {
                             <label for="search-colorpicker-input" class="col-md-3 control-label">${__('Color')}</label>
                             <div id="search-colorpicker" class="input-group colorpicker-component col-md-10">
                                 <input id="search-colorpicker-input" name="search-colorpicker-input"
-                                       type="text" value="#ff0000" class="form-control"
+                                       type="color" value="#ff0000" class="form-control form-control-color"
                                        style="margin-left: 15px;"/>
                                 <span class="input-group-addon"><i style="margin-left: 10px;"/></span>
+
                             </div>
                         </div>
                     </div>
