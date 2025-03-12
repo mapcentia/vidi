@@ -102,6 +102,8 @@ df
 
 Til WMS baggrundskort fra Datafordeler og Dataforsyningen kan der anvendes en proxy, som til dels fixer et problem med Datafordeler og til dels kan forsyne kaldene med brugernavn/kodeord eller token, så disse ikke bliver eksponeret til Vidi brugerne.
 
+* ``redirect`` Angiver om modulet skal omstille kaldene til Datafordeler og Dataforsyningen, eller klienten skal vente på svaret fra services. default er false.
+
 Det er kun nødvendig at angive enten username/password eller token. Token har forrang hvis begge er angivet:
 
 .. code-block:: json
@@ -116,7 +118,8 @@ Det er kun nødvendig at angive enten username/password eller token. Token har f
             "username": "....",
             "password": "....",
             "token": "...."
-        }
+        },
+        "redirect": false
     }
 
 Se i Kørselskonfigurationen :ref:`configjs_baselayers` hvordan WMS'er fra Datafordeler og Dataforsyningen kan anvendes
