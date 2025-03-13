@@ -49,6 +49,7 @@ module.exports = {
         const defaults = {
             schemata: [],
             baseLayers: [],
+            baseLayerGroups: [],
             autoPanPopup: false,
             crossMultiSelect: false,
             brandName: '',
