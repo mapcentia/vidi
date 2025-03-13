@@ -250,12 +250,12 @@ module.exports = module.exports = {
     },
 
     // get the baseLayerGroup object.
-    getBaseLayerGruop() {
+    getBaseLayerGroup() {
         return window.vidiConfig.baseLayerGroups;
     },
     // true: baseLayerGroups exists
     hasBaseLayerGroup() {
-        return _self.getBaseLayerGruop() !== undefined;
+        return _self.getBaseLayerGroup() !== undefined;
     },
 
 
@@ -264,18 +264,18 @@ module.exports = module.exports = {
     baseLayerGroupNames() {
         if (!_self.hasBaseLayerGroup())
             return [];
-        return _self.getBaseLayerGruop().map(group => group.groupName);
+        return _self.getBaseLayerGroup().map(group => group.groupName);
     },
     // returns array of layerIds for a group 
     baseLayerGetLayersFromGroup(groupName) {
-        const group = _self.getBaseLayerGruop().find(group => group.groupName === groupName);
+        const group = _self.getBaseLayerGroup().find(group => group.groupName === groupName);
         return group ? group.layers : null;
     },
     //  true: layerId is in a baseLayerGroup
     baseLayerIsInGroup(layerId) {
         if (!_self.hasBaseLayerGroup())
             return false;
-        for (const group of _self.getBaseLayerGruop()) {
+        for (const group of _self.getBaseLayerGroup()) {
             if (group.layers.includes(layerId)) {
                 return true; //group.groupName;
             }
