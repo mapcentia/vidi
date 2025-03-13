@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## Unreleased
+
+### Added
+
+- Added configuration for grouping baselayers:
+
+```json
+"baseLayerGroups": [
+        {
+            "groupName": "Hexagon DDO ortofoto",
+            "layers": [
+                "DK-DDOland2022_125mm_UTM32ETRS89",
+                ...,
+                ...
+            ]
+        },
+        {
+            "groupName": "GeoDanmark ortofoto",
+            "layers": [
+                "ortofoto_foraar_temp_DF",
+                "ortofoto_foraar_2023",
+                ...,
+                ...
+            ]
+        }
+    ]
+```
+
 ## [2025.3.1] - 2025-10-3
 
 ### Added
