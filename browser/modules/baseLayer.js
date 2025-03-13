@@ -282,9 +282,9 @@ module.exports = module.exports = {
         }
         return false;
     },
-    buildLayerHtmlNode(layerId, layerName, tooltip, displayInfo, abstract) {
+    buildLayerHtmlNode(layerId, layerName, tooltip, displayInfo, abstract, ingroup=false) {
         const sideBySideLayerControl = _self.getSideBySideLayerControl(layerId);
-        return `<li class="list-group-item js-base-layer-control d-flex align-items-center">
+        return `<li class="list-group-item js-base-layer-control d-flex align-items-center${ingroup ? `px-3 border-start-0 border-end-0` : ``}">
                     <div class="d-flex align-items-center gap-1 me-auto">
                         <div class='base-layer-item' data-gc2-base-id='${layerId}'>
                             <input type='radio' class="form-check-input" name='baselayers' value='${layerId}' ${layerId === activeBaseLayer ? `checked=""` : ``}> 
@@ -312,7 +312,7 @@ module.exports = module.exports = {
     },
     buildLayerHtmlGroupStart(groupName, open) {
         const isOpen = open ? "open='open'" : ''
-        return `<li class="list-group-item js-base-layer-control d-flex align-items-center"> <details ${isOpen}><summary>${groupName}</summary>`;
+        return `<li class="list-group-item js-base-layer-control align-items-center p-0"> <details ${isOpen}><summary class="py-2 px-3">${groupName}</summary>`;
     },
     buildLayerHtmlGroupEnd() {
         return '</details></li>';
@@ -335,7 +335,7 @@ module.exports = module.exports = {
 
                 let displayInfo = (bl.abstract ? `visible` : `hidden`);
                 let tooltip = (bl.abstract ? $(bl.abstract).text() : ``);
-                result += _self.buildLayerHtmlNode(bl.id, bl.name, tooltip, displayInfo, bl.abstract)
+                result += _self.buildLayerHtmlNode(bl.id, bl.name, tooltip, displayInfo, bl.abstract, true);
             }
             result += _self.buildLayerHtmlGroupEnd();
         }
