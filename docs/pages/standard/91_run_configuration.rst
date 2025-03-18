@@ -337,6 +337,57 @@ Vidi sørger så for at tilføje bruger-infomationen og tilrette URL.
 .. note::
     HERE, Bing og Google Maps kræver API nøgle opsat i GC2. Google Maps fungerer på en anden måde end andre lag og langt fra optimalt. Fx kan man ikke printe Google Maps.
 
+.. _configjs_baseLayergroups:
+
+baseLayerGroups
+*****************************************************************
+
+Det er muligt at gruppere flere baggrundskort i en gruppe. Grupperne kan vises indledningsvis i en skuffe. 
+
+For at gruppere baggrundskortene, angives strukturen i ``baseLayerGroups``. De enkelte baggrundskort angives med samme id som beskrevet i :ref:`configjs_baselayers`.
+
+.. code-block:: json
+
+    "baseLayerGroups": [
+        {
+            "groupName": "Hexagon DDO ortofoto 2022-1995 + 1954",
+            "layers": [
+                "DK-DDOland2022_125mm_UTM32ETRS89",
+                "DK-DDOland2020_125mm_UTM32ETRS89",
+                "DK_HxIP-ORTO2018_30cm_UTM32ETRS89",
+                "DK-DDOland2016_125mm_UTM32ETRS89",
+                "DK-DDOland2015_25CM_UTM32ETRS89",
+                "DK-DDOland2014_12CM_UTM32ETRS89",
+                "DK-DDObasis2013_25cm_UTM32ETRS89",
+                "DK-DDOland2012_125mm_UTM32ETRS89",
+                "DK-DDOland2010_125mm_UTM32ETRS89",
+                "DK-DDOland2008_125mm_UTM32ETRS89",
+                "DK-DDOland2006_25cm_UTM32ETRS89",
+                "DK-DDOland2004_25cm_UTM32ETRS89",
+                "DK-DDOland2002_40cm_UTM32ETRS89",
+                "DK-DDOland1999_40cm_UTM32ETRS89",
+                "DK-DDOland1995_80cm_UTM32ETRS89",
+                "DK-DDOland1954_25cm_UTM32ETRS89"
+            ]
+        },
+        {
+            "groupName": "GeoDanmark forår ortofoto 2023-2015 + quick-orto",
+            "layers": [
+                "ortofoto_foraar_temp_DF",
+                "ortofoto_foraar_2023",
+                "ortofoto_foraar_2022",
+                "ortofoto_foraar_2021",
+                "ortofoto_foraar_2020",
+                "ortofoto_foraar_2019",
+                "ortofoto_foraar_2018",
+                "ortofoto_foraar_2017",
+                "ortofoto_foraar_2016",
+                "ortofoto_foraar_2015"
+            ]
+        }
+    ]
+
+
 .. _configjs_aboutbox:
 
 aboutBox
