@@ -210,6 +210,7 @@ module.exports = {
                                         defaultValue={this.state.sessionScreenName}
                                         onChange={this.handleChange}
                                         placeholder={__("User name")}
+                                        autoComplete="username"
                                     />
                                 </div>
                                 <div className="col-4"
@@ -224,6 +225,7 @@ module.exports = {
                                         onChange={this.handleChange}
                                         type="password"
                                         placeholder={__("Password")}
+                                        autoComplete="current-password"
                                     />
                                 </div>
                                 <div className="col-2">
