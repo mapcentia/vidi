@@ -319,27 +319,32 @@ module.exports = {
                     backboneEvents.get().trigger('ready:meta');
                     layerTree.create(false, [], true).then(() => {
                         // Toggle active layers, so protected layers will be reevaluated
-                        // Skip 'activeLayers' from config
                         layerTree.getActiveLayers().forEach(l => {
-                            if (!window.vidiConfig.activeLayers.includes(l)) {
-                                switchLayer.init(l, false).then(() => {
-                                    switchLayer.init(l, true);
-                                });
-                            }
+                            switchLayer.init(l, false).then(() => {
+                                switchLayer.init(l, true);
+                            });
                         })
                         if (!urlVars.state) {
-                            meta.getLayerNamesFromSchemata(window.vidiConfig.activeLayers).then(layers => {
-                                window.vidiConfig.activeLayers.forEach(i => {
-                                    if (i.startsWith('v:')) {
-                                        layers.push(i);
-                                    }
+                            if (window.vidiConfig?.activeLayers?.length > 0) {
+                                meta.getLayerNamesFromSchemata(window.vidiConfig.activeLayers.map(i => i.replace('v:', ''))).then(layers => {
+                                    window.vidiConfig.activeLayers.forEach(i => {
+                                        if (i.startsWith('v:')) {
+                                            layers.push(i);
+                                            const index = layers.indexOf(i.replace('v:', ''));
+                                            layers.splice(index, 1);
+                                        }
+                                    })
+                                    console.info('Activating layers:', layers)
+                                    layers.forEach((l) => {
+                                        // Don't activate layer already active
+                                        if (!layerTree.getActiveLayers().includes(l)) {
+                                            switchLayer.init(l, false).then(() => {
+                                                switchLayer.init(l, true);
+                                            });
+                                        }
+                                    })
                                 })
-                                layers.forEach((l) => {
-                                    switchLayer.init(l, false).then(() => {
-                                        switchLayer.init(l, true);
-                                    });
-                                })
-                            })
+                            }
                         }
                     });
                 }

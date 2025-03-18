@@ -117,3 +117,6 @@ config/_variables.less
 
 # Environment variables
 .env
+
+# Ignore the docs build folder
+docs/_build

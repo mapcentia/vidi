@@ -5,12 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## Unreleased
+## [UNRELEASED] - 2025-18-3
 
 ### Added
 
-- Added configuration for grouping baselayers:
-
+- A new config `extensionConfig.editor.alwaysActivate`. If set to `false` the editor controls will be hidden until the user sign in.
+- Configuration for grouping baselayers:
 ```json
 "baseLayerGroups": [
         {
@@ -33,6 +33,10 @@ and this project adheres to [CalVer](https://calver.org/).
     ]
 ```
 
+### Fixed
+
+- Better handling of vector layers in `activeLayers`. If `activeLayers` only had vector layers, they wouldn't be activated.
+
 ## [2025.3.1] - 2025-10-3
 
 ### Added
@@ -42,7 +46,8 @@ and this project adheres to [CalVer](https://calver.org/).
 ## [2025.3.0] - 2025-7-3
 
 ### Added
-
+- Added information on building the documentation.
+- Fixed some typos in changelog.
 - The default coordinate system can now be set in Coordinates module:
 
 ```json
@@ -72,7 +77,7 @@ and this project adheres to [CalVer](https://calver.org/).
           "title": "My symbols"
         }
       ],
-      "options": {
+      "symbolOptions": {
         "extra": false
       }
     }

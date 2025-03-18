@@ -7,11 +7,12 @@
 const express = require('express');
 const request = require('request');
 const router = express.Router();
+const config = require('../config/config.js');
 
 router.get('/api/datafordeler/*', (req, response) => {
-    const userName = require('../config/config.js')?.df?.datafordeler?.username;
-    const pwd = require('../config/config.js')?.df?.datafordeler?.password;
-    const token = require('../config/config.js')?.df?.datafordeler?.token;
+    const userName = config?.df?.datafordeler?.username;
+    const pwd = config?.df?.datafordeler?.password;
+    const token = config?.df?.datafordeler?.token;
     const host = 'https://services.datafordeler.dk';
     let creds = token ? `&token=${token}` : `&username=${userName}&password=${pwd}`;
     let requestURL = host + decodeURIComponent(req.url.substr(17)) + creds;
@@ -19,9 +20,9 @@ router.get('/api/datafordeler/*', (req, response) => {
     get(requestURL, response);
 });
 router.get('/api/dataforsyningen/*', (req, response) => {
-    const userName = require('../config/config.js')?.df?.dataforsyningen?.username;
-    const pwd = require('../config/config.js')?.df?.dataforsyningen?.password;
-    const token = require('../config/config.js')?.df?.dataforsyningen?.token;
+    const userName = config?.df?.dataforsyningen?.username;
+    const pwd = config?.df?.dataforsyningen?.password;
+    const token = config?.df?.dataforsyningen?.token;
     const host = 'https://api.dataforsyningen.dk';
     let creds = token ? `&token=${token}` : `&username=${userName}&password=${pwd}`;
     let requestURL = host + decodeURIComponent(req.url.substr(20)) + creds;
@@ -30,11 +31,17 @@ router.get('/api/dataforsyningen/*', (req, response) => {
 });
 
 const get = (url, res) => {
-    //console.log(url);
-    let options = {
-        method: 'GET',
-        uri: url
-    };
-    request(options).on('error', (e) => console.error(e)).pipe(res);
+    // Let the user decide if they want to redirect or wait for the response
+    if (config?.df?.redirect) {
+        res.redirect(url);
+    
+    // or wait for the response
+    } else {
+        let options = {
+            method: 'GET',
+            uri: url
+        };
+        request(options).on('error', (e) => console.error(e)).pipe(res);
+    }
 }
 module.exports = router;
