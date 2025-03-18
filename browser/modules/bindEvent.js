@@ -319,13 +319,10 @@ module.exports = {
                     backboneEvents.get().trigger('ready:meta');
                     layerTree.create(false, [], true).then(() => {
                         // Toggle active layers, so protected layers will be reevaluated
-                        // Skip 'activeLayers' from config
                         layerTree.getActiveLayers().forEach(l => {
-                            if (!window.vidiConfig.activeLayers.includes(l)) {
-                                switchLayer.init(l, false).then(() => {
-                                    switchLayer.init(l, true);
-                                });
-                            }
+                            switchLayer.init(l, false).then(() => {
+                                switchLayer.init(l, true);
+                            });
                         })
                         if (!urlVars.state) {
                             if (window.vidiConfig?.activeLayers?.length > 0) {
@@ -339,9 +336,12 @@ module.exports = {
                                     })
                                     console.info('Activating layers:', layers)
                                     layers.forEach((l) => {
-                                        switchLayer.init(l, false).then(() => {
-                                            switchLayer.init(l, true);
-                                        });
+                                        // Don't activate layer already active
+                                        if (!layerTree.getActiveLayers().includes(l)) {
+                                            switchLayer.init(l, false).then(() => {
+                                                switchLayer.init(l, true);
+                                            });
+                                        }
                                     })
                                 })
                             }

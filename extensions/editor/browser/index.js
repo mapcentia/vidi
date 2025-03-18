@@ -1,6 +1,6 @@
 /*
  * @author     Alexander Shumilov
- * @copyright  2013-2023 MapCentia ApS
+ * @copyright  2013-2025 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -55,6 +55,8 @@ let featureWasEdited = false;
 let nonCommitedEditedFeature = false;
 
 let switchLayer;
+
+let session;
 
 const FileUploadWidget = require('./FileUploadWidget');
 
@@ -139,6 +141,7 @@ module.exports = {
         switchLayer = o.switchLayer;
         backboneEvents = o.backboneEvents;
         bindEvent = o.bindEvent;
+        session = o.extensions.session.index;
 
         _self = this;
         try {
@@ -226,15 +229,20 @@ module.exports = {
         $(document).arrive('.gc2-edit-tools', {
             existing: true
         }, function () {
+
+            if (!session.isAuthenticated() && !window.vidiConfig.editorAlwaysActivated) {
+                document.querySelectorAll('.gc2-edit-tools').forEach(e => e.classList.add('d-none'))
+            }
+
             let id = parseInt(($(this).data('edit-layer-id')));
             let name = ($(this).data('edit-layer-name'));
             let vector = ($(this).data('edit-vector'));
-            $(this).find('.popup-edit-btn').on("click", function (e) {
+            $(this).find('.popup-edit-btn').on('click', function (e) {
                 isVectorLayer = vector;
                 _self.edit(getLayerById(id), name, isVectorLayer)
                 e.stopPropagation();
             });
-            $(this).find('.popup-delete-btn').on("click", function (e) {
+            $(this).find('.popup-delete-btn').on('click', function (e) {
                 if (window.confirm(__(`Are you sure you want to delete the feature?`))) {
                     isVectorLayer = vector;
                     _self.delete(getLayerById(id), name, isVectorLayer)

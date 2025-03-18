@@ -97,6 +97,7 @@ module.exports = {
             emptyInfoCallback: null,
             infoCallback: null,
             dateFormats: {},
+            editorAlwaysActivated: true,
         };
         // Set session from URL
         if (typeof urlVars.session === "string") {
