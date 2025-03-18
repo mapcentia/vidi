@@ -9,7 +9,7 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ### Added
 
-- A new config `editorAlwaysActivated`. If set to `false` the editor controls will be hidden until the user sign in.
+- A new config `extensionConfig.editor.alwaysActivate`. If set to `false` the editor controls will be hidden until the user sign in.
 
 ### Fixed
 

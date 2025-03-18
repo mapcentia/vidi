@@ -24,6 +24,7 @@ let APIBridgeSingletone = require('../../../browser/modules/api-bridge');
 
 const config = require('../../../config/config.js');
 const drawTooltip = config?.extensionConfig?.editor?.tooltip;
+const alwaysActivate = config?.extensionConfig?.editor?.alwaysActivate;
 
 /**
  *
@@ -230,7 +231,7 @@ module.exports = {
             existing: true
         }, function () {
 
-            if (!session.isAuthenticated() && !window.vidiConfig.editorAlwaysActivated) {
+            if (!session.isAuthenticated() && !alwaysActivate) {
                 document.querySelectorAll('.gc2-edit-tools').forEach(e => e.classList.add('d-none'))
             }
 
