@@ -328,18 +328,23 @@ module.exports = {
                             }
                         })
                         if (!urlVars.state) {
-                            meta.getLayerNamesFromSchemata(window.vidiConfig.activeLayers).then(layers => {
-                                window.vidiConfig.activeLayers.forEach(i => {
-                                    if (i.startsWith('v:')) {
-                                        layers.push(i);
-                                    }
+                            if (window.vidiConfig?.activeLayers?.length > 0) {
+                                meta.getLayerNamesFromSchemata(window.vidiConfig.activeLayers.map(i => i.replace('v:', ''))).then(layers => {
+                                    window.vidiConfig.activeLayers.forEach(i => {
+                                        if (i.startsWith('v:')) {
+                                            layers.push(i);
+                                            const index = layers.indexOf(i.replace('v:', ''));
+                                            layers.splice(index, 1);
+                                        }
+                                    })
+                                    console.info('Activating layers:', layers)
+                                    layers.forEach((l) => {
+                                        switchLayer.init(l, false).then(() => {
+                                            switchLayer.init(l, true);
+                                        });
+                                    })
                                 })
-                                layers.forEach((l) => {
-                                    switchLayer.init(l, false).then(() => {
-                                        switchLayer.init(l, true);
-                                    });
-                                })
-                            })
+                            }
                         }
                     });
                 }
