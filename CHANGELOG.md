@@ -5,12 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [UNRELEASED] - 2025-24-2
+## [UNRELEASED] - 2025-18-3
+
+### Added
+
+- A new config `extensionConfig.editor.alwaysActivate`. If set to `false` the editor controls will be hidden until the user sign in.
+
+### Fixed
+
+- Better handling of vector layers in `activeLayers`. If `activeLayers` only had vector layers, they wouldn't be activated.
+
+## [2025.3.1] - 2025-10-3
+
+### Added
+
+- Added Handlebars helper 'formatDecimalNumber', which converts a decimal number to the chosen locale (either decimal separator '.' or ',').
+
+## [2025.3.0] - 2025-7-3
 
 ### Added
 - Added information on building the documentation.
 - Fixed some typos in changelog.
-
 - The default coordinate system can now be set in Coordinates module:
 
 ```json
@@ -47,13 +62,21 @@ and this project adheres to [CalVer](https://calver.org/).
   }
 }
 ```
-- 
 - Symbol handles are now using Bootstrap icons.
+- Config option 'activateLayers' can now be set to the same kind of values as 'schemata' (including tag: and schema name).
+  A new method meta::getLayerNamesFromSchemata will convert the schemata to an array of layer names.
+- A global variable `decimalSeparator` is now set from current locale. It's used in conflictSearch.
 
 ## Changed
 
 - Auto hide login modal after successful login.
 - When using `featureInfoTableOnMap` closing the popup wil clear selected features in the map.
+- Config option 'activeLayers' will now be evaluated when signing in, so protected layers will be switched on.
+
+### Fixed
+
+- When signin out active layers will be toggled so protected layers are efficient removed from the map.
+- Bug regrading removal of empty groups in conflictSearch.
 
 ## [2025.2.1] - 2025-7-2
 

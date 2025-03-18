@@ -24,6 +24,7 @@ const config = require('../../config/config.js');
 import mustache from 'mustache';
 import dayjs from "dayjs";
 import customParseFormat from 'dayjs/plugin/customParseFormat';
+import {meta} from "@turf/turf";
 dayjs.extend(customParseFormat);
 
 module.exports = {
@@ -96,6 +97,7 @@ module.exports = {
             emptyInfoCallback: null,
             infoCallback: null,
             dateFormats: {},
+            editorAlwaysActivated: true,
         };
         // Set session from URL
         if (typeof urlVars.session === "string") {
@@ -223,6 +225,12 @@ module.exports = {
                         return text;
                     }
                     return null;
+                });
+                Handlebars.registerHelper('formatDecimalNumber', function (value) {
+                    if (value === null) {
+                        return null;
+                    }
+                    return value.toString().replace('.', window.decimalSeparator);
                 });
 
                 if (configFile) {
@@ -576,9 +584,21 @@ module.exports = {
                                 modules.layerTree.setRecreateStores(true);
                                 // Switch on activeLayers from config if not snapshot
                                 if (!urlVars.state) {
-                                    st.modules.layerTree.activeLayers.forEach((l) => {
-                                        modules.switchLayer.init(l, true)
-                                    })
+                                    if (window.vidiConfig?.activeLayers?.length > 0) {
+                                        modules.meta.getLayerNamesFromSchemata(window.vidiConfig.activeLayers.map(i => i.replace('v:', ''))).then(layers => {
+                                            window.vidiConfig.activeLayers.forEach(i => {
+                                                if (i.startsWith('v:')) {
+                                                    layers.push(i);
+                                                    const index = layers.indexOf(i.replace('v:', ''));
+                                                    layers.splice(index, 1);
+                                                }
+                                            })
+                                            console.info('Activating layers:', layers)
+                                            layers.forEach((l) => {
+                                                modules.switchLayer.init(l, true)
+                                            })
+                                        })
+                                    }
                                 }
                             });
                         })

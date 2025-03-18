@@ -73,7 +73,7 @@ module.exports = {
                 mainLayerOffcanvas.toggle()
             });
             if (window.vidiConfig.showOffcanvas === true ||
-                ((window.vidiConfig.showOffcanvas === 'mobile' || window.vidiConfig.showOffcanvas === 'mobil')  && window.screen.width > 700)
+                ((window.vidiConfig.showOffcanvas === 'mobile' || window.vidiConfig.showOffcanvas === 'mobil') && window.screen.width > 700)
             ) {
                 mainLayerOffcanvas.show();
             }
@@ -99,7 +99,7 @@ module.exports = {
             fadeWhenDraggingClass.animate({opacity: '0.3'}, 200);
             fadeWhenDraggingClass.css('pointer-events', 'none');
         }
-         
+
         // Define how we want the menu to fade in
         let fadeInMenu = function (fadeWhenDraggingClass) {
             fadeWhenDraggingClass.animate({opacity: '1'}, 200);
@@ -317,7 +317,36 @@ module.exports = {
         backboneEvents.get().on('refresh:meta', function () {
             meta.init(null, false, false).then(() => {
                     backboneEvents.get().trigger('ready:meta');
-                    layerTree.create(false, [], true);
+                    layerTree.create(false, [], true).then(() => {
+                        // Toggle active layers, so protected layers will be reevaluated
+                        layerTree.getActiveLayers().forEach(l => {
+                            switchLayer.init(l, false).then(() => {
+                                switchLayer.init(l, true);
+                            });
+                        })
+                        if (!urlVars.state) {
+                            if (window.vidiConfig?.activeLayers?.length > 0) {
+                                meta.getLayerNamesFromSchemata(window.vidiConfig.activeLayers.map(i => i.replace('v:', ''))).then(layers => {
+                                    window.vidiConfig.activeLayers.forEach(i => {
+                                        if (i.startsWith('v:')) {
+                                            layers.push(i);
+                                            const index = layers.indexOf(i.replace('v:', ''));
+                                            layers.splice(index, 1);
+                                        }
+                                    })
+                                    console.info('Activating layers:', layers)
+                                    layers.forEach((l) => {
+                                        // Don't activate layer already active
+                                        if (!layerTree.getActiveLayers().includes(l)) {
+                                            switchLayer.init(l, false).then(() => {
+                                                switchLayer.init(l, true);
+                                            });
+                                        }
+                                    })
+                                })
+                            }
+                        }
+                    });
                 }
             );
         });
