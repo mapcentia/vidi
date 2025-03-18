@@ -17,19 +17,34 @@ Extensions
 .. contents::
     :depth: 3
 
-.. _edit:
+.. _extensions_directions:
 
-Editering
+Rutevejledning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Introduktion
+``directions`` er en udvidelse til vidi der giver mulighed for at lave rutevejledning i kortet. Der laves en rutevejledning fra brugerens position til et punkt på kortet. Det er i øjeblikket kun muligt at lave rutevejledning med Google Maps.
+
+Intallation
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""" 
+ 
+Funktionen skal medtages i :ref:`configjs_extensions`
+
+.. code-block:: js
+
+    extensions: {
+        browser: [
+            {"directions": ["index"]},
+        ],
+    },
+
+
+Brug
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""" 
 
-.. figure:: ../../_media/meow.jpg
-    :width: 400px
+.. figure:: ../../_media/extensions-directions-icon.png
     :align: center
-    :alt: meow
     :figclass: align-center
-    :name: cat
 
-    figure are like images but with a caption
+    ikon i :ref:`gettingstarted_controls`
+
+Start med at aktivere geolokation i :ref:`gettingstarted_controls` og klik på ikonet. Derefter klik på kortet for at vælge destinationen. Rutevejledningen vil åbne i et nyt vindue.

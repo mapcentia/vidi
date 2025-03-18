@@ -24,7 +24,8 @@ and this project adheres to [CalVer](https://calver.org/).
 ## [2025.3.0] - 2025-7-3
 
 ### Added
-
+- Added information on building the documentation.
+- Fixed some typos in changelog.
 - The default coordinate system can now be set in Coordinates module:
 
 ```json
@@ -54,7 +55,7 @@ and this project adheres to [CalVer](https://calver.org/).
           "title": "My symbols"
         }
       ],
-      "options": {
+      "symbolOptions": {
         "extra": false
       }
     }

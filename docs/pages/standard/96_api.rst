@@ -31,6 +31,15 @@ Med denne metode kan man tænde for et lag. Den tager et argument som er et fuld
 
     api.turnOn("schema.lag");
 
+Sluk lag (turnOff)
+=================================================================
+
+Med denne metode kan man tænde for et lag. Den tager et argument som er et fuldt lagnavn med evt. type præfiks:
+
+.. code-block:: javascript
+
+    api.turnOff("schema.lag");
+
 Sæt filter på lag (filter)
 =================================================================
 
