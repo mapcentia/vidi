@@ -89,18 +89,18 @@ module.exports = {
         let placeholder = window.vidiConfig?.searchConfig?.placeholderText;
         if (placeholder) {
             searchTxt = placeholder;
-            $(".custom-search.tt-input").attr("placeholder",
+            $(".custom-search.typeahead.form-control:not(.tt-hint)").attr("placeholder",
                 searchTxt
             );
         } else {
             searchTxt = "Adresse, matr. nr.";
             if (sfeSearchActive) {
-                $(".custom-search.tt-input").attr("placeholder",
+                $(".custom-search.typeahead.form-control:not(.tt-hint)").attr("placeholder",
                     searchTxt
                     + (esrSearchActive ? ", ESR nr. " : "")
                     + " eller SFE nr.");
             } else if (esrSearchActive) {
-                $(".custom-search.tt-input").attr("placeholder",
+                $(".custom-search.typeahead.form-control:not(.tt-hint)").attr("placeholder",
                     searchTxt + " eller ESR nr.");
             }
         }
@@ -1201,7 +1201,7 @@ module.exports = {
             fromVarsIsDone = true;
         }
         $(el).typeahead({
-            highlight: false
+            highlight: false,
         }, ...standardSearches);
         $(el).bind('typeahead:selected', function (obj, datum, name) {
             if ((type1 === "adresse" && name === "adresse") || (type2 === "jordstykke" && name === "matrikel")
