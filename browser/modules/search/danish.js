@@ -1201,7 +1201,7 @@ module.exports = {
             fromVarsIsDone = true;
         }
         $(el).typeahead({
-            highlight: false,
+            highlight: false
         }, ...standardSearches);
         $(el).bind('typeahead:selected', function (obj, datum, name) {
             if ((type1 === "adresse" && name === "adresse") || (type2 === "jordstykke" && name === "matrikel")
