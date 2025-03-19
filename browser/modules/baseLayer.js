@@ -260,13 +260,13 @@ module.exports = module.exports = {
 
 
 
-    // returns a array of groupName from 
+    // returns a array of groupName from
     baseLayerGroupNames() {
         if (!_self.hasBaseLayerGroup())
             return [];
         return _self.getBaseLayerGroup().map(group => group.groupName);
     },
-    // returns array of layerIds for a group 
+    // returns array of layerIds for a group
     baseLayerGetLayersFromGroup(groupName) {
         const group = _self.getBaseLayerGroup().find(group => group.groupName === groupName);
         return group ? group.layers : null;
@@ -300,7 +300,7 @@ module.exports = module.exports = {
                             style="visibility: ${displayInfo};"
                             data-baselayer-name="${layerName}"
                             data-baselayer-info="${abstract}"
-                            class="info-label btn btn-sm btn-light"><i class="bi bi-info-square pe-none"></i></button>
+                            class="info-label btn btn-sm btn-outline-secondary"><i class="bi bi-info-square pe-none"></i></button>
                     </div>
                 </li>`;
 
@@ -364,7 +364,7 @@ module.exports = module.exports = {
             let appendedCode = ``;
             for (const bl of window.setBaseLayers) {
 
-                 
+
                 let layerId = false;
                 let layerName = false;
                 if (typeof bl.type !== "undefined" && bl.type === "XYZ") {
@@ -674,7 +674,7 @@ module.exports = module.exports = {
                 let BLmaxZoom = bl.maxZoom? bl.maxZoom : 20;
                 let BLmaxNativeZoom = bl.maxNativeZoom? bl.maxNativeZoom : 18;
 
-                
+
                 if (bl?.type === "WMTS") {
                     result = cloud.get().addWMTSBaselayer(bl.url, {
                         name: bl.id,

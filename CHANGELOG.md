@@ -10,27 +10,29 @@ and this project adheres to [CalVer](https://calver.org/).
 ### Added
 
 - A new config `extensionConfig.editor.alwaysActivate`. If set to `false` the editor controls will be hidden until the user sign in.
-- Configuration for grouping baselayers:
+- Configuration for grouping base layers:
 ```json
-"baseLayerGroups": [
-        {
-            "groupName": "Hexagon DDO ortofoto",
-            "layers": [
-                "DK-DDOland2022_125mm_UTM32ETRS89",
-                ...,
-                ...
-            ]
-        },
-        {
-            "groupName": "GeoDanmark ortofoto",
-            "layers": [
-                "ortofoto_foraar_temp_DF",
-                "ortofoto_foraar_2023",
-                ...,
-                ...
-            ]
-        }
-    ]
+{
+  "baseLayerGroups": [
+    {
+      "groupName": "Hexagon DDO ortofoto",
+      "layers": [
+        "DK-DDOland2022_125mm_UTM32ETRS89",
+        ...,
+        ...
+      ]
+    },
+    {
+      "groupName": "GeoDanmark ortofoto",
+      "layers": [
+        "ortofoto_foraar_temp_DF",
+        "ortofoto_foraar_2023",
+        ...,
+        ...
+      ]
+    }
+  ]
+}
 ```
 
 ### Fixed
