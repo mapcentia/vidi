@@ -147,7 +147,7 @@ module.exports = module.exports = {
                     return true;
                 }
             }).map(v => v.id)
-
+            let layerListItems = window.vidiConfig.baseLayers.map(v => v.id)
             cloud.get().setBaseLayer(str, (e) => {
                 // _tileReady() in src/layer/tile/GridLayer.js@879 is firing more than once on first load for
                 // MVT layers, so the single time event firing guard was added
@@ -155,11 +155,12 @@ module.exports = module.exports = {
                     if (alreadyLoaded) return;
                     alreadyLoaded = true;
                 }
-                // Re-arrange the fail-over array
-                const index = drawerItems.indexOf(str);
-                if (index !== -1) {
-                    drawerItems = [...drawerItems.slice(index), ...drawerItems.slice(0, index)];
-                }
+                // Re-arrange the fail-over arrays
+                let i1 = drawerItems.indexOf(str);
+                drawerItems = [...drawerItems.slice(i1), ...drawerItems.slice(0, i1)];
+                let i2 = layerListItems.indexOf(str);
+                layerListItems = [...layerListItems.slice(i2), ...layerListItems.slice(0, i2)];
+
                 // If 100 tiles fails within 10 secs the next base layer is chosen
                 if (numberOfErroredTiles > 100) {
                     const message = `Base layer ${str} was loaded with errors (${numberOfErroredTiles} tiles failed to load), trying to load next layer`;
@@ -173,20 +174,7 @@ module.exports = module.exports = {
                             mapcontrols.setToggleItem();
                         }
                     } else {
-                        window.setBaseLayers.map(item => {
-                            if (failedLayers.indexOf(item.id) === -1) {
-                                alternativeLayer = item.id;
-                                return false;
-                            }
-                        });
-                        backboneEvents.get().trigger("doneLoading:setBaselayer", str);
-                        if (alternativeLayer === false) {
-                            console.error(`Unable to load any of available base layers`);
-                        } else {
-                            setTimeout(() => {
-                                _self.init(alternativeLayer);
-                            });
-                        }
+                        _self.init(layerListItems[1]);
                     }
                 } else {
                     backboneEvents.get().trigger("doneLoading:setBaselayer", str);
