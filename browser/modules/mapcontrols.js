@@ -1,6 +1,6 @@
 /*
  * @author     Alexander Shumilov
- * @copyright  2013-2023 MapCentia ApS
+ * @copyright  2013-2025 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -9,7 +9,7 @@
 const MODULE_NAME = `mapcontrols`;
 
 let state, cloud, setting, backboneEvents;
-let clearMapControl, fullScreenMapControl, defaultMapExtentControl, baselayerToggleControl, baselayerDrawerControl, googleDirectionsMapControl;
+let clearMapControl, fullScreenMapControl, defaultMapExtentControl, baselayerToggleControl, baselayerDrawerControl;
 let _self = false;
 let embedModeIsEnabled = false;
 let utils;
@@ -149,11 +149,8 @@ module.exports = {
                         id="baselayer-toggle"
                         class="leaflet-bar-part leaflet-bar-part-single overflow-hidden">
                         <img alt="" src="${window.vidiConfig.baseLayers?.[toggledBaselayer === 0 ? 1 : 0]?.thumbnail}"></a>`),
-                    onclick: (e) => {
-                        e.target.src = window.vidiConfig.baseLayers?.[toggledBaselayer]?.thumbnail;
-                        e.target.parentElement.title = window.vidiConfig.baseLayers?.[toggledBaselayer]?.name;
-                        toggledBaselayer = toggledBaselayer === 0 ? 1 : 0
-                        setBaseLayer.init(window.vidiConfig.baseLayers?.[toggledBaselayer]?.id);
+                    onclick: () => {
+                        _self.setToggleItem()
                     }
                 };
                 let BaselayerToggleControl = L.Control.extend({
@@ -199,11 +196,7 @@ module.exports = {
                                 cl.add('d-none');
                             }
                         } else {
-                            const el = e.target;
-                            const id = el.dataset.vidiBaselayerId;
-                            document.querySelectorAll('.baselayer-drawer-item-shadow').forEach(node => node.classList.add('d-none'))
-                            el.nextElementSibling.classList.remove('d-none')
-                            setBaseLayer.init(id);
+                            _self.setDrawerItem(e.target.dataset.vidiBaselayerId)
                         }
                     }
                 };
@@ -307,6 +300,22 @@ module.exports = {
         zoomOut.innerHTML = "";
         zoomOut.classList.add("bi");
         zoomOut.classList.add("bi-dash");
+    },
+
+    setDrawerItem: (id) => {
+        document.querySelectorAll('.baselayer-drawer-item-shadow').forEach(node => node.classList.add('d-none'))
+        document.querySelector(`[data-vidi-baselayer-id="${id}"]`).nextElementSibling.classList.remove('d-none')
+        setBaseLayer.init(id);
+    },
+
+    setToggleItem: () => {
+        const e = document.querySelector('.baselayer-toggle img');
+        const baseLayers = window.vidiConfig.baseLayers;
+        toggledBaselayer = baseLayers.findIndex(x => x.id === setBaseLayer.getActiveBaseLayer()?.id);
+        e.src = window.vidiConfig.baseLayers?.[toggledBaselayer]?.thumbnail;
+        e.parentElement.title = window.vidiConfig.baseLayers?.[toggledBaselayer]?.name;
+        toggledBaselayer = toggledBaselayer === 0 ? 1 : 0
+        setBaseLayer.init(window.vidiConfig.baseLayers?.[toggledBaselayer]?.id);
     },
 
     /**

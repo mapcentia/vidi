@@ -40,6 +40,7 @@ and this project adheres to [CalVer](https://calver.org/).
 ### Fixed
 
 - Better handling of vector layers in `activeLayers`. If `activeLayers` only had vector layers, they wouldn't be activated.
+- Fail-over for base layers is now working in embed mode with both base layer toggle and drawer.
 
 ## [2025.3.1] - 2025-10-3
 
