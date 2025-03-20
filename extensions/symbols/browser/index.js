@@ -25,6 +25,8 @@ let filesAreLoaded = false;
 let autoScale = false;
 let locked = false;
 let popup;
+let bindEvent;
+let isStarted = false;
 const exId = "symbols";
 const urlparser = require('./../../../browser/modules/urlparser');
 const db = urlparser.db;
@@ -230,7 +232,7 @@ const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file, gro
     let deleteHandleStr = "d_" + id;
     let scaleHandleStr = "s_" + id;
     let extraHandleStr = "e_" + id;
-    let html = `<div class="drag-marker symbols-map ${attension ? 'target': ''} ${classStr}" draggable="false">`;
+    let html = `<div class="drag-marker symbols-map ${attension ? 'target' : ''} ${classStr}" draggable="false">`;
     let callback = config?.extensionConfig?.symbols?.symbolOptions?.[file]?.callback;
     if (callback === undefined) {
         callback = config?.extensionConfig?.symbols?.options?.callback;
@@ -415,8 +417,10 @@ module.exports = {
         utils = o.utils;
         cloud = o.cloud;
         state = o.state;
+        bindEvent = o.bindEvent;
         backboneEvents = o.backboneEvents;
         _self = this;
+
         return this;
     },
 
@@ -424,6 +428,7 @@ module.exports = {
      *
      */
     init: function () {
+
         let map = cloud.get().map;
         let prevZoom = map.getZoom();
 
@@ -572,7 +577,7 @@ module.exports = {
                             symbolState[id].scale = scale;
                         }
                         $($(`.dm_${id}`)[0]).css('transform', 'rotate(' + (symbolState[id].rotation).toString() + 'deg) scale(' + scale.toString() + ')');
-                        backboneEvents.get().trigger(`${MODULE_ID}:state_change`);
+                        setState();
                     }
                 }
             }
@@ -600,11 +605,7 @@ module.exports = {
      * @returns {{}}
      */
     getState: () => {
-        return {
-            symbolState: symbolState,
-            autoScale: autoScale,
-            locked: locked
-        };
+        return {symbolState, autoScale, locked};
     },
 
     /**
@@ -614,7 +615,12 @@ module.exports = {
      */
     applyState: (newState) => {
         return new Promise((resolve) => {
-            if (config?.extensionConfig?.symbols?.stateless === true) {
+            if (config?.extensionConfig?.symbols?.stateless === true && !isStarted) {
+                isStarted = true;
+                setTimeout(() => {
+                    _self.resetState();
+                    setState();
+                }, 100);
                 resolve();
                 return;
             }
@@ -629,7 +635,8 @@ module.exports = {
                     _self.lock();
                 }
             }
-            backboneEvents.get().trigger(`${MODULE_ID}:state_change`);
+            setState();
+            isStarted = true;
             resolve();
         });
     },
