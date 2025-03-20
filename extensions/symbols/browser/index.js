@@ -616,11 +616,11 @@ module.exports = {
     applyState: (newState) => {
         return new Promise((resolve) => {
             if (config?.extensionConfig?.symbols?.stateless === true && !isStarted) {
-                isStarted = true;
                 setTimeout(() => {
                     _self.resetState();
                     setState();
-                }, 100);
+                    isStarted = true;
+                }, 0);
                 resolve();
                 return;
             }
