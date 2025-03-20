@@ -41,6 +41,7 @@ var alreadySetFromState = false;
 var setState = true;
 var paramsFromDb;
 let scaleFromForm = false;
+let min_scale = scales.length > 0 ? Math.min(...scales) : 200;
 
 import dayjs from 'dayjs';
 import advancedFormat from "dayjs/plugin/advancedFormat";
@@ -460,8 +461,8 @@ module.exports = {
 
         var layerQueryDraw = [], layerQueryResult = [], layerQueryBuffer = [], layerPrint = [], e, parr,
             configFile = null;
-        if (scale && (isNaN(scale) || scale < 200)) {
-            alert(__("Not a valid scale. Must be over 200."));
+        if (scale && (isNaN(scale) || scale < min_scale)) {
+            alert(__("Not a valid scale. Must be over ") + min_scale + ".");
             return false;
         }
         backboneEvents.get().trigger("start:print");

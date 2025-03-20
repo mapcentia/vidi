@@ -41,6 +41,10 @@ and this project adheres to [CalVer](https://calver.org/).
 
 - Better handling of vector layers in `activeLayers`. If `activeLayers` only had vector layers, they wouldn't be activated.
 
+### Changed
+
+- The minimum scale available for print has been changed from a fixed `200` to the lowest value of `config.print.scales`.
+
 ## [2025.3.1] - 2025-10-3
 
 ### Added
