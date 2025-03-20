@@ -182,7 +182,7 @@ module.exports = {
         "Ok": "Ok",
         "Apply default style settings for this drawing?": "Apply default style settings for this drawing?",
 
-        "Not a valid scale. Must be over 200.": "Not a valid scale. Must be over 200.",
+        "Not a valid scale. Must be over ": "Not a valid scale. Must be over ",
 
         "Languages": "Languages",
 
