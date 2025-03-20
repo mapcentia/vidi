@@ -342,7 +342,7 @@ Vidi sørger så for at tilføje bruger-infomationen og tilrette URL.
 baseLayerGroups
 *****************************************************************
 
-Det er muligt at gruppere flere baggrundskort i en gruppe. Grupperne kan vises indledningsvis i en skuffe. 
+Det er muligt at gruppere flere baggrundskort i en gruppe. Grupperne kan vises indledningsvis i en skuffe.
 
 For at gruppere baggrundskortene, angives strukturen i ``baseLayerGroups``. De enkelte baggrundskort angives med samme id som beskrevet i :ref:`configjs_baselayers`.
 
@@ -773,6 +773,17 @@ Hvis ens datoer ikke er et standardformat, men fx Plandata's, hvor datoer bliver
     Se `mulige datoformateringer <https://day.js.org/docs/en/display/format>`_
 
     Læs mere om :ref:`templates`
+
+.. _configjs_dateformats:
+
+statelessDraw
+*****************************************************************
+
+Hvis man ikke vil have at tegninger "hænger ved" efter refresh af browser, kan denne option sættes til `true`.
+
+.. code-block:: json
+
+    "statelessDraw": false
 
 #################################################################
 Referencer
