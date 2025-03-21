@@ -36,6 +36,12 @@ and this project adheres to [CalVer](https://calver.org/).
 ```
 - Draw module can now be set to stateless with config `statelessDraw: true`. This means that drawings are not recreated on browser refresh.
 - Symbol extension can now set to stateless with config `extensionConfig.symbols.stateless: true`. This means that symbols are not recreated on browser refresh.
+- Opening layer groups at startup can now be done with config `openLayerTreeGroups`, which value must be an array with group names:
+```json
+{
+  "openLayerTreeGroups": ["Group1", "Group2"]
+}
+```
 
 ### Fixed
 

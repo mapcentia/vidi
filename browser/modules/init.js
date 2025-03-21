@@ -99,7 +99,8 @@ module.exports = {
             infoCallback: null,
             dateFormats: {},
             editorAlwaysActivated: true,
-            statelessDraw: false
+            statelessDraw: false,
+            openLayerTreeGroups: [],
         };
         // Set session from URL
         if (typeof urlVars.session === "string") {

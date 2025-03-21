@@ -25,7 +25,7 @@ let sqlQuery;
 let applicationModules = false;
 let isStarted = false;
 let readyCallbackIsfired = false;
-let firstGroupIsOpened = false;
+let groupsIsOpened = false;
 let urlVars = urlparser.urlVars;
 
 let mainLayerOffcanvas;
@@ -211,20 +211,36 @@ module.exports = {
         });
 
         backboneEvents.get().on("allDoneLoading:layers", function () {
-            const openFirtIfNotOpen = () => {
-                let e = document.querySelector('.js-toggle-layer-panel');
-                if (window.vidiConfig.expandFirstInLayerTree === true && e?.classList?.contains("collapsed")) {
-                    e.click();
-                }
+            const openFirstIfNotOpen = () => {
+                setTimeout(()=> {
+                    const e = document.querySelector('.js-toggle-layer-panel');
+                    if (window.vidiConfig.expandFirstInLayerTree === true && e?.classList?.contains("collapsed")) {
+                        e.click();
+                    }
+                }, 0)
+            }
+            const openLayerTreeGroupsIfNotOpen = () => {
+                setTimeout(()=> {
+                    if (window.vidiConfig.openLayerTreeGroups.length > 0) {
+                        window.vidiConfig.openLayerTreeGroups.forEach(g => {
+                            const e = document.querySelector(`[data-gc2-group-id="${g}"] .js-toggle-layer-panel`);
+                            if (e?.classList?.contains("collapsed")) {
+                                e.click();
+                            }
+                        })
+                    }
+                }, 0)
             }
             if (!isStarted) {
                 isStarted = true;
-                openFirtIfNotOpen();
+                openFirstIfNotOpen();
+                openLayerTreeGroupsIfNotOpen();
 
             } else {
-                if (!firstGroupIsOpened) {
-                    openFirtIfNotOpen();
-                    firstGroupIsOpened = true;
+                if (!groupsIsOpened) {
+                    openFirstIfNotOpen();
+                    openLayerTreeGroupsIfNotOpen();
+                    groupsIsOpened = true;
                 }
                 if (!readyCallbackIsfired && urlVars?.readyCallback) {
                     try {

@@ -785,6 +785,17 @@ Hvis man ikke vil have at tegninger "hænger ved" efter refresh af browser, kan 
 
     "statelessDraw": false
 
+.. _configjs_openlayertreegroups:
+
+openLayerTreeGroups
+*****************************************************************
+
+Angiv hvilke grupper, som skal være foldet ud i lagtræet fra starten.
+
+.. code-block:: json
+
+    "openLayerTreeGroups": ["Gruppe1", "Gruppe2"]
+
 #################################################################
 Referencer
 #################################################################
