@@ -154,7 +154,7 @@ module.exports = {
                 let prefix;
                 let isChecked = $(e.target).prop(`checked`);
                 let groupName = $(this).data(`gc2-group-name`);
-                let layers = meta.getMetaData().data.filter((e) => {
+                meta.getMetaData().data.filter((e) => {
                     if (e.layergroup === groupName) {
                         let parsedMeta = layerTree.parseLayerMeta(e);
                         prefix = parsedMeta?.default_layer_type && parsedMeta.default_layer_type !== 't' ? parsedMeta.default_layer_type + ':' : '';
@@ -359,6 +359,7 @@ module.exports = {
                                             });
                                         }
                                     })
+                                    backboneEvents.get().trigger(`layerTree:activeLayersChange`);
                                 })
                             }
                         }

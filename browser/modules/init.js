@@ -600,6 +600,7 @@ module.exports = {
                                             layers.forEach((l) => {
                                                 modules.switchLayer.init(l, true)
                                             })
+                                            backboneEvents.get().trigger(`layerTree:activeLayersChange`);
                                         })
                                     }
                                 }
