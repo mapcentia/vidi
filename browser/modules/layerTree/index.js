@@ -3013,42 +3013,26 @@ module.exports = {
         return layersAndSubgroupsForCurrentGroup;
     },
 
+    /**
+     *
+     * @param forcedState NOT IN USE
+     * @param precheckedLayers NOT IN USE
+     * @param localItem
+     * @returns {{layerIsActive: boolean, activeLayerName: boolean}}
+     */
     checkIfLayerIsActive: (forcedState, precheckedLayers, localItem) => {
         if (!localItem) {
             throw new Error(`Layer meta object is empty`);
         }
-
         let layerIsActive = false;
         let activeLayerName = false;
-
         let name = `${localItem.f_table_schema}.${localItem.f_table_name}`;
-
-        // If activeLayers are set, then no need to sync with the map
-        if (forcedState?.activeLayers?.length > 0 && forcedState.activeLayers.includes(name)) {
-            forcedState.activeLayers.map(key => {
-                if (layerTreeUtils.stripPrefix(key) === name) {
-                    layerIsActive = true;
-                    activeLayerName = key;
-                }
-            });
-        } else {
-            if (precheckedLayers && Array.isArray(precheckedLayers) && precheckedLayers.length > 0) {
-                precheckedLayers.map(item => {
-                    if (layerTreeUtils.stripPrefix(item.id) === name) {
-                        layerIsActive = true;
-                        activeLayerName = item.id;
-                    }
-                });
+        cloud.get().map.eachLayer(function (layer) {
+            if (layer.id && layerTreeUtils.stripPrefix(layer.id) === name && !layer.baseLayer) {
+                layerIsActive = true;
+                activeLayerName = layer.id;
             }
-
-            cloud.get().map.eachLayer(function (layer) {
-                if (layer.id && layerTreeUtils.stripPrefix(layer.id) === name && !layer.baseLayer) {
-                    layerIsActive = true;
-                    activeLayerName = layer.id;
-                }
-            });
-        }
-
+        });
         return {layerIsActive, activeLayerName}
     },
 
