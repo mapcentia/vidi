@@ -14,7 +14,7 @@ import {
     ICONS,
     LAYER,
     LOG,
-    MAP_RESOLUTIONS,
+    MAP_RESOLUTIONS, MAP_RESOLUTIONS_EPSG25832,
     MODULE_NAME,
     SELECTED_ICON_SCALE,
     SELECTED_STYLE,
@@ -1848,7 +1848,7 @@ module.exports = {
                                     }, 200)
                                 }, null, [coord3857[0], coord3857[1]]);
                             }
-                            const distance = 10 * MAP_RESOLUTIONS[cloud.get().getZoom()];
+                            const distance = window.vidiConfig.crs === 'EPSG25832' ? 10 * MAP_RESOLUTIONS_EPSG25832[cloud.get().getZoom()] : 10 * MAP_RESOLUTIONS[cloud.get().getZoom()];
                             const clickFeature = turfBuffer(turfPoint([e.latlng.lng, e.latlng.lat]), distance, {units: 'meters'});
                             let mapObj = cloud.get().map;
                             for (let l in mapObj._layers) {

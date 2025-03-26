@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2019 MapCentia ApS
+ * @copyright  2013-2025 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -46,20 +46,12 @@ let clicktimer;
  */
 let mapObj;
 
-let cowiUrl;
 
-let mapillaryUrl = "https://www.mapillary.com/app/?z=17";
 
 let config = require('../../../config/config.js');
 
-if (typeof config.extensionConfig !== "undefined" && typeof config.extensionConfig.streetView !== "undefined") {
-    if (typeof config.extensionConfig.streetView.mapillary !== "undefined") {
-        mapillaryUrl = config.extensionConfig.streetView.mapillary;
-    }
-    if (typeof config.extensionConfig.streetView.cowi !== "undefined") {
-        cowiUrl = config.extensionConfig.streetView.cowi;
-    }
-}
+let cowiUrl = config?.extensionConfig?.streetView?.cowi;
+let mapillaryUrl = config?.extensionConfig?.streetView?.mapillary ||"https://www.mapillary.com/app/?z=17";
 
 /**
  *
@@ -153,7 +145,7 @@ module.exports = {
 
                 this.state = {
                     active: false,
-                    selectedOption: "google"
+                    selectedOption: config?.extensionConfig?.streetView?.default || "google"
                 };
 
                 this.onChange = this.onChange.bind(this);
@@ -225,6 +217,9 @@ module.exports = {
                                 case "skraafoto":
                                     url = `https://skraafoto.dataforsyningen.dk/viewer.html?center=${pUtm.x},${pUtm.y}&orientation=north`;
                                     break;
+                                case "maps":
+                                    url = `https://www.google.dk/maps/@${p.y},${p.x},17z`;
+                                    break;
 
                                 case "cowi":
                                     url = cowiUrl + "&srid=4326&x=" + p.x + "&y=" + p.y;
@@ -252,7 +247,7 @@ module.exports = {
                                            value="google" checked={this.state.selectedOption === 'google'}
                                            onChange={this.onChange}/>
                                     <label className="btn btn-sm btn-outline-secondary"
-                                           htmlFor="streetview-service-google">Google Street View</label>
+                                           htmlFor="streetview-service-google">Street View</label>
 
                                     <input className="btn-check" type="radio" id="streetview-service-mapillary"
                                            name="streetview-service" value="mapillary"

@@ -6,7 +6,7 @@
 
 'use strict';
 
-import {LAYER, MAP_RESOLUTIONS, SYSTEM_FIELD_PREFIX} from './layerTree/constants';
+import {LAYER, MAP_RESOLUTIONS, SYSTEM_FIELD_PREFIX, MAP_RESOLUTIONS_EPSG25832} from './layerTree/constants';
 import {GEOJSON_PRECISION, MIME_TYPES_APPS, MIME_TYPES_IMAGES} from './constants';
 import dayjs from 'dayjs';
 
@@ -297,7 +297,7 @@ module.exports = {
             backboneEvents.get().trigger("startLoading:layers", key);
 
             if (geoType !== "POLYGON" && geoType !== "MULTIPOLYGON") {
-                distance = 10 * MAP_RESOLUTIONS[cloud.get().getZoom()];
+                distance = window.vidiConfig.crs === 'EPSG25832' ? 10 * MAP_RESOLUTIONS_EPSG25832[cloud.get().getZoom()] : 10 * MAP_RESOLUTIONS[cloud.get().getZoom()];
             }
 
             if (!callBack) {

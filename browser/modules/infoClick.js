@@ -6,7 +6,7 @@
 
 'use strict';
 
-import {LAYER, MAP_RESOLUTIONS} from "./layerTree/constants";
+import {LAYER, MAP_RESOLUTIONS, MAP_RESOLUTIONS_EPSG25832} from "./layerTree/constants";
 import {booleanIntersects as turfIntersects, buffer as turfBuffer} from "@turf/turf";
 import {feature as turfFeature, point as turfPoint} from "@turf/helpers";
 
@@ -102,7 +102,7 @@ module.exports = {
                     } else {
                         let coord3857 = utils.transform("EPSG:4326", "EPSG:3857", [e.latlng.lng, e.latlng.lat]);
                         let intersectingFeatures = [];
-                        const distance = 10 * MAP_RESOLUTIONS[cloud.get().getZoom()];
+                        const distance = window.vidiConfig.crs === 'EPSG25832' ? 10 * MAP_RESOLUTIONS_EPSG25832[cloud.get().getZoom()] : 10 * MAP_RESOLUTIONS[cloud.get().getZoom()];
                         const clickFeature = turfBuffer(turfPoint([e.latlng.lng, e.latlng.lat]), distance, {units: 'meters'});
                         let mapObj = cloud.get().map;
                         for (let l in mapObj._layers) {
