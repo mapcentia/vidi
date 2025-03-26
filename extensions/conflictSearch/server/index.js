@@ -179,10 +179,17 @@ router.post('/api/extension/conflictSearch', function (req, response) {
             } else {
                 quotedTableName = `"${table}"`;
             }
-
-            const sql = "SELECT " + fieldStr + " FROM " + quotedTableName + " WHERE  ST_intersects(" + geomField + ", ST_Transform(ST_geomfromtext('" + wkt + "',4326)," + srid + "))";
+            let bufferValue = JSON.parse(metaDataKeys[table].meta)?.buffer_conflict;
+            bufferValue = bufferValue && bufferValue !== '' && !isNaN(parseInt(bufferValue)) ? parseInt(bufferValue) : 0;
+            let searchBuffer
+            if (bufferValue > 0) {
+                searchBuffer = "ST_Buffer(ST_geomfromtext('" + wkt + "',4326)::geography, " + bufferValue + ")::geometry";
+            } else {
+                searchBuffer = "ST_geomfromtext('" + wkt + "',4326)";
+            }
+            const sql = "SELECT " + fieldStr + ", ST_AsGeoJSON(" + searchBuffer + ") as _buffer, ST_LENGTH(ST_Intersection(" + geomField + ", ST_Transform(" + searchBuffer + "," + srid + "))) as _length, ST_AREA(ST_Intersection(" + geomField + ", ST_Transform(" + searchBuffer + "," + srid + "))) as _area FROM " + quotedTableName + " WHERE  ST_intersects(" + geomField + ", ST_Transform(" + searchBuffer + "," + srid + "))";
             const queryables = JSON.parse(metaDataKeys[table].fieldconf);
-            let postData = "client_encoding=UTF8&srs=4326&lifetime=0&base64=true&q=" +  base64url.encode(sql) + "&key=" + "&key=" + (typeof req.session.gc2ApiKey !== "undefined" ? req.session.gc2ApiKey : "xxxxx" /*Dummy key is sent to prevent start of session*/),
+            let postData = "client_encoding=UTF8&srs=4326&lifetime=0&base64=true&q=" + base64url.encode(sql) + "&key=" + "&key=" + (typeof req.session.gc2ApiKey !== "undefined" ? req.session.gc2ApiKey : "xxxxx" /*Dummy key is sent to prevent start of session*/),
                 options = {
                     method: 'POST',
                     body: postData,
@@ -202,6 +209,9 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                                 error = result.message;
                             }
                             time = new Date().getTime() - startTime;
+                            let totalLength = 0;
+                            let totalArea = 0;
+                            let buffer;
                             if (result?.features) {
                                 for (let i = 0; i < result.features.length; i++) {
                                     for (let prop in queryables) {
@@ -214,15 +224,21 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                                                     sort_id: queryables[prop].sort_id,
                                                     link: queryables[prop].link,
                                                     linkprefix: queryables[prop].linkprefix,
+                                                    template: queryables[prop].template,
                                                     key: false
                                                 })
                                             }
                                         }
                                     }
+                                    totalLength += parseFloat(result.features[i].properties._length);
+                                    totalArea += parseFloat(result.features[i].properties._area);
+                                    buffer = JSON.parse(result.features[i].properties._buffer);
+
+
                                     if (tmp.length > 0) {
                                         tmp.push({
                                             name: metaDataKeys[table].pkey,
-                                            alias: null,
+                                            alias: queryables[metaDataKeys[table].pkey]?.alias || metaDataKeys[table].pkey,
                                             value: result.features[i].properties[metaDataKeys[table].pkey],
                                             sort_id: null,
                                             key: true
@@ -251,7 +267,11 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                                     f_table_name: meta.f_table_name,
                                     f_table_title: meta.f_table_title || meta.f_table_name,
                                     meta_url: meta.meta_url,
-                                }
+                                },
+                                totalLength,
+                                totalArea,
+                                buffer,
+                                bufferValue
                             };
                             io.emit(socketId, hit);
                             resolve(hit)

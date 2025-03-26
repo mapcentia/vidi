@@ -249,45 +249,42 @@ module.exports = module.exports = {
         _self.drawBaseLayersControl();
     },
 
-    drawBaseLayersControl: () => {
-        return new Promise((resolve, reject) => {
-            // Resetting the side-by-side mode
-            currentTwoLayersAtOnceMode = TWO_LAYERS_AT_ONCE_MODES[defaultMode - 1];
+    // get the baseLayerGroup object.
+    getBaseLayerGroup() {
+        return window.vidiConfig.baseLayerGroups;
+    },
+    // true: baseLayerGroups exists
+    hasBaseLayerGroup() {
+        return _self.getBaseLayerGroup() !== undefined;
+    },
 
-            // Delete current layers
-            $(`.js-base-layer-control`).remove();
-            baseLayers = [];
 
-            // Add base layers controls
-            let appendedCode = ``;
-            for (var i = 0; i < window.setBaseLayers.length; i = i + 1) {
-                let bl = window.setBaseLayers[i];
 
-                let layerId = false;
-                let layerName = false;
-                if (typeof bl.type !== "undefined" && bl.type === "MVT") {
-                    baseLayers.push(bl.id);
-                    layerId = bl.id;
-                    layerName = bl.name;
-                } else if (typeof window.setBaseLayers[i].restrictTo === "undefined"
-                    || window.setBaseLayers[i].restrictTo.filter((n) => {
-                        return schemas.indexOf(n) !== -1;
-                    }).length > 0) {
-                    baseLayers.push(window.setBaseLayers[i].id);
-                    layerId = window.setBaseLayers[i].id;
-                    layerName = window.setBaseLayers[i].name;
-                }
-
-                let sideBySideLayerControl = ``;
-                if (twoLayersAtOnceEnabled) {
-                    sideBySideLayerControl = `<div class='base-layer-item' data-gc2-side-by-side-base-id='${layerId}' style='float: left;'>
-                            <input type='radio' class="form-check-input" name='side-by-side-baselayers' value='${layerId}' ${layerId === activeTwoLayersModeLayer ? `checked=""` : ``}>
-                    </div>`;
-                }
-
-                let displayInfo = (bl.abstract ? `visible` : `hidden`);
-                let tooltip = (bl.abstract ? $(bl.abstract).text() : ``);
-                appendedCode += `<li class="list-group-item js-base-layer-control d-flex align-items-center">
+    // returns a array of groupName from
+    baseLayerGroupNames() {
+        if (!_self.hasBaseLayerGroup())
+            return [];
+        return _self.getBaseLayerGroup().map(group => group.groupName);
+    },
+    // returns array of layerIds for a group
+    baseLayerGetLayersFromGroup(groupName) {
+        const group = _self.getBaseLayerGroup().find(group => group.groupName === groupName);
+        return group ? group.layers : null;
+    },
+    //  true: layerId is in a baseLayerGroup
+    baseLayerIsInGroup(layerId) {
+        if (!_self.hasBaseLayerGroup())
+            return false;
+        for (const group of _self.getBaseLayerGroup()) {
+            if (group.layers.includes(layerId)) {
+                return true; //group.groupName;
+            }
+        }
+        return false;
+    },
+    buildLayerHtmlNode(layerId, layerName, tooltip, displayInfo, abstract, ingroup=false) {
+        const sideBySideLayerControl = _self.getSideBySideLayerControl(layerId);
+        return `<li class="list-group-item js-base-layer-control d-flex align-items-center${ingroup ? `px-3 border-start-0 border-end-0` : ``}">
                     <div class="d-flex align-items-center gap-1 me-auto">
                         <div class='base-layer-item' data-gc2-base-id='${layerId}'>
                             <input type='radio' class="form-check-input" name='baselayers' value='${layerId}' ${layerId === activeBaseLayer ? `checked=""` : ``}> 
@@ -302,12 +299,96 @@ module.exports = module.exports = {
                             title="${tooltip}"
                             style="visibility: ${displayInfo};"
                             data-baselayer-name="${layerName}"
-                            data-baselayer-info="${bl.abstract}"
+                            data-baselayer-info="${abstract}"
                             class="info-label btn btn-sm btn-outline-secondary"><i class="bi bi-info-square pe-none"></i></button>
                     </div>
                 </li>`;
 
+    },
+
+    getBaseLayerById(layerId) {
+        const bl = window.setBaseLayers.find(bl => bl.id === layerId);
+        return bl;
+    },
+    buildLayerHtmlGroupStart(groupName, open) {
+        const isOpen = open ? "open='open'" : ''
+        return `<li class="list-group-item js-base-layer-control align-items-center p-0"> <details ${isOpen}><summary class="py-2 px-3">${groupName}</summary>`;
+    },
+    buildLayerHtmlGroupEnd() {
+        return '</details></li>';
+    },
+
+    buildLayerHtmlInGroup() {
+
+        let result = '';
+
+        for (const groupName of _self.baseLayerGroupNames()) {
+            const bls = _self.baseLayerGetLayersFromGroup(groupName);
+            if (!bls)
+                continue;
+            const isOpen = bls.includes(activeBaseLayer);
+            result += _self.buildLayerHtmlGroupStart(groupName, isOpen);
+
+            for (const layerId of bls) {
+                const bl = _self.getBaseLayerById(layerId);
+                if (!bl) continue;
+
+                let displayInfo = (bl.abstract ? `visible` : `hidden`);
+                let tooltip = (bl.abstract ? $(bl.abstract).text() : ``);
+                result += _self.buildLayerHtmlNode(bl.id, bl.name, tooltip, displayInfo, bl.abstract, true);
             }
+            result += _self.buildLayerHtmlGroupEnd();
+        }
+        return result;
+    },
+
+    getSideBySideLayerControl(layerId) {
+        const valueContent = layerId === activeTwoLayersModeLayer ? `checked=""` : ``;
+        return (twoLayersAtOnceEnabled) ?
+            `<div class='base-layer-item' data-gc2-side-by-side-base-id='${layerId}' style='float: left;'>
+                    <input type='radio' class="form-check-input" name='side-by-side-baselayers' value='${layerId}' ${valueContent}>
+            </div>`:
+            ``;
+    },
+
+    drawBaseLayersControl: () => {
+        return new Promise((resolve, reject) => {
+            // Resetting the side-by-side mode
+            currentTwoLayersAtOnceMode = TWO_LAYERS_AT_ONCE_MODES[defaultMode - 1];
+
+            // Delete current layers
+            $(`.js-base-layer-control`).remove();
+            baseLayers = [];
+
+            // Add base layers controls, not in group
+            let appendedCode = ``;
+            for (const bl of window.setBaseLayers) {
+
+
+                let layerId = false;
+                let layerName = false;
+                if (typeof bl.type !== "undefined" && bl.type === "XYZ") {
+                    baseLayers.push(bl.id);
+                    layerId = bl.id;
+                    layerName = bl.name;
+                } else if (typeof bl.restrictTo === "undefined"
+                    || bl.restrictTo.filter((n) => {
+                        return schemas.indexOf(n) !== -1;
+                    }).length > 0) {
+                    baseLayers.push(bl.id);
+                    layerId = bl.id;
+                    layerName = bl.name;
+                }
+                if (_self.baseLayerIsInGroup(layerId)) {
+                    continue;
+                }
+
+                let displayInfo = (bl.abstract ? `visible` : `hidden`);
+                let tooltip = (bl.abstract ? $(bl.abstract).text() : ``);
+                appendedCode += _self.buildLayerHtmlNode(layerId, layerName, tooltip, displayInfo, bl.abstract);
+
+            }
+            appendedCode += _self.buildLayerHtmlInGroup();
 
             const disableInputs = () => {
                 // Disabling inputs of side-by-side base layers
@@ -593,7 +674,7 @@ module.exports = module.exports = {
                 let BLmaxZoom = bl.maxZoom? bl.maxZoom : 20;
                 let BLmaxNativeZoom = bl.maxNativeZoom? bl.maxNativeZoom : 18;
 
-                
+
                 if (bl?.type === "WMTS") {
                     result = cloud.get().addWMTSBaselayer(bl.url, {
                         name: bl.id,

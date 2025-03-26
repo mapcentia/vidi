@@ -1,6 +1,6 @@
 /*
  * @author     Alexander Shumilov
- * @copyright  2013-2023 MapCentia ApS
+ * @copyright  2013-2025 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -21,7 +21,7 @@ let toggledBaselayer = 0;
  * Full screen map control
  */
 const FullScreenMapControlOptions = {
-    template: (`<a title="${__(`Full screen`)}"
+    template: (`<a href="#" title="${__(`Full screen`)}"
         id="mapcontrols-full-screen-map"
         class="leaflet-bar-part leaflet-bar-part-single">
         <span class="bi bi-fullscreen"></span>
@@ -46,7 +46,7 @@ let FullScreenMapControl = L.Control.extend({
  * Clear map control
  */
 const ClearMapControlOptions = {
-    template: (`<a title="${__(`Clear map`)}"
+    template: (`<a href="#" title="${__(`Clear map`)}"
         id="mapcontrols-clear-map"
         class="leaflet-bar-part leaflet-bar-part-single" style="outline: none;">
         <span class="bi bi-slash-circle"></span>
@@ -99,7 +99,7 @@ const setDefaultZoomCenter = () => {
  * Default map extent control
  */
 const DefaultMapExtentControlOptions = {
-    template: (`<a title="${__(`Default map extent`)}"
+    template: (`<a href="#" title="${__(`Default map extent`)}"
         id="mapcontrols-default-map-extent"
         class="leaflet-bar-part leaflet-bar-part-single" style="outline: none;">
         <span class="bi bi-house"></span>
@@ -145,15 +145,12 @@ module.exports = {
                 const baseLayers = window.vidiConfig.baseLayers;
                 toggledBaselayer = baseLayers.findIndex(x => x.id === currentBaseLayerId);
                 BaselayerToggleOptions = {
-                    template: (`<a title="${window.vidiConfig.baseLayers?.[toggledBaselayer === 0 ? 1 : 0]?.name}"
+                    template: (`<a href="#" title="${window.vidiConfig.baseLayers?.[toggledBaselayer === 0 ? 1 : 0]?.name}"
                         id="baselayer-toggle"
                         class="leaflet-bar-part leaflet-bar-part-single overflow-hidden">
                         <img alt="" src="${window.vidiConfig.baseLayers?.[toggledBaselayer === 0 ? 1 : 0]?.thumbnail}"></a>`),
-                    onclick: (e) => {
-                        e.target.src = window.vidiConfig.baseLayers?.[toggledBaselayer]?.thumbnail;
-                        e.target.parentElement.title = window.vidiConfig.baseLayers?.[toggledBaselayer]?.name;
-                        toggledBaselayer = toggledBaselayer === 0 ? 1 : 0
-                        setBaseLayer.init(window.vidiConfig.baseLayers?.[toggledBaselayer]?.id);
+                    onclick: () => {
+                        _self.setToggleItem()
                     }
                 };
                 let BaselayerToggleControl = L.Control.extend({
@@ -174,7 +171,7 @@ module.exports = {
                 window.vidiConfig.baseLayers.forEach((v, i) => {
                     if (v?.inDrawer) {
                         drawerItems.push(`
-                            <a title="${v?.name}}" class="position-relative baselayer-drawer-item leaflet-bar-part leaflet-bar-part-single overflow-hidden d-flex">
+                            <a href="#" title="${v?.name}}" class="position-relative baselayer-drawer-item leaflet-bar-part leaflet-bar-part-single overflow-hidden d-flex">
                             <img style="height: 30px; width: 30px" data-vidi-baselayer-id="${v.id}" data-vidi-baselayer-num="${i}" alt="" src="${v?.thumbnail}">
                             <div class="${currentBaseLayerId !== v.id ? 'd-none' : ''} baselayer-drawer-item-shadow"></div>
                             </a>
@@ -184,7 +181,7 @@ module.exports = {
                 })
                 template = `<div class="d-flex">
                         <div class="baselayer-drawer-container d-flex d-none">${drawerItems.join('')}</div>
-                        <a title="${__('Base layer')}" class="leaflet-bar-part leaflet-bar-part-single baselayer-drawer">
+                        <a href="#" title="${__('Base layer')}" class="leaflet-bar-part leaflet-bar-part-single baselayer-drawer">
                             <span class="bi bi-map baselayer-drawer"></span> 
                         </a>
                     </div>`;
@@ -199,11 +196,7 @@ module.exports = {
                                 cl.add('d-none');
                             }
                         } else {
-                            const el = e.target;
-                            const id = el.dataset.vidiBaselayerId;
-                            document.querySelectorAll('.baselayer-drawer-item-shadow').forEach(node => node.classList.add('d-none'))
-                            el.nextElementSibling.classList.remove('d-none')
-                            setBaseLayer.init(id);
+                            _self.setDrawerItem(e.target.dataset.vidiBaselayerId)
                         }
                     }
                 };
@@ -260,7 +253,7 @@ module.exports = {
         defaultMapExtentControl = new DefaultMapExtentControl();
         cloud.get().map.addControl(defaultMapExtentControl);
 
-        const simpleMapScreenshoter = L.simpleMapScreenshoter(
+        L.simpleMapScreenshoter(
             {
                 position: 'topright',
                 screenName: 'Screenshot',
@@ -276,6 +269,8 @@ module.exports = {
         });
 
         const printBtnEl = document.querySelector(".leaflet-control-simpleMapScreenshoter a");
+        // Without href, the button will get en blinking cursor in Edge!
+        printBtnEl.setAttribute('href', '#')
         printBtnEl.title = __("Create a screenshot of the map. The screenshot is downloaded as a PNG file");
         const resetPrintBtn = () => printBtnEl.innerHTML = "<span class='bi bi-camera'></span>";
         resetPrintBtn();
@@ -305,6 +300,22 @@ module.exports = {
         zoomOut.innerHTML = "";
         zoomOut.classList.add("bi");
         zoomOut.classList.add("bi-dash");
+    },
+
+    setDrawerItem: (id) => {
+        document.querySelectorAll('.baselayer-drawer-item-shadow').forEach(node => node.classList.add('d-none'))
+        document.querySelector(`[data-vidi-baselayer-id="${id}"]`).nextElementSibling.classList.remove('d-none')
+        setBaseLayer.init(id);
+    },
+
+    setToggleItem: () => {
+        const e = document.querySelector('.baselayer-toggle img');
+        const baseLayers = window.vidiConfig.baseLayers;
+        toggledBaselayer = baseLayers.findIndex(x => x.id === setBaseLayer.getActiveBaseLayer()?.id);
+        e.src = window.vidiConfig.baseLayers?.[toggledBaselayer]?.thumbnail;
+        e.parentElement.title = window.vidiConfig.baseLayers?.[toggledBaselayer]?.name;
+        toggledBaselayer = toggledBaselayer === 0 ? 1 : 0
+        setBaseLayer.init(window.vidiConfig.baseLayers?.[toggledBaselayer]?.id);
     },
 
     /**

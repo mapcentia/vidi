@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2025 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -31,6 +31,7 @@ var _self = false;
 var failedLayers = [];
 
 let utils;
+let mapcontrols;
 
 /**
  *
@@ -43,23 +44,24 @@ module.exports = module.exports = {
         layers = o.layers;
         baseLayer = o.baseLayer;
         backboneEvents = o.backboneEvents;
+        mapcontrols = o.mapcontrols;
         utils = o.utils;
 
         _self = this;
         return this;
     },
     init: function (str) {
-        $.each(window.setBaseLayers, function (i, v) {
-                if (v.id === str) {
-                    if (v?.bounds?.length > 0) {
-                        baseLayer.setBounds(v.bounds);
-                    } else {
-                        baseLayer.setBounds(null);
-                    }
+        window.setBaseLayers.forEach(v => {
+            if (v.id === str) {
+                if (v?.bounds?.length > 0) {
+                    baseLayer.setBounds(v.bounds);
+                } else {
+                    baseLayer.setBounds(null);
                 }
+            }
         })
-        let result = new Promise((resolve, reject) => {
-            var u, l;
+        return new Promise((resolve, reject) => {
+            let u, l;
             layers.removeHidden();
             if (!cloud.get().getLayersByName(str)) {
                 let layerAddedFromConfiguration = baseLayer.addBaseLayer(str);
@@ -91,7 +93,7 @@ module.exports = module.exports = {
             }
 
             if (typeof window.setBaseLayers !== "undefined") {
-                $.each(window.setBaseLayers, function (i, v) {
+                window.setBaseLayers.forEach(function (v, i) {
                     if (v.id === str) {
                         activeBaseLayer = v;
                         if (typeof v.overlays === "object") {
@@ -105,9 +107,9 @@ module.exports = module.exports = {
                                         }, bl)
                                     )];
                                     l[0].on("loading", function () {
-                                                layers.incrementCountLoading(layerName);
-                                                backboneEvents.get().trigger("startLoading:layers", layerName);
-                                            });
+                                        layers.incrementCountLoading(layerName);
+                                        backboneEvents.get().trigger("startLoading:layers", layerName);
+                                    });
                                     l[0].on("load", function () {
                                         layers.decrementCountLoading(layerName);
                                         backboneEvents.get().trigger("doneLoading:layers", layerName);
@@ -130,7 +132,6 @@ module.exports = module.exports = {
                                         },
                                     }, v.overlays[u].config));
                                 }
-
                                 // Set prefix on id, so the layer will not be returned by layers.getLayers
                                 l[0].id = "__hidden." + v.overlays[u].id;
                             }
@@ -141,6 +142,12 @@ module.exports = module.exports = {
 
             let numberOfErroredTiles = 0, timerHasStarted = false;
             let alreadyLoaded = false;
+            let drawerItems = window.vidiConfig.baseLayers.filter(v => {
+                if (v?.inDrawer) {
+                    return true;
+                }
+            }).map(v => v.id)
+            let layerListItems = window.vidiConfig.baseLayers.map(v => v.id)
             cloud.get().setBaseLayer(str, (e) => {
                 // _tileReady() in src/layer/tile/GridLayer.js@879 is firing more than once on first load for
                 // MVT layers, so the single time event firing guard was added
@@ -148,26 +155,26 @@ module.exports = module.exports = {
                     if (alreadyLoaded) return;
                     alreadyLoaded = true;
                 }
+                // Re-arrange the fail-over arrays
+                let i1 = drawerItems.indexOf(str);
+                drawerItems = [...drawerItems.slice(i1), ...drawerItems.slice(0, i1)];
+                let i2 = layerListItems.indexOf(str);
+                layerListItems = [...layerListItems.slice(i2), ...layerListItems.slice(0, i2)];
 
                 // If 100 tiles fails within 10 secs the next base layer is chosen
                 if (numberOfErroredTiles > 100) {
-                    utils.showInfoToast(`Base layer ${str} was loaded with errors (${numberOfErroredTiles} tiles failed to load), trying to load next layer`);
+                    const message = `Base layer ${str} was loaded with errors (${numberOfErroredTiles} tiles failed to load), trying to load next layer`;
+                    utils.showInfoToast(message);
                     let alternativeLayer = false;
                     failedLayers.push(str);
-                    window.setBaseLayers.map(item => {
-                        if (failedLayers.indexOf(item.id) === -1) {
-                            alternativeLayer = item.id;
-                            return false;
+                    if (utils.isEmbedEnabled()) {
+                        if (window.vidiConfig.baselayerDrawer) {
+                            mapcontrols.setDrawerItem(drawerItems[1])
+                        } else {
+                            mapcontrols.setToggleItem();
                         }
-                    });
-
-                    backboneEvents.get().trigger("doneLoading:setBaselayer", str);
-                    if (alternativeLayer === false) {
-                        console.error(`Unable to load any of available base layers`);
                     } else {
-                        setTimeout(() => {
-                            _self.init(alternativeLayer);
-                        });
+                        _self.init(layerListItems[1]);
                     }
                 } else {
                     backboneEvents.get().trigger("doneLoading:setBaselayer", str);
@@ -180,13 +187,12 @@ module.exports = module.exports = {
                         }, 10000)
                     }
                 }
-            }, (e) => {
+            }, () => {
                 if (layerTreeUtils.isVectorTileLayerId(str)) {
                     alreadyLoaded = false;
                 }
-
                 backboneEvents.get().trigger("startLoading:setBaselayer", str);
-            }, (e) => {
+            }, () => {
                 numberOfErroredTiles++;
             }, () => {
                 console.warn(`Base layer ${str} was not found, switching to first available base layer`);
@@ -196,15 +202,10 @@ module.exports = module.exports = {
                     throw new Error(`No default layers were set`);
                 }
             });
-
             baseLayer.redraw(str);
-
             pushState.init();
-
             resolve();
         });
-
-        return result;
     },
 
     getActiveBaseLayer: () => {

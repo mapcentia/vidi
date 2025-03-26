@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2021 MapCentia ApS
+ * @copyright  2013-2025 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -34,6 +34,8 @@ module.exports = {
         let parent = this;
         let React = require('react');
         let ReactDOM = require('react-dom');
+
+        const modal = new bootstrap.Offcanvas('#login-modal');
 
         document.querySelector(".sign-in-btn")?.classList.remove("d-none");
 
@@ -109,6 +111,8 @@ module.exports = {
                             $(".gc2-session-btn-text").html(data.screen_name)
                             userName = data.screen_name;
                             parent.update();
+                            // Close the off canvas
+                            setTimeout(() => modal.hide(), 400);
                         },
 
                         error: function () {
@@ -206,6 +210,7 @@ module.exports = {
                                         defaultValue={this.state.sessionScreenName}
                                         onChange={this.handleChange}
                                         placeholder={__("User name")}
+                                        autoComplete="username"
                                     />
                                 </div>
                                 <div className="col-4"
@@ -220,6 +225,7 @@ module.exports = {
                                         onChange={this.handleChange}
                                         type="password"
                                         placeholder={__("Password")}
+                                        autoComplete="current-password"
                                     />
                                 </div>
                                 <div className="col-2">

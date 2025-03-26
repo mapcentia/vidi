@@ -6,9 +6,9 @@
 
 'use strict';
 
-import mustache from "mustache";
 import {LAYER, MAP_RESOLUTIONS, SYSTEM_FIELD_PREFIX} from './layerTree/constants';
 import {GEOJSON_PRECISION, MIME_TYPES_APPS, MIME_TYPES_IMAGES} from './constants';
+import dayjs from 'dayjs';
 
 const layerTreeUtils = require('./layerTree/utils');
 
@@ -88,6 +88,10 @@ const defaultTemplateForCrossMultiSelect =
     `<div class="vidi-popup-content">
         {{#_vidi_content.fields}}
             {{#if value}}
+                <h4>{{title}}</h4>
+                <p {{#if type}}class="{{type}}"{{/if}}>{{{value}}}</p>
+            {{/if}}
+            {{#if template}}
                 <h4>{{title}}</h4>
                 <p {{#if type}}class="{{type}}"{{/if}}>{{{value}}}</p>
             {{/if}}
@@ -327,8 +331,7 @@ module.exports = {
                                 } else {
                                     const popup = L.popup({
                                         minWidth: 350
-                                    })
-                                        .setLatLng(infoClickPoint)
+                                    }).setLatLng(infoClickPoint)
                                         .setContent(`<div id="info-box-pop-up"></div>`)
                                         .openOn(cloud.get().map)
                                         .on('remove', () => {
@@ -336,11 +339,12 @@ module.exports = {
                                                 _self.resetAll();
                                             }
                                         });
-
                                     if (draggableEnabled) {
                                         _self.makeDraggable(popup);
                                     }
-
+                                    popup.on('remove', function () {
+                                        backboneEvents.get().trigger("sqlQuery:clear");
+                                    });
                                     $("#info-box-pop-up").html(popUpInner);
                                 }
 
@@ -740,9 +744,10 @@ module.exports = {
                     $.each(sortObject(fieldConf), (name, property) => {
                         if (property.value.querable) {
                             let value = feature.properties[property.key];
-                            if (property.value.template && feature.properties[property.key] && feature.properties[property.key] !== '') {
+                            // Only set field template if property is set or not empty string OR if 'replaceNull' helper is used, which will replace nulls
+                            if ((property.value.template && feature.properties[property.key] && feature.properties[property.key] !== '') || property.value?.template?.includes('replaceNull')) {
                                 const fieldTmpl = property.value.template;
-                                value = mustache.render(fieldTmpl, feature.properties);
+                                value = Handlebars.compile(fieldTmpl)(feature.properties);
                             } else if (property.value.link && feature.properties[property.key] && feature.properties[property.key] !== '') {
                                 value = "<a target='_blank' rel='noopener' href='" + (property.value.linkprefix ? property.value.linkprefix : "") + feature.properties[property.key] + (property.value.linksuffix ? property.value.linksuffix : "") + "'>Link</a>";
                             } else if (property.value.content && property.value.content === "image") {
@@ -778,11 +783,7 @@ module.exports = {
                                                         <span class="sr-only">Next</span>
                                                     </a>
                                                 </div>`;
-                                        Handlebars.registerHelper('breaklines', function (text) {
-                                            text = Handlebars.Utils.escapeExpression(text);
-                                            text = text.replace(/(\r\n|\n|\r)/gm, '<br>');
-                                            return new Handlebars.SafeString(text);
-                                        });
+
                                         value = Handlebars.compile(tmpl)(feature.properties[property.key]);
                                     } else {
                                         let subValue = decodeURIComponent(feature.properties[property.key]);
@@ -826,7 +827,7 @@ module.exports = {
                                         value = `
                                         <div>
                                             <div class="alert alert-warning" role="alert">
-                                            <i class="bi bi-exclamation-triangle-fill"></i> ${__("The file type can't be shown but you can download it") + ": <a download href=" + subValue + "/>" + type + ""}
+                                            <i class="bi bi-exclamation-triangle-fill"></i> ${__("The file type can't be shown but you can download it")}: <a download href="${subValue}"/>${type}</a>
                                             </div>
                                         </div>
                                     `

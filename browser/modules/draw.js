@@ -11,7 +11,7 @@ import {GEOJSON_PRECISION} from './constants';
 
 const drawTools = require(`./drawTools`);
 const fileSaver = require(`file-saver`);
-const marked = require('marked');
+const marked = require('marked').parse;
 let cloud, utils, state, serializeLayers;
 let drawOn = false;
 let drawnItems = new L.FeatureGroup();
@@ -26,7 +26,7 @@ let editing = false;
 let _self = false;
 let conflictSearch;
 let selectedDrawing;
-let overRideOnCheck = false;
+let isStarted = false;
 const createId = () => (+new Date * (Math.random() + 1)).toString(36).substr(2, 5);
 const EMPTY_TOOLTIP = "-";
 
@@ -445,6 +445,15 @@ module.exports = {
         return new Promise((resolve) => {
             store.reset();
             _self.control(false);
+            if (window.vidiConfig.statelessDraw && !isStarted) {
+                setTimeout(() => {
+                    _self.resetState();
+                    backboneEvents.get().trigger(`${MODULE_NAME}:update`);
+                    isStarted = true;
+                }, 0);
+                resolve();
+                return;
+            }
             if (newState.drawnItems && newState.drawnItems.length > 0) {
                 setTimeout(() => {
                     _self.recreateDrawnings(newState.drawnItems, false);

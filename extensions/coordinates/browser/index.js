@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2021 MapCentia ApS
+ * @copyright  2013-2025 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -47,7 +47,8 @@ var exId = "coordinates";
 
 
 let config = require('../../../config/config.js');
-const lockedUtmZone = config?.extensionConfig?.coordinates?.lockUtmZoneTo
+const lockedUtmZone = config?.extensionConfig?.coordinates?.lockUtmZoneTo;
+const defaultChecked = config?.extensionConfig?.coordinates?.default || 'dd';
 
 /**
  *
@@ -159,7 +160,8 @@ module.exports = {
                     north: 0,
                     south: 0,
                     zone: 0,
-                    panTo: ""
+                    panTo: "",
+                    coordinatesSystem: defaultChecked,
                 };
 
                 this.center = {
@@ -181,8 +183,6 @@ module.exports = {
                     float: "right"
                 };
 
-                this.coordinatesSystem = "dd";
-
                 this.handlePanToCoordsChange = this.handlePanToCoordsChange.bind(this);
                 this.handlePanToCoordsSubmit = this.handlePanToCoordsSubmit.bind(this);
             }
@@ -198,9 +198,9 @@ module.exports = {
                     }, coords = proj4(crss.source, crss.dest, [e.latlng.lng, e.latlng.lat]);
 
                     me.setState({
-                        lat: me.coordinatesSystem === "dd" ? utils.__("Lat", dict) + ": " + e.latlng.lat.toFixed(5) : me.coordinatesSystem === "dms" ? me.convertDDToDMS(e.latlng.lat, false) : "X: " + coords[0].toFixed(2),
-                        lng: me.coordinatesSystem === "dd" ? utils.__("Lng", dict) + ": " + e.latlng.lng.toFixed(5) : me.coordinatesSystem === "dms" ? me.convertDDToDMS(e.latlng.lng, true) : "Y: " + coords[1].toFixed(2),
-                        zone: me.coordinatesSystem === "dd" ? "" : me.coordinatesSystem === "dms" ? "" : "Zone: " + z,
+                        lat: me.state.coordinatesSystem === "dd" ? utils.__("Lat", dict) + ": " + e.latlng.lat.toFixed(5) : me.state.coordinatesSystem === "dms" ? me.convertDDToDMS(e.latlng.lat, false) : "X: " + coords[0].toFixed(2),
+                        lng: me.state.coordinatesSystem === "dd" ? utils.__("Lng", dict) + ": " + e.latlng.lng.toFixed(5) : me.state.coordinatesSystem === "dms" ? me.convertDDToDMS(e.latlng.lng, true) : "Y: " + coords[1].toFixed(2),
+                        zone: me.state.coordinatesSystem === "dd" ? "" : me.state.coordinatesSystem === "dms" ? "" : "Zone: " + z,
                     });
 
                 });
@@ -219,15 +219,15 @@ module.exports = {
                         coords2 = proj4(crss.source, crss.dest, [bounds.getEast(), bounds.getNorth()]);
 
                     this.setState({
-                        west: me.coordinatesSystem === "dd" ? bounds.getWest().toFixed(5) : me.coordinatesSystem === "dms" ? me.convertDDToDMS(bounds.getWest(), true) : coords1[0].toFixed(2),
-                        east: me.coordinatesSystem === "dd" ? bounds.getEast().toFixed(5) : me.coordinatesSystem === "dms" ? me.convertDDToDMS(bounds.getEast(), true) : coords2[0].toFixed(2),
-                        north: me.coordinatesSystem === "dd" ? bounds.getNorth().toFixed(5) : me.coordinatesSystem === "dms" ? me.convertDDToDMS(bounds.getNorth(), false) : coords2[1].toFixed(2),
-                        south: me.coordinatesSystem === "dd" ? bounds.getSouth().toFixed(5) : me.coordinatesSystem === "dms" ? me.convertDDToDMS(bounds.getSouth(), false) : coords1[1].toFixed(2),
+                        west: me.state.coordinatesSystem === "dd" ? bounds.getWest().toFixed(5) : me.state.coordinatesSystem === "dms" ? me.convertDDToDMS(bounds.getWest(), true) : coords1[0].toFixed(2),
+                        east: me.state.coordinatesSystem === "dd" ? bounds.getEast().toFixed(5) : me.state.coordinatesSystem === "dms" ? me.convertDDToDMS(bounds.getEast(), true) : coords2[0].toFixed(2),
+                        north: me.state.coordinatesSystem === "dd" ? bounds.getNorth().toFixed(5) : me.state.coordinatesSystem === "dms" ? me.convertDDToDMS(bounds.getNorth(), false) : coords2[1].toFixed(2),
+                        south: me.state.coordinatesSystem === "dd" ? bounds.getSouth().toFixed(5) : me.state.coordinatesSystem === "dms" ? me.convertDDToDMS(bounds.getSouth(), false) : coords1[1].toFixed(2),
                     })
                 };
 
                 this.onCoordinatesSystemClick = function (e) {
-                    me.coordinatesSystem = e.currentTarget.value;
+                    me.setState({'coordinatesSystem': e.currentTarget.value});
                     me.setExtent();
 
                 };
@@ -284,7 +284,7 @@ module.exports = {
             handlePanToCoordsSubmit(event) {
                 event.preventDefault();
                 let coords;
-                switch (this.coordinatesSystem) {
+                switch (this.state.coordinatesSystem) {
                     case "dms":
                         coords = this.convertDMSToDD(this.state.panTo);
                         break;
@@ -325,7 +325,7 @@ module.exports = {
                             <label>
                                 <input className="form-check-input" onClick={this.onCoordinatesSystemClick} type="radio"
                                        id="coordinates-system-dd"
-                                       name="coordinates-system" value="dd" defaultChecked="1"/>
+                                       name="coordinates-system" value="dd" defaultChecked={this.state.coordinatesSystem === 'dd'}/>
                                 {utils.__("Latitude/Longitude, decimal degrees", dict)}
                             </label>
                         </div>
@@ -334,7 +334,7 @@ module.exports = {
                             <label>
                                 <input className="form-check-input" onClick={this.onCoordinatesSystemClick} type="radio"
                                        id="coordinates-system-dms"
-                                       name="coordinates-system" value="dms"/>
+                                       name="coordinates-system" value="dms" defaultChecked={this.state.coordinatesSystem === 'dms'}/>
                                 {utils.__("Latitude/Longitude, degrees, minutes and seconds", dict)}
                             </label>
                         </div>
@@ -342,7 +342,7 @@ module.exports = {
                         <div className="form-check">
                             <label>
                                 <input className="form-check-input" onClick={this.onCoordinatesSystemClick} type="radio"
-                                       id="coordinates-system-utm"
+                                       id="coordinates-system-utm" defaultChecked={this.state.coordinatesSystem === 'utm'}
                                        name="coordinates-system" value="utm"/>
                                 UTM
                             </label>

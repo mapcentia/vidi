@@ -282,7 +282,7 @@ module.exports = module.exports = {
         getProperty = config.extensionConfig?.conflictSearch?.getProperty || false;
         searchStr = config.extensionConfig?.conflictSearch?.searchString || "";
         searchLoadedLayers = config.extensionConfig?.conflictSearch?.searchLoadedLayers || true;
-          
+
         // Set up draw module for conflict
         draw.setConflictSearch(this);
         $("#_draw_make_conflict_with_selected").show();
@@ -792,21 +792,25 @@ module.exports = module.exports = {
 
         resultOrigin = response.text || "Na";
 
-        $.each(response.hits, function (i, v) {
+        response.hits.forEach(function (v, i) {
             v.meta.layergroup = v.meta.layergroup != null ? v.meta.layergroup : "Ungrouped";
             groups.push(v.meta.layergroup);
         });
         groups = array_unique(groups.reverse());
         for (let i = 0; i < groups.length; ++i) {
-            let row = "<tr><td><h4 style='font-weight: 400'>" + groups[i] + "</h4></td><td></td><td></td></tr>";
+            let row = "<tr><td><h5>" + groups[i] + "</h5></td><td></td><td></td><td></td><td></td></tr>";
             hitsTable.append(row);
             let count = 0;
             $.each(response.hits, function (u, v) {
                 if (v.hits > 0) {
                     let metaData = v.meta;
+                    let bufferValue = '';
+                    if(v.bufferValue > 0) {
+                        bufferValue = "<span class='text-secondary'>Buffer</span> " + L.GeometryUtil.readableDistance(v.bufferValue, true, false, false, {m: 1}).replace('.', decimalSeparator);
+                    }
                     if (metaData.layergroup === groups[i]) {
                         count++;
-                        row = "<tr><td>" + v.title + "</td><td>" + v.hits + "</td><td><div class='form-check form-switch text-end'><label class='form-check-label'><input class='form-check-input' type='checkbox' data-gc2-id='" + v.table + "' " + ($.inArray(v.table, visibleLayers) > -1 ? "checked" : "") + "></label></div></td></tr>";
+                        row = "<tr><td>" + v.title + "</td><td>" + v.hits + "</td><td>" + bufferValue  + "</td><td>" + (v.totalLength > 0 ? "<span class='text-secondary'>Total</span> " + L.GeometryUtil.readableDistance(v.totalLength, true, false, false, {m: 1}).replace('.', decimalSeparator) : v.totalArea > 0 ? "<span class='text-secondary'>Total</span> " + L.GeometryUtil.readableArea(v.totalArea, true) : '') +"</td><td><div class='form-check form-switch text-end'><label class='form-check-label'><input class='form-check-input' type='checkbox' data-gc2-id='" + v.table + "' " + (visibleLayers.includes(v.table) ? "checked" : "") + "></label></div></td></tr>";
                         hitsTable.append(row);
                     }
                 }
@@ -818,10 +822,10 @@ module.exports = module.exports = {
         }
 
         for (let u = 0; u < groups.length; ++u) {
-            let row = "<h4 style='font-weight: 400'>" + groups[u] + "</h4><hr style='margin-top: 2px; border-top: 1px solid #aaa'>";
+            let row = "<h5 class='hits-data-h'>" + groups[u] + "</h5><hr class='mt-1 border-top'>";
             hitsData.append(row);
             let count = 0;
-            $.each(response.hits, function (i, v) {
+            response.hits.forEach(function (v, i) {
                 let table = v.table, table1, table2, tr, td, title, metaData = v.meta;
                 if (metaData.layergroup === groups[u]) {
                     title = (typeof metaData.f_table_title !== "undefined" && metaData.f_table_title !== "" && metaData.f_table_title !== null) ? metaData.f_table_title : table;
@@ -829,22 +833,22 @@ module.exports = module.exports = {
                         if (metaData.meta_url) {
                             title = "<a target='_blank' href='" + metaData.meta_url + "'>" + title + "</a>";
                         }
-                        row = "<tr><td>" + title + "</td><td>" + v.hits + "</td><td><div class='form-check form-switch text-end'><label class='form-check-label'><input class='form-check-input' type='checkbox' data-gc2-id='" + table + "' " + ($.inArray(i, visibleLayers) > -1 ? "checked" : "") + "></label></div></td></tr>";
+                        row = "<tr><td>" + title + "</td><td><div class='form-check form-switch text-end'><label class='form-check-label'><input class='form-check-input' type='checkbox' data-gc2-id='" + v.table + "' " + (visibleLayers.includes(v.table) ? "checked" : "") + "></label></div></td></tr>";
                         if (v.hits > 0) {
                             count++;
                             hitsCount++;
                             table1 = $("<table class='table table-data'/>");
-                            hitsData.append("<h5>" + title + " (" + v.hits + ")<div class='form-check form-switch text-end float-end'><label class='form-check-label'><input class='form-check-input' type='checkbox' data-gc2-id='" + table + "' " + ($.inArray(i, visibleLayers) > -1 ? "checked" : "") + "></label></div></h5>");
+                            hitsData.append("<div class='d-flex align-items-center'><div class='flex-grow-1 fw-bold'>" + title + " (" + v.hits + ")</div><div class='form-check form-switch text-end float-end'><label class='form-check-label'><input class='form-check-input' type='checkbox' data-gc2-id='" + v.table + "' " + (visibleLayers.includes(v.table) ? "checked" : "") + "></label></div></div>");
                             let conflictForLayer = metaData.meta !== null ? JSON.parse(metaData.meta) : null;
                             if (conflictForLayer !== null && 'short_conflict_meta_desc' in conflictForLayer) {
-                                hitsData.append("<p style='margin: 0'>" + conflictForLayer.short_conflict_meta_desc + "</p>");
+                                hitsData.append("<p>" + conflictForLayer.short_conflict_meta_desc + "</p>");
                             }
                             if (conflictForLayer !== null && 'long_conflict_meta_desc' in conflictForLayer && conflictForLayer.long_conflict_meta_desc !== '') {
-                                $(`<i style="cursor: pointer; color: #999999">Lagbeskrivelse - klik her</i>`).appendTo(hitsData).on("click", function () {
+                                $(`<div class="mb-2"><i style="cursor: pointer" class="text-info">Lagbeskrivelse - klik her</i></div>`).appendTo(hitsData).on("click", function () {
                                     let me = this;
                                     if ($(me).next().children().length === 0) {
-                                        $(me).next().html(`<div class="alert alert-dismissible alert-info" role="alert" style="background-color: #d4d4d4; color: #333; padding: 7px 30px 7px 7px">
-                                                                            <button type="button" class="close" data-dismiss="alert">×</button>${conflictForLayer.long_conflict_meta_desc}
+                                        $(me).next().html(`<div class="alert alert-info alert-dismissible fade show" role="alert">
+                                                                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>${conflictForLayer.long_conflict_meta_desc}
                                                                         </div>`);
                                     } else {
                                         $(me).next().find(".alert").alert('close');
@@ -853,20 +857,26 @@ module.exports = module.exports = {
                                 $(`<div></div>`).appendTo(hitsData);
                             }
                             if (v.data.length > 0) {
-                                $.each(v.data, function (u, row) {
+                                v.data.forEach((row, u) => {
+                                    const properties = {};
+                                    row.forEach(r => properties[r.name] = r.value);
                                     let key = null, fid = null;
-                                    tr = $("<tr style='border-top: 0 solid #eee'/>");
+                                    tr = $("<tr class='border-top'/>");
                                     td = $("<td/>");
-                                    table2 = $("<table style='margin-bottom: 5px; margin-top: 5px;' class='table'/>");
+                                    table2 = $("<table class='table mt-1 mb-1'/>");
                                     row.sort((a, b) => (a.sort_id > b.sort_id) ? 1 : ((b.sort_id > a.sort_id) ? -1 : 0));
-                                    $.each(row, function (n, field) {
+                                    row.forEach(field => {
+                                        let value = field.value;
+                                        if (field.template) {
+                                            value = Handlebars.compile(field.template)(properties);
+                                        }
                                         if (!field.key) {
                                             if (!field.link) {
-                                                table2.append("<tr><td class='conflict-heading-cell' '>" + field.alias + "</td><td class='conflict-value-cell'>" + (field.value !== null ? field.value : "&nbsp;") + "</td></tr>");
+                                                table2.append("<tr><td class='conflict-heading-cell' '>" + field.alias + "</td><td class='conflict-value-cell'>" + (value !== null ? value : "&nbsp;") + "</td></tr>");
                                             } else {
                                                 let link = "&nbsp;";
-                                                if (field.value && field !== "") {
-                                                    link = "<a target='_blank' rel='noopener' href='" + (field.linkprefix ? field.linkprefix : "") + field.value + "'>Link</a>"
+                                                if (value && field !== "") {
+                                                    link = "<a target='_blank' rel='noopener' href='" + (field.linkprefix ? field.linkprefix : "") + value + "'>Link</a>"
                                                 }
                                                 table2.append("<tr><td class='conflict-heading-cell'>" + field.alias + "</td><td class='conflict-value-cell'>" + link + "</td></tr>")
                                             }
@@ -902,7 +912,7 @@ module.exports = module.exports = {
 
             // Remove empty groups
             if (count === 0) {
-                hitsData.find("h4").last().remove();
+                hitsData.find(".hits-data-h").last().remove();
                 hitsData.find("hr").last().remove();
             }
 
@@ -1003,23 +1013,10 @@ let dom = `
         <!-- Tab panes -->
         <div class="tab-content" style="display: none">
             <div role="tabpanel" class="tab-pane active" id="conflict-result-content">
-                <div id="conflict-result" class="d-flex flex-column gap-4">
-                    <div class="d-flex flex-column gap-4">
+                <div id="conflict-result" class="d-flex flex-column gap-2">
+                    <div class="d-flex flex-column gap-4 form-control mt-2">
                         <span id="conflict-result-origin" class="mt-2"></span>
-                        <span class="btn-group">
-                            <input class="btn-check" type="radio" name="conflict-report-type" id="conflict-report-type-1" value="1" checked>
-                            <label for="conflict-report-type-1" class="btn btn-sm btn-outline-secondary">
-                                Kompakt
-                            </label>
-                            <input class="btn-check" type="radio" name="conflict-report-type" id="conflict-report-type-2" value="2">
-                            <label for="conflict-report-type-2" class="btn btn-sm btn-outline-secondary">
-                                Lang, kun hits
-                            </label>
-                            <input class="btn-check" type="radio" name="conflict-report-type" id="conflict-report-type-3" value="3">
-                            <label for="conflict-report-type-3" class="btn btn-sm btn-outline-secondary">
-                                Lang, alle
-                            </label>
-                        </span>
+           
                         <div class="d-flex gap-2 justify-content-start">
                             <button disabled class="btn btn-sm btn-outline-success start-print-btn" id="conflict-print-btn">
                                 <span class="spinner-border spinner-border-sm"
@@ -1043,6 +1040,20 @@ let dom = `
                             </fieldset>
                             <a href="" target="_blank" class="btn btn-sm btn-outline-secondary" id="conflict-excel-btn">Excel</a>
                         </div>
+                          <span class="btn-group">
+                            <input class="btn-check" type="radio" name="conflict-report-type" id="conflict-report-type-1" value="1" checked>
+                            <label for="conflict-report-type-1" class="btn btn-sm btn-outline-secondary">
+                                Kompakt
+                            </label>
+                            <input class="btn-check" type="radio" name="conflict-report-type" id="conflict-report-type-2" value="2">
+                            <label for="conflict-report-type-2" class="btn btn-sm btn-outline-secondary">
+                                Lang, kun hits
+                            </label>
+                            <input class="btn-check" type="radio" name="conflict-report-type" id="conflict-report-type-3" value="3">
+                            <label for="conflict-report-type-3" class="btn btn-sm btn-outline-secondary">
+                                Lang, alle
+                            </label>
+                        </span>
                     </div>
 
                     <div role="tabpanel">

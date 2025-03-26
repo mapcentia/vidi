@@ -89,18 +89,18 @@ module.exports = {
         let placeholder = window.vidiConfig?.searchConfig?.placeholderText;
         if (placeholder) {
             searchTxt = placeholder;
-            $(".custom-search.tt-input").attr("placeholder",
+            $(".custom-search.typeahead.form-control:not(.tt-hint)").attr("placeholder",
                 searchTxt
             );
         } else {
             searchTxt = "Adresse, matr. nr.";
             if (sfeSearchActive) {
-                $(".custom-search.tt-input").attr("placeholder",
+                $(".custom-search.typeahead.form-control:not(.tt-hint)").attr("placeholder",
                     searchTxt
                     + (esrSearchActive ? ", ESR nr. " : "")
                     + " eller SFE nr.");
             } else if (esrSearchActive) {
-                $(".custom-search.tt-input").attr("placeholder",
+                $(".custom-search.typeahead.form-control:not(.tt-hint)").attr("placeholder",
                     searchTxt + " eller ESR nr.");
             }
         }
@@ -117,9 +117,10 @@ module.exports = {
                             <label for="search-colorpicker-input" class="col-md-3 control-label">${__('Color')}</label>
                             <div id="search-colorpicker" class="input-group colorpicker-component col-md-10">
                                 <input id="search-colorpicker-input" name="search-colorpicker-input"
-                                       type="text" value="#ff0000" class="form-control"
+                                       type="color" value="#ff0000" class="form-control form-control-color"
                                        style="margin-left: 15px;"/>
                                 <span class="input-group-addon"><i style="margin-left: 10px;"/></span>
+
                             </div>
                         </div>
                     </div>
@@ -127,9 +128,6 @@ module.exports = {
 
         if (advanced) {
             $("#place-search").append(colorPicker)
-            $("#search-colorpicker").colorpicker({
-                container: $("#search-colorpicker")
-            });
         }
 
         // Set max zoom then zooming on target

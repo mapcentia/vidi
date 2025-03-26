@@ -482,6 +482,7 @@ module.exports = {
         "Find me": "Find me",
 
         "Symbols": "Symbols",
+        "Copy symbol": "Copy symbol",
 
         // Sign in
         "User name": "User name",

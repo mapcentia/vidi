@@ -50,6 +50,10 @@ Hvis der ikke angives en template, så anvendes en standard, som looper felterne
         {{/_vidi_content.fields}}
     </div>
 
+.. note::
+
+    Se også :ref:`templates`
+
 **Element selector**
 
 Hvilket DOM element skal pop-up templaten renderes i? Kan bruges til brugerdefinerede templates.
@@ -589,6 +593,8 @@ Hvis værdien af et felt skal udtrykkes i pop-up og tabel ved andet end selve de
 
 .. note::
     Hvis der anvendes en brugerdefineret pop-up template, har denne indstilling ingen effekt (se :ref:`gc2mata_infopopup`)
+
+    Se også :ref:`templates`
 
 Egenskaber
 =================================================================

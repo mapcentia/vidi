@@ -25,7 +25,7 @@ let sqlQuery;
 let applicationModules = false;
 let isStarted = false;
 let readyCallbackIsfired = false;
-let firstGroupIsOpened = false;
+let groupsIsOpened = false;
 let urlVars = urlparser.urlVars;
 
 let mainLayerOffcanvas;
@@ -73,7 +73,7 @@ module.exports = {
                 mainLayerOffcanvas.toggle()
             });
             if (window.vidiConfig.showOffcanvas === true ||
-                ((window.vidiConfig.showOffcanvas === 'mobile' || window.vidiConfig.showOffcanvas === 'mobil')  && window.screen.width > 700)
+                ((window.vidiConfig.showOffcanvas === 'mobile' || window.vidiConfig.showOffcanvas === 'mobil') && window.screen.width > 700)
             ) {
                 mainLayerOffcanvas.show();
             }
@@ -99,7 +99,7 @@ module.exports = {
             fadeWhenDraggingClass.animate({opacity: '0.3'}, 200);
             fadeWhenDraggingClass.css('pointer-events', 'none');
         }
-         
+
         // Define how we want the menu to fade in
         let fadeInMenu = function (fadeWhenDraggingClass) {
             fadeWhenDraggingClass.animate({opacity: '1'}, 200);
@@ -154,7 +154,7 @@ module.exports = {
                 let prefix;
                 let isChecked = $(e.target).prop(`checked`);
                 let groupName = $(this).data(`gc2-group-name`);
-                let layers = meta.getMetaData().data.filter((e) => {
+                meta.getMetaData().data.filter((e) => {
                     if (e.layergroup === groupName) {
                         let parsedMeta = layerTree.parseLayerMeta(e);
                         prefix = parsedMeta?.default_layer_type && parsedMeta.default_layer_type !== 't' ? parsedMeta.default_layer_type + ':' : '';
@@ -211,20 +211,36 @@ module.exports = {
         });
 
         backboneEvents.get().on("allDoneLoading:layers", function () {
-            const openFirtIfNotOpen = () => {
-                let e = document.querySelector('.js-toggle-layer-panel');
-                if (window.vidiConfig.expandFirstInLayerTree === true && e?.classList?.contains("collapsed")) {
-                    e.click();
-                }
+            const openFirstIfNotOpen = () => {
+                setTimeout(()=> {
+                    const e = document.querySelector('.js-toggle-layer-panel');
+                    if (window.vidiConfig.expandFirstInLayerTree === true && e?.classList?.contains("collapsed")) {
+                        e.click();
+                    }
+                }, 0)
+            }
+            const openLayerTreeGroupsIfNotOpen = () => {
+                setTimeout(()=> {
+                    if (window.vidiConfig.openLayerTreeGroups.length > 0) {
+                        window.vidiConfig.openLayerTreeGroups.forEach(g => {
+                            const e = document.querySelector(`[data-gc2-group-id="${g}"] .js-toggle-layer-panel`);
+                            if (e?.classList?.contains("collapsed")) {
+                                e.click();
+                            }
+                        })
+                    }
+                }, 0)
             }
             if (!isStarted) {
                 isStarted = true;
-                openFirtIfNotOpen();
+                openFirstIfNotOpen();
+                openLayerTreeGroupsIfNotOpen();
 
             } else {
-                if (!firstGroupIsOpened) {
-                    openFirtIfNotOpen();
-                    firstGroupIsOpened = true;
+                if (!groupsIsOpened) {
+                    openFirstIfNotOpen();
+                    openLayerTreeGroupsIfNotOpen();
+                    groupsIsOpened = true;
                 }
                 if (!readyCallbackIsfired && urlVars?.readyCallback) {
                     try {
@@ -317,7 +333,37 @@ module.exports = {
         backboneEvents.get().on('refresh:meta', function () {
             meta.init(null, false, false).then(() => {
                     backboneEvents.get().trigger('ready:meta');
-                    layerTree.create(false, [], true);
+                    layerTree.create(false, [], true).then(() => {
+                        // Toggle active layers, so protected layers will be reevaluated
+                        layerTree.getActiveLayers().forEach(l => {
+                            switchLayer.init(l, false).then(() => {
+                                switchLayer.init(l, true);
+                            });
+                        })
+                        if (!urlVars.state) {
+                            if (window.vidiConfig?.activeLayers?.length > 0) {
+                                meta.getLayerNamesFromSchemata(window.vidiConfig.activeLayers.map(i => i.replace('v:', ''))).then(layers => {
+                                    window.vidiConfig.activeLayers.forEach(i => {
+                                        if (i.startsWith('v:')) {
+                                            layers.push(i);
+                                            const index = layers.indexOf(i.replace('v:', ''));
+                                            layers.splice(index, 1);
+                                        }
+                                    })
+                                    console.info('Activating layers:', layers)
+                                    layers.forEach((l) => {
+                                        // Don't activate layer already active
+                                        if (!layerTree.getActiveLayers().includes(l)) {
+                                            switchLayer.init(l, false).then(() => {
+                                                switchLayer.init(l, true);
+                                            });
+                                        }
+                                    })
+                                    backboneEvents.get().trigger(`layerTree:activeLayersChange`);
+                                })
+                            }
+                        }
+                    });
                 }
             );
         });

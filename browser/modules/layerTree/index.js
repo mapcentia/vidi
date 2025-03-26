@@ -50,7 +50,8 @@ import Download from './Download';
 
 let _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEvents,
     onEachFeature = [], pointToLayer = {}, onSelectedStyle = [], onLoad = [], onSelect = [],
-    onMouseOver = [], cm = [], styles = {}, tables = {}, childLayersThatShouldBeEnabled = [];
+    onMouseOver = [], cm = [], styles = {}, tables = {}, childLayersThatShouldBeEnabled = [],
+    table;
 
 const {v4: uuidv4} = require('uuid');
 const React = require('react');
@@ -1652,9 +1653,14 @@ module.exports = {
                 hl,
                 onLoad: (l) => {
                     let reloadInterval = meta.parseLayerMeta(layerKey)?.reload_interval;
-                    let tableElement = meta.parseLayerMeta(layerKey)?.show_table_on_side;
+                    let showTable = meta.parseLayerMeta(layerKey)?.show_table_on_side;
                     // Create side table once
-                    if (tableElement) {
+                    if (showTable) {
+                        const existingTable = document.getElementById(VECTOR_SIDE_TABLE_EL);
+                        if (existingTable) {
+                            existingTable.remove();
+                            table = null;
+                        }
                         let styles;
                         let height = null;
                         let tableBodyHeight;
@@ -1662,6 +1668,7 @@ module.exports = {
                         const w = window.vidiConfig.vectorTable.width;
                         const position = window.vidiConfig.vectorTable.position;
                         const e = $('#pane');
+                        const o = $('.offcanvas');
                         if (position === 'right') {
                             styles = `width: ${w}; float: right;`;
                             e.css("width", `calc(100vw - ${w})`);
@@ -1671,12 +1678,13 @@ module.exports = {
                         } else if (position === 'bottom') {
                             styles = `width: 100%; height: ${h}; bottom: 0; position: fixed;`;
                             e.css("height", `calc(100vh - ${h})`);
+                            o.css("height", `calc(100vh - ${h})`);
                             height = parseInt(h);
                             tableBodyHeight = (height - 34) + "px"
                         }
                         if (position === 'right' || position === 'bottom') {
-                            e.before(`<div id="${VECTOR_SIDE_TABLE_EL}" style="${styles}; background-color: white; " data-vidi-vector-table-id="${trackingLayerKey}"></div>`)
-                            _self.createTable(layerKey, true, "#" + VECTOR_SIDE_TABLE_EL, {
+                            e.before(`<div id="${VECTOR_SIDE_TABLE_EL}" style="${styles}; background-color: white;" data-vidi-vector-table-id="${trackingLayerKey}"></div>`)
+                            table = _self.createTable(layerKey, true, "#" + VECTOR_SIDE_TABLE_EL, {
                                 showToggle: false,
                                 showExport: false,
                                 showColumns: false,
@@ -1687,6 +1695,11 @@ module.exports = {
                             });
                         }
                     }
+                    // Reload table in layer tree if shown
+                    if (document.getElementById('table_view-' + layerKey.replace(".", "_"))?.offsetParent !== null) {
+                        _self.createTable(layerKey, true);
+                    }
+
                     if (reloadInterval && reloadInterval !== "") {
                         let reloadCallback = meta.parseLayerMeta(layerKey)?.reload_callback;
                         let func = reloadCallback && reloadCallback !== "" ? Function('"use strict";return (' + reloadCallback + ')')() : () => {
@@ -2014,7 +2027,7 @@ module.exports = {
             let tableHeaders = sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + layerKey,
                 JSON.parse(JSON.stringify(layerWithData[0].toGeoJSON(GEOJSON_PRECISION).features)));
 
-            window.operateFormatter = (value, row, index) => {
+            window.filterFormatter = (value, row, index) => {
                 return `
                     <div class="d-flex justify-content-around">
                     <a class="btn btn-outline-secondary btn-sm filter" href="javascript:void(0)" title="Filter">
@@ -2026,8 +2039,20 @@ module.exports = {
                     </div>
                     `;
             }
+
+            window.editFormatter = (value, row, index) => {
+                return `
+                    <div class="d-flex justify-content-center gap-1">
+                    <a class="btn btn-outline-secondary btn-sm edit" href="javascript:void(0)" title="Edit">
+                        <i class="bi bi-pencil text-primary"></i>
+                    </a>
+                    <a class="btn btn-outline-secondary btn-sm delete" href="javascript:void(0)" title="Delete">
+                        <i class="bi bi-trash text-danger"></i>
+                    </a>
+                    </div>
+                    `;
+            }
             const filter = (row) => {
-                console.log(row)
                 _self.onApplyArbitraryFiltersHandler({
                     layerKey,
                     filters: {
@@ -2043,7 +2068,7 @@ module.exports = {
                     }
                 }, LAYER.VECTOR);
             }
-            const unfilter = () => {
+            const unFilter = () => {
                 _self.onDisableArbitraryFiltersHandler(layerKey)
                 _self.onApplyArbitraryFiltersHandler({
                     layerKey,
@@ -2053,19 +2078,46 @@ module.exports = {
                     }
                 }, LAYER.VECTOR)
             }
-            window.operateEvents = {
-                'click .filter': (e, value, row, index) => filter(row),
-                'click .unfilter': (e, value, row, index) => unfilter()
+
+            const edit = (row) => {
+                console.log(layerKey, row._id.toString());
+                backboneEvents.get().trigger("edit:editor", row._id, layerKey, true);
+            }
+            const _delete = (row) => {
+                if (window.confirm(__(`Are you sure you want to delete the feature?`))) {
+                    backboneEvents.get().trigger("delete:editor", row._id, layerKey, true);
+                }
             }
 
-            /*
-                        tableHeaders.push({
-                            header: "Filter",
-                            dataIndex: "filter",
-                            formatter: "operateFormatter",
-                            events: "operateEvents"
-                        })
-            */
+            window.filterEvents = {
+                'click .filter': (e, value, row, index) => filter(row),
+                'click .unfilter': (e, value, row, index) => unFilter()
+            }
+
+            window.editEvents = {
+                'click .edit': (e, value, row, index) => edit(row),
+                'click .delete': (e, value, row, index) => {
+
+                    _delete(row)
+                }
+            }
+
+            // tableHeaders.push({
+            //     header: "Filter",
+            //     dataIndex: "filter",
+            //     formatter: "filterFormatter",
+            //     events: "filterEvents"
+            // })
+            let parsedMeta = _self.parseLayerMeta(meta.getMetaByKey(layerKey, false));
+
+            if (parsedMeta?.vidi_layer_editable && window.vidiConfig.enabledExtensions.includes('editor')) {
+                tableHeaders.push({
+                    header: "Editor",
+                    dataIndex: "editor",
+                    formatter: "editFormatter",
+                    events: "editEvents"
+                })
+            }
 
             let styleSelected = (onSelectedStyle[LAYER.VECTOR + ':' + layerKey] ? onSelectedStyle[LAYER.VECTOR + ':' + layerKey] : {
                 weight: 5,
@@ -2073,8 +2125,6 @@ module.exports = {
                 dashArray: '',
                 fillOpacity: 0.2
             });
-
-            let parsedMeta = _self.parseLayerMeta(meta.getMetaByKey(layerKey, false));
 
             let selectCallBack = () => {
             };
@@ -2190,12 +2240,6 @@ module.exports = {
                     console.info("Error in click function for: " + layerKey, e.message);
                 }
             }
-
-            Handlebars.registerHelper('breaklines', function (text) {
-                text = Handlebars.Utils.escapeExpression(text);
-                text = text.replace(/(\r\n|\n|\r)/gm, '<br>');
-                return new Handlebars.SafeString(text);
-            });
             let randText = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
                 let r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
                 return v.toString(16);
@@ -2969,42 +3013,26 @@ module.exports = {
         return layersAndSubgroupsForCurrentGroup;
     },
 
+    /**
+     *
+     * @param forcedState NOT IN USE
+     * @param precheckedLayers NOT IN USE
+     * @param localItem
+     * @returns {{layerIsActive: boolean, activeLayerName: boolean}}
+     */
     checkIfLayerIsActive: (forcedState, precheckedLayers, localItem) => {
         if (!localItem) {
             throw new Error(`Layer meta object is empty`);
         }
-
         let layerIsActive = false;
         let activeLayerName = false;
-
         let name = `${localItem.f_table_schema}.${localItem.f_table_name}`;
-
-        // If activeLayers are set, then no need to sync with the map
-        if (forcedState?.activeLayers?.length > 0 && forcedState.activeLayers.includes(name)) {
-            forcedState.activeLayers.map(key => {
-                if (layerTreeUtils.stripPrefix(key) === name) {
-                    layerIsActive = true;
-                    activeLayerName = key;
-                }
-            });
-        } else {
-            if (precheckedLayers && Array.isArray(precheckedLayers) && precheckedLayers.length > 0) {
-                precheckedLayers.map(item => {
-                    if (layerTreeUtils.stripPrefix(item.id) === name) {
-                        layerIsActive = true;
-                        activeLayerName = item.id;
-                    }
-                });
+        cloud.get().map.eachLayer(function (layer) {
+            if (layer.id && layerTreeUtils.stripPrefix(layer.id) === name && !layer.baseLayer) {
+                layerIsActive = true;
+                activeLayerName = layer.id;
             }
-
-            cloud.get().map.eachLayer(function (layer) {
-                if (layer.id && layerTreeUtils.stripPrefix(layer.id) === name && !layer.baseLayer) {
-                    layerIsActive = true;
-                    activeLayerName = layer.id;
-                }
-            });
-        }
-
+        });
         return {layerIsActive, activeLayerName}
     },
 
@@ -3560,18 +3588,15 @@ module.exports = {
                     $(layerContainer).find(`.js-toggle-table`).click(() => {
                         let tableContainerId = `#table_view-${layerKey.replace(".", "_")}`;
                         // If table is open, then destroy it so it doesn't leak
-                        if ($(tableContainerId + ` .bootstrap-table`).length > 0) {
-                            tables[LAYER.VECTOR + ':' + layerKey].destroy();
+                        const existingTable = document.getElementById(tableContainerId);
+                        if (existingTable) {
+                            existingTable.remove();
                             delete tables[LAYER.VECTOR + ':' + layerKey];
-                            $(tableContainerId + ` .bootstrap-table`).remove();
-                        } else {
-                            _self.createTable(layerKey, true);
                         }
+                        _self.createTable(layerKey, true);
                         _self._selectIcon($(layerContainer).find('.js-toggle-table'));
                         $(layerContainer).find('.js-layer-settings-table').toggle();
-
                         if ($(tableContainerId).length !== 1) throw new Error(`Unable to find the table view container`);
-
                         // Refresh all tables when opening one panel, because DOM changes can make the tables un-aligned
                         $(`.js-layer-settings-table table`).bootstrapTable('resetView');
                     });
@@ -4150,7 +4175,7 @@ module.exports = {
                     }
                     return false;
                 }).length;
-                activeLayersInSubGroups += activeLayers.filter(e => JSON.parse(metaDataKeys[layerTreeUtils.stripPrefix(e)].meta)?.vidi_sub_group.match(re) && metaDataKeys[layerTreeUtils.stripPrefix(e)].layergroup === layerGroup).length;
+                activeLayersInSubGroups += activeLayers.filter(e => JSON.parse(metaDataKeys[layerTreeUtils.stripPrefix(e)].meta)?.vidi_sub_group?.match(re) && metaDataKeys[layerTreeUtils.stripPrefix(e)].layergroup === layerGroup).length;
                 const searchPath = `[data-gc2-group-id="${layerGroup}"]` + ' ' + split.map(e => `[data-gc2-subgroup-id="${e}"]`).join(' ') + ` [data-gc2-subgroup-name="${split[split.length - 1]}"]`;
                 const el = document.querySelector(searchPath);
                 if (el) {

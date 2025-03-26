@@ -227,12 +227,6 @@ module.exports = {
                                     break;
 
                                 case "cowi":
-                                    const params = new URLSearchParams(cowiUrl.split('?')[1]);
-                                    console.log(params.has('u'));
-                                    console.log(params.has('p'));
-                                    if (!params.has('u') || !params.has('p')) {
-
-                                    }
                                     url = cowiUrl + "&srid=4326&x=" + p.x + "&y=" + p.y;
                                     break;
                             }
@@ -273,13 +267,22 @@ module.exports = {
                                            onChange={this.onChange}/>
                                     <label className="btn btn-sm btn-outline-secondary"
                                            htmlFor="streetview-service-skraafoto">Skråfoto</label>
-
-                                    <input className="btn-check" type="radio" id="streetview-service-cowi"
-                                           name="streetview-service" value="cowi"
-                                           checked={this.state.selectedOption === 'cowi'}
+                                    <input className="btn-check" type="radio" id="streetview-service-maps"
+                                           name="streetview-service" value="maps"
+                                           checked={this.state.selectedOption === 'maps'}
                                            onChange={this.onChange}/>
                                     <label className="btn btn-sm btn-outline-secondary"
-                                           htmlFor="streetview-service-cowi">COWI Gadefoto</label>
+                                           htmlFor="streetview-service-maps">Maps</label>
+                                    {cowiUrl !== undefined ?
+                                        <input className="btn-check" type="radio" id="streetview-service-cowi"
+                                               name="streetview-service" value="cowi"
+                                               checked={this.state.selectedOption === 'cowi'}
+                                               onChange={this.onChange}/> : null
+                                    }
+                                    {cowiUrl !== undefined ?
+                                        <label className="btn btn-sm btn-outline-secondary"
+                                               htmlFor="streetview-service-cowi">COWI Gadefoto</label> : null
+                                    }
                                 </span>
                             </div>
                         </div>

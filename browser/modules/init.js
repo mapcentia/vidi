@@ -22,6 +22,10 @@ const cookie = require('js-cookie');
 const config = require('../../config/config.js');
 
 import mustache from 'mustache';
+import dayjs from "dayjs";
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+import {meta} from "@turf/turf";
+dayjs.extend(customParseFormat);
 
 module.exports = {
 
@@ -45,6 +49,7 @@ module.exports = {
         const defaults = {
             schemata: [],
             baseLayers: [],
+            baseLayerGroups: [],
             autoPanPopup: false,
             crossMultiSelect: false,
             brandName: '',
@@ -92,6 +97,10 @@ module.exports = {
             theme: 'light',
             emptyInfoCallback: null,
             infoCallback: null,
+            dateFormats: {},
+            editorAlwaysActivated: true,
+            statelessDraw: false,
+            openLayerTreeGroups: [],
         };
         // Set session from URL
         if (typeof urlVars.session === "string") {
@@ -194,6 +203,38 @@ module.exports = {
                 } else if (window.vidiConfig.defaultConfig) {
                     configFile = window.vidiConfig.defaultConfig;
                 }
+                // Register Handlebars helpers
+                Handlebars.registerHelper("formatDate", function(datetime, format = null, inFormat = null) {
+                    if (datetime == null) {
+                        return null;
+                    }
+                    const dateFormats = window.vidiConfig.dateFormats;
+                    if (format !== null && dateFormats.hasOwnProperty(format)) {
+                        return dayjs(datetime.toString(), inFormat).format(dateFormats[format]);
+                    } else {
+                        return dayjs(datetime.toString(), inFormat).format(format);
+                    }
+                });
+                Handlebars.registerHelper('breakLines', function (text) {
+                    if (text == null) {
+                        return null;
+                    }
+                    text = Handlebars.Utils.escapeExpression(text);
+                    text = text.replace(/(\r\n|\n|\r)/gm, '<br>');
+                    return new Handlebars.SafeString(text);
+                });
+                Handlebars.registerHelper('replaceNull', function (value, text) {
+                    if (value === null) {
+                        return text;
+                    }
+                    return null;
+                });
+                Handlebars.registerHelper('formatDecimalNumber', function (value) {
+                    if (value === null) {
+                        return null;
+                    }
+                    return value.toString().replace('.', window.decimalSeparator);
+                });
 
                 if (configFile) {
                     loadConfig();
@@ -546,9 +587,22 @@ module.exports = {
                                 modules.layerTree.setRecreateStores(true);
                                 // Switch on activeLayers from config if not snapshot
                                 if (!urlVars.state) {
-                                    st.modules.layerTree.activeLayers.forEach((l) => {
-                                        modules.switchLayer.init(l, true)
-                                    })
+                                    if (window.vidiConfig?.activeLayers?.length > 0) {
+                                        modules.meta.getLayerNamesFromSchemata(window.vidiConfig.activeLayers.map(i => i.replace('v:', ''))).then(layers => {
+                                            window.vidiConfig.activeLayers.forEach(i => {
+                                                if (i.startsWith('v:')) {
+                                                    layers.push(i);
+                                                    const index = layers.indexOf(i.replace('v:', ''));
+                                                    layers.splice(index, 1);
+                                                }
+                                            })
+                                            console.info('Activating layers:', layers)
+                                            layers.forEach((l) => {
+                                                modules.switchLayer.init(l, true)
+                                            })
+                                            backboneEvents.get().trigger(`layerTree:activeLayersChange`);
+                                        })
+                                    }
                                 }
                             });
                         })

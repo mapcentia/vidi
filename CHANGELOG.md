@@ -1,8 +1,171 @@
 # Changelog
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
+
+## [UNRELEASED] - 2025-18-3
+
+### Added
+
+- A new config `extensionConfig.editor.alwaysActivate`. If set to `false` the editor controls will be hidden until the user sign in.
+- Configuration for grouping base layers:
+```json
+{
+  "baseLayerGroups": [
+    {
+      "groupName": "Hexagon DDO ortofoto",
+      "layers": [
+        "DK-DDOland2022_125mm_UTM32ETRS89",
+        ...,
+        ...
+      ]
+    },
+    {
+      "groupName": "GeoDanmark ortofoto",
+      "layers": [
+        "ortofoto_foraar_temp_DF",
+        "ortofoto_foraar_2023",
+        ...,
+        ...
+      ]
+    }
+  ]
+}
+```
+- Draw module can now be set to stateless with config `statelessDraw: true`. This means that drawings are not recreated on browser refresh.
+- Symbol extension can now set to stateless with config `extensionConfig.symbols.stateless: true`. This means that symbols are not recreated on browser refresh.
+- Opening layer groups at startup can now be done with config `openLayerTreeGroups`, which value must be an array with group names:
+```json
+{
+  "openLayerTreeGroups": ["Group1", "Group2"]
+}
+```
+
+### Fixed
+
+- Better handling of vector layers in `activeLayers`. If `activeLayers` only had vector layers, they wouldn't be activated.
+- Fail-over for base layers is now working in embed mode with both base layer toggle and drawer. 
+- Fail-over for base layer module is improved, so its cycles from the top and starts over.
+
+## [2025.3.1] - 2025-10-3
+
+### Added
+
+- Added Handlebars helper 'formatDecimalNumber', which converts a decimal number to the chosen locale (either decimal separator '.' or ',').
+
+## [2025.3.0] - 2025-7-3
+
+### Added
+- Added information on building the documentation.
+- Fixed some typos in changelog.
+- The default coordinate system can now be set in Coordinates module:
+
+```json
+{
+  "extensionConfig": {
+    "coordinates": {
+      "default": "utm",
+      "lockUtmZoneTo": 32
+    }
+  }
+}
+```
+
+- Google Maps added to Coordinates module and COWI Gadefoto will not be shown if not configured.
+- New module `directions`, which adds a map control button. After activating the control the user can click in map and
+  Google Maps with directions to that point will start. The geolocation control must be active for to use the directions
+  control.
+- New "More" handle on symbols with a Copy function, which clones the symbol to a new one. It can be configured like the
+  other handles and is called `extra`. Here it's disabled:
+```json
+{
+  "extensionConfig": {
+    "symbols": {
+      "files": [
+        {
+          "file": "symbol_set.json",
+          "title": "My symbols"
+        }
+      ],
+      "symbolOptions": {
+        "extra": false
+      }
+    }
+  }
+}
+```
+- Symbol handles are now using Bootstrap icons.
+- Config option 'activateLayers' can now be set to the same kind of values as 'schemata' (including tag: and schema name).
+  A new method meta::getLayerNamesFromSchemata will convert the schemata to an array of layer names.
+- A global variable `decimalSeparator` is now set from current locale. It's used in conflictSearch.
+
+## Changed
+
+- Auto hide login modal after successful login.
+- When using `featureInfoTableOnMap` closing the popup wil clear selected features in the map.
+- Config option 'activeLayers' will now be evaluated when signing in, so protected layers will be switched on.
+
+### Fixed
+
+- When signin out active layers will be toggled so protected layers are efficient removed from the map.
+- Bug regrading removal of empty groups in conflictSearch.
+
+## [2025.2.1] - 2025-7-2
+
+## Added
+
+- In ConflictSearch modul the total length and area is calculated for intersections with lines and polygons and
+  reported.
+- Individual buffer for layers. The buffer for a layer is set with the GC2 Meta option `buffer_conflict`, which is added
+  to the buffer on the search polygon. In the result report the Individual set buffers are shown.
+- It's now possible to use the helper function `formatDate` in templates like this:
+  ```handlebars
+  {{formatDate date "D. MMMM YYYY" "YYYYMMDD"}}
+  ```
+  Where first argument is output format and the second is input format (if needed).
+- And template helper function `replaceNull` is also added, which replace null with a value:
+  ```handlebars
+  {{replaceNull date "No date"}}
+  ```
+  The function will not return a value, if input is not null.
+
+## [2025.2.0] - 2025-4-2
+
+### Added
+
+- Editor 'Edit' and 'Delete' buttons in feature table, so editing can be started without pop-up.
+
+### Fixed
+
+- The "Show table" is now given space, so it doesn't overlap other elements like off canvases.
+
+## [2025.1.5] - 2025-28-1
+
+### Fixed
+
+- The annotation tool in Draw is fixed. After upgrading 'marked' module, the code had to be adjusted.
+
+## [2025.1.4] - 2025-22-1
+
+### Fixed
+
+- The "Show table" table widget was on reload of layer duplicated in the DOM.
+- When disabling layer the table was not removed in other templates than embed.tmpl.
+- Styles regarding tables were adjusted.
+
+## [2025.1.3] - 2025-16-1
+
+### Fixed
+
+- Update Leaflet CSS path to use node_modules source. It was using an old CSS sheet.
+
+## [2025.1.2] - 2025-15-1
+
+### Fixed
+
+- Refs in configs now works again. And they also works in external configs.
 
 ## [2025.1.1] - 2025-13-1
 ### Fixed
@@ -57,18 +220,25 @@ and this project adheres to [CalVer](https://calver.org/).
 ```
 
 ### Fixed
-- Bug in editor caused layers with restrictions to be output as textareas. Now the editor will correctly output a select with the values setup in GC2.
+
+- Bug in editor caused layers with restrictions to be output as textareas. Now the editor will correctly output a select
+  with the values setup in GC2.
 - On mobile, it was possible for the menu to get into a stuck transparent state. This has been fixed.
 - A bug caused the defaults not to load in the `conflictSearch` module. This has been fixed.
 - Attributions and zoom-settings are now correctly passed onto WMTS layers.
 
 ## [2024.11.1] - 2024-21-11
+
 ### Fixed
-- Editor now handles JSON fields, which before rendered a syntax error in the decoding. 
+
+- Editor now handles JSON fields, which before rendered a syntax error in the decoding.
 
 ## [2024.11.0] - 2024-21-11
+
 ### Added
-- Themes selector in default template. Choose between Dark, Light or Auto. Is set to the same theme as the OS (if supported). Auto will change the theme according to the OS.
+
+- Themes selector in default template. Choose between Dark, Light or Auto. Is set to the same theme as the OS (if
+  supported). Auto will change the theme according to the OS.
 - It's now possible to set up MapLibre layers as base layers (overlays will come later). Setup like this:
 ```json
 {
@@ -83,13 +253,15 @@ and this project adheres to [CalVer](https://calver.org/).
   "maxNativeZoom": 19
 }
 ```
-- Also WMTS layer support is added for base layers:
+
+- Also, WMTS layer support is added for base layers:
+
 ```json
 {
   "type": "WMTS",
   "url": "https://api.dataforsyningen.dk/orto_foraar_webm_DAF?token=xxx&",
-  "tileMatrixSet": "DFD_GoogleMapsCompatible",
-  "layer": "orto_foraar_webm",
+  "tileMatrixSet": 'DFD_GoogleMapsCompatible',
+  "layer": 'orto_foraar_webm',
   "id": "wmts",
   "name": "Ortofoto (wmts)",
   "description": "Kort fra wmts",
@@ -992,29 +1164,42 @@ function(store, map) {
 ### Changed
 - CalVer is now used with month identifier like this: YYYY.MM.Minor.Modifier
 - Custom searches can now be added to danish search module.
-- `embed.js` will wait with loading Vidi until target element is visible in the DOM. This way, Vidi can be embedded in a element with `display:none`.
-- Its now possible to add custom extra searches to `danish.js`. A search needs an Elasticsearch index, which must have an id and string property. The latter is the search string. Also a look-up table/view with geometries is required. An example of a setup:
-```json
+- `embed.js` will wait with loading Vidi until target element is visible in the DOM. This way, Vidi can be embedded in a
+  element with `display:none`.
+- Its now possible to add custom extra searches to `danish.js`. A search needs an Elasticsearch index, which must have
+  an id and string property. The latter is the search string. Also a look-up table/view with geometries is required. An
+  example of a setup:
+
+```javascript
 {
-    "searchConfig": {
-        "size": 4,
-        "komkode": "*",
-        "esrSearchActive": true,
-        "sfeSearchActive": true,
-        "extraSearches": [{
-            "name": "stednavne_search",
-            "db": "dk",
-            "host": "https://dk.gc2.io",
-            "heading": "Stednavne",
-            "index": {
-                "name": "stednavne/navne_samlet",
-                "field": "string",
-                "key": "gid"
+    searchConfig: {
+        size: 4,
+            komkode
+    :
+        "*",
+            esrSearchActive
+    :
+        true,
+            sfeSearchActive
+    :
+        true, // Example of config for danish search
+            extraSearches
+    :
+        [, {
+            name: "stednavne_search",
+            db: "dk",
+            host: "https://dk.gc2.io",
+            heading: "Stednavne",
+            index: {
+                name: "stednavne/navne_samlet",
+                field: "string",
+                key: "gid",
+
             },
-            "relation": {
-                "name": "stednavne.navne_samlet_geom",
-                "key": "gid",
-                "geom": "the_geom"
+            relation: {
+                name: "stednavne.navne_samlet_geom",
+                key: "gid",
+                geom: "the_geom"
             }
         }]
     }

@@ -131,6 +131,9 @@ let urlsIgnoredForCaching = [{
 }, {
     regExp: true,
     requested: '/api/df'
+}, {
+    regExp: true,
+    requested: 'socket\.io'
 }];
 
 if (typeof CONFIG.urlsIgnoredForCaching === "object") {
@@ -1011,7 +1014,7 @@ self.addEventListener('fetch', (event) => {
                     if (apiCallDetectionRegExp.test(cleanedRequestURL)) {
                         return queryAPI(cleanedRequestURL, event, response);
                     } else {
-                        // Checking if the request is eligible for caching 
+                        // Checking if the request is eligible for caching
                         let requestHasToBeCached = true;
                         if (forceIgnoredExtensionsCaching === false) {
                             ignoredExtensionsRegExps.map(item => {
