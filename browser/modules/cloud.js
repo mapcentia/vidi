@@ -6,6 +6,7 @@
 
 'use strict';
 
+import {getProjection} from './crs'
 
 let cloud;
 let lc;
@@ -31,16 +32,6 @@ module.exports = {
             console.info(e.message);
         }
 
-        const projections = {
-            EPSG3857: L.CRS.EPSG3857,
-            EPSG25832: new L.Proj.CRS('EPSG:25832',
-                '+proj=utm +zone=32 +ellps=GRS80 +units=m +no_defs', {
-                    resolutions: [1638.4, 819.2, 409.6, 204.8, 102.4, 51.2, 25.6, 12.8, 6.4, 3.2, 1.6, 0.8, 0.4, 0.2],
-                    origin: [120000, 6500000],
-                    bounds: L.bounds([120000, 5661139.2], [1378291.2, 6500000])
-                }),
-        }
-
         /**
          *
          * @type {geocloud.map}
@@ -56,7 +47,7 @@ module.exports = {
             editable: true,
             maxBoundsViscosity: 1.0,
             preferCanvas: false,
-            crs: projections[window.vidiConfig.crs]
+            crs: getProjection(window.vidiConfig.crs),
         });
 
         let map = cloud.map;

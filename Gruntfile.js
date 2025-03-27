@@ -234,6 +234,8 @@ module.exports = function (grunt) {
                 files: {
                     'public/js/build/all.min.js': [
                         'node_modules/leaflet/dist/leaflet-src.js',
+                        'node_modules/proj4/dist/proj4.js',
+                        'node_modules/proj4leaflet/src/proj4leaflet.js',
                         'public/js/bundle.js',
                     ],
                     'public/js/build/all.async.min.js': [
@@ -252,8 +254,6 @@ module.exports = function (grunt) {
                         'public/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.js',
                         'public/js/lib/leaflet-simple-map-screenshoter/dist/leaflet-simple-map-screenshoter.js',
                         'public/js/lib/leaflet.tilelayer.wmts/leaflet.tilelayer.wmts.src.js',
-                        'node_modules/proj4/dist/proj4.js',
-                        'node_modules/proj4leaflet/src/proj4leaflet.js',
 
                         'public/js/lib/jquery.canvasResize.js/jquery.canvasResize.js',
                         'public/js/lib/jquery.canvasResize.js/jquery.exif.js',

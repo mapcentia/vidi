@@ -79,6 +79,8 @@
 <!-- Build -->
 <!-- build:js /js/build/all.min.js -->
 <script src="/node_modules/leaflet/dist/leaflet-src.js"></script>
+<script src="/node_modules/proj4/dist/proj4.js"></script>
+<script src="/node_modules/proj4leaflet/src/proj4leaflet.js"></script>
 <script src="/js/bundle.js"></script>
 <!-- /build -->
 <!-- Async load Javascript -->

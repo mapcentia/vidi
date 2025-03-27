@@ -14,7 +14,6 @@ import {
     ICONS,
     LAYER,
     LOG,
-    MAP_RESOLUTIONS, MAP_RESOLUTIONS_EPSG25832,
     MODULE_NAME,
     SELECTED_ICON_SCALE,
     SELECTED_STYLE,
@@ -46,6 +45,7 @@ import {
 } from '@turf/turf'
 import MetaSettingForm from "./MetaSettingForm";
 import Download from './Download';
+import {getResolutions} from "../crs";
 
 
 let _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEvents,
@@ -1848,7 +1848,7 @@ module.exports = {
                                     }, 200)
                                 }, null, [coord3857[0], coord3857[1]]);
                             }
-                            const distance = window.vidiConfig.crs === 'EPSG25832' ? 10 * MAP_RESOLUTIONS_EPSG25832[cloud.get().getZoom()] : 10 * MAP_RESOLUTIONS[cloud.get().getZoom()];
+                            const distance = 10 * getResolutions(window.vidiConfig.crs)[cloud.get().getZoom()];
                             const clickFeature = turfBuffer(turfPoint([e.latlng.lng, e.latlng.lat]), distance, {units: 'meters'});
                             let mapObj = cloud.get().map;
                             for (let l in mapObj._layers) {
