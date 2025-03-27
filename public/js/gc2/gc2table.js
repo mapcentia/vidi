@@ -450,6 +450,12 @@ var gc2table = (function () {
                             layerClone[n] = `<div style="cursor: pointer" onclick="window.open().document.body.innerHTML = '<img src=\\'${layerClone[n]}\\' />';">
                                         <img style='width:25px' src='${layerClone[n]}'/>
                                      </div>`
+                        } else if (k.dataIndex === n && (k?.restrictions && (layerClone[n] && layerClone[n] !== ''))) {
+                            let restriction = k.restrictions.find(restriction => restriction.value === layerClone[n]);
+                            if (restriction) {
+                                // replace value with alias
+                                layerClone[n] = restriction.alias;
+                            }
                         }
                     });
                 });

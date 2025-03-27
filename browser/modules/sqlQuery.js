@@ -9,6 +9,7 @@
 import {LAYER, MAP_RESOLUTIONS, SYSTEM_FIELD_PREFIX} from './layerTree/constants';
 import {GEOJSON_PRECISION, MIME_TYPES_APPS, MIME_TYPES_IMAGES} from './constants';
 import dayjs from 'dayjs';
+import { PropertyValue } from 'maplibre-gl';
 
 const layerTreeUtils = require('./layerTree/utils');
 
@@ -837,17 +838,16 @@ module.exports = {
                             }
                             // If metaDataForField.restrictions has an array, we get the related values
                             else if (metaDataForField && metaDataForField.restriction && Array.isArray(metaDataForField.restriction)) {
-                                let restrictions = metaDataForField.restriction;
-                                let restriction = restrictions.find(restriction => restriction.value === value);
+                                property.restrictions = metaDataForField.restriction;
+                                let restriction = property.restrictions.find(restriction => restriction.value === value);
                                 if (restriction) {
                                     value = restriction.alias;
                                 }
                             }
-                            
                             fields.push({title: property.value.alias || property.key, value});
                             fieldLabel = (property.value.alias !== null && property.value.alias !== "") ? property.value.alias : property.key;
                             if (feature.properties[property.key] !== undefined) {
-                                out.push([property.key, property.value.sort_id, fieldLabel, property.value.link, property.value.template, property.value.content]);
+                                out.push([property.key, property.value.sort_id, fieldLabel, property.value.link, property.value.template, property.value.content, property.restrictions || null]);
                             }
                         }
                     });
@@ -869,6 +869,7 @@ module.exports = {
                             link: property[3],
                             template: property[4],
                             content: property[5],
+                            restrictions: property[6]
                         })
                     });
                     first = false;
