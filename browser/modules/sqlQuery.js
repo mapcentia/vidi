@@ -9,7 +9,6 @@
 import {LAYER, MAP_RESOLUTIONS, SYSTEM_FIELD_PREFIX} from './layerTree/constants';
 import {GEOJSON_PRECISION, MIME_TYPES_APPS, MIME_TYPES_IMAGES} from './constants';
 import dayjs from 'dayjs';
-import { PropertyValue } from 'maplibre-gl';
 
 const layerTreeUtils = require('./layerTree/utils');
 
