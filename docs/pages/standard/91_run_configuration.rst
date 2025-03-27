@@ -796,6 +796,17 @@ Angiv hvilke grupper, som skal være foldet ud i lagtræet fra starten.
 
     "openLayerTreeGroups": ["Gruppe1", "Gruppe2"]
 
+.. _configjs_crs:
+
+crs
+*****************************************************************
+
+Angiv den kort projektion/grid, som skal anvendes. Default er `EPSG3857` and den eneste anden mulighed er `EPSG25832`, som er det danske UTM32 grid.
+
+.. code-block:: json
+
+    "crs": "EPSG25832"
+
 #################################################################
 Referencer
 #################################################################

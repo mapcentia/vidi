@@ -42,6 +42,12 @@ and this project adheres to [CalVer](https://calver.org/).
   "openLayerTreeGroups": ["Group1", "Group2"]
 }
 ```
+- Custom map projections can now be used. One is added: The Danish UTM32 grid. It can be set with config:
+```json
+  {
+    "crs": "EPSG25832"
+  }
+```
 
 ### Fixed
 
