@@ -82,7 +82,6 @@ module.exports = {
     },
 
     transform: function (from, to, coordinates) {
-        const proj4 = require("proj4");
         return proj4(from, to, coordinates);
     },
 

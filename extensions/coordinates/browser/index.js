@@ -36,11 +36,6 @@ var utmZone = require('./../../../browser/modules/utmZone');
 
 /**
  *
- */
-var proj4 = require('proj4');
-
-/**
- *
  * @type {string}
  */
 var exId = "coordinates";
