@@ -51,6 +51,7 @@ let mapObj;
 let config = require('../../../config/config.js');
 
 let cowiUrl = config?.extensionConfig?.streetView?.cowi;
+let ignorelist = config?.extensionConfig?.streetView?.ignorelist || [];
 let mapillaryUrl = config?.extensionConfig?.streetView?.mapillary ||"https://www.mapillary.com/app/?z=17";
 
 /**
@@ -242,32 +243,51 @@ module.exports = {
                         <div className="form-group">
                             <div className="d-flex flex-column gap-4">
                                 <span className="btn-group">
-                                    <input className="btn-check" type="radio" id="streetview-service-google"
-                                           name="streetview-service"
-                                           value="google" checked={this.state.selectedOption === 'google'}
-                                           onChange={this.onChange}/>
-                                    <label className="btn btn-sm btn-outline-secondary"
-                                           htmlFor="streetview-service-google">Street View</label>
-
-                                    <input className="btn-check" type="radio" id="streetview-service-mapillary"
-                                           name="streetview-service" value="mapillary"
-                                           checked={this.state.selectedOption === 'mapillary'}
-                                           onChange={this.onChange}/>
-                                    <label className="btn btn-sm btn-outline-secondary"
-                                           htmlFor="streetview-service-mapillary">Mapillary</label>
-
-                                    <input className="btn-check" type="radio" id="streetview-service-skraafoto"
-                                           name="streetview-service" value="skraafoto"
-                                           checked={this.state.selectedOption === 'skraafoto'}
-                                           onChange={this.onChange}/>
-                                    <label className="btn btn-sm btn-outline-secondary"
-                                           htmlFor="streetview-service-skraafoto">Skråfoto</label>
-                                    <input className="btn-check" type="radio" id="streetview-service-maps"
-                                           name="streetview-service" value="maps"
-                                           checked={this.state.selectedOption === 'maps'}
-                                           onChange={this.onChange}/>
-                                    <label className="btn btn-sm btn-outline-secondary"
-                                           htmlFor="streetview-service-maps">Maps</label>
+                                {ignorelist.length > 0 && !ignorelist.includes("streetview") ?
+                                    <>
+                                        <input className="btn-check" type="radio" id="streetview-service-activate"
+                                               name="streetview-service"
+                                               value="activate" checked={this.state.selectedOption === 'activate'}
+                                               onChange={this.onChange}/>
+                                        <label className="btn btn-sm btn-outline-secondary"
+                                               htmlFor="streetview-service-activate">Street View</label>
+                                    </>
+                                    : null
+                                }
+                                {ignorelist.length > 0 && !ignorelist.includes("mapillary") ?
+                                    <>
+                                        <input className="btn-check" type="radio" id="streetview-service-mapillary"
+                                               name="streetview-service"
+                                               value="mapillary" checked={this.state.selectedOption === 'mapillary'}
+                                               onChange={this.onChange}/>
+                                        <label className="btn btn-sm btn-outline-secondary"
+                                               htmlFor="streetview-service-mapillary">Mapillary</label>
+                                    </>
+                                    : null
+                                }
+                                {ignorelist.length > 0 && !ignorelist.includes("skraafoto") ?
+                                    <>
+                                        <input className="btn-check" type="radio" id="streetview-service-skraafoto"
+                                               name="streetview-service"
+                                               value="skraafoto" checked={this.state.selectedOption === 'skraafoto'}
+                                               onChange={this.onChange}/>
+                                        <label className="btn btn-sm btn-outline-secondary"
+                                               htmlFor="streetview-service-skraafoto">Skråfoto</label>
+                                    </>
+                                    : null
+                                }
+                                {ignorelist.length > 0 && !ignorelist.includes("maps") ?
+                                    <>
+                                        <input className="btn-check" type="radio" id="streetview-service-maps"
+                                               name="streetview-service"
+                                               value="maps" checked={this.state.selectedOption === 'maps'}
+                                               onChange={this.onChange}/>
+                                        <label className="btn btn-sm btn-outline-secondary"
+                                               htmlFor="streetview-service-maps">Maps</label>
+                                    </>
+                                    : null
+                                }
+                                
                                     {cowiUrl !== undefined ?
                                         <input className="btn-check" type="radio" id="streetview-service-cowi"
                                                name="streetview-service" value="cowi"

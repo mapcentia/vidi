@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [Unreleased]
+
+### Added
+
+- A new config `extensionConfig.streetView.ignorelist`. This setting will not render the buttons for selected options. possible values. (To hide `cowi` - no not set `extensionConfig.streetView.cowi`): 
+  - streetview
+  - mapillary
+  - skraafoto
+  - maps
+
+
 ## [2025.3.2] - 2025-28-3
 
 ### Added
