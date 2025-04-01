@@ -272,7 +272,6 @@ module.exports = {
                         }, 200)
                     }
                 }
-
                 poll();
             }
         });
@@ -403,17 +402,7 @@ module.exports = {
                         case `smallint`:
                         case `integer`:
                         case `bigint`:
-                            properties[key].type = `array`;
-                            properties[key].items = {
-                                type: 'string',
-                            };
-                            uiSchema[key] = {
-                                items: {
-                                    'ui:widget': 'fileupload'
-                                }
-
-                            };
-
+                            properties[key].type = `integer`;
                             break;
                         case `decimal`:
                         case `numeric`:
