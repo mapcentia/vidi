@@ -24,7 +24,7 @@ let APIBridgeSingletone = require('../../../browser/modules/api-bridge');
 
 const config = require('../../../config/config.js');
 const drawTooltip = config?.extensionConfig?.editor?.tooltip;
-const alwaysActivate = config?.extensionConfig?.editor?.alwaysActivate;
+const alwaysActivate = config?.extensionConfig?.editor?.alwaysActivate ?? true;
 
 /**
  *
