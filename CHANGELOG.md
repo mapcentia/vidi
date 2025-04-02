@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [Unreleased]
+
+### Added
+- A new config `print.timeout` controls the timeout of the headless browser. Defaults to `60000` which equals the previously hardcoded value.
+
 ## [2025.3.2] - 2025-28-3
 
 ### Added
