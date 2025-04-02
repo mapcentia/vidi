@@ -944,17 +944,29 @@ module.exports = {
      */
     makeDraggable: (popup) => {
         const map = cloud.get().map
+        const wrapper = '.leaflet-popup-content-wrapper'
+        const popupContent = popup._container.querySelector(wrapper);
+        
+        // Only apply dragging behavior to content wrapper, not children
+        popupContent.style.cursor = 'move';
+        popupContent.children[0].style.cursor = 'auto';
+        
         const draggable = new L.Draggable(popup._container, popup._wrapper);
-        // change cursor class
-        $(".leaflet-popup-content-wrapper").css('cursor', 'move');
+        
+        // Handle mousedown event to check if it should start dragging
+        popup._container.addEventListener('mousedown', function(e) {
+            // drag only on the wrapper class
+            if (!e.target.classList.contains(wrapper.replace('.', ''))) {
+                draggable.disable();
+                setTimeout(() => draggable.enable(), 100); // Re-enable after interaction
+            }
+        });
         draggable.on('dragstart', function (e) {
-            //on first drag, remove the pop-up tip
             $(".leaflet-popup-tip-container").hide();
         });
         draggable.on('dragend', function (e) {
-            // set the new position
             popup.setLatLng(map.layerPointToLatLng(e.target._newPos));
-        });
+        });     
         draggable.enable();
     },
 
