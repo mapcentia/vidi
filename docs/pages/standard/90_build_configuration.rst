@@ -58,6 +58,15 @@ Herunder er et eksempel på en opsætning der kun giver mulighed for print i ``1
 
     "scales": [1000, 2000, 10000]
 
+.. _configjs_print_timeout:
+
+timeout
+*****************************************************************
+
+``timeout`` er en integer der angiver hvor lang tid der må gå før print-processen stopper sig selv. Det kan være nødvendigt at øge denne værdi hvis man ønsker at printe i større formater som A1 eller over. 
+
+``timeout`` er i ms og default er 60000.
+
 .. _configjs_configurl:
 
 configUrl
