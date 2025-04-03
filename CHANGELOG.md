@@ -10,7 +10,7 @@ and this project adheres to [CalVer](https://calver.org/).
 ### Added
 
 - A new config `extensionConfig.streetView.ignorelist`. This setting will not render the buttons for selected options. possible values. (To hide `cowi` - no not set `extensionConfig.streetView.cowi`): 
-  - streetview
+  - google
   - mapillary
   - skraafoto
   - maps
