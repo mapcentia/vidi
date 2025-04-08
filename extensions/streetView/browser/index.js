@@ -261,7 +261,7 @@ module.exports = {
                         <div className="form-group">
                             <div className="d-flex flex-column gap-4">
                                 <span className="btn-group">
-                                {ignorelist.length > 0 && !ignorelist.includes("google") ?
+                                {!ignorelist.includes("google") ?
                                     <>
                                         <input className="btn-check" type="radio" id="streetview-service-google"
                                                name="streetview-service"
@@ -272,7 +272,7 @@ module.exports = {
                                     </>
                                     : null
                                 }
-                                {ignorelist.length > 0 && !ignorelist.includes("mapillary") ?
+                                {!ignorelist.includes("mapillary") ?
                                     <>
                                         <input className="btn-check" type="radio" id="streetview-service-mapillary"
                                                name="streetview-service"
@@ -283,7 +283,7 @@ module.exports = {
                                     </>
                                     : null
                                 }
-                                {ignorelist.length > 0 && !ignorelist.includes("skraafoto") ?
+                                {!ignorelist.includes("skraafoto") ?
                                     <>
                                         <input className="btn-check" type="radio" id="streetview-service-skraafoto"
                                                name="streetview-service"
@@ -294,7 +294,7 @@ module.exports = {
                                     </>
                                     : null
                                 }
-                                {ignorelist.length > 0 && !ignorelist.includes("maps") ?
+                                {!ignorelist.includes("maps") ?
                                     <>
                                         <input className="btn-check" type="radio" id="streetview-service-maps"
                                                name="streetview-service"
@@ -305,7 +305,7 @@ module.exports = {
                                     </>
                                     : null
                                 }
-                                {ignorelist.length > 0 && !ignorelist.includes("cowi") ?
+                                {!ignorelist.includes("cowi") ?
                                     <>
                                         <input className="btn-check" type="radio" id="streetview-service-cowi"
                                                name="streetview-service"
