@@ -276,7 +276,34 @@ module.exports = {
                 let names = [];
                 (function ca() {
                     if (window.vidiConfig?.searchConfig?.sortByScore) {
-                        let scriptTpl = template(`def docval = params['_source'].properties.<%= string%>.toLowerCase(); def path = '<%= query%>'; def first = path.indexOf(' '); def str = first > -1 ? path.substring(0, first): path; def index = (float)docval.indexOf(str); return index > -1 ? (1 / index) : 0;`);
+                        let scriptTpl = template(`
+def docval = params['_source']['properties'][params.fieldName].toLowerCase();
+def path   = params.userQuery.toLowerCase();
+int idx = docval.indexOf(path);
+if (idx == -1) {
+    return 0.0;
+}
+float baseScore = 1.0f / (idx %2B 1);
+float boundaryBonus = 0.0f;
+float letterSuffixBonus = 0.0f;
+int endPos = idx %2B path.length();
+if (endPos >= docval.length()) {
+    boundaryBonus = 1.0f;
+} else {
+    char nextChar = docval.charAt(endPos);
+    if (!Character.isLetterOrDigit(nextChar)) {
+        boundaryBonus = 1.0f;
+    } 
+    else {
+        if (path.length() > 0 && Character.isDigit(path.charAt(path.length() - 1))) {
+            if (Character.isLetter(nextChar)) {
+                letterSuffixBonus = 0.5f;
+            }
+        }
+    }
+}
+return baseScore %2B boundaryBonus %2B letterSuffixBonus;
+                        `);
                         let safeQuery = query.toLowerCase().replace(",", "")
                         switch (type1) {
                             case "vejnavn,bynavn":
@@ -302,15 +329,16 @@ module.exports = {
                                                     }
                                                 }
                                             },
-                                            "boost_mode": "sum",
+                                            "boost_mode": "replace",
                                             "functions": [
                                                 {
                                                     "script_score": {
                                                         "script": {
-                                                            "source": scriptTpl({
-                                                                'string': 'string2',
-                                                                'query': safeQuery
-                                                            })
+                                                            "source": scriptTpl(),
+                                                            "params": {
+                                                                "fieldName": "string2",
+                                                                "userQuery": safeQuery
+                                                            }
                                                         }
                                                     }
                                                 }
@@ -372,16 +400,17 @@ module.exports = {
                                                 }
                                             },
 
-                                            "boost_mode": "sum",
+                                            "boost_mode": "replace",
 
                                             "functions": [
                                                 {
                                                     "script_score": {
                                                         "script": {
-                                                            "source": scriptTpl({
-                                                                'string': 'string3',
-                                                                'query': safeQuery
-                                                            })
+                                                            "source": scriptTpl(),
+                                                            "params": {
+                                                                "fieldName": "string3",
+                                                                "userQuery": safeQuery
+                                                            }
                                                         }
                                                     }
                                                 }
@@ -437,16 +466,17 @@ module.exports = {
                                                     }
                                                 }
                                             },
-                                            "boost_mode": "sum",
+                                            "boost_mode": "replace",
 
                                             "functions": [
                                                 {
                                                     "script_score": {
                                                         "script": {
-                                                            "source": scriptTpl({
-                                                                'string': 'string1',
-                                                                'query': safeQuery
-                                                            })
+                                                            "source": scriptTpl(),
+                                                            "params": {
+                                                                "fieldName": "string1",
+                                                                "userQuery": safeQuery
+                                                            }
                                                         }
                                                     }
                                                 }
@@ -514,17 +544,21 @@ module.exports = {
                                                 {
                                                     "script_score": {
                                                         "script": {
-                                                            "source": scriptTpl({
-                                                                'string': 'string4',
-                                                                'query': safeQuery
-                                                            })
+                                                            "source": scriptTpl(),
+                                                            "params": {
+                                                                "fieldName": "string4",
+                                                                "userQuery": safeQuery
+                                                            }
                                                         }
                                                     }
                                                 }
                                             ],
-                                            "boost_mode": "sum"
+                                            "boost_mode": "replace"
                                         }
-                                    }
+                                    },
+                                    "sort": [
+                                        { "_score": "desc" }
+                                    ]
                                 };
                                 break;
                         }
