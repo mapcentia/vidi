@@ -56,7 +56,7 @@ module.exports = module.exports = {
                     layers = visibleLayers;
                 }
 
-                param = 'l=' + layers + '&db=' + db;
+                param = 'l=' + encodeURIComponent(layers) + '&db=' + db;
             } else {
                 hasBeenVisible = arrayUnique([...hasBeenVisible, ...layerArr ? layerArr : visibleLayers.split(";")]);
 
@@ -66,7 +66,7 @@ module.exports = module.exports = {
                 }
 
                 hasBeenVisibleTmp = hasBeenVisible;
-                param = 'l=' + hasBeenVisible.join(";") + '&db=' + db;
+                param = 'l=' + encodeURIComponent(hasBeenVisible.join(";")) + '&db=' + db;
             }
 
             $.ajax({
