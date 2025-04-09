@@ -45,7 +45,8 @@ module.exports = {
             tr = $("<tr class='print-report-group-heading' style='border-top: 1px solid; '><td style='padding-bottom: 4px;'><h3>" + groups[x] + "</h3></td></tr>");
             table.append(tr);
             let count = 0;
-            e.hits.forEach((v, i) => {
+            Object.keys(e.hits).forEach((v, i) => {
+                v = e.hits[v];
                 let metaData = v.meta;
                 if (metaData.layergroup === groups[x]) {
                     if (v.hits > 0) {
