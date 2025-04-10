@@ -5,9 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [2025.40] - 2025-28-3
+## [UNRELEASED] - 2025-10-4
 
 - Danish search with `sortByScore` is improved so more relevant hits get ranked higher. `sortByScore` is now default.
+
+## [2025.3.2] - 2025-28-3
 
 ### Added
 
