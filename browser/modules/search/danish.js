@@ -56,6 +56,17 @@ const template = require('lodash/template');
  */
 window.vidiConfig = require('../../../config/config.js');
 
+function markHouseNumber(input) {
+    return input.replace(/\b(\d+\w?)\b/, function(match) {
+        // If the token is exactly 4 digits, assume it’s a zip code and leave it unaltered.
+        if (/^\d{4}$/.test(match)) {
+            return match;
+        } else {
+            return "_" + match + "_";
+        }
+    });
+}
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -275,20 +286,65 @@ module.exports = {
                 }
                 let names = [];
                 (function ca() {
-                    if (window.vidiConfig?.searchConfig?.sortByScore) {
+                    if (window.vidiConfig?.searchConfig?.sortByScore === undefined || window.vidiConfig.searchConfig.sortByScore) {
                         let scriptTpl = template(`
 def docval = params['_source']['properties'][params.fieldName].toLowerCase();
 def path   = params.userQuery.toLowerCase();
 int idx = docval.indexOf(path);
-if (idx == -1) {
-    return 0.0;
-}
-float baseScore = 1.0f / (idx %2B 1);
+// if (idx == -1) {
+//     return 0.0;
+// }
+float baseScore = 1.0f;
 float boundaryBonus = 0.0f;
 float letterSuffixBonus = 0.0f;
+float prefixBonus = 0.0f;
+float houseBonus = 0.0f;
+
+
+// Assume that we have pre-marked the house number in the query string 
+// by surrounding it with underscores. For example: "Peter Bangs Vej _6d_, 2000 Frederiksberg"
+// Extract the house token from the query.
+String houseToken = "";
+int firstUnderscore = path.indexOf("_");
+int lastUnderscore = path.lastIndexOf("_");
+if (firstUnderscore != -1 && lastUnderscore > firstUnderscore) {
+  houseToken = path.substring(firstUnderscore %2B 1, lastUnderscore);
+}
+
+// Now, manually split the document text into tokens.
+// (Since we can’t use split(), we do it manually.)
+if (houseToken != "") {
+  List tokens = new ArrayList();
+  int start = 0;
+  while (true) {
+    int pos = docval.indexOf(" ", start);
+    if (pos == -1) {
+      tokens.add(docval.substring(start));
+      break;
+    }
+    tokens.add(docval.substring(start, pos));
+    start = pos %2B 1;
+  }
+  
+  // If any token equals the houseToken exactly, add the bonus.
+  for (int i = 0; i < tokens.size(); i%2B%2B) {
+    if (tokens.get(i).replace(",", "").equals(houseToken)) {
+      houseBonus = 0.5f;  // Adjust the bonus as needed.
+      break;
+    }
+  }
+}
+
+// Reset path to remove the house token.
+path = path.replace("_", "");
+
+// Create normalized versions (remove commas and trim extra spaces)
+def normalizedDoc = docval.replace(",", "").trim();
+def normalizedQuery = path.replace(",", "").trim();
+
 int endPos = idx %2B path.length();
 if (endPos >= docval.length()) {
-    boundaryBonus = 1.0f;
+    boundaryBonus = 10.0f;
 } else {
     char nextChar = docval.charAt(endPos);
     if (!Character.isLetterOrDigit(nextChar)) {
@@ -302,9 +358,30 @@ if (endPos >= docval.length()) {
         }
     }
 }
-return baseScore %2B boundaryBonus %2B letterSuffixBonus;
+if (docval.startsWith(path)) {
+    prefixBonus = 3.0f; // give a large bonus if doc text starts with the entire query
+} else {
+    // Else, maybe do the partial check for N characters
+    int N = 3;
+    if (docval.length() >= N && path.length() >= N) {
+        if (docval.regionMatches(true, 0, path, 0, N)) {
+            prefixBonus = 2.0f; // smaller bonus for partial match
+        }
+    }
+}
+
+// If the normalized doc equals the normalized query, award a high bonus
+if (normalizedDoc.equals(normalizedQuery)) {
+    prefixBonus = 5.0f;
+}
+// Else if the normalized doc starts with the normalized query, award a moderate bonus
+else if (normalizedDoc.startsWith(normalizedQuery)) {
+    prefixBonus = 10.0f;
+}
+
+return baseScore %2B boundaryBonus %2B letterSuffixBonus %2B prefixBonus %2B houseBonus;
                         `);
-                        let safeQuery = query.toLowerCase().replace(",", "")
+                        let safeQuery = query;
                         switch (type1) {
                             case "vejnavn,bynavn":
                                 gids[type1] = [];
@@ -399,9 +476,7 @@ return baseScore %2B boundaryBonus %2B letterSuffixBonus;
                                                     }
                                                 }
                                             },
-
                                             "boost_mode": "replace",
-
                                             "functions": [
                                                 {
                                                     "script_score": {
@@ -467,7 +542,6 @@ return baseScore %2B boundaryBonus %2B letterSuffixBonus;
                                                 }
                                             },
                                             "boost_mode": "replace",
-
                                             "functions": [
                                                 {
                                                     "script_score": {
@@ -547,7 +621,7 @@ return baseScore %2B boundaryBonus %2B letterSuffixBonus;
                                                             "source": scriptTpl(),
                                                             "params": {
                                                                 "fieldName": "string4",
-                                                                "userQuery": safeQuery
+                                                                "userQuery": markHouseNumber(safeQuery)
                                                             }
                                                         }
                                                     }

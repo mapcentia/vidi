@@ -55,7 +55,7 @@ module.exports = {
             brandName: '',
             startUpModal: '',
             enabledExtensions: [],
-            searchConfig: [],
+            searchConfig: {},
             aboutBox: '',
             enabledSearch: 'google',
             removeDisabledLayersFromLegend: false,
