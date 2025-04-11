@@ -61,7 +61,7 @@ const base64url = require('base64url');
 const urlparser = require('./../urlparser');
 const download = require('./../download');
 const MarkupGenerator = require('./MarkupGenerator');
-const marked = require('marked');
+const marked = require('marked').parse;
 
 let offlineModeControlsManager = false;
 let markupGeneratorInstance = new MarkupGenerator();
