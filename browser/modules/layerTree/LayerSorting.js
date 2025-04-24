@@ -6,7 +6,7 @@
 
 /**
  * Tools for sorting layers
- * 
+ *
  * @todo Rewrite layerTree using React or Angular
  */
 
@@ -19,7 +19,7 @@ class LayerSorting {
     /**
      * Sorts groups according to defined order (not all groups
      * can be present in order definition).
-     * 
+     *
      * @returns {Array}
      */
     sortGroups(order, notSortedGroupsArray) {
@@ -50,7 +50,7 @@ class LayerSorting {
 
     /**
      * Sorts layers and their subgroups
-     * 
+     *
      * @returns {Array}
      */
     sortLayers(order, notSortedLayersAndSubgroupsForCurrentGroup, groupName) {
@@ -101,10 +101,10 @@ class LayerSorting {
 
             /**
              * Ordering layers in subgroup
-             * 
+             *
              * @param {Object} alreadyOrdered Already ordered layers and subgroups
              * @param {Object} beingOrdered   Layers and subgroups that need to be ordered
-             * 
+             *
              * @returns {Array}
              */
             const orderLayersInSubgroup = (alreadyOrdered, beingOrdered) => {
@@ -112,7 +112,7 @@ class LayerSorting {
                     console.log(alreadyOrdered, beingOrdered);
                     throw new Error(`Invalid order data or ordered objects`);
                 }
-    
+
                 let alreadyOrderedCopy = JSON.parse(JSON.stringify(alreadyOrdered.children));
                 let sortedCopy = JSON.parse(JSON.stringify(beingOrdered.children));
 
@@ -151,7 +151,9 @@ class LayerSorting {
             for (let orderKey in groupOrder) {
                 for (let key in sortedLayersAndSubgroups) {
                     if (sortedLayersAndSubgroups[key].type === GROUP_CHILD_TYPE_GROUP && sortedLayersAndSubgroups[key].id === groupOrder[orderKey].id) {
-                        sortedLayersAndSubgroups[orderKey].children = orderLayersInSubgroup(groupOrder[orderKey], sortedLayersAndSubgroups[key]);
+                        if (typeof sortedLayersAndSubgroups[orderKey] !== 'undefined') {
+                            sortedLayersAndSubgroups[orderKey].children = orderLayersInSubgroup(groupOrder[orderKey], sortedLayersAndSubgroups[key]);
+                        }
                     }
                 }
             }
@@ -163,7 +165,7 @@ class LayerSorting {
 
     /**
      * Checking the order object structure
-     * 
+     *
      * [{
      *   id: "Group with children",
      *   panelWasInitialized: true,
@@ -176,13 +178,13 @@ class LayerSorting {
      *     children: [{ id: "public.test_line" }, { .. }]
      *   }]
      * }]
-     * 
+     *
      * [{
      *   id: "Group without children",
      *   panelWasInitialized: false,
      *   children: []
      * }]
-     * 
+     *
      * @returns {Boolean}
      */
     validateOrderObject(order) {

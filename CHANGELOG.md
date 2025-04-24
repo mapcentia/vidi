@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2025.4.1] - 2025-24-4
+
+### Fixed
+
+- Added a null check to prevent potential errors when accessing undefined objects during layer sorting.
+
 ## [2025.4.0] - 2025-10-4
 
 - Danish search with `sortByScore` is improved so more relevant hits get ranked higher. `sortByScore` is now default.
