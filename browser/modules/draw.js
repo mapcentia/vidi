@@ -439,6 +439,13 @@ module.exports = {
     },
 
     /**
+     * Returns the selected drawing
+     */
+    getSelectedDrawing: () => {
+        return selectedDrawing;
+    },
+
+    /**
      * Applies externally provided state
      */
     applyState: (newState) => {
