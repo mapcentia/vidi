@@ -7,6 +7,7 @@
 'use strict';
 
 import {LAYER_TYPE_DEFAULT} from './layerTree/constants';
+import legend from './legend';
 
 require('dom-shims');
 require('arrive');
@@ -160,6 +161,7 @@ module.exports = {
                         prefix = parsedMeta?.default_layer_type && parsedMeta.default_layer_type !== 't' ? parsedMeta.default_layer_type + ':' : '';
                         setTimeout(() => {
                             switchLayer.init(prefix + e.f_table_schema + "." + e.f_table_name, isChecked, true, false);
+                            legend.init();
                         }, 1)
                         return true;
                     }
