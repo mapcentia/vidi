@@ -70,6 +70,10 @@ and this project adheres to [CalVer](https://calver.org/).
 - Fail-over for base layers is now working in embed mode with both base layer toggle and drawer. 
 - Fail-over for base layer module is improved, so its cycles from the top and starts over.
 
+### Changed
+
+- The minimum scale available for print has been changed from a fixed `200` to the lowest value of `config.print.scales`.
+
 ## [2025.3.1] - 2025-10-3
 
 ### Added
