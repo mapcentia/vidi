@@ -8,9 +8,14 @@ and this project adheres to [CalVer](https://calver.org/).
 ## [Unreleased]
 
 ### Added
+
 - A new config `print.timeout` controls the timeout of the headless browser. Defaults to `60000` which equals the previously hardcoded value.
-- 
-- ## [2025.4.1] - 2025-24-4
+
+### Changed
+
+- The minimum scale available for print has been changed from a fixed `200` to the lowest value of `config.print.scales`.
+
+## [2025.4.1] - 2025-24-4
 
 ### Fixed
 
@@ -69,10 +74,6 @@ and this project adheres to [CalVer](https://calver.org/).
 - Better handling of vector layers in `activeLayers`. If `activeLayers` only had vector layers, they wouldn't be activated.
 - Fail-over for base layers is now working in embed mode with both base layer toggle and drawer. 
 - Fail-over for base layer module is improved, so its cycles from the top and starts over.
-
-### Changed
-
-- The minimum scale available for print has been changed from a fixed `200` to the lowest value of `config.print.scales`.
 
 ## [2025.3.1] - 2025-10-3
 
