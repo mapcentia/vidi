@@ -276,6 +276,10 @@ function print(key, q, req, response, outputPng = false, frame = 0, count, retur
                                     height = 1500;
                                     break;
                             }
+                            // nobody like non-integer pixel values, make sure to round them
+                            width = Math.floor(width);
+                            height = Math.floor(height);
+                                
                             page.emulate({
                                 viewport: {width, height},
                                 userAgent: 'Puppeteer'
