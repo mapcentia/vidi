@@ -421,6 +421,28 @@ module.exports = {
         backboneEvents = o.backboneEvents;
         _self = this;
 
+        // Expose the a setSymbol function
+        api.setSymbol = (s) => {
+            _self.applyState(s);
+        }
+
+        // Listen to messages send by the embed API
+        window.addEventListener("message", function (event) {
+            if (event.data?.method === "setSymbol") {
+                _self.applyState(event.data.symbol);
+            }
+            if (event.data?.method === "storeSymbol") {
+                _self.store(event.data?.tag).then(
+                    () => {
+                        utils.showInfoToast("Symbolerne er gemt");
+                    },
+                    (err) => {
+                        utils.showInfoToast("Fejl, prøv igen");
+                    }
+                );
+            }
+        });
+
         return this;
     },
 
@@ -614,6 +636,7 @@ module.exports = {
      * @returns {Promise<unknown>}
      */
     applyState: (newState) => {
+        console.log(newState)
         return new Promise((resolve) => {
             if (config?.extensionConfig?.symbols?.stateless === true && !isStarted) {
                 setTimeout(() => {

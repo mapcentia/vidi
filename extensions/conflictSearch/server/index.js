@@ -187,7 +187,9 @@ router.post('/api/extension/conflictSearch', function (req, response) {
             } else {
                 searchBuffer = "ST_geomfromtext('" + wkt + "',4326)";
             }
-            const sql = "SELECT " + fieldStr + ", ST_AsGeoJSON(" + searchBuffer + ") as _buffer, ST_LENGTH(ST_Intersection(" + geomField + ", ST_Transform(" + searchBuffer + "," + srid + "))) as _length, ST_AREA(ST_Intersection(" + geomField + ", ST_Transform(" + searchBuffer + "," + srid + "))) as _area FROM " + quotedTableName + " WHERE  ST_intersects(" + geomField + ", ST_Transform(" + searchBuffer + "," + srid + "))";
+            const where = "ST_intersects(" + geomField + ", ST_Transform(" + searchBuffer + "," + srid + "))";
+            const $sqlConflict = JSON.parse(metaDataKeys[table].meta)?.sql_conflict ? "(" + JSON.parse(metaDataKeys[table].meta)?.sql_conflict?.replace("@WHERE@", where) + ") as _extra," : "";
+            const sql = "SELECT " + $sqlConflict + fieldStr + ", ST_AsGeoJSON(" + searchBuffer + ") as _buffer, ST_LENGTH(ST_Intersection(" + geomField + ", ST_Transform(" + searchBuffer + "," + srid + "))) as _length, ST_AREA(ST_Intersection(" + geomField + ", ST_Transform(" + searchBuffer + "," + srid + "))) as _area FROM " + quotedTableName + " WHERE " + where;
             const queryables = JSON.parse(metaDataKeys[table].fieldconf);
             let postData = "client_encoding=UTF8&srs=4326&lifetime=0&base64=true&q=" + base64url.encode(sql) + "&key=" + "&key=" + (typeof req.session.gc2ApiKey !== "undefined" ? req.session.gc2ApiKey : "xxxxx" /*Dummy key is sent to prevent start of session*/),
                 options = {
@@ -212,6 +214,7 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                             let totalLength = 0;
                             let totalArea = 0;
                             let buffer;
+                            let extra;
                             if (result?.features) {
                                 for (let i = 0; i < result.features.length; i++) {
                                     for (let prop in queryables) {
@@ -233,7 +236,7 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                                     totalLength += parseFloat(result.features[i].properties._length);
                                     totalArea += parseFloat(result.features[i].properties._area);
                                     buffer = JSON.parse(result.features[i].properties._buffer);
-
+                                    extra = JSON.parse(result.features[i].properties?._extra || "[]");
 
                                     if (tmp.length > 0) {
                                         tmp.push({
@@ -271,7 +274,8 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                                 totalLength,
                                 totalArea,
                                 buffer,
-                                bufferValue
+                                bufferValue,
+                                extra
                             };
                             io.emit(socketId, hit);
                             resolve(hit)

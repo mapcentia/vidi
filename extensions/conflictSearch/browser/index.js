@@ -230,6 +230,7 @@ var hitsTable;
 var hitsData;
 var noHitsTable;
 var errorTable;
+var extraTable;
 var visibleLayers;
 var projWktWithBuffer;
 /**
@@ -363,6 +364,7 @@ module.exports = module.exports = {
         hitsData = $("#hits-data");
         noHitsTable = $("#nohits-content tbody");
         errorTable = $("#error-content tbody");
+        extraTable = $("#extra");
         let c = 0;
         backboneEvents.get().on("end:conflictSearch", () => {
             c = 0;
@@ -534,6 +536,7 @@ module.exports = module.exports = {
         $("#hits-data").empty();
         $("#nohits-content tbody").empty();
         $("#error-content tbody").empty();
+        $("#extra").empty();
 
         $('#conflict-result-content a[href="#hits-content"] span').empty();
         $('#conflict-result-content a[href="#nohits-content"] span').empty();
@@ -565,6 +568,7 @@ module.exports = module.exports = {
             hitsTable = $("#hits-content tbody"),
             noHitsTable = $("#nohits-content tbody"),
             errorTable = $("#error-content tbody"),
+            extraTable = $("#extra"),
             hitsData = $("#hits-data"),
             row, fileId, searchFinish, geomStr,
             visibleLayers = cloud.getAllTypesOfVisibleLayers().split(";");
@@ -578,6 +582,7 @@ module.exports = module.exports = {
         hitsTable.empty();
         noHitsTable.empty();
         errorTable.empty();
+        extraTable.empty();
         hitsData.empty();
 
         try {
@@ -767,7 +772,7 @@ module.exports = module.exports = {
     },
     handleResult: function (response) {
         visibleLayers = cloud.getAllTypesOfVisibleLayers().split(";"); // Must be set here also, if result is coming from state
-        let hitsCount = 0, noHitsCount = 0, errorCount = 0, resultOrigin, groups = [];
+        let hitsCount = 0, noHitsCount = 0, errorCount = 0, extraCount = 0, resultOrigin, groups = [];
         _result = response;
         setTimeout(function () {
             utils.hideInfoToast(TOAST_ID);
@@ -896,15 +901,85 @@ module.exports = module.exports = {
                             noHitsTable.append(row);
                             noHitsCount++;
                         }
+                        if (v.extra !== null && typeof v.extra === 'object' && Object.keys(v.extra).length > 0) {
+                            extraCount++;
+                            const el = $("<table data-show-export=\"true\" data-show-toggle=\"true\" data-show-columns=\"true\" data-show-fullscreen=\"false\"></table>"); // Add bootstrap classes for basic styling
+                            const thead = $("<thead></thead>");
+                            const tbody = $("<tbody></tbody>");
+                            const headerRow = $("<tr></tr>");
+
+                            // --- Determine all possible headers from inner objects ---
+                            const allHeadersSet = new Set();
+                            for (const categoryKey in v.extra) {
+                                // Ensure it's an own property and the value is an object
+                                if (Object.hasOwnProperty.call(v.extra, categoryKey) && v.extra[categoryKey] && typeof v.extra[categoryKey] === 'object') {
+                                    const rowData = v.extra[categoryKey];
+                                    for (const headerKey in rowData) {
+                                        if (Object.hasOwnProperty.call(rowData, headerKey)) {
+                                            allHeadersSet.add(headerKey); // Add unique keys to the Set
+                                        }
+                                    }
+                                }
+                            }
+                            const headers = Array.from(allHeadersSet); // Convert Set to Array for consistent order
+
+                            // --- Build Header Row ---
+                            headerRow.append("<th data-sortable=\"true\">Column A</th>"); // First column for the main key (e.g., 'solidFuels')
+                            headers.forEach(header => {
+                                // Simple capitalization for headers (optional)
+                                const displayHeader = header.charAt(0).toUpperCase() + header.slice(1);
+                                headerRow.append(`<th data-sortable=\"true\">${displayHeader}</th>`);
+                            });
+                            thead.append(headerRow);
+
+                            // --- Build Data Rows ---
+                            for (const categoryKey in v.extra) {
+                                if (Object.hasOwnProperty.call(v.extra, categoryKey)) {
+                                    const rowData = v.extra[categoryKey];
+                                    const dataRow = $("<tr></tr>");
+
+                                    dataRow.append(`<td>${categoryKey}</td>`); // Add the category key cell
+
+                                    // Check if rowData is an object before trying to access its properties
+                                    if (rowData && typeof rowData === 'object') {
+                                        headers.forEach(header => {
+                                            // Get the value if the key exists in this specific row's data, otherwise use an empty string
+                                            const value = Object.hasOwnProperty.call(rowData, header) ? rowData[header] : '';
+                                            dataRow.append(`<td>${value}</td>`);
+                                        });
+                                    } else {
+                                        // If rowData is not an object (e.g., null, string, number), add empty cells for all headers
+                                        headers.forEach(() => {
+                                            dataRow.append(`<td></td>`);
+                                        });
+                                    }
+                                    tbody.append(dataRow);
+                                }
+                            }
+
+                            // --- Assemble and Append Table ---
+                            el.append(thead);
+                            el.append(tbody);
+                            extraTable.append("<h4>" + title + "</h4>");
+                            extraTable.append(el);
+
+                            $(el).bootstrapTable({
+                                uniqueId: "_id",
+                                height: "300px"
+                            });
+                        }
+
                     } else {
                         row = "<tr><td>" + title + "</td><td>" + v.error + "</td></tr>";
                         errorTable.append(row);
                         errorCount++;
                     }
+
                     $('#conflict-result-content a[href="#hits-content"] span').html(" (" + hitsCount + ")");
                     $('#conflict-result-content a[href="#hits-data-content"] span').html(" (" + hitsCount + ")");
                     $('#conflict-result-content a[href="#nohits-content"] span').html(" (" + noHitsCount + ")");
                     $('#conflict-result-content a[href="#error-content"] span').html(" (" + errorCount + ")");
+                    $('#conflict-result-content a[href="#extra-content"] span').html(" (" + extraCount + ")");
                     $('#conflict-result-origin').html(`Søgning foretaget med: <b>${resultOrigin}</b>`);
                 }
 
@@ -1063,6 +1138,7 @@ let dom = `
                             <li role="presentation" class="nav-item"><a class="nav-link" href="#hits-data-content" aria-controls="hits-data-content" role="tab" data-bs-toggle="tab">Data fra konflikter<span></span></a></li>
                             <li role="presentation" class="nav-item"><a class="nav-link" href="#nohits-content" aria-controls="nohits-content" role="tab" data-bs-toggle="tab">Uden konflikter<span></span></a></li>
                             <li role="presentation" class="nav-item"><a class="nav-link" href="#error-content" aria-controls="error-content" role="tab" data-bs-toggle="tab">Fejl<span></span></a></li>
+                            <li role="presentation" class="nav-item"><a class="nav-link" href="#extra-content" aria-controls="error-content" role="tab" data-bs-toggle="tab">Analyse<span></span></a></li>
                         </ul>
                         <div class="tab-content">
                             <div role="tabpanel" class="tab-pane active conflict-result-content" id="hits-content">
@@ -1088,6 +1164,9 @@ let dom = `
                                         <tbody></tbody>
                                     </table>
                                 </div>
+                            </div>
+                            <div role="tabpanel" class="tab-pane conflict-result-content" id="extra-content">
+                                <div id="extra">HEJ</div>
                             </div>
                         </div>
                     </div>
