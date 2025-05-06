@@ -122,6 +122,7 @@ window.Vidi = function () {
     // ===============================================
 
     modules.init.set(modules);
+    modules.cloud.set(modules);
     modules.socketId.set(modules);
     modules.meta.set(modules);
     modules.layerTree.set(modules);

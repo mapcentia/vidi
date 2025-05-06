@@ -175,7 +175,44 @@ window.embedApi = {
         } catch (e) {
             this._noFrame(frame);
         }
+    },
+
+    setSymbol: function (symbol, frame) {
+        var win = window.frames[frame];
+        try {
+            win.postMessage({symbol, method: "setSymbol"}, "*");
+        } catch (e) {
+            this._noFrame(frame);
+        }
+    },
+
+    storeSymbol: function (tag, frame) {
+        var win = window.frames[frame];
+        try {
+            win.postMessage({tag, method: "storeSymbol"}, "*");
+        } catch (e) {
+            this._noFrame(frame);
+        }
+    },
+
+    setView: function (latLng, z, frame) {
+        var win = window.frames[frame];
+        try {
+            win.postMessage({latLng, z, method: "setView"}, "*");
+        } catch (e) {
+            this._noFrame(frame);
+        }
+    },
+
+    setVar: function (name, value, frame) {
+        var win = window.frames[frame];
+        try {
+            win.postMessage({name, value, method: "setVar"}, "*");
+        } catch (e) {
+            this._noFrame(frame);
+        }
     }
+
 };
 
 /**

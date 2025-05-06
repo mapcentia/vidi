@@ -17,7 +17,24 @@ module.exports = {
      *
      * @returns {exports}
      */
-    set: function () {
+    set: function (o) {
+        const _self = this;
+        // Expose the functions
+        api.setView = (latLng, z) => {
+            cloud.map.setView(latLng, z);
+        }
+
+        // Listen to messages send by the embed API
+        window.addEventListener("message", function (event) {
+            if (event.data?.method === "setView") {
+                cloud.map.setView(event.data?.latLng, event.data?.z);
+            }
+
+            if (event.data?.method === "setVar") {
+                window[event.data.name] = event.data?.value;
+            }
+        });
+
         return this;
     },
 
