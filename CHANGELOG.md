@@ -9,6 +9,16 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ### Added
 - A new config `print.timeout` controls the timeout of the headless browser. Defaults to `60000` which equals the previously hardcoded value.
+- 
+- ## [2025.4.1] - 2025-24-4
+
+### Fixed
+
+- Added a null check to prevent potential errors when accessing undefined objects during layer sorting.
+
+## [2025.4.0] - 2025-10-4
+
+- Danish search with `sortByScore` is improved so more relevant hits get ranked higher. `sortByScore` is now default.
 
 ## [2025.3.2] - 2025-28-3
 

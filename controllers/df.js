@@ -27,6 +27,18 @@ router.get('/api/dataforsyningen/*', (req, response) => {
     let creds = token ? `&token=${token}` : `&username=${userName}&password=${pwd}`;
     let requestURL = host + decodeURIComponent(req.url.substr(20)) + creds;
     requestURL = requestURL.replace('false', 'FALSE')
+
+    // if the string has a parameter tileMatrixSet, with the value of View1 - we need to rewrite the tileMatrix value
+    if (requestURL.includes('tileMatrixSet=View1')) {
+        let tileMatrix = requestURL.match(/tileMatrix=\d+/);
+        // pad the tileMatrix with 0 to 2 digits, and prefix the value with L
+        let tileMatrixValue = tileMatrix[0].split('=')[1];
+        tileMatrixValue = 'L' + tileMatrixValue.padStart(2, '0').toString();
+        console.log(tileMatrixValue);
+        // replace the tileMatrix value in the url with the new value
+        requestURL = requestURL.replace(/tileMatrix=\d+/, 'tileMatrix='+tileMatrixValue);
+    }
+    
     get(requestURL, response);
 });
 
