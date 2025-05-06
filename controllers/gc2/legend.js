@@ -13,7 +13,7 @@ router.get('/api/legend/:db', function (req, response) {
 
     var l = req.query.l, db = req.params.db, url;
 
-    url = config.host + "/api/v1/legend/json/" + db + "?l=" + l;
+    url = config.host + "/api/v1/legend/json/" + db + "?l=" + encodeURIComponent(l);
 
     var options = {
         uri: url,
