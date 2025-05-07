@@ -1,7 +1,6 @@
 
 .. _extensions_directions:
 
-=================
 Rutevejledning (directions)
 =================
 
@@ -15,7 +14,9 @@ Rutevejledning (directions)
 ``directions`` er en udvidelse til vidi der giver mulighed for at lave rutevejledning i kortet. Der laves en rutevejledning fra brugerens position til et punkt på kortet. Det er i øjeblikket kun muligt at lave rutevejledning med Google Maps.
 
 Installation
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""" 
+-----------------
+
+``directions`` er en del af Vidi og kræver ikke installation. 
  
 Funktionen skal medtages i :ref:`configjs_extensions`
 
@@ -28,12 +29,12 @@ Funktionen skal medtages i :ref:`configjs_extensions`
     },
 
 Konfiguration
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+-----------------
 
 Der er ikke nogen konfiguration for denne extension. Den vil automatisk blive tilføjet til værktøjslinjen.
 
 Brug
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""" 
+-----------------
 
 .. figure:: ../../_media/extensions-directions-icon.png
     :align: center
