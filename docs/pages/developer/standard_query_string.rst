@@ -6,8 +6,6 @@ Standard query string
 
 .. topic:: Overview
 
-    :Date: |today|
-    :Vidi-version: 2022.8.4
     :Forfattere: `mapcentia <https://github.com/mapcentia>`_
 
 .. contents::

@@ -6,8 +6,6 @@ Templates
 
 .. topic:: Overview
 
-    :Date: |today|
-    :Vidi-version: 2025.2.1
     :Forfattere: `mapcentia <https://github.com/mapcentia>`_
 
 .. contents::

@@ -1,27 +1,18 @@
 .. _project:
 
-#################################################################
-Projekter
-#################################################################
+
+*****************************************************************
+Projekt
+***************************************************************** 
 
 .. topic:: Overview
 
-    :Date: |today|
-    :Vidi-version: 2021.9.0
     :Forfatter: `giovanniborella <https://github.com/giovanniborella>`_ | `mapcentia <https://github.com/mapcentia>`_
 
 .. contents:: 
     :depth: 1
 
-
-*****************************************************************
-Projekter
-***************************************************************** 
-
 .. include:: ../../_subs/NOTE_GETTINGSTARTED.rst
-
-Projekt
-=================================================================
 
 Projekt-værktøjet kan bruges til at gemme og distribuere øjebliksbilleder af kortets tilstand.
 

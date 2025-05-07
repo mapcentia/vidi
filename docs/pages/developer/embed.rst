@@ -6,12 +6,10 @@ Indlejring af Vidi på andre hjemmesider
 
 .. topic:: Overview
 
-    :Date: |today|
-    :Vidi-version: UNRELEASED
     :Forfattere: `mapcentia <https://github.com/mapcentia>`_
 
 .. contents::
-    :depth: 4
+    :depth: 3
 
 .. _embed_script:
 

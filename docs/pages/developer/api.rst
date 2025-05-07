@@ -1,4 +1,4 @@
-.. _api:
+.. _developer_api:
 
 #################################################################
 Vidi API
@@ -6,8 +6,6 @@ Vidi API
 
 .. topic:: Overview
 
-    :Date: |today|
-    :Vidi-version: MASTER
     :Forfattere: `mapcentia <https://github.com/mapcentia>`_
 
 .. contents::
@@ -17,7 +15,7 @@ Vidi API
 Brug
 *****************************************************************
 
-APIet kan bruges i de forskellige templates og funktioner, der kan defineres forskellige steder i en Vidi opsætning. Fx i :ref:`gc2mata_infopopup` templates og funktioner.
+APIet kan bruges i de forskellige templates og funktioner, der kan defineres forskellige steder i en Vidi opsætning. Fx i :ref:`gc2meta_infopopup` templates og funktioner.
 
 .. note::
     APIet kan ikke bruges til indlejrede Vidi kort - dvs. på den webside som Vidi er indlejret på. Her henvises til :ref:`embed_api`

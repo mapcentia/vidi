@@ -1,29 +1,20 @@
 .. _draw:
 
-#################################################################
+*****************************************************************
 Tegn
-#################################################################
+***************************************************************** 
 
 .. topic:: Overview
 
-    :Date: |today|
     :Vidi-version: 2020.11.0
     :Forfatter: `giovanniborella <https://github.com/giovanniborella>`_
 
 .. contents:: 
     :depth: 3
 
-
-*****************************************************************
-Tegn-værktøjet
-***************************************************************** 
-
 .. include:: ../../_subs/NOTE_GETTINGSTARTED.rst
 
 Elementer vil også fremgå på PDF-print.
-
-Typer
-=================================================================
 
 Når værktøjet er tændt er det muligt at tegne elementer ind på kortet. Elementerne er bundet op på den geografiske placering, så de vil blive selv om man panorerer i kortet.
 
@@ -36,7 +27,7 @@ Når værktøjet er tændt er det muligt at tegne elementer ind på kortet. Elem
     Værktøjet er tændt, og klar til at lave elementer.
 
 Tegn elementer
------------------------------------------------------------------
+=================================================================
 
 For at tegne elementer, gøres følgende:
 

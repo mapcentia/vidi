@@ -6,8 +6,6 @@ Kørselskonfiguration (configs)
 
 .. topic:: Overview
 
-    :Date: |today|
-    :Vidi-version: 2024.11.0
     :Forfattere: `giovanniborella <https://github.com/giovanniborella>`_ | `mapcentia <https://github.com/mapcentia>`_
 
 .. contents::
@@ -23,10 +21,13 @@ Som kan læses sådan:
 
 ``https://<host>/app/<database>/?config=<kørselskonfiguration>.json``
 
+config.json
+=================================================================
+
 .. _configjs_schemata:
 
 schemata
-*****************************************************************
+----------------------------------------------------------------
 
 Her angives hvilke lag, der skal hente ind i lagtræet. Der er tre måder at angive på:
 
@@ -52,7 +53,7 @@ De tre måder kan kombineres.
 .. _configjs_enabledextensions:
 
 enabledExtensions
-*****************************************************************
+----------------------------------------------------------------
 
 Her angives hvilke extensions, som skal aktiveres.
 
@@ -72,7 +73,7 @@ Her angives hvilke extensions, som skal aktiveres.
 .. _configjs_extensionconfig:
 
 extensionConfig
-*****************************************************************
+----------------------------------------------------------------
 
 Her kan opsætningen af de enkelte extensions laves. Det er ikke alle extensions, som har sine egne indstillinger.
 
@@ -120,7 +121,7 @@ Her følger hvordan de enkelte extensions kan opsættes (Pt. omfatter denne del 
 .. _configjs_enabledprints:
 
 enabledPrints
-*****************************************************************
+----------------------------------------------------------------
 
 Her angives hvilke print-templates der skal være adgang til. Angives flere end én kan brugeren vælge mellem dem i print-dialogen.
 
@@ -131,7 +132,7 @@ Her angives hvilke print-templates der skal være adgang til. Angives flere end 
 .. _configjs_enabledsearch:
 
 enabledSearch
-*****************************************************************
+----------------------------------------------------------------
 
 Her angives hvilket søgemodul, der skal være aktiveret. Pt. er der to standard moduler:
 
@@ -145,7 +146,7 @@ Her angives hvilket søgemodul, der skal være aktiveret. Pt. er der to standard
 .. _configjs_searchconfig:
 
 searchConfig
-*****************************************************************
+----------------------------------------------------------------
 
 Her kan det valgte søgemodul konfigureres.
 
@@ -200,7 +201,7 @@ De ekstra søgemoduler kan opsættes således:
 .. _configjs_template:
 
 template
-*****************************************************************
+----------------------------------------------------------------
 
 Her angives hvilken template, som skal bruges. Angives det ikke, bruges standard-templaten ``default.tmpl``.
 Egne Templates kan placeres på egen server ved angivelse af :ref:`configUrl<configjs_configurl>` indstillingen.
@@ -212,7 +213,7 @@ Egne Templates kan placeres på egen server ved angivelse af :ref:`configUrl<con
 .. _configjs_brandname:
 
 brandName
-*****************************************************************
+----------------------------------------------------------------
 
 Her kan sættes en tekst som placeres vha. en placeholder i templates.
 
@@ -223,7 +224,7 @@ Her kan sættes en tekst som placeres vha. en placeholder i templates.
 .. _configjs_baselayers:
 
 baseLayers
-*****************************************************************
+----------------------------------------------------------------
 
 Opsætning af tilgængelige base layers kan ske på fire forskellige metoder:
 
@@ -340,7 +341,7 @@ Vidi sørger så for at tilføje bruger-infomationen og tilrette URL.
 .. _configjs_baseLayergroups:
 
 baseLayerGroups
-*****************************************************************
+----------------------------------------------------------------
 
 Det er muligt at gruppere flere baggrundskort i en gruppe. Grupperne kan vises indledningsvis i en skuffe.
 
@@ -391,7 +392,7 @@ For at gruppere baggrundskortene, angives strukturen i ``baseLayerGroups``. De e
 .. _configjs_aboutbox:
 
 aboutBox
-*****************************************************************
+----------------------------------------------------------------
 
 Her kan sættes en tekst eller HTML som vises i About Box.
 
@@ -402,7 +403,7 @@ Her kan sættes en tekst eller HTML som vises i About Box.
 .. _configjs_startupmodal:
 
 startUpModal
-*****************************************************************
+----------------------------------------------------------------
 
 Hvis angivet, vil et modal-vindue vises ved opstart med tekst eller HTML. Vinduet kan skjules en gang eller for altid (indtil cookies nulstilles eller indeholdet ændres).
 
@@ -413,7 +414,7 @@ Hvis angivet, vil et modal-vindue vises ved opstart med tekst eller HTML. Vindue
 .. _configjs_startupmodalsupressiontemplates:
 
 startupModalSupressionTemplates
-*****************************************************************
+----------------------------------------------------------------
 
 :ref:`startUpModal <configjs_startupmodal>` kan undertrykkes ved udvalgte templates. Templates kan angives ved navn eller regular expression.
 
@@ -427,7 +428,7 @@ startupModalSupressionTemplates
 .. _configjs_featureinfoonmap:
 
 featureInfoTableOnMap
-*****************************************************************
+----------------------------------------------------------------
 
 Når denne er sat til ``true`` vises feature-info tabellerne i en popup på kortet i stedet for i sidepanelet. Det gør indstillingen veleget til embed template.
 Ved brug af "avanceret forespørgelse" vises tabellerne dog stadig i sidepanelet.
@@ -449,7 +450,7 @@ Ved brug af "avanceret forespørgelse" vises tabellerne dog stadig i sidepanelet
 .. _configjs_crossmultiselect:
 
 crossMultiSelect
-*****************************************************************
+----------------------------------------------------------------
 
 Når denne er sat til ``true`` vil feature info klik fange både raster- og vektor-lag og opstille de enkelte resultater i en "harmonika". Derved inddeles resultatet ikke efter hvilke lag de tilhører.
 Overskrifterne har to dele:
@@ -476,7 +477,7 @@ Ovenstående sættes i GC2 Meta.
 .. _configjs_activatemaintab:
 
 activateMainTab
-*****************************************************************
+----------------------------------------------------------------
 
 Sæt hvilket modul, som skal være aktivt fra starten. Mulighederne er:
 
@@ -499,7 +500,7 @@ Sæt hvilket modul, som skal være aktivt fra starten. Mulighederne er:
 .. _configjs_cssfiles:
 
 cssFiles
-*****************************************************************
+----------------------------------------------------------------
 
 Load eksterne CSS filer. Filerne skal placeres på en HTTP server, som forbindes til vha. :ref:`configUrl<configjs_configurl>`
 
@@ -513,7 +514,7 @@ Load eksterne CSS filer. Filerne skal placeres på en HTTP server, som forbindes
 .. _configjs_dontuseadvancedbaselayerswitcher:
 
 dontUseAdvancedBaseLayerSwitcher
-*****************************************************************
+----------------------------------------------------------------
 
 Deaktiver dobbelt baggrundskort funktionen.
 
@@ -524,7 +525,7 @@ Deaktiver dobbelt baggrundskort funktionen.
 .. _configjs_advancedbaselayerswitcher
 
 advancedBaseLayerSwitcher
-*****************************************************************
+----------------------------------------------------------------
 
 Opsætning af dobbelt baggrundskort funktionen.
 
@@ -545,7 +546,7 @@ Opsætning af dobbelt baggrundskort funktionen.
 .. _configjs_infoclickcursorstyle:
 
 infoClickCursorStyle
-*****************************************************************
+----------------------------------------------------------------
 
 Sæt hvilken CSS cursor style markøren skal have når feature-info modulet er aktivt. Default er "crosshair".
 
@@ -558,7 +559,7 @@ Andre muligheder kan ses `her <https://developer.mozilla.org/en-US/docs/Web/CSS/
 .. _configjs_showlayergroupcheckboxes:
 
 showLayerGroupCheckbox
-*****************************************************************
+----------------------------------------------------------------
 
 Viser en tjekboks i hver lag-gruppe og under-gruppe, som tænder/slukker alle lag i den pågældende gruppe.
 
@@ -569,7 +570,7 @@ Viser en tjekboks i hver lag-gruppe og under-gruppe, som tænder/slukker alle la
 .. _configjs_activelayers:
 
 activeLayers
-*****************************************************************
+----------------------------------------------------------------
 
 Liste over lag, som skal tændes fra starten. Lag angives schema qualified og med evt. type præfiks (v:, mvt:, w:). De angivne lag behøver ikke at være includeret i :ref:`schemata<configjs_schemata>`. Hvis Vidi startes med et projekt link, vil denne konfiguration blive ignoreret.
 
@@ -584,7 +585,7 @@ Liste over lag, som skal tændes fra starten. Lag angives schema qualified og me
 .. _configjs_removedisabledlayersfromLegend:
 
 removeDisabledLayersFromLegend
-*****************************************************************
+----------------------------------------------------------------
 
 Hvis sættes til true, så fjernes lag fra signaturforklaringen, når laget slukkes. Ellers forbliver det på signaturen, men tjekboksen bliver tom. Default er "false".
 
@@ -595,7 +596,7 @@ Hvis sættes til true, så fjernes lag fra signaturforklaringen, når laget sluk
 .. _configjs_autoPanPopup:
 
 autoPanPopup
-*****************************************************************
+----------------------------------------------------------------
 
 Denne indstilling bevirker, at når en pop-up åbnes, så panoreres kort således, at pop-up'en kommer indenfor kortets udsnit. Bemærk, at indstillingen helst skal sættes til "false", hvis der anvendes vektor-lag med dynamisk loading af data, fordi panoreringen evt. kan bevirke reload af data og derefter lukkes pop-up'en Default er "false".
 
@@ -606,7 +607,7 @@ Denne indstilling bevirker, at når en pop-up åbnes, så panoreres kort sålede
 .. _configjs_vectorTable:
 
 vectorTable
-*****************************************************************
+----------------------------------------------------------------
 
 Denne indstilling styrer om :ref:`vektorlag tabellen<gc2mata_vectorsettings>` skal vises til højre for eller i bunden af kortet. Endvidere kan højde/bredde styres. Hvis positionen er sat til ``right``
 vil kun ``width`` have effekt og tabellen vil altid fylde højden ud. Hvis position er sat til ``bottom`` vil kun ``height`` have effekt og bredden bliver den samme som kortet.
@@ -623,7 +624,7 @@ vil kun ``width`` have effekt og tabellen vil altid fylde højden ud. Hvis posit
 .. _configjs_initFunction:
 
 initFunction
-*****************************************************************
+----------------------------------------------------------------
 
 Her kan angives en JavaScript funktion, som bliver kørt når Vidi er klar. Funktionen skal skrives som en linje tekst startende med `function()` og den efterfølgende blok er den, som bliver eksekveret:
 
@@ -634,7 +635,7 @@ Her kan angives en JavaScript funktion, som bliver kørt når Vidi er klar. Funk
 .. _configjs_initZoomCenter:
 
 initZoomCenter
-*****************************************************************
+----------------------------------------------------------------
 
 Hvis sat vil Vidi starte op på det angivet zoom/center. Denne indstilling vil have forrang over zoom/center sat i URL og projekt-link. Kan fx anvendes til at sikre, at alle indlejrede kort starter med samme zoom/center.
 
@@ -648,7 +649,7 @@ Angives således `/z/x/y`. Dette svarer til det, der vises i Vidi URL'en.
 .. _configjs_popupdraggable:
 
 popupDraggable
-*****************************************************************
+----------------------------------------------------------------
 
 Hvis sat til `true` kan man flytte feature-info pop-up'en på kortet.
 
@@ -660,7 +661,7 @@ Hvis sat til `true` kan man flytte feature-info pop-up'en på kortet.
 .. _configjs_title:
 
 title
-*****************************************************************
+----------------------------------------------------------------
 
 Sæt titel på siden (den der vises på browser-fanen).
 
@@ -675,7 +676,7 @@ Sæt titel på siden (den der vises på browser-fanen).
 .. _configjs_baselayerdrawer:
 
 baselayerDrawer
-*****************************************************************
+----------------------------------------------------------------
 
 Anvend baggrundskort "skuffe" i stedet for toggle knappen. Skuffen kan indeholde et vilkårlig antal muligheder. Udvælgelsen af baggrundskort til skuffen og thumbnails/ skal opsættes i :ref:`configjs_baselayers`
 
@@ -695,7 +696,7 @@ Anvend baggrundskort "skuffe" i stedet for toggle knappen. Skuffen kan indeholde
 .. _configjs_showoffcanvas:
 
 showOffcanvas
-*****************************************************************
+----------------------------------------------------------------
 
 Her kan angives, om menuen skal være vist fra starten. Værdierne kan være ``true``, ``false`` eller ``"mobile"``. Den sidste viser menuen, hvis skærmen er bred men ikke på fx en smal telefonskærm.
 
@@ -708,7 +709,7 @@ Her kan angives, om menuen skal være vist fra starten. Værdierne kan være ``t
 .. _configjs_expandfirstinlayertree:
 
 expandFirstInLayerTree
-*****************************************************************
+----------------------------------------------------------------
 
 Angiver om den første/øverste gruppe i lagtræet skal være foldet ud fra starten.
 
@@ -720,7 +721,7 @@ Angiver om den første/øverste gruppe i lagtræet skal være foldet ud fra star
 .. _configjs_infocallback:
 
 infoCallback
-*****************************************************************
+----------------------------------------------------------------
 
 En funktion som køres, når feature info rammer et eller flere lag. En liste af med de ramte lag sendes med.
 
@@ -731,7 +732,7 @@ En funktion som køres, når feature info rammer et eller flere lag. En liste af
 .. _configjs_emptyinfocallback:
 
 emptyInfoCallback
-*****************************************************************
+----------------------------------------------------------------
 
 En funktion som køres, når feature info IKKE rammer noget.
 
@@ -742,7 +743,7 @@ En funktion som køres, når feature info IKKE rammer noget.
 .. _configjs_dateformats:
 
 dateFormats
-*****************************************************************
+----------------------------------------------------------------
 
 Det er muligt at formatere datoer i templates (både popup- og felt-templates). Det gøres ved at kalde en template "helper" og angive et defineret datoformat.
 
@@ -777,7 +778,7 @@ Hvis ens datoer ikke er et standardformat, men fx Plandata's, hvor datoer bliver
 .. _configjs_dateformats:
 
 statelessDraw
-*****************************************************************
+----------------------------------------------------------------
 
 Hvis man ikke vil have at tegninger "hænger ved" efter refresh af browser, kan denne option sættes til `true`.
 
@@ -788,7 +789,7 @@ Hvis man ikke vil have at tegninger "hænger ved" efter refresh af browser, kan 
 .. _configjs_openlayertreegroups:
 
 openLayerTreeGroups
-*****************************************************************
+----------------------------------------------------------------
 
 Angiv hvilke grupper, som skal være foldet ud i lagtræet fra starten.
 
@@ -799,7 +800,7 @@ Angiv hvilke grupper, som skal være foldet ud i lagtræet fra starten.
 .. _configjs_crs:
 
 crs
-*****************************************************************
+----------------------------------------------------------------
 
 Angiv den kort projektion/grid, som skal anvendes. Default er `EPSG3857` and den eneste anden mulighed er `EPSG25832`, som er det danske UTM32 grid.
 
@@ -807,9 +808,9 @@ Angiv den kort projektion/grid, som skal anvendes. Default er `EPSG3857` and den
 
     "crs": "EPSG25832"
 
-#################################################################
+
 Referencer
-#################################################################
+=================================================================
 
 En konfiguration kan henvise til andre konfigurationer og på den måde kan dele af en opsætning genbruges i flere konfigurationer.
 

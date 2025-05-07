@@ -1,25 +1,14 @@
-.. _gettingstarted:
 
-.. |gc2| raw:: html
-
-  <abbr title="MapCentia Geocloud2">GC2</abbr>
-
-*****************************************************************
-Kom godt i gang med Vidi
-*****************************************************************
+Hvad er Vidi?
+================================================================= 
 
 .. topic:: Overview
 
     :Date: |today|
-    :Vidi-version: 2020.11.0
     :Forfatter: `giovanniborella <https://github.com/giovanniborella>`_
 
 .. contents:: 
     :depth: 3
-
-
-Hvad er Vidi?
-================================================================= 
 
 Vidi er en HTML5 applikation til at vise og forespørge på kortdata fra |gc2|. 
 

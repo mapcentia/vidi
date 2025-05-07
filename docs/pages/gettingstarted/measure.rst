@@ -1,22 +1,16 @@
 .. _measure:
 
-#################################################################
-Måleværktøjer
-#################################################################
+=====================
+Måleværktøj
+===================== 
 
 .. topic:: Overview
 
     :Date: |today|
-    :Vidi-version: 2020.11.0
     :Forfatter: `giovanniborella <https://github.com/giovanniborella>`_
 
 .. contents:: 
-    :depth: 3
-
-
-*****************************************************************
-Måle-værktøjet
-***************************************************************** 
+    :depth: 2
 
 .. include:: ../../_subs/NOTE_GETTINGSTARTED.rst
 
@@ -32,8 +26,6 @@ Måleværktøjet vil være tilgængeligt i toolbaren. For at aktivere; klik på 
 
     Start værktøjet ved klikke på "linealen"
 
-Mål
-=================================================================
 
 Når værktøjet er tændt er det muligt at tegne elementer ind på kortet. Elementerne er bundet op på den geografiske placering, så de vil blive selv om man panorerer i kortet.
 
@@ -45,7 +37,7 @@ Når værktøjet er tændt er det muligt at tegne elementer ind på kortet. Elem
 
     Værktøjet er tændt, og klar til at lave elementer.
 
-Mål
+Mål afstand eller areal
 -----------------------------------------------------------------
 
 For at måles, gøres følgende:

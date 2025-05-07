@@ -1,30 +1,17 @@
-.. _non_standard_extensions:
 
-.. |gc2| raw:: html
+.. _extensions_otp:
 
-  <abbr title="MapCentia Geocloud2">GC2</abbr>
-
-#################################################################
-Ikke-standard extensions
-#################################################################
+=================
+Rutevejledning (otp)
+=================
 
 .. topic:: Overview
 
-    :Date: |today|
-    :Author: `mapcentia <https://github.com/mapcentia>`_
+    :Vidi-version: UNRELEASED
+    :Forfattere: `mapcentia <https://github.com/mapcentia>`_
 
 .. contents::
     :depth: 3
-
-*****************************************************************
-Introduktion
-*****************************************************************
-
-Herunder findes dokumentation på nogle af de extensions, som ikke følger med Vidi som standard. Skal en af disse anvendes kræves det, at den bliver installeret.
-
-*****************************************************************
-Rejsetid (otp)
-*****************************************************************
 
 Rejsetid extensionen opsættes i en kørselskonfiguration (config) under :ref:`configjs_extensionconfig`
 
