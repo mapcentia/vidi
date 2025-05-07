@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [Unreleased]
+## [2025.5.0] - 2025-6-5
 
 ### Added
 
@@ -14,6 +14,10 @@ and this project adheres to [CalVer](https://calver.org/).
 ### Changed
 
 - The minimum scale available for print has been changed from a fixed `200` to the lowest value of `config.print.scales`.
+
+### Fixed
+
+- Multipage print in conflictSearch now works.
 
 ## [2025.4.1] - 2025-24-4
 
