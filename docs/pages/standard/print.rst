@@ -6,8 +6,6 @@ Print
 
 .. topic:: Overview
 
-    :Date: |today|
-    :Vidi-version: 2020.11.0
     :Forfatter: `giovanniborella <https://github.com/giovanniborella>`_
 
 .. include:: ../../_subs/NOTE_CONF.rst

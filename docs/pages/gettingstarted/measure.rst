@@ -6,7 +6,6 @@ Måleværktøj
 
 .. topic:: Overview
 
-    :Date: |today|
     :Forfatter: `giovanniborella <https://github.com/giovanniborella>`_
 
 .. contents:: 

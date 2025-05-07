@@ -6,8 +6,6 @@ Lagopsætning fra GC2
 
 .. topic:: Overview
 
-    :Date: |today|
-    :Vidi-version: 2020.11.0
     :Forfattere: `mapcentia <https://github.com/mapcentia>`_
 
 .. contents::
