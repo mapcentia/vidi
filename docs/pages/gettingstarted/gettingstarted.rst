@@ -1,6 +1,6 @@
 
 Hvad er Vidi?
-================================================================= 
+=================
 
 .. topic:: Overview
 
@@ -24,7 +24,7 @@ Vidi er ikke bygget ind i GC2, men kræver sin egen installation.
 `Du kan prøve det live her <https://kort.geofyn.dk/>`_
 
 Kortvinduet
------------------------------------------------------------------
+-----------------
 
 .. figure:: ../../_media/gettingstarted-main.png
     :width: 400px
@@ -37,7 +37,7 @@ Kortvinduet
 .. _gettingstarted_menu:
 
 Menu
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+-----------------
 
 .. figure:: ../../_media/gettingstarted-menu.png
     :width: 400px
@@ -54,7 +54,7 @@ Menuen gemmer sig selv hvis kortvinduet er for smalt, men kan bringes frem igen 
 .. _gettingstarted_navigate:
 
 Navigér
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+-----------------
 
 Panorer i kortet ved at klikke og trække med musen. Det er også muligt at bruge piletasterne på tastaturet.
 
@@ -73,7 +73,7 @@ Man kan gå tilbage i kortudsnit ved at bruge ``Forrige udsnit``-knappen i værk
 .. _gettingstarted_controls:
 
 Værktøjslinjen
------------------------------------------------------------------
+-----------------
 
 .. figure:: ../../_media/gettingstarted-controls.png
     :align: center

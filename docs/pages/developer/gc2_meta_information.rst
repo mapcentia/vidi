@@ -1,8 +1,7 @@
 .. _gc2meta:
 
-#################################################################
 Lagopsætning fra GC2
-#################################################################
+=================
 
 .. topic:: Overview
 
@@ -11,9 +10,8 @@ Lagopsætning fra GC2
 .. contents::
     :depth: 4
 
-*****************************************************************
 GC2 Meta information
-*****************************************************************
+-----------------
 
 GC2 har et konfigurerbart Meta Data system med egenskaber tilknyttet de enkelte lag, som Vidi læser ved opstart. Egenskaberne omfatter fx om lag kan editeres, om et lag skal vises som tile- eller vektorlag osv.
 
@@ -29,7 +27,7 @@ Herunder følger de forskellige egenskaber, der har betydning for Vidi.
 .. _gc2meta_infopopup:
 
 Info pop-up
-=================================================================
+-----------------
 
 **Pop-up template**
 
@@ -124,7 +122,7 @@ Anvendes ved brugen af :ref:`configjs_crossmultiselect`
 .. _gc2meta_layertype:
 
 Layer type
-=================================================================
+-----------------
 
 **Type**
 
@@ -140,7 +138,7 @@ Hvilken type skal være valgt fra starten.
 .. _gc2meta_tables:
 
 Tables
-=================================================================
+-----------------
 
 **Zoom on select**
 
@@ -153,7 +151,7 @@ Hvis der zoomes, så kan maks zoom-level sættes. Jo højere tal jo længere ind
 .. _gc2meta_editor:
 
 Editor
-=================================================================
+-----------------
 
 **Editable**
 
@@ -169,7 +167,7 @@ Skal laget være editerbart? Både Tile og Vector kan editeres. Det anbefales do
 .. _gc2meta_tilesettings:
 
 Tile settings
-=================================================================
+-----------------
 
 (Har kun betydning for lag af typen Tile)
 
@@ -201,7 +199,7 @@ Eksempel på et style-objekt:
 .. _gc2meta_vectorsettings:
 
 Vector settings
-=================================================================
+-----------------
 
 (Har kun betydning for lag af typen Vector)
 
@@ -334,7 +332,7 @@ Hvis der angives en tooltip template får hver vektorfeature et tooltip/label me
 .. _gc2meta_filters:
 
 Filters
-=================================================================
+-----------------
 
 **Filter config**
 
@@ -391,7 +389,7 @@ Hvis denne egenskab er slået til kan filteropsætningen ikke ændres i Vidi.
 .. _gc2meta_mouseover:
 
 Mouse over
-=================================================================
+-----------------
 
 **Activate mouse over**
 
@@ -418,7 +416,7 @@ Ved mouse over på tile-lag anvendes et såkaldt UTF grid, som er en slags inter
 .. _gc2meta_references:
 
 References
-=================================================================
+-----------------
 
 **Referenced by**
 
@@ -452,7 +450,7 @@ I Vidi i laget-træet kan børne-lagene ses på forældre-laget:
 .. _gc2meta_layerstree:
 
 Layer tree
-=================================================================
+-----------------
 
 **Sub group**
 
@@ -485,9 +483,8 @@ Her ses alle mulighederne:
 Laget kan låses. Det låses op, hvis laget er registreret som "barn" til et andet lag gennem :ref:`gc2meta_references`, hvorpå der aktiveres et filter.
 
 
-*****************************************************************
 GC2 Struktur-fanen
-*****************************************************************
+=================
 
 I GC2's struktur-fane kan der laves en række indstillinger på feltniveau.
 
@@ -499,25 +496,25 @@ I GC2's struktur-fane kan der laves en række indstillinger på feltniveau.
 |
 
 Alias
-=================================================================
+-----------------
 
 Giv feltet et alias, som vises i stedet for det tekniske feltnavn i Vidi. Kan indeholde specialtegn
 
 Vis i klik-info
-=================================================================
+-----------------
 
 Medtag feltet i feature-info. Gælder kun ved brugen af standard pop-up templaten. (se :ref:`gc2meta_infopopup`)
 
 .. _gc2structure_mouseover:
 
 Vis i mouse-over
-=================================================================
+-----------------
 
 Medtag feltet i mouse-over. Gælder kun ved brugen af standard mouse-over-templaten. Men skal klikkes af, hvis feltet overhovedet skal med i UTF Grid'et. (se :ref:`gc2meta_mouseover`)
 
 
 Søgbar
-=================================================================
+-----------------
 
 Gør feltet søgbart i lagets fritekstsøgning.
 
@@ -529,13 +526,13 @@ Gør feltet søgbart i lagets fritekstsøgning.
 |
 
 Deaktiver filtrering
-=================================================================
+-----------------
 
 Ekskluder feltet fra lag-filtrering.
 
 
 Autocomplete
-=================================================================
+-----------------
 
 Aktiver autocomplete på feltet i filtrering.
 
@@ -549,7 +546,7 @@ Aktiver autocomplete på feltet i filtrering.
 .. _gc2structure_link:
 
 Gør til link
-=================================================================
+-----------------
 
 Hvis feltet indholder en web-adresse gøres det til et aktivt link i pop-up'en.
 
@@ -557,7 +554,7 @@ Hvis feltet indholder en web-adresse gøres det til et aktivt link i pop-up'en.
     Hvis der anvendes en brugerdefineret pop-up template, har denne indstilling ingen effekt (se :ref:`gc2meta_infopopup`)
 
 Content
-=================================================================
+-----------------
 
 Hvis feltet indeholder et link til et billede eller mp4-video kan der her vælges typen. Ved brug af standard templaten bliver billedet eller videoen sat ind (se :ref:`gc2meta_infopopup`)
 
@@ -567,7 +564,7 @@ Hvis feltet indeholder et link til et billede eller mp4-video kan der her vælge
 .. _gc2structure_link_prefix:
 
 Link prefix
-=================================================================
+-----------------
 
 Hvis :ref:`gc2structure_link` er tjekket af, kan der sættes en tekst-streng foran linket. Fx hvis ``https://`` mangler i linket (fx ``minside.dk/mitdok.pdf``) således det blivet et gyldigt link.
 
@@ -575,7 +572,7 @@ Hvis :ref:`gc2structure_link` er tjekket af, kan der sættes en tekst-streng for
     Hvis der anvendes en brugerdefineret pop-up template, har denne indstilling ingen effekt (se :ref:`gc2meta_infopopup`)
 
 Link suffix
-=================================================================
+-----------------
 
 Som ved :ref:`gc2structure_link_prefix` men bare bagved. Fx hvis feltet kun indeholder en titel på et dokument: ``mitdok``, så kan ``https://minside.dk`` sættes som prefix og ``.pdf`` som suffix. og resultatet bliver ``https://minside.dk/mitdok.pdf``.
 
@@ -583,7 +580,7 @@ Som ved :ref:`gc2structure_link_prefix` men bare bagved. Fx hvis feltet kun inde
     Hvis der anvendes en brugerdefineret pop-up template, har denne indstilling ingen effekt (se :ref:`gc2meta_infopopup`)
 
 Template
-=================================================================
+-----------------
 
 Hvis værdien af et felt skal udtrykkes i pop-up og tabel ved andet end selve den rå værdi kan der indsættes en template for feltet. En template har adgang til alle objektets attributter. Fx kan der defineres en template, som skaber et link med link-tekst og ``title`` og ``aria-label`` attributter fra et andet felt. Fx:
 
@@ -597,7 +594,7 @@ Hvis værdien af et felt skal udtrykkes i pop-up og tabel ved andet end selve de
     Se også :ref:`templates`
 
 Egenskaber
-=================================================================
+-----------------
 
 Her kan der defineres hvilke værdier, der kan være i feltet. Hvis dette defineres, vil der i Vidi's filter og editerings funktioner blive dannet en drop-down-liste, hvor værdierne kan vælges. Det vil altså ikke være muligt at indtaste vilkårlige værdier.
 
@@ -637,6 +634,3 @@ Listen kan både bestå af tal og tekster.
 **Wild card**
 
 Der kan dannes en drop-down-liste af samtlige unikke værdier som allerede findes i feltet. Det gøres ved at indsætte ``*`` i feltet.
-
-
-

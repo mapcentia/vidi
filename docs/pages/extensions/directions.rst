@@ -16,7 +16,7 @@ Rutevejledning (directions)
 Installation
 -----------------
 
-``directions`` er en del af Vidi og kræver ikke installation. 
+``directions`` er en del af Vidi og kræver ikke yderligere installation. 
  
 Funktionen skal medtages i :ref:`configjs_extensions`
 

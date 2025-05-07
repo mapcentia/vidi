@@ -1,8 +1,7 @@
 .. _templates:
 
-#################################################################
 Templates
-#################################################################
+=================
 
 .. topic:: Overview
 
@@ -10,10 +9,6 @@ Templates
 
 .. contents::
     :depth: 4
-
-
-Indledning
-*****************************************************************
 
 Vidi anvender såkaldte templates til styrings af layouts. Helt overordnet styres Vidis layout af en template, men også mindre dele styres af templates.
 
@@ -34,7 +29,7 @@ I ovenstående template bliver ``{{plannr}}`` og ``{{vedtagetdato}}`` skiftet ud
     Der kan anvendes HTML i templates.
 
 Indbyggede hjælpefunktioner
-*****************************************************************
+-----------------
 
 I Vidi er der defineret nogle hjælpefunktioner, som kan anvendes i templates. En hjælpefunktion tager selve værdien og evt. nogle argumenter som input og returnere typisk en ændret værdi.
 

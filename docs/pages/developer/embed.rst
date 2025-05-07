@@ -1,8 +1,7 @@
 .. _embed:
 
-#################################################################
 Indlejring af Vidi på andre hjemmesider
-#################################################################
+=================
 
 .. topic:: Overview
 
@@ -13,9 +12,8 @@ Indlejring af Vidi på andre hjemmesider
 
 .. _embed_script:
 
-*****************************************************************
-Embed.js script
-*****************************************************************
+Installation
+-----------------
 
 Vidi kan indlejres på en hjemmeside vha. embed.js scriptet. Dette script skal loades på hjemmesiden, hvor Vidi skal indlejres.
 
@@ -29,9 +27,8 @@ Scriptet kan både placeres i toppen og bunden af hjemmesiden.
 
 .. _embed_div:
 
-*****************************************************************
 Indlejring af Vidi
-*****************************************************************
+-----------------
 
 Indlejring af Vidi sker ved at placere et ``div`` element på hjemmeside, hvor Vidi ønskes placeret. En række ``data`` attributer styrer hvordan kortet vises.
 
@@ -106,9 +103,8 @@ Følgende funktioner er skjulte, men kan sættes til "inline" hvis funktionerne 
 
 .. _embed_api:
 
-*****************************************************************
 Embed API
-*****************************************************************
+-----------------
 
 Embed scriptet udstiller et API, så det er muligt at ændre Vidi's tilstand og definere callback funtioner fra den hjemmeside det er indlejret på.
 

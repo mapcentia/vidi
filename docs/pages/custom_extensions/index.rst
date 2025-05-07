@@ -1,6 +1,5 @@
 .. _non_standard_extensions:
 
-=====================
 Ikke-standard extensions
 =====================
 

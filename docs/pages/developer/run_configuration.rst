@@ -1,8 +1,7 @@
 .. _configjson:
 
-#################################################################
 Kørselskonfiguration (configs)
-#################################################################
+=================
 
 .. topic:: Overview
 
@@ -20,9 +19,6 @@ Vidi startes med en URL som denne (uden fragments [#fragment]_):
 Som kan læses sådan:
 
 ``https://<host>/app/<database>/?config=<kørselskonfiguration>.json``
-
-config.json
-=================================================================
 
 .. _configjs_schemata:
 

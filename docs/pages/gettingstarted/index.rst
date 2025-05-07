@@ -1,6 +1,5 @@
 .. _gettingstarted:
 
-=====================
 Kom godt i gang med Vidi
 =====================
 

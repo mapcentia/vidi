@@ -1,7 +1,7 @@
 .. _GIT:
 
 Mere om Vidi-projektet
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+=================
 
 Her er links til mere generel information
 
