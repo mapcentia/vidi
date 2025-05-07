@@ -717,7 +717,7 @@ msgstr ""
 #: 36157096796041d68cde2e25169b7be6
 msgid ""
 "Laget kan låses. Det låses op, hvis laget er registreret som \"barn\" til"
-" et andet lag gennem :ref:`gc2mata_references`, hvorpå der aktiveres et "
+" et andet lag gennem :ref:`gc2meta_references`, hvorpå der aktiveres et "
 "filter."
 msgstr ""
 
@@ -752,7 +752,7 @@ msgstr ""
 #: ed3d3c6df22a4dab8dbefaa43a27ecfc
 msgid ""
 "Medtag feltet i feature-info. Gælder kun ved brugen af standard pop-up "
-"templaten. (se :ref:`gc2mata_infopopup`)"
+"templaten. (se :ref:`gc2meta_infopopup`)"
 msgstr ""
 
 #: ../../pages/standard/92_gc2_meta_information.rst:510
@@ -765,7 +765,7 @@ msgstr ""
 msgid ""
 "Medtag feltet i mouse-over. Gælder kun ved brugen af standard mouse-over-"
 "templaten. Men skal klikkes af, hvis feltet overhovedet skal med i UTF "
-"Grid'et. (se :ref:`gc2mata_mouseover`)"
+"Grid'et. (se :ref:`gc2meta_mouseover`)"
 msgstr ""
 
 #: ../../pages/standard/92_gc2_meta_information.rst:516
@@ -820,7 +820,7 @@ msgstr ""
 #: e9d58c74fc1b4c998a79537b536c2ed7
 msgid ""
 "Hvis der anvendes en brugerdefineret pop-up template, har denne "
-"indstilling ingen effekt (se :ref:`gc2mata_infopopup`)"
+"indstilling ingen effekt (se :ref:`gc2meta_infopopup`)"
 msgstr ""
 
 #: ../../pages/standard/92_gc2_meta_information.rst:556
@@ -833,7 +833,7 @@ msgstr ""
 msgid ""
 "Hvis feltet indeholder et link til et billede eller mp4-video kan der her"
 " vælges typen. Ved brug af standard templaten bliver billedet eller "
-"videoen sat ind (se :ref:`gc2mata_infopopup`)"
+"videoen sat ind (se :ref:`gc2meta_infopopup`)"
 msgstr ""
 
 #: ../../pages/standard/92_gc2_meta_information.rst:566

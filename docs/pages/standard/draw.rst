@@ -6,7 +6,6 @@ Tegn
 
 .. topic:: Overview
 
-    :Vidi-version: 2020.11.0
     :Forfatter: `giovanniborella <https://github.com/giovanniborella>`_
 
 .. contents:: 

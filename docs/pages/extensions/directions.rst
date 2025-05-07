@@ -7,7 +7,6 @@ Rutevejledning (directions)
 
 .. topic:: Overview
 
-    :Vidi-version: UNRELEASED
     :Forfattere: `mapcentia <https://github.com/mapcentia>`_
 
 .. contents::

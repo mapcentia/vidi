@@ -2074,7 +2074,7 @@ msgstr ""
 #: ../../pages/standard/92_gc2_meta_information.rst:481
 msgid ""
 "Laget kan låses. Det låses op, hvis laget er registreret som \"barn\" til"
-" et andet lag gennem :ref:`gc2mata_references`, hvorpå der aktiveres et "
+" et andet lag gennem :ref:`gc2meta_references`, hvorpå der aktiveres et "
 "filter."
 msgstr ""
 
@@ -2103,7 +2103,7 @@ msgstr ""
 #: ../../pages/standard/92_gc2_meta_information.rst:505
 msgid ""
 "Medtag feltet i feature-info. Gælder kun ved brugen af standard pop-up "
-"templaten. (se :ref:`gc2mata_infopopup`)"
+"templaten. (se :ref:`gc2meta_infopopup`)"
 msgstr ""
 
 #: ../../pages/standard/92_gc2_meta_information.rst:510
@@ -2114,7 +2114,7 @@ msgstr ""
 msgid ""
 "Medtag feltet i mouse-over. Gælder kun ved brugen af standard mouse-over-"
 "templaten. Men skal klikkes af, hvis feltet overhovedet skal med i UTF "
-"Grid'et. (se :ref:`gc2mata_mouseover`)"
+"Grid'et. (se :ref:`gc2meta_mouseover`)"
 msgstr ""
 
 #: ../../pages/standard/92_gc2_meta_information.rst:516
@@ -2158,7 +2158,7 @@ msgstr ""
 #: ../../pages/standard/92_gc2_meta_information.rst:591
 msgid ""
 "Hvis der anvendes en brugerdefineret pop-up template, har denne "
-"indstilling ingen effekt (se :ref:`gc2mata_infopopup`)"
+"indstilling ingen effekt (se :ref:`gc2meta_infopopup`)"
 msgstr ""
 
 #: ../../pages/standard/92_gc2_meta_information.rst:556
@@ -2169,7 +2169,7 @@ msgstr ""
 msgid ""
 "Hvis feltet indeholder et link til et billede eller mp4-video kan der her"
 " vælges typen. Ved brug af standard templaten bliver billedet eller "
-"videoen sat ind (se :ref:`gc2mata_infopopup`)"
+"videoen sat ind (se :ref:`gc2meta_infopopup`)"
 msgstr ""
 
 #: ../../pages/standard/92_gc2_meta_information.rst:566
@@ -2622,7 +2622,7 @@ msgstr ""
 msgid ""
 "APIet kan bruges i de forskellige templates og funktioner, der kan "
 "defineres forskellige steder i en Vidi opsætning. Fx i "
-":ref:`gc2mata_infopopup` templates og funktioner."
+":ref:`gc2meta_infopopup` templates og funktioner."
 msgstr ""
 
 #: ../../pages/standard/96_api.rst:23

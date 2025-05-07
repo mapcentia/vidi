@@ -67,6 +67,13 @@ Vidi kan konfigureres og udvides. Herunder kan du finde dokumentation om hvordan
     pages/developer/index
 
 
-.. Include generic links to repo
+*****************************************************************
+Vidiprojektet
+*****************************************************************
 
-.. include:: ./_subs/GIT.rst 
+Her kan du finde mere information om selve Vidi-projektet, og hvordan du kan bidrage til det.
+
+.. toctree::
+    :maxdepth: 2
+
+    pages/vidi/index

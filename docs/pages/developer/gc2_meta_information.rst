@@ -23,9 +23,10 @@ GC2 har et konfigurerbart Meta Data system med egenskaber tilknyttet de enkelte 
     :name: cross-multi-select
     :figclass: align-center
 |
+
 Herunder følger de forskellige egenskaber, der har betydning for Vidi.
 
-.. _gc2mata_infopopup:
+.. _gc2meta_infopopup:
 
 Info pop-up
 =================================================================
@@ -36,7 +37,7 @@ Indeholdet i feature-info pop-up'en styres vha. en template, som anvender sproge
 
 Hvis der ikke angives en template, så anvendes en standard, som looper felterne igennem og lister dem. Den ser således ud:
 
-.. code-block:: handlebars
+.. code-block:: 
 
     <div class="vidi-popup-content">
         <h3 class="popup-title">{{_vidi_content.title}}</h3>
@@ -120,7 +121,7 @@ Anvendes ved brugen af :ref:`configjs_crossmultiselect`
 
 Anvendes ved brugen af :ref:`configjs_crossmultiselect`
 
-.. _gc2mata_layertype:
+.. _gc2meta_layertype:
 
 Layer type
 =================================================================
@@ -136,7 +137,7 @@ Hvilken type skal laget have i Vidi? Enten Vector eller Tile. Tile er WMS fra Ma
 
 Hvilken type skal være valgt fra starten.
 
-.. _gc2mata_tables:
+.. _gc2meta_tables:
 
 Tables
 =================================================================
@@ -149,7 +150,7 @@ Skal der zoomes ved valg af objekt i feature-info-tabellen?
 
 Hvis der zoomes, så kan maks zoom-level sættes. Jo højere tal jo længere ind zoomes der. Er speciel anvendelig ved punktlag, hvor der altid zoomes maks ind. Standard sat til 17.
 
-.. _gc2mata_editor:
+.. _gc2meta_editor:
 
 Editor
 =================================================================
@@ -164,7 +165,8 @@ Skal laget være editerbart? Både Tile og Vector kan editeres. Det anbefales do
     :name: cross-multi-select
     :figclass: align-center
 |
-.. _gc2mata_tilesettings:
+
+.. _gc2meta_tilesettings:
 
 Tile settings
 =================================================================
@@ -196,7 +198,7 @@ Eksempel på et style-objekt:
         "dashSpeed": 5
     }
 
-.. _gc2mata_vectorsettings:
+.. _gc2meta_vectorsettings:
 
 Vector settings
 =================================================================
@@ -329,7 +331,7 @@ Hvis der angives en tooltip template får hver vektorfeature et tooltip/label me
 
    <i>{{plannavn}} {{plannr}}</i>
 
-.. _gc2mata_filters:
+.. _gc2meta_filters:
 
 Filters
 =================================================================
@@ -386,7 +388,7 @@ Hvad skal match være som standard: All eller Any
 
 Hvis denne egenskab er slået til kan filteropsætningen ikke ændres i Vidi.
 
-.. _gc2mata_mouseover:
+.. _gc2meta_mouseover:
 
 Mouse over
 =================================================================
@@ -413,7 +415,7 @@ Hvis der ikke angives en template, så anvendes en standard, som looper valgte f
 
 Ved mouse over på tile-lag anvendes et såkaldt UTF grid, som er en slags interaktivt lag, som loades bag tile-laget. Det kræver database og CPU resourcer at danne disse grids, så det er muligt at cache dem, således allerede brugte grids ikke skal gendannes.
 
-.. _gc2mata_references:
+.. _gc2meta_references:
 
 References
 =================================================================
@@ -447,7 +449,7 @@ I Vidi i laget-træet kan børne-lagene ses på forældre-laget:
     :figclass: align-center
 |
 
-.. _gc2mata_layerstree:
+.. _gc2meta_layerstree:
 
 Layer tree
 =================================================================
@@ -458,7 +460,7 @@ Denne egenskab kan gruppere lag i en under-lag-grupper. Alle lag med samme Sub g
 
 Man kan have uendelig mange undergrupper og stien af undergrupper, hvor laget skal befinde sig skal angives således:
 
-.. code-block:: json
+.. code-block:: 
 
     sub group 1|sub group 2|sub group 3|sub group 4
 
@@ -480,7 +482,7 @@ Her ses alle mulighederne:
 
 **Disable check box**
 
-Laget kan låses. Det låses op, hvis laget er registreret som "barn" til et andet lag gennem :ref:`gc2mata_references`, hvorpå der aktiveres et filter.
+Laget kan låses. Det låses op, hvis laget er registreret som "barn" til et andet lag gennem :ref:`gc2meta_references`, hvorpå der aktiveres et filter.
 
 
 *****************************************************************
@@ -504,14 +506,14 @@ Giv feltet et alias, som vises i stedet for det tekniske feltnavn i Vidi. Kan in
 Vis i klik-info
 =================================================================
 
-Medtag feltet i feature-info. Gælder kun ved brugen af standard pop-up templaten. (se :ref:`gc2mata_infopopup`)
+Medtag feltet i feature-info. Gælder kun ved brugen af standard pop-up templaten. (se :ref:`gc2meta_infopopup`)
 
 .. _gc2structure_mouseover:
 
 Vis i mouse-over
 =================================================================
 
-Medtag feltet i mouse-over. Gælder kun ved brugen af standard mouse-over-templaten. Men skal klikkes af, hvis feltet overhovedet skal med i UTF Grid'et. (se :ref:`gc2mata_mouseover`)
+Medtag feltet i mouse-over. Gælder kun ved brugen af standard mouse-over-templaten. Men skal klikkes af, hvis feltet overhovedet skal med i UTF Grid'et. (se :ref:`gc2meta_mouseover`)
 
 
 Søgbar
@@ -552,15 +554,15 @@ Gør til link
 Hvis feltet indholder en web-adresse gøres det til et aktivt link i pop-up'en.
 
 .. note::
-    Hvis der anvendes en brugerdefineret pop-up template, har denne indstilling ingen effekt (se :ref:`gc2mata_infopopup`)
+    Hvis der anvendes en brugerdefineret pop-up template, har denne indstilling ingen effekt (se :ref:`gc2meta_infopopup`)
 
 Content
 =================================================================
 
-Hvis feltet indeholder et link til et billede eller mp4-video kan der her vælges typen. Ved brug af standard templaten bliver billedet eller videoen sat ind (se :ref:`gc2mata_infopopup`)
+Hvis feltet indeholder et link til et billede eller mp4-video kan der her vælges typen. Ved brug af standard templaten bliver billedet eller videoen sat ind (se :ref:`gc2meta_infopopup`)
 
 .. note::
-    Hvis der anvendes en brugerdefineret pop-up template, har denne indstilling ingen effekt (se :ref:`gc2mata_infopopup`)
+    Hvis der anvendes en brugerdefineret pop-up template, har denne indstilling ingen effekt (se :ref:`gc2meta_infopopup`)
 
 .. _gc2structure_link_prefix:
 
@@ -570,7 +572,7 @@ Link prefix
 Hvis :ref:`gc2structure_link` er tjekket af, kan der sættes en tekst-streng foran linket. Fx hvis ``https://`` mangler i linket (fx ``minside.dk/mitdok.pdf``) således det blivet et gyldigt link.
 
 .. note::
-    Hvis der anvendes en brugerdefineret pop-up template, har denne indstilling ingen effekt (se :ref:`gc2mata_infopopup`)
+    Hvis der anvendes en brugerdefineret pop-up template, har denne indstilling ingen effekt (se :ref:`gc2meta_infopopup`)
 
 Link suffix
 =================================================================
@@ -578,7 +580,7 @@ Link suffix
 Som ved :ref:`gc2structure_link_prefix` men bare bagved. Fx hvis feltet kun indeholder en titel på et dokument: ``mitdok``, så kan ``https://minside.dk`` sættes som prefix og ``.pdf`` som suffix. og resultatet bliver ``https://minside.dk/mitdok.pdf``.
 
 .. note::
-    Hvis der anvendes en brugerdefineret pop-up template, har denne indstilling ingen effekt (se :ref:`gc2mata_infopopup`)
+    Hvis der anvendes en brugerdefineret pop-up template, har denne indstilling ingen effekt (se :ref:`gc2meta_infopopup`)
 
 Template
 =================================================================
@@ -590,7 +592,7 @@ Hvis værdien af et felt skal udtrykkes i pop-up og tabel ved andet end selve de
    <a href="{{doklink}}" target="_blank" title="Link til lokalplan {{plannavn}} {{plannr}} som pdf" aria-label="Link til lokalplan {{plannavn}} {{plannr}} som pdf">{{plannr}} {{plannavn}}</a>
 
 .. note::
-    Hvis der anvendes en brugerdefineret pop-up template, har denne indstilling ingen effekt (se :ref:`gc2mata_infopopup`)
+    Hvis der anvendes en brugerdefineret pop-up template, har denne indstilling ingen effekt (se :ref:`gc2meta_infopopup`)
 
     Se også :ref:`templates`
 

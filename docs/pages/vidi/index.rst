@@ -5,6 +5,10 @@ Mere om Vidi-projektet
 
 Her er links til mere generel information
 
-* :ref:`README`
-* :ref:`CHANGELOG`
-* :ref:`CONTRIBUTING`
+.. toctree::
+    :maxdepth: 2
+    :glob:
+
+    README
+    CHANGELOG
+    CONTRIBUTING
