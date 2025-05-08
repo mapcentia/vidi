@@ -21,7 +21,7 @@ Herunder er alle de nøgler der kan anvendes i ``config.js`` beskrevet. Bemærk 
 .. _configjs_puppeteerprocesses:
 
 puppeteerProcesses
------------------
+------------------
 
 ``puppeteerProcesses`` er en blok der indeholder opsætning af puppeteer-processer. 
 
@@ -157,6 +157,28 @@ Da alle extensions er forskellige i opbygning, kan det være nødvendigt at tilf
             {"directions": ["index"]},
         ]
     },
+
+.. _configjs_urlsIgnoredForCaching:
+
+urlsIgnoredForCaching
+---------------------
+
+For at tilføje en extension til Vidi, skal der tilføjes en blok i ``extensions``. Der skal angives hvilke filer der skal bygges ind i vidi.
+
+Da alle extensions er forskellige i opbygning, kan det være nødvendigt at tilføje den til både ``browser`` og ``server``. Når den enkelte extension er bygget, kan den aktiveres i :ref:`configjs_enabledExtensions`. 
+
+.. code-block:: json
+
+      "urlsIgnoredForCaching": [
+    {
+      "regExp": true,
+      "requested": "services.hxgncontent.com"
+    },
+    {
+      "regExp": true,
+      "requested": "socket\\.io"
+    }
+  ],
 
 Komplet eksempel
 -----------------

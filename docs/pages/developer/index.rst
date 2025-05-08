@@ -14,4 +14,5 @@ Herunder findes dokumentation på emner der er relevante for udviklere og system
    templates
    standard_query_string
    gc2_meta_information
+   serviceworker
    api

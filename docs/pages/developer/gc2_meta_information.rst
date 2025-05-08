@@ -483,10 +483,10 @@ Her ses alle mulighederne:
 Laget kan låses. Det låses op, hvis laget er registreret som "barn" til et andet lag gennem :ref:`gc2meta_references`, hvorpå der aktiveres et filter.
 
 
-GC2 Struktur-fanen
+Tabelopsætning fra GC2
 =================
 
-I GC2's struktur-fane kan der laves en række indstillinger på feltniveau.
+I GC2's struktur-fane for den enkelte tabel, kan der laves en række indstillinger på feltniveau.
 
 .. figure:: ../../_media/structure-overview.png
     :width: 700px
