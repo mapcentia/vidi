@@ -1,7 +1,7 @@
 .. _configjson:
 
 Kørselskonfiguration (configs)
-=================
+==============================
 
 .. topic:: Overview
 
@@ -174,25 +174,27 @@ De ekstra søgemoduler kan opsættes således:
 
 .. code-block:: json
 
-    searchConfig: {
-        extraSearches: [,{
-            name: "stednavne_search",
-            db: "dk",
-            host: "https://dk.gc2.io",
-            heading: "Stednavne",
-            zoom: 20, // Zoomniveau, når der klikkes på et søgeresultat
-            index: {
-                name: "stednavne/navne_samlet",
-                field: "string",
-                key: "gid",
-            },
-            relation: {
-                name: "stednavne.navne_samlet_geom",
-                key: "gid",
-                geom: "the_geom"
-            }
-        }]
-    },
+    {
+        "searchConfig": {
+            "extraSearches": [{
+                "name": "stednavne_search",
+                "db": "dk",
+                "host": "https://dk.gc2.io",
+                "heading": "Stednavne",
+                "zoom": 20,
+                "index": {
+                    "name": "stednavne/navne_samlet",
+                    "field": "string",
+                    "key": "gid"
+                },
+                "relation": {
+                    "name": "stednavne.navne_samlet_geom",
+                    "key": "gid",
+                    "geom": "the_geom"
+                }
+            }]
+        }
+    }
 
 .. _configjs_template:
 
@@ -438,9 +440,11 @@ Ved brug af "avanceret forespørgelse" vises tabellerne dog stadig i sidepanelet
     :align: center
     :name: feature-info-table-on-map
     :figclass: align-center
+
 |
 
 .. note::
+    
     Kan ikke anvendes i sammenhæng med :ref:`configjs_crossmultiselect`
 
 .. _configjs_crossmultiselect:
@@ -465,9 +469,11 @@ Ovenstående sættes i GC2 Meta.
     :align: center
     :name: cross-multi-select
     :figclass: align-center
+
 |
 
 .. note::
+
     Hvis extension ``editor`` er aktiv vil ``crossMultiSelect`` bliver sat til ``false``.
 
 .. _configjs_activatemaintab:
@@ -518,7 +524,7 @@ Deaktiver dobbelt baggrundskort funktionen.
 
     "dontUseAdvancedBaseLayerSwitcher": true
 
-.. _configjs_advancedbaselayerswitcher
+.. _configjs_advancedbaselayerswitcher:
 
 advancedBaseLayerSwitcher
 ----------------------------------------------------------------
@@ -605,7 +611,7 @@ Denne indstilling bevirker, at når en pop-up åbnes, så panoreres kort sålede
 vectorTable
 ----------------------------------------------------------------
 
-Denne indstilling styrer om :ref:`vektorlag tabellen<gc2mata_vectorsettings>` skal vises til højre for eller i bunden af kortet. Endvidere kan højde/bredde styres. Hvis positionen er sat til ``right``
+Denne indstilling styrer om :ref:`vektorlag tabellen<gc2meta_vectorsettings>` skal vises til højre for eller i bunden af kortet. Endvidere kan højde/bredde styres. Hvis positionen er sat til ``right``
 vil kun ``width`` have effekt og tabellen vil altid fylde højden ud. Hvis position er sat til ``bottom`` vil kun ``height`` have effekt og bredden bliver den samme som kortet.
 ``width`` kan både være relativ ``%`` og absolute ``px`` mens ``height`` kun kan angives som absolute ``px``. Hvis ikke denne indstilling sættes bruges default værdier som vist nedenunder.
 
@@ -678,8 +684,9 @@ Anvend baggrundskort "skuffe" i stedet for toggle knappen. Skuffen kan indeholde
 
 .. figure:: ../../_media/baselayer-drawer.png
     :align: center
-    :name: feature-info-table-on-map
+    :name: baselayer-drawer
     :figclass: align-center
+
 |
 
 .. code-block:: json
@@ -771,7 +778,6 @@ Hvis ens datoer ikke er et standardformat, men fx Plandata's, hvor datoer bliver
 
     Læs mere om :ref:`templates`
 
-.. _configjs_dateformats:
 
 statelessDraw
 ----------------------------------------------------------------
@@ -864,7 +870,7 @@ URL'en til konfigurationen fås ved at anvende knappen KOPIER LINK:
 .. figure:: ../../_media/json-refs.png
     :width: 400px
     :align: center
-    :name: feature-info-table-on-map
+    :name: json-refs
     :figclass: align-center
 
 .. note::
