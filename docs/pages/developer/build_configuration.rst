@@ -1,7 +1,7 @@
 .. _configjs:
 
 Systemkonfiguration
-=================
+===========================================================================
 
 .. topic:: Overview
 
@@ -21,7 +21,7 @@ Herunder er alle de nøgler der kan anvendes i ``config.js`` beskrevet. Bemærk 
 .. _configjs_puppeteerprocesses:
 
 puppeteerProcesses
-------------------
+---------------------------------------------------------------------------
 
 ``puppeteerProcesses`` er en blok der indeholder opsætning af puppeteer-processer. 
 
@@ -45,7 +45,7 @@ Antallet af varme puppeteer-instanser vil have en effekt på systemets RAM forbr
 .. _configjs_print:
 
 print
------------------
+---------------------------------------------------------------------------
 
 Denne nøgle indeholder opsætningen af print. Den består af underdele som alle er obligatoriske. 
 
@@ -53,7 +53,7 @@ Denne nøgle indeholder opsætningen af print. Den består af underdele som alle
 .. _configjs_scales:
 
 scales
------------------
+---------------------------------------------------------------------------
 
 ``scales`` er en array af heltal der definérer hvilke zoom-forhold det er muligt at lave print i.
 
@@ -66,7 +66,7 @@ Herunder er et eksempel på en opsætning der kun giver mulighed for print i ``1
 .. _configjs_print_timeout:
 
 timeout
------------------
+---------------------------------------------------------------------------
 
 ``timeout`` er en integer der angiver hvor lang tid der må gå før print-processen stopper sig selv. Det kan være nødvendigt at øge denne værdi hvis man ønsker at printe i større formater som A1 eller over. 
 
@@ -75,7 +75,7 @@ timeout
 .. _configjs_configurl:
 
 configUrl
------------------
+---------------------------------------------------------------------------
 
 HTTP server hvor eksterne resourcer findes. Resourcer kan være:
 
@@ -99,7 +99,7 @@ Der kan angives forskellige URLer til forskellige databaser. ``_default`` betyde
 .. _configjs_leftslidewidths:
 
 leftSlideWidths
------------------
+---------------------------------------------------------------------------
 
 Angivelse af bredder i det venstre slide-ud panel i default template.
 
@@ -112,7 +112,7 @@ Tallene angiver brededer i hhv. phone, tablet og desktop.
 .. _configjs_df:
 
 df
------------------
+---------------------------------------------------------------------------
 
 Til WMS baggrundskort fra Datafordeler og Dataforsyningen kan der anvendes en proxy, som til dels fixer et problem med Datafordeler og til dels kan forsyne kaldene med brugernavn/kodeord eller token, så disse ikke bliver eksponeret til Vidi brugerne.
 
@@ -141,7 +141,7 @@ Se i Kørselskonfigurationen :ref:`configjs_baselayers` hvordan WMS'er fra Dataf
 .. _configjs_extensions:
 
 extensions
------------------
+---------------------------------------------------------------------------
 
 For at tilføje en extension til Vidi, skal der tilføjes en blok i ``extensions``. Der skal angives hvilke filer der skal bygges ind i vidi.
 
@@ -161,7 +161,7 @@ Da alle extensions er forskellige i opbygning, kan det være nødvendigt at tilf
 .. _configjs_urlsIgnoredForCaching:
 
 urlsIgnoredForCaching
----------------------
+---------------------------------------------------------------------------
 
 For at tilføje en extension til Vidi, skal der tilføjes en blok i ``extensions``. Der skal angives hvilke filer der skal bygges ind i vidi.
 
@@ -181,6 +181,6 @@ Da alle extensions er forskellige i opbygning, kan det være nødvendigt at tilf
   ],
 
 Komplet eksempel
------------------
+---------------------------------------------------------------------------
 
 For at se et komplet eksempel på en konfiguration henvises til default config i repo. `Den kan du finde her <https://github.com/mapcentia/vidi/blob/master/docker/stable/conf/vidi/config.js>`_

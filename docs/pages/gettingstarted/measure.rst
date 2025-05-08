@@ -1,7 +1,7 @@
 .. _measure:
 
 Måleværktøj
-=================
+===========================================================================
 
 .. topic:: Overview
 
@@ -36,7 +36,7 @@ Når værktøjet er tændt er det muligt at tegne elementer ind på kortet. Elem
     Værktøjet er tændt, og klar til at lave elementer.
 
 Mål afstand eller areal
------------------
+---------------------------------------------------------------------------
 
 For at måles, gøres følgende:
 
@@ -67,7 +67,7 @@ For at måles, gøres følgende:
 
 
 Ændre elementer
------------------
+---------------------------------------------------------------------------
 
 Når værktøjet aktiveres er det muligt at ændre knudepunkter mm. for de tegnede mål. 
 
@@ -82,7 +82,7 @@ Når værktøjet aktiveres er det muligt at ændre knudepunkter mm. for de tegne
 Klik for ``Gem`` for at gemme, ``Fortryd`` for at annulere alle ændringer.
 
 Slet mål
------------------
+---------------------------------------------------------------------------
 
 Når værktøjet aktiveres er det muligt at fjerne mål enkeltvis, eller alle på én gang.
 

@@ -1,7 +1,7 @@
 .. _serviceworker:
 
 Serviceworker
-==============================
+===========================================================================
 
 .. topic:: Overview
 
@@ -13,7 +13,7 @@ Serviceworker
 Vidi benytter en serviceworker til at cache data og til at håndtere offline-tilstand. Dette gøres for at forbedre hastigheden ved indlæsning af Vidi og for at sikre, at Vidi kan bruges offline.
 
 Caching
------------------
+---------------------------------------------------------------------------
 
 For at forbedre hastigheden ved indlæsning af Vidi, caches mange eksterne kald. Dette gælder blandt andet for kald til bagggrundskort, så disse kommer hurtigere frem i kortet efterfølgende.
 

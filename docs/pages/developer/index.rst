@@ -1,7 +1,7 @@
 .. _developer:
 
 Udviklerdokumentation
-=====================
+===========================================================================
 
 Herunder findes dokumentation på emner der er relevante for udviklere og systemadministratorer.
 

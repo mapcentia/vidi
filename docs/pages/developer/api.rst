@@ -1,7 +1,7 @@
 .. _developer_api:
 
 Vidi API
-=================
+===========================================================================
 
 .. topic:: Overview
 
@@ -16,7 +16,7 @@ APIet kan bruges i de forskellige templates og funktioner, der kan defineres for
     APIet kan ikke bruges til indlejrede Vidi kort - dvs. på den webside som Vidi er indlejret på. Her henvises til :ref:`embed_api`
 
 Tænd lag (turnOn)
------------------
+---------------------------------------------------------------------------
 
 Med denne metode kan man tænde for et lag. Den tager et argument som er et fuldt lagnavn med evt. type præfiks:
 
@@ -25,7 +25,7 @@ Med denne metode kan man tænde for et lag. Den tager et argument som er et fuld
     api.turnOn("schema.lag");
 
 Sluk lag (turnOff)
------------------
+---------------------------------------------------------------------------
 
 Med denne metode kan man tænde for et lag. Den tager et argument som er et fuldt lagnavn med evt. type præfiks:
 
@@ -34,7 +34,7 @@ Med denne metode kan man tænde for et lag. Den tager et argument som er et fuld
     api.turnOff("schema.lag");
 
 Sæt filter på lag (filter)
------------------
+---------------------------------------------------------------------------
 
 Med denne metode kan der sættes et filter på et givnet lag. Første argument er et fuldt lagnavn (uden type præfiks) og andet argument er filter objektet:
 

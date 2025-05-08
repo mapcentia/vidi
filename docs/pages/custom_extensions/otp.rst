@@ -2,7 +2,7 @@
 .. _extensions_otp:
 
 Rutevejledning (otp)
-=================
+===========================================================================
 
 .. topic:: Overview
 
@@ -12,7 +12,7 @@ Rutevejledning (otp)
     :depth: 3
 
 Installation
------------------
+---------------------------------------------------------------------------
 
 Denne extension kræver yderligere installation som ikke er beskrevet her.
 
@@ -27,7 +27,7 @@ Funktionen skal medtages i :ref:`configjs_extensions`
     },
 
 Konfiguration
------------------
+---------------------------------------------------------------------------
 
 Der er ikke nogen konfiguration for denne extension. Den vil automatisk blive tilføjet til værktøjslinjen.
 
@@ -105,6 +105,6 @@ Eksempel på konfiguration:
     }
 
 Brug
------------------
+---------------------------------------------------------------------------
 
 Brugen beskrives her.

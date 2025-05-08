@@ -1,7 +1,7 @@
 .. _print:
 
 Print
-=================
+===========================================================================
 
 .. topic:: Overview
 
@@ -27,7 +27,7 @@ Når værktøjet er tændt vil man se en rød kasser der representerer udskrifts
     Værktøjet er tændt, og klar til at printe
 
 Muligheder
------------------
+---------------------------------------------------------------------------
 
 Efter print-området er dannet er det muligt i kortvinduet at:
 
