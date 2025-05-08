@@ -1,4 +1,6 @@
 sphinx==7.2
+# temporary pin for https://github.com/sphinx-doc/sphinx/issues/13533
+snowballstemmer<3.0.0
 m2r2
 sphinx-rtd-theme
 sphinx-intl
