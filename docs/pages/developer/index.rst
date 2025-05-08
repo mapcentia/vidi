@@ -13,6 +13,6 @@ Herunder findes dokumentation på emner der er relevante for udviklere og system
    embed
    templates
    standard_query_string
-   gc2_meta_information
+   gc2
    serviceworker
    api
