@@ -10,9 +10,9 @@ import Dropzone from 'react-dropzone';
 import {MIME_TYPES_APPS, MIME_TYPES_IMAGES} from '../../../browser/modules/constants';
 import {splitBase64} from '../../../browser/modules/utils';
 
-const MAX_WIDTH = 1024;
-const MAX_HEIGHT = 768;
-const MAX_SIZE = 5000000;
+const MAX_WIDTH = 1600;
+const MAX_HEIGHT = 1200;
+const MAX_SIZE = 10000000;
 
 
 
