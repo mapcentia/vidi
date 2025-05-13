@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2025.5.1] - 2025-13-5
+
+### Changed
+- 
+- Adjust file upload limits in FileUploadWidget.js
+
 ## [2025.5.0] - 2025-6-5
 
 ### Added
