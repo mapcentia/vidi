@@ -230,14 +230,14 @@ const copyTableToClipboard = (id) => {
     let tableEl = document.querySelector(`#extra-table-${id}`);
     let table = tableEl.outerHTML;
     table = table
-        .replaceAll('\n','<br style="mso-data-placement:same-cell;"/>')  // new lines inside html cells => Alt+Enter in Excel
-        .replaceAll('<td','<td style="vertical-align: top;"');  // align top
+        .replaceAll('\n', '<br style="mso-data-placement:same-cell;"/>')  // new lines inside html cells => Alt+Enter in Excel
+        .replaceAll('<td', '<td style="vertical-align: top;"');  // align top
     navigator.clipboard.writeText(table).then(
-        ()=> {
+        () => {
             tableEl.classList.add("table-copy");
-            setTimeout(()=> tableEl.classList.remove("table-copy"), 1000);
+            setTimeout(() => tableEl.classList.remove("table-copy"), 1000);
         },
-        (e)=>console.log("error", e),
+        (e) => console.log("error", e),
     );
 }
 
@@ -297,7 +297,11 @@ module.exports = module.exports = {
         startBuffer = config.extensionConfig?.conflictSearch?.startBuffer || 40;
         getProperty = config.extensionConfig?.conflictSearch?.getProperty || false;
         searchStr = config.extensionConfig?.conflictSearch?.searchString || "";
-        searchLoadedLayers = config.extensionConfig?.conflictSearch?.searchLoadedLayers || true;
+        searchLoadedLayers = config.extensionConfig?.conflictSearch?.searchLoadedLayers;
+        if (searchLoadedLayers === undefined) {
+            searchLoadedLayers = true;
+        }
+
 
         // Set up draw module for conflict
         draw.setConflictSearch(this);
@@ -825,12 +829,12 @@ module.exports = module.exports = {
                 if (v.hits > 0) {
                     let metaData = v.meta;
                     let bufferValue = '';
-                    if(v.bufferValue > 0) {
+                    if (v.bufferValue > 0) {
                         bufferValue = "<span class='text-secondary'>Buffer</span> " + L.GeometryUtil.readableDistance(v.bufferValue, true, false, false, {m: 1}).replace('.', decimalSeparator);
                     }
                     if (metaData.layergroup === groups[i]) {
                         count++;
-                        row = "<tr><td>" + v.title + "</td><td>" + v.hits + "</td><td>" + bufferValue  + "</td><td>" + (v.totalLength > 0 ? "<span class='text-secondary'>Total</span> " + L.GeometryUtil.readableDistance(v.totalLength, true, false, false, {m: 1}).replace('.', decimalSeparator) : v.totalArea > 0 ? "<span class='text-secondary'>Total</span> " + L.GeometryUtil.readableArea(v.totalArea, true) : '') +"</td><td><div class='form-check form-switch text-end'><label class='form-check-label'><input class='form-check-input' type='checkbox' data-gc2-id='" + v.table + "' " + (visibleLayers.includes(v.table) ? "checked" : "") + "></label></div></td></tr>";
+                        row = "<tr><td>" + v.title + "</td><td>" + v.hits + "</td><td>" + bufferValue + "</td><td>" + (v.totalLength > 0 ? "<span class='text-secondary'>Total</span> " + L.GeometryUtil.readableDistance(v.totalLength, true, false, false, {m: 1}).replace('.', decimalSeparator) : v.totalArea > 0 ? "<span class='text-secondary'>Total</span> " + L.GeometryUtil.readableArea(v.totalArea, true) : '') + "</td><td><div class='form-check form-switch text-end'><label class='form-check-label'><input class='form-check-input' type='checkbox' data-gc2-id='" + v.table + "' " + (visibleLayers.includes(v.table) ? "checked" : "") + "></label></div></td></tr>";
                         hitsTable.append(row);
                     }
                 }
@@ -978,7 +982,7 @@ module.exports = module.exports = {
                             extraTable.append("<h4 class='mb-0 mt-3'>" + title + "</h4>");
                             extraTable.append(el);
                             extraTable.append($(`<button class="btn btn-outline-success btn-sm mt-1 w-100" data-extra-id="${extraCount}">Kopier '${title}' til udklipsholderen</button>`));
-                            $(`*[data-extra-id="${extraCount}"]`).click( (e) => copyTableToClipboard(e.target.dataset.extraId) );
+                            $(`*[data-extra-id="${extraCount}"]`).click((e) => copyTableToClipboard(e.target.dataset.extraId));
                             $(el).bootstrapTable({
                                 uniqueId: "_id",
                                 // height: "300px"
