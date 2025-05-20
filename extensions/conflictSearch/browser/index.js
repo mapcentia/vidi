@@ -977,7 +977,7 @@ module.exports = module.exports = {
                             el.append(tbody);
                             extraTable.append("<h4 class='mb-0 mt-3'>" + title + "</h4>");
                             extraTable.append(el);
-                            extraTable.append($(`<button class="btn btn-outline-success btn-sm mt-1" data-extra-id="${extraCount}">Kopier '${title}'</button>`));
+                            extraTable.append($(`<button class="btn btn-outline-success btn-sm mt-1 w-100" data-extra-id="${extraCount}">Kopier '${title}' til udklipsholderen</button>`));
                             $(`*[data-extra-id="${extraCount}"]`).click( (e) => copyTableToClipboard(e.target.dataset.extraId) );
                             $(el).bootstrapTable({
                                 uniqueId: "_id",
