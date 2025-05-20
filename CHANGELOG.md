@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2025.5.2] - 2025-20-5
+
+### Added
+
+-Implemented a feature to copy extra tables to the clipboard as HTML, making it compatible with Excel formatting. Added animations to indicate successful copying and updated table rendering to include copy buttons.
+
+
 ## [2025.5.1] - 2025-13-5
 
 ### Changed
