@@ -229,3 +229,11 @@ form.feature-attribute-editing-form img {
 .target {
   animation: target-fade 1s;
 }
+
+@keyframes table-copy-fade {
+  from { border-color: var(--bs-primary); } /* [1] */
+}
+
+.table-copy {
+  animation: table-copy-fade 1s;
+}

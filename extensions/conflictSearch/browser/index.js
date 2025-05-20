@@ -226,6 +226,21 @@ var _zoomToFeature = function (table, key, fid) {
     dataStore.load();
 };
 
+const copyTableToClipboard = (id) => {
+    let tableEl = document.querySelector(`#extra-table-${id}`);
+    let table = tableEl.outerHTML;
+    table = table
+        .replaceAll('\n','<br style="mso-data-placement:same-cell;"/>')  // new lines inside html cells => Alt+Enter in Excel
+        .replaceAll('<td','<td style="vertical-align: top;"');  // align top
+    navigator.clipboard.writeText(table).then(
+        ()=> {
+            tableEl.classList.add("table-copy");
+            setTimeout(()=> tableEl.classList.remove("table-copy"), 1000);
+        },
+        (e)=>console.log("error", e),
+    );
+}
+
 var hitsTable;
 var hitsData;
 var noHitsTable;
@@ -903,7 +918,7 @@ module.exports = module.exports = {
                         }
                         if (v.extra !== null && typeof v.extra === 'object' && Object.keys(v.extra).length > 0) {
                             extraCount++;
-                            const el = $("<table data-show-export=\"true\" data-show-toggle=\"true\" data-show-columns=\"true\" data-show-fullscreen=\"false\"></table>"); // Add bootstrap classes for basic styling
+                            const el = $(`<table id="extra-table-${extraCount}" data-show-columns="true" data-show-fullscreen="false"></table>`); // Add bootstrap classes for basic styling
                             const thead = $("<thead></thead>");
                             const tbody = $("<tbody></tbody>");
                             const headerRow = $("<tr></tr>");
@@ -960,12 +975,13 @@ module.exports = module.exports = {
                             // --- Assemble and Append Table ---
                             el.append(thead);
                             el.append(tbody);
-                            extraTable.append("<h4>" + title + "</h4>");
+                            extraTable.append("<h4 class='mb-0 mt-3'>" + title + "</h4>");
                             extraTable.append(el);
-
+                            extraTable.append($(`<button class="btn btn-outline-success btn-sm mt-1" data-extra-id="${extraCount}">Kopier '${title}'</button>`));
+                            $(`*[data-extra-id="${extraCount}"]`).click( (e) => copyTableToClipboard(e.target.dataset.extraId) );
                             $(el).bootstrapTable({
                                 uniqueId: "_id",
-                                height: "300px"
+                                // height: "300px"
                             });
                         }
 
