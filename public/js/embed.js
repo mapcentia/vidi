@@ -148,6 +148,11 @@ window.embedApi = {
     activeLayersReady: {},
 
     /**
+     * Holds callback functions for when symbols layers are changed.
+     */
+    symbolIsChanged: {},
+
+    /**
      * Switch on raster layer
      *
      * @param layerId string Id of layer in the form schema.relation
@@ -229,6 +234,13 @@ window.addEventListener("message", (event) => {
     try {
         if (event.data.type === "vidiCallback" && event.data.method) {
             window.embedApi.vidiReady[event.data.method]();
+        }
+    } catch (e) {
+        console.log("No callback function for vidiCallback");
+    }
+    try {
+        if (event.data.type === "symbolIsChanged") {
+            window.embedApi.symbolIsChanged[event.data.method]();
         }
     } catch (e) {
         console.log("No callback function for vidiCallback");

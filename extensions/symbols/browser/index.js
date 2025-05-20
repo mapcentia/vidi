@@ -32,6 +32,8 @@ const urlparser = require('./../../../browser/modules/urlparser');
 const db = urlparser.db;
 const MODULE_ID = exId;
 const config = require('../../../config/config.js');
+const urlVars = urlparser.urlVars;
+
 
 
 /**
@@ -91,6 +93,16 @@ const store = (tag) => {
 
 const setState = () => {
     backboneEvents.get().trigger(`${MODULE_ID}:state_change`);
+}
+
+const handleChange = () => {
+    if (urlVars?.readyCallback) {
+        window.parent.postMessage({
+            type: "symbolIsChanged",
+            method: urlVars.readyCallback
+
+        }, "*");
+    }
 }
 
 /**
@@ -210,6 +222,7 @@ const handleDragEnd = (e) => {
         }
     }
     createSymbol(svg, id, coord, 0, 1, map.getZoom(), file, group, true);
+    handleChange();
 }
 
 /**
@@ -319,6 +332,7 @@ const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file, gro
         delete markers[e.target.id];
         delete symbolState[e.target.id];
         setState();
+        handleChange();
         try {
             func(file, group, symbolState, "delete");
         } catch (e) {
@@ -579,6 +593,7 @@ module.exports = {
             map.touchZoom.enable();
             if (idBeingChanged) {
                 setState();
+                handleChange();
             }
             $(document).off("mousemove.symbol touchmove.symbol");
             mouseDown = false;

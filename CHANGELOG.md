@@ -9,8 +9,8 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ### Added
 
--Implemented a feature to copy extra tables to the clipboard as HTML, making it compatible with Excel formatting. Added animations to indicate successful copying and updated table rendering to include copy buttons.
-
+- Implemented a feature to copy extra tables to the clipboard as HTML, making it compatible with Excel formatting. Added animations to indicate successful copying and updated table rendering to include copy buttons.
+- Add callback handling for symbol changes. This ensures external systems can respond to changes via the `symbolIsChanged` event and corresponding embed API callbacks.
 
 ## [2025.5.1] - 2025-13-5
 
