@@ -177,6 +177,10 @@ module.exports = {
                     }
                     $.getJSON(configParam, function (data) {
                         for (let prop in defaults) {
+                            // if we are printing, skip the activelayers prop
+                            if (prop === "activeLayers" && (urlVars.px || urlVars.py)) {
+                                continue;
+                            }
                             window.vidiConfig[prop] = typeof data[prop] !== 'undefined' ? data[prop] : window.vidiConfig[prop];
                         }
                     }).fail(function () {
