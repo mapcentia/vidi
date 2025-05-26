@@ -226,17 +226,33 @@ var _zoomToFeature = function (table, key, fid) {
     dataStore.load();
 };
 
-const copyTableToClipboard = (id) => {
-    let tableEl = document.querySelector(`#extra-table-${id}`);
-    let table = tableEl.outerHTML;
-    table = table
+const tableToText = (el) => {
+    let html = el.outerHTML;
+    html = html
         .replaceAll('\n', '<br style="mso-data-placement:same-cell;"/>')  // new lines inside html cells => Alt+Enter in Excel
         .replaceAll('<td', '<td style="vertical-align: top;"');  // align top
-    navigator.clipboard.writeText(table).then(
-        () => {
-            tableEl.classList.add("table-copy");
-            setTimeout(() => tableEl.classList.remove("table-copy"), 1000);
-        },
+    el.classList.add("table-copy");
+    setTimeout(() => el.classList.remove("table-copy"), 1000);
+    return html;
+}
+
+
+const copyTableToClipboard = (id) => {
+    let el = document.querySelector(`#extra-table-${id}`);
+    const text = tableToText(el);
+    navigator.clipboard.writeText(text).then(
+        () => {},
+        (e) => console.log("error", e),
+    );
+}
+
+const copyAllTablesToClipboard = () => {
+    let text = '';
+    document.querySelectorAll(".extra-table").forEach(el => {
+        text = text + tableToText(el);
+    })
+    navigator.clipboard.writeText(text).then(
+        () => {},
         (e) => console.log("error", e),
     );
 }
@@ -922,9 +938,10 @@ module.exports = module.exports = {
                         }
                         if (v.extra !== null && typeof v.extra === 'object' && Object.keys(v.extra).length > 0) {
                             extraCount++;
-                            const el = $(`<table id="extra-table-${extraCount}" data-show-columns="true" data-show-fullscreen="false"></table>`); // Add bootstrap classes for basic styling
+                            const el = $(`<table class="extra-table" data-extra-table-id="${extraCount}" id="extra-table-${extraCount}" data-show-columns="true" data-show-fullscreen="false"></table>`); // Add bootstrap classes for basic styling
                             const thead = $("<thead></thead>");
                             const tbody = $("<tbody></tbody>");
+                            const tcaption = $("<caption></caption>");
                             const headerRow = $("<tr></tr>");
 
                             // --- Determine all possible headers from inner objects ---
@@ -979,13 +996,16 @@ module.exports = module.exports = {
                             // --- Assemble and Append Table ---
                             el.append(thead);
                             el.append(tbody);
+                            if (v.totalLength || v.totalArea) {
+                                tcaption.append((v.totalLength > 0 ? "<span class='text-secondary'>Total</span> " + L.GeometryUtil.readableDistance(v.totalLength, true, false, false, {m: 1}).replace('.', decimalSeparator) : v.totalArea > 0 ? "<span class='text-secondary'>Total</span> " + L.GeometryUtil.readableArea(v.totalArea, true) : '') );
+                                el.append(tcaption);
+                            }
                             extraTable.append("<h4 class='mb-0 mt-3'>" + title + "</h4>");
                             extraTable.append(el);
                             extraTable.append($(`<button class="btn btn-outline-success btn-sm mt-1 w-100" data-extra-id="${extraCount}">Kopier '${title}' til udklipsholderen</button>`));
                             $(`*[data-extra-id="${extraCount}"]`).click((e) => copyTableToClipboard(e.target.dataset.extraId));
                             $(el).bootstrapTable({
-                                uniqueId: "_id",
-                                // height: "300px"
+                                uniqueId: "_id"
                             });
                         }
 
@@ -1186,7 +1206,8 @@ let dom = `
                                 </div>
                             </div>
                             <div role="tabpanel" class="tab-pane conflict-result-content" id="extra-content">
-                                <div id="extra">HEJ</div>
+                                <button class="btn btn-outline-success mt-1 w-100 mt-3" onclick="copyAllTablesToClipboard()">Kopier alt til udklipsholderen</button>
+                                <div id="extra"></div>
                             </div>
                         </div>
                     </div>
