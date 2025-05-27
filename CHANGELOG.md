@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [UNRELEASED] - 2025-27-5
+
+- A `tileMatrixTransform` function can now be parsed to WMTS layers. The function takes the current zoom number and must return a valid tilematrix. The example will pad the zoom number with `0` and prefix with `L`. If the `tileMatrixTransform` is not set, the zoom number will be used for tilematrix.
+```json
+{
+  "type": "WMTS",
+  "url": "https://api.dataforsyningen.dk/wmts/forvaltning2?",
+  "tileMatrixSet": "View1",
+  "layer": "forvaltning2",
+  "id": "forvaltning2",
+  "name": "Forvaltning2 (UTM)",
+  "tileMatrixTransform": "(zoom) => {return 'L' + zoom.padStart(2, '0').toString()}"
+}
+```
+
 ## [2025.5.2] - 2025-20-5
 
 ### Added

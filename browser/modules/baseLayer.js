@@ -685,6 +685,7 @@ module.exports = module.exports = {
                         baseLayer: true,
                         layer: bl.layer,
                         tileMatrixSet: bl.tileMatrixSet,
+                        tileMatrixTransform: bl.tileMatrixTransform || null
                     });
                 } else if (bl?.type === "MVT") {
                     result = cloud.get().addMVTBaselayer(bl.url, {
