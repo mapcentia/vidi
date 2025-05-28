@@ -20,6 +20,7 @@
                     wmtsParams[i] = options[i];
                 }
             }
+            options = L.setOptions(this, options);
             const realRetina = options.detectRetina && retina ? 2 : 1;
             const tileSize = this.getTileSize();
             wmtsParams.width = tileSize.x * realRetina;
