@@ -344,7 +344,8 @@ module.exports = {
                                                     halfLat = (sw.lat + ne.lat) / 2,
                                                     midLeft = L.latLng(halfLat, sw.lng),
                                                     midRight = L.latLng(halfLat, ne.lng),
-                                                    scaleFactor = ($("#pane1").width() / (cloud.get().map.project(midRight).x - cloud.get().map.project(midLeft).x));
+                                                    width = document.getElementById('pane1').offsetWidth + 10,
+                                                    scaleFactor = (width / (cloud.get().map.project(midRight).x - cloud.get().map.project(midLeft).x));
                                                 const getCurrenTransform = (el) => {
                                                     const st = window.getComputedStyle(el, null);
                                                     const tr = st.getPropertyValue("transform");
@@ -381,7 +382,7 @@ module.exports = {
                                                 if (hashArr[0]) {
                                                     setLayers()
                                                 }
-                                                cloud.get().map.removeLayer(g);
+                                                // cloud.get().map.removeLayer(g);
                                             }, 0)
                                         }
                                     });
