@@ -364,7 +364,8 @@ module.exports = {
             });
             return scale;
         };
-        var rectangle = function (initCenter, scaleObject, color, initScale, isFirst) {
+
+        var rectangle_ = function (initCenter, scaleObject, color, initScale, isFirst) {
             scale = initScale ? initScale : _getScale(scaleObject);
             $("#select-scale").val(scale);
             if (isFirst && !sc) { // Only when print tool is activated first time and no state from project
@@ -376,21 +377,83 @@ module.exports = {
                 }
                 scale = scales[scaleIndex];
             }
-            var centerM = geocloud.transformPoint(initCenter.lng, initCenter.lat, "EPSG:4326", "EPSG:32632");
+
+            // Transform center to UTM (EPSG:25832)
+            var centerM = geocloud.transformPoint(initCenter.lng, initCenter.lat, "EPSG:4326", "EPSG:25832");
+
+            // Calculate print size in meters based on scale and page size
             var printSizeM = [(ps[0] * scale / 1000), (ps[1] * scale / 1000)];
+
+            // Calculate southwest and northeast corners
             var printSwM = [centerM.x - (printSizeM[0] / 2), centerM.y - (printSizeM[1] / 2)];
             var printNeM = [centerM.x + (printSizeM[0] / 2), centerM.y + (printSizeM[1] / 2)];
-            var printSwG = geocloud.transformPoint(printSwM[0], printSwM[1], "EPSG:32632", "EPSG:4326");
-            var printNeG = geocloud.transformPoint(printNeM[0], printNeM[1], "EPSG:32632", "EPSG:4326");
+
+            // Transform corners back to geographic (EPSG:4326)
+            var printSwG = geocloud.transformPoint(printSwM[0], printSwM[1], "EPSG:25832", "EPSG:4326");
+            var printNeG = geocloud.transformPoint(printNeM[0], printNeM[1], "EPSG:25832", "EPSG:4326");
+
             var rectangle = L.rectangle([[printSwG.y, printSwG.x], [printNeG.y, printNeG.x]], {
                 color: color,
                 fillOpacity: 0,
                 opacity: 1,
-                aspectRatio: (ps[0] / ps[1])
+                aspectRatio: (ps[0] / ps[1]),
+                transform: true
             });
             center[boxCount] = rectangle.getBounds().getCenter();
             return rectangle;
         };
+
+        var rectangle = function (initCenter, scaleObject, color, initScale, isFirst, interactive = true) {
+            scale = initScale ? initScale : _getScale(scaleObject);
+            $("#select-scale").val(scale);
+            if (isFirst && !sc) { // Only when print tool is activated first time and no state from project
+                var scaleIndex = scales.indexOf(scale);
+                if (scaleIndex > 1) {
+                    scaleIndex = scaleIndex - 2;
+                } else if (scaleIndex > 0) {
+                    scaleIndex = scaleIndex - 1;
+                }
+                scale = scales[scaleIndex];
+            }
+
+            // Convert center point to UTM
+            var centerM = geocloud.transformPoint(initCenter.lng, initCenter.lat, "EPSG:4326", "EPSG:25832");
+
+            // Calculate the dimensions of the rectangle in meters
+            var printSizeM = [(ps[0] * scale / 1000), (ps[1] * scale / 1000)];
+
+            // Calculate corners in projected coordinates (UTM)
+            var halfWidth = printSizeM[0] / 2;
+            var halfHeight = printSizeM[1] / 2;
+
+            var cornersM = [
+                [centerM.x - halfWidth, centerM.y - halfHeight], // SW
+                [centerM.x - halfWidth, centerM.y + halfHeight], // NW
+                [centerM.x + halfWidth, centerM.y + halfHeight], // NE
+                [centerM.x + halfWidth, centerM.y - halfHeight], // SE
+                [centerM.x - halfWidth, centerM.y - halfHeight]  // Close polygon by repeating first point
+            ];
+
+            // Transform corners back to geographic coordinates for Leaflet polygon
+            var cornersLatLng = cornersM.map(function (pt) {
+                var geo = geocloud.transformPoint(pt[0], pt[1], "EPSG:25832", "EPSG:4326");
+                return [geo.y, geo.x];
+            });
+
+            // Create polygon instead of rectangle to control shape precisely
+            var rectPoly = L.polygon(cornersLatLng, {
+                color: color,
+                fillOpacity: 0,
+                opacity: 1,
+                transform: true,
+                interactive: interactive
+                // aspectRatio does not apply here, polygon manages shape explicitly
+            });
+
+            center[boxCount] = rectPoly.getBounds().getCenter();
+            return rectPoly;
+        };
+
         var first = !center[0];
         center[boxCount] = center[boxCount] || cloud.get().map.getCenter(); // Init center as map center
         if (bnds) {
@@ -402,15 +465,22 @@ module.exports = {
             recEdit[boxCount] = rectangle(rec.getBounds().getCenter(), cloud.get().map, "yellow", scale, first);
             bnds = null;
         } else {
-            recEdit[boxCount] = rectangle(center[boxCount], cloud.get().map, "yellow", scale, first);
+            recEdit[boxCount] = rectangle(center[boxCount], cloud.get().map, "blue", scale, first);
         }
         recEdit[boxCount]._vidi_type = "printHelper";
         recEdit[boxCount]._count = boxCount;
         printItems.addLayer(recEdit[boxCount]);
-        recEdit[boxCount].editing.enable();
+        recEdit[boxCount].dragging.enable();
 
         let c = recEdit[boxCount].getBounds().getCenter();
-        recScale[boxCount] = rectangle(c, recEdit[boxCount], "red");
+        recScale[boxCount] = rectangle(c, recEdit[boxCount], "red", null, false, false);
+
+
+        // recScale[boxCount].editing.enable();
+        // recScale[boxCount].transform.enable();
+        recScale[boxCount].dragging.enable();
+
+
         recScale[boxCount]._vidi_type = "print";
         printItems.addLayer(recScale[boxCount]);
         icons[boxCount] = L.marker(c, {
@@ -423,7 +493,7 @@ module.exports = {
 
         var sw = recEdit[boxCount].getBounds().getSouthWest(), ne = recEdit[boxCount].getBounds().getNorthEast();
         curBounds[boxCount] = [sw.lat, sw.lng, ne.lat, ne.lng];
-        recEdit[boxCount].on('edit', function (e) {
+        recEdit[boxCount].on('dragend', function (e) {
             icons.forEach((icon) => {
                 cloud.get().map.removeLayer(icon);
             })
@@ -438,16 +508,16 @@ module.exports = {
                     })
                 }).addTo(cloud.get().map));
                 center[i] = c; // re-calculate centers
-                rectangle(c, recEdit[i], "red");
+                rectangle(c, recEdit[i], "red", null, false, true);
                 cloud.get().map.removeLayer(recScale[i]);
                 // Set bounds from the one being edited to all
-                recScale[i] = rectangle(c, recEdit[e.target._count], "red");
+                recScale[i] = rectangle(c, recEdit[e.target._count], "red", null, false, false);
                 recScale[i]._vidi_type = "print";
                 printItems.addLayer(recScale[i]);
                 $("#get-print-fieldset").prop("disabled", true);
-                recEdit[i].editing.disable();
-                recEdit[i].setBounds(recScale[i].getBounds());
-                recEdit[i].editing.enable();
+                recEdit[i].dragging.disable();
+                // recEdit[i].setBounds(recScale[i].getBounds());
+                recEdit[i].dragging.enable();
 
                 var sw = recEdit[i].getBounds().getSouthWest(),
                     ne = recEdit[i].getBounds().getNorthEast();
@@ -470,7 +540,7 @@ module.exports = {
             recEdit.editing.disable();
         } catch (e) {
         }
-        recEdit[recEdit.length - 1]?.editing.enable();
+        // recEdit[recEdit.length - 1]?.editing.enable();
         if (paramsFromDb) {
             setTimeout(() => {
                 paramsFromDb = null;
@@ -577,6 +647,7 @@ module.exports = {
                 scales: scales,
                 sticky: $("#print-sticky").is(":checked")
             };
+            console.log(data)
         } catch (e) {
             data = {};
         }

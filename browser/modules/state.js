@@ -328,11 +328,15 @@ module.exports = {
                                     parr = response.data.print;
                                     v = parr;
                                     $.each(v[0].geojson.features, function (n, m) {
-                                        if (m.type === "Rectangle") {
-                                            var g = L.rectangle([m._latlngs[0], m._latlngs[2]], {
+                                        if (m.type === "Feature") {
+                                            const flippedCoordinates = m.geometry.coordinates[0].map(coord => [coord[1], coord[0]]);
+                                            console.log(flippedCoordinates);
+
+                                            var g = L.polygon([flippedCoordinates], {
                                                 fillOpacity: 0,
-                                                opacity: 1,
+                                                opacity: 0.5,
                                                 color: 'red',
+                                                fillColor: 'red',
                                                 weight: 1
                                             });
                                             g.feature = m.feature;
@@ -343,8 +347,14 @@ module.exports = {
                                                     ne = bounds.getNorthEast(),
                                                     halfLat = (sw.lat + ne.lat) / 2,
                                                     midLeft = L.latLng(halfLat, sw.lng),
-                                                    midRight = L.latLng(halfLat, ne.lng),
-                                                    scaleFactor = ($("#pane1").width() / (cloud.get().map.project(midRight).x - cloud.get().map.project(midLeft).x));
+                                                    midRight = L.latLng(halfLat, ne.lng);
+
+                                                const width = document.getElementById('pane1').offsetWidth + 10;
+                                                const midRightP = cloud.get().map.project(midRight).x;
+                                                const midLeftP = cloud.get().map.project(midLeft).x;
+
+                                                const scaleFactor = width / (midRightP - midLeftP);
+
                                                 const getCurrenTransform = (el) => {
                                                     const st = window.getComputedStyle(el, null);
                                                     const tr = st.getPropertyValue("transform");
@@ -381,7 +391,7 @@ module.exports = {
                                                 if (hashArr[0]) {
                                                     setLayers()
                                                 }
-                                                cloud.get().map.removeLayer(g);
+                                                // cloud.get().map.removeLayer(g);
                                             }, 0)
                                         }
                                     });
