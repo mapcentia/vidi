@@ -333,19 +333,16 @@ module.exports = {
                                                 fillOpacity: 0,
                                                 opacity: 1,
                                                 color: 'red',
-                                                weight: 1
+                                                weight: 1,
+                                                className: 'print-rect-poly',
                                             });
                                             g.feature = m.feature;
                                             cloud.get().map.addLayer(g);
                                             setTimeout(function () {
-                                                const bounds = g.getBounds(),
-                                                    sw = bounds.getSouthWest(),
-                                                    ne = bounds.getNorthEast(),
-                                                    halfLat = (sw.lat + ne.lat) / 2,
-                                                    midLeft = L.latLng(halfLat, sw.lng),
-                                                    midRight = L.latLng(halfLat, ne.lng),
-                                                    width = document.getElementById('pane1').offsetWidth + 10,
-                                                    scaleFactor = (width / (cloud.get().map.project(midRight).x - cloud.get().map.project(midLeft).x));
+                                                const width = document.getElementById('pane1').offsetWidth;
+                                                const rectWidth = document.querySelector('.print-rect-poly').getBoundingClientRect().width;
+                                                const scaleFactor = width / rectWidth;
+
                                                 const getCurrenTransform = (el) => {
                                                     const st = window.getComputedStyle(el, null);
                                                     const tr = st.getPropertyValue("transform");
@@ -382,7 +379,7 @@ module.exports = {
                                                 if (hashArr[0]) {
                                                     setLayers()
                                                 }
-                                                // cloud.get().map.removeLayer(g);
+                                                cloud.get().map.removeLayer(g);
                                             }, 0)
                                         }
                                     });
