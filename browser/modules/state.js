@@ -337,23 +337,15 @@ module.exports = {
                                                 opacity: 0.5,
                                                 color: 'red',
                                                 fillColor: 'red',
-                                                weight: 1
+                                                weight: 1,
+                                                className: 'print-rect-poly',
                                             });
                                             g.feature = m.feature;
                                             cloud.get().map.addLayer(g);
                                             setTimeout(function () {
-                                                const bounds = g.getBounds(),
-                                                    sw = bounds.getSouthWest(),
-                                                    ne = bounds.getNorthEast(),
-                                                    halfLat = (sw.lat + ne.lat) / 2,
-                                                    midLeft = L.latLng(halfLat, sw.lng),
-                                                    midRight = L.latLng(halfLat, ne.lng);
-
-                                                const width = document.getElementById('pane1').offsetWidth + 10;
-                                                const midRightP = cloud.get().map.project(midRight).x;
-                                                const midLeftP = cloud.get().map.project(midLeft).x;
-
-                                                const scaleFactor = width / (midRightP - midLeftP);
+                                                const width = document.getElementById('pane1').offsetWidth;
+                                                const rectWidth = document.querySelector('.print-rect-poly').getBoundingClientRect().width;
+                                                const scaleFactor = width / rectWidth;
 
                                                 const getCurrenTransform = (el) => {
                                                     const st = window.getComputedStyle(el, null);
