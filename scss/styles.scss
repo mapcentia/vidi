@@ -238,11 +238,11 @@ form.feature-attribute-editing-form img {
   animation: table-copy-fade 1s;
 }
 
-.leaflet-tooltip-left.print-rect-poly-tooltip:before {
+.leaflet-tooltip.print-rect-poly-tooltip:before {
   border: none;
 }
 
-.leaflet-tooltip-left.print-rect-poly-tooltip {
+.leaflet-tooltip.print-rect-poly-tooltip {
   padding: 0;
   color: red;
   background-color: inherit;
