@@ -101,7 +101,7 @@ module.exports = {
             editorAlwaysActivated: true,
             statelessDraw: false,
             openLayerTreeGroups: [],
-            crs: 'EPSG3857'
+            crs: 'EPSG:3857',
         };
         // Set session from URL
         if (typeof urlVars.session === "string") {

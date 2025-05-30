@@ -328,11 +328,15 @@ module.exports = {
                                     parr = response.data.print;
                                     v = parr;
                                     $.each(v[0].geojson.features, function (n, m) {
-                                        if (m.type === "Rectangle") {
-                                            var g = L.rectangle([m._latlngs[0], m._latlngs[2]], {
+                                        if (m.type === "Feature") {
+                                            const flippedCoordinates = m.geometry.coordinates[0].map(coord => [coord[1], coord[0]]);
+                                            console.log(flippedCoordinates);
+
+                                            var g = L.polygon([flippedCoordinates], {
                                                 fillOpacity: 0,
                                                 opacity: 1,
                                                 color: 'red',
+                                                fillColor: 'red',
                                                 weight: 10,
                                                 className: 'print-rect-poly',
                                             });
