@@ -333,7 +333,7 @@ module.exports = {
                                                 fillOpacity: 0,
                                                 opacity: 1,
                                                 color: 'red',
-                                                weight: 1,
+                                                weight: 10,
                                                 className: 'print-rect-poly',
                                             });
                                             g.feature = m.feature;
@@ -379,7 +379,9 @@ module.exports = {
                                                 if (hashArr[0]) {
                                                     setLayers()
                                                 }
-                                                cloud.get().map.removeLayer(g);
+                                                if (urlVars.html !== 'true') {
+                                                    cloud.get().map.removeLayer(g);
+                                                }
                                             }, 0)
                                         }
                                     });

@@ -135,7 +135,8 @@ function print(key, q, req, response, outputPng = false, frame = 0, count, retur
 
         const margin = q.tmpl === "_conflictPrint" ? {left: '0.4cm', top: '1cm', right: '0.4cm', bottom: '1cm'} : 0;
         const port = process.env.PORT ? process.env.PORT : 3000;
-        let url = "http://127.0.0.1:" + port + '/app/' + q.db + '/' + q.schema + '/' + (q.queryString !== "" ? q.queryString : "?") + '&frame=' + frame + '&frameN=' + numberOfFrames + '&session=' + (typeof req.cookies["connect.gc2"] !== "undefined" ? encodeURIComponent(req.cookies["connect.gc2"]) : "") + '&tmpl=' + q.tmpl + '.tmpl&l=' + q.legend + '&h=' + q.header + '&px=' + q.px + '&py=' + q.py + '&td=' + q.dateTime + '&d=' + q.date + '&k=' + key + '&t=' + q.title + '&c=' + q.comment + q.anchor;
+        let uri = '/app/' + q.db + '/' + q.schema + '/' + (q.queryString !== "" ? q.queryString : "?") + '&frame=' + frame + '&frameN=' + numberOfFrames + '&session=' + (typeof req.cookies["connect.gc2"] !== "undefined" ? encodeURIComponent(req.cookies["connect.gc2"]) : "") + '&tmpl=' + q.tmpl + '.tmpl&l=' + q.legend + '&h=' + q.header + '&px=' + q.px + '&py=' + q.py + '&td=' + q.dateTime + '&d=' + q.date + '&k=' + key + '&t=' + q.title + '&c=' + q.comment + q.anchor;
+        let url = "http://127.0.0.1:" + port + uri;
         console.log(`Printing ` + url);
 
         let check = false;
@@ -147,7 +148,7 @@ function print(key, q, req, response, outputPng = false, frame = 0, count, retur
                             headless.destroy(browser);
                             console.log("Destroying browser after timeout " + timeout);
                         }
-                    }, timeout); 
+                    }, timeout);
                     if (!outputPng) {
                         browser.newPage().then(async (page) => {
                             await page.emulateMedia('screen');
@@ -168,7 +169,7 @@ function print(key, q, req, response, outputPng = false, frame = 0, count, retur
                                                     console.log('Done #', count.n);
                                                     if (q.bounds.length === 1) { // Only one page. No need to merge
                                                         console.log('Only one page. No need to merge.');
-                                                        response.send({success: true, key, url, "format": "pdf"});
+                                                        response.send({success: true, key, uri, "format": "pdf"});
                                                     }
                                                     headless.destroy(browser);
                                                     count.n++;
@@ -279,7 +280,7 @@ function print(key, q, req, response, outputPng = false, frame = 0, count, retur
                             // nobody like non-integer pixel values, make sure to round them
                             width = Math.floor(width);
                             height = Math.floor(height);
-                                
+
                             page.emulate({
                                 viewport: {width, height},
                                 userAgent: 'Puppeteer'
@@ -299,7 +300,7 @@ function print(key, q, req, response, outputPng = false, frame = 0, count, retur
                                                     if (!returnImage) {
                                                         fs.writeFile(`${__dirname}/../public/tmp/print/png/${key}.png`, img, (err) => {
                                                             if (q.bounds.length === 1) { // Only one page. No need to merge
-                                                                response.send({success: true, key, url, "format": "png"});
+                                                                response.send({success: true, key, uri, "format": "png"});
                                                             }
                                                             headless.destroy(browser);
                                                             console.log('Done #', count.n);

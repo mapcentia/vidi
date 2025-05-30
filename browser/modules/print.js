@@ -122,7 +122,7 @@ module.exports = {
                 $("#download-pdf, #open-pdf").attr("href", "/tmp/print/png/" + response.key + ".zip");
             }
             $("#download-pdf").attr("download", response.key);
-            $("#open-html").attr("href", response.url);
+            $("#open-html").attr("href", response.uri + '&html=true');
             $("#start-print-btn").find("span").hide();
             $(".dropdown-toggle.start-print-btn").prop("disabled", false);
             // GeoEnviron
