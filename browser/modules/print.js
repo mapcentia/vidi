@@ -567,7 +567,6 @@ module.exports = {
                 scales: scales,
                 sticky: $("#print-sticky").is(":checked")
             };
-            console.log(data)
         } catch (e) {
             data = {};
         }
