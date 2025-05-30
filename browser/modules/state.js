@@ -327,12 +327,13 @@ module.exports = {
                                     GeoJsonAdded = false;
                                     parr = response.data.print;
                                     v = parr;
+                                    let rectWidth;
                                     $.each(v[0].geojson.features, function (n, m) {
                                         if (m.type === "Feature") {
                                             const flippedCoordinates = m.geometry.coordinates[0].map(coord => [coord[1], coord[0]]);
                                             console.log(flippedCoordinates);
 
-                                            var g = L.polygon([flippedCoordinates], {
+                                            const g = L.polygon([flippedCoordinates], {
                                                 fillOpacity: 0,
                                                 opacity: 1,
                                                 color: 'red',
@@ -340,53 +341,50 @@ module.exports = {
                                                 weight: 10,
                                                 className: 'print-rect-poly',
                                             });
-                                            g.feature = m.feature;
+                                            // g.feature = m.feature;
                                             cloud.get().map.addLayer(g);
-                                            setTimeout(function () {
-                                                const width = document.getElementById('pane1').offsetWidth;
-                                                const rectWidth = document.querySelector('.print-rect-poly').getBoundingClientRect().width;
-                                                const scaleFactor = width / rectWidth;
+                                            const width = document.getElementById('pane1').offsetWidth;
+                                            rectWidth = rectWidth || document.querySelector('.print-rect-poly').getBoundingClientRect().width;
+                                            const scaleFactor = width / rectWidth;
+                                            const getCurrenTransform = (el) => {
+                                                const st = window.getComputedStyle(el, null);
+                                                const tr = st.getPropertyValue("transform");
+                                                let scale, angle;
+                                                let values = tr.split('(')[1];
+                                                values = values.split(')')[0];
+                                                values = values.split(',');
+                                                const a = values[0];
+                                                const b = values[1];
+                                                scale = Math.sqrt(a * a + b * b);
+                                                const radians = Math.atan2(b, a);
+                                                angle = Math.round(radians * (180 / Math.PI));
+                                                return [angle, scale];
+                                            }
+                                            const zoom = cloud.get().map.getZoom();
+                                            const orgZoom = parseInt(response.data.anchor.split('/')[1]);
+                                            document.querySelectorAll('.drag-marker').forEach(marker => {
+                                                const tr = getCurrenTransform(marker);
+                                                const rotate = tr[0];
+                                                const scale = tr[1] * Math.pow(2, (zoom - orgZoom));
+                                                marker.style.transform = `rotate(${rotate}deg) scale(${scale})`;
+                                            })
+                                            $("#container1").css("transform", "scale(" + scaleFactor + ")");
+                                            $(".leaflet-control-scale-line").prependTo("#scalebar").css("transform", "scale(" + scaleFactor + ")");
+                                            $(".leaflet-control-scale-line").prependTo("#scalebar").css("transform-origin", "left bottom 0px");
+                                            $("#scale").html("1 : " + response.data.scale);
+                                            $("#title").html(decodeURIComponent(urlVars.t));
+                                            parr = urlVars.c.split("#");
+                                            if (parr.length > 1) {
+                                                parr.pop();
+                                            }
+                                            $("#comment").html(decodeURIComponent(parr.join()));
 
-                                                const getCurrenTransform = (el) => {
-                                                    const st = window.getComputedStyle(el, null);
-                                                    const tr = st.getPropertyValue("transform");
-                                                    let scale, angle;
-                                                    let values = tr.split('(')[1];
-                                                    values = values.split(')')[0];
-                                                    values = values.split(',');
-                                                    const a = values[0];
-                                                    const b = values[1];
-                                                    scale = Math.sqrt(a * a + b * b);
-                                                    const radians = Math.atan2(b, a);
-                                                    angle = Math.round(radians * (180 / Math.PI));
-                                                    return [angle, scale];
-                                                }
-                                                const zoom = cloud.get().map.getZoom();
-                                                const orgZoom = parseInt(response.data.anchor.split('/')[1]);
-                                                document.querySelectorAll('.drag-marker').forEach(marker => {
-                                                    const tr = getCurrenTransform(marker);
-                                                    const rotate = tr[0];
-                                                    const scale = tr[1] * Math.pow(2, (zoom - orgZoom));
-                                                    marker.style.transform = `rotate(${rotate}deg) scale(${scale})`;
-                                                })
-                                                $("#container1").css("transform", "scale(" + scaleFactor + ")");
-                                                $(".leaflet-control-scale-line").prependTo("#scalebar").css("transform", "scale(" + scaleFactor + ")");
-                                                $(".leaflet-control-scale-line").prependTo("#scalebar").css("transform-origin", "left bottom 0px");
-                                                $("#scale").html("1 : " + response.data.scale);
-                                                $("#title").html(decodeURIComponent(urlVars.t));
-                                                parr = urlVars.c.split("#");
-                                                if (parr.length > 1) {
-                                                    parr.pop();
-                                                }
-                                                $("#comment").html(decodeURIComponent(parr.join()));
-
-                                                if (hashArr[0]) {
-                                                    setLayers()
-                                                }
-                                                if (urlVars.html !== 'true') {
-                                                    cloud.get().map.removeLayer(g);
-                                                }
-                                            }, 0)
+                                            if (hashArr[0]) {
+                                                setLayers()
+                                            }
+                                            if (urlVars.html !== 'true') {
+                                                //    cloud.get().map.removeLayer(g);
+                                            }
                                         }
                                     });
                                 }

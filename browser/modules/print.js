@@ -437,7 +437,7 @@ module.exports = {
             for (let i = 0; i <= boxCount; i++) {
                 let c = recEdit[i].getBounds().getCenter();
                 center[i] = c; // re-calculate centers
-                rectangle(c, recEdit[i], "red", null, false, true);
+               // rectangle(c, recEdit[i], "red", null, false, true);
                 $("#get-print-fieldset").prop("disabled", true);
                 var sw = recEdit[i].getBounds().getSouthWest(),
                     ne = recEdit[i].getBounds().getNorthEast();
