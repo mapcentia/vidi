@@ -13,7 +13,6 @@ var printOn = false;
 var boxCount = 0;
 var recEdit = [];
 var curBounds = [];
-var icons = [];
 var serializeLayers;
 var anchor;
 var printItems = new L.FeatureGroup();
@@ -62,9 +61,6 @@ var _cleanUp = function (hard) {
     } catch (e) {
         //console.error(e.message);
     }
-    icons.forEach((icon) => {
-        cloud.get().map.removeLayer(icon);
-    });
     printOn = false;
     if (hard) {
         center = [];
@@ -144,10 +140,8 @@ module.exports = {
         $("#remove-print-box-btn").on("click", function () {
             if (boxCount > 0) {
                 cloud.get().map.removeLayer(recEdit[boxCount]);
-                cloud.get().map.removeLayer(icons[boxCount]);
                 recEdit.pop()
                 center.pop()
-                icons.pop()
                 boxCount--;
                 backboneEvents.get().trigger(`${MODULE_ID}:state_change`);
             }
@@ -360,44 +354,6 @@ module.exports = {
             return scale;
         };
 
-        var rectangle_ = function (initCenter, scaleObject, color, initScale, isFirst) {
-            scale = initScale ? initScale : _getScale(scaleObject);
-            $("#select-scale").val(scale);
-            if (isFirst && !sc) { // Only when print tool is activated first time and no state from project
-                var scaleIndex = scales.indexOf(scale);
-                if (scaleIndex > 1) {
-                    scaleIndex = scaleIndex - 2;
-                } else if (scaleIndex > 0) {
-                    scaleIndex = scaleIndex - 1;
-                }
-                scale = scales[scaleIndex];
-            }
-
-            // Transform center to UTM (EPSG:25832)
-            var centerM = geocloud.transformPoint(initCenter.lng, initCenter.lat, "EPSG:4326", "EPSG:25832");
-
-            // Calculate print size in meters based on scale and page size
-            var printSizeM = [(ps[0] * scale / 1000), (ps[1] * scale / 1000)];
-
-            // Calculate southwest and northeast corners
-            var printSwM = [centerM.x - (printSizeM[0] / 2), centerM.y - (printSizeM[1] / 2)];
-            var printNeM = [centerM.x + (printSizeM[0] / 2), centerM.y + (printSizeM[1] / 2)];
-
-            // Transform corners back to geographic (EPSG:4326)
-            var printSwG = geocloud.transformPoint(printSwM[0], printSwM[1], "EPSG:25832", "EPSG:4326");
-            var printNeG = geocloud.transformPoint(printNeM[0], printNeM[1], "EPSG:25832", "EPSG:4326");
-
-            var rectangle = L.rectangle([[printSwG.y, printSwG.x], [printNeG.y, printNeG.x]], {
-                color: color,
-                fillOpacity: 0,
-                opacity: 1,
-                aspectRatio: (ps[0] / ps[1]),
-                transform: true
-            });
-            center[boxCount] = rectangle.getBounds().getCenter();
-            return rectangle;
-        };
-
         const epsg = window.vidiConfig.crs;
         const rectangle = function (initCenter, scaleObject, color, initScale, isFirst, interactive = true) {
             scale = initScale ? initScale : _getScale(scaleObject);
@@ -449,7 +405,11 @@ module.exports = {
                 interactive: interactive,
                 className: 'print-rect-poly'
             });
-
+            rectPoly.bindTooltip(`${(boxCount + 1)}`, {
+                    permanent: true,
+                    className: 'print-rect-poly-tooltip'
+                }
+            )
             center[boxCount] = rectPoly.getBounds().getCenter();
             return rectPoly;
         };
@@ -470,39 +430,15 @@ module.exports = {
         printItems.addLayer(recEdit[boxCount]);
         recEdit[boxCount].dragging.enable();
 
-        let c = recEdit[boxCount].getBounds().getCenter();
-
-        icons[boxCount] = L.marker(c, {
-            icon: L.divIcon({
-                className: 'print-div-icon',
-                iconSize: null,
-                html: `<span>${(boxCount + 1)}</span>`,
-            }),
-            interactive: false
-        }).addTo(cloud.get().map);
-
         var sw = recEdit[boxCount].getBounds().getSouthWest(), ne = recEdit[boxCount].getBounds().getNorthEast();
         curBounds[boxCount] = [sw.lat, sw.lng, ne.lat, ne.lng];
         recEdit[boxCount].on('dragend', function (e) {
-            icons.forEach((icon) => {
-                cloud.get().map.removeLayer(icon);
-            })
             scaleFromForm = false;
             for (let i = 0; i <= boxCount; i++) {
                 let c = recEdit[i].getBounds().getCenter();
-                icons[i] = (L.marker(c, {
-                    icon: L.divIcon({
-                        className: 'print-div-icon',
-                        iconSize: null,
-                        html: `<span>${(i + 1)}</span>`
-                    }),
-                    interactive: false
-                }).addTo(cloud.get().map));
                 center[i] = c; // re-calculate centers
                 rectangle(c, recEdit[i], "red", null, false, true);
                 $("#get-print-fieldset").prop("disabled", true);
-                recEdit[i].dragging.disable();
-                recEdit[i].dragging.enable();
                 var sw = recEdit[i].getBounds().getSouthWest(),
                     ne = recEdit[i].getBounds().getNorthEast();
                 curBounds[boxCount] = [sw.lat, sw.lng, ne.lat, ne.lng];

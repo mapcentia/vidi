@@ -237,3 +237,18 @@ form.feature-attribute-editing-form img {
 .table-copy {
   animation: table-copy-fade 1s;
 }
+
+.leaflet-tooltip-left.print-rect-poly-tooltip:before {
+  border: none;
+}
+
+.leaflet-tooltip-left.print-rect-poly-tooltip {
+  padding: 0;
+  color: red;
+  background-color: inherit;
+  box-shadow: none;
+  border: none;
+  font-size: 24px;
+  font-weight: bold;
+  margin: 0;
+}
