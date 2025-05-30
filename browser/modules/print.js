@@ -398,13 +398,12 @@ module.exports = {
             return rectangle;
         };
 
-        // const epsg = "EPSG:3857";
-        const epsg = "EPSG:25832";
-        var rectangle = function (initCenter, scaleObject, color, initScale, isFirst, interactive = true) {
+        const epsg = window.vidiConfig.crs;
+        const rectangle = function (initCenter, scaleObject, color, initScale, isFirst, interactive = true) {
             scale = initScale ? initScale : _getScale(scaleObject);
             $("#select-scale").val(scale);
             if (isFirst && !sc) { // Only when print tool is activated first time and no state from project
-                var scaleIndex = scales.indexOf(scale);
+                let scaleIndex = scales.indexOf(scale);
                 if (scaleIndex > 1) {
                     scaleIndex = scaleIndex - 2;
                 } else if (scaleIndex > 0) {
@@ -413,17 +412,21 @@ module.exports = {
                 scale = scales[scaleIndex];
             }
 
-            // Convert center point to UTM
-            var centerM = geocloud.transformPoint(initCenter.lng, initCenter.lat, "EPSG:4326", epsg);
+            // Convert center point
+            const centerM = geocloud.transformPoint(initCenter.lng, initCenter.lat, "EPSG:4326", epsg);
 
             // Calculate the dimensions of the rectangle in meters
-            var printSizeM = [(ps[0] * scale / 1000), (ps[1] * scale / 1000)];
-
-            // Calculate corners in projected coordinates (UTM)
-            var halfWidth = printSizeM[0] / 2;
-            var halfHeight = printSizeM[1] / 2;
-
-            var cornersM = [
+            const printSizeM = [(ps[0] * scale / 1000), (ps[1] * scale / 1000)];
+            let correctionFactor = 1;
+            if (epsg === "EPSG:3857") {
+                correctionFactor = 1 / Math.cos(initCenter.lat * Math.PI / 180);
+            }
+            // Calculate corners in projected coordinates
+            const adjustedWidth = printSizeM[0] * correctionFactor;
+            const adjustedHeight = printSizeM[1] * correctionFactor;
+            const halfWidth = adjustedWidth / 2;
+            const halfHeight = adjustedHeight / 2;
+            const cornersM = [
                 [centerM.x - halfWidth, centerM.y - halfHeight], // SW
                 [centerM.x - halfWidth, centerM.y + halfHeight], // NW
                 [centerM.x + halfWidth, centerM.y + halfHeight], // NE
@@ -432,13 +435,13 @@ module.exports = {
             ];
 
             // Transform corners back to geographic coordinates for Leaflet polygon
-            var cornersLatLng = cornersM.map(function (pt) {
-                var geo = geocloud.transformPoint(pt[0], pt[1], epsg, "EPSG:4326");
+            const cornersLatLng = cornersM.map(function (pt) {
+                const geo = geocloud.transformPoint(pt[0], pt[1], epsg, "EPSG:4326");
                 return [geo.y, geo.x];
             });
 
-            // Create polygon instead of rectangle to control shape precisely
-            var rectPoly = L.polygon(cornersLatLng, {
+            // Create polygon
+            const rectPoly = L.polygon(cornersLatLng, {
                 color: color,
                 fillOpacity: 0,
                 opacity: 1,

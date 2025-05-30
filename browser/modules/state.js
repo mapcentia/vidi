@@ -334,10 +334,10 @@ module.exports = {
 
                                             var g = L.polygon([flippedCoordinates], {
                                                 fillOpacity: 0,
-                                                opacity: 0.5,
+                                                opacity: 1,
                                                 color: 'red',
                                                 fillColor: 'red',
-                                                weight: 1,
+                                                weight: 10,
                                                 className: 'print-rect-poly',
                                             });
                                             g.feature = m.feature;
