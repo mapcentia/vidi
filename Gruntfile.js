@@ -38,6 +38,9 @@ module.exports = function (grunt) {
         env: {
             prod: {
                 NODE_ENV: 'production'
+            },
+            dev: {
+                NODE_ENV: 'development'
             }
         },
         version: {
