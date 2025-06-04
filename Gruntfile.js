@@ -238,7 +238,7 @@ module.exports = function (grunt) {
                         'node_modules/proj4leaflet/src/proj4leaflet.js',
                         'public/js/bundle.js',
                     ],
-                    'public/js/build/all.async.min.js': [
+                    'public/js/build/libs.min.js': [
                         'public/js/lib/localforage/localforage.js',
                         'public/js/lib/leaflet-history/leaflet-history.js',
                         'public/js/lib/leaflet-boxzoom/leaflet-boxzoom.js',

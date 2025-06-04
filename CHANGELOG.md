@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [UNRELEASED] - 2025-4-6
+
+### Changed
+
+- The JavaScript libs are now loaded in sync, because the app had to poll for them anyway. This doesn't change performance and the Chrome [violation] regarding setTimeout is gone.
+
 ## [2025.6.0] - 2025-2-6
 
 ### Added
