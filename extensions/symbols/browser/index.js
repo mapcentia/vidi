@@ -651,7 +651,6 @@ module.exports = {
      * @returns {Promise<unknown>}
      */
     applyState: (newState) => {
-        console.log(newState)
         return new Promise((resolve) => {
             if (config?.extensionConfig?.symbols?.stateless === true && !isStarted) {
                 setTimeout(() => {
