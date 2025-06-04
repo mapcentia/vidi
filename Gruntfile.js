@@ -18,9 +18,13 @@ module.exports = function (grunt) {
         presets: ["@babel/preset-env", "@babel/preset-react"],
         plugins: ["@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread", "@babel/plugin-proposal-optional-chaining"]
     }], 'require-globify'];
-    const browserifyOptions = {
+    const browserifyDevOptions = {
         debug: true,
         fullPaths: true
+    };
+    const browserifyProdOptions = {
+        debug: false,
+        fullPaths: false
     };
     const files = {
         'public/js/bundle.js': ['browser/index.js'],
@@ -160,13 +164,18 @@ module.exports = function (grunt) {
             publish: {
                 files,
                 options: {
-                    transform
+                    browserifyProdOptions,
+                    transform,
+                    alias: {
+                        react: 'react/cjs/react.production.min.js',
+                        'react-dom': 'react-dom/cjs/react-dom.production.min.js'
+                    }
                 }
             },
             debug: {
                 files,
                 options: {
-                    browserifyOptions,
+                    browserifyDevOptions,
                     transform
                 }
             },
@@ -191,7 +200,7 @@ module.exports = function (grunt) {
             watch: {
                 files,
                 options: {
-                    browserifyOptions,
+                    browserifyDevOptions,
                     transform,
                     watch: true,
                     keepAlive: true,
