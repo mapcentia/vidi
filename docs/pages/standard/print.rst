@@ -1,13 +1,10 @@
 .. _print:
 
-#################################################################
 Print
-#################################################################
+===========================================================================
 
 .. topic:: Overview
 
-    :Date: |today|
-    :Vidi-version: 2020.11.0
     :Forfatter: `giovanniborella <https://github.com/giovanniborella>`_
 
 .. include:: ../../_subs/NOTE_CONF.rst
@@ -15,17 +12,9 @@ Print
 .. contents:: 
     :depth: 3
 
-
-*****************************************************************
-Printværktøj
-***************************************************************** 
-
 .. include:: ../../_subs/NOTE_GETTINGSTARTED.rst
 
 Når værktøjet vælges er det indledningsvis tændt.
-
-Print
-=================================================================
 
 Når værktøjet er tændt vil man se en rød kasser der representerer udskriftsområdet.
 
@@ -38,7 +27,7 @@ Når værktøjet er tændt vil man se en rød kasser der representerer udskrifts
     Værktøjet er tændt, og klar til at printe
 
 Muligheder
------------------------------------------------------------------
+---------------------------------------------------------------------------
 
 Efter print-området er dannet er det muligt i kortvinduet at:
 

@@ -63,7 +63,7 @@ msgstr ""
 msgid ""
 "APIet kan bruges i de forskellige templates og funktioner, der kan "
 "defineres forskellige steder i en Vidi opsætning. Fx i "
-":ref:`gc2mata_infopopup` templates og funktioner."
+":ref:`gc2meta_infopopup` templates og funktioner."
 msgstr ""
 
 #: ../../pages/standard/96_api.rst:23 637991e9d02e4c778d0916f572f24e7c

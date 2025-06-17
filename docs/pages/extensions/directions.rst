@@ -1,31 +1,22 @@
-.. _extensions:
 
-.. |gc2| raw:: html
+.. _extensions_directions:
 
-  <abbr title="MapCentia Geocloud2">GC2</abbr>
-
-*****************************************************************
-Extensions
-*****************************************************************
+Rutevejledning (directions)
+===========================================================================
 
 .. topic:: Overview
 
-    :Date: |today|
-    :Vidi-version: UNRELEASED
     :Forfattere: `mapcentia <https://github.com/mapcentia>`_
 
 .. contents::
     :depth: 3
 
-.. _extensions_directions:
-
-Rutevejledning
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
 ``directions`` er en udvidelse til vidi der giver mulighed for at lave rutevejledning i kortet. Der laves en rutevejledning fra brugerens position til et punkt på kortet. Det er i øjeblikket kun muligt at lave rutevejledning med Google Maps.
 
-Intallation
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""" 
+Installation
+---------------------------------------------------------------------------
+
+``directions`` er en del af Vidi og kræver ikke yderligere installation. 
  
 Funktionen skal medtages i :ref:`configjs_extensions`
 
@@ -37,9 +28,13 @@ Funktionen skal medtages i :ref:`configjs_extensions`
         ],
     },
 
+Konfiguration
+---------------------------------------------------------------------------
+
+Der er ikke nogen konfiguration for denne extension. Den vil automatisk blive tilføjet til værktøjslinjen.
 
 Brug
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""" 
+---------------------------------------------------------------------------
 
 .. figure:: ../../_media/extensions-directions-icon.png
     :align: center
