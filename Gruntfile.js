@@ -34,6 +34,9 @@ module.exports = function (grunt) {
         env: {
             prod: {
                 NODE_ENV: 'production'
+            },
+            dev: {
+                NODE_ENV: 'development'
             }
         },
         version: {
@@ -160,7 +163,11 @@ module.exports = function (grunt) {
             publish: {
                 files,
                 options: {
-                    transform
+                    transform,
+                    alias: {
+                        react: 'react/cjs/react.production.min.js',
+                        'react-dom': 'react-dom/cjs/react-dom.production.min.js'
+                    }
                 }
             },
             debug: {
@@ -238,7 +245,7 @@ module.exports = function (grunt) {
                         'node_modules/proj4leaflet/src/proj4leaflet.js',
                         'public/js/bundle.js',
                     ],
-                    'public/js/build/all.async.min.js': [
+                    'public/js/build/libs.min.js': [
                         'public/js/lib/localforage/localforage.js',
                         'public/js/lib/leaflet-history/leaflet-history.js',
                         'public/js/lib/leaflet-boxzoom/leaflet-boxzoom.js',
@@ -309,7 +316,7 @@ module.exports = function (grunt) {
         },
         cacheBust: {
             options: {
-                assets: ['js/build/all.min.js', 'js/build/all.async.min.js', 'css/build/all.min.css', 'js/templates.js'],
+                assets: ['js/build/all.min.js', 'js/build/libs.min.js', 'css/build/all.min.css', 'js/templates.js'],
                 queryString: false,
                 baseDir: './public/',
                 jsonOutput: false,

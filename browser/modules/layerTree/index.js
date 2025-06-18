@@ -1004,7 +1004,6 @@ module.exports = {
         let result;
         if (moduleState.isBeingBuilt) {
             result = new Promise((resolve, reject) => {
-                console.trace(`async`);
                 console.error(`Asynchronous layerTree.create() attempt, forced state:`, forcedState);
                 reject();
             });

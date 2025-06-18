@@ -34,10 +34,14 @@ module.exports = {
         let parent = this;
         let React = require('react');
         let ReactDOM = require('react-dom');
+        let modal;
+        try {
+            modal = new bootstrap.Offcanvas('#login-modal');
+            document.querySelector(".sign-in-btn")?.classList.remove("d-none");
+        } catch (e) {
+            console.warn("Login modal is not initialized.")
+        }
 
-        const modal = new bootstrap.Offcanvas('#login-modal');
-
-        document.querySelector(".sign-in-btn")?.classList.remove("d-none");
 
         // Check if signed in
         //===================

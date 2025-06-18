@@ -253,7 +253,7 @@ module.exports = module.exports = {
                 resolve();
             }).catch(err => {
                 if (err) {
-                    console.warn(`Unable to add layer ${gc2Id}, trying to get meta for it`, err);
+                    console.warn(`Unable to add layer ${gc2Id}, trying to get meta for it`);
                 }
 
                 _self.loadMissingMeta(gc2Id).then(() => {

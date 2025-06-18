@@ -202,7 +202,8 @@ module.exports = {
                         if (urlVars?.readyCallback) {
                             try {
                                 window.parent.postMessage({
-                                    type: "vidiCallback", method: urlVars.readyCallback
+                                    type: "vidiCallback",
+                                    method: urlVars.readyCallback
                                 }, "*");
                             } catch (e) {
                             }

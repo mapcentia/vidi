@@ -18,7 +18,7 @@
   ~ @author     Martin Høgh <mh@mapcentia.com>
   ~ @copyright  2013-2024 MapCentia ApS
   ~ @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
-  ~ @version    2025.5.2
+  ~ @version    2025.6.1
 
   -->
 <html lang="en">
@@ -35,10 +35,6 @@
     <link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
     <meta name="msapplication-TileColor" content="#00aba9">
     <meta name="theme-color" content="#ffffff">
-    <!-- Preload fonts. -->
-    <link rel="preload" href="/fonts/roboto-v18-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="/fonts/roboto-v18-latin-500.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="/fonts/roboto-v18-latin-300.woff2" as="font" type="font/woff2" crossorigin>
     <!-- Build -->
     <link rel="stylesheet" href="/css/build/all.min.css">
 </head>
@@ -83,10 +79,9 @@
 <script src="/node_modules/proj4leaflet/src/proj4leaflet.js"></script>
 <script src="/js/bundle.js"></script>
 <!-- /build -->
-<!-- Async load Javascript -->
-<script src="/js/build/all.async.min.js" async></script>
-<script>
-    window.MapCentia = new Vidi().init.init();
-</script>
+<!-- Load Javascript libs -->
+<script src="/js/build/libs.min.js"></script>
+<!-- Start app -->
+<script>window.MapCentia = new Vidi().init.init()</script>
 </body>
 </html>

@@ -25,6 +25,7 @@ import mustache from 'mustache';
 import dayjs from "dayjs";
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import {meta} from "@turf/turf";
+
 dayjs.extend(customParseFormat);
 
 module.exports = {
@@ -166,89 +167,80 @@ module.exports = {
         link.setAttribute('href', 'data:application/json;charset=utf-8,' + encodeURIComponent(stringManifest))
         document.head.appendChild(link);
 
-        (function poll() {
-            if (typeof L.control.locate !== "undefined") {
-                let loadConfig = function () {
-                    let configParam;
-                    if (configFile.startsWith("/")) {
-                        configParam = "/api/gc2/config/" + urlparser.db + "/" + configFile.split('/')[5]
-                    } else {
-                        configParam = "/api/config/" + urlparser.db + "/" + configFile;
-                    }
-                    $.getJSON(configParam, function (data) {
-                        for (let prop in defaults) {
-                            window.vidiConfig[prop] = typeof data[prop] !== 'undefined' ? data[prop] : window.vidiConfig[prop];
-                        }
-                    }).fail(function () {
-                        console.log("Could not load: " + configFile);
-                        if (window.vidiConfig.defaultConfig && (window.vidiConfig.defaultConfig !== configFile)) {
-                            configFile = window.vidiConfig.defaultConfig;
-                            if (!stop) {
-                                stop = true;
-                                loadConfig();
-                            } else {
-                                me.render();
-                            }
-                        } else {
-                            me.render();
-                        }
-                    }).done(function () {
-                        me.render();
-                    });
-                };
-
-                if (urlVars.config) {
-                    configFile = urlVars.config;
-                } else if (window.vidiConfig.autoLoadingConfig) {
-                    configFile = urlparser.db + ".json";
-                } else if (window.vidiConfig.defaultConfig) {
-                    configFile = window.vidiConfig.defaultConfig;
+        let loadConfig = function () {
+            let configParam;
+            if (configFile.startsWith("/")) {
+                configParam = "/api/gc2/config/" + urlparser.db + "/" + configFile.split('/')[5]
+            } else {
+                configParam = "/api/config/" + urlparser.db + "/" + configFile;
+            }
+            $.getJSON(configParam, function (data) {
+                for (let prop in defaults) {
+                    window.vidiConfig[prop] = typeof data[prop] !== 'undefined' ? data[prop] : window.vidiConfig[prop];
                 }
-                // Register Handlebars helpers
-                Handlebars.registerHelper("formatDate", function(datetime, format = null, inFormat = null) {
-                    if (datetime == null) {
-                        return null;
-                    }
-                    const dateFormats = window.vidiConfig.dateFormats;
-                    if (format !== null && dateFormats.hasOwnProperty(format)) {
-                        return dayjs(datetime.toString(), inFormat).format(dateFormats[format]);
+            }).fail(function () {
+                console.log("Could not load: " + configFile);
+                if (window.vidiConfig.defaultConfig && (window.vidiConfig.defaultConfig !== configFile)) {
+                    configFile = window.vidiConfig.defaultConfig;
+                    if (!stop) {
+                        stop = true;
+                        loadConfig();
                     } else {
-                        return dayjs(datetime.toString(), inFormat).format(format);
+                        me.render();
                     }
-                });
-                Handlebars.registerHelper('breakLines', function (text) {
-                    if (text == null) {
-                        return null;
-                    }
-                    text = Handlebars.Utils.escapeExpression(text);
-                    text = text.replace(/(\r\n|\n|\r)/gm, '<br>');
-                    return new Handlebars.SafeString(text);
-                });
-                Handlebars.registerHelper('replaceNull', function (value, text) {
-                    if (value === null) {
-                        return text;
-                    }
-                    return null;
-                });
-                Handlebars.registerHelper('formatDecimalNumber', function (value) {
-                    if (value === null) {
-                        return null;
-                    }
-                    return value.toString().replace('.', window.decimalSeparator);
-                });
-
-                if (configFile) {
-                    loadConfig();
                 } else {
                     me.render();
                 }
-            } else {
-                console.log("polling...");
-                setTimeout(() => {
-                    poll();
-                }, 10)
+            }).done(function () {
+                me.render();
+            });
+        };
+
+        if (urlVars.config) {
+            configFile = urlVars.config;
+        } else if (window.vidiConfig.autoLoadingConfig) {
+            configFile = urlparser.db + ".json";
+        } else if (window.vidiConfig.defaultConfig) {
+            configFile = window.vidiConfig.defaultConfig;
+        }
+        // Register Handlebars helpers
+        Handlebars.registerHelper("formatDate", function (datetime, format = null, inFormat = null) {
+            if (datetime == null) {
+                return null;
             }
-        }());
+            const dateFormats = window.vidiConfig.dateFormats;
+            if (format !== null && dateFormats.hasOwnProperty(format)) {
+                return dayjs(datetime.toString(), inFormat).format(dateFormats[format]);
+            } else {
+                return dayjs(datetime.toString(), inFormat).format(format);
+            }
+        });
+        Handlebars.registerHelper('breakLines', function (text) {
+            if (text == null) {
+                return null;
+            }
+            text = Handlebars.Utils.escapeExpression(text);
+            text = text.replace(/(\r\n|\n|\r)/gm, '<br>');
+            return new Handlebars.SafeString(text);
+        });
+        Handlebars.registerHelper('replaceNull', function (value, text) {
+            if (value === null) {
+                return text;
+            }
+            return null;
+        });
+        Handlebars.registerHelper('formatDecimalNumber', function (value) {
+            if (value === null) {
+                return null;
+            }
+            return value.toString().replace('.', window.decimalSeparator);
+        });
+
+        if (configFile) {
+            loadConfig();
+        } else {
+            me.render();
+        }
     },
 
 

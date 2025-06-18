@@ -5,9 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [UNRELEASED] - 2025-27-5
+## [2025.6.1] - 2025-4-6
 
-- A `tileMatrixTransform` function can now be parsed to WMTS layers. The function takes the current zoom number and must return a valid tilematrix. The example will pad the zoom number with `0` and prefix with `L`. If the `tileMatrixTransform` is not set, the zoom number will be used for tilematrix.
+### Changed
+
+- The JavaScript libs are now loaded in sync, because the app had to poll for them anyway. This doesn't change performance and the Chrome [violation] regarding setTimeout is gone.
+
+### Fixed
+
+- Removed redundant console traces and improved error handling in multiple modules. Added safeguards for modal initialization to prevent runtime issues when the login modal is unavailable.
+
+
+## [2025.6.0] - 2025-2-6
+
+### Added
+
+- A `tileMatrixTransform` function can now be passed to WMTS layers. The function takes the current zoom number and must return a valid tilematrix. The example will pad the zoom number with `0` and prefix with `L`. If the `tileMatrixTransform` is not set, the zoom number will be used directly for tilematrix.
 ```json
 {
   "type": "WMTS",
@@ -19,6 +32,9 @@ and this project adheres to [CalVer](https://calver.org/).
   "tileMatrixTransform": "(zoom) => {return 'L' + zoom.padStart(2, '0').toString()}"
 }
 ```
+
+## Fixed
+- In print the EPSG:32632 projection is replaced with EPSG:3857 for consistency and improved accuracy. Introduced a correction factor to adjust for latitude distortions in dimensions. Refactored related calculations to ensure proper map scaling and alignment.
 
 ## [2025.5.2] - 2025-20-5
 
