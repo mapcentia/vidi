@@ -10,6 +10,7 @@ import {LAYER, SYSTEM_FIELD_PREFIX} from './layerTree/constants';
 import {GEOJSON_PRECISION, MIME_TYPES_APPS, MIME_TYPES_IMAGES} from './constants';
 import dayjs from 'dayjs';
 import {getResolutions} from "./crs";
+import {utils as xlsxUtils, writeFile} from 'xlsx';
 
 const layerTreeUtils = require('./layerTree/utils');
 
@@ -129,6 +130,79 @@ const sortObject = function (obj) {
     return arr; // returns array
 };
 
+let result = []
+
+new MutationObserver(function (mutations) {
+    for (let u = 0; u < mutations.length; u++) {
+        const mutation = mutations[u];
+        for (let i = 0; i < mutation.addedNodes.length; i++) {
+            if (mutation.addedNodes[i].id === 'modal-info-body') {
+                let btn = document.createElement("button");
+                btn.classList.add("btn");
+                btn.classList.add("btn-outline-primary");
+                btn.classList.add("w-100");
+                btn.classList.add("mb-4");
+                btn.innerText = __('Get result as MS Excel');
+                btn.onclick = function () {
+                    let postfixNumber = 1;
+                    let dataAdded = false;
+                    const wb = xlsxUtils.book_new();
+                    let names = [];
+                    result.forEach(r => {
+                        let data = [];
+                        let name = r.layerTitle;
+                        name = name.slice(0, 30);
+                        if (names.includes(name)) {
+                            name = name.slice(0, -1) + postfixNumber;
+                            postfixNumber++;
+                            names.push(name);
+                        }
+                        names.push(name);
+                        if (r.data.features.length > 0) {
+                            const header = [];
+                            for (const prop in r.data.features[0].properties) {
+                                if (r.data.features[0].properties.hasOwnProperty(prop) && prop !== '_id' && prop !== '_vidi_content') {
+                                    if (r.fieldConf?.[prop]?.querable || !r.fieldConf) {
+                                        header.push(r.fieldConf?.[prop]?.alias || prop);
+                                    }
+                                }
+                            }
+                            data = r.data.features.map(feature => {
+                                const row = [];
+                                for (const prop in feature.properties) {
+                                    if (r.data.features[0].properties.hasOwnProperty(prop) && prop !== '_id' && prop !== '_vidi_content') {
+                                        if (r.fieldConf?.[prop]?.querable || !r.fieldConf) {
+                                            row.push(feature.properties[prop]);
+                                        }
+                                    }
+                                }
+                                return row;
+                            });
+                            data.unshift(header)
+                        }
+                        let ws = xlsxUtils.aoa_to_sheet(data);
+                        dataAdded = true;
+                        try {
+                            xlsxUtils.book_append_sheet(wb, ws, name);
+                        } catch (e) {
+                            console.error(e.message);
+                        }
+                    })
+                    if (!dataAdded) {
+                        xlsxUtils.book_append_sheet(wb, [[]]);
+                    }
+                    try {
+                        writeFile(wb, 'Result.xlsb');
+                    } catch (e) {
+                        console.error(e.message, 'Could not create excel file.')
+                    }
+                }
+                document.querySelector("#modal-info-body").prepend(btn);
+            }
+        }
+    }
+}).observe(document, {childList: true, subtree: true});
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init, reset: module.exports.reset}}
@@ -215,7 +289,7 @@ module.exports = {
 
         backboneEvents.get().trigger("start:sqlQuery");
 
-
+        result = [];
         $.each(layers, function (index, value) {
             // No need to search in the already displayed vector layers
             if (value.indexOf('v:') === 0) {
@@ -248,8 +322,8 @@ module.exports = {
             let keyWithoutGeom = metaDataKeys[value].f_table_schema + "." + metaDataKeys[value].f_table_name;
             let pkey = metaDataKeys[value].pkey;
             let geoType = metaDataKeys[value].type;
-            let layerTitel = (metaDataKeys[value].f_table_title !== null && metaDataKeys[value].f_table_title !== "") ? metaDataKeys[value].f_table_title : metaDataKeys[value].f_table_name;
-            let not_querable = metaDataKeys[value].not_querable;
+            let layerTitle = (metaDataKeys[value].f_table_title !== null && metaDataKeys[value].f_table_title !== "") ? metaDataKeys[value].f_table_title : metaDataKeys[value].f_table_name;
+            let notQueryable = metaDataKeys[value].not_querable;
             let versioning = metaDataKeys[value].versioning;
             let fields = metaDataKeys?.[value]?.fields || null;
             let onLoad;
@@ -316,7 +390,8 @@ module.exports = {
                         template = editToolsHtml + template;
                     }
 
-                    if (!isEmpty && !not_querable) {
+                    if (!isEmpty && !notQueryable) {
+                        result.push({data: layerObj.geoJSON, layerTitle, fieldConf});
                         layersWithHits.push(value);
                         if (firstLoop) { // Only add html once
                             firstLoop = false;
@@ -353,7 +428,6 @@ module.exports = {
                                 $("#info-box").html(popUpInner);
                             }
                         }
-
                         let display = simple ? "none" : "flex";
                         let dataShowExport, dataShowColumns, dataShowToggle, dataDetailView;
                         let info = infoText ? `<div>${infoText}</div>` : "";
@@ -361,7 +435,7 @@ module.exports = {
 
                         $(`#${elementPrefix}modal-info-body`).show();
                         $(`#${elementPrefix}info-tab`).append(`<li class="nav-item">
-                                                                    <button type="button" class="nav-link" data-bs-toggle="tab" onclick="setTimeout(()=>{$('#${elementPrefix}modal-info-body table').bootstrapTable('resetView'),100})" id="tab_${storeId}" data-bs-target="#_${storeId}">${layerTitel}</button>
+                                                                    <button type="button" class="nav-link" data-bs-toggle="tab" onclick="setTimeout(()=>{$('#${elementPrefix}modal-info-body table').bootstrapTable('resetView'),100})" id="tab_${storeId}" data-bs-target="#_${storeId}">${layerTitle}</button>
                                                                </li>`);
                         $(`#${elementPrefix}info-pane`).append(`<div class="tab-pane _sql_query" id="_${storeId}">
                             <div style="display: ${display}" class="justify-content-around mt-3 mb-3">
@@ -578,7 +652,7 @@ module.exports = {
                 base64: true,
                 styleMap: styleForSelectedFeatures,
                 error: () => {
-                    utils.showInfoToast(__("Error or timeout on") + " " + layerTitel);
+                    utils.showInfoToast(__("Error or timeout on") + " " + layerTitle);
                 },
                 // Set _vidi_type on all vector layers,
                 // so they can be recreated as query layers
@@ -662,7 +736,7 @@ module.exports = {
 
             sql = sql + " LIMIT " + (num || 10000);
 
-            qstore[index].onLoad = onLoad || callBack.bind(this, qstore[index], isEmpty, not_querable, layerTitel, fieldConf, layers, count);
+            qstore[index].onLoad = onLoad || callBack.bind(this, qstore[index], isEmpty, notQueryable, layerTitle, fieldConf, layers, count);
             qstore[index].sql = sql;
             qstore[index].load();
         });
