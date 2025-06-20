@@ -142,7 +142,7 @@ module.exports = {
                                 $('#layer-filter-container').css('pointer-events', 'auto').css('opacity', 1.0);
                                 $('.layer-loading-indicator').hide();
                                 if (data.data && data.data.length > 0) {
-                                   // data.data = data.data.filter(d => d.layergroup !== null)
+                                    // data.data = data.data.filter(d => d.layergroup !== null)
                                     me.addMetaData(data);
                                     ready = true;
                                     resolve(schemata);
@@ -330,7 +330,7 @@ module.exports = {
                     }
                     response.json().then(data => {
                         if (data.data && data.data.length > 0) {
-                            const layerNames = data.data.map((l) => l.f_table_schema + '.' + l.f_table_name  );
+                            const layerNames = data.data.map((l) => l.f_table_schema + '.' + l.f_table_name);
                             resolve(layerNames);
                         } else {
                             reject();
@@ -342,6 +342,9 @@ module.exports = {
                 console.error(error);
             })
         })
+    },
+    resetMetaDataCloneTimer: function () {
+        metaDataCloneTimer = undefined;
     }
 };
 

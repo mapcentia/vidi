@@ -1520,6 +1520,8 @@ module.exports = {
         if (isVirtual && isVectorTile) throw new Error(`Vector tile layer can not be virtual`);
         if (layer.virtual_layer) {
             isVirtual = true;
+            // When virtual, we clear cached meta, because virtual layers are added from session data
+            meta.resetMetaDataCloneTimer();
         }
         let parentFiltersHash = ``;
         let layerKey = layer.f_table_schema + '.' + layer.f_table_name;
