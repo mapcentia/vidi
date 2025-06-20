@@ -691,6 +691,14 @@ module.exports = module.exports = {
 
             })
         }
+
+        // Show or hide the "has filter" icon
+        if (activeFilters.length > 0) {
+            $(`[data-gc2-layer-key^="${layerKey}"]`).find('.js-tiles-has-filter').show();
+        } else {
+            $(`[data-gc2-layer-key^="${layerKey}"]`).find('.js-tiles-has-filter').hide();
+        }
+
         if (parsedMeta?.referenced_by && activeFilters.length === 0) {
             JSON.parse(parsedMeta.referenced_by).forEach((i) => {
                 let parsedMetaChildLayer = meta.parseLayerMeta(i.rel);
