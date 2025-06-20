@@ -132,6 +132,7 @@ const sortObject = function (obj) {
 
 let result = []
 
+// Listen to the arrival of the result and create a "get excal button"
 new MutationObserver(function (mutations) {
     for (let u = 0; u < mutations.length; u++) {
         const mutation = mutations[u];
@@ -139,7 +140,7 @@ new MutationObserver(function (mutations) {
             if (mutation.addedNodes[i].id === 'modal-info-body') {
                 let btn = document.createElement("button");
                 btn.classList.add("btn");
-                btn.classList.add("btn-outline-primary");
+                btn.classList.add("btn-outline-secondary");
                 btn.classList.add("w-100");
                 btn.classList.add("mb-4");
                 btn.innerText = __('Get result as MS Excel');
@@ -439,13 +440,10 @@ module.exports = {
                                                                </li>`);
                         $(`#${elementPrefix}info-pane`).append(`<div class="tab-pane _sql_query" id="_${storeId}">
                             <div style="display: ${display}" class="justify-content-around mt-3 mb-3">
-                                <a class="btn btn-sm btn-outline-secondary" id="_download_geojson_${storeId}" target="_blank" href="javascript:void(0)">
+                                <button class="btn btn-sm btn-outline-secondary" id="_download_geojson_${storeId}">
                                     <i class="bi bi-download" aria-hidden="true"></i> GeoJson
-                                </a> 
-                                <a class="btn btn-sm btn-outline-secondary" id="_download_excel_${storeId}" target="_blank" href="javascript:void(0)">
-                                    <i class="bi bi-download" aria-hidden="true"></i> Excel
-                                </a>
-                                <button class="btn btn-sm btn-outline-secondary" id="_create_layer_${storeId}" target="_blank" href="javascript:void(0)">
+                                </button> 
+                                <button class="btn btn-sm btn-outline-secondary" id="_create_layer_${storeId}">
                                     <i class="bi bi-plus" aria-hidden="true"></i> ${__(`Create virtual layer`)}
                                 </button>
                             </div>
