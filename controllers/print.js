@@ -152,7 +152,19 @@ function print(key, q, req, response, outputPng = false, frame = 0, count, retur
                     if (!outputPng) {
                         browser.newPage().then(async (page) => {
                             await page.emulateMedia('screen');
-                            page.on('console', msg => {
+                            page.on('console', async msg => {
+
+                                // Log error description
+                                const args = await msg.args()
+                                for (const arg of args) {
+                                    const val = await arg.jsonValue()
+                                    // value is serializable
+                                    if (JSON.stringify(val) === JSON.stringify({}))  {
+                                        const { type, subtype, description } = arg._remoteObject
+                                        console.log(`type: ${type}, subtype: ${subtype}, description:\n ${description}`)
+                                    }
+                                }
+
                                 console.log(msg.text());
                                 if (msg.text().indexOf(`Vidi is now loaded`) !== -1) {
                                     if (!check) {
