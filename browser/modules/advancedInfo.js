@@ -25,6 +25,9 @@ const _clearDrawItems = function () {
     drawnItems.clearLayers();
     bufferItems.clearLayers();
     sqlQuery.reset(qstore);
+    if (document.getElementById("modal-info-body")) {
+        document.getElementById("modal-info-body").innerHTML = '';
+    }
 };
 let backboneEvents;
 const debounce = require('lodash/debounce');
@@ -228,6 +231,7 @@ module.exports = {
             _self.off();
             backboneEvents.get().trigger(`on:infoClick`);
             backboneEvents.get().trigger("advancedInfo:turnedOff");
+            _clearDrawItems()
         }
     },
 
