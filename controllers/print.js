@@ -27,6 +27,14 @@ const printCounter = new Prometheus.Counter({
     labelNames: ['scale', 'format', 'status', 'template', 'db']
 });
 
+// Initialize Prometheus histogram for print duration tracking
+const printDurationHistogram = new Prometheus.Histogram({
+    name: 'vidi_controllers_print_duration_seconds',
+    help: 'Duration of print operations in seconds',
+    labelNames: ['format', 'template', 'db', 'scale'],
+    buckets: [0.1, 0.5, 1, 2, 5, 10, 20, 30, 60, 120] // Buckets in seconds
+});
+
 
 /**
  *
@@ -152,8 +160,18 @@ router.get('/api/postdata', function (req, response) {
 });
 
 function print(key, q, req, response, outputPng = false, frame = 0, count, returnImage = true, numberOfFrames) {
+    // Start timer for tracking print duration
+    const printTimer = printDurationHistogram.startTimer({
+        format: outputPng ? 'png' : 'pdf',
+        template: q.tmpl || 'default',
+        db: q.db || 'unknown',
+        scale: q.scale || 'unknown'
+    });
+    
     fs.writeFile(__dirname + "/../public/tmp/print/json/" + key, JSON.stringify(q), async (err) => {
         if (err) {
+            // Stop timer for file write error
+            printTimer();
             response.send({success: true, error: err});
             return;
         }
@@ -161,6 +179,8 @@ function print(key, q, req, response, outputPng = false, frame = 0, count, retur
         /*
         // Randomly send an error - for testing
         if (Math.random() > 0.5) {
+            // Stop timer for random error
+            printTimer();
             response.status(500).send({
                 success: false
             });
@@ -223,6 +243,8 @@ function print(key, q, req, response, outputPng = false, frame = 0, count, retur
                                                         printCounter.inc({ scale, format: 'pdf', status: 'success', template, db });
                                                         response.send({success: true, key, uri, "format": "pdf"});
                                                     }
+                                                    // Stop timer for PDF success
+                                                    printTimer();
                                                     headless.destroy(browser);
                                                     count.n++;
                                                 }
@@ -233,6 +255,8 @@ function print(key, q, req, response, outputPng = false, frame = 0, count, retur
                                                     const template = q.tmpl || 'default';
                                                     const db = q.db || 'unknown';
                                                     printCounter.inc({ scale, format: 'pdf', status: 'error', template, db });
+                                                    // Stop timer for PDF error
+                                                    printTimer();
                                                     headless.destroy(browser);
                                                     response.status(500).send({
                                                         success: false
@@ -246,6 +270,8 @@ function print(key, q, req, response, outputPng = false, frame = 0, count, retur
                             await page.goto(url);
                         }).catch(() => {
                             console.log('Error while creating PDF');
+                            // Stop timer for PDF error
+                            printTimer();
                             headless.destroy(browser);
                             response.status(500).send({
                                 success: false
@@ -364,6 +390,8 @@ function print(key, q, req, response, outputPng = false, frame = 0, count, retur
                                                                 printCounter.inc({ scale, format: 'png', status: 'success', template, db });
                                                                 response.send({success: true, key, uri, "format": "png"});
                                                             }
+                                                            // Stop timer for PNG success
+                                                            printTimer();
                                                             headless.destroy(browser);
                                                             console.log('Done #', count.n);
                                                             count.n++;
@@ -378,6 +406,8 @@ function print(key, q, req, response, outputPng = false, frame = 0, count, retur
                                                         const template = q.tmpl || 'default';
                                                         const db = q.db || 'unknown';
                                                         printCounter.inc({ scale, format: 'png', status: 'success', template, db });
+                                                        // Stop timer for direct PNG return
+                                                        printTimer();
                                                         headless.destroy(browser);
                                                         response.end(img);
                                                     }
@@ -388,12 +418,16 @@ function print(key, q, req, response, outputPng = false, frame = 0, count, retur
                                                     const template = q.tmpl || 'default';
                                                     const db = q.db || 'unknown';
                                                     printCounter.inc({ scale, format: 'png', status: 'error', template, db });
+                                                    // Stop timer for PNG error
+                                                    printTimer();
                                                     headless.destroy(browser);
                                                     response.status(500);
                                                     response.send(error);
                                                 });
                                             }).catch(error => {
                                                 console.log('Error while creating PNG');
+                                                // Stop timer for PNG error
+                                                printTimer();
                                                 headless.destroy(browser);
                                                 response.status(500);
                                                 response.send(error);
@@ -403,11 +437,15 @@ function print(key, q, req, response, outputPng = false, frame = 0, count, retur
                                 });
                                 page.goto(url);
                             }).catch(error => {
+                                // Stop timer for emulate error
+                                printTimer();
                                 headless.destroy(browser);
                                 response.status(500);
                                 response.send(error);
                             });
                         }).catch(error => {
+                            // Stop timer for browser newPage error
+                            printTimer();
                             headless.destroy(browser);
                             response.status(500);
                             response.send(error);
