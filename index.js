@@ -11,8 +11,8 @@ let path = require('path');
 require('dotenv').config({path: path.join(__dirname, ".env")});
 
 // Load the Prometheus client and express-prom-bundle for metrics
-const promBundle = require('express-prom-bundle');
-const promClient = require('prom-client');
+const PrometheusBundle = require('express-prom-bundle');
+const Prometheus = require('prom-client');
 
 let express = require('express');
 let http = require('http');
@@ -32,7 +32,11 @@ let app = express();
 // Initialize Prometheus client if metrics are enabled
 if (config?.metrics?.enabled) {
     // Initialize Prometheus metrics
-    new promClient.AggregatorRegistry();
+    new Prometheus.AggregatorRegistry().setDefaultLabels({
+        app: 'vidi',
+        instance: process.env.HOSTNAME || 'localhost',
+        version: config?.version || 'unknown',
+        });
 
     // Register default metrics, and make sure to collect other endpoints
 
@@ -52,13 +56,13 @@ if (config?.metrics?.enabled) {
     ];
     
     const ignorestring = "/((?!(" + pathsToIgnore.map(path => path).join('|') + ")))*";
-    app.use(ignorestring, promBundle({
+    app.use(ignorestring, PrometheusBundle({
         autoregister: false, // disable /metrics for single workers
         includeMethod: true,
         includePath: true,
         includeStatusCode: true,
         includeUp: true,
-        httpDurationMetricName: 'vidi_http_request_duration_seconds',
+        httpDurationMetricName: 'vidi_http_request',
         normalizePath: [
             // Normalize app paths with database/schema parameters
             ['^/app/[^/]+/[^/]+.*', '/app/#db/#schema'],
@@ -70,6 +74,7 @@ if (config?.metrics?.enabled) {
             ['^/api/legend/[^/]+.*', '/api/legend/#db'],
             ['^/api/wms/[^/]+/[^/]+.*', '/api/wms/#db/#schema'],
             ['^/api/dataforsyningen/[^/]+.*', '/api/dataforsyningen/#param'],
+            ['^/api/datafordeler/[^/]+.*', '/api/datafordeler/#param'],
             ['^/api/sql/nocache/[^/]+.*', '/api/sql/nocache/#db'],
             ['^/api/sql/[^/]+.*', '/api/sql/#db'],
             ['^/api/config/[^/]+.*', '/api/config/#db'],
@@ -184,7 +189,7 @@ if (!sticky.listen(server, port, {})) {
         if (config?.metrics?.enabled) {
             let metricsPort = config?.metrics?.port || 9100;
             const metricsApp = express();
-            metricsApp.use('/metrics', promBundle.clusterMetrics());
+            metricsApp.use('/metrics', PrometheusBundle.clusterMetrics());
             metricsApp.listen(metricsPort);
             console.log(`cluster metrics listening on ${metricsPort}`);
         }
