@@ -33,13 +33,36 @@ let app = express();
 if (config?.metrics?.enabled) {
     // Initialize Prometheus metrics
     new promClient.AggregatorRegistry();
-    app.use(promBundle({
+
+    // Register default metrics, and make sure to collect other endpoints
+
+    const pathsToIgnore = [
+        'favicon.ico',
+        'images/',
+        'css/',
+        'js/',
+        'node_modules/',
+        'fonts/',
+        'public/',
+        'service-worker.bundle.js',
+        'locale',
+    ];
+    
+    const ignorestring = "/((?!(" + pathsToIgnore.map(path => path).join('|') + ")))*";
+    app.use(ignorestring, promBundle({
         autoregister: false, // disable /metrics for single workers
         includeMethod: true,
         includePath: true,
         includeStatusCode: true,
         includeUp: true,
-        httpDurationMetricName: 'vidi_http_request_duration_seconds'
+        httpDurationMetricName: 'vidi_http_request_duration_seconds',
+        normalizePath: [
+            // Normalize app paths with database/schema parameters
+            ['^/app/[^/]+/[^/]+.*', '/app/#db/#schema'],
+            ['^/app/[^/]+.*', '/app/#db'],
+            ['^/api/state-snapshots/[^/]+.*', '/api/state-snapshots/#db'],
+            ['^/api/gc2/config/[^/]+.*', '/api/gc2/config/#config'],
+        ],
     }));
 }
 
