@@ -10,6 +10,10 @@
 let path = require('path');
 require('dotenv').config({path: path.join(__dirname, ".env")});
 
+// Load the Prometheus client and express-prom-bundle for metrics
+const promBundle = require('express-prom-bundle');
+const promClient = require('prom-client');
+
 let express = require('express');
 let http = require('http');
 let cluster = require('cluster');
