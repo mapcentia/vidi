@@ -78,6 +78,7 @@ if (config?.metrics?.enabled) {
             ['^/api/sql/nocache/[^/]+.*', '/api/sql/nocache/#db'],
             ['^/api/sql/[^/]+.*', '/api/sql/#db'],
             ['^/api/config/[^/]+.*', '/api/config/#db'],
+            ['^/api/symbols/[^/]+.*', '/api/symbols/#db'],
             ['^/index.html', '/'],
         ],
     }));
