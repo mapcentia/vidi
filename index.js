@@ -25,7 +25,15 @@ let session = require('express-session');
 let cors = require('cors');
 let config = require('./config/config.js');
 let store;
+
+// Initialize Prometheus metrics
+new promClient.AggregatorRegistry();
 let app = express();
+
+app.use(promBundle({
+        autoregister: false, // disable /metrics for single workers
+        includeMethod: true
+    }));
 
 const MAXAGE = (config.sessionMaxAge || 86400) * 1000;
 
@@ -127,8 +135,15 @@ if (!sticky.listen(server, port, {})) {
     // Master code
     server.once('listening', function () {
         console.log(`server started on port ${port}`);
+
+        const metricsApp = express();
+        metricsApp.use('/metrics', promBundle.clusterMetrics());
+        metricsApp.listen(9100);
+
+        console.log('cluster metrics listening on 9100');
     });
 } else {
+    // Worker code
     console.log('worker: ' + cluster.worker.id);
 }
 
