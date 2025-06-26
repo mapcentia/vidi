@@ -10,7 +10,36 @@ var config = require('../../config/config.js').gc2;
 var request = require('request');
 var fs = require('fs');
 
+Prometheus = require('prom-client');
+
+// Initialize Prometheus metrics
+const sqlQueryCounter = new Prometheus.Counter({
+    name: 'vidi_controllers_gc2_sql_queries_total',
+    help: 'Total number of SQL queries processed',
+    labelNames: ['db', 'format', 'status']
+});
+
+const sqlQueryDuration = new Prometheus.Histogram({
+    name: 'vidi_controllers_gc2_sql_query_duration_seconds',
+    help: 'Duration of SQL queries in seconds',
+    labelNames: ['db', 'format'],
+    buckets: [0.1, 0.5, 1, 2, 5, 10, 30, 60]
+});
+
+const sqlResponseSize = new Prometheus.Histogram({
+    name: 'vidi_controllers_gc2_sql_response_size_bytes',
+    help: 'Size of SQL query responses in bytes',
+    labelNames: ['db', 'format'],
+    buckets: [1000, 10000, 100000, 1000000, 10000000, 100000000]
+});
+
 var query = function (req, response) {
+    // Start timing the query
+    const endTimer = sqlQueryDuration.startTimer();
+    
+    // Track response size
+    let responseSize = 0;
+    
     req.setTimeout(0); // no timeout
     var db = req.params.db,
         q = req.body.q || req.query.q,
@@ -89,16 +118,31 @@ var query = function (req, response) {
         if (!store) {
             response.writeHead(res.statusCode, headers);
         }
+        
+        // Track query status in the counter
+        sqlQueryCounter.inc({
+            db: db,
+            format: format,
+            status: res.statusCode >= 400 ? 'error' : 'success'
+        });
     });
 
     rem.on('data', function (chunk) {
+        responseSize += chunk.length;
         if (store) {
             writeStream.write(chunk, 'binary');
         } else {
             response.write(chunk);
         }
     });
+    
     rem.on('end', function () {
+        // End timer and record duration with labels
+        endTimer({ db: db, format: format });
+        
+        // Record response size
+        sqlResponseSize.observe({ db: db, format: format }, responseSize);
+        
         if (store) {
             console.log("Result saved");
             response.send({"success": true, "file": fileName});
