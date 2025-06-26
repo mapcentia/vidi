@@ -46,6 +46,8 @@ if (config?.metrics?.enabled) {
         'public/',
         'service-worker.bundle.js',
         'locale',
+        '.well-known/appspecific/com.chrome.devtools.json',
+        //'connection-check.ico', - not this, we need it to track active maps
     ];
     
     const ignorestring = "/((?!(" + pathsToIgnore.map(path => path).join('|') + ")))*";
@@ -62,6 +64,11 @@ if (config?.metrics?.enabled) {
             ['^/app/[^/]+.*', '/app/#db'],
             ['^/api/state-snapshots/[^/]+.*', '/api/state-snapshots/#db'],
             ['^/api/gc2/config/[^/]+.*', '/api/gc2/config/#config'],
+            ['^/api/meta/[^/]+/[^/]+.*', '/api/meta/#db/#schema'],
+            ['^/api/setting/[^/]+/[^/]+.*', '/api/setting/#db/#schema'],
+            ['^/api/legend/[^/]+.*', '/api/legend/#db'],
+            ['^/api/wms/[^/]+/[^/]+.*', '/api/wms/#db/#schema'],
+            ['^/api/dataforsyningen/[^/]+.*', '/api/dataforsyningen/#param'],
         ],
     }));
 }
