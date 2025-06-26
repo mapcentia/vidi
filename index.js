@@ -26,14 +26,23 @@ let cors = require('cors');
 let config = require('./config/config.js');
 let store;
 
-// Initialize Prometheus metrics
-new promClient.AggregatorRegistry();
 let app = express();
 
-app.use(promBundle({
+
+// Initialize Prometheus client if metrics are enabled
+if (config?.metrics?.enabled) {
+    // Initialize Prometheus metrics
+    new promClient.AggregatorRegistry();
+    app.use(promBundle({
         autoregister: false, // disable /metrics for single workers
-        includeMethod: true
+        includeMethod: true,
+        includePath: true,
+        includeStatusCode: true,
+        includeUp: true,
+        httpDurationMetricName: 'vidi_http_request_duration_seconds'
     }));
+}
+
 
 const MAXAGE = (config.sessionMaxAge || 86400) * 1000;
 
@@ -136,11 +145,14 @@ if (!sticky.listen(server, port, {})) {
     server.once('listening', function () {
         console.log(`server started on port ${port}`);
 
-        const metricsApp = express();
-        metricsApp.use('/metrics', promBundle.clusterMetrics());
-        metricsApp.listen(9100);
-
-        console.log('cluster metrics listening on 9100');
+        // Initialize Prometheus metrics endpoint
+        if (config?.metrics?.enabled) {
+            let metricsPort = config?.metrics?.port || 9100;
+            const metricsApp = express();
+            metricsApp.use('/metrics', promBundle.clusterMetrics());
+            metricsApp.listen(metricsPort);
+            console.log(`cluster metrics listening on ${metricsPort}`);
+        }
     });
 } else {
     // Worker code

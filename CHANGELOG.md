@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [unreleased]
+
+### Added
+- It is now possible to expose prometheus metrics from vidi. To enable metrics on the `/metrics`-endpoint, enable it in `config.js`. note that the default port is `9100`.
+```json
+"metrics": {
+  "enabled": true,
+},
+```
+
+
 ## [2025.6.2] - 2025-19-6
 
 ### Added
