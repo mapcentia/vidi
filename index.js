@@ -47,6 +47,7 @@ if (config?.metrics?.enabled) {
         'service-worker.bundle.js',
         'locale',
         '.well-known/appspecific/com.chrome.devtools.json',
+        'icons/',
         //'connection-check.ico', - not this, we need it to track active maps
     ];
     
@@ -69,6 +70,10 @@ if (config?.metrics?.enabled) {
             ['^/api/legend/[^/]+.*', '/api/legend/#db'],
             ['^/api/wms/[^/]+/[^/]+.*', '/api/wms/#db/#schema'],
             ['^/api/dataforsyningen/[^/]+.*', '/api/dataforsyningen/#param'],
+            ['^/api/sql/nocache/[^/]+.*', '/api/sql/nocache/#db'],
+            ['^/api/sql/[^/]+.*', '/api/sql/#db'],
+            ['^/api/config/[^/]+.*', '/api/config/#db'],
+            ['^/index.html', '/'],
         ],
     }));
 }
