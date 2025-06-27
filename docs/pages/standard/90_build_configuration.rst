@@ -153,6 +153,24 @@ Da alle extensions er forskellige i opbygning, kan det være nødvendigt at tilf
         ]
     },
 
+.. _configjs_metrics:
+
+metrics
+*****************************************************************
+
+Det er nu muligt at udtrække metrics fra Vidi. Metrics kan bruges til at overvåge systemet og se hvor lang tid forskellige operationer tager.
+
+Hvis denne funktion er slået til, vil Vidi eksponere en endpoint på ``/metrics``. Denne endpoint kan bruges af Prometheus eller andre systemer til at indsamle metrics.
+
+For ikke at udstille disse informationer, udstilles dette endpoint på en separat port, som kan angives i konfigurationen.
+
+.. code-block:: json
+
+    "metrics": {
+        "enabled": true,  // Enable or disable metrics (default is false)
+        "port": 9100,     // Port til metrics endpoint (default er 9100)
+    },
+
 Komplet eksempel
 *****************************************************************
 

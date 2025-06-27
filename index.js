@@ -10,6 +10,10 @@
 let path = require('path');
 require('dotenv').config({path: path.join(__dirname, ".env")});
 
+// Load the Prometheus client and express-prom-bundle for metrics
+const PrometheusBundle = require('express-prom-bundle');
+const Prometheus = require('prom-client');
+
 let express = require('express');
 let http = require('http');
 let cluster = require('cluster');
@@ -21,7 +25,66 @@ let session = require('express-session');
 let cors = require('cors');
 let config = require('./config/config.js');
 let store;
+
 let app = express();
+
+
+// Initialize Prometheus client if metrics are enabled
+if (config?.metrics?.enabled) {
+    // Initialize Prometheus metrics
+    new Prometheus.AggregatorRegistry().setDefaultLabels({
+        app: 'vidi',
+        instance: process.env.HOSTNAME || 'localhost',
+        version: config?.version || 'unknown',
+        });
+
+    // Register default metrics, and make sure to collect other endpoints
+
+    const pathsToIgnore = [
+        'favicon.ico',
+        'images/',
+        'css/',
+        'js/',
+        'node_modules/',
+        'fonts/',
+        'public/',
+        'service-worker.bundle.js',
+        'locale',
+        '.well-known/appspecific/com.chrome.devtools.json',
+        'icons/',
+        //'connection-check.ico', - not this, we need it to track active maps
+    ];
+    
+    const ignorestring = "/((?!(" + pathsToIgnore.map(path => path).join('|') + ")))*";
+    app.use(ignorestring, PrometheusBundle({
+        autoregister: false, // disable /metrics for single workers
+        includeMethod: true,
+        includePath: true,
+        includeStatusCode: true,
+        includeUp: true,
+        httpDurationMetricName: 'vidi_http_request',
+        normalizePath: [
+            // Normalize app paths with database/schema parameters
+            ['^/app/[^/]+/[^/]+.*', '/app/#db/#schema'],
+            ['^/app/[^/]+.*', '/app/#db'],
+            ['^/api/state-snapshots/[^/]+.*', '/api/state-snapshots/#db'],
+            ['^/api/gc2/config/[^/]+.*', '/api/gc2/config/#config'],
+            ['^/api/meta/[^/]+/[^/]+.*', '/api/meta/#db/#schema'],
+            ['^/api/setting/[^/]+/[^/]+.*', '/api/setting/#db/#schema'],
+            ['^/api/legend/[^/]+.*', '/api/legend/#db'],
+            ['^/api/wms/[^/]+/[^/]+.*', '/api/wms/#db/#schema'],
+            ['^/api/dataforsyningen/[^/]+.*', '/api/dataforsyningen/#param'],
+            ['^/api/datafordeler/[^/]+.*', '/api/datafordeler/#param'],
+            ['^/api/sql/nocache/[^/]+.*', '/api/sql/nocache/#db'],
+            ['^/api/sql/[^/]+.*', '/api/sql/#db'],
+            ['^/api/config/[^/]+.*', '/api/config/#db'],
+            ['^/api/symbols/[^/]+.*', '/api/symbols/#param'],
+            ['^/api/css/[^/]+.*', '/api/css/#param'],
+            ['^/index.html', '/'],
+        ],
+    }));
+}
+
 
 const MAXAGE = (config.sessionMaxAge || 86400) * 1000;
 
@@ -123,8 +186,18 @@ if (!sticky.listen(server, port, {})) {
     // Master code
     server.once('listening', function () {
         console.log(`server started on port ${port}`);
+
+        // Initialize Prometheus metrics endpoint
+        if (config?.metrics?.enabled) {
+            let metricsPort = config?.metrics?.port || 9100;
+            const metricsApp = express();
+            metricsApp.use('/metrics', PrometheusBundle.clusterMetrics());
+            metricsApp.listen(metricsPort);
+            console.log(`cluster metrics listening on ${metricsPort}`);
+        }
     });
 } else {
+    // Worker code
     console.log('worker: ' + cluster.worker.id);
 }
 
