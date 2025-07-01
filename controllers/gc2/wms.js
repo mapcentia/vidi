@@ -7,35 +7,43 @@
 const express = require('express');
 const router = express.Router();
 const config = require('../../config/config.js').gc2;
+const appConfig = require('../../config/config.js');
 const request = require('request');
 const Prometheus = require('prom-client');
 
-// Initialize Prometheus metrics
-const wmsRequestCounter = new Prometheus.Counter({
-    name: 'vidi_controllers_gc2_wms_requests_total',
-    help: 'Total number of WMS requests processed',
-    labelNames: ['db', 'request_type', 'status']
-});
+// Initialize Prometheus metrics only if enabled in config
+let wmsRequestCounter, wmsRequestDuration, wmsResponseSize;
 
-const wmsRequestDuration = new Prometheus.Histogram({
-    name: 'vidi_controllers_gc2_wms_request_duration_seconds',
-    help: 'Duration of WMS requests in seconds',
-    labelNames: ['db', 'request_type'],
-    buckets: [0.1, 0.5, 1, 2, 5, 10, 30, 60]
-});
+if (appConfig?.metrics?.enabled) {
+    wmsRequestCounter = new Prometheus.Counter({
+        name: 'vidi_controllers_gc2_wms_requests_total',
+        help: 'Total number of WMS requests processed',
+        labelNames: ['db', 'request_type', 'status']
+    });
 
-const wmsResponseSize = new Prometheus.Histogram({
-    name: 'vidi_controllers_gc2_wms_response_size_bytes',
-    help: 'Size of WMS responses in bytes',
-    labelNames: ['db', 'request_type'],
-    buckets: [1000, 10000, 100000, 1000000, 10000000, 100000000]
-});
+    wmsRequestDuration = new Prometheus.Histogram({
+        name: 'vidi_controllers_gc2_wms_request_duration_seconds',
+        help: 'Duration of WMS requests in seconds',
+        labelNames: ['db', 'request_type'],
+        buckets: [0.1, 0.5, 1, 2, 5, 10, 30, 60]
+    });
+
+    wmsResponseSize = new Prometheus.Histogram({
+        name: 'vidi_controllers_gc2_wms_response_size_bytes',
+        help: 'Size of WMS responses in bytes',
+        labelNames: ['db', 'request_type'],
+        buckets: [1000, 10000, 100000, 1000000, 10000000, 100000000]
+    });
+}
 
 const proxifyRequest = (req, response) => {
-    // Start timing the request
-    const endTimer = wmsRequestDuration.startTimer();
+    // Start timing the request if metrics are enabled
+    let endTimer;
+    if (appConfig?.metrics?.enabled) {
+        endTimer = wmsRequestDuration.startTimer();
+    }
     
-    // Track response size
+    // Track response size if metrics are enabled
     let responseSize = 0;
     
     // Determine request type (WMS, mapcache, gmaps)
@@ -65,11 +73,13 @@ const proxifyRequest = (req, response) => {
     
     wmsRequest.on('response', function(res) {
         // Track request status in the counter
-        wmsRequestCounter.inc({
-            db: db,
-            request_type: requestType,
-            status: res.statusCode >= 400 ? 'error' : 'success'
-        });
+        if (appConfig?.metrics?.enabled) {
+            wmsRequestCounter.inc({
+                db: db,
+                request_type: requestType,
+                status: res.statusCode >= 400 ? 'error' : 'success'
+            });
+        }
     });
     
     wmsRequest.on('data', function(chunk) {
@@ -78,10 +88,14 @@ const proxifyRequest = (req, response) => {
     
     wmsRequest.on('end', function() {
         // End timer and record duration with labels
-        endTimer({ db: db, request_type: requestType });
+        if (appConfig?.metrics?.enabled) {
+            endTimer({ db: db, request_type: requestType });
+        }
         
         // Record response size
-        wmsResponseSize.observe({ db: db, request_type: requestType }, responseSize);
+        if (appConfig?.metrics?.enabled) {
+            wmsResponseSize.observe({ db: db, request_type: requestType }, responseSize);
+        }
     });
     
     wmsRequest.pipe(response);

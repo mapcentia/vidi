@@ -7,37 +7,45 @@
 var express = require('express');
 var router = express.Router();
 var config = require('../../config/config.js').gc2;
+var appConfig = require('../../config/config.js');
 var request = require('request');
 var fs = require('fs');
 
 Prometheus = require('prom-client');
 
-// Initialize Prometheus metrics
-const sqlQueryCounter = new Prometheus.Counter({
-    name: 'vidi_controllers_gc2_sql_queries_total',
-    help: 'Total number of SQL queries processed',
-    labelNames: ['db', 'format', 'status']
-});
+// Initialize Prometheus metrics only if enabled in config
+let sqlQueryCounter, sqlQueryDuration, sqlResponseSize;
 
-const sqlQueryDuration = new Prometheus.Histogram({
-    name: 'vidi_controllers_gc2_sql_query_duration_seconds',
-    help: 'Duration of SQL queries in seconds',
-    labelNames: ['db', 'format'],
-    buckets: [0.1, 0.5, 1, 2, 5, 10, 30, 60]
-});
+if (appConfig?.metrics?.enabled) {
+    sqlQueryCounter = new Prometheus.Counter({
+        name: 'vidi_controllers_gc2_sql_queries_total',
+        help: 'Total number of SQL queries processed',
+        labelNames: ['db', 'format', 'status']
+    });
 
-const sqlResponseSize = new Prometheus.Histogram({
-    name: 'vidi_controllers_gc2_sql_response_size_bytes',
-    help: 'Size of SQL query responses in bytes',
-    labelNames: ['db', 'format'],
-    buckets: [1000, 10000, 100000, 1000000, 10000000, 100000000]
-});
+    sqlQueryDuration = new Prometheus.Histogram({
+        name: 'vidi_controllers_gc2_sql_query_duration_seconds',
+        help: 'Duration of SQL queries in seconds',
+        labelNames: ['db', 'format'],
+        buckets: [0.1, 0.5, 1, 2, 5, 10, 30, 60]
+    });
+
+    sqlResponseSize = new Prometheus.Histogram({
+        name: 'vidi_controllers_gc2_sql_response_size_bytes',
+        help: 'Size of SQL query responses in bytes',
+        labelNames: ['db', 'format'],
+        buckets: [1000, 10000, 100000, 1000000, 10000000, 100000000]
+    });
+}
 
 var query = function (req, response) {
-    // Start timing the query
-    const endTimer = sqlQueryDuration.startTimer();
+    // Start timing the query if metrics are enabled
+    let endTimer;
+    if (appConfig?.metrics?.enabled) {
+        endTimer = sqlQueryDuration.startTimer();
+    }
     
-    // Track response size
+    // Track response size if metrics are enabled
     let responseSize = 0;
     
     req.setTimeout(0); // no timeout
@@ -120,11 +128,13 @@ var query = function (req, response) {
         }
         
         // Track query status in the counter
-        sqlQueryCounter.inc({
-            db: db,
-            format: format,
-            status: res.statusCode >= 400 ? 'error' : 'success'
-        });
+        if (appConfig?.metrics?.enabled) {
+            sqlQueryCounter.inc({
+                db: db,
+                format: format,
+                status: res.statusCode >= 400 ? 'error' : 'success'
+            });
+        }
     });
 
     rem.on('data', function (chunk) {
@@ -137,11 +147,13 @@ var query = function (req, response) {
     });
     
     rem.on('end', function () {
-        // End timer and record duration with labels
-        endTimer({ db: db, format: format });
-        
-        // Record response size
-        sqlResponseSize.observe({ db: db, format: format }, responseSize);
+        // End timer and record duration with labels if metrics are enabled
+        if (appConfig?.metrics?.enabled) {
+            endTimer({ db: db, format: format });
+            
+            // Record response size
+            sqlResponseSize.observe({ db: db, format: format }, responseSize);
+        }
         
         if (store) {
             console.log("Result saved");
