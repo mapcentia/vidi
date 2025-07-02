@@ -16,9 +16,9 @@ var query = function (req, response) {
     const sqlMetrics = metrics.isEnabled() ? metrics.getSqlMetrics() : null;
     
     // Start timing the query
-    let endTimer;
+    let startTime;
     if (sqlMetrics) {
-        endTimer = sqlMetrics.duration.startTimer();
+        startTime = Date.now();
     }
     
     // Track response size
@@ -125,7 +125,8 @@ var query = function (req, response) {
     rem.on('end', function () {
         // End timer and record duration with labels
         if (sqlMetrics) {
-            endTimer({ db: db, format: format });
+            const durationMs = Date.now() - startTime;
+            sqlMetrics.duration.observe({ db: db, format: format }, durationMs);
             
             // Record response size
             sqlMetrics.responseSize.observe({ db: db, format: format }, responseSize);

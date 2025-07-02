@@ -16,7 +16,7 @@ let wmsRequestCounter, wmsRequestDuration, wmsResponseSize;
 let printCounter, printDurationHistogram;
 
 // Set common bucket sizes for histograms
-const secondsBuckets = [0.1, 0.5, 1, 2, 5, 10, 30, 60, 120, 240];
+const millisecondsBuckets = [100, 500, 1000, 2000, 5000, 10000, 30000, 60000, 120000, 240000];
 const bytesBuckets = [1000, 10000, 100000, 1000000, 10000000, 100000000];
 
 /**
@@ -31,10 +31,10 @@ function initializeCollectors() {
     });
 
     sqlQueryDuration = new Prometheus.Histogram({
-        name: 'vidi_controllers_gc2_sql_query_duration_seconds',
-        help: 'Duration of SQL queries in seconds',
+        name: 'vidi_controllers_gc2_sql_query_duration_milliseconds',
+        help: 'Duration of SQL queries in milliseconds',
         labelNames: ['db', 'format'],
-        buckets: secondsBuckets
+        buckets: millisecondsBuckets
     });
 
     sqlResponseSize = new Prometheus.Histogram({
@@ -52,10 +52,10 @@ function initializeCollectors() {
     });
 
     wmsRequestDuration = new Prometheus.Histogram({
-        name: 'vidi_controllers_gc2_wms_request_duration_seconds',
-        help: 'Duration of WMS requests in seconds',
+        name: 'vidi_controllers_gc2_wms_request_duration_milliseconds',
+        help: 'Duration of WMS requests in milliseconds',
         labelNames: ['db', 'request_type'],
-        buckets: secondsBuckets
+        buckets: millisecondsBuckets
     });
 
     wmsResponseSize = new Prometheus.Histogram({
@@ -73,10 +73,10 @@ function initializeCollectors() {
     });
 
     printDurationHistogram = new Prometheus.Histogram({
-        name: 'vidi_controllers_print_duration_seconds',
-        help: 'Duration of print operations in seconds',
+        name: 'vidi_controllers_print_duration_milliseconds',
+        help: 'Duration of print operations in milliseconds',
         labelNames: ['format', 'template', 'db', 'scale'],
-        buckets: secondsBuckets
+        buckets: millisecondsBuckets
     });
 }
 

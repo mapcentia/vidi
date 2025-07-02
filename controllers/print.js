@@ -162,21 +162,23 @@ function print(key, q, req, response, outputPng = false, frame = 0, count, retur
     const printMetrics = metrics.isEnabled() ? metrics.getPrintMetrics() : null;
     
     // Start timer for tracking print duration
-    let printTimer;
+    let startTime;
+    const printLabels = {
+        format: outputPng ? 'png' : 'pdf',
+        template: q.tmpl || 'default',
+        db: q.db || 'unknown',
+        scale: q.scale || 'unknown'
+    };
     if (printMetrics) {
-        printTimer = printMetrics.duration.startTimer({
-            format: outputPng ? 'png' : 'pdf',
-            template: q.tmpl || 'default',
-            db: q.db || 'unknown',
-            scale: q.scale || 'unknown'
-        });
+        startTime = Date.now();
     }
     
     fs.writeFile(__dirname + "/../public/tmp/print/json/" + key, JSON.stringify(q), async (err) => {
         if (err) {
             // Stop timer for file write error
-            if (printTimer) {
-                printTimer();
+            if (printMetrics) {
+                const durationMs = Date.now() - startTime;
+                printMetrics.duration.observe(printLabels, durationMs);
             }
             response.send({success: true, error: err});
             return;
@@ -186,7 +188,10 @@ function print(key, q, req, response, outputPng = false, frame = 0, count, retur
         // Randomly send an error - for testing
         if (Math.random() > 0.5) {
             // Stop timer for random error
-            if (printTimer) { printTimer(); }
+            if (printMetrics) {
+                const durationMs = Date.now() - startTime;
+                printMetrics.duration.observe(printLabels, durationMs);
+            }
             response.status(500).send({
                 success: false
             });
@@ -252,8 +257,9 @@ function print(key, q, req, response, outputPng = false, frame = 0, count, retur
                                                         response.send({success: true, key, uri, "format": "pdf"});
                                                     }
                                                     // Stop timer for PDF success
-                                                    if (printTimer) {
-                                                        printTimer();
+                                                    if (printMetrics) {
+                                                        const durationMs = Date.now() - startTime;
+                                                        printMetrics.duration.observe(printLabels, durationMs);
                                                     }
                                                     headless.destroy(browser);
                                                     count.n++;
@@ -268,8 +274,9 @@ function print(key, q, req, response, outputPng = false, frame = 0, count, retur
                                                         printMetrics.counter.inc({ scale, format: 'pdf', status: 'error', template, db });
                                                     }
                                                     // Stop timer for PDF error
-                                                    if (printTimer) {
-                                                        printTimer();
+                                                    if (printMetrics) {
+                                                        const durationMs = Date.now() - startTime;
+                                                        printMetrics.duration.observe(printLabels, durationMs);
                                                     }
                                                     headless.destroy(browser);
                                                     response.status(500).send({
@@ -285,7 +292,10 @@ function print(key, q, req, response, outputPng = false, frame = 0, count, retur
                         }).catch(() => {
                             console.log('Error while creating PDF');
                             // Stop timer for PDF error
-                            if (printTimer) { printTimer(); }
+                            if (printMetrics) {
+                                const durationMs = Date.now() - startTime;
+                                printMetrics.duration.observe(printLabels, durationMs);
+                            }
                             headless.destroy(browser);
                             response.status(500).send({
                                 success: false
@@ -407,8 +417,9 @@ function print(key, q, req, response, outputPng = false, frame = 0, count, retur
                                                                 response.send({success: true, key, uri, "format": "png"});
                                                             }
                                                             // Stop timer for PNG success
-                                                            if (printTimer) {
-                                                                printTimer();
+                                                            if (printMetrics) {
+                                                                const durationMs = Date.now() - startTime;
+                                                                printMetrics.duration.observe(printLabels, durationMs);
                                                             }
                                                             headless.destroy(browser);
                                                             console.log('Done #', count.n);
@@ -427,8 +438,9 @@ function print(key, q, req, response, outputPng = false, frame = 0, count, retur
                                                             printMetrics.counter.inc({ scale, format: 'png', status: 'success', template, db });
                                                         }
                                                         // Stop timer for direct PNG return
-                                                        if (printTimer) {
-                                                            printTimer();
+                                                        if (printMetrics) {
+                                                            const durationMs = Date.now() - startTime;
+                                                            printMetrics.duration.observe(printLabels, durationMs);
                                                         }
                                                         headless.destroy(browser);
                                                         response.end(img);
@@ -443,8 +455,9 @@ function print(key, q, req, response, outputPng = false, frame = 0, count, retur
                                                         printMetrics.counter.inc({ scale, format: 'png', status: 'error', template, db });
                                                     }
                                                     // Stop timer for PNG error
-                                                    if (printTimer) {
-                                                        printTimer();
+                                                    if (printMetrics) {
+                                                        const durationMs = Date.now() - startTime;
+                                                        printMetrics.duration.observe(printLabels, durationMs);
                                                     }
                                                     headless.destroy(browser);
                                                     response.status(500);
@@ -453,7 +466,10 @@ function print(key, q, req, response, outputPng = false, frame = 0, count, retur
                                             }).catch(error => {
                                                 console.log('Error while creating PNG');
                                                 // Stop timer for PNG error
-                                                if (printTimer) { printTimer(); }
+                                                if (printMetrics) {
+                                                    const durationMs = Date.now() - startTime;
+                                                    printMetrics.duration.observe(printLabels, durationMs);
+                                                }
                                                 headless.destroy(browser);
                                                 response.status(500);
                                                 response.send(error);
@@ -464,14 +480,20 @@ function print(key, q, req, response, outputPng = false, frame = 0, count, retur
                                 page.goto(url);
                             }).catch(error => {
                                 // Stop timer for emulate error
-                                if (printTimer) { printTimer(); }
+                                if (printMetrics) {
+                                    const durationMs = Date.now() - startTime;
+                                    printMetrics.duration.observe(printLabels, durationMs);
+                                }
                                 headless.destroy(browser);
                                 response.status(500);
                                 response.send(error);
                             });
                         }).catch(error => {
                             // Stop timer for browser newPage error
-                            if (printTimer) { printTimer(); }
+                            if (printMetrics) {
+                                const durationMs = Date.now() - startTime;
+                                printMetrics.duration.observe(printLabels, durationMs);
+                            }
                             headless.destroy(browser);
                             response.status(500);
                             response.send(error);

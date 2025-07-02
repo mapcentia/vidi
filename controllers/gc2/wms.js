@@ -15,9 +15,9 @@ const proxifyRequest = (req, response) => {
     const wmsMetrics = metrics.isEnabled() ? metrics.getWmsMetrics() : null;
     
     // Start timing the request
-    let endTimer;
+    let startTime;
     if (wmsMetrics) {
-        endTimer = wmsMetrics.duration.startTimer();
+        startTime = Date.now();
     }
     
     // Track response size
@@ -66,7 +66,8 @@ const proxifyRequest = (req, response) => {
     wmsRequest.on('end', function() {
         // End timer and record duration with labels
         if (wmsMetrics) {
-            endTimer({ db: db, request_type: requestType });
+            const durationMs = Date.now() - startTime;
+            wmsMetrics.duration.observe({ db: db, request_type: requestType }, durationMs);
             
             // Record response size
             wmsMetrics.responseSize.observe({ db: db, request_type: requestType }, responseSize);
