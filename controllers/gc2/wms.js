@@ -7,43 +7,20 @@
 const express = require('express');
 const router = express.Router();
 const config = require('../../config/config.js').gc2;
-const appConfig = require('../../config/config.js');
+const metrics = require('../../modules/metrics');
 const request = require('request');
-const Prometheus = require('prom-client');
-
-// Initialize Prometheus metrics only if enabled in config
-let wmsRequestCounter, wmsRequestDuration, wmsResponseSize;
-
-if (appConfig?.metrics?.enabled) {
-    wmsRequestCounter = new Prometheus.Counter({
-        name: 'vidi_controllers_gc2_wms_requests_total',
-        help: 'Total number of WMS requests processed',
-        labelNames: ['db', 'request_type', 'status']
-    });
-
-    wmsRequestDuration = new Prometheus.Histogram({
-        name: 'vidi_controllers_gc2_wms_request_duration_seconds',
-        help: 'Duration of WMS requests in seconds',
-        labelNames: ['db', 'request_type'],
-        buckets: [0.1, 0.5, 1, 2, 5, 10, 30, 60]
-    });
-
-    wmsResponseSize = new Prometheus.Histogram({
-        name: 'vidi_controllers_gc2_wms_response_size_bytes',
-        help: 'Size of WMS responses in bytes',
-        labelNames: ['db', 'request_type'],
-        buckets: [1000, 10000, 100000, 1000000, 10000000, 100000000]
-    });
-}
 
 const proxifyRequest = (req, response) => {
-    // Start timing the request if metrics are enabled
+    // Get WMS metrics if enabled
+    const wmsMetrics = metrics.isEnabled() ? metrics.getWmsMetrics() : null;
+    
+    // Start timing the request
     let endTimer;
-    if (appConfig?.metrics?.enabled) {
-        endTimer = wmsRequestDuration.startTimer();
+    if (wmsMetrics) {
+        endTimer = wmsMetrics.duration.startTimer();
     }
     
-    // Track response size if metrics are enabled
+    // Track response size
     let responseSize = 0;
     
     // Determine request type (WMS, mapcache, gmaps)
@@ -73,8 +50,8 @@ const proxifyRequest = (req, response) => {
     
     wmsRequest.on('response', function(res) {
         // Track request status in the counter
-        if (appConfig?.metrics?.enabled) {
-            wmsRequestCounter.inc({
+        if (wmsMetrics) {
+            wmsMetrics.counter.inc({
                 db: db,
                 request_type: requestType,
                 status: res.statusCode >= 400 ? 'error' : 'success'
@@ -88,13 +65,11 @@ const proxifyRequest = (req, response) => {
     
     wmsRequest.on('end', function() {
         // End timer and record duration with labels
-        if (appConfig?.metrics?.enabled) {
+        if (wmsMetrics) {
             endTimer({ db: db, request_type: requestType });
-        }
-        
-        // Record response size
-        if (appConfig?.metrics?.enabled) {
-            wmsResponseSize.observe({ db: db, request_type: requestType }, responseSize);
+            
+            // Record response size
+            wmsMetrics.responseSize.observe({ db: db, request_type: requestType }, responseSize);
         }
     });
     
