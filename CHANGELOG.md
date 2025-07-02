@@ -18,16 +18,16 @@ and this project adheres to [CalVer](https://calver.org/).
 
   1. Print Controller (print.js)
   - `vidi_controllers_print_print_requests_total` (Counter): Counts the total number of print requests processed. Labels: scale, format, status, template, db. Helps track print request volume.
-  - `vidi_controllers_print_duration_seconds` (Histogram): Measures the duration of print operations in seconds. Labels: format, template, db, scale. Buckets: 0.1, 0.5, 1, 2, 5, 10, 20, 30, 60, 120 seconds.
+  - `vidi_controllers_print_duration_milliseconds` (Histogram): Measures the duration of print operations in milliseconds. Labels: format, template, db, scale. Buckets: 100, 500, 1000, 2000, 5000, 10000, 30000, 60000, 120000, 240000 milliseconds.
 
   2. WMS Controller (wms.js)
   - `vidi_controllers_gc2_wms_requests_total` (Counter): Counts the total number of WMS requests processed. Labels: db, request_type, status.
-  - `vidi_controllers_gc2_wms_request_duration_seconds` (Histogram): Measures the duration of WMS requests in seconds. Labels: db, request_type. Buckets: 0.1, 0.5, 1, 2, 5, 10, 30, 60 seconds.
+  - `vidi_controllers_gc2_wms_request_duration_milliseconds` (Histogram): Measures the duration of WMS requests in milliseconds. Labels: db, request_type. Buckets: 100, 500, 1000, 2000, 5000, 10000, 30000, 60000, 120000, 240000 milliseconds.
   - `vidi_controllers_gc2_wms_response_size_bytes` (Histogram): Measures the size of WMS responses in bytes. Labels: db, request_type. Buckets: 1000, 10000, 100000, 1000000, 10000000, 100000000 bytes.
 
   3. SQL Controller (sql.js)
   - `vidi_controllers_gc2_sql_queries_total` (Counter): Counts the total number of SQL queries processed. Labels: db, format, status.
-  - `vidi_controllers_gc2_sql_query_duration_seconds` (Histogram): Measures the duration of SQL queries in seconds. Labels: db, format. Buckets: 0.1, 0.5, 1, 2, 5, 10, 30, 60 seconds.
+  - `vidi_controllers_gc2_sql_query_duration_milliseconds` (Histogram): Measures the duration of SQL queries in milliseconds. Labels: db, format. Buckets: 100, 500, 1000, 2000, 5000, 10000, 30000, 60000, 120000, 240000 milliseconds.
   - `vidi_controllers_gc2_sql_response_size_bytes` (Histogram): Measures the size of SQL query responses in bytes. Labels: db, format. Buckets: 1000, 10000, 100000, 1000000, 10000000, 100000000 bytes.
   
   4. Express server
