@@ -71,6 +71,9 @@ function initializeMetrics(app) {
             ['^/api/symbols/[^/]+.*', '/api/symbols/#param'],
             ['^/api/css/[^/]+.*', '/api/css/#param'],
             ['^/index.html', '/'],
+            ['^/tmp/print/pdf/[^/]+.*', '/tmp/print/pdf/#param'],
+            ['^/tmp/print/png/[^/]+.*', '/tmp/print/png/#param'],
+            ['^/tmp/print/zip/[^/]+.*', '/tmp/print/zip/#param'],
         ],
     }));
 }
