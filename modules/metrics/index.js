@@ -8,6 +8,7 @@ const express = require('express');
 const PrometheusBundle = require('express-prom-bundle');
 const Prometheus = require('prom-client');
 const config = require('../../config/config.js');
+const collectors = require('./collectors');
 
 /**
  * Initialize Prometheus metrics for the application
@@ -17,6 +18,9 @@ function initializeMetrics(app) {
     if (!isEnabled()) {
         return;
     }
+
+    // Initialize all metric collectors
+    collectors.initializeCollectors();
 
     // Initialize Prometheus metrics
     new Prometheus.AggregatorRegistry().setDefaultLabels({
@@ -97,5 +101,8 @@ function isEnabled() {
 module.exports = {
     initializeMetrics,
     startMetricsServer,
-    isEnabled
+    isEnabled,
+    getSqlMetrics: collectors.getSqlMetrics,
+    getWmsMetrics: collectors.getWmsMetrics,
+    getPrintMetrics: collectors.getPrintMetrics
 };
