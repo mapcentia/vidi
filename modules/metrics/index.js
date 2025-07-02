@@ -22,6 +22,9 @@ function initializeMetrics(app) {
     // Initialize all metric collectors
     collectors.initializeCollectors();
 
+    // Set up error metrics handlers
+    setupErrorMetrics();
+
     // Initialize Prometheus metrics
     new Prometheus.AggregatorRegistry().setDefaultLabels({
         app: 'vidi',
@@ -94,6 +97,77 @@ function startMetricsServer() {
 }
 
 /**
+ * Set up error metrics handlers
+ */
+function setupErrorMetrics() {
+    if (!isEnabled()) {
+        return;
+    }
+
+    const errorMetrics = collectors.getErrorMetrics();
+
+    // Handle uncaught exceptions
+    process.on('uncaughtException', (error) => {
+        errorMetrics.uncaughtExceptions.inc({ 
+            type: error.name || 'UnknownError', 
+            origin: 'uncaughtException' 
+        });
+        console.error('Uncaught Exception:', error);
+        // Don't exit the process, just log and count
+    });
+
+    // Handle unhandled promise rejections
+    process.on('unhandledRejection', (reason, promise) => {
+        errorMetrics.uncaughtExceptions.inc({ 
+            type: reason?.name || 'UnhandledRejection', 
+            origin: 'unhandledRejection' 
+        });
+        console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+    });
+}
+
+/**
+ * Set up socket.io error metrics
+ * @param {Object} io - Socket.io server instance
+ * @param {string} namespace - Socket namespace (optional)
+ */
+function setupSocketErrorMetrics(io, namespace = 'default') {
+    if (!isEnabled()) {
+        return;
+    }
+
+    const errorMetrics = collectors.getErrorMetrics();
+
+    io.on('connection', (socket) => {
+        socket.on('error', (error) => {
+            errorMetrics.socketErrors.inc({ 
+                event: 'connection_error', 
+                namespace: namespace 
+            });
+            console.error('Socket.io connection error:', error);
+        });
+
+        socket.on('disconnect', (reason) => {
+            if (reason === 'transport error' || reason === 'ping timeout') {
+                errorMetrics.socketErrors.inc({ 
+                    event: 'disconnect_error', 
+                    namespace: namespace 
+                });
+                console.error('Socket.io disconnect error:', reason);
+            }
+        });
+    });
+
+    io.on('error', (error) => {
+        errorMetrics.socketErrors.inc({ 
+            event: 'server_error', 
+            namespace: namespace 
+        });
+        console.error('Socket.io server error:', error);
+    });
+}
+
+/**
  * Check if metrics are enabled
  * @returns {boolean} - Whether metrics are enabled
  */
@@ -104,8 +178,10 @@ function isEnabled() {
 module.exports = {
     initializeMetrics,
     startMetricsServer,
+    setupSocketErrorMetrics,
     isEnabled,
     getSqlMetrics: collectors.getSqlMetrics,
     getWmsMetrics: collectors.getWmsMetrics,
-    getPrintMetrics: collectors.getPrintMetrics
+    getPrintMetrics: collectors.getPrintMetrics,
+    getErrorMetrics: collectors.getErrorMetrics
 };

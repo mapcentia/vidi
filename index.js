@@ -143,3 +143,6 @@ global.io = require('socket.io')(server);
 io.on('connection', function (socket) {
     console.log(socket.id);
 });
+
+// Set up socket.io error metrics
+metrics.setupSocketErrorMetrics(io, 'main');

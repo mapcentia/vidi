@@ -33,6 +33,10 @@ and this project adheres to [CalVer](https://calver.org/).
   4. Express server
   - `vidi_http_request` (Histogram): Measures the duration of HTTP-endpoints in seconds. Labels: status_code, method, path. Buckets: 0.003, 0.03, 0.1, 0.3, 1.5, 10 seconds.
 
+  5. Error Monitoring
+  - `vidi_uncaught_exceptions_total` (Counter): Counts uncaught exceptions and unhandled promise rejections. Labels: type, origin. Helps track application stability.
+  - `vidi_socket_errors_total` (Counter): Counts socket.io connection and server errors. Labels: event, namespace. Helps monitor real-time communication issues.
+
 
 ## [2025.6.2] - 2025-19-6
 

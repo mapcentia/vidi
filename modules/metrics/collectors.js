@@ -15,6 +15,9 @@ let wmsRequestCounter, wmsRequestDuration, wmsResponseSize;
 // Print Request Metrics
 let printCounter, printDurationHistogram;
 
+// Error Metrics
+let uncaughtExceptionsCounter, socketErrorsCounter;
+
 // Set common bucket sizes for histograms
 const millisecondsBuckets = [100, 500, 1000, 2000, 5000, 10000, 30000, 60000, 120000, 240000];
 const bytesBuckets = [1000, 10000, 100000, 1000000, 10000000, 100000000];
@@ -78,6 +81,19 @@ function initializeCollectors() {
         labelNames: ['format', 'template', 'db', 'scale'],
         buckets: millisecondsBuckets
     });
+
+    // Error Metrics
+    uncaughtExceptionsCounter = new Prometheus.Counter({
+        name: 'vidi_uncaught_exceptions_total',
+        help: 'Total number of uncaught exceptions',
+        labelNames: ['type', 'origin']
+    });
+
+    socketErrorsCounter = new Prometheus.Counter({
+        name: 'vidi_socket_errors_total',
+        help: 'Total number of socket.io errors',
+        labelNames: ['event', 'namespace']
+    });
 }
 
 /**
@@ -115,9 +131,21 @@ function getPrintMetrics() {
     };
 }
 
+/**
+ * Get Error metrics collectors
+ * @returns {Object} Error metrics objects
+ */
+function getErrorMetrics() {
+    return {
+        uncaughtExceptions: uncaughtExceptionsCounter,
+        socketErrors: socketErrorsCounter
+    };
+}
+
 module.exports = {
     initializeCollectors,
     getSqlMetrics,
     getWmsMetrics,
-    getPrintMetrics
+    getPrintMetrics,
+    getErrorMetrics
 };
