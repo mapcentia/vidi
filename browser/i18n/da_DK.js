@@ -97,6 +97,7 @@ module.exports = {
         "Print": "Print",
         "Search places": "Søg på steder",
         "Activate advanced query": "Aktivér avanceret forespørgsel",
+        "Get result as MS Excel": "Hent resultat som MS Excel",
         "Help text overlays": "Slå overlejringslag til og fra. Viste lag vil være spørgbare.",
         "Help text baselayers": "Vælg baggrundskort. Det er muligt at sammenligne to baggrundskort. Her kan man vælge om de to baggrundskort skal vises ved siden af hinanden eller om de skal lægges ovenpå hinanden. Ved førstnævnte kan man \\'slide\\' mellem de to kort og ved sidstnævnte kan man ændre det øverste korts gennemsigtighed.",
         "Help text legend": "Signatur for tændte overlejringskort",

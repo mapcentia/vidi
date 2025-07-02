@@ -53,9 +53,8 @@ const ClearMapControlOptions = {
     </a>`),
     onclick: (e) => {
         e.stopPropagation();
-        backboneEvents.get().trigger(`reset:infoClick`);
-        backboneEvents.get().trigger(`reset:advancedInfo`);
-        state.resetState([`draw`, `measurements`]);
+        backboneEvents.get().trigger('reset:all');
+        state.resetState(['draw', 'measurements', 'symbols']);
         setTimeout(() => {
             // Detect which module is now active and reactivate it
             $('#main-tabs > li[class="active"] > a').trigger('click');

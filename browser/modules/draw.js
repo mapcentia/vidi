@@ -426,6 +426,10 @@ module.exports = {
         return new Promise((resolve) => {
             _self.control(false);
             _self.removeFeatures();
+            table.loadDataInTable(false, true);
+            setTimeout(() => {
+                backboneEvents.get().trigger(`${MODULE_NAME}:update`);
+            }, 0)
             resolve();
         });
     },

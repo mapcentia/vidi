@@ -97,6 +97,7 @@ module.exports = {
         "Print": "Print",
         "Search places": "Search places",
         "Activate advanced query": "Activate advanced query",
+        "Get result as MS Excel": "Get result as MS Excel",
         "Help text overlays": "Turn overlay maps on and off. Visible overlays becomes queryable.",
         "Help text baselayers": "Choose base layer.",
         "Help text legend": "Legend for visible overlay maps.",

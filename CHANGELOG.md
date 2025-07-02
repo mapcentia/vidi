@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2025.7.0] - 2025-19-6
+### Fixed
+- The "Clear map" button now clears symbols and resets the state for drawings (before drawings were cleared but state not proper reset).  
+
+## [2025.6.2] - 2025-19-6
+
+### Added
+- New "Download MS Excel" button in Advanced Query. This function will download one Excel Workbook with a sheet containing results for every queried layer.
+
+### Fixed
+- The Virtual layer in Advanced Query is fixed
+
 ## [2025.6.1] - 2025-4-6
 
 ### Changed
@@ -21,6 +33,7 @@ and this project adheres to [CalVer](https://calver.org/).
 ### Added
 
 - A `tileMatrixTransform` function can now be passed to WMTS layers. The function takes the current zoom number and must return a valid tilematrix. The example will pad the zoom number with `0` and prefix with `L`. If the `tileMatrixTransform` is not set, the zoom number will be used directly for tilematrix.
+
 ```json
 {
   "type": "WMTS",
