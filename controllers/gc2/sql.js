@@ -7,45 +7,21 @@
 var express = require('express');
 var router = express.Router();
 var config = require('../../config/config.js').gc2;
-var appConfig = require('../../config/config.js');
+var metrics = require('../../modules/metrics');
 var request = require('request');
 var fs = require('fs');
 
-Prometheus = require('prom-client');
-
-// Initialize Prometheus metrics only if enabled in config
-let sqlQueryCounter, sqlQueryDuration, sqlResponseSize;
-
-if (appConfig?.metrics?.enabled) {
-    sqlQueryCounter = new Prometheus.Counter({
-        name: 'vidi_controllers_gc2_sql_queries_total',
-        help: 'Total number of SQL queries processed',
-        labelNames: ['db', 'format', 'status']
-    });
-
-    sqlQueryDuration = new Prometheus.Histogram({
-        name: 'vidi_controllers_gc2_sql_query_duration_seconds',
-        help: 'Duration of SQL queries in seconds',
-        labelNames: ['db', 'format'],
-        buckets: [0.1, 0.5, 1, 2, 5, 10, 30, 60]
-    });
-
-    sqlResponseSize = new Prometheus.Histogram({
-        name: 'vidi_controllers_gc2_sql_response_size_bytes',
-        help: 'Size of SQL query responses in bytes',
-        labelNames: ['db', 'format'],
-        buckets: [1000, 10000, 100000, 1000000, 10000000, 100000000]
-    });
-}
-
 var query = function (req, response) {
-    // Start timing the query if metrics are enabled
+    // Get SQL metrics if enabled
+    const sqlMetrics = metrics.isEnabled() ? metrics.getSqlMetrics() : null;
+    
+    // Start timing the query
     let endTimer;
-    if (appConfig?.metrics?.enabled) {
-        endTimer = sqlQueryDuration.startTimer();
+    if (sqlMetrics) {
+        endTimer = sqlMetrics.duration.startTimer();
     }
     
-    // Track response size if metrics are enabled
+    // Track response size
     let responseSize = 0;
     
     req.setTimeout(0); // no timeout
@@ -128,8 +104,8 @@ var query = function (req, response) {
         }
         
         // Track query status in the counter
-        if (appConfig?.metrics?.enabled) {
-            sqlQueryCounter.inc({
+        if (sqlMetrics) {
+            sqlMetrics.counter.inc({
                 db: db,
                 format: format,
                 status: res.statusCode >= 400 ? 'error' : 'success'
@@ -147,12 +123,12 @@ var query = function (req, response) {
     });
     
     rem.on('end', function () {
-        // End timer and record duration with labels if metrics are enabled
-        if (appConfig?.metrics?.enabled) {
+        // End timer and record duration with labels
+        if (sqlMetrics) {
             endTimer({ db: db, format: format });
             
             // Record response size
-            sqlResponseSize.observe({ db: db, format: format }, responseSize);
+            sqlMetrics.responseSize.observe({ db: db, format: format }, responseSize);
         }
         
         if (store) {
