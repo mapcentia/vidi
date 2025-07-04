@@ -682,14 +682,17 @@ module.exports = {
      *
      */
     resetState: () => {
-        mouseDown = false;
-        touch = false;
-        idBeingChanged = false;
-        creatingFromState = false;
-        autoScale = false;
-        locked = false;
-        $("#vidi-symbols-autoscale").prop("checked", false);
-        _self.removeSymbols();
+        return new Promise((resolve) => {
+            mouseDown = false;
+            touch = false;
+            idBeingChanged = false;
+            creatingFromState = false;
+            autoScale = false;
+            locked = false;
+            _self.removeSymbols();
+            $("#vidi-symbols-autoscale").prop("checked", false);
+            resolve();
+        });
     },
 
     /**
