@@ -429,7 +429,7 @@ module.exports = {
             table.loadDataInTable(false, true);
             setTimeout(() => {
                 backboneEvents.get().trigger(`${MODULE_NAME}:update`);
-            }, 0)
+            }, 0);
             resolve();
         });
     },
