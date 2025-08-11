@@ -5,7 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [2025.7.0] - 2025-19-6
+## [2025.8.0] - 2025-11-8
+### Added
+- New config `crs` for setting the coordinate system. The default is `EPSG:3857`. Only alternative is for now `EPSG:25832`. Background layers must be configured accordingly.
+
+### Changed
+- The print border rectangle is now created with a `polygon` object instead of a `rectangle` so it aligns with choosen coordinate system. This means that the rectangle edit handles are not available anymore. Scale can only be changed with the `scale` dialog.
+- The analysis function in `conflictSearch` will format distance to `km` when above 100.000 instead of 1.000.
+- The analysis function now has a GC2 Meta option `sql_conflict_header` for setting the header of the fist column in the analysis result table.
+
+## [2025.7.0] - 2025-2-7
 ### Fixed
 - The "Clear map" button now clears symbols and resets the state for drawings (before drawings were cleared but state not proper reset).  
 
