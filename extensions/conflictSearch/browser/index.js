@@ -939,6 +939,7 @@ module.exports = module.exports = {
                             noHitsCount++;
                         }
                         if (v.extra !== null && typeof v.extra === 'object' && Object.keys(v.extra).length > 0) {
+                            let parsedMeta = metaData.meta !== null ? JSON.parse(metaData.meta) : null;
                             extraCount++;
                             const el = $(`<table class="extra-table" data-extra-table-id="${extraCount}" id="extra-table-${extraCount}" data-show-columns="true" data-show-fullscreen="false"></table>`); // Add bootstrap classes for basic styling
                             const thead = $("<thead></thead>");
@@ -962,7 +963,7 @@ module.exports = module.exports = {
                             const headers = Array.from(allHeadersSet); // Convert Set to Array for consistent order
 
                             // --- Build Header Row ---
-                            headerRow.append("<th data-sortable=\"true\">Column A</th>"); // First column for the main key (e.g., 'solidFuels')
+                            headerRow.append(`<th data-sortable="true">${parsedMeta?.sql_conflict_header || 'Header'}</th>`); // First column for the main key (e.g., 'solidFuels')
                             headers.forEach(header => {
                                 // Simple capitalization for headers (optional)
                                 const displayHeader = header.charAt(0).toUpperCase() + header.slice(1);
