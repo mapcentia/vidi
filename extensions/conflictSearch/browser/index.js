@@ -806,6 +806,8 @@ module.exports = module.exports = {
         }
     },
     handleResult: function (response) {
+        let _self = this;
+
         visibleLayers = cloud.getAllTypesOfVisibleLayers().split(";"); // Must be set here also, if result is coming from state
         let hitsCount = 0, noHitsCount = 0, errorCount = 0, extraCount = 0, resultOrigin, groups = [];
         _result = response;
@@ -846,11 +848,11 @@ module.exports = module.exports = {
                     let metaData = v.meta;
                     let bufferValue = '';
                     if (v.bufferValue > 0) {
-                        bufferValue = "<span class='text-secondary'>Buffer</span> " + L.GeometryUtil.readableDistance(v.bufferValue, true, false, false, {m: 1}).replace('.', decimalSeparator);
+                        bufferValue = "<span class='text-secondary'>Buffer</span> " + readableDistance(v.bufferValue, true, false, false, {m: 1});
                     }
                     if (metaData.layergroup === groups[i]) {
                         count++;
-                        row = "<tr><td>" + v.title + "</td><td>" + v.hits + "</td><td>" + bufferValue + "</td><td>" + (v.totalLength > 0 ? "<span class='text-secondary'>Total</span> " + L.GeometryUtil.readableDistance(v.totalLength, true, false, false, {m: 1}).replace('.', decimalSeparator) : v.totalArea > 0 ? "<span class='text-secondary'>Total</span> " + L.GeometryUtil.readableArea(v.totalArea, true) : '') + "</td><td><div class='form-check form-switch text-end'><label class='form-check-label'><input class='form-check-input' type='checkbox' data-gc2-id='" + v.table + "' " + (visibleLayers.includes(v.table) ? "checked" : "") + "></label></div></td></tr>";
+                        row = "<tr><td>" + v.title + "</td><td>" + v.hits + "</td><td>" + bufferValue + "</td><td>" + (v.totalLength > 0 ? "<span class='text-secondary'>Total</span> " + readableDistance(v.totalLength, true, false, false, {m: 1}) : v.totalArea > 0 ? "<span class='text-secondary'>Total</span> " + L.GeometryUtil.readableArea(v.totalArea, true) : '') + "</td><td><div class='form-check form-switch text-end'><label class='form-check-label'><input class='form-check-input' type='checkbox' data-gc2-id='" + v.table + "' " + (visibleLayers.includes(v.table) ? "checked" : "") + "></label></div></td></tr>";
                         hitsTable.append(row);
                     }
                 }
@@ -997,7 +999,7 @@ module.exports = module.exports = {
                             el.append(thead);
                             el.append(tbody);
                             if (v.totalLength || v.totalArea) {
-                                tcaption.append((v.totalLength > 0 ? "<span class='text-secondary'>Total</span> " + L.GeometryUtil.readableDistance(v.totalLength, true, false, false, {m: 1}).replace('.', decimalSeparator) : v.totalArea > 0 ? "<span class='text-secondary'>Total</span> " + L.GeometryUtil.readableArea(v.totalArea, true) : '') );
+                                tcaption.append((v.totalLength > 0 ? "<span class='text-secondary'>Total</span> " + readableDistance(v.totalLength, true, false, false, {m: 1}) : v.totalArea > 0 ? "<span class='text-secondary'>Total</span> " + L.GeometryUtil.readableArea(v.totalArea, true) : '') );
                                 el.append(tcaption);
                             }
                             extraTable.append("<h4 class='mb-0 mt-3'>" + title + "</h4>");
@@ -1053,6 +1055,7 @@ module.exports = module.exports = {
             callBack();
         }
     },
+
     addDrawing: function (layer) {
         drawnItems.addLayer(layer);
     },
@@ -1099,6 +1102,71 @@ module.exports = module.exports = {
     },
     TOAST_ID,
 };
+
+const readableDistance = function (distance, isMetric, isFeet, isNauticalMile, precision) {
+    const defaultPrecision = {
+        km: 2,
+        ha: 2,
+        m: 0,
+        mi: 2,
+        ac: 2,
+        yd: 0,
+        ft: 0,
+        nm: 2
+    };
+
+    const formattedNumber = function (n, precision) {
+        const formatted = Math.round(n * Math.pow(10, precision)) / Math.pow(10, precision);
+        const local = _vidiLocale.replace(/_/g, '-');
+        return formatted.toLocaleString(local);
+    };
+
+    let distanceStr;
+    let units;
+
+    precision = L.Util.extend({}, defaultPrecision, precision);
+
+    if (isMetric) {
+        units = typeof isMetric == 'string' ? isMetric : 'metric';
+    } else if (isFeet) {
+        units = 'feet';
+    } else if (isNauticalMile) {
+        units = 'nauticalMile';
+    } else {
+        units = 'yards';
+    }
+
+    switch (units) {
+        case 'metric':
+            // show metres when distance is < 1km, then show km
+            if (distance > 100000) {
+                distanceStr = L.GeometryUtil.formattedNumber(distance / 1000, precision['km']) + ' km';
+            } else {
+                distanceStr = formattedNumber(distance, precision['m']) + ' m';
+            }
+            break;
+        case 'feet':
+            distance *= 1.09361 * 3;
+            distanceStr = L.GeometryUtil.formattedNumber(distance, precision['ft']) + ' ft';
+
+            break;
+        case 'nauticalMile':
+            distance *= 0.53996;
+            distanceStr = L.GeometryUtil.formattedNumber(distance / 1000, precision['nm']) + ' nm';
+            break;
+        case 'yards':
+        default:
+            distance *= 1.09361;
+
+            if (distance > 1760) {
+                distanceStr = L.GeometryUtil.formattedNumber(distance / 1760, precision['mi']) + ' miles';
+            } else {
+                distanceStr = L.GeometryUtil.formattedNumber(distance, precision['yd']) + ' yd';
+            }
+            break;
+    }
+    return distanceStr;
+}
 
 let dom = `
 <div role="tabpanel">
