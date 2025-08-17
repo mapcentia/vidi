@@ -1,29 +1,18 @@
 .. _draw:
 
-#################################################################
 Tegn
-#################################################################
+===========================================================================
 
 .. topic:: Overview
 
-    :Date: |today|
-    :Vidi-version: 2020.11.0
     :Forfatter: `giovanniborella <https://github.com/giovanniborella>`_
 
 .. contents:: 
     :depth: 3
 
-
-*****************************************************************
-Tegn-værktøjet
-***************************************************************** 
-
 .. include:: ../../_subs/NOTE_GETTINGSTARTED.rst
 
 Elementer vil også fremgå på PDF-print.
-
-Typer
-=================================================================
 
 Når værktøjet er tændt er det muligt at tegne elementer ind på kortet. Elementerne er bundet op på den geografiske placering, så de vil blive selv om man panorerer i kortet.
 
@@ -34,9 +23,6 @@ Når værktøjet er tændt er det muligt at tegne elementer ind på kortet. Elem
     :figclass: align-center
 
     Værktøjet er tændt, og klar til at lave elementer.
-
-Tegn elementer
------------------------------------------------------------------
 
 For at tegne elementer, gøres følgende:
 
@@ -79,7 +65,7 @@ For at tegne elementer, gøres følgende:
     * Indtast notat
 
 Ændre elementer
------------------------------------------------------------------
+---------------------------------------------------------------------------
 
 Når værktøjet aktiveres er det muligt at ændre knudepunkter mm. for de tegnede elementer. 
 
@@ -94,7 +80,7 @@ Når værktøjet aktiveres er det muligt at ændre knudepunkter mm. for de tegne
 Klik for ``Gem`` for at gemme, ``Fortryd`` for at annulere alle ændringer.
 
 Slet elementer
------------------------------------------------------------------
+---------------------------------------------------------------------------
 
 Når værktøjet aktiveres er det muligt at fjerne elementer enkeltvis, eller alle på én gang.
 
@@ -105,12 +91,12 @@ Klik for ``Gem`` for at gemme, ``Fortryd`` for at annulere alle ændringer.
 .. warning:: Klikker man på ``Slet alle`` kan handlingen ikke fortrydes
 
 Stilart
-=================================================================
+===========================================================================
 
 TBD
 
 Linjer
------------------------------------------------------------------
+---------------------------------------------------------------------------
 
 Det er muligt at definere en ende på hver linje. Denne indstilling sættes inden man tegner sin linje. 
 
@@ -125,7 +111,7 @@ Der er også mulighed for at få vist mål på linjer, samt totalmål.
     Fra venstre mod højre: Pilehoved, Stop, firkant, punkt. Den sidste linje er sat op som vist i billedet. 
 
 Oversigt
------------------------------------------------------------------
+---------------------------------------------------------------------------
 
 Nederst vil der være en tabel over de tegnede geometrier. Ved at klikke på en række vil kortet flyve over til den relevante geometri.
 

@@ -1,25 +1,13 @@
-.. _gettingstarted:
 
-.. |gc2| raw:: html
-
-  <abbr title="MapCentia Geocloud2">GC2</abbr>
-
-*****************************************************************
-Kom godt i gang med Vidi
-*****************************************************************
+Hvad er Vidi?
+===========================================================================
 
 .. topic:: Overview
 
-    :Date: |today|
-    :Vidi-version: 2020.11.0
     :Forfatter: `giovanniborella <https://github.com/giovanniborella>`_
 
 .. contents:: 
     :depth: 3
-
-
-Hvad er Vidi?
-================================================================= 
 
 Vidi er en HTML5 applikation til at vise og forespørge på kortdata fra |gc2|. 
 
@@ -36,7 +24,7 @@ Vidi er ikke bygget ind i GC2, men kræver sin egen installation.
 `Du kan prøve det live her <https://kort.geofyn.dk/>`_
 
 Kortvinduet
------------------------------------------------------------------
+---------------------------------------------------------------------------
 
 .. figure:: ../../_media/gettingstarted-main.png
     :width: 400px
@@ -49,7 +37,7 @@ Kortvinduet
 .. _gettingstarted_menu:
 
 Menu
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+---------------------------------------------------------------------------
 
 .. figure:: ../../_media/gettingstarted-menu.png
     :width: 400px
@@ -66,7 +54,7 @@ Menuen gemmer sig selv hvis kortvinduet er for smalt, men kan bringes frem igen 
 .. _gettingstarted_navigate:
 
 Navigér
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+---------------------------------------------------------------------------
 
 Panorer i kortet ved at klikke og trække med musen. Det er også muligt at bruge piletasterne på tastaturet.
 
@@ -85,7 +73,7 @@ Man kan gå tilbage i kortudsnit ved at bruge ``Forrige udsnit``-knappen i værk
 .. _gettingstarted_controls:
 
 Værktøjslinjen
------------------------------------------------------------------
+---------------------------------------------------------------------------
 
 .. figure:: ../../_media/gettingstarted-controls.png
     :align: center
