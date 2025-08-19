@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2025.8.1] - 2025-19-8
+### Fixed
+- Added `min-width: 0` to `.main-content`, so content is propper sized if wider than the parent container.
+
 ## [2025.8.0] - 2025-11-8
 ### Added
 - New config `crs` for setting the coordinate system. The default is `EPSG:3857`. Only alternative is for now `EPSG:25832`. Background layers must be configured accordingly.
