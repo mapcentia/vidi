@@ -313,7 +313,6 @@ module.exports = module.exports = {
         startBuffer = config.extensionConfig?.conflictSearch?.startBuffer ?? 0;
         getProperty = config.extensionConfig?.conflictSearch?.getProperty ?? false;
         searchStr = config.extensionConfig?.conflictSearch?.searchString ?? "";
-        searchLoadedLayers = config.extensionConfig?.conflictSearch?.searchLoadedLayers;
         searchLoadedLayers = config.extensionConfig?.conflictSearch?.searchLoadedLayers ?? true;
 
         // Set up draw module for conflict
