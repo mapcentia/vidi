@@ -75,6 +75,7 @@
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.15.4",
     "@googlemaps/js-api-loader": "^1.16.2",
+    "@mapcentia/gc2-js-client": "^0.0.12",
     "@maplibre/maplibre-gl-leaflet": "^0.0.22",
     "@material-ui/core": "^3.9.4",
     "@material-ui/icons": "^3.0.2",
