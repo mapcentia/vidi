@@ -241,6 +241,12 @@ module.exports = {
         } else {
             me.render();
         }
+
+        // If Vidi does not load within 20 seconds, send the loaded message. This is to prevent print from locking up.
+        // If Vidi loads, the timeout will be cleared in State
+        window.loadingTimeout = setTimeout(() => {
+            console.log("Timeout reached. Sending 'Vidi is now loaded' message");
+        }, 20000);
     },
 
 

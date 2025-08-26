@@ -190,6 +190,7 @@ module.exports = {
                 backboneEvents.get().once("allDoneLoading:layers", function (e) {
                     legend.init().then(function () {
                         console.log("Vidi is now loaded");// Vidi is now fully loaded
+                        clearTimeout(window.loadingTimeout)
                         window.status = "all_loaded";
                         if (window.vidiConfig?.initFunction) {
                             let func = Function('"use strict";return (' + window.vidiConfig.initFunction + ')')();
