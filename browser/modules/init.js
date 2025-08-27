@@ -103,7 +103,7 @@ module.exports = {
             statelessDraw: false,
             openLayerTreeGroups: [],
             crs: 'EPSG:3857',
-            loadingTimeout: 20000,
+            loadingTimeout: 30000,
             loadCheckingInterval: 15000,
         };
         // Set default for unset props
