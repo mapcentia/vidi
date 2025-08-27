@@ -574,6 +574,13 @@ module.exports = {
 
                 backboneEvents.get().trigger("end:state");
 
+                // At this point we believe that Vidi is started successfully
+                console.log('Clear load checking interval');
+                clearInterval(window.loadCheckingInterval)
+                try {
+                    new bootstrap.Toast(document.getElementById('load-checking-toast')).hide();
+                } catch (e) {}
+
             } catch (e) {
                 console.error(e);
                 initReject();

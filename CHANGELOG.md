@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2025.8.2] - 2025-27-8
+### Added
+- A 20-second timeout to handle cases where Vidi fails to load, ensuring the "Vidi is now loaded" console message is sent to prevent lockups in print. Clears timeout on successful loading. The timeout can be changed with `config.loadingTimeout` in build-time config.
+- A 15-second interval to check if Vidi is loaded. If the interval is reached and Vidi is not loaded, a 'toast' is shown which enables the user to clear cache storage and refresh the browser. The interval Can be changed with `config.loadCheckingInterval` in build-time config. 
+
 ## [2025.8.1] - 2025-19-8
 ### Fixed
 - Added `min-width: 0` to `.main-content`, so content is propper sized if wider than the parent container.
