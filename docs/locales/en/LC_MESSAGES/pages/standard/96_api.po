@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Vidi 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-09 12:54+0100\n"
+"POT-Creation-Date: 2025-09-01 13:41+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -17,76 +17,81 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.12.1\n"
+"Generated-By: Babel 2.17.0\n"
 
-#: ../../pages/standard/96_api.rst:5 2061ba1fe366459d83bd573a5c06d6e7
+#: ../../pages/standard/96_api.rst:5 8efa3f9836134fd7b93bc4d176372008
 msgid "Vidi API"
 msgstr ""
 
-#: ../../pages/standard/96_api.rst:5 da382eaa1ded45dbb11b44e970305dc4
+#: ../../pages/standard/96_api.rst:5 1bdbdbb964e04b9b90fa07f4f5585d2c
 msgid "Overview"
 msgstr ""
 
-#: ../../pages/standard/96_api.rst 2db17b4ccdf64310a215db97bb92afd3
+#: ../../pages/standard/96_api.rst 1a6b22563f8b4574a0ba48f1ffec8533
 msgid "Date"
 msgstr ""
 
-#: ../../pages/standard/96_api.rst:9 f71f7c40440744e2ab5365af2a966343
+#: ../../pages/standard/96_api.rst:9 ea894d10c31a4543a9de4254b0e10624
 msgid "|today|"
 msgstr ""
 
-#: ../../pages/standard/96_api.rst f8bad17c5df44dae9a587aa82bac0653
+#: ../../pages/standard/96_api.rst 4d906772699346eb84e4a17804cf97e1
 msgid "Vidi-version"
 msgstr ""
 
-#: ../../pages/standard/96_api.rst:10 c4cfe8be359b47c4b42540c6a0e3d8da
+#: ../../pages/standard/96_api.rst:10 8ecb3fa423404dd693a2b35ff5d7f8c3
 msgid "MASTER"
 msgstr ""
 
-#: ../../pages/standard/96_api.rst 83bdad8722b94135a1d05385fdcc24df
+#: ../../pages/standard/96_api.rst 6d3c020a2343435f9c64d4ebf3b1c39e
 msgid "Forfattere"
 msgstr ""
 
-#: ../../pages/standard/96_api.rst:11 67edf782e8284746ab9bb8fd8bb1d88b
+#: ../../pages/standard/96_api.rst:11 35be3a9095094f78b4dea35207065d75
 msgid "`mapcentia <https://github.com/mapcentia>`_"
 msgstr ""
 
-#: ../../pages/standard/96_api.rst:14 cff412318c9c4ba09599fdb1c8ca97eb
+#: ../../pages/standard/96_api.rst:14 e5758809d7cf448fba23449a17c4b3f7
 msgid "Indhold"
 msgstr ""
 
-#: ../../pages/standard/96_api.rst:18 2e8a70074cf54f988a8c1ad1f9bdd60c
+#: ../../pages/standard/96_api.rst:18 e189b332c937464988ec66eac32c0e7d
 msgid "Brug"
 msgstr ""
 
-#: ../../pages/standard/96_api.rst:20 8ed1ac61fbda40b6b15127b54645a083
+#: ../../pages/standard/96_api.rst:20 ec320a5495fb4a32a959dce00bccf3ca
 msgid ""
 "APIet kan bruges i de forskellige templates og funktioner, der kan "
 "defineres forskellige steder i en Vidi opsætning. Fx i "
 ":ref:`gc2mata_infopopup` templates og funktioner."
 msgstr ""
 
-#: ../../pages/standard/96_api.rst:23 637991e9d02e4c778d0916f572f24e7c
+#: ../../pages/standard/96_api.rst:23 f4aa3ebd3b304d5fb641a1166482c1cf
 msgid ""
 "APIet kan ikke bruges til indlejrede Vidi kort - dvs. på den webside som "
 "Vidi er indlejret på. Her henvises til :ref:`embed_api`"
 msgstr ""
 
-#: ../../pages/standard/96_api.rst:26 ce617713f5694d3ab1bd8e0bd5e21df0
+#: ../../pages/standard/96_api.rst:26 704be97e76794bf5956db98662d9a0f9
 msgid "Tænd lag (turnOn)"
 msgstr ""
 
-#: ../../pages/standard/96_api.rst:28 e7f0986a04c442d9a9839e43f8b5b51c
+#: ../../pages/standard/96_api.rst:28 ../../pages/standard/96_api.rst:37
+#: 86aa4157a9e340c5802cf051cf8ee026 b2137c360ead451790c9b65b69676abe
 msgid ""
 "Med denne metode kan man tænde for et lag. Den tager et argument som er "
 "et fuldt lagnavn med evt. type præfiks:"
 msgstr ""
 
-#: ../../pages/standard/96_api.rst:35 b0a0c22531a146d4ab54fe65e45adbf3
+#: ../../pages/standard/96_api.rst:35 09303283c7294c658d669bf9fb9f1713
+msgid "Sluk lag (turnOff)"
+msgstr ""
+
+#: ../../pages/standard/96_api.rst:44 361af6dd3a27440b841d0047fdf0a933
 msgid "Sæt filter på lag (filter)"
 msgstr ""
 
-#: ../../pages/standard/96_api.rst:37 ac05e840340b4dbf816cc415ad532652
+#: ../../pages/standard/96_api.rst:46 676b6453d9aa4e0e83fb5b2b12800129
 msgid ""
 "Med denne metode kan der sættes et filter på et givnet lag. Første "
 "argument er et fuldt lagnavn (uden type præfiks) og andet argument er "

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Vidi 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-09 12:54+0100\n"
+"POT-Creation-Date: 2025-09-01 13:41+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -17,57 +17,88 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.12.1\n"
+"Generated-By: Babel 2.17.0\n"
 
-#: ../../pages/extensions/extensions.rst:9 afd2d09db1034da981e8c4bb21786b82
+#: ../../pages/extensions/extensions.rst:9 1c666cc6d3664f56a5e1991546f13739
 msgid "Extensions"
 msgstr ""
 
-#: ../../pages/extensions/extensions.rst:9 c02e957d01be4b1aa883749338b70e4e
+#: ../../pages/extensions/extensions.rst:9 d2bd8a5262db4288a719c65cdf2788d7
 msgid "Overview"
 msgstr ""
 
-#: ../../pages/extensions/extensions.rst 0b367b1e860e4ca883cc0f31eb52a646
+#: ../../pages/extensions/extensions.rst 1d7543cba11d4c2eb2a0ade10539cb7c
 msgid "Date"
 msgstr ""
 
-#: ../../pages/extensions/extensions.rst:13 dc093f1b8f7e44049168f29f167faae6
+#: ../../pages/extensions/extensions.rst:13 19f399b1d6484cb18268cc852ddfbf14
 msgid "|today|"
 msgstr ""
 
-#: ../../pages/extensions/extensions.rst 94c86ccd870740f19eb09a490d95659b
+#: ../../pages/extensions/extensions.rst eb155679e23d422190f16a689e9c70da
 msgid "Vidi-version"
 msgstr ""
 
-#: ../../pages/extensions/extensions.rst:14 7d6b5cd3b31044898f4bd274f1c5015a
+#: ../../pages/extensions/extensions.rst:14 f898e0473a534c688974b41889a26158
 msgid "UNRELEASED"
 msgstr ""
 
-#: ../../pages/extensions/extensions.rst e138496c4de84c44b1566d5a115310f5
+#: ../../pages/extensions/extensions.rst f0e4ac4bca964d39beddff2561445027
 msgid "Forfattere"
 msgstr ""
 
-#: ../../pages/extensions/extensions.rst:15 31ec90787d99400c9c0e65f7139b6326
+#: ../../pages/extensions/extensions.rst:15 434c9baf4ddb4a4b9c3421b1bda530f5
 msgid "`mapcentia <https://github.com/mapcentia>`_"
 msgstr ""
 
-#: ../../pages/extensions/extensions.rst:18 e0d637bc98e34c15a8e21072c56b166e
+#: ../../pages/extensions/extensions.rst:18 cd328c0843fa4b8b9cb5067f2fe02447
 msgid "Indhold"
 msgstr ""
 
-#: ../../pages/extensions/extensions.rst:23 1280315369204079adc268c82f6fa04b
-msgid "Editering"
+#: ../../pages/extensions/extensions.rst:23 573956d8542742e2bf52812fa74fdc43
+msgid "Rutevejledning"
 msgstr ""
 
-#: ../../pages/extensions/extensions.rst:26 5944e145da104b4cbbf578b189a3afb2
-msgid "Introduktion"
+#: ../../pages/extensions/extensions.rst:25 00646f96492f416aaabf51c1bc050c44
+msgid ""
+"``directions`` er en udvidelse til vidi der giver mulighed for at lave "
+"rutevejledning i kortet. Der laves en rutevejledning fra brugerens "
+"position til et punkt på kortet. Det er i øjeblikket kun muligt at lave "
+"rutevejledning med Google Maps."
 msgstr ""
 
-#: ../../pages/extensions/extensions.rst:35 bedec73b3a81497e9b3b9585b6f446f9
-msgid "meow"
+#: ../../pages/extensions/extensions.rst:28 b7a93125af7b40fe8aad3d912ce0b3d6
+msgid "Intallation"
 msgstr ""
 
-#: ../../pages/extensions/extensions.rst:35 4e9caffd50ae452e9c3ba71bb45f2507
-msgid "figure are like images but with a caption"
+#: ../../pages/extensions/extensions.rst:30 538c326e154a484da186dc345d4c53f1
+msgid "Funktionen skal medtages i :ref:`configjs_extensions`"
 msgstr ""
+
+#: ../../pages/extensions/extensions.rst:42 b41832a37260424b884182bdecbb0be6
+msgid "Brug"
+msgstr ""
+
+#: ../../pages/extensions/extensions.rst:48 4ecc7e2c38bc40a7bfd4e6b4cfaa03c8
+msgid "ikon i :ref:`gettingstarted_controls`"
+msgstr ""
+
+#: ../../pages/extensions/extensions.rst:50 948a2da003e04841bf11ed1ee908c7af
+msgid ""
+"Start med at aktivere geolokation i :ref:`gettingstarted_controls` og "
+"klik på ikonet. Derefter klik på kortet for at vælge destinationen. "
+"Rutevejledningen vil åbne i et nyt vindue."
+msgstr ""
+
+#~ msgid "Editering"
+#~ msgstr ""
+
+#~ msgid "Introduktion"
+#~ msgstr ""
+
+#~ msgid "meow"
+#~ msgstr ""
+
+#~ msgid "figure are like images but with a caption"
+#~ msgstr ""
 

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Vidi 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-09 12:54+0100\n"
+"POT-Creation-Date: 2025-09-01 13:41+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -17,60 +17,60 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.12.1\n"
+"Generated-By: Babel 2.17.0\n"
 
 #: ../../pages/standard/92_gc2_meta_information.rst:5
-#: 8345086c20764b2eb80fbfa9e461857d
+#: 12bebfa95dec4e9d84ee72433c8cae22
 msgid "Lagopsætning fra GC2"
 msgstr ""
 
 #: ../../pages/standard/92_gc2_meta_information.rst:5
-#: 7064e677ca94415da0c4644920890af3
+#: 7425b7b4677f4d3b8a9bfd72fb5b5cd6
 msgid "Overview"
 msgstr ""
 
 #: ../../pages/standard/92_gc2_meta_information.rst
-#: 73e5d242618c4772b6d43951bf42e06f
+#: bb1546bef430416088bee04ae84491da
 msgid "Date"
 msgstr ""
 
 #: ../../pages/standard/92_gc2_meta_information.rst:9
-#: 35165f9450c04ea190c9e6514e5e3ec6
+#: 61262a7e2c9842eca4d61d52120f9367
 msgid "|today|"
 msgstr ""
 
 #: ../../pages/standard/92_gc2_meta_information.rst
-#: 0a4999a843fd4d3aa09ef226e3ab3d39
+#: 63d4beed1fd74046af1365281b083902
 msgid "Vidi-version"
 msgstr ""
 
 #: ../../pages/standard/92_gc2_meta_information.rst:10
-#: 94b94ee7ca344625ad9d18fa732b5376
+#: 9cbddae33d2f49c2b40d575c9f40b6e8
 msgid "2020.11.0"
 msgstr ""
 
 #: ../../pages/standard/92_gc2_meta_information.rst
-#: 335325a9b99a40419aa5dc6421b582c1
+#: a019bb6d57a645888db75701becc5a0c
 msgid "Forfattere"
 msgstr ""
 
 #: ../../pages/standard/92_gc2_meta_information.rst:11
-#: d0dd2e848a84410e82dedc551c019a80
+#: 2380c1aba02c45fbba49601ea4a48823
 msgid "`mapcentia <https://github.com/mapcentia>`_"
 msgstr ""
 
 #: ../../pages/standard/92_gc2_meta_information.rst:14
-#: 2a16c58decbe4db2a61235b68037e898
+#: fa792f337a1449edbf7a586b41e6eb8d
 msgid "Indhold"
 msgstr ""
 
 #: ../../pages/standard/92_gc2_meta_information.rst:18
-#: 3d58b055275a43d8a60642f58999db02
+#: 46551444fe0a4cf78f0d20f55f775628
 msgid "GC2 Meta information"
 msgstr ""
 
 #: ../../pages/standard/92_gc2_meta_information.rst:20
-#: 14858642348b449c93978b1407b12be3
+#: 2b137879391c4eaf9e6f118d73c77452
 msgid ""
 "GC2 har et konfigurerbart Meta Data system med egenskaber tilknyttet de "
 "enkelte lag, som Vidi læser ved opstart. Egenskaberne omfatter fx om lag "
@@ -78,109 +78,115 @@ msgid ""
 msgstr ""
 
 #: ../../pages/standard/92_gc2_meta_information.rst:28
-#: 05d2cdd10c9548a3827649c086afeb3d
+#: 8ea20ba9f1ba4a91a2c08120f0467f5d
 msgid "Herunder følger de forskellige egenskaber, der har betydning for Vidi."
 msgstr ""
 
 #: ../../pages/standard/92_gc2_meta_information.rst:33
-#: 95d2c690b7464454a2415a5b3fa17bc7
+#: 090bee38773a435d8c48411c9aa8c41a
 msgid "Info pop-up"
 msgstr ""
 
 #: ../../pages/standard/92_gc2_meta_information.rst:35
-#: 55ed215ff5d249ff98c877083e96da72
+#: e62e82cf862b4d849dea428bc8e1b69e
 msgid "**Pop-up template**"
 msgstr ""
 
 #: ../../pages/standard/92_gc2_meta_information.rst:37
-#: ef697dae6dca4e4c9dd01618aae74d0f
+#: e9625859cc1e429881cc84d94d2217d0
 msgid ""
 "Indeholdet i feature-info pop-up'en styres vha. en template, som anvender"
 " sproget `handlebars <https://handlebarsjs.com>`_"
 msgstr ""
 
 #: ../../pages/standard/92_gc2_meta_information.rst:39
-#: a3ad34e2e30c4f21af1d380784bee605
+#: 90e062b96e9341498ef858197406712b
 msgid ""
 "Hvis der ikke angives en template, så anvendes en standard, som looper "
 "felterne igennem og lister dem. Den ser således ud:"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:53
-#: a0680980f8e442cdabc7b23695ced380
+#: ../../pages/standard/92_gc2_meta_information.rst:55
+#: ../../pages/standard/92_gc2_meta_information.rst:597
+#: e76ea343eb2648afb5c6507a29612740 f58d6a3d42334cd4929785f7606ddc89
+msgid "Se også :ref:`templates`"
+msgstr ""
+
+#: ../../pages/standard/92_gc2_meta_information.rst:57
+#: b384251462d445c7b310a68a170f9ba3
 msgid "**Element selector**"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:55
-#: 9cbdad0214e64b4a83c5b1782db7aa59
+#: ../../pages/standard/92_gc2_meta_information.rst:59
+#: ac1ad6be7e9e4a1284c68e2a56bc7089
 msgid ""
 "Hvilket DOM element skal pop-up templaten renderes i? Kan bruges til "
 "brugerdefinerede templates."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:57
-#: a9acbf5ac179463e8b2e4d824a04c6bf
+#: ../../pages/standard/92_gc2_meta_information.rst:61
+#: b05557c235db47b68988c875cff9324f
 msgid "**Function**"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:59
-#: acf844850f9d40cfb9c96524e46cb483
+#: ../../pages/standard/92_gc2_meta_information.rst:63
+#: 83f7bba3953640a494ce325afbb6ecf6
 msgid ""
 "En JavaScript funktion som kaldes når feature-info foretages. En række "
 "argumenter bliver sendt til funktionen, herunder det objekt man har "
 "klikket i GeoJSON formatet."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:68
-#: ../../pages/standard/92_gc2_meta_information.rst:96
-#: 1ba591615559439e878ef1c6a6519946 7e0e5c8c48b34684a8f4654785595834
+#: ../../pages/standard/92_gc2_meta_information.rst:72
+#: ../../pages/standard/92_gc2_meta_information.rst:100
+#: c0fa394ceae44cc292c3ab04291fb3e9 d952e9a81b0a4c79872219f1a31c4f97
 msgid ""
 "Man kan nøjes med at skrive selve funktionens \"body\" og undlade "
 "`function` og listen af argumenterne. I såfald kan argumenterne tilgås "
 "med de navne, som angivet ovenfor:"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:75
-#: 411f0373929b49c8be5a164df1cd4987
+#: ../../pages/standard/92_gc2_meta_information.rst:79
+#: 2c67ac37ef264b388f8252c2e549ba17
 msgid "**Select function**"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:77
-#: 32008fc1d04549a0b7f23cca96a25cf4
+#: ../../pages/standard/92_gc2_meta_information.rst:81
+#: 2c9acd3ed95a4dd69b6503909a98ec7b
 msgid ""
 "En JavaScript funktion, som kaldes når der vælges en række i feature-"
 "listen. Id på Leaflet layer samt selve Leaflet layer bliver sendt som "
 "argumenter."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:113
-#: 292f27604251429eae4c91281b1206be
+#: ../../pages/standard/92_gc2_meta_information.rst:117
+#: 781c6c7216424c6080c6bd31c9ab648f
 msgid "**Accordion summery prefix**"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:115
 #: ../../pages/standard/92_gc2_meta_information.rst:119
-#: 0648924c67074712894922a12fc88804 c503208cb4d247c6bf58e79ff24977c9
+#: ../../pages/standard/92_gc2_meta_information.rst:123
+#: c58be7ff655f44aa9c00a76b92558f6e f73faa3116804c759728991802268081
 msgid "Anvendes ved brugen af :ref:`configjs_crossmultiselect`"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:117
-#: 0cc44d23ad90479480f62e7d07c5d313
+#: ../../pages/standard/92_gc2_meta_information.rst:121
+#: d79ff496316c42c5b3e915cae0955f6c
 msgid "**Accordion summery**"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:124
-#: eb953b431c6f43579c7d598595ef750b
+#: ../../pages/standard/92_gc2_meta_information.rst:128
+#: 88a6213390a14da485922cc563262776
 msgid "Layer type"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:126
-#: 2f1d646f45df40ddb4a7316adb7d39ff
+#: ../../pages/standard/92_gc2_meta_information.rst:130
+#: 8c8f1d0882f94feab25d6d0d76c539fa
 msgid "**Type**"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:128
-#: 117f2082f16b47698ecad8a2d244ec76
+#: ../../pages/standard/92_gc2_meta_information.rst:132
+#: fb198559396047e7a16ab2a657222968
 msgid ""
 "Hvilken type skal laget have i Vidi? Enten Vector eller Tile. Tile er WMS"
 " fra MapServer/QGIS Server og er standard. Hvis Vector vælges vil Vidi "
@@ -189,86 +195,86 @@ msgid ""
 "mellem dem i lag-træet."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:131
-#: 1018679bfb624f7c980b3b2b89df06f7
+#: ../../pages/standard/92_gc2_meta_information.rst:135
+#: b8303402f72c4e51bd876bba85c3f488
 msgid ""
 "Typerne WebGL og MVT (vector tiles) er eksperimentielle og virker "
 "givetvis ikke i Vidi."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:133
-#: 44fa5d136cf04ddc991cd80c8b0abf5a
+#: ../../pages/standard/92_gc2_meta_information.rst:137
+#: 353bff94234242408ca099d74f692843
 msgid "**Default**"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:135
-#: 4b7ee131091e404c9abd22720581af00
+#: ../../pages/standard/92_gc2_meta_information.rst:139
+#: da9db990b2644dc4b75db4469a5c13cf
 msgid "Hvilken type skal være valgt fra starten."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:140
-#: a4dcb36856974d6c8e87cd67879a9045
+#: ../../pages/standard/92_gc2_meta_information.rst:144
+#: f6281ed1c7e54c7eb5aabf94ae5dabd4
 msgid "Tables"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:142
-#: f16920b62ad54e6d9e7ec6e1534f6bc8
+#: ../../pages/standard/92_gc2_meta_information.rst:146
+#: 295fbc4132104d63a416fcfd45165c8d
 msgid "**Zoom on select**"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:144
-#: 97ff0e63a6ed471d973a5bd11107e5a3
+#: ../../pages/standard/92_gc2_meta_information.rst:148
+#: ca95204b2b4147608fcc6549a5c0a08c
 msgid "Skal der zoomes ved valg af objekt i feature-info-tabellen?"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:146
-#: 81bc16b44935462289e0997e911192c2
+#: ../../pages/standard/92_gc2_meta_information.rst:150
+#: 49b5076c986d478eacf27c13da7ef0d9
 msgid "**Max zoom level**"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:148
-#: faadd6d3d9094c088b85a033a26c6789
+#: ../../pages/standard/92_gc2_meta_information.rst:152
+#: 817e032f41ca4e61a0216ffeec47b02d
 msgid ""
 "Hvis der zoomes, så kan maks zoom-level sættes. Jo højere tal jo længere "
 "ind zoomes der. Er speciel anvendelig ved punktlag, hvor der altid zoomes"
 " maks ind. Standard sat til 17."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:153
-#: 335ed835824f4bf7b05b2e54895001fb
+#: ../../pages/standard/92_gc2_meta_information.rst:157
+#: b45ab706fd8e4fb08e761674d8cc4b0c
 msgid "Editor"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:155
-#: 20dd55741d6448de8f7156b32496eae4
+#: ../../pages/standard/92_gc2_meta_information.rst:159
+#: 2e5ced3a334b4d6e92ccf9b354b6637a
 msgid "**Editable**"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:157
-#: 7ff0f76074624207954694ca46c66685
+#: ../../pages/standard/92_gc2_meta_information.rst:161
+#: 566f8f2688e348cd9b12cc1490c0d7bb
 msgid ""
 "Skal laget være editerbart? Både Tile og Vector kan editeres. Det "
 "anbefales dog at benytte Vector til lag, som skal editeres i marken, da "
 "der er fuld funktionalitet uden netværk eller med langsom forbindelse."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:168
-#: 1405e3b6c0794c899edd7490ff5ba057
+#: ../../pages/standard/92_gc2_meta_information.rst:172
+#: e07ab1602f6b41be8ea175c88398e15a
 msgid "Tile settings"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:170
-#: c3fade8436fa47a193a0db31759c79b3
+#: ../../pages/standard/92_gc2_meta_information.rst:174
+#: 337bda1c4c104268a7e232323ec54f5a
 msgid "(Har kun betydning for lag af typen Tile)"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:172
-#: b4b24ffeaf3842f6889c0207c40aeda4
+#: ../../pages/standard/92_gc2_meta_information.rst:176
+#: 38c4827ca63346b9a5c02944c467c8bd
 msgid "**Use tile cache (WMS)**"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:174
-#: a6d2e9d8343a45dc97fc9cf53ee2e19f
+#: ../../pages/standard/92_gc2_meta_information.rst:178
+#: fc2fb854af2a4470ad9316bee6fbd6fb
 msgid ""
 "Hvis tjekket af, vil Vidi omgå MapCache og trække laget direkte fra WMS. "
 "Dette gør, at laget altid er synkront med databasen. Ulempen er, at "
@@ -276,53 +282,53 @@ msgid ""
 "har mange samtidige visninger."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:176
-#: d22ceb982f4d4cac8215f90518a6a260
+#: ../../pages/standard/92_gc2_meta_information.rst:180
+#: 9b73591c3bcc4b0eb83b22e7ffeb99e1
 msgid "**Tile service URI**"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:178
-#: f6ba6d98c623474a96ebf4935a2b254e
+#: ../../pages/standard/92_gc2_meta_information.rst:182
+#: bbdc198c174e4a1bb25d8b9c39ac3480
 msgid ""
 "Denne egenskab bevirker, at laget tiles bliver trukket fra et "
 "brugerdefineret API. Fx en extension til GC2."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:180
-#: 516dc79adf364e1daba8ec255fa02c29
+#: ../../pages/standard/92_gc2_meta_information.rst:184
+#: 76d6dd12e2794c5c91b11c8db9788c22
 msgid "**Selected style**"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:182
-#: 1ad7c5633c504ce0b80e3ac84ec47e70
+#: ../../pages/standard/92_gc2_meta_information.rst:186
+#: 8bb762a6d1fc4c4a85c3f6947b72ea20
 msgid ""
 "Her kan angives et style-objekt, som styrer hvordan det valgte objekt "
 "bliver markeret ved feature-info. Hvis det angives anvendes e. standard "
 "styling."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:184
-#: fca04072951c4a7eab582270d9bc8f13
+#: ../../pages/standard/92_gc2_meta_information.rst:188
+#: 92182b71bd484ffc99a5170900710e77
 msgid "Eksempel på et style-objekt:"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:200
-#: b985ea2dcfa54aa48cb81f8d4bf91a00
+#: ../../pages/standard/92_gc2_meta_information.rst:204
+#: fae89bf81d4e4072977fbed5613aec62
 msgid "Vector settings"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:202
-#: 5f7fa19b6bde4fd2bd3959cea2bc204f
+#: ../../pages/standard/92_gc2_meta_information.rst:206
+#: 7f2209f3900a41b6a12e11bbae63eff3
 msgid "(Har kun betydning for lag af typen Vector)"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:204
-#: 23cc5d7a8aff42f0b516eb46c340b10e
+#: ../../pages/standard/92_gc2_meta_information.rst:208
+#: 244406f497214faaba9c855c7ccc5134
 msgid "**Load strategy**"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:206
-#: d825e27a4bec459ba905dfb3cbd48152
+#: ../../pages/standard/92_gc2_meta_information.rst:210
+#: 30ed4bc85cd04973898bf467669b6b84
 msgid ""
 "Kan enten være Static eller dynamic. Static betyder, at alle lagets data "
 "bliver hentet fra databasen, når laget tændes. Ved dynamic hentes kun de "
@@ -331,44 +337,44 @@ msgid ""
 "standard."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:208
-#: 9e9081a788804b1c8708e760b8337251
+#: ../../pages/standard/92_gc2_meta_information.rst:212
+#: 02ab3945632f46e9bf9b3906f46e21e9
 msgid "**Max features**"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:210
-#: 06acf12bae3348b7a1fdaf9a1341eef6
+#: ../../pages/standard/92_gc2_meta_information.rst:214
+#: 36f5f1bc5b6548cf9e4b276bc6754078
 msgid ""
 "Hvor mange features skal skal der max leveres? Når laget tændes og max "
 "bliver nået, vises ingen features i laget og brugeren bliver informeret "
 "om, at max blev nået."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:212
-#: fd4eb7ccdcdd458e829af48950b73cad
+#: ../../pages/standard/92_gc2_meta_information.rst:216
+#: 4100001e9852430fb8f87aa4cbe3263c
 msgid "**Use clustering**"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:214
-#: 18f77632b60140f0ba233c04e82ff367
+#: ../../pages/standard/92_gc2_meta_information.rst:218
+#: 6be856327937467689751f1c38c28e6d
 msgid "Aktiverer Leaflet Cluster Map på laget."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:216
-#: c4e2034e3b6d4e3e9d6f19e26839db75
+#: ../../pages/standard/92_gc2_meta_information.rst:220
+#: 21a22653c1bb4710ba9cf8b58c8e05e9
 msgid "**Point to layer**"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:218
-#: d4fbaa6ac38d4e3490f2dc1308ec31e3
+#: ../../pages/standard/92_gc2_meta_information.rst:222
+#: 78b872b79d9c467a832067b1bb6fdb1d
 msgid ""
 "Vektor-punkter punkter kan vises som enten circle markers eller grafiske "
 "markers. Førstnævnte kan sammenlignes med vektor-linjer og flader og vil "
 "anvende nedenfornævnte Style function."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:220
-#: d16ef7837cae4e09b91b7007519eb366
+#: ../../pages/standard/92_gc2_meta_information.rst:224
+#: 55cf0944a12b4170bd686bd46a9d2458
 msgid ""
 "Men punkter kan også vises som grafisk ikoner. Vidi har indbygget Leaflet"
 " Plugin'en `Extra Markers "
@@ -376,13 +382,13 @@ msgid ""
 "<https://fontawesome.com>`_ , som anvendes uden videre:"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:236
-#: a2a08d50e4274c77bf4624d1cdbd71b9
+#: ../../pages/standard/92_gc2_meta_information.rst:240
+#: 910d2b9e4a5d450e895c6d94adf07d3a
 msgid "Her er et eksempel på hvordan et brugerdefineret SVG symbol kan anvendes:"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:251
-#: de6b8445587143f086db55501c78c05f
+#: ../../pages/standard/92_gc2_meta_information.rst:255
+#: 64b6b04c0fea44a3a4cc0539ede6db8b
 msgid ""
 "Markers placeres som standard i \"marker-pane\", som ligger øverste i "
 "kortet. Dvs. at marker-lag ikke kan sorteres mellem andre lag ej heller "
@@ -391,34 +397,34 @@ msgid ""
 "eget pane."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:253
-#: 7c3db3551d4741f299025c71276fec75
+#: ../../pages/standard/92_gc2_meta_information.rst:257
+#: eb0cc186f37d4fa58c3ae67dde260961
 msgid ""
 "Hvert lag har sit eget pane, som hedder \"schemanavn-lagnavn\". Dette kan"
 " angives i hhv. ``pane`` og ``shadowPane``. Sidstnævnte anvendes kun ved "
 "bruge af ExtraMarkers eller tilsvarende, som har en skygge:"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:271
-#: 9f26c9d730384909a8be790b071c4db4
+#: ../../pages/standard/92_gc2_meta_information.rst:275
+#: b190f7ee8d0643cea71cedcd300ffdb7
 msgid "**Style function**"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:273
-#: 9153cb5fd53e40b29536dc92a3972d73
+#: ../../pages/standard/92_gc2_meta_information.rst:277
+#: a95aaff7e35044328bc9ed40f5948119
 msgid ""
 "Funktion til styling af vektor-lag. Funktionen modtager hver enkelt "
 "feature i laget og leverer en style tilbage. Man kan derved lave meget "
 "anvanceret tematiseringer:"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:288
-#: c3f7166e736a453582a3613b9cfa5d19
+#: ../../pages/standard/92_gc2_meta_information.rst:292
+#: a5c3b7a435d54a0491cb9cbf8cea19fd
 msgid "**Show table**"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:290
-#: 873b6c4c6a244da19c1db191767290cb
+#: ../../pages/standard/92_gc2_meta_information.rst:294
+#: c6afc7f04b144b359f3ef3f969d26df6
 msgid ""
 "Hvis tjekket af og laget bliver tændt som vektor vil en tabel med lagets "
 "attributter vises. Kolonnerne styres af ``Vis i klik-info`` og ``Alias`` "
@@ -429,112 +435,112 @@ msgid ""
 ":ref:`Kørselskonfiguration (configs)<configjs_vectorTable>`"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:302
-#: a08cfdf3477540b2afa487bb28affae7
+#: ../../pages/standard/92_gc2_meta_information.rst:306
+#: f9dd4423269b4bc1809cd3b17c72e9d8
 msgid "**Reload Interval**"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:304
-#: ee7f0e1d96da433a9569ddb54a8c1254
+#: ../../pages/standard/92_gc2_meta_information.rst:308
+#: 88bf940b98294b0b830f9190f06907a2
 msgid ""
 "Hvis dette sættes vil laget refreshe i det angivne interval. Angives i "
 "millisekunder."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:306
-#: b8e3fcfd877f4ff999db48b10ed1b6c9
+#: ../../pages/standard/92_gc2_meta_information.rst:310
+#: 89384e85e7ce4976bfc4616300aaaebe
 msgid "**Reload callback**"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:308
-#: d9500976bc794dc8a0875d326e478535
+#: ../../pages/standard/92_gc2_meta_information.rst:312
+#: 8b5adb21933244889d09282321a47d55
 msgid "Hvis ovenfor er sat, vil denne funktion blive kørt ved hvert refresh."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:310
-#: 7bb05b8ffd3147e389af2f6b8046931d
+#: ../../pages/standard/92_gc2_meta_information.rst:314
+#: ce8e47fd5e054fb5bdb0deeb0d123a3f
 msgid "**Disable feature info**"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:312
-#: 308f1fc1dc8248c1b20485e7e3fb8b2d
+#: ../../pages/standard/92_gc2_meta_information.rst:316
+#: b29c4de324aa43f3aa0b4d8f2ace8afc
 msgid "Deaktiverer feature-info på vektor-laget."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:314
-#: af6ce7fb9e1c4cecb3658fa159f1265b
+#: ../../pages/standard/92_gc2_meta_information.rst:318
+#: 87f38bf77e304b0785650c02f8106bec
 msgid "**Max zoom**"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:316
-#: 13e304fb9c1a4feab44f1af9e89b1924
+#: ../../pages/standard/92_gc2_meta_information.rst:320
+#: e10918f865b44cf7a17fc21a625a1cc7
 msgid ""
 "Højeste zoom-level hvor laget skal være synligt. Værdien skal være en "
 "tile-set zoom level (0-20). Virker for både vektor og marker lag."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:318
-#: c950a3f0659e434cbaba7ab640bcd006
+#: ../../pages/standard/92_gc2_meta_information.rst:322
+#: cc0f7935fe4741cb971af54ccbd28306
 msgid "**Min zoom**"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:320
-#: 2b8f5e170f37449b9081ce2f02798d98
+#: ../../pages/standard/92_gc2_meta_information.rst:324
+#: 2a4943af3f8043a587a82f4b8515e934
 msgid ""
 "Laveste zoom-level hvor laget skal være synligt. Værdien skal være en "
 "tile-set zoom level (0-20). Virker for både vektor og marker lag."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:322
-#: 6cf0afa478244320b02db2c839e4c270
+#: ../../pages/standard/92_gc2_meta_information.rst:326
+#: 2c2043111dbf46048b173fe81b3ab193
 msgid "**Tooltip template**"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:324
-#: 1d6eb6d6a2c942288012878a49b1bee8
+#: ../../pages/standard/92_gc2_meta_information.rst:328
+#: 03eaa46bc1f94716b74ad76454dfcec3
 msgid ""
 "Hvis der angives en tooltip template får hver vektorfeature et "
 "tooltip/label med værdien. Templaten har adgang til alle attributter for "
 "feature:"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:333
-#: 3ed9118b77434db5b679172379dcb84d
+#: ../../pages/standard/92_gc2_meta_information.rst:337
+#: df85c60f4f3542aea652f10be0c6f037
 msgid "Filters"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:335
-#: 4c082ab1eee44a00902fa57fa3bc6c76
+#: ../../pages/standard/92_gc2_meta_information.rst:339
+#: a8b626d021df40929c949cf6b9b9fd98
 msgid "**Filter config**"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:337
-#: d10c7c5e8ef342459305be7d7b51de91
+#: ../../pages/standard/92_gc2_meta_information.rst:341
+#: 85cfc9c4a74944e48992b74c53bbdc0d
 msgid ""
 "Her kan der foruddefineres hvilke filtre, der skal være parate til brug "
 "fra starten. Derved skal brugeren blot skrive værdier i filtrene og "
 "klikke Apply."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:339
-#: 06e3b494ae5044c284dc67906be4e464
+#: ../../pages/standard/92_gc2_meta_information.rst:343
+#: b6fd61a22baf4cb982250fb455c9ed3f
 msgid ""
 "Filteropsætningen er en liste af objekter med hver to egenskaber: field "
 "og operator. Eksempel på en opsætning:"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:349
-#: 35dde1a9c8b94ffa82f66f537bb60d64
+#: ../../pages/standard/92_gc2_meta_information.rst:353
+#: 7e09c386c005448c80730d58c76cb403
 msgid "Som giver dette resultat:"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:357
-#: dc9568e97ac44ca886a871e54083facf
+#: ../../pages/standard/92_gc2_meta_information.rst:361
+#: 32846334def94ee5be7166159a73134e
 msgid "**Predefined filters**"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:359
-#: 048f5e5424734d5a9b1cb3ac9c79d1bb
+#: ../../pages/standard/92_gc2_meta_information.rst:363
+#: 4c0669937e8f46c3862091a995868fe4
 msgid ""
 "Præ-definerede filtre gør det muligt, at aktivere fastsatte filtrer med "
 "en tjekboks. Som udgangspunkt er et filter aktiveret og som match bruges "
@@ -544,73 +550,73 @@ msgid ""
 " selve filtret, som er en SQL where clause."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:370
-#: e17151bbab7e498cb297f13865620068
+#: ../../pages/standard/92_gc2_meta_information.rst:374
+#: 908a43767e854590a1fa23b03ee67cfa
 msgid "Eksemplet ser sådan ud i lag-træet:"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:379
-#: a22d217f55a0479f960517761651371d
+#: ../../pages/standard/92_gc2_meta_information.rst:383
+#: 96bea674e27e4119bb45e7f0d0a935dc
 msgid "**Default match**"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:381
-#: f087fc17dbb64e6186420984e4f8718b
+#: ../../pages/standard/92_gc2_meta_information.rst:385
+#: f953422b4387482d9eb437171637f4bc
 msgid "Hvad skal match være som standard: All eller Any"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:383
-#: dad55efcde704930afb53753fc8af43b
+#: ../../pages/standard/92_gc2_meta_information.rst:387
+#: b70227ba05a74c199889f31336a71acb
 msgid "**Immutable**"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:385
-#: eb818d1bb8e440798390a4ea46fe8c29
+#: ../../pages/standard/92_gc2_meta_information.rst:389
+#: 1fb5d6fbd76d4890ab76f774b8de380e
 msgid "Hvis denne egenskab er slået til kan filteropsætningen ikke ændres i Vidi."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:390
-#: f11a81a133754716901f3e252db91d0f
+#: ../../pages/standard/92_gc2_meta_information.rst:394
+#: 32a56f195f8544b0ab536ad790e0797a
 msgid "Mouse over"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:392
-#: 19cf5e37a96345a08fe7d975b0eaec46
+#: ../../pages/standard/92_gc2_meta_information.rst:396
+#: 3089b0cd25334de986bc285dd5732805
 msgid "**Activate mouse over**"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:394
-#: 1667a19fbaaa46ef8fb32282c3f4df6f
+#: ../../pages/standard/92_gc2_meta_information.rst:398
+#: 4e5eacb8bb6e4d9bb155fc6844ba8e82
 msgid "Aktiverer mouse over på laget. Virker på tile- og vektor-lag."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:396
-#: 6f1e87e3eadc4956a922de5ca4ff6ed5
+#: ../../pages/standard/92_gc2_meta_information.rst:400
+#: 6105a39a65ce474dbf5866c22742ca4a
 msgid "**Template**"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:398
-#: b7cea315f5a340d29020221a8042aeb4
+#: ../../pages/standard/92_gc2_meta_information.rst:402
+#: d88e500e50f74f66bd4609d908fb989c
 msgid ""
 "Indeholdet i mouse over labelen styres vha. en template, som anvender "
 "sproget `handlebars <https://handlebarsjs.com>`_"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:400
-#: fb5b32c09c8b4c16a226b0cb5d856d60
+#: ../../pages/standard/92_gc2_meta_information.rst:404
+#: b315712e11df484980ee25398daef15f
 msgid ""
 "Hvis der ikke angives en template, så anvendes en standard, som looper "
 "valgte felterne (tjekket af i :ref:`gc2structure_mouseover`) igennem og "
 "lister dem. Den ser således ud:"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:410
-#: 451869a40b6f48ea9a6966636504fa15
+#: ../../pages/standard/92_gc2_meta_information.rst:414
+#: ebdb1518dbee4e9d9c5295c151750623
 msgid "**Cache UTF grid**"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:412
-#: 78ff5c56f25d4a52863b2f094c97220b
+#: ../../pages/standard/92_gc2_meta_information.rst:416
+#: 598510d4a67b43aca85c22eb3f0f6d8d
 msgid ""
 "Ved mouse over på tile-lag anvendes et såkaldt UTF grid, som er en slags "
 "interaktivt lag, som loades bag tile-laget. Det kræver database og CPU "
@@ -618,18 +624,18 @@ msgid ""
 "allerede brugte grids ikke skal gendannes."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:417
-#: 1ec4047f9bc146bfa46cb4330e7b80ba
+#: ../../pages/standard/92_gc2_meta_information.rst:421
+#: b1bc4c5f48204c10a62bc7f916332a76
 msgid "References"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:419
-#: 5b1121fbd3f342999a870fe680f0eba8
+#: ../../pages/standard/92_gc2_meta_information.rst:423
+#: 9d75822c7884404aa9dc33a470ee6bea
 msgid "**Referenced by**"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:421
-#: d4019f7873f84927ac65737191661c50
+#: ../../pages/standard/92_gc2_meta_information.rst:425
+#: 8705586732274f48828198879d2585eb
 msgid ""
 "Her kan et lag linkes til et eller flere andre lag. Dvs. at når "
 "\"forældre\"-laget filtreres, så bliver \"børne\"-lagene også filtreret. "
@@ -638,224 +644,224 @@ msgid ""
 "nøglefelt, som optræder som fremmednøglefelt i børne-lagene."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:423
-#: 8fc247d56a234fde9d86dff23bb39f87
+#: ../../pages/standard/92_gc2_meta_information.rst:427
+#: fd0419470b4e4cb180c77c05c7d645b1
 msgid "Opsætningen sker i forældre-laget, som refererer til børne-lagene."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:425
-#: 6419c5aeb5d248adb7b060222f2cbc68
+#: ../../pages/standard/92_gc2_meta_information.rst:429
+#: 3adc1f28c4d04128bed05ea09aa37b46
 msgid ""
 "I eksemplet nedenunder refererer børne-laget drift.vw_searchjourneystop "
 "til forældrelaget, som har det unikke nøglefelt vj_gid. Fremmednøglen i "
 "børne-laget hedder vehjourneygid."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:427
-#: 17325bc04b474f30bf80a93f81edf173
+#: ../../pages/standard/92_gc2_meta_information.rst:431
+#: f926e0fb96534e0593149dfa24e674ac
 msgid "Her er der kun ét børne-lag, men der skrives flere objekter ind i listen."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:439
-#: 2bd6172d5d844784a7ab27e4c78ea388
+#: ../../pages/standard/92_gc2_meta_information.rst:443
+#: c883cfb7732f4e2fac6f8cc078a9d8f8
 msgid "I Vidi i laget-træet kan børne-lagene ses på forældre-laget:"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:451
-#: ef33f48ffdb0472fa465085fb4416fb3
+#: ../../pages/standard/92_gc2_meta_information.rst:455
+#: f689b7a37dd74f0fb0a8906ef118fb95
 msgid "Layer tree"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:453
-#: 8e2c9820da054158a122c863de42a9af
+#: ../../pages/standard/92_gc2_meta_information.rst:457
+#: 56d3e93495484c84a409020512c7f641
 msgid "**Sub group**"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:455
-#: f6140f1b348344b8a0a77ab216eb390b
+#: ../../pages/standard/92_gc2_meta_information.rst:459
+#: bf914703304743b6a8bc3099416c739c
 msgid ""
 "Denne egenskab kan gruppere lag i en under-lag-grupper. Alle lag med "
 "samme Sub group vil blive samlet i en gruppe. Lagene skal ligge i samme "
 "GC2 Group."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:457
-#: 484af441f1244694b3c51b215f61fba8
+#: ../../pages/standard/92_gc2_meta_information.rst:461
+#: 5684fd2dec1d4af088f0d41980d39a7a
 msgid ""
 "Man kan have uendelig mange undergrupper og stien af undergrupper, hvor "
 "laget skal befinde sig skal angives således:"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:463
-#: 8d53675e2a754377a74b3846843f52e2
+#: ../../pages/standard/92_gc2_meta_information.rst:467
+#: db3c9152e2c944ba95a1a57478928a99
 msgid "**Open tools**"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:465
-#: 51e0f51d27bf43038d22689e5bd39c3b
+#: ../../pages/standard/92_gc2_meta_information.rst:469
+#: 2ba1f4a3567f4484bad8e65812148b5d
 msgid ""
 "Her kan angives om et lags værktøjer skal være åbne fra starten. Hvilke "
 "værktøjer, der skal være åbne, angives således:"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:471
-#: cb8f6d69db504a9992f690d605afa68f
+#: ../../pages/standard/92_gc2_meta_information.rst:475
+#: 203a895fd8174ed9bf1d1acbdb0010c0
 msgid "I ovenstående tilfælde vil filter-værktøjerne være åbne."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:473
-#: e6482eb7e1504d2894cd32baf05be047
+#: ../../pages/standard/92_gc2_meta_information.rst:477
+#: db00e16859ef4556bef5980ea0602fd3
 msgid "Her ses alle mulighederne:"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:479
-#: c5c322aee1e3431f8945041885e26b95
+#: ../../pages/standard/92_gc2_meta_information.rst:483
+#: 66110e0bfe2d41c4a645979177fee399
 msgid "**Disable check box**"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:481
-#: 36157096796041d68cde2e25169b7be6
+#: ../../pages/standard/92_gc2_meta_information.rst:485
+#: 5e6a8b48259a459bb2c1dbcd6f3b682b
 msgid ""
 "Laget kan låses. Det låses op, hvis laget er registreret som \"barn\" til"
 " et andet lag gennem :ref:`gc2mata_references`, hvorpå der aktiveres et "
 "filter."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:486
-#: b7bda2ac4a7e473ca1d97ff6684991ed
+#: ../../pages/standard/92_gc2_meta_information.rst:490
+#: e415d24e6fab40899dd0ae63e12dde17
 msgid "GC2 Struktur-fanen"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:488
-#: b677ab35e84243ad8b6f026c1944b76e
+#: ../../pages/standard/92_gc2_meta_information.rst:492
+#: 5a8c02a4d5ba446588b6cb2943a66817
 msgid "I GC2's struktur-fane kan der laves en række indstillinger på feltniveau."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:498
-#: 7c22d9b9476d4010ac410c79092ab3da
+#: ../../pages/standard/92_gc2_meta_information.rst:502
+#: c350cb003b974892a5f3f978c932d553
 msgid "Alias"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:500
-#: 5e18930befd24d6f8abe848261d9200b
+#: ../../pages/standard/92_gc2_meta_information.rst:504
+#: 82398c257cac42bab35f38f1ce61f72d
 msgid ""
 "Giv feltet et alias, som vises i stedet for det tekniske feltnavn i Vidi."
 " Kan indeholde specialtegn"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:503
-#: 0e16e6b119a8460fb04d793eb0acca5b
+#: ../../pages/standard/92_gc2_meta_information.rst:507
+#: f05000b07ddb46e8898f024f41f77a7a
 msgid "Vis i klik-info"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:505
-#: ed3d3c6df22a4dab8dbefaa43a27ecfc
+#: ../../pages/standard/92_gc2_meta_information.rst:509
+#: ede5ddee103d4ea5811ded40a0a9eaad
 msgid ""
 "Medtag feltet i feature-info. Gælder kun ved brugen af standard pop-up "
 "templaten. (se :ref:`gc2mata_infopopup`)"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:510
-#: 48db4274041b41d190a7b8b79c78ff0c
+#: ../../pages/standard/92_gc2_meta_information.rst:514
+#: 27e4f162613e47be884d55f520737ce2
 msgid "Vis i mouse-over"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:512
-#: 7be6af4ddf3840e282c23f543427072d
+#: ../../pages/standard/92_gc2_meta_information.rst:516
+#: b014461e47374437b5685b491e8222b7
 msgid ""
 "Medtag feltet i mouse-over. Gælder kun ved brugen af standard mouse-over-"
 "templaten. Men skal klikkes af, hvis feltet overhovedet skal med i UTF "
 "Grid'et. (se :ref:`gc2mata_mouseover`)"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:516
-#: ffe573d8492d43d1aaa4d5140d641200
+#: ../../pages/standard/92_gc2_meta_information.rst:520
+#: 42f4bcce635c494194052526aad1061e
 msgid "Søgbar"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:518
-#: 3fb9d7f63a6743bc960fb167081303fb
+#: ../../pages/standard/92_gc2_meta_information.rst:522
+#: 6bb6c6d4e12b49b998b586e7af054ebe
 msgid "Gør feltet søgbart i lagets fritekstsøgning."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:528
-#: fb092b1c9bba42c2a5eb351086e1dad5
+#: ../../pages/standard/92_gc2_meta_information.rst:532
+#: 44cdf729ddfe489ab6e5c468ac2d253b
 msgid "Deaktiver filtrering"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:530
-#: 37dbfb67421a4aef8489a37d6ff3069b
+#: ../../pages/standard/92_gc2_meta_information.rst:534
+#: e0bbde73003048de8177be0fbda166fd
 msgid "Ekskluder feltet fra lag-filtrering."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:534
-#: 22c91a5b50424c7a9bfe658d735f7949
+#: ../../pages/standard/92_gc2_meta_information.rst:538
+#: 5f3975d0cbe042c787129bcf984e8b52
 msgid "Autocomplete"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:536
-#: 59f7df9d13ab4591bbf78da2f7ce53ab
+#: ../../pages/standard/92_gc2_meta_information.rst:540
+#: 7b1a67bad60c445daa0cf22c0a3acc4d
 msgid "Aktiver autocomplete på feltet i filtrering."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:548
-#: 2ca0c7d94f234ceeba77cfa27f60d54d
+#: ../../pages/standard/92_gc2_meta_information.rst:552
+#: 64178e8b93144f798f59ddd3033df99e
 msgid "Gør til link"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:550
-#: 91cfded6678048e98d9dc2be45b7b5ae
+#: ../../pages/standard/92_gc2_meta_information.rst:554
+#: 3a6e8c5727734d8a9436ae71896ef6c0
 msgid ""
 "Hvis feltet indholder en web-adresse gøres det til et aktivt link i pop-"
 "up'en."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:553
-#: ../../pages/standard/92_gc2_meta_information.rst:561
-#: ../../pages/standard/92_gc2_meta_information.rst:571
-#: ../../pages/standard/92_gc2_meta_information.rst:579
-#: ../../pages/standard/92_gc2_meta_information.rst:591
-#: 2375673212cf43f4896696f4b5134d1c 44a33324108347699106ef670db13373
-#: 44d77e2e79424692a7bd037bb01e88eb 51ba425e50764505b57f66c4cfeb57aa
-#: e9d58c74fc1b4c998a79537b536c2ed7
+#: ../../pages/standard/92_gc2_meta_information.rst:557
+#: ../../pages/standard/92_gc2_meta_information.rst:565
+#: ../../pages/standard/92_gc2_meta_information.rst:575
+#: ../../pages/standard/92_gc2_meta_information.rst:583
+#: ../../pages/standard/92_gc2_meta_information.rst:595
+#: 5e9c5efd8d894f008fed5795ead4e169 6ab7309c5882413a827429cd9c74990e
+#: 6c8a6cf20ff74a96905df6d7c7376630 b91837e4583146b0ba1d896a68b9dad9
+#: e8d07e2f1be242e4834e5a7a293670c0
 msgid ""
 "Hvis der anvendes en brugerdefineret pop-up template, har denne "
 "indstilling ingen effekt (se :ref:`gc2mata_infopopup`)"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:556
-#: 01286da0a4694efcab1489f06d694d84
+#: ../../pages/standard/92_gc2_meta_information.rst:560
+#: 6abf7d05556b4df0851e5b347b7a7109
 msgid "Content"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:558
-#: 4d402d110a914eb1bdec7fcc0711ad1a
+#: ../../pages/standard/92_gc2_meta_information.rst:562
+#: 3c42275ae1e347d791308575d50a74b3
 msgid ""
 "Hvis feltet indeholder et link til et billede eller mp4-video kan der her"
 " vælges typen. Ved brug af standard templaten bliver billedet eller "
 "videoen sat ind (se :ref:`gc2mata_infopopup`)"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:566
-#: 28e749e1845d4df6831c385b3a6a87b0
+#: ../../pages/standard/92_gc2_meta_information.rst:570
+#: db9f85e450a64967abec9c30c9f7e01d
 msgid "Link prefix"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:568
-#: 30fd52695e364ab794bbd50e1485b416
+#: ../../pages/standard/92_gc2_meta_information.rst:572
+#: 192ac8c56ef64f8d9e339e9cae2d60b3
 msgid ""
 "Hvis :ref:`gc2structure_link` er tjekket af, kan der sættes en tekst-"
 "streng foran linket. Fx hvis ``https://`` mangler i linket (fx "
 "``minside.dk/mitdok.pdf``) således det blivet et gyldigt link."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:574
-#: 383db6d87849401e82b3b3cfca769e47
+#: ../../pages/standard/92_gc2_meta_information.rst:578
+#: 03b2adb9b3cd4d0b880e17c9b636d675
 msgid "Link suffix"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:576
-#: 6633717d52e042c8be4ce089758d335e
+#: ../../pages/standard/92_gc2_meta_information.rst:580
+#: 24aa91a8bfc54eaa9157f9d60a10ca24
 msgid ""
 "Som ved :ref:`gc2structure_link_prefix` men bare bagved. Fx hvis feltet "
 "kun indeholder en titel på et dokument: ``mitdok``, så kan "
@@ -863,13 +869,13 @@ msgid ""
 "resultatet bliver ``https://minside.dk/mitdok.pdf``."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:582
-#: 9f73ee8ac29f4515ac301faa48afb6ac
+#: ../../pages/standard/92_gc2_meta_information.rst:586
+#: 95d81bfac2554ec087721ae6c003dab6
 msgid "Template"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:584
-#: 78de515d98fe4c5fa393ecaa58bb814b
+#: ../../pages/standard/92_gc2_meta_information.rst:588
+#: 22f889eee13f4ddca28aadb2a6303fee
 msgid ""
 "Hvis værdien af et felt skal udtrykkes i pop-up og tabel ved andet end "
 "selve den rå værdi kan der indsættes en template for feltet. En template "
@@ -878,13 +884,13 @@ msgid ""
 "label`` attributter fra et andet felt. Fx:"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:594
-#: 8f114d51ec024e548d4caef621b3ccd7
+#: ../../pages/standard/92_gc2_meta_information.rst:600
+#: c754f1af797543c5ace96387899fbc7e
 msgid "Egenskaber"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:596
-#: 6b0a2408b3da4b8f9d4669e94a554674
+#: ../../pages/standard/92_gc2_meta_information.rst:602
+#: 8f8c2db7f90941f295e70c570721fc6c
 msgid ""
 "Her kan der defineres hvilke værdier, der kan være i feltet. Hvis dette "
 "defineres, vil der i Vidi's filter og editerings funktioner blive dannet "
@@ -892,80 +898,80 @@ msgid ""
 "muligt at indtaste vilkårlige værdier."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:599
-#: b787a7ca30cf43348dc61ab53f554b31
+#: ../../pages/standard/92_gc2_meta_information.rst:605
+#: ebc6fd8c27e948fca2ea1357e59aea01
 msgid "Listen af værdier kan defineres på en række forskellige måder."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:601
-#: 155b8325ab374f438c8cf26665959e30
+#: ../../pages/standard/92_gc2_meta_information.rst:607
+#: 589f5eead2734cd08429da0ac13f5b2e
 msgid "**Reference-tabel**"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:603
-#: 12801e72766344f0809901b1bb3c7fd9
+#: ../../pages/standard/92_gc2_meta_information.rst:609
+#: 244b167b3dde499184b660e91cb28a73
 msgid ""
 "Værdier kan komme fra en anden tabel i databasen. Dette angives ved tre "
 "parameter i et JSON objekt:"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:609
-#: 84036765fb5043c0903722916ecf54ae
+#: ../../pages/standard/92_gc2_meta_information.rst:615
+#: 15b9f873a6c94636a5955a92b0cabbdf
 msgid ""
 "``_rel`` angiver reference-tabellen (eller view) som schema-kvalificeret "
 "(schema-navnet skal angives foran tabelnavnet)."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:610
-#: d83023b9a2534963b5a9fbe566084fcd
+#: ../../pages/standard/92_gc2_meta_information.rst:616
+#: 6859d62c39384a468d02d2dab197ce23
 msgid "``_value`` angiver feltet, som indeholder værdierne."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:611
-#: 370fdc7bac444d3a9d9e3a0652e84e4d
+#: ../../pages/standard/92_gc2_meta_information.rst:617
+#: 2d45044ea37249578abf33c5bdf22eb6
 msgid ""
 "``_text`` angiver feltet, som indeholder den tekst, der skal vises i "
 "drop-down-listen. Dette felt kan godt være det samme som ovenstående "
 "_value felt."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:613
-#: aab9b97d39ca4ca0b26396910c395fa6
+#: ../../pages/standard/92_gc2_meta_information.rst:619
+#: ee4a7e2558e94a2baa7bf9ed0ba883db
 msgid "**Værdi-tekst liste**"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:615
-#: 50940e60eb8c447981df3e1e34031cac
+#: ../../pages/standard/92_gc2_meta_information.rst:621
+#: 34caec1b86964026b5aa46b360a3e846
 msgid ""
 "Værdier kan angive som en liste af værdi-tekst par i et JSON objekt. Dvs."
 " at det er teksten (venstre side), som bliver vist i drop-down-listen, "
 "mens værdien (højre side) bliver anvendt."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:621
-#: 4d4bde4691a046cea50ad2d3e90aae92
+#: ../../pages/standard/92_gc2_meta_information.rst:627
+#: 65a58e3baa004ad59366190f27e700bc
 msgid "**Værdi liste**"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:623
-#: aebd6e1b21af4d72a05ef7ea595d49ed
+#: ../../pages/standard/92_gc2_meta_information.rst:629
+#: 5cfa12fd6de74281ba1b2625f0603467
 msgid ""
 "Værdier kan angives som en liste i et JSON array. Værdierne bliver vist i"
 " drop-down-listen."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:629
-#: 978fea2fa7af411fa4ade04cb22b2d03
+#: ../../pages/standard/92_gc2_meta_information.rst:635
+#: affff7d0da1e4974af65f6a0a6fb73c4
 msgid "Listen kan både bestå af tal og tekster."
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:631
-#: aa9982d2c8d24101b6269581cabe02b2
+#: ../../pages/standard/92_gc2_meta_information.rst:637
+#: d3a9835d7b0c4e909d681f371208a945
 msgid "**Wild card**"
 msgstr ""
 
-#: ../../pages/standard/92_gc2_meta_information.rst:633
-#: b2e3ae4a8fea4efc8d4f8adee1ae8431
+#: ../../pages/standard/92_gc2_meta_information.rst:639
+#: bf4b71e930e8409ab648694cf91751ba
 msgid ""
 "Der kan dannes en drop-down-liste af samtlige unikke værdier som allerede"
 " findes i feltet. Det gøres ved at indsætte ``*`` i feltet."

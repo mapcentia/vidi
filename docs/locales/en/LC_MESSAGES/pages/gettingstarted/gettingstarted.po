@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Vidi 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-09 13:16+0100\n"
+"POT-Creation-Date: 2025-09-01 13:41+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -17,142 +17,285 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.12.1\n"
+"Generated-By: Babel 2.17.0\n"
 
 #: ../../pages/gettingstarted/gettingstarted.rst:9
-#: a3e2fe7216034fe295914711ecc6031a
+#: 2d84388fe623409f833d61de27a3ec3e
 msgid "Kom godt i gang med Vidi"
 msgstr "Get started with the Vidi"
 
 #: ../../pages/gettingstarted/gettingstarted.rst:9
-#: c894927ac2f24b2d847863e2ae9ba293
+#: ba4c3ee9df084b6ea9db20cf86cd93b4
 msgid "Overview"
 msgstr ""
 
 #: ../../pages/gettingstarted/gettingstarted.rst
-#: cae8b5011c0146be8877eb3533f0979e
+#: 2a6fa3888797441d9bde15659efd8a17
 msgid "Date"
 msgstr ""
 
 #: ../../pages/gettingstarted/gettingstarted.rst:13
-#: 2045ef9ac82043ff93a43d406543003a
+#: f4437506568a4bc2acf2229c3d49b4f5
 msgid "|today|"
 msgstr ""
 
 #: ../../pages/gettingstarted/gettingstarted.rst
-#: e2b8c93575514f888dc3a1b92e3b3c65
+#: ee1dd40df834442eabfbdd23c8b3f510
 msgid "Vidi-version"
 msgstr ""
 
 #: ../../pages/gettingstarted/gettingstarted.rst:14
-#: a6e5bf481f0b49ce9b6050d9de29c16b
+#: eeccd4c8361c45b09635fe3d5774d5ed
 msgid "2020.11.0"
 msgstr ""
 
 #: ../../pages/gettingstarted/gettingstarted.rst
-#: 34fddf59f9c94806a57751005f6b0f33
+#: 1763201d89594d35863d16a5f6274e36
 msgid "Forfatter"
 msgstr ""
 
 #: ../../pages/gettingstarted/gettingstarted.rst:15
-#: 3d384c1632e84b4689c32b1317fc6732
+#: 8565c39093b745b5819416dddf468c58
 msgid "`giovanniborella <https://github.com/giovanniborella>`_"
 msgstr ""
 
 #: ../../pages/gettingstarted/gettingstarted.rst:19
-#: ca5c7f568de54c2689adc0980d25f14c
+#: 964eda3181354b3b9add4d182face0ff
 msgid "Indhold"
 msgstr ""
 
 #: ../../pages/gettingstarted/gettingstarted.rst:22
-#: 53010237a08f4eb992764e41be52b589
+#: 0e5b5045005446b08e4e6fda44bde900
 msgid "Hvad er Vidi?"
 msgstr ""
 
 #: ../../pages/gettingstarted/gettingstarted.rst:24
-#: b7f5ab26b9c9429c9ac6593f58a09fbc
+#: 42cce81bc8054c00869b5a44f05588bb
 msgid ""
 "Vidi er en HTML5 applikation til at vise og forespørge på kortdata fra "
-"|gc2|. Klienten læser information fra GC2's meta-api, og viser en moderne"
-" kort-browser med lag for den specificerede PostGreSQL"
+"|gc2|."
 msgstr ""
 
 #: ../../pages/gettingstarted/gettingstarted.rst:26
-#: c4fd7948043c48269df8ab3646dd5394
-msgid "Her er et udpluk af nogle af funktionaliteterne."
+#: 2b68181ba0b64c6999992e72b2515449
+msgid ""
+"Klienten læser information fra GC2's meta-api, og viser en moderne kort-"
+"browser med lag for den specificerede PostGreSQL"
 msgstr ""
 
 #: ../../pages/gettingstarted/gettingstarted.rst:28
-#: 22bdfdbbb2df49919e09aadf947cca7b
-msgid "Avanceret forespørgsler med buffer"
-msgstr ""
-
-#: ../../pages/gettingstarted/gettingstarted.rst:29
-#: 98a75121928541ccbbb9c99229b0f1a1
-msgid "Print til PDF"
+#: a609cf1473f94962b66869153b224d16
+msgid "Her er et udpluk af nogle af funktionaliteterne."
 msgstr ""
 
 #: ../../pages/gettingstarted/gettingstarted.rst:30
-#: 74e4fa561bc04803b02c3cea419272ed
-msgid "Klar til udvidelser"
+#: 04b64a8d456b4f64a7921aa04d7ca8d5
+msgid "Avanceret forespørgsler med buffer"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:31
+#: e26682555be04f409a2eab32f97a392f
+msgid "Print til PDF"
 msgstr ""
 
 #: ../../pages/gettingstarted/gettingstarted.rst:32
-#: 00029f78b2d04e30898b42e59b161829
-msgid "Vidi er ikke bygget ind i GC2, men kræver sin egen installation."
+#: 1cfbc59e50614b5793d691eacf330345
+msgid "Klar til udvidelser"
 msgstr ""
 
 #: ../../pages/gettingstarted/gettingstarted.rst:34
-#: aab402574662416eaa0e9f382f867df9
+#: ae25958a449e4c16b4aabf280a6478ca
+msgid "Vidi er ikke bygget ind i GC2, men kræver sin egen installation."
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:36
+#: 3a527cec9978472baccee2af8276887c
 msgid "`Du kan prøve det live her <https://kort.geofyn.dk/>`_"
 msgstr ""
 
 #: ../../pages/gettingstarted/gettingstarted.rst:39
-#: eb2195cada2e4e8b89fd9cd4784f783f
-msgid "Vidi ved et øjekast"
-msgstr ""
-
-#: ../../pages/gettingstarted/gettingstarted.rst:41
-#: ../../pages/gettingstarted/gettingstarted.rst:46
-#: ../../pages/gettingstarted/gettingstarted.rst:51
-#: ../../pages/gettingstarted/gettingstarted.rst:56
-#: ../../pages/gettingstarted/gettingstarted.rst:61
-#: ../../pages/gettingstarted/gettingstarted.rst:66
-#: ../../pages/gettingstarted/gettingstarted.rst:71
-#: 51ac5c1dc8d14584b52dc8b14c966bca 5959bc90871844279d1d1a84b47d6e6b
-#: 9e9a6cd2cc124a6592478600ee494db5 a35351f3c94b4648b07c4be56bc21ddd
-#: e02893f1ebbc4b9f8aa62fe0160a7fc3 e9fe2b0791eb4d7eae2d1525a262443d
-#: ef45b1f428224c70af7317880d3351d8
-msgid "TBD"
-msgstr ""
-
-#: ../../pages/gettingstarted/gettingstarted.rst:44
-#: 284dd279fec6442781d7942f4180f92b
+#: 0c5501dfc4b642fcb8495c2d89e7fd79
 msgid "Kortvinduet"
 msgstr ""
 
-#: ../../pages/gettingstarted/gettingstarted.rst:49
-#: 0ce29d29dd5e4abb8243e1e3bbc652b2
-msgid "Toolbar"
+#: ../../pages/gettingstarted/gettingstarted.rst:47
+#: 0c33a0885a2a427faeed8132c58e7163
+msgid "Startskærmen i Vidi"
 msgstr ""
 
-#: ../../pages/gettingstarted/gettingstarted.rst:54
-#: 2bd5296f6ae7479290220bc4948802e2
-msgid "Navigér"
+#: ../../pages/gettingstarted/gettingstarted.rst:52
+#: 78df814f4906441a8db4b61d79a9272c
+msgid "Menu"
 msgstr ""
 
-#: ../../pages/gettingstarted/gettingstarted.rst:59
-#: 16c0f3eacf0d46dcb1ab80a2d2dd5489
-msgid "Sidebar"
+#: ../../pages/gettingstarted/gettingstarted.rst:60
+#: 4f0c07bd2b5e4c549d773760c2891665
+msgid "Menuen i Vidi"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:62
+#: 59848fc80d8e49208559d07b6a655365
+msgid ""
+"Menuen indholder de fleste funktionalitet til kortet, og indeholder "
+"lagstyring, søgeværktøjer, info-værktøj, print og meget mere."
 msgstr ""
 
 #: ../../pages/gettingstarted/gettingstarted.rst:64
-#: f483d39545884c9aa2765ffc5c1cc0f2
-msgid "Skifte visning"
+#: 91e6ab968b474ea58e5a1d4126e7bc4c
+msgid ""
+"Menuen gemmer sig selv hvis kortvinduet er for smalt, men kan bringes "
+"frem igen ved hjælp af ``Menu``-knappen."
 msgstr ""
 
 #: ../../pages/gettingstarted/gettingstarted.rst:69
-#: 3d279cf431fa4c018b924c2f2c7af64b
-msgid "Tool"
+#: 4c41f152d5be44e8b664eb6b92335a6e
+msgid "Navigér"
 msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:71
+#: fb40c77e5ca84690a02fd15e58604073
+msgid ""
+"Panorer i kortet ved at klikke og trække med musen. Det er også muligt at"
+" bruge piletasterne på tastaturet."
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:73
+#: 7afca7c26ba049758987950882aa3b94
+msgid ""
+"Zoom ind og ud ved at bruge scrollhjulet på musen eller ved at klikke på "
+"plus- og minusknapperne i værktøjslinjen. Det er også muligt at bruge "
+"``+`` og ``-`` på tastaturet."
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:76
+#: c4b0d3a64c9b42849d394d30370ce2ce
+msgid "Der kan være begrænsninger på zoomniveauet, afhængigt af datakilden."
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:78
+#: 301a2a0b9e4e43019fb8afda3760017c
+msgid ""
+"Zoom ind på et bestemt område ved at holde ``Shift`` nede, klikke og "
+"trække en boks i kortet. Eller kan man bruge ``Zoom til udsnit``-knappen "
+"i værktøjslinjen."
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:80
+#: 05d5bf7ec91a4830a144a8071c06a4ea
+msgid ""
+"Det er muligt at komme tilbage til det oprindelige kortudsnit ved at "
+"klikke på ``Hjem``-knappen i værktøjslinjen."
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:82
+#: bed192e690d9478fb7aa539183d8dffa
+msgid ""
+"Man kan gå tilbage i kortudsnit ved at bruge ``Forrige udsnit``-knappen i"
+" værktøjslinjen, her kan man også gå frem igen ved at bruge ``Næste "
+"udsnit``-knappen."
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:88
+#: d906654a8ff1404194c1a77691935688
+msgid "Værktøjslinjen"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:95
+#: 9c7559b03d46476c84ae97bd4ef8bc43
+msgid "Værktøjslinjen i Vidi"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:97
+#: 4f2f7d3a5401423b94c6b043f2eba6c8
+msgid ""
+"Værktøjslinjen indeholder en række værktøjer til at interagere med "
+"kortet. Værktøjerne vil altid være tilgængelige i toppen af kortet."
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:99
+#: 19fb41ac85d94e229c19af127d839759
+msgid "Værktøjerne i billedet er (oppefra):"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:101
+#: 4f884920d34b4c4ca6387fb6e5b34ca9
+msgid "``Hjem``"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:102
+#: 838f6ac49fc1494097e9e7393b5d9148
+msgid "``Zoom ind``"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:103
+#: 60fc1a55f40d4accbaa44f6006e911a8
+msgid "``Zoom ud``"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:104
+#: b151604f4d27411ba3f44274c36046c6
+msgid "``Geolokation``"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:105
+#: f956da8c63cf4b6db0da9e7464b08abb
+msgid "``Måleværktøj``"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:106
+#: 1f5818e6e55d4e258b2dba6ee4fae16d
+msgid "``Fuldskærm``"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:107
+#: fb1a92ab4d7e4b2d91ee7257682a6202
+msgid "``Ryd kort``"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:108
+#: 40508e4cffaa499db29409647db31996
+msgid "``screenshot``"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:109
+#: 765fe2f48055480b823cde3ed9ec9325
+msgid "``Forrige udsnit``"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:110
+#: 086db00378004bd497f324986ec920be
+msgid "``Næste udsnit``"
+msgstr ""
+
+#: ../../pages/gettingstarted/gettingstarted.rst:111
+#: cadd4c6878084f40bd44e6dc282a1b7a
+msgid "``Zoom til udsnit``"
+msgstr ""
+
+#~ msgid ""
+#~ "Vidi er en HTML5 applikation til "
+#~ "at vise og forespørge på kortdata "
+#~ "fra |gc2|. Klienten læser information "
+#~ "fra GC2's meta-api, og viser en"
+#~ " moderne kort-browser med lag for "
+#~ "den specificerede PostGreSQL"
+#~ msgstr ""
+
+#~ msgid "Vidi ved et øjekast"
+#~ msgstr ""
+
+#~ msgid "TBD"
+#~ msgstr ""
+
+#~ msgid "Toolbar"
+#~ msgstr ""
+
+#~ msgid "Sidebar"
+#~ msgstr ""
+
+#~ msgid "Skifte visning"
+#~ msgstr ""
+
+#~ msgid "Tool"
+#~ msgstr ""
 
