@@ -7,7 +7,11 @@
     "serve": "grunt && grunt browserify:watch",
     "serve:watsonc": "grunt --theme=watsonc && grunt --theme=watsonc browserify:watch",
     "test": "nyc mocha -t 100000 --recursive test/unit && nyc mocha -t 100000 --recursive test/api && nyc mocha test/puppeteer/bootstrap.js -t 100000 --recursive test/puppeteer",
-    "test_custom": "nyc mocha test/puppeteer/bootstrap.js -t 100000 -b --recursive test/puppeteer --grep \"Layer tree layer types\""
+    "test_custom": "nyc mocha test/puppeteer/bootstrap.js -t 100000 -b --recursive test/puppeteer --grep \"Layer tree layer types\"",
+    "build_docs": "sphinx-build ./docs ./docs/_build/html/da",
+    "gettext": "sphinx-build ./docs -b gettext ./docs/_build/gettext",
+    "update_en": "cd ./docs && sphinx-intl update -p _build/gettext -l en",
+    "build_en": "sphinx-build -b html -D language=en ./docs ./docs/_build/html/en"
   },
   "repository": {
     "type": "git",

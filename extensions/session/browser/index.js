@@ -12,12 +12,14 @@ let layerTree;
 let sessionInstance = false;
 let userName = null;
 let isStatusChecked = false;
+let anchor;
 let exId = `login-modal-body`;
 const config = require('./../../../config/config.js');
 const urlparser = require('./../../../browser/modules/urlparser');
 const urlVars = urlparser.urlVars;
 const cookie = require('js-cookie');
 const React = require("react");
+
 
 /**
  *
@@ -28,6 +30,7 @@ module.exports = {
         utils = o.utils;
         backboneEvents = o.backboneEvents;
         layerTree = o.layerTree;
+        anchor = o.anchor;
         return this;
     },
     init: function () {
@@ -87,6 +90,23 @@ module.exports = {
                 let me = this;
                 event.preventDefault();
                 if (!me.state.auth) {
+
+                    const uri = encodeURIComponent(anchor.getUri() + '?' + anchor.getParam() + anchor.getAnchor());
+                    console.log(uri);
+
+
+                    //window.location.href = "/openid.html?" + uri;
+                    const win = utils.popupCenter("/openid.html", 600, 400, "Sign in");
+                    console.log(win)
+                    var timer = setInterval(function() {
+                        if(win.closed) {
+                            clearInterval(timer);
+                            window.location.reload()
+                        }
+                    }, 1000);
+
+                    return;
+
                     let dataToAuthorizeWith = {
                         "user": me.state.sessionScreenName,
                         "password": me.state.sessionPassword,
@@ -130,6 +150,8 @@ module.exports = {
                         url: "/api/session/stop",
                         type: "GET",
                         success: function () {
+                            localStorage.removeItem('gc2_tokens')
+
                             backboneEvents.get().trigger(`session:authChange`, false);
 
                             me.setState({statusText: __("Not signed in")});
@@ -203,39 +225,10 @@ module.exports = {
                         <form onSubmit={this.handleSubmit}>
                             <Status statusText={this.state.statusText} alertClass={this.state.alertClass}/>
                             <div className="row g-3 align-items-center">
-                                <div className="col-4"
-                                     style={{
-                                         display: this.state.auth ? 'none' : 'block',
-                                         minWidth: '250px'
-                                     }}>
-                                    <input
-                                        id="sessionScreenName"
-                                        className="form-control"
-                                        defaultValue={this.state.sessionScreenName}
-                                        onChange={this.handleChange}
-                                        placeholder={__("User name")}
-                                        autoComplete="username"
-                                    />
-                                </div>
-                                <div className="col-4"
-                                     style={{
-                                         display: this.state.auth ? 'none' : 'block',
-                                         minWidth: '250px'
-                                     }}>
-                                    <input
-                                        id="sessionPassword"
-                                        className="form-control"
-                                        defaultValue={this.state.sessionPassword}
-                                        onChange={this.handleChange}
-                                        type="password"
-                                        placeholder={__("Password")}
-                                        autoComplete="current-password"
-                                    />
-                                </div>
                                 <div className="col-2">
                                     <button
                                         type="submit"
-                                        disabled={!this.validateForm()}
+                                        // disabled={!this.validateForm()}
                                         className="btn btn-outline-primary text-nowrap"
                                     >
                                         {this.state.btnText}

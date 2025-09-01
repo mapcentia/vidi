@@ -120,3 +120,4 @@ config/_variables.less
 
 # Ignore the docs build folder
 docs/_build
+/venv/

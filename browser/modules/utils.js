@@ -92,7 +92,7 @@ module.exports = {
         //Allow for title and status bars.
         topPosition = (window.screen.height / 2) - ((height / 2) + 50);
         //Open the window.
-        window.open(url, name,
+        return window.open(url, name,
             "status=no,height=" + height + ",width=" + width + ",resizable=yes,left="
             + leftPosition + ",top=" + topPosition + ",screenX=" + leftPosition + ",screenY="
             + topPosition + ",toolbar=no,menubar=no,scrollbars=no,location=no,directories=no");
