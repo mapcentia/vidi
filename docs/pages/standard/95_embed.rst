@@ -70,6 +70,8 @@ Følgende attributer styrer hvilke funktioner, der skal være synlige.
 
 Følgende funktioner er synlige, men kan sættes til "none" hvis funktionerne skal skjules:
 
+* **data-vidi-brand (valgfri)**
+ * Brandnavn.
 * **data-vidi-search (valgfri)**
  * Søgeboksen.
 * **data-vidi-history (valgfri)**
