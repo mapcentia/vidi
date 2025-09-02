@@ -195,7 +195,9 @@ module.exports = {
                         if (window.vidiConfig?.initFunction) {
                             let func = Function('"use strict";return (' + window.vidiConfig.initFunction + ')')();
                             try {
-                                func();
+                                if (func && typeof func === "function") {
+                                    func();
+                                }
                             } catch (e) {
                                 console.error("Error in initFunction:", e.message)
                             }
