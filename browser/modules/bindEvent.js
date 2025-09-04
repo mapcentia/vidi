@@ -63,8 +63,8 @@ module.exports = {
             mainLayerOffcanvas = new bootstrap.Offcanvas('#mainLayerOffcanvas');
             offcanvasInfo = new bootstrap.Offcanvas('#offcanvasLayerDesc');
             document.getElementById('mainLayerOffcanvas').addEventListener('shown.bs.offcanvas', event => {
-                document.querySelector("#offcanvasLayerControlBtn .bi-arrow-bar-left").classList.remove("d-none");
-                document.querySelector("#offcanvasLayerControlBtn .bi-arrow-bar-right").classList.add("d-none");
+                document.querySelector("#offcanvasLayerControlBtn .bi-arrow-bar-left")?.classList.remove("d-none");
+                document.querySelector("#offcanvasLayerControlBtn .bi-arrow-bar-right")?.classList.add("d-none");
             })
             document.getElementById('mainLayerOffcanvas').addEventListener('hidden.bs.offcanvas', event => {
                 document.querySelector("#offcanvasLayerControlBtn .bi-arrow-bar-right").classList.remove("d-none");
