@@ -31,12 +31,6 @@ var hash = urlparser.hash;
  */
 var urlVars = urlparser.urlVars;
 
-/**
- *
- * @type {string}
- */
-var BACKEND = require('../../config/config.js').backend;
-
 var anchor;
 
 var layers;
