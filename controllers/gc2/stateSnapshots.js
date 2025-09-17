@@ -1,6 +1,6 @@
 /*
  * @author     Alexander Shumilov
- * @copyright  2013-2021 MapCentia ApS
+ * @copyright  2013-2025 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -352,6 +352,9 @@ router.put('/api/state-snapshots/:dataBase/:stateSnapshotKey', (req, res, next) 
     }
 });
 
+/**
+ * Update state snapshot tags
+ */
 router.patch('/api/state-snapshots/:dataBase/:stateSnapshotKey', (req, res, next) => {
     req.body = JSON.parse(base64url.decode(req.body));
     console.log(req.body);
