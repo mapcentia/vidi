@@ -237,6 +237,24 @@ class StateSnapshotsDashboard extends React.Component {
         });
     }
 
+    updateSnapshotWithTag(data, tags) {
+        let _self = this;
+        _self.setState({loading: true});
+        data.tags = tags ? tags.filter((value, index, array) => array.indexOf(value) === index) : [];
+        $.ajax({
+            url: `${this.state.apiUrl}/${vidiConfig.appDatabase}/${data.id}`,
+            method: 'PATCH',
+            contentType: 'text/plain; charset=utf-8',
+            dataType: 'text',
+            data: base64url(JSON.stringify({tags: data.tags}))
+        }).then(() => {
+            _self.setState({
+                updatedItemId: false,
+                loading: false
+            });
+        });
+    }
+
     /**
      * Enables updat form for snapshot
      *
@@ -397,7 +415,8 @@ class StateSnapshotsDashboard extends React.Component {
             let importButton = false;
             if (local && this.state.authenticated) {
                 importButton = (
-                    <button type="button" className="btn btn-sm btn-outline-secondary" onClick={() => this.seizeSnapshot(item)}>
+                    <button type="button" className="btn btn-sm btn-outline-secondary"
+                            onClick={() => this.seizeSnapshot(item)}>
                         <i title={titles.seize} className="bi bi-person-add"></i>
                     </button>);
             }
@@ -534,7 +553,8 @@ class StateSnapshotsDashboard extends React.Component {
                                 {selectSize}
                             </div>
                         </div>)}
-                    <TagComponent onAdd={tags => this.updateSnapshot(item, item.title, tags, false)} tags={item.tags}
+                    <TagComponent onAdd={tags => this.updateSnapshotWithTag(item, tags, false)}
+                                  tags={item.tags}
                                   allTags={allTags}/>
                 </div>
             </div>);

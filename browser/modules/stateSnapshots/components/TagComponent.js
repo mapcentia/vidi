@@ -4,7 +4,7 @@
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
-import React, {StrictMode} from 'react';
+import React, {StrictMode, useState} from 'react';
 import Multiselect from "react-widgets/Multiselect";
 
 
@@ -12,17 +12,19 @@ import Multiselect from "react-widgets/Multiselect";
  * Title field
  */
 function TagComponent({onAdd, tags = [], allTags}) {
-
+    const [tagList, setTagList] = useState(tags);
     function onAddTag(e) {
         const t = e;
-        if (!t || t === '' || tags.includes(t)) {
+        if (!t || t === '' || tagList.includes(t)) {
             return
         }
-        tags.push(t)
-        onAdd(tags);
+        const newTags = [...tagList, t];
+        setTagList(newTags)
+        onAdd(newTags);
     }
 
     function onRemoveTag(e) {
+        setTagList(e)
         onAdd(e)
     }
 
@@ -31,8 +33,8 @@ function TagComponent({onAdd, tags = [], allTags}) {
             messages={{emptyList: __('There is no tags in the list'), emptyFilter: __('The filter returned no results'), createOption: (_value, searchTerm) => [__('Create tag'), searchTerm && ' ', searchTerm && React.createElement("strong", {
                     key: "_"
                 }, `"${searchTerm}"`)]}}
-            data={tags ? allTags.filter((o) => tags?.indexOf(o) === -1).concat(tags.filter((o) => allTags.indexOf(o) === -1)) : allTags}
-            value={tags}
+            data={tagList ? allTags.filter((o) => tagList?.indexOf(o) === -1).concat(tagList.filter((o) => allTags.indexOf(o) === -1)) : allTags}
+            value={tagList}
             textField="fullName"
             allowCreate="onFilter"
             onCreate={onAddTag}
