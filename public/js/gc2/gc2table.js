@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2020 MapCentia ApS
+ * @copyright  2013-2025 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -504,38 +504,6 @@ var gc2table = (function () {
 
         if (autoUpdate) {
             m.on("moveend", moveEndEvent);
-        }
-
-        var jrespond = require('jrespond');
-        var jRes = jrespond([
-            {
-                label: 'handheld',
-                enter: 0,
-                exit: 400
-            },
-            {
-                label: 'desktop',
-                enter: 401,
-                exit: 100000
-            }
-        ]);
-        if (responsive) {
-            jRes.addFunc({
-                breakpoint: ['handheld'],
-                enter: function () {
-                    $(el).bootstrapTable('toggleView');
-                },
-                exit: function () {
-                    $(el).bootstrapTable('toggleView');
-                }
-            });
-            jRes.addFunc({
-                breakpoint: ['desktop'],
-                enter: function () {
-                },
-                exit: function () {
-                }
-            });
         }
 
         return {

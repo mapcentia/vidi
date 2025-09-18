@@ -60,7 +60,6 @@ let urlsToCache = [
     '/js/lib/backbone/backbone.js',
     '/js/lib/raphael/raphael.min.js',
     '/js/lib/underscore/underscore.js',
-    '/js/lib/jrespond/jRespond.js',
     '/js/lib/mustache.js/mustache.js',
     '/js/lib/jquery/jquery.js',
     '/js/lib/jquery-ui/jquery-ui.min.js',
