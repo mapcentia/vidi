@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2025.9.0] - 2025-27-8
+### Fixed
+- Changing Snapshot tags will now not update the whole snapshot. Only the tags that are changed will be updated.
+
 ## [2025.8.2] - 2025-27-8
 ### Added
 - A 30-second timeout to handle cases where Vidi fails to load, ensuring the "Vidi is now loaded" console message is sent to prevent lockups in print. Clears timeout on successful loading. The timeout can be changed with `config.loadingTimeout` in build-time config.
