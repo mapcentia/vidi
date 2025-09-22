@@ -225,11 +225,11 @@ module.exports = function (grunt) {
                 tasks: 'css'
             }
         },
-        uglify: {
+        terser: {
             publish: {
                 options: {
                     sourceMap: true,
-                    sourceMapIncludeSources: true,
+                    mangle: true,
                     compress: {
                         dead_code: false,
                         drop_debugger: false,
@@ -369,8 +369,8 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-templates-hogan');
     grunt.loadNpmTasks('grunt-browserify');
     grunt.loadNpmTasks('grunt-shell');
+    grunt.loadNpmTasks('grunt-terser');
     grunt.loadNpmTasks('grunt-contrib-less');
-    grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-processhtml');
     grunt.loadNpmTasks('grunt-cache-bust');
@@ -382,7 +382,7 @@ module.exports = function (grunt) {
 
 
     grunt.registerTask('default', ['prepareAssets', 'browserify:publish', 'browserify:publish_sw_dev', 'css', 'hogan', 'version']);
-    grunt.registerTask('production', ['env:prod', 'hogan', 'prepareAssets', 'browserify:publish', 'browserify:publish_sw', 'css', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust', 'version', 'appendBuildHashToVersion']);
+    grunt.registerTask('production', ['env:prod', 'hogan', 'prepareAssets', 'browserify:publish', 'browserify:publish_sw', 'css', 'terser', 'processhtml', 'cssmin:build', 'cacheBust', 'version', 'appendBuildHashToVersion']);
     grunt.registerTask('production-test', ['env:prod', 'browserify:publish']);
     grunt.registerTask('css', ['less', 'sass', 'cssmin']);
 };

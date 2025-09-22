@@ -57,12 +57,12 @@
     "grunt-contrib-handlebars": "^1.0.0",
     "grunt-contrib-less": "^1.4.0",
     "grunt-contrib-sass": "^2.0.0",
-    "grunt-contrib-uglify": "^5.2.2",
     "grunt-contrib-watch": "^1.1.0",
     "grunt-env": "^0.4.4",
     "grunt-extract-sourcemap": "^0.1.19",
     "grunt-processhtml": "^0.4.2",
     "grunt-templates-hogan": "^0.3.0",
+    "grunt-terser": "^2.0.0",
     "grunt-version": "^1.3.2",
     "install": "^0.12.1",
     "karma": "6.3.16",
@@ -73,7 +73,7 @@
     "mocha": "^5.1.1",
     "npm": "^6.14.17",
     "nyc": "^12.0.2",
-    "uglifyify": "^5.0.2",
+    "terser": "^5.44.0",
     "windowify": "^0.3.0"
   },
   "dependencies": {
