@@ -27,15 +27,16 @@
     "grunt-contrib-cssmin": "^1.0.2",
     "grunt-contrib-handlebars": "^1.0.0",
     "grunt-contrib-less": "^1.4.0",
-    "grunt-contrib-uglify": "^2.0.0",
     "grunt-contrib-watch": "^1.0.0",
     "grunt-env": "^0.4.4",
     "grunt-git": "^1.0.0",
     "grunt-processhtml": "^0.4.1",
     "grunt-templates-hogan": "^0.3.0",
+    "grunt-terser": "^2.0.0",
     "grunt-watchify": "^0.1.0",
     "load-grunt-tasks": "^3.5.2",
-    "reactify": "^1.1.1"
+    "reactify": "^1.1.1",
+    "terser": "^5.44.0"
   },
   "dependencies": {
     "@turf/turf": "^5.1.6",
@@ -46,7 +47,7 @@
     "body-parser": "^1.15.2",
     "bootstrap": "^3.3.7",
     "bootstrap-select": "^1.12.4",
-    "browserify": "^16.1.1",
+    "browserify": "^17.0.1",
     "browserify-fs": "^1.0.0",
     "bulk-require": "^1.0.0",
     "circular-functions": "0.0.3",

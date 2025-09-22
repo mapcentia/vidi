@@ -142,12 +142,12 @@ module.exports = function (grunt) {
                 }
             }
         },
-        uglify: {
+        terser: {
             publish: {
                 options: {
                     sourceMap: true,
-                    sourceMapIncludeSources: true,
-                    compress: false
+                    compress: false,
+                    mangle: false
                 },
                 files: {
                     'public/js/build/all.min.js': [
@@ -261,8 +261,8 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-browserify');
     grunt.loadNpmTasks('grunt-git');
     grunt.loadNpmTasks('grunt-shell');
+    grunt.loadNpmTasks('grunt-terser');
     grunt.loadNpmTasks('grunt-contrib-less');
-    grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-processhtml');
     grunt.loadNpmTasks('grunt-cache-bust');
@@ -272,7 +272,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-bower-task');
 
     grunt.registerTask('default', ['browserify:publish', 'extension-css', 'hogan']);
-    grunt.registerTask('production', ['env', 'gitreset', 'browserify:publish', 'extension-css', 'hogan', 'shell', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust']);
+    grunt.registerTask('production', ['env', 'gitreset', 'browserify:publish', 'extension-css', 'hogan', 'shell', 'terser', 'processhtml', 'cssmin:build', 'cacheBust']);
     grunt.registerTask('extension-css', ['less', 'cssmin:extensions']);
 };
 
