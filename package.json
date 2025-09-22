@@ -102,7 +102,7 @@
     "bootstrap-icons": "^1.10.2",
     "bootstrap-select": "^1.13.17",
     "bootstrap-table": "^1.24.2",
-    "browserify": "^16.5.1",
+    "browserify": "^17.0.1",
     "browserify-fs": "^1.0.0",
     "bulk-require": "^1.0.0",
     "can-ndjson-stream": "^1.0.2",
