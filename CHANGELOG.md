@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2025.10.0] - 2025-2-10
+### Added
+- New config option `mode` for setting different optimization modes with bitmask flags:
+  - 1: No transparency fade animation in GUI
+  - 2: No visibility check of tile layers
+  - 4: No map animations
+
+### Changed
+- Remove `jrespond` dependency and related code.
+- Remove `bower.json` and its dependencies as it's no longer used
+- Update `@maplibre/maplibre-gl-leaflet` to v0.1.3 and `maplibre-gl` to v5.7.2.
+- Replace `grunt-contrib-uglify` with `grunt-terser`.
+- Update `browserify` to v17.0.1
+
 ## [2025.9.0] - 2025-27-8
 ### Fixed
 - Changing Snapshot tags will now not update the whole snapshot. Only the tags that are changed will be updated.
