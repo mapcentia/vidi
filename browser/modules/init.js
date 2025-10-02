@@ -6,8 +6,6 @@
 
 'use strict';
 
-import {fallback} from "async/internal/setImmediate";
-
 let modules;
 let tmpl;
 const urlparser = require('./../modules/urlparser');
@@ -105,6 +103,7 @@ module.exports = {
             crs: 'EPSG:3857',
             loadingTimeout: 30000,
             loadCheckingInterval: 15000,
+            mode: 0,
         };
         // Set default for unset props
         for (let prop in defaults) {

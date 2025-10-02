@@ -8,6 +8,7 @@
 
 import {LAYER_TYPE_DEFAULT} from './layerTree/constants';
 import legend from './legend';
+import {NO_GUI_FADE} from "./constants";
 
 require('dom-shims');
 require('arrive');
@@ -107,21 +108,15 @@ module.exports = {
             fadeWhenDraggingClass.css('pointer-events', 'all');
         }
 
-        cloud.get().on('dragstart', function () {
-            fadeOutMenu(fadeWhenDraggingClass);
-        });
+        if ((window.vidiConfig.mode & NO_GUI_FADE) === 0) {
+            cloud.get().on('dragstart', function () {
+                fadeOutMenu(fadeWhenDraggingClass);
+            });
 
-        cloud.get().on('dragend', function () {
-            fadeInMenu(fadeWhenDraggingClass);
-        });
-
-        cloud.get().on('zoomstart', function () {
-            fadeOutMenu(fadeWhenDraggingClass);
-        });
-
-        cloud.get().on('zoomend', function () {
-            fadeInMenu(fadeWhenDraggingClass);
-        });
+            cloud.get().on('dragend', function () {
+                fadeInMenu(fadeWhenDraggingClass);
+            });
+        }
 
         /**
          * Triggered when the layer control is changed in any module
