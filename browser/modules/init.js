@@ -121,7 +121,7 @@ module.exports = {
                                          aria-atomic="true">
                                         <div class="d-flex">
                                             <div class="toast-body">
-                                                <p>Vidi takes a long time to load. Update to clear caches and refresh. Cancel to wait.</p>
+                                                <p>${__('Vidi takes a long time to load. Update to clear caches and refresh. Cancel to wait.')}</p>
                                                 <button class='btn btn-secondary' onclick="updateApp()" >${__('Update')}</button><button class='btn btn-primary close-info-toast'" >${__('Cancel')}</button>
                                             </div>
                                         </div>
