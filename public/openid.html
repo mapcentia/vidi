@@ -11,7 +11,7 @@
           integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 </head>
 <body>
-<div id="container"></div>
+<div id="container">TEST</div>
 <script>
     const DEFAULTS = {
         redirectUri: 'http://localhost:3000/openid.html',
@@ -40,7 +40,7 @@
             fetch('/api/session/start', {
                 method: 'POST',
                 headers: {"Content-Type": "application/json;charset=UTF-8",},
-                body: JSON.stringify({nonce, token}),
+                body: JSON.stringify({nonce, token, database: 'mydb'}),
             }).then(res => res.json()).then(data => {
                 //codeFlow.clear()
                 document.querySelector('#container').innerHTML = 'Signed in'
@@ -60,7 +60,7 @@
             }
         }
     }).catch(err => {
-        // alert(err)
+        alert(err)
         // location.reload()
     })
 </script>

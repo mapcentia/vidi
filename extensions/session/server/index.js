@@ -36,7 +36,8 @@ let start = function (dataToAuthorizeWith, req, response, status) {
             method: 'POST',
             uri: config.gc2.host + "/api/v2/session/token",
             body: JSON.stringify({
-                token: dataToAuthorizeWith.token
+                token: dataToAuthorizeWith.token,
+                database: dataToAuthorizeWith.database,
             })
         };
     } else {
@@ -126,6 +127,7 @@ let start = function (dataToAuthorizeWith, req, response, status) {
 
 router.post('/api/session/start', function (req, response) {
     if (req.body) {
+        console.log(req.body);
         start(req.body, req, response);
     }
 });

@@ -96,7 +96,7 @@ module.exports = {
 
 
                     //window.location.href = "/openid.html?" + uri;
-                    const win = utils.popupCenter("/openid.html", 600, 400, "Sign in");
+                    const win = utils.popupCenter("/openid.html", 600, 800, "Sign in");
                     console.log(win)
                     var timer = setInterval(function() {
                         if(win.closed) {
