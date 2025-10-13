@@ -673,9 +673,7 @@ module.exports = {
 
             if (fields) {
                 $.each(fields, function (i, v) {
-                    if (v.type === "bytea") {
-                        fieldNames.push("encode(\"" + i + "\",'escape') as \"" + i + "\"");
-                    } else if (fieldConf?.[i]?.ignore !== true) {
+                    if (fieldConf?.[i]?.ignore !== true) {
                         fieldNames.push("\"" + i + "\"");
                     }
                 });
@@ -881,7 +879,12 @@ module.exports = {
                             } else if (property.value.type === 'bytea' && feature.properties[property.key]) {
                                 let subValue = decodeURIComponent(feature.properties[property.key]);
                                 if (subValue) {
-                                    const type = utils.splitBase64(subValue).contentType;
+                                    let type;
+                                    try {
+                                        type = utils.splitBase64(subValue).contentType;
+                                    } catch (e) {
+                                        type = "application/pdf";
+                                    }
                                     if (MIME_TYPES_IMAGES.includes(type)) {
                                         value =
                                             `<div style="cursor: pointer" onclick="window.open().document.body.innerHTML = '<img src=\\'${subValue}\\' />';">

@@ -1532,10 +1532,7 @@ module.exports = {
         let fieldNames = [];
         if (fields) {
             Object.keys(fields).forEach(function (i) {
-                let v = fields[i];
-                if (v.type === 'bytea') {
-                    fieldNames.push(`encode("${i}",'escape') as "${i}"`);
-                } else if (fieldConf?.[i]?.ignore !== true) {
+                if (fieldConf?.[i]?.ignore !== true) {
                     fieldNames.push(`"${i}"`);
                 }
             });
