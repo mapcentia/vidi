@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2025.10.1] - 2025-14-10
+### Changed
+- Support for GC2 setting `convertDataUrlsToHttp`. Vector layers, editor and feature-info can now deal with both
+  data and http urls.  
+
 ## [2025.10.0] - 2025-2-10
 ### Added
 - New config option `mode` for setting different optimization modes with bitmask flags:
