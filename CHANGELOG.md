@@ -64,7 +64,7 @@ and this project adheres to [CalVer](https://calver.org/).
 }
 ```
 
-## Fixed
+### Fixed
 - In print the EPSG:32632 projection is replaced with EPSG:3857 for consistency and improved accuracy. Introduced a correction factor to adjust for latitude distortions in dimensions. Refactored related calculations to ensure proper map scaling and alignment.
 
 ## [2025.5.2] - 2025-20-5
@@ -206,7 +206,7 @@ and this project adheres to [CalVer](https://calver.org/).
   A new method meta::getLayerNamesFromSchemata will convert the schemata to an array of layer names.
 - A global variable `decimalSeparator` is now set from current locale. It's used in conflictSearch.
 
-## Changed
+### Changed
 
 - Auto hide login modal after successful login.
 - When using `featureInfoTableOnMap` closing the popup wil clear selected features in the map.
@@ -219,7 +219,7 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ## [2025.2.1] - 2025-7-2
 
-## Added
+### Added
 
 - In ConflictSearch modul the total length and area is calculated for intersections with lines and polygons and
   reported.
