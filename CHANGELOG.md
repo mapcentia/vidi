@@ -9,6 +9,7 @@ and this project adheres to [CalVer](https://calver.org/).
 ### Changed
 - Upgrade React and ReactDOM to v17.0.2.
 - Replace react-autocomplete with react-widgets Combobox in layer tree controls to support React 17.
+- Remove unused packages from package.json (react-addons, react-button, rc-slider, react-color, mutationobserver-shim, grunt-bower-task, esmify, install, npm).
 
 ## [2025.10.2] - 2025-21-10
 ### Changed
