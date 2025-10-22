@@ -367,7 +367,7 @@ module.exports = {
 
         // Init some GUI stuff after modules are loaded
         // ============================================
-        $('[data-toggle=tooltip]').tooltip();
+        // $('[data-toggle=tooltip]').tooltip();
 
         touchScroll('.tab-pane');
         touchScroll('#info-modal-body-wrapper');

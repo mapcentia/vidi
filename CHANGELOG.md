@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2025.10.3] - 2025-22-10
+### Changed
+- Upgrade React and ReactDOM to v17.0.2.
+- Replace react-autocomplete with react-widgets Combobox in layer tree controls to support React 17.
+
 ## [2025.10.2] - 2025-21-10
 ### Changed
 - Support for GC2 setting `convertDataUrlsToHttp`. Vector layers, editor and feature-info can now deal with both
