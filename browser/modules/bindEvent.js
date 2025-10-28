@@ -8,6 +8,7 @@
 
 import {LAYER_TYPE_DEFAULT} from './layerTree/constants';
 import legend from './legend';
+import {NO_GUI_FADE} from "./constants";
 
 require('dom-shims');
 require('arrive');
@@ -63,8 +64,8 @@ module.exports = {
             mainLayerOffcanvas = new bootstrap.Offcanvas('#mainLayerOffcanvas');
             offcanvasInfo = new bootstrap.Offcanvas('#offcanvasLayerDesc');
             document.getElementById('mainLayerOffcanvas').addEventListener('shown.bs.offcanvas', event => {
-                document.querySelector("#offcanvasLayerControlBtn .bi-arrow-bar-left").classList.remove("d-none");
-                document.querySelector("#offcanvasLayerControlBtn .bi-arrow-bar-right").classList.add("d-none");
+                document.querySelector("#offcanvasLayerControlBtn .bi-arrow-bar-left")?.classList.remove("d-none");
+                document.querySelector("#offcanvasLayerControlBtn .bi-arrow-bar-right")?.classList.add("d-none");
             })
             document.getElementById('mainLayerOffcanvas').addEventListener('hidden.bs.offcanvas', event => {
                 document.querySelector("#offcanvasLayerControlBtn .bi-arrow-bar-right").classList.remove("d-none");
@@ -107,21 +108,15 @@ module.exports = {
             fadeWhenDraggingClass.css('pointer-events', 'all');
         }
 
-        cloud.get().on('dragstart', function () {
-            fadeOutMenu(fadeWhenDraggingClass);
-        });
+        if ((window.vidiConfig.mode & NO_GUI_FADE) === 0) {
+            cloud.get().on('dragstart', function () {
+                fadeOutMenu(fadeWhenDraggingClass);
+            });
 
-        cloud.get().on('dragend', function () {
-            fadeInMenu(fadeWhenDraggingClass);
-        });
-
-        cloud.get().on('zoomstart', function () {
-            fadeOutMenu(fadeWhenDraggingClass);
-        });
-
-        cloud.get().on('zoomend', function () {
-            fadeInMenu(fadeWhenDraggingClass);
-        });
+            cloud.get().on('dragend', function () {
+                fadeInMenu(fadeWhenDraggingClass);
+            });
+        }
 
         /**
          * Triggered when the layer control is changed in any module
@@ -372,7 +367,7 @@ module.exports = {
 
         // Init some GUI stuff after modules are loaded
         // ============================================
-        $('[data-toggle=tooltip]').tooltip();
+        // $('[data-toggle=tooltip]').tooltip();
 
         touchScroll('.tab-pane');
         touchScroll('#info-modal-body-wrapper');

@@ -75,7 +75,6 @@ module.exports = function (grunt) {
                     'public/css/build/all.min.css': [
                         // Bootstrap icons
                         'node_modules/bootstrap-icons/font/bootstrap-icons.css',
-                        'node_modules/@fortawesome/fontawesome-free/css/all.css',
                         // Leaflet
                         'node_modules/leaflet/dist/leaflet.css',
                         'public/js/lib/leaflet-draw/leaflet.draw.css',

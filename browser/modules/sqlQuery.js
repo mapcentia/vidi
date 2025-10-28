@@ -883,7 +883,7 @@ module.exports = {
                                     try {
                                         type = utils.splitBase64(subValue).contentType;
                                     } catch (e) {
-                                        type = "application/pdf";
+                                        type = subValue.split("=")[1];
                                     }
                                     if (MIME_TYPES_IMAGES.includes(type)) {
                                         value =
@@ -897,7 +897,7 @@ module.exports = {
                                         width="100%"
                                         height="200px"
                                     />
-                                    <a download href=${subValue}>${__("Download the file")}</a>
+                                    <a download target="_blank" href=${subValue}>${__("Download the file")}</a>
                                     `;
                                     } else {
                                         value = `

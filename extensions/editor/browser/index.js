@@ -198,7 +198,6 @@ module.exports = {
 
             document.getElementById("offcanvasEditBtn").addEventListener("click", () => offcanvasEdit.toggle());
         } catch (e) {
-            console.log(e)
         }
 
         // Listen to arrival of add-feature buttons

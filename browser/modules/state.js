@@ -31,12 +31,6 @@ var hash = urlparser.hash;
  */
 var urlVars = urlparser.urlVars;
 
-/**
- *
- * @type {string}
- */
-var BACKEND = require('../../config/config.js').backend;
-
 var anchor;
 
 var layers;
@@ -195,7 +189,9 @@ module.exports = {
                         if (window.vidiConfig?.initFunction) {
                             let func = Function('"use strict";return (' + window.vidiConfig.initFunction + ')')();
                             try {
-                                func();
+                                if (func && typeof func === "function") {
+                                    func();
+                                }
                             } catch (e) {
                                 console.error("Error in initFunction:", e.message)
                             }

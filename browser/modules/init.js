@@ -6,8 +6,6 @@
 
 'use strict';
 
-import {fallback} from "async/internal/setImmediate";
-
 let modules;
 let tmpl;
 const urlparser = require('./../modules/urlparser');
@@ -105,6 +103,7 @@ module.exports = {
             crs: 'EPSG:3857',
             loadingTimeout: 30000,
             loadCheckingInterval: 15000,
+            mode: 0,
         };
         // Set default for unset props
         for (let prop in defaults) {
@@ -122,7 +121,7 @@ module.exports = {
                                          aria-atomic="true">
                                         <div class="d-flex">
                                             <div class="toast-body">
-                                                <p>Vidi takes a long time to load. Update to clear caches and refresh. Cancel to wait.</p>
+                                                <p>${__('Vidi takes a long time to load. Update to clear caches and refresh. Cancel to wait.')}</p>
                                                 <button class='btn btn-secondary' onclick="updateApp()" >${__('Update')}</button><button class='btn btn-primary close-info-toast'" >${__('Cancel')}</button>
                                             </div>
                                         </div>

@@ -31,6 +31,61 @@ class FileUploadWidget extends React.Component {
         this.deleteFile = this.deleteFile.bind(this);
     }
 
+    componentDidMount() {
+        this.ensureDataUrlFromHttp();
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        if (prevProps.value !== this.props.value && this.state.loadedImageData !== this.props.value) {
+            this.setState({ loadedImageData: this.props.value });
+            return;
+        }
+        if (prevState.loadedImageData !== this.state.loadedImageData) {
+            this.ensureDataUrlFromHttp();
+        }
+    }
+
+    isHttpUrl(str) {
+        return typeof str === 'string' && !str.startsWith('data:') && (str.startsWith('http://') || str.startsWith('https://'));
+    }
+
+    ensureDataUrlFromHttp() {
+        const val = this.state.loadedImageData;
+        if (!val || !this.isHttpUrl(val)) return;
+        // Fetch the resource and convert to data URL for preview/embed
+        // Avoid multiple concurrent conversions for the same URL
+        if (this._convertingUrl === val) return;
+        this._convertingUrl = val;
+        fetch(val)
+            .then(res => {
+                if (res.status === 404) {
+                    this.setState({ loadedImageData: false });
+                    throw new Error('404 Not Found');
+                }
+                if (!res.ok) throw new Error('Network response was not ok');
+                return res.blob();
+            })
+            .then(blob => new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            }))
+            .then(dataUrl => {
+                // Only update if the URL hasn't changed in the meantime
+                if (this.state.loadedImageData === val || this.isHttpUrl(this.state.loadedImageData)) {
+                    this.setState({ loadedImageData: dataUrl });
+                    this.props.onChange(dataUrl);
+                }
+            })
+            .catch((e) => {
+                console.warn(e && e.message ? e.message : e);
+            })
+            .finally(() => {
+                this._convertingUrl = null;
+            });
+    }
+
     onDrop(files) {
         let _self = this;
         const file = files[0];
@@ -92,7 +147,12 @@ class FileUploadWidget extends React.Component {
     render() {
         let control = false;
         if (this.state.loadedImageData) {
-            const type = splitBase64(this.state.loadedImageData).contentType;
+            let type;
+            try {
+                type = splitBase64(this.state.loadedImageData).contentType;
+            } catch (e) {
+                return false;
+            }
             console.log("Viewing", type);
             let el;
             if (MIME_TYPES_IMAGES.includes(type)) {

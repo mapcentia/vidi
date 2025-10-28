@@ -1,12 +1,12 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2020 MapCentia ApS
+ * @copyright  2013-2025 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import ReactAutocomplete from 'react-autocomplete'
+import { Combobox } from 'react-widgets'
 
 
 /**
@@ -21,11 +21,6 @@ class AutocompleteControl extends React.Component {
             currentField: null
         }
 
-    }
-
-    handleOnSelect(value) {
-        this.setState({value});
-        this.props.onChange(value)
     }
 
     componentDidMount() {
@@ -57,49 +52,25 @@ class AutocompleteControl extends React.Component {
 
     render() {
         return (
-            <ReactAutocomplete
-                wrapperStyle={{display: "inline"}}
-                id={this.props.id}
-                items={this.state.options}
-                shouldItemRender={(item, value) => {
-                    if (value.length > 1) {
-                        if (item !== null) {
-                            return item.toLowerCase().startsWith(value.toLocaleLowerCase());
-                        } else {
-                            return false;
-                        }
-                    } else {
-                        return false;
-                    }
-                }}
-                getItemValue={item => item}
-                renderItem={(item, highlighted) =>
-                    <div key={item} style={{backgroundColor: highlighted ? '#eee' : 'transparent'}}>{item}</div>
-                }
-                value={this.props.value}
-                onChange={(event) => {
-                    this.props.onChange(event.target.value)
-                }}
-                onSelect={value => this.handleOnSelect(value)}
-                renderMenu={children => (
-                    <div style={{
-                        boxShadow: '0 2px 12px rgba(0, 0, 0, 0.1)',
-                        padding: '2px 0',
-                        position: 'absolute',
-                        width: '100%',
-                        maxWidth: '160px',
-                        background: 'rgba(255, 255, 255, 1)',
-                        zIndex: '10000'
-
+            <div style={{display: "inline"}}>
+                <Combobox
+                    inputProps={{
+                        id: this.props.id,
+                        placeholder: "abc123",
+                        className: "form-control form-control-sm"
                     }}
-                         className="menu">{children.slice(0, 10)}</div>
-                )}
-                inputProps={{
-                    placeholder: "abc123",
-                    className: "form-control form-control-sm"
-
-                }}
-            />
+                    data={this.state.options}
+                    value={this.props.value}
+                    onChange={(value) => {
+                        this.props.onChange(value === null || value === undefined ? '' : value)
+                    }}
+                    filter={(item, value) => {
+                        if (!value || value.length <= 1) return false;
+                        if (item === null || item === undefined) return false;
+                        return item.toString().toLowerCase().startsWith(value.toString().toLowerCase());
+                    }}
+                />
+            </div>
         )
     }
 }

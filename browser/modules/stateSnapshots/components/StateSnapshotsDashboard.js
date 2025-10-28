@@ -1,6 +1,6 @@
 /*
  * @author     Alexander Shumilov
- * @copyright  2013-2021 MapCentia ApS
+ * @copyright  2013-2025 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -238,6 +238,34 @@ class StateSnapshotsDashboard extends React.Component {
     }
 
     /**
+     * Updates the snapshot data with the provided tags and sends an asynchronous request
+     * to update the corresponding record in the database.
+     *
+     * @param {Object} data - The snapshot data to be updated, including its unique identifier.
+     * @param {Array} tags - An array of tags to be associated with the snapshot. If tags are
+     *                       provided, duplicates will be removed.
+     * @return {void} This method does not return a value; it updates the state and sends an
+     *                asynchronous database update request.
+     */
+    updateSnapshotWithTag(data, tags) {
+        let _self = this;
+        _self.setState({loading: true});
+        data.tags = tags ? tags.filter((value, index, array) => array.indexOf(value) === index) : [];
+        $.ajax({
+            url: `${this.state.apiUrl}/${vidiConfig.appDatabase}/${data.id}`,
+            method: 'PATCH',
+            contentType: 'text/plain; charset=utf-8',
+            dataType: 'text',
+            data: base64url(JSON.stringify({tags: data.tags}))
+        }).then(() => {
+            _self.setState({
+                updatedItemId: false,
+                loading: false
+            });
+        });
+    }
+
+    /**
      * Enables updat form for snapshot
      *
      * @param {String} id Snapshot identifier
@@ -397,7 +425,8 @@ class StateSnapshotsDashboard extends React.Component {
             let importButton = false;
             if (local && this.state.authenticated) {
                 importButton = (
-                    <button type="button" className="btn btn-sm btn-outline-secondary" onClick={() => this.seizeSnapshot(item)}>
+                    <button type="button" className="btn btn-sm btn-outline-secondary"
+                            onClick={() => this.seizeSnapshot(item)}>
                         <i title={titles.seize} className="bi bi-person-add"></i>
                     </button>);
             }
@@ -534,7 +563,8 @@ class StateSnapshotsDashboard extends React.Component {
                                 {selectSize}
                             </div>
                         </div>)}
-                    <TagComponent onAdd={tags => this.updateSnapshot(item, item.title, tags, false)} tags={item.tags}
+                    <TagComponent onAdd={tags => this.updateSnapshotWithTag(item, tags)}
+                                  tags={item.tags}
                                   allTags={allTags}/>
                 </div>
             </div>);
