@@ -885,19 +885,21 @@ module.exports = {
                                     } catch (e) {
                                         type = subValue.split("=")[1];
                                     }
+                                    // We've to clean the relation name of double quotes
+                                    const cleanValue = subValue.replaceAll('"', '')
                                     if (MIME_TYPES_IMAGES.includes(type)) {
                                         value =
-                                            `<div style="cursor: pointer" onclick="window.open().document.body.innerHTML = '<img src=\\'${subValue}\\' />';">
-                                        <img class="w-100" src='${subValue}'/>
+                                            `<div style="cursor: pointer" onclick="window.open().document.body.innerHTML = '<img src=\\'${cleanValue}\\' />';">
+                                        <img class="w-100" src='${cleanValue}'/>
                                      </div>`;
                                     } else if (MIME_TYPES_APPS.includes(type)) {
                                         value = `<embed
-                                        src=${subValue}
+                                        src=${cleanValue}
                                         type=${type}
                                         width="100%"
                                         height="200px"
                                     />
-                                    <a download target="_blank" href=${subValue}>${__("Download the file")}</a>
+                                    <a download target="_blank" href=${cleanValue}>${__("Download the file")}</a>
                                     `;
                                     } else {
                                         value = `

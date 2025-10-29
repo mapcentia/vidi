@@ -25,7 +25,8 @@ class FileUploadWidget extends React.Component {
         super(props);
 
         this.state = {
-            loadedImageData: (props.value ? props.value : false)
+            // Clean up if there is double qoutes from relations names
+            loadedImageData: (props.value ? props.value.replaceAll('"', '') : false)
         };
 
         this.deleteFile = this.deleteFile.bind(this);

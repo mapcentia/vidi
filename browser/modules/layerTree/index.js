@@ -1540,8 +1540,9 @@ module.exports = {
         } else {
             fieldStr = '*';
         }
+        const qoutedRelation = utils.quoteRelation(layerKey);
         let sql = `SELECT ${fieldStr}
-                   FROM ${layerKey} LIMIT ${layerSpecificQueryLimit}`;
+                   FROM ${qoutedRelation} LIMIT ${layerSpecificQueryLimit}`;
         if (isVirtual) {
             let storeWasFound = false;
             moduleState.virtualLayers.map(item => {

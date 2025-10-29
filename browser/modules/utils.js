@@ -240,9 +240,11 @@ module.exports = {
                 const lng = position.coords.longitude;
                 return resolve([lat, lng]);
             }
+
             function error(e) {
                 return reject(e);
             }
+
             const options = {
                 enableHighAccuracy: true,
                 maximumAge: 30000,
@@ -253,5 +255,31 @@ module.exports = {
                 navigator.geolocation.getCurrentPosition(success, error, options);
             }
         })
+    },
+
+    quoteRelation(relation) {
+        if (!relation || typeof relation !== 'string') {
+            throw new Error('Invalid relation: must be a non-empty string');
+        }
+
+        // Remove existing quotes if present
+        relation = relation.replace(/"/g, '');
+
+        const parts = relation.split('.');
+
+        if (parts.length !== 2) {
+            throw new Error('Invalid relation format: expected "schema.table"');
+        }
+
+        const [schema, table] = parts.map(part => part.trim());
+
+        if (!schema || !table) {
+            throw new Error('Invalid relation: schema and table cannot be empty');
+        }
+
+        // Escape any internal quotes by doubling them (PostgreSQL standard)
+        const escapeQuotes = (str) => str.replace(/"/g, '""');
+
+        return `"${escapeQuotes(schema)}"."${escapeQuotes(table)}"`;
     }
 };
