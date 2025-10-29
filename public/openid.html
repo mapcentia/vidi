@@ -1,9 +1,9 @@
 <!doctype html>
 <html lang="da">
 <head>
-    <title>NT Statistik</title>
+    <title>Vidi signin</title>
     <script src="/api/baselayer"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mapcentia/gc2-js-client@0.0.21/build/gc2-js-client.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mapcentia/gc2-js-client@0.0.25/build/gc2-js-client.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
             crossorigin="anonymous"></script>
@@ -31,6 +31,10 @@
         const scope = oidc?.scope ?? DEFAULTS.scope;
         return {redirectUri, clientId, host, tokenUri, authUri, scope, logoutUri};
     }
+
+    const oidcConfig = extractOidcConfig()
+    const codeFlow = new gc2.CodeFlow(oidcConfig)
+
     // Minimal JWT decoder (payload only)
     function jwtDecode(token) {
         try {
@@ -71,7 +75,7 @@
             headers: {"Content-Type": "application/json;charset=UTF-8",},
             body: JSON.stringify({nonce, token, database: selectedDb, superuser: superuserLogin}),
         }).then(res => res.json()).then(data => {
-            //codeFlow.clear()
+            codeFlow.clear()
             document.querySelector('#container').innerHTML = 'Signed in'
             setTimeout(() => window.close(), 500)
         })
@@ -147,9 +151,6 @@
         container.appendChild(wrap);
     }
 
-    console.log(extractOidcConfig())
-    const oidcConfig = extractOidcConfig()
-    const codeFlow = new gc2.CodeFlow(oidcConfig)
     codeFlow.redirectHandle().then(async isSignedIn => {
         if (isSignedIn) {
             const token = JSON.parse(localStorage.getItem('gc2_tokens') || '{}')['idToken']
