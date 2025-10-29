@@ -38,6 +38,7 @@ let start = function (dataToAuthorizeWith, req, response, status) {
             body: JSON.stringify({
                 token: dataToAuthorizeWith.token,
                 database: dataToAuthorizeWith.database,
+                superuser: dataToAuthorizeWith.superuser,
             })
         };
     } else {
