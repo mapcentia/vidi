@@ -154,7 +154,7 @@
     codeFlow.redirectHandle().then(async isSignedIn => {
         if (isSignedIn) {
             const token = JSON.parse(localStorage.getItem('gc2_tokens') || '{}')['idToken']
-            // const token = JSON.parse(localStorage.getItem('gc2_tokens') || '{}')['accessToken']
+            //const token = JSON.parse(localStorage.getItem('gc2_tokens') || '{}')['accessToken']
             const nonce = localStorage.getItem('gc2_nonce')
             const {database, superuser} = jwtDecode(token)
             if (!database) {
