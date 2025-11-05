@@ -1286,7 +1286,7 @@ let dom = `
             </div>
             <div role="tabpanel" class="tab-pane" id="conflict-info-content">
             <div class="d-grid gap-2 mt-2 mb-2">
-                <button style="display: none" class="btn btn-outline-secondary btn-block" id="conflict-search-with-feature">Søg med valgte</button>
+                <button style="display: none" class="btn btn-outline-warning btn-block" id="conflict-search-with-feature">Søg med valgte</button>
             </div>
             <div id="conflict-info-box">
                 <div id="conflict-modal-info-body">
