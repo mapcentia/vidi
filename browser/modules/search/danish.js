@@ -67,6 +67,8 @@ function markHouseNumber(input) {
     });
 }
 
+const createId = () => (+new Date * (Math.random() + 1)).toString(36).substr(2, 5);
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -170,6 +172,7 @@ module.exports = {
                     this.layer.eachLayer((l) => {
                         console.log(l)
                         l._vidi_type = "draw";
+                        l._vidi_id = createId();
 
                         if (typeof l._latlng !== "undefined") {
                             l.feature = {
