@@ -11,7 +11,6 @@ let meta;
 let _layers;
 let urlparser = require('./urlparser');
 let db = urlparser.db;
-let BACKEND = require('../../config/config.js').backend;
 let hasBeenVisible = [];
 let hasBeenVisibleTmp = [];
 let constants = require('./layerTree/constants')

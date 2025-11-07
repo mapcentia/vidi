@@ -5,6 +5,62 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2025.10.3] - 2025-22-10
+### Changed
+- Upgrade React and ReactDOM to v17.0.2.
+- Replace react-autocomplete with react-widgets Combobox in layer tree controls to support React 17.
+- Remove unused packages from package.json (react-addons, react-button, rc-slider, react-color, mutationobserver-shim, grunt-bower-task, esmify, install, npm).
+
+## [2025.10.2] - 2025-21-10
+### Changed
+- Support for GC2 setting `convertDataUrlsToHttp`. Vector layers, editor and feature-info can now deal with both
+  data and http urls. 
+
+## [2025.10.1] - 2025-14-10
+### Changed
+- Support for GC2 setting `convertDataUrlsToHttp`. Vector layers, editor and feature-info can now deal with both
+  data and http urls.  
+
+## [2025.10.0] - 2025-2-10
+### Added
+- New config option `mode` for setting different optimization modes with bitmask flags:
+  - 1: No transparency fade animation in GUI
+  - 2: No visibility check of tile layers
+  - 4: No map animations
+
+### Changed
+- Remove `jrespond` dependency and related code.
+- Remove `bower.json` and its dependencies as it's no longer used
+- Update `@maplibre/maplibre-gl-leaflet` to v0.1.3 and `maplibre-gl` to v5.7.2.
+- Replace `grunt-contrib-uglify` with `grunt-terser`.
+- Update `browserify` to v17.0.1
+
+## [2025.9.0] - 2025-27-8
+### Fixed
+- Changing Snapshot tags will now not update the whole snapshot. Only the tags that are changed will be updated.
+
+## [2025.8.2] - 2025-27-8
+### Added
+- A 30-second timeout to handle cases where Vidi fails to load, ensuring the "Vidi is now loaded" console message is sent to prevent lockups in print. Clears timeout on successful loading. The timeout can be changed with `config.loadingTimeout` in build-time config.
+- A 15-second interval to check if Vidi is loaded. If the interval is reached and Vidi is not loaded, a 'toast' is shown which enables the user to clear cache storage and refresh the browser. The interval Can be changed with `config.loadCheckingInterval` in build-time config. 
+
+## [2025.8.1] - 2025-19-8
+### Fixed
+- Added `min-width: 0` to `.main-content`, so content is propper sized if wider than the parent container.
+
+## [2025.8.0] - 2025-11-8
+### Added
+- New config `crs` for setting the coordinate system. The default is `EPSG:3857`. Only alternative is for now `EPSG:25832`. Background layers must be configured accordingly.
+
+### Changed
+- The print border rectangle is now created with a `polygon` object instead of a `rectangle` so it aligns with choosen coordinate system. This means that the rectangle edit handles are not available anymore. Scale can only be changed with the `scale` dialog.
+- The analysis function in `conflictSearch` will format distance to `km` when above 100.000 instead of 1.000.
+- The analysis function now has a GC2 Meta option `sql_conflict_header` for setting the header of the fist column in the analysis result table.
+
+## [2025.7.0] - 2025-2-7
+### Fixed
+- The "Clear map" button now clears symbols and resets the state for drawings (before drawings were cleared but state not proper reset).  
+
 ## [2025.6.2] - 2025-19-6
 
 ### Added

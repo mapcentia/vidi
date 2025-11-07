@@ -31,12 +31,6 @@ var hash = urlparser.hash;
  */
 var urlVars = urlparser.urlVars;
 
-/**
- *
- * @type {string}
- */
-var BACKEND = require('../../config/config.js').backend;
-
 var anchor;
 
 var layers;
@@ -190,11 +184,14 @@ module.exports = {
                 backboneEvents.get().once("allDoneLoading:layers", function (e) {
                     legend.init().then(function () {
                         console.log("Vidi is now loaded");// Vidi is now fully loaded
+                        clearTimeout(window.loadingTimeout)
                         window.status = "all_loaded";
                         if (window.vidiConfig?.initFunction) {
                             let func = Function('"use strict";return (' + window.vidiConfig.initFunction + ')')();
                             try {
-                                func();
+                                if (func && typeof func === "function") {
+                                    func();
+                                }
                             } catch (e) {
                                 console.error("Error in initFunction:", e.message)
                             }
@@ -297,14 +294,9 @@ module.exports = {
                         }
 
                         $.ajax({
-                            dataType: "json",
-                            method: "get",
-                            url: '/api/postdata/',
-                            data: {
+                            dataType: "json", method: "get", url: '/api/postdata/', data: {
                                 k: parr.join()
-                            },
-                            scriptCharset: "utf-8",
-                            success: function (response) {
+                            }, scriptCharset: "utf-8", success: function (response) {
                                 // Server replies have different structure
                                 if (!(`anchor` in response.data) && !(`bounds` in response.data) && `data` in response.data && response.data.data) {
                                     if (`anchor` in response.data.data && `bounds` in response.data.data) {
@@ -328,15 +320,16 @@ module.exports = {
                                     parr = response.data.print;
                                     v = parr;
                                     let m = v[0].geojson.features[frame];
-                                    if (m.type === "Rectangle") {
-                                        var g = L.rectangle([m._latlngs[0], m._latlngs[2]], {
+                                    if (m.type === "Feature") {
+                                        const flippedCoordinates = m.geometry.coordinates[0].map(coord => [coord[1], coord[0]]);
+                                        const g = L.polygon([flippedCoordinates], {
                                             fillOpacity: 0,
                                             opacity: 1,
                                             color: 'red',
+                                            fillColor: 'red',
                                             weight: 10,
                                             className: 'print-rect-poly',
                                         });
-                                        g.feature = m.feature;
                                         cloud.get().map.addLayer(g);
                                         const width = document.getElementById('pane1').offsetWidth;
                                         const rectWidth = document.querySelector('.print-rect-poly').getBoundingClientRect().width;
@@ -357,7 +350,7 @@ module.exports = {
                                         }
                                         const zoom = cloud.get().map.getZoom();
                                         const orgZoom = parseInt(response.data.anchor.split('/')[1]);
-                                        setTimeout(function () {
+                                        setTimeout(() => {
                                             document.querySelectorAll('.drag-marker').forEach(marker => {
                                                 const tr = getCurrenTransform(marker);
                                                 const rotate = tr[0];
@@ -375,6 +368,7 @@ module.exports = {
                                             parr.pop();
                                         }
                                         $("#comment").html(decodeURIComponent(parr.join()));
+
                                         if (hashArr[0]) {
                                             setLayers()
                                         }
@@ -575,6 +569,13 @@ module.exports = {
                 }
 
                 backboneEvents.get().trigger("end:state");
+
+                // At this point we believe that Vidi is started successfully
+                console.log('Clear load checking interval');
+                clearInterval(window.loadCheckingInterval)
+                try {
+                    new bootstrap.Toast(document.getElementById('load-checking-toast')).hide();
+                } catch (e) {}
 
             } catch (e) {
                 console.error(e);

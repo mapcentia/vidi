@@ -43,6 +43,7 @@ module.exports = {
         "Sign in": "Sign in",
         "Update": "Update",
         "New version available": "New version available",
+        "Vidi takes a long time to load. Update to clear caches and refresh. Cancel to wait.": "Vidi takes a long time to load. Update to clear caches and refresh. Cancel to wait.",
 
         // Drawing
         "Cancel drawing": "Cancel drawing",

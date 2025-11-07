@@ -125,6 +125,9 @@ let urlsIgnoredForCaching = [{
 }, {
     regExp: true,
     requested: '/api/v2/(?!configuration)'
+},{
+    regExp: true,
+    requested: '/api/v1/decodeimg'
 }, {
     regExp: true,
     requested: '/mapcache/'

@@ -12,13 +12,6 @@ module.exports = {
     // ===============================================
 
 
-    // ========================================
-    // Which back-end is used. "gc2" or "carto"
-    // ========================================
-
-    "backend": "gc2",
-
-
     // ==========================================
     // GC2 host. Both HTTP and HTTPS is supported
     // Carto is hardcoded to carto.com

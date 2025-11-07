@@ -9,6 +9,7 @@
 import {GROUP_CHILD_TYPE_LAYER} from './layerTree/LayerSorting';
 import {LAYER} from './layerTree/constants';
 import layerTreeUtils from './layerTree/utils';
+import {NO_VISIBILITY_CHECK} from "./constants";
 
 /**
  *
@@ -320,40 +321,44 @@ module.exports = {
                         visibility: !(parsedMeta?.filter_required) || (parsedMeta?.filter_required && layerTree.getLayerFilterString(layerKey) !== ''),
                         loadEvent: function (e) {
                             let canvasHasData = false;
-                            if (!tiled) {
-                                // Single tiles layers are canvas, so it can be used directly
-                                if (e.target.id && e.target._bufferCanvas) {
-                                    try {
-                                        let canvas = e.target._bufferCanvas;
-                                        canvasHasData = new Uint32Array(canvas.getContext('2d')
-                                            .getImageData(0, 0, canvas.width, canvas.height).data.buffer).some(x => x !== 0);
-                                    } catch (e) {
-                                        canvasHasData = true; // In case of Internet Explorer
+                            if ((window.vidiConfig.mode & NO_VISIBILITY_CHECK) === 0) {
+                                if (!tiled) {
+                                    // Single tiles layers are canvas, so it can be used directly
+                                    if (e.target.id && e.target._bufferCanvas) {
+                                        try {
+                                            let canvas = e.target._bufferCanvas;
+                                            canvasHasData = new Uint32Array(canvas.getContext('2d')
+                                                .getImageData(0, 0, canvas.width, canvas.height).data.buffer).some(x => x !== 0);
+                                        } catch (e) {
+                                            canvasHasData = true; // In case of Internet Explorer
+                                        }
+                                    }
+                                } else {
+                                    // For tiled layer we loop through images and turn them into canvas
+                                    for (const obj in e.target._tiles) {
+                                        const imgEl = e.target._tiles[obj].el
+                                        const w = imgEl.clientWidth;
+                                        const h = imgEl.clientHeight;
+                                        let canvas = document.createElement("canvas");
+                                        canvas.width = w;
+                                        canvas.height = h;
+                                        let context = canvas.getContext('2d');
+                                        context.drawImage(imgEl, 0, 0, w, h, 0, 0, w, h);
+                                        try {
+                                            canvasHasData = new Uint32Array(canvas.getContext('2d')
+                                                .getImageData(0, 0, canvas.width, canvas.height).data.buffer).some(x => x !== 0);
+                                        } catch (e) {
+                                            canvasHasData = true; // In case of Internet Explorer
+                                        }
+                                        if (canvasHasData) {
+                                            canvas = null;
+                                            break;
+                                        }
+                                        canvas = null;
                                     }
                                 }
                             } else {
-                                // For tiled layer we loop through images and turn them into canvas
-                                for (const obj in e.target._tiles) {
-                                    const imgEl = e.target._tiles[obj].el
-                                    const w = imgEl.clientWidth;
-                                    const h = imgEl.clientHeight;
-                                    let canvas = document.createElement("canvas");
-                                    canvas.width = w;
-                                    canvas.height = h;
-                                    let context = canvas.getContext('2d');
-                                    context.drawImage(imgEl, 0, 0, w, h, 0, 0, w, h);
-                                    try {
-                                        canvasHasData = new Uint32Array(canvas.getContext('2d')
-                                            .getImageData(0, 0, canvas.width, canvas.height).data.buffer).some(x => x !== 0);
-                                    } catch (e) {
-                                        canvasHasData = true; // In case of Internet Explorer
-                                    }
-                                    if (canvasHasData) {
-                                        canvas = null;
-                                        break;
-                                    }
-                                    canvas = null;
-                                }
+                                canvasHasData = true;
                             }
                             backboneEvents.get().trigger("tileLayerVisibility:layers", {
                                 id: e.target.id,

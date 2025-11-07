@@ -43,6 +43,7 @@ module.exports = {
         "Sign in": "Log ind",
         "Update": "Opdater",
         "New version available": "Ny version er tilgængelig",
+        "Vidi takes a long time to load. Update to clear caches and refresh. Cancel to wait.": "Vidi tager lang tid om at starte. Opdater for at rydde cache og genstart. Afbryd for at vente.",
 
         // Drawing
         "Cancel drawing": " Afbryd tegning",

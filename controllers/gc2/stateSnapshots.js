@@ -1,6 +1,6 @@
 /*
  * @author     Alexander Shumilov
- * @copyright  2013-2021 MapCentia ApS
+ * @copyright  2013-2025 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -308,8 +308,7 @@ router.put('/api/state-snapshots/:dataBase/:stateSnapshotKey', (req, res, next) 
                 let parsedBody = false;
                 let currentDate = new Date();
                 try {
-                    let localParsedBody = JSON.parse(base64url.decode(response.body));
-                    parsedBody = localParsedBody;
+                    parsedBody = JSON.parse(base64url.decode(response.body));
                 } catch (e) {
                 }
 
@@ -351,6 +350,65 @@ router.put('/api/state-snapshots/:dataBase/:stateSnapshotKey', (req, res, next) 
     } else {
         shared.throwError(res, 'MISSING_DATA');
     }
+});
+
+/**
+ * Update state snapshot tags
+ */
+router.patch('/api/state-snapshots/:dataBase/:stateSnapshotKey', (req, res, next) => {
+    req.body = JSON.parse(base64url.decode(req.body));
+    console.log(req.body);
+    let {browserId, userId} = shared.getCurrentUserIdentifiers(req);
+    // Get the specified state snapshot
+    request({
+        method: 'GET',
+        encoding: 'utf8',
+        uri: API_LOCATION + `/` + req.params.dataBase + `/` + req.params.stateSnapshotKey,
+        json: false,
+        headers: {
+            'Accept': 'text/plain'
+        }
+    }, (error, response) => {
+        if (response.body.data === false) {
+            shared.throwError(res, 'INVALID_SNAPSHOT_ID');
+        } else {
+            let parsedBody = false;
+            try {
+                parsedBody = JSON.parse(base64url.decode(response.body));
+            } catch (e) {
+            }
+
+            if (parsedBody) {
+                let parsedSnapshotData = JSON.parse(parsedBody.data.value);
+                if (`browserId` in parsedSnapshotData && parsedSnapshotData.browserId === browserId ||
+                    `userId` in parsedSnapshotData && parsedSnapshotData.userId === userId) {
+                    parsedSnapshotData.tags = req.body.tags;
+                    parsedSnapshotData.updated_at = parsedBody.updated_at;
+                    request({
+                        method: 'PUT',
+                        encoding: 'utf8',
+                        uri: API_LOCATION + `/` + req.params.dataBase + `/` + req.params.stateSnapshotKey,
+                        body: base64url(JSON.stringify(parsedSnapshotData)),
+                        headers: {
+                            'Content-Type': 'text/plain',
+                            'Accept': 'text/plain'
+                        }
+                    }, (error, response) => {
+                        if (error) {
+                            res.send({status: 'error'});
+                        } else {
+                            res.send({status: 'success'});
+                        }
+                    });
+                } else {
+                    shared.throwError(res, 'ACCESS_DENIED');
+                }
+            } else {
+                shared.throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', {body: response.body});
+            }
+        }
+    });
+
 });
 
 /**

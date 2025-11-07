@@ -7,6 +7,7 @@
 'use strict';
 
 import {getProjection} from './crs'
+import {NO_MAP_ANIMATION} from "./constants";
 
 let cloud;
 let lc;
@@ -49,6 +50,11 @@ module.exports = {
             console.info(e.message);
         }
 
+        let mapAnimation = false
+        if ((window.vidiConfig.mode & NO_MAP_ANIMATION) === 0 && window.vidiTimeout === 0) {
+            mapAnimation = true;
+        }
+
         /**
          *
          * @type {geocloud.map}
@@ -57,10 +63,8 @@ module.exports = {
             el: "map",
             zoomControl: false,
             numZoomLevels: 21,
-            // Set CSS animation true if not print
-            fadeAnimation: (window.vidiTimeout === 0),
-            //zoomAnimation: false, // https://github.com/Leaflet/Leaflet/issues/3249
-            zoomAnimation: (window.vidiTimeout === 0),
+            fadeAnimation: mapAnimation,
+            zoomAnimation: mapAnimation, // https://github.com/Leaflet/Leaflet/issues/3249
             editable: true,
             maxBoundsViscosity: 1.0,
             preferCanvas: false,

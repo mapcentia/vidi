@@ -1532,10 +1532,7 @@ module.exports = {
         let fieldNames = [];
         if (fields) {
             Object.keys(fields).forEach(function (i) {
-                let v = fields[i];
-                if (v.type === 'bytea') {
-                    fieldNames.push(`encode("${i}",'escape') as "${i}"`);
-                } else if (fieldConf?.[i]?.ignore !== true) {
+                if (fieldConf?.[i]?.ignore !== true) {
                     fieldNames.push(`"${i}"`);
                 }
             });
@@ -3719,7 +3716,7 @@ module.exports = {
                     } else {
                         $(search).find('.searchable-fields').show();
                         $.each(countSearchFields, function (i, val) {
-                            $(search).find('.searchable-fields').append(`<span class="label label-default" style="margin-right: 3px">${fieldConf[val].alias || val}</span>`)
+                            $(search).find('.searchable-fields').append(`<span class="badge text-bg-secondary me-1">${fieldConf[val].alias || val}</span>`)
                         });
                     }
 

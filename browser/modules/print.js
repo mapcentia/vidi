@@ -12,9 +12,7 @@ var cloud;
 var printOn = false;
 var boxCount = 0;
 var recEdit = [];
-var recScale = [];
 var curBounds = [];
-var icons = [];
 var serializeLayers;
 var anchor;
 var printItems = new L.FeatureGroup();
@@ -58,19 +56,14 @@ dayjs.locale(lc);
 var _cleanUp = function (hard) {
     try {
         for (let i = 0; i <= boxCount; i++) {
-            cloud.get().map.removeLayer(recScale[i]);
             cloud.get().map.removeLayer(recEdit[i]);
         }
     } catch (e) {
         //console.error(e.message);
     }
-    icons.forEach((icon) => {
-        cloud.get().map.removeLayer(icon);
-    });
     printOn = false;
     if (hard) {
         center = [];
-        recScale = [];
         printC = config.print.templates;
         // scales = config.print.scales;
         scale = null;
@@ -146,13 +139,9 @@ module.exports = {
         });
         $("#remove-print-box-btn").on("click", function () {
             if (boxCount > 0) {
-                console.log(icons)
-                cloud.get().map.removeLayer(recScale[boxCount]);
                 cloud.get().map.removeLayer(recEdit[boxCount]);
-                cloud.get().map.removeLayer(icons[boxCount]);
-                recScale.pop()
+                recEdit.pop()
                 center.pop()
-                icons.pop()
                 boxCount--;
                 backboneEvents.get().trigger(`${MODULE_ID}:state_change`);
             }
@@ -364,11 +353,13 @@ module.exports = {
             });
             return scale;
         };
-        var rectangle = function (initCenter, scaleObject, color, initScale, isFirst) {
+
+        const epsg = window.vidiConfig.crs;
+        const rectangle = function (initCenter, scaleObject, color, initScale, isFirst, interactive = true) {
             scale = initScale ? initScale : _getScale(scaleObject);
             $("#select-scale").val(scale);
             if (isFirst && !sc) { // Only when print tool is activated first time and no state from project
-                var scaleIndex = scales.indexOf(scale);
+                let scaleIndex = scales.indexOf(scale);
                 if (scaleIndex > 1) {
                     scaleIndex = scaleIndex - 2;
                 } else if (scaleIndex > 0) {
@@ -377,87 +368,77 @@ module.exports = {
                 scale = scales[scaleIndex];
             }
 
-            var centerM = geocloud.transformPoint(initCenter.lng, initCenter.lat, "EPSG:4326", "EPSG:3857");
-            var printSizeM = [(ps[0] * scale / 1000), (ps[1] * scale / 1000)];
+            // Convert center point
+            const centerM = geocloud.transformPoint(initCenter.lng, initCenter.lat, "EPSG:4326", epsg);
 
-            const correctionFactor = 1 / Math.cos(initCenter.lat * Math.PI / 180);
+            // Calculate the dimensions of the rectangle in meters
+            const printSizeM = [(ps[0] * scale / 1000), (ps[1] * scale / 1000)];
+            let correctionFactor = 1;
+            if (epsg === "EPSG:3857") {
+                correctionFactor = 1 / Math.cos(initCenter.lat * Math.PI / 180);
+            }
+            // Calculate corners in projected coordinates
             const adjustedWidth = printSizeM[0] * correctionFactor;
             const adjustedHeight = printSizeM[1] * correctionFactor;
             const halfWidth = adjustedWidth / 2;
             const halfHeight = adjustedHeight / 2;
+            const cornersM = [
+                [centerM.x - halfWidth, centerM.y - halfHeight], // SW
+                [centerM.x - halfWidth, centerM.y + halfHeight], // NW
+                [centerM.x + halfWidth, centerM.y + halfHeight], // NE
+                [centerM.x + halfWidth, centerM.y - halfHeight], // SE
+                [centerM.x - halfWidth, centerM.y - halfHeight]  // Close polygon by repeating first point
+            ];
 
-            var printSwM = [centerM.x - halfWidth, centerM.y - halfHeight];
-            var printNeM = [centerM.x + halfWidth, centerM.y + halfHeight];
-            var printSwG = geocloud.transformPoint(printSwM[0], printSwM[1], "EPSG:3857", "EPSG:4326");
-            var printNeG = geocloud.transformPoint(printNeM[0], printNeM[1], "EPSG:3857", "EPSG:4326");
+            // Transform corners back to geographic coordinates for Leaflet polygon
+            const cornersLatLng = cornersM.map(function (pt) {
+                const geo = geocloud.transformPoint(pt[0], pt[1], epsg, "EPSG:4326");
+                return [geo.y, geo.x];
+            });
 
-            var rectangle = L.rectangle([[printSwG.y, printSwG.x], [printNeG.y, printNeG.x]], {
+            // Create polygon
+            const rectPoly = L.polygon(cornersLatLng, {
                 color: color,
                 fillOpacity: 0,
                 opacity: 1,
-                aspectRatio: (ps[0] / ps[1])
+                transform: true,
+                interactive: interactive,
+                className: 'print-rect-poly'
             });
-            center[boxCount] = rectangle.getBounds().getCenter();
-            return rectangle;
+            rectPoly.bindTooltip(`${(boxCount + 1)}`, {
+                    permanent: true,
+                    className: 'print-rect-poly-tooltip'
+                }
+            )
+            center[boxCount] = rectPoly.getBounds().getCenter();
+            return rectPoly;
         };
+
         var first = !center[0];
         center[boxCount] = center[boxCount] || cloud.get().map.getCenter(); // Init center as map center
         if (bnds) {
             let rec = L.rectangle([[bnds._southWest.lat, bnds._southWest.lng], [bnds._northEast.lat, bnds._northEast.lng]], {
-                color: "yellow",
-                fillOpacity: 0,
                 aspectRatio: (ps[0] / ps[1])
             });
-            recEdit[boxCount] = rectangle(rec.getBounds().getCenter(), cloud.get().map, "yellow", scale, first);
+            recEdit[boxCount] = rectangle(rec.getBounds().getCenter(), cloud.get().map, "blue", scale, first);
             bnds = null;
         } else {
-            recEdit[boxCount] = rectangle(center[boxCount], cloud.get().map, "yellow", scale, first);
+            recEdit[boxCount] = rectangle(center[boxCount], cloud.get().map, "red", scale, first);
         }
-        recEdit[boxCount]._vidi_type = "printHelper";
+        recEdit[boxCount]._vidi_type = "print";
         recEdit[boxCount]._count = boxCount;
         printItems.addLayer(recEdit[boxCount]);
-        recEdit[boxCount].editing.enable();
-
-        let c = recEdit[boxCount].getBounds().getCenter();
-        recScale[boxCount] = rectangle(c, recEdit[boxCount], "red");
-        recScale[boxCount]._vidi_type = "print";
-        printItems.addLayer(recScale[boxCount]);
-        icons[boxCount] = L.marker(c, {
-            icon: L.divIcon({
-                className: 'print-div-icon',
-                iconSize: null,
-                html: `<span>${(boxCount + 1)}</span>`
-            })
-        }).addTo(cloud.get().map);
+        recEdit[boxCount].dragging.enable();
 
         var sw = recEdit[boxCount].getBounds().getSouthWest(), ne = recEdit[boxCount].getBounds().getNorthEast();
         curBounds[boxCount] = [sw.lat, sw.lng, ne.lat, ne.lng];
-        recEdit[boxCount].on('edit', function (e) {
-            icons.forEach((icon) => {
-                cloud.get().map.removeLayer(icon);
-            })
+        recEdit[boxCount].on('dragend', function (e) {
             scaleFromForm = false;
             for (let i = 0; i <= boxCount; i++) {
                 let c = recEdit[i].getBounds().getCenter();
-                icons[i] = (L.marker(c, {
-                    icon: L.divIcon({
-                        className: 'print-div-icon',
-                        iconSize: null,
-                        html: `<span>${(i + 1)}</span>`
-                    })
-                }).addTo(cloud.get().map));
                 center[i] = c; // re-calculate centers
-                rectangle(c, recEdit[i], "red");
-                cloud.get().map.removeLayer(recScale[i]);
-                // Set bounds from the one being edited to all
-                recScale[i] = rectangle(c, recEdit[e.target._count], "red");
-                recScale[i]._vidi_type = "print";
-                printItems.addLayer(recScale[i]);
+               // rectangle(c, recEdit[i], "red", null, false, true);
                 $("#get-print-fieldset").prop("disabled", true);
-                recEdit[i].editing.disable();
-                recEdit[i].setBounds(recScale[i].getBounds());
-                recEdit[i].editing.enable();
-
                 var sw = recEdit[i].getBounds().getSouthWest(),
                     ne = recEdit[i].getBounds().getNorthEast();
                 curBounds[boxCount] = [sw.lat, sw.lng, ne.lat, ne.lng];
@@ -479,7 +460,7 @@ module.exports = {
             recEdit.editing.disable();
         } catch (e) {
         }
-        recEdit[recEdit.length - 1]?.editing.enable();
+        // recEdit[recEdit.length - 1]?.editing.enable();
         if (paramsFromDb) {
             setTimeout(() => {
                 paramsFromDb = null;
@@ -567,7 +548,7 @@ module.exports = {
                 queryBuffer: (typeof layerQueryBuffer[0] !== "undefined" && layerQueryBuffer[0].geojson.features.length > 0) ? layerQueryBuffer : null,
                 queryResult: (typeof layerQueryResult[0] !== "undefined" && layerQueryResult[0].geojson.features.length > 0) ? layerQueryResult : null,
                 print: (typeof layerPrint[0] !== "undefined" && layerPrint[0].geojson.features.length > 0) ? layerPrint : null,
-                bounds: recScale.map(i => i.getBounds()),
+                bounds: recEdit.map(i => i.getBounds()),
                 scale: scale,
                 tmpl: tmpl,
                 pageSize: pageSize,

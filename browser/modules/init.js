@@ -6,8 +6,6 @@
 
 'use strict';
 
-import {fallback} from "async/internal/setImmediate";
-
 let modules;
 let tmpl;
 const urlparser = require('./../modules/urlparser');
@@ -24,7 +22,6 @@ const config = require('../../config/config.js');
 import mustache from 'mustache';
 import dayjs from "dayjs";
 import customParseFormat from 'dayjs/plugin/customParseFormat';
-import {meta} from "@turf/turf";
 
 dayjs.extend(customParseFormat);
 
@@ -47,6 +44,7 @@ module.exports = {
      */
     init: function () {
         let me = this, configFile, stop = false;
+        // Set default config
         const defaults = {
             schemata: [],
             baseLayers: [],
@@ -102,8 +100,41 @@ module.exports = {
             editorAlwaysActivated: true,
             statelessDraw: false,
             openLayerTreeGroups: [],
-            crs: 'EPSG3857'
+            crs: 'EPSG:3857',
+            loadingTimeout: 30000,
+            loadCheckingInterval: 15000,
+            mode: 0,
         };
+        // Set default for unset props
+        for (let prop in defaults) {
+            window.vidiConfig[prop] = typeof window.vidiConfig[prop] !== 'undefined' ? window.vidiConfig[prop] : defaults[prop];
+        }
+        // If Vidi does not load within 20 seconds, send the loaded message. This is to prevent print from locking up.
+        // If Vidi loads, the timeout will be cleared in State
+        window.loadingTimeout = setTimeout(() => {
+            console.log("Timeout reached. Sending 'Vidi is now loaded' message");
+        },  window.vidiConfig.loadingTimeout);
+
+        // In a interval of x seconds, check if the app is still loading. If it is, send the 'still loading' message.
+        const html = `<div class="toast-container position-fixed bottom-0 end-0 p-3 me-sm-5" style="z-index: 999999999">
+                                    <div id="load-checking-toast" class="toast align-items-center text-bg-primary border-0" role="alert" aria-live="assertive"
+                                         aria-atomic="true">
+                                        <div class="d-flex">
+                                            <div class="toast-body">
+                                                <p>${__('Vidi takes a long time to load. Update to clear caches and refresh. Cancel to wait.')}</p>
+                                                <button class='btn btn-secondary' onclick="updateApp()" >${__('Update')}</button><button class='btn btn-primary close-info-toast'" >${__('Cancel')}</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>`;
+        document.querySelector('body').insertAdjacentHTML('beforeend', html);
+        const toast = new bootstrap.Toast(document.getElementById('load-checking-toast'),  {delay: 99999999, autohide: false});
+        document.querySelector('.close-info-toast').onclick = function () {toast.hide()}
+        window.loadCheckingInterval = setInterval(() => {
+            if (!toast.isShown()) {
+                toast.show();
+            }
+        }, window.vidiConfig.loadCheckingInterval)
         // Set session from URL
         if (typeof urlVars.session === "string") {
             const MAXAGE = (config?.sessionMaxAge || 86400) / 86400; // In days
@@ -125,11 +156,6 @@ module.exports = {
                 history.pushState(null, '', newUrl);
             }
         }
-        // Set default for unset props
-        for (let prop in defaults) {
-            window.vidiConfig[prop] = typeof window.vidiConfig[prop] !== 'undefined' ? window.vidiConfig[prop] : defaults[prop];
-        }
-
         // Set manifest
         const hostname = urlparser.hostname;
         const db = urlparser.db;

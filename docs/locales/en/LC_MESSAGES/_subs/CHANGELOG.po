@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Vidi 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-27 10:20+0200\n"
+"POT-Creation-Date: 2025-09-01 13:41+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -17,232 +17,982 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.16.0\n"
+"Generated-By: Babel 2.17.0\n"
 
 #: ../../../CHANGELOG.md:3 ../../_subs/CHANGELOG.rst:5
-#: 90e3c98848964cb7af3e2e415c1bf0f0 adf8772c81844d229f0989f1dca80d1b
+#: 0f3acdb1199e4a94add784b1f5934b31 ab1f9485307840199d82ca8d91f407c0
 msgid "Changelog"
 msgstr ""
 
-#: ../../../CHANGELOG.md:5 7dc06b3a0a434483a371a4a66ca13a10
+#: ../../../CHANGELOG.md:5 e5ee7ddf83f7403cb3a2f79c9dfa092b
 msgid "All notable changes to this project will be documented in this file."
 msgstr ""
 
-#: ../../../CHANGELOG.md:7 e3a1ca80e56c4176b0eefd7b9f95248e
+#: ../../../CHANGELOG.md:7 35629c79196a48f1bb4a42402a4533e7
 msgid ""
 "The format is based on `Keep a Changelog "
 "<http://keepachangelog.com/en/1.0.0/>`_ and this project adheres to "
 "`CalVer <https://calver.org/>`_."
 msgstr ""
 
-#: ../../../CHANGELOG.md:11 93dfe5c9b2ae47568bc7fc08a87dcf14
-msgid "[2024.9.0] - 2024-19-9"
+#: ../../../CHANGELOG.md:11 71ee56e81af74a5aafce8534692c1768
+msgid "[2025.8.2] - 2025-27-8"
 msgstr ""
 
-#: ../../../CHANGELOG.md:14 ../../../CHANGELOG.md:45 ../../../CHANGELOG.md:81
-#: ../../../CHANGELOG.md:99 ../../../CHANGELOG.md:134 ../../../CHANGELOG.md:146
-#: ../../../CHANGELOG.md:155 ../../../CHANGELOG.md:248
-#: ../../../CHANGELOG.md:259 ../../../CHANGELOG.md:276
-#: ../../../CHANGELOG.md:291 ../../../CHANGELOG.md:311
-#: ../../../CHANGELOG.md:331 ../../../CHANGELOG.md:372
-#: ../../../CHANGELOG.md:396 ../../../CHANGELOG.md:424
-#: ../../../CHANGELOG.md:444 ../../../CHANGELOG.md:466
-#: ../../../CHANGELOG.md:490 ../../../CHANGELOG.md:500
-#: ../../../CHANGELOG.md:543 ../../../CHANGELOG.md:608
-#: ../../../CHANGELOG.md:643 ../../../CHANGELOG.md:687
-#: ../../../CHANGELOG.md:748 ../../../CHANGELOG.md:774
-#: ../../../CHANGELOG.md:816 ../../../CHANGELOG.md:831
-#: ../../../CHANGELOG.md:883 ../../../CHANGELOG.md:900
-#: ../../../CHANGELOG.md:935 ../../../CHANGELOG.md:970
-#: ../../../CHANGELOG.md:1005 ../../../CHANGELOG.md:1075
-#: ../../../CHANGELOG.md:1135 ../../../CHANGELOG.md:1298
-#: ../../../CHANGELOG.md:1376 ../../../CHANGELOG.md:1445
-#: ../../../CHANGELOG.md:1479 ../../../CHANGELOG.md:1511
-#: ../../../CHANGELOG.md:1535 ../../../CHANGELOG.md:1575
-#: ../../../CHANGELOG.md:1639 004e6c20a777415d9868072149bf90ff
-#: 01e6ab5985974a549f31da819ad7b266 0b7d13eeb8de474e9c2d63d299e2472c
-#: 11409a89cda74b1cb3e5992a3b460339 170568e947c145ccb86eb8653210414d
-#: 18f9a402060e4cd0b36c9fdf8cf72a73 1d340348a69d457ca136e2173206e349
-#: 248d239e8fad409495fc613d62b7019e 25e3084d6ccc4a339c29bd62dedef80a
-#: 2b12195f3ac244e683bf53c674973b7a 2d75f37811ad43208d1552940ab3b0c7
-#: 30516f49a9c74faaa1f3c1c655699cae 379da879d0974913be2a331057d04812
-#: 427162355e0c4c039344fc7ee5ef6c77 46dc4ad3d52d46ddbaeef4e37a11c8c1
-#: 4983bfc55f9a4257af787e1812c765a2 621e4762573a4aa9b05f08c78e157701
-#: 6a5b0fa9cea44209af46562692623e61 704c9b17a8e84ca4978069698a6459e9
-#: 74cd6aeb745f43e8aef7a100c2310175 879a4dae10b4490fb4791de173564ff7
-#: 951432f0cc364c68bbfeedb3a6763bc5 96f1ac1ce7f7462381f271659f91806d
-#: 9751535c8a444c6a9f4102f24049b363 9fc66924bde64626b2f2b562a2761ef0
-#: 9ff71d1059e94262bd7a74229d9af774 a2f8085a6a7d4555a079d431f3dcaa6c
-#: a947c7703c09414d8cca115ce5bced1f b3753e5c323d41a2b9250d50ca8ceebd
-#: b3cb43cac79941c3990e7b3386aa49a7 bd1ab9ce42ae4216a052d3c747bcad21
-#: c5ab48fda2e647eb87aa3bab04fc80e8 c74560689e7e49ddae03242876eb7552
-#: c834bb6447c348f1a952df6e38827cb0 c8b0d5b1e03c45999ff99f0d384fe1d5
-#: d3637beac2a94b9b92e1e3b097dd27f3 d8d63da086024b4c99bb99d0f8ccb729
-#: dcef1c2a1c6e421bac5cc72f0cbd3213 e12cb184d51b470b904bfbbb01a8bd3c
-#: e52b937fed774eba822b8dc8ba1a9b3f ef09209a9aad4ec39d04a81534943c99
-#: fd7fb295f22c439bbfee7ca4840360ed ff7624600f0e42df8c66ffbbaf2a5655
+#: ../../../CHANGELOG.md:14 ../../../CHANGELOG.md:33 ../../../CHANGELOG.md:59
+#: ../../../CHANGELOG.md:89 ../../../CHANGELOG.md:116 ../../../CHANGELOG.md:135
+#: ../../../CHANGELOG.md:171 ../../../CHANGELOG.md:228
+#: ../../../CHANGELOG.md:237 ../../../CHANGELOG.md:304
+#: ../../../CHANGELOG.md:326 ../../../CHANGELOG.md:422
+#: ../../../CHANGELOG.md:480 ../../../CHANGELOG.md:595
+#: ../../../CHANGELOG.md:642 ../../../CHANGELOG.md:651
+#: ../../../CHANGELOG.md:695 ../../../CHANGELOG.md:719
+#: ../../../CHANGELOG.md:764 ../../../CHANGELOG.md:838
+#: ../../../CHANGELOG.md:881 ../../../CHANGELOG.md:915
+#: ../../../CHANGELOG.md:949 ../../../CHANGELOG.md:968
+#: ../../../CHANGELOG.md:994 ../../../CHANGELOG.md:1018
+#: ../../../CHANGELOG.md:1061 ../../../CHANGELOG.md:1132
+#: ../../../CHANGELOG.md:1171 ../../../CHANGELOG.md:1273
+#: ../../../CHANGELOG.md:1315 ../../../CHANGELOG.md:1387
+#: ../../../CHANGELOG.md:1460 ../../../CHANGELOG.md:1475
+#: ../../../CHANGELOG.md:1575 ../../../CHANGELOG.md:1632
+#: ../../../CHANGELOG.md:1686 ../../../CHANGELOG.md:1723
+#: ../../../CHANGELOG.md:1903 ../../../CHANGELOG.md:1981
+#: ../../../CHANGELOG.md:2008 ../../../CHANGELOG.md:2049
+#: ../../../CHANGELOG.md:2066 ../../../CHANGELOG.md:2113
+#: ../../../CHANGELOG.md:2141 ../../../CHANGELOG.md:2162
+#: 01279e6930ed45c6a3f1f3c820d19acf 02084291de024893953de3a776ed322c
+#: 0802aaf01cc14f93bd4457e9d698e105 177639041d2d450ea8f7bf8b74e42177
+#: 2307b717a0ee4101ab17c06416a13744 3787bfdcd0144111ad73f6a1c87fe2b0
+#: 3be3520956664d37a6ddb31f6174c669 3f138789e0994a099ec6029a6b796ff7
+#: 565b0ed2e82649adb84b3a9bb827ba22 5be2564682fd47ae8b9f01a7b0b0416e
+#: 6275526711e74edcb988c33c32b6b2cd 6b9c4e87f27a4dc685db45a5a134b13e
+#: 6e9ce74484e44b808afe9df86297ed0f 7436ee4c77684e56b771d7be2822b522
+#: 75aab2c498f54126b9af9f4002993522 7a0e0b4c395d42f9b01d32f258fd69b8
+#: 7addcf5298064997bbb5e25d556d3c0c 8211a1d09e76432691e2c863d614386b
+#: 87b98dd121384e89a8ac2e253fcaaa53 884b7476da154e7c9947b6775f0fa484
+#: 9e439855bb1342db90c80a8417ce2f4c a68aaa6ebbc74a51b615a37efcfe158b
+#: b5c27bbfe66e4483ae40f7b1a04f6406 bcc89841fd444b72b05802f9e4de33a0
+#: bd079d4f8cc746558ba208db605f0951 c3a1573e83ec4ab892fc6d2dd08398fb
+#: c6916015d07f46908c7867b3676c44e3 c6a5dec8869a4ddc918c4dbb85aae18e
+#: c8d9965a0b964ab0929799717505e07c c93a905bc6d2436db925d0dce4c8590a
+#: d37c9b02ec8a4b8abf80a4cd8aa635cb d43e67f3b962470980dea146ff33fc2d
+#: d87e6bf3f68c478d92b53df8a28dee32 db1e583c4b7d4a34bc2ef4c86e95d0ae
+#: dca54ab69bee4b129d8f07f817863937 e293c161ee3840b78ac9dcb5cd62f8d7
+#: e3a311f39f244b46bfeeca710bc8e812 e7ed2ccf157e472ea92205486e9ebe34
+#: e94c9e1fbc1b4dcc8301ba5eec2e597d ea5509d5eaeb42e48b444f01782c5ff0
+#: ee8d757a5b4f4807b65018c914fdd887 eef1e2ca8a8746d68e488cabe4f13e17
+#: f0a2325ae3c24a09be17d05ebc14bf1b fc68c140248c45d3a20d041d78ff8412
+#: fd488a024c2e4e218ef5a31640b2985c fda211a290e34c3cbe93939768e25141
+msgid "Added"
+msgstr ""
+
+#: ../../../CHANGELOG.md:17 12498b8dca4d49138762061fc4ff7157
+msgid ""
+"A 30-second timeout to handle cases where Vidi fails to load, ensuring "
+"the \"Vidi is now loaded\" console message is sent to prevent lockups in "
+"print. Clears timeout on successful loading. The timeout can be changed "
+"with ``config.loadingTimeout`` in build-time config."
+msgstr ""
+
+#: ../../../CHANGELOG.md:18 e4c900019f0f4e96b09a56b344ae3c76
+msgid ""
+"A 15-second interval to check if Vidi is loaded. If the interval is "
+"reached and Vidi is not loaded, a 'toast' is shown which enables the user"
+" to clear cache storage and refresh the browser. The interval Can be "
+"changed with ``config.loadCheckingInterval`` in build-time config."
+msgstr ""
+
+#: ../../../CHANGELOG.md:21 4116766a55174f2fa999d19c4913f100
+msgid "[2025.8.1] - 2025-19-8"
+msgstr ""
+
+#: ../../../CHANGELOG.md:24 ../../../CHANGELOG.md:50 ../../../CHANGELOG.md:65
+#: ../../../CHANGELOG.md:80 ../../../CHANGELOG.md:107 ../../../CHANGELOG.md:147
+#: ../../../CHANGELOG.md:156 ../../../CHANGELOG.md:217
+#: ../../../CHANGELOG.md:294 ../../../CHANGELOG.md:332
+#: ../../../CHANGELOG.md:341 ../../../CHANGELOG.md:350
+#: ../../../CHANGELOG.md:361 ../../../CHANGELOG.md:370
+#: ../../../CHANGELOG.md:379 ../../../CHANGELOG.md:388
+#: ../../../CHANGELOG.md:397 ../../../CHANGELOG.md:458
+#: ../../../CHANGELOG.md:471 ../../../CHANGELOG.md:528
+#: ../../../CHANGELOG.md:539 ../../../CHANGELOG.md:558
+#: ../../../CHANGELOG.md:568 ../../../CHANGELOG.md:585
+#: ../../../CHANGELOG.md:623 ../../../CHANGELOG.md:659
+#: ../../../CHANGELOG.md:701 ../../../CHANGELOG.md:710
+#: ../../../CHANGELOG.md:728 ../../../CHANGELOG.md:737
+#: ../../../CHANGELOG.md:746 ../../../CHANGELOG.md:755
+#: ../../../CHANGELOG.md:773 ../../../CHANGELOG.md:801
+#: ../../../CHANGELOG.md:853 ../../../CHANGELOG.md:939
+#: ../../../CHANGELOG.md:984 ../../../CHANGELOG.md:1007
+#: ../../../CHANGELOG.md:1040 ../../../CHANGELOG.md:1067
+#: ../../../CHANGELOG.md:1094 ../../../CHANGELOG.md:1103
+#: ../../../CHANGELOG.md:1112 ../../../CHANGELOG.md:1122
+#: ../../../CHANGELOG.md:1162 ../../../CHANGELOG.md:1183
+#: ../../../CHANGELOG.md:1193 ../../../CHANGELOG.md:1203
+#: ../../../CHANGELOG.md:1212 ../../../CHANGELOG.md:1290
+#: ../../../CHANGELOG.md:1299 ../../../CHANGELOG.md:1356
+#: ../../../CHANGELOG.md:1378 ../../../CHANGELOG.md:1398
+#: ../../../CHANGELOG.md:1425 ../../../CHANGELOG.md:1440
+#: ../../../CHANGELOG.md:1451 ../../../CHANGELOG.md:1495
+#: ../../../CHANGELOG.md:1510 ../../../CHANGELOG.md:1520
+#: ../../../CHANGELOG.md:1529 ../../../CHANGELOG.md:1595
+#: ../../../CHANGELOG.md:1654 ../../../CHANGELOG.md:1706
+#: ../../../CHANGELOG.md:1885 ../../../CHANGELOG.md:1972
+#: ../../../CHANGELOG.md:1998 ../../../CHANGELOG.md:2037
+#: ../../../CHANGELOG.md:2129 ../../../CHANGELOG.md:2151
+#: ../../../CHANGELOG.md:2202 0109b7a2bde942e4a21609dd96d1b506
+#: 04b306aa8f3f479d9feca2107e44578d 07184d807f9b4deb91809a192eb3f4bc
+#: 097b5a429ca14ef3a690fe6f82e72b4d 0d5fdaf361044986b840b19d95673742
+#: 0d8178afdb2d4528a00a7a0ffdaeecb1 107842c6bb384ecd926f979deb49fea3
+#: 1ad54300e68a4a66aef884fa4ef71ed1 1c2e915417aa470e9119fbc0fb47dae6
+#: 1f3536bce46a4befb1f2997348ead3a5 20cc802c9f81485683d031e18e8afa93
+#: 243f7b12ddbc45a9b6235abc017958c2 278d795d247b4807ba2a93ac838469bb
+#: 28388867cd324e99874330f8b39153e9 309b0919538f447786531a74a51820ec
+#: 39c517c6f81e424daa82e94b9bd198f2 3a40a138441c438d96b40ff56e16ef22
+#: 3a8993a7860f4f56b4f1fe0be337c376 43debd6692af4dc6a0438cef9af2a5ea
+#: 4b99a82644214a8bab7536238a11747e 4f7fd6fc2819401595830601417e3db1
+#: 529f7c4986674a55b51a8cc3bd25dbd6 534264f662404f378c218ed9f31a8975
+#: 59e2af05be6245d6a6ba60ef06b4edb5 5aaa8645c3574a568b635323411b6396
+#: 5fa7a2e3b6594e7fa61b297b2ccda6bf 5fd23b97d6324c3b9d31644281214676
+#: 63743c4c82d443caa68f829ae6735672 65768191e82c4912981ac6fce8d06396
+#: 66c6a1fc17174481a168ab1942b44a69 68573375199a4432b6fcda61aaa83e75
+#: 6a8bfe806b974a63bc050213ea9977a6 7474dd22df6446e78f93d925f1704ea7
+#: 78dbb1956dd74d7a9a7d1161252a6481 844824dfb5f44744b011a6c1354b81f6
+#: 883ef6cda6fd43b994a70b405d47ceab 8a6db504867d4aa09772d7dc787a05f4
+#: 8b939c4e384c4d20b5f68bdf66b9bacb 8d6a7b7dd67e473b9d914e9319c6537e
+#: 904cd4dc73144648b0a13064607a5def 913260477a7046549b676e4dd6dca369
+#: 932f68b2135c4ed3bd45b9cb6886d7b1 94bc68fb9b9745de825b2c4530728f67
+#: 96df74b10a2e4d79a668ebdc683c19d2 9b882aad833f442aacaaee2792e22731
+#: 9c3b68a4f11e4546856dca5726e06faf ae8d446f2e614c65bdb3940e82f756cb
+#: b4ae93263cfc4371baf47716fafd0228 b7089948341f4819bb342feac151fa47
+#: bc3bd47634bb4598b4c838cc5161e771 c0c991db417f4176ab594199270561a0
+#: c62617962b484c43927868fff3f06b0b c69a790276fa44e89c399d7249f0fa0d
+#: cd42acdcd0844a2e90d29280a69b1670 cf30812559134d55bf287312b0c739bb
+#: d2e91cb7fe3b408480b3845e0d790426 d99dd4673748467bbdcda7cd3afbeabd
+#: db01702beca7403282281cb181b279c1 dc7ad6b089e14be98c9f07254f54cd3d
+#: dd129a8c869e4c20a10776edf101f822 df77385f4dcb496aa91005a129bc8ab3
+#: e79d93e74a9e4bbe8eed537b20ecd96d e8663e436a9f458dbc25ccc057ecb3fd
+#: e91d86bce5a849d6b9687f5a99c72469 ece6673b56114e6fb083817e0ac5c3bb
+#: f04bfbcddd374176978b87f1d7936474 f2e9330ae82c414d985caaaba18cb4d6
+#: f391a9f0ca4442c3bc16e598b5e759ab f891852505e547899e2a7c3d781c091b
+#: fa9002edb1404323bbcb555b9ee8a794 fdb890a9954847fe923508d583a98599
+msgid "Fixed"
+msgstr ""
+
+#: ../../../CHANGELOG.md:27 8bc8a62ebce94f76905b69c671085008
+msgid ""
+"Added ``min-width: 0`` to ``.main-content``\\ , so content is propper "
+"sized if wider than the parent container."
+msgstr ""
+
+#: ../../../CHANGELOG.md:30 7fec253d430b4e9c9c83c2a80e94938c
+msgid "[2025.8.0] - 2025-11-8"
+msgstr ""
+
+#: ../../../CHANGELOG.md:36 d4f1473c6eb34f3398ca103faf6193e2
+msgid ""
+"New config ``crs`` for setting the coordinate system. The default is "
+"``EPSG:3857``. Only alternative is for now ``EPSG:25832``. Background "
+"layers must be configured accordingly."
+msgstr ""
+
+#: ../../../CHANGELOG.md:39 ../../../CHANGELOG.md:74 ../../../CHANGELOG.md:126
+#: ../../../CHANGELOG.md:141 ../../../CHANGELOG.md:286
+#: ../../../CHANGELOG.md:407 ../../../CHANGELOG.md:548
+#: ../../../CHANGELOG.md:579 ../../../CHANGELOG.md:615
+#: ../../../CHANGELOG.md:633 ../../../CHANGELOG.md:668
+#: ../../../CHANGELOG.md:680 ../../../CHANGELOG.md:689
+#: ../../../CHANGELOG.md:782 ../../../CHANGELOG.md:793
+#: ../../../CHANGELOG.md:810 ../../../CHANGELOG.md:825
+#: ../../../CHANGELOG.md:845 ../../../CHANGELOG.md:865
+#: ../../../CHANGELOG.md:906 ../../../CHANGELOG.md:930
+#: ../../../CHANGELOG.md:958 ../../../CHANGELOG.md:978
+#: ../../../CHANGELOG.md:1000 ../../../CHANGELOG.md:1024
+#: ../../../CHANGELOG.md:1034 ../../../CHANGELOG.md:1077
+#: ../../../CHANGELOG.md:1142 ../../../CHANGELOG.md:1177
+#: ../../../CHANGELOG.md:1221 ../../../CHANGELOG.md:1282
+#: ../../../CHANGELOG.md:1308 ../../../CHANGELOG.md:1350
+#: ../../../CHANGELOG.md:1365 ../../../CHANGELOG.md:1417
+#: ../../../CHANGELOG.md:1434 ../../../CHANGELOG.md:1469
+#: ../../../CHANGELOG.md:1504 ../../../CHANGELOG.md:1539
+#: ../../../CHANGELOG.md:1609 ../../../CHANGELOG.md:1669
+#: ../../../CHANGELOG.md:1832 ../../../CHANGELOG.md:1910
+#: ../../../CHANGELOG.md:1990 ../../../CHANGELOG.md:2024
+#: ../../../CHANGELOG.md:2056 ../../../CHANGELOG.md:2080
+#: ../../../CHANGELOG.md:2120 ../../../CHANGELOG.md:2184
+#: 125edf0aa1954c70b6ce7b5f331a05c0 1dd2951529e04aa99dbd43f67858e24d
+#: 2e8b74ad75014767aa49b312180deb0d 2f48dac6f09c4e229479bc52ea608627
+#: 2fadf22e917742848ce4e811b367aeee 30ebe78545f4417d94357047e7a8fc74
+#: 31e0122837434d36bfeeb7207468cbed 360a3575c49f48f9b0518e71f93eab3e
+#: 393e48fa66df49e4933701a56d8d78e3 427a105657214ed8b25798b79a5f7094
+#: 45c38d3a2ff1497cadb973ddaf2fa674 49dfe00335f9489eae2cd7c7ab1a946f
+#: 4a25036cc96141cdbb4d19547f6ff2ca 4e81b1827fba4b0fb25ecd47ab95bccb
+#: 5431ec12b04d4cf18878897b7d179013 54d1b77b6bba4b3181b8313b0350486d
+#: 56f1e2d9fac54de3a585bfb821143cba 5ba40c35486a46708f9cefd8d1117246
+#: 604382713d934d86bae0ff5ab7252d99 61bf7e6506e344988764a59f858e593c
+#: 641f8318fe0f4790886663bb30c70a15 6d40b58e1dd74317b09e5cb2a01c91d5
+#: 6e23ad3f88b84b87b6b42496655f627f 70a3344885a14a29b3d5695a9d32a9bc
+#: 757bc8ee03774bae927108ac06a34776 75822a1d8ed2418886a83ee013acc3aa
+#: 76747a573eec4e60a0476b0213793179 7768ca72843845a8a807475c47826384
+#: 77a5ac82a5ad4cfe8e5a1f45c3abba5d 7bb48fa0fa4c4f5b950bd055cd238828
+#: 8b8c5cdf79914ff9a8b71e3b1b7e804f 8ee51a41f3694d39bbe180885a2d70c5
+#: 974e51402d034724b3f0bd83696c9fd6 9a7bebe6aa0647c7aa8fc80805472c84
+#: 9acb0a3ae2db44adb96f7a59436d6313 9ccf0d3b56d34563a123877eaea73924
+#: a3cb8045d7fc4fd8941d339c55dea4de b1ce7005fff44861883571cf74cda8b7
+#: b3438cf3b47741149186a52ae9cfdd05 c28b3bd1fdda4b1995d73a02db57c5fe
+#: c4d33ee1c7904c46b068a2047fa10bad c8498467261e427880fe268e32dd045e
+#: ca15daf80ef149c79760c00fef862d75 cd0444cde4cc4ef9a586168358f2e775
+#: cd5bcd5f32b14c728f827f84b51dbbf6 dff891220688487b907461a4d4e3b1bb
+#: e0fd58d864da4041ab2464282ea7c188 ec730b3c8b854ad38fea1311f5544f16
+#: f9d22f69bd8644c1a99eb3085f0a4998
 msgid "Changed"
 msgstr ""
 
-#: ../../../CHANGELOG.md:17 0753e5cdfb244e0c9c1dd23ad27dd0e1
+#: ../../../CHANGELOG.md:42 c53a60876f4949a5951ef725922ae86d
+msgid ""
+"The print border rectangle is now created with a ``polygon`` object "
+"instead of a ``rectangle`` so it aligns with choosen coordinate system. "
+"This means that the rectangle edit handles are not available anymore. "
+"Scale can only be changed with the ``scale`` dialog."
+msgstr ""
+
+#: ../../../CHANGELOG.md:43 df9023c193ac44a1820e86aa0cf4054c
+msgid ""
+"The analysis function in ``conflictSearch`` will format distance to "
+"``km`` when above 100.000 instead of 1.000."
+msgstr ""
+
+#: ../../../CHANGELOG.md:44 a48ce2d7f3af4b0289247f8b89eacc6b
+msgid ""
+"The analysis function now has a GC2 Meta option ``sql_conflict_header`` "
+"for setting the header of the fist column in the analysis result table."
+msgstr ""
+
+#: ../../../CHANGELOG.md:47 287818833a214036b13ceb9feddd34e5
+msgid "[2025.7.0] - 2025-2-7"
+msgstr ""
+
+#: ../../../CHANGELOG.md:53 60f694aa082944799fd39192cafa1a27
+msgid ""
+"The \"Clear map\" button now clears symbols and resets the state for "
+"drawings (before drawings were cleared but state not proper reset)."
+msgstr ""
+
+#: ../../../CHANGELOG.md:56 1961d32c2c14465095f86dc97e6f812c
+msgid "[2025.6.2] - 2025-19-6"
+msgstr ""
+
+#: ../../../CHANGELOG.md:62 d87c53176d4b4ba9b185b3e87374a44a
+msgid ""
+"New \"Download MS Excel\" button in Advanced Query. This function will "
+"download one Excel Workbook with a sheet containing results for every "
+"queried layer."
+msgstr ""
+
+#: ../../../CHANGELOG.md:68 8f3889d205ff4b5c9684f923673fdac6
+msgid "The Virtual layer in Advanced Query is fixed"
+msgstr ""
+
+#: ../../../CHANGELOG.md:71 2d8660e953004324923c3401c0c8891b
+msgid "[2025.6.1] - 2025-4-6"
+msgstr ""
+
+#: ../../../CHANGELOG.md:77 30249897dd804d09bd74671797c3ecbb
+msgid ""
+"The JavaScript libs are now loaded in sync, because the app had to poll "
+"for them anyway. This doesn't change performance and the Chrome "
+"[violation] regarding setTimeout is gone."
+msgstr ""
+
+#: ../../../CHANGELOG.md:83 c3f9a7aa785146ee85ea7f265db30298
+msgid ""
+"Removed redundant console traces and improved error handling in multiple "
+"modules. Added safeguards for modal initialization to prevent runtime "
+"issues when the login modal is unavailable."
+msgstr ""
+
+#: ../../../CHANGELOG.md:86 803ae9db1bb44ef1864031b972d21699
+msgid "[2025.6.0] - 2025-2-6"
+msgstr ""
+
+#: ../../../CHANGELOG.md:92 21d5366183d840079e24a054fbcd043e
+msgid ""
+"A ``tileMatrixTransform`` function can now be passed to WMTS layers. The "
+"function takes the current zoom number and must return a valid "
+"tilematrix. The example will pad the zoom number with ``0`` and prefix "
+"with ``L``. If the ``tileMatrixTransform`` is not set, the zoom number "
+"will be used directly for tilematrix."
+msgstr ""
+
+#: ../../../CHANGELOG.md:110 cf50db3cd7af488a85064eebdab53842
+msgid ""
+"In print the EPSG:32632 projection is replaced with EPSG:3857 for "
+"consistency and improved accuracy. Introduced a correction factor to "
+"adjust for latitude distortions in dimensions. Refactored related "
+"calculations to ensure proper map scaling and alignment."
+msgstr ""
+
+#: ../../../CHANGELOG.md:113 f5d39023366242d9af6bfff28a6607f3
+msgid "[2025.5.2] - 2025-20-5"
+msgstr ""
+
+#: ../../../CHANGELOG.md:119 0259bcb7dc67405099869cf3db368fef
+msgid ""
+"Implemented a feature to copy extra tables to the clipboard as HTML, "
+"making it compatible with Excel formatting. Added animations to indicate "
+"successful copying and updated table rendering to include copy buttons."
+msgstr ""
+
+#: ../../../CHANGELOG.md:120 a2722ea6c0d34db6820b5777dfae516f
+msgid ""
+"Add callback handling for symbol changes. This ensures external systems "
+"can respond to changes via the ``symbolIsChanged`` event and "
+"corresponding embed API callbacks."
+msgstr ""
+
+#: ../../../CHANGELOG.md:123 d686ef56cf3e44518c222a0a4cf920cf
+msgid "[2025.5.1] - 2025-13-5"
+msgstr ""
+
+#: ../../../CHANGELOG.md:129 3759e525a8e34b81aad09f84ddf3c87f
+msgid "Adjust file upload limits in FileUploadWidget.js"
+msgstr ""
+
+#: ../../../CHANGELOG.md:132 61b2b3ab36c3409bbe0da1727c6ac097
+msgid "[2025.5.0] - 2025-6-5"
+msgstr ""
+
+#: ../../../CHANGELOG.md:138 09abc97efc6d4d75bbf7023eda024499
+msgid ""
+"A new config ``print.timeout`` controls the timeout of the headless "
+"browser. Defaults to ``60000`` which equals the previously hardcoded "
+"value."
+msgstr ""
+
+#: ../../../CHANGELOG.md:144 8e0723c3245847e988655176979dee94
+msgid ""
+"The minimum scale available for print has been changed from a fixed "
+"``200`` to the lowest value of ``config.print.scales``."
+msgstr ""
+
+#: ../../../CHANGELOG.md:150 1f03fcadfb4445e2a0e6ce5b3e76bdf3
+msgid "Multipage print in conflictSearch now works."
+msgstr ""
+
+#: ../../../CHANGELOG.md:153 88a89fdecf434df6904abb96d2ffc52a
+msgid "[2025.4.1] - 2025-24-4"
+msgstr ""
+
+#: ../../../CHANGELOG.md:159 6746714271d447cda27f7cbea2466da5
+msgid ""
+"Added a null check to prevent potential errors when accessing undefined "
+"objects during layer sorting."
+msgstr ""
+
+#: ../../../CHANGELOG.md:162 365971edee7b43559fa6c3feb16de665
+msgid "[2025.4.0] - 2025-10-4"
+msgstr ""
+
+#: ../../../CHANGELOG.md:165 29b5158e400b4a93bd37e9b401df506d
+msgid ""
+"Danish search with ``sortByScore`` is improved so more relevant hits get "
+"ranked higher. ``sortByScore`` is now default."
+msgstr ""
+
+#: ../../../CHANGELOG.md:168 09c43111e8e041ecbdc640c523db4866
+msgid "[2025.3.2] - 2025-28-3"
+msgstr ""
+
+#: ../../../CHANGELOG.md:174 445bd80f24604b67942287e477802f2e
+msgid ""
+"A new config ``extensionConfig.editor.alwaysActivate``. If set to "
+"``false`` the editor controls will be hidden until the user sign in. "
+"Default is ``true``."
+msgstr ""
+
+#: ../../../CHANGELOG.md:175 9593a246dfc44b8c853fc5afcf3d8ba7
+msgid "Configuration for grouping base layers: .. code-block:: json"
+msgstr ""
+
+#: ../../../CHANGELOG.md:178 922b71948cb1483999c2945c53bcb5ac
+msgid "{ \"baseLayerGroups\": ["
+msgstr ""
+
+#: ../../../CHANGELOG.md:-1 ../../../CHANGELOG.md:185 ../../../CHANGELOG.md:212
+#: ../../../CHANGELOG.md:269 ../../../CHANGELOG.md:1051
+#: ../../../CHANGELOG.md:1252 ../../../CHANGELOG.md:1393
+#: ../../../CHANGELOG.md:1409 ../../../CHANGELOG.md:1640
+#: ../../../CHANGELOG.md:1760 ../../../CHANGELOG.md:1762
+#: ../../../CHANGELOG.md:1812 ../../../CHANGELOG.md:1827
+#: 0dba065c44af4e96b8569cc9173a5182 1c04e0dd6d934debb957ef21e287bf22
+#: 26482fa2acf04bc59aa41b37b86cd2ad 3c27fe1a511245d0895a1e22a07f6f51
+#: 40720078ac7e4cc197399744d03e4372 597fd8291cb047b38dd316d45ba65ac3
+#: 6408875889354591b79ff20417bc58c2 862e3b88667443559af12955fcfc8e09
+#: b0b3d694df444feaadfbbe147ca09b52 b0ce8725b28449269e15e8f0d02fe56f
+#: c844340044de4152a7769e1b20456090 c9917a8aaf3a4cfcb3890b1876d0e4a3
+#: f8c74ae4a2f04635a717bcb87e79630b
+msgid "{"
+msgstr ""
+
+#: ../../../CHANGELOG.md:181 ae8bbf14eb044de7ac385046500d25d1
+msgid "\"groupName\": \"Hexagon DDO ortofoto\", \"layers\": ["
+msgstr ""
+
+#: ../../../CHANGELOG.md:183 9ccd893d4b804156830b996a6cdbf5aa
+msgid "\"DK-DDOland2022_125mm_UTM32ETRS89\", ..., ..."
+msgstr ""
+
+#: ../../../CHANGELOG.md:186 ../../../CHANGELOG.md:195
+#: ../../../CHANGELOG.md:1409 ../../../CHANGELOG.md:1763
+#: 0c4edf6c74084accbde779e7ed51ee3b 292bb2fd4adf4682b3a262cef77bf0cd
+#: 43cf5e32d52342eb97d9a7cc1f96f8b6 dc3a43fedb01456aba345414d334fa28
+msgid "]"
+msgstr ""
+
+#: ../../../CHANGELOG.md:187 ../../../CHANGELOG.md:1254
+#: ../../../CHANGELOG.md:1747 0df40e4e037247a58817355479cc4da9
+#: 0e2a10e5bfbc47d39974b0b98bfd4193 fc6886d33c52409b9a426c4a314a6680
+msgid "}, {"
+msgstr ""
+
+#: ../../../CHANGELOG.md:189 fe9dcab33bb74137af82ae48c940b5c9
+msgid "\"groupName\": \"GeoDanmark ortofoto\", \"layers\": ["
+msgstr ""
+
+#: ../../../CHANGELOG.md:191 adc3d11e4b8d4a38937c89fbf1b0de33
+msgid "\"ortofoto_foraar_temp_DF\", \"ortofoto_foraar_2023\", ..., ..."
+msgstr ""
+
+#: ../../../CHANGELOG.md:196 ../../../CHANGELOG.md:214
+#: ../../../CHANGELOG.md:271 ../../../CHANGELOG.md:275
+#: ../../../CHANGELOG.md:276 ../../../CHANGELOG.md:1053
+#: ../../../CHANGELOG.md:1089 ../../../CHANGELOG.md:1238
+#: ../../../CHANGELOG.md:1268 ../../../CHANGELOG.md:1395
+#: ../../../CHANGELOG.md:1410 ../../../CHANGELOG.md:1411
+#: ../../../CHANGELOG.md:1485 ../../../CHANGELOG.md:1492
+#: ../../../CHANGELOG.md:1641 ../../../CHANGELOG.md:1642
+#: ../../../CHANGELOG.md:1762 ../../../CHANGELOG.md:1764
+#: ../../../CHANGELOG.md:1814 ../../../CHANGELOG.md:1829
+#: ../../../CHANGELOG.md:1873 ../../../CHANGELOG.md:1874
+#: 0b8104fc5f9142fabf1ab08d78073aad 150d6e9225094abbac06f199ce6aee02
+#: 2023c277f020403782d4b0287a367cbf 2613959335294be3ba5a593313d2db9f
+#: 2b56921965f9446f9ddb16b00b915bf5 53b504105b224d04a1aa2f8d7c262ece
+#: 59059be48c6d47d48ad77fb61ee08c4b 6b921a266ef5442fa9e843c87b160a0f
+#: 71990e66d50344ee941e3fbca8670756 8307555572f540a583bdfa50f1c19e6a
+#: 8df994d5f1d6465bb017f99fb4b6edf1 9d391b3dac9f4272acfe63864b3379fe
+#: a2c2a30b079d4a9c8d68529347fd886b b11c8481d8f541698d522a96b61d180e
+#: b3d5849632a24eac8e9f7aeebb30673e c737c19693f341949e398cafe1740591
+#: d122010453574ef291d014e9a54789e3 d1c5313af88341a8b5b19dbaebafa6b6
+#: e51858991bdb4569bbb1ae537faf71dd e7227afb0d5c4aca93318bef2ad549fa
+#: ee63a436fa1e4ce5a04e6e4e58f76732 f75c2e3feba4498e9fed28e829389f73
+msgid "}"
+msgstr ""
+
+#: ../../../CHANGELOG.md:200 19c115b535304ced84ae55d9f22e0a98
+msgid ""
+"Draw module can now be set to stateless with config ``statelessDraw: "
+"true``. This means that drawings are not recreated on browser refresh."
+msgstr ""
+
+#: ../../../CHANGELOG.md:201 5924c0d737f742f0b3749ac19e3a6a9b
+msgid ""
+"Symbol extension can now set to stateless with config "
+"``extensionConfig.symbols.stateless: true``. This means that symbols are "
+"not recreated on browser refresh."
+msgstr ""
+
+#: ../../../CHANGELOG.md:202 80f8f336f98b4b38ac93d8a87195aa40
+msgid ""
+"Opening layer groups at startup can now be done with config "
+"``openLayerTreeGroups``\\ , which value must be an array with group "
+"names: .. code-block:: json"
+msgstr ""
+
+#: ../../../CHANGELOG.md:205 9c67fe21478f4895904e56067303fd73
+#, python-brace-format
+msgid "{ \"openLayerTreeGroups\": [\"Group1\", \"Group2\"] }"
+msgstr ""
+
+#: ../../../CHANGELOG.md:209 8da86d0b0e834d56a769821d14666f34
+msgid ""
+"Custom map projections can now be used. One is added: The Danish UTM32 "
+"grid. It can be set with config: .. code-block:: json"
+msgstr ""
+
+#: ../../../CHANGELOG.md:213 20fc968f7506471cb14dd39278f13255
+msgid "\"crs\": \"EPSG25832\""
+msgstr ""
+
+#: ../../../CHANGELOG.md:220 df88c9102cd747bb85a679e6bcc65544
+msgid ""
+"Better handling of vector layers in ``activeLayers``. If ``activeLayers``"
+" only had vector layers, they wouldn't be activated."
+msgstr ""
+
+#: ../../../CHANGELOG.md:221 82275da051d84e548811bae5e9efdfdd
+msgid ""
+"Fail-over for base layers is now working in embed mode with both base "
+"layer toggle and drawer."
+msgstr ""
+
+#: ../../../CHANGELOG.md:222 dfd08d6bac3e4d9085c5b44169f8ffe2
+msgid ""
+"Fail-over for base layer module is improved, so its cycles from the top "
+"and starts over."
+msgstr ""
+
+#: ../../../CHANGELOG.md:225 ab12f0d106e0443fadbed451c6421a93
+msgid "[2025.3.1] - 2025-10-3"
+msgstr ""
+
+#: ../../../CHANGELOG.md:231 562e1d6e90b64e069e849fcd8cf5942d
+msgid ""
+"Added Handlebars helper 'formatDecimalNumber', which converts a decimal "
+"number to the chosen locale (either decimal separator '.' or ',')."
+msgstr ""
+
+#: ../../../CHANGELOG.md:234 d0e726a5aa5140cbac23ee4fd21d00bb
+msgid "[2025.3.0] - 2025-7-3"
+msgstr ""
+
+#: ../../../CHANGELOG.md:240 6adf3789d745412eb1c1a582a8229d58
+msgid "Added information on building the documentation."
+msgstr ""
+
+#: ../../../CHANGELOG.md:241 fca7f85bb4144c6e9e7e7a9a670c302b
+msgid "Fixed some typos in changelog."
+msgstr ""
+
+#: ../../../CHANGELOG.md:242 2730074fca2a4a8abf43a042fee7aa7b
+msgid "The default coordinate system can now be set in Coordinates module:"
+msgstr ""
+
+#: ../../../CHANGELOG.md:256 e2137006478c40fbbd3cf32e281db05e
+msgid ""
+"Google Maps added to Coordinates module and COWI Gadefoto will not be "
+"shown if not configured."
+msgstr ""
+
+#: ../../../CHANGELOG.md:257 99734f856c47421ea2c5089d0ab0a64a
+msgid ""
+"New module ``directions``\\ , which adds a map control button. After "
+"activating the control the user can click in map and Google Maps with "
+"directions to that point will start. The geolocation control must be "
+"active for to use the directions control."
+msgstr ""
+
+#: ../../../CHANGELOG.md:260 976a648640da4d0f9e19fe11ad888d50
+msgid ""
+"New \"More\" handle on symbols with a Copy function, which clones the "
+"symbol to a new one. It can be configured like the other handles and is "
+"called ``extra``. Here it's disabled: .. code-block:: json"
+msgstr ""
+
+#: ../../../CHANGELOG.md:264 ../../../CHANGELOG.md:1084
+#: b8c5647139854af4ad7db3894e7400e2 bd44f729be184c58a4e6df295cb22589
+msgid "{ \"extensionConfig\": {"
+msgstr ""
+
+#: ../../../CHANGELOG.md:274 e565198adaa54fdf96469184c732f749
+msgid "\"symbols\": {"
+msgstr ""
+
+#: ../../../CHANGELOG.md:270 79734bdc08204f07b09ab7f48c57f20d
+msgid "\"files\": ["
+msgstr ""
+
+#: ../../../CHANGELOG.md:269 fdc5cea358a94660a60aa5282b21301f
+msgid "\"file\": \"symbol_set.json\", \"title\": \"My symbols\""
+msgstr ""
+
+#: ../../../CHANGELOG.md:272 44b2e68af0974f56ba48e21afe60f9fc
+msgid "], \"symbolOptions\": {"
+msgstr ""
+
+#: ../../../CHANGELOG.md:274 f35758e345ec4f9c8ac6169b2459e104
+msgid "\"extra\": false"
+msgstr ""
+
+#: ../../../CHANGELOG.md:280 1b40d4119a4d4687a61ab3a2a64f35e0
+msgid "Symbol handles are now using Bootstrap icons."
+msgstr ""
+
+#: ../../../CHANGELOG.md:281 9fbb7304c69d4c3c9944b6376f24d2d7
+msgid ""
+"Config option 'activateLayers' can now be set to the same kind of values "
+"as 'schemata' (including tag: and schema name). A new method "
+"meta::getLayerNamesFromSchemata will convert the schemata to an array of "
+"layer names."
+msgstr ""
+
+#: ../../../CHANGELOG.md:283 34f074ee1f8542dcae0ad95592bea58d
+msgid ""
+"A global variable ``decimalSeparator`` is now set from current locale. "
+"It's used in conflictSearch."
+msgstr ""
+
+#: ../../../CHANGELOG.md:289 3623a67e17ce49078b9ae9ce5e310e22
+msgid "Auto hide login modal after successful login."
+msgstr ""
+
+#: ../../../CHANGELOG.md:290 1db544a4dfd04b61944df42acaaec65d
+msgid ""
+"When using ``featureInfoTableOnMap`` closing the popup wil clear selected"
+" features in the map."
+msgstr ""
+
+#: ../../../CHANGELOG.md:291 890e937cf4c8457b9b68e0312c124052
+msgid ""
+"Config option 'activeLayers' will now be evaluated when signing in, so "
+"protected layers will be switched on."
+msgstr ""
+
+#: ../../../CHANGELOG.md:297 2530406d39f24bce9a8bcd4ed2d035c6
+msgid ""
+"When signin out active layers will be toggled so protected layers are "
+"efficient removed from the map."
+msgstr ""
+
+#: ../../../CHANGELOG.md:298 9577304278ff4af998a29ae931634abe
+msgid "Bug regrading removal of empty groups in conflictSearch."
+msgstr ""
+
+#: ../../../CHANGELOG.md:301 f0b3e896a0424877bd04f616b32ac5c7
+msgid "[2025.2.1] - 2025-7-2"
+msgstr ""
+
+#: ../../../CHANGELOG.md:307 8dbb06a77a454175bd153c42e9c79a32
+msgid ""
+"In ConflictSearch modul the total length and area is calculated for "
+"intersections with lines and polygons and reported."
+msgstr ""
+
+#: ../../../CHANGELOG.md:309 592c69b106064cad8186a8abb7ab78ff
+msgid ""
+"Individual buffer for layers. The buffer for a layer is set with the GC2 "
+"Meta option ``buffer_conflict``\\ , which is added to the buffer on the "
+"search polygon. In the result report the Individual set buffers are "
+"shown."
+msgstr ""
+
+#: ../../../CHANGELOG.md:311 cec614f327b242d091d4b1f650b4dac3
+msgid ""
+"It's now possible to use the helper function ``formatDate`` in templates "
+"like this: .. code-block:: handlebars"
+msgstr ""
+
+#: ../../../CHANGELOG.md:314 fc55662eab6244c99f3f18e152a5fdcb
+msgid "{{formatDate date \"D. MMMM YYYY\" \"YYYYMMDD\"}}"
+msgstr ""
+
+#: ../../../CHANGELOG.md:315 65b2d62eb26547e5ad066f0edbf041e4
+msgid ""
+"Where first argument is output format and the second is input format (if "
+"needed)."
+msgstr ""
+
+#: ../../../CHANGELOG.md:316 2619ba0e2dcb43e8bf6fe20cabab5962
+msgid ""
+"And template helper function ``replaceNull`` is also added, which replace"
+" null with a value: .. code-block:: handlebars"
+msgstr ""
+
+#: ../../../CHANGELOG.md:319 2365054335ee496781083a9a5daa877d
+msgid "{{replaceNull date \"No date\"}}"
+msgstr ""
+
+#: ../../../CHANGELOG.md:320 b9770f2ed03c4b328951611b894e01cc
+msgid "The function will not return a value, if input is not null."
+msgstr ""
+
+#: ../../../CHANGELOG.md:323 66d72b8d5085457db59eb27b37a4eeb7
+msgid "[2025.2.0] - 2025-4-2"
+msgstr ""
+
+#: ../../../CHANGELOG.md:329 810d01678f6f4e52bcbe92779c7356f2
+msgid ""
+"Editor 'Edit' and 'Delete' buttons in feature table, so editing can be "
+"started without pop-up."
+msgstr ""
+
+#: ../../../CHANGELOG.md:335 d7d0c40b7be246d89522a1af751fbe93
+msgid ""
+"The \"Show table\" is now given space, so it doesn't overlap other "
+"elements like off canvases."
+msgstr ""
+
+#: ../../../CHANGELOG.md:338 b49b19f6eeb546d7a4fb054eb668c544
+msgid "[2025.1.5] - 2025-28-1"
+msgstr ""
+
+#: ../../../CHANGELOG.md:344 e9f863d832fe4056a1404a09695f515a
+msgid ""
+"The annotation tool in Draw is fixed. After upgrading 'marked' module, "
+"the code had to be adjusted."
+msgstr ""
+
+#: ../../../CHANGELOG.md:347 04093800355a4e1d9dcf833657ebb1d1
+msgid "[2025.1.4] - 2025-22-1"
+msgstr ""
+
+#: ../../../CHANGELOG.md:353 04156769643042c1b5f9fa16dae7db2b
+msgid ""
+"The \"Show table\" table widget was on reload of layer duplicated in the "
+"DOM."
+msgstr ""
+
+#: ../../../CHANGELOG.md:354 d9a2395e31ef40758db9ace5c7a80dc8
+msgid ""
+"When disabling layer the table was not removed in other templates than "
+"embed.tmpl."
+msgstr ""
+
+#: ../../../CHANGELOG.md:355 65b6169a6fca4329ae4ef60be1d2542a
+msgid "Styles regarding tables were adjusted."
+msgstr ""
+
+#: ../../../CHANGELOG.md:358 7c39a6ce21d24af8b6c5d435f371f13f
+msgid "[2025.1.3] - 2025-16-1"
+msgstr ""
+
+#: ../../../CHANGELOG.md:364 5ecb41f9373d4b4da7693a588f338f2f
+msgid ""
+"Update Leaflet CSS path to use node_modules source. It was using an old "
+"CSS sheet."
+msgstr ""
+
+#: ../../../CHANGELOG.md:367 3069d6e25b504bb2b091f5aa28faf3a0
+msgid "[2025.1.2] - 2025-15-1"
+msgstr ""
+
+#: ../../../CHANGELOG.md:373 2d6f74f83491446794a15a817bc5eda6
+msgid "Refs in configs now works again. And they also works in external configs."
+msgstr ""
+
+#: ../../../CHANGELOG.md:376 7160eace2a3f44f59e7dd77cf4a1b5ed
+msgid "[2025.1.1] - 2025-13-1"
+msgstr ""
+
+#: ../../../CHANGELOG.md:382 426279a92d2f4674bcbedb84178e17b3
+msgid ""
+"After editing raster layer, the layer was added again. Now it's only "
+"reloaded."
+msgstr ""
+
+#: ../../../CHANGELOG.md:385 e4a5b95d06b140888c823de830443bdb
+msgid "[2025.1.0] - 2025-8-1"
+msgstr ""
+
+#: ../../../CHANGELOG.md:391 d40129686e984704ab279a505d4373b3
+msgid ""
+"The removal of tke session parameter from URL after setting cookie caused"
+" an error in print. This is now fixed."
+msgstr ""
+
+#: ../../../CHANGELOG.md:394 26a9f686b46a4a2e9fdb5b480531893d
+msgid "[2024.12.2] - 2024-17-12"
+msgstr ""
+
+#: ../../../CHANGELOG.md:400 1fb7dbd46d3d4852a8dbeb84077b1df9
+msgid ""
+"If ``navigator.clipboard`` is not available (e.g. on an unsecure "
+"connection), the Snapshot module will fall back to a hacky method with "
+"``document.execCommand`` for copying to the clipboard."
+msgstr ""
+
+#: ../../../CHANGELOG.md:404 a47fbcba4d374a1ab3fea468bf605dc6
+msgid "[2024.12.1] - 2024-16-12"
+msgstr ""
+
+#: ../../../CHANGELOG.md:410 ba4d42eb5f9545c5b37a07b483e78f9c
+msgid "Use a button instead of a link for layer panel toggle"
+msgstr ""
+
+#: ../../../CHANGELOG.md:413 ../../../CHANGELOG.md:2208
+#: 5e67a14a5bdf40c087bb6b91e290d113 82ed3a3677e64ed5b8c9c781360c6c0f
+msgid "Security"
+msgstr ""
+
+#: ../../../CHANGELOG.md:416 cd26125a62ee4a9d97c759dba172c70d
+msgid ""
+"Remove session parameter from URL after setting cookie. This change "
+"ensures the session parameter is removed from the URL after it is used to"
+" set the cookie. It improves user privacy by preventing sensitive session"
+" data from lingering in the URL."
+msgstr ""
+
+#: ../../../CHANGELOG.md:419 e4209b54d46f4661b9811ed75af8432a
+msgid "[2024.12.0] - 2024-11-12"
+msgstr ""
+
+#: ../../../CHANGELOG.md:426 3f0090e9f74e4da5a82fbf1896584193
+msgid ""
+"New option for setting the zoom-level of custom searches. default is "
+"level 18. The value can be set in the config, using the key ``zoom``\\ :"
+msgstr ""
+
+#: ../../../CHANGELOG.md:461 1bdd04b9b3f7469ab372696bedf39a6f
+msgid ""
+"Bug in editor caused layers with restrictions to be output as textareas. "
+"Now the editor will correctly output a select with the values setup in "
+"GC2."
+msgstr ""
+
+#: ../../../CHANGELOG.md:463 2a4fa5a5513f416aa590559422b22871
+msgid ""
+"On mobile, it was possible for the menu to get into a stuck transparent "
+"state. This has been fixed."
+msgstr ""
+
+#: ../../../CHANGELOG.md:464 ccca332d8e6a4b459c7ffb2881e4abcb
+msgid ""
+"A bug caused the defaults not to load in the ``conflictSearch`` module. "
+"This has been fixed."
+msgstr ""
+
+#: ../../../CHANGELOG.md:465 b8305b4354c04c1c9bda417ab2348510
+msgid "Attributions and zoom-settings are now correctly passed onto WMTS layers."
+msgstr ""
+
+#: ../../../CHANGELOG.md:468 9a6f8acce229489f84f3b9a0737aad49
+msgid "[2024.11.1] - 2024-21-11"
+msgstr ""
+
+#: ../../../CHANGELOG.md:474 85e9f25cbf04460fa931cef6d78a3245
+msgid ""
+"Editor now handles JSON fields, which before rendered a syntax error in "
+"the decoding."
+msgstr ""
+
+#: ../../../CHANGELOG.md:477 7236154e15a7455ab00690450eb1c8a6
+msgid "[2024.11.0] - 2024-21-11"
+msgstr ""
+
+#: ../../../CHANGELOG.md:483 3f7250cbd63e485495cd9cfdec7f28b3
+msgid ""
+"Themes selector in default template. Choose between Dark, Light or Auto. "
+"Is set to the same theme as the OS (if supported). Auto will change the "
+"theme according to the OS."
+msgstr ""
+
+#: ../../../CHANGELOG.md:486 952815cf8a194545b639200f2aa62653
+msgid ""
+"It's now possible to set up MapLibre layers as base layers (overlays will"
+" come later). Setup like this:"
+msgstr ""
+
+#: ../../../CHANGELOG.md:503 1cdc9630fa094135b9ecf90d95f4d049
+msgid "Also, WMTS layer support is added for base layers:"
+msgstr ""
+
+#: ../../../CHANGELOG.md:522 23be74f7afc5487899d732b653317f4e
+msgid "#"
+msgstr ""
+
+#: ../../../CHANGELOG.md:525 0fafe6d93eaf4307923deb63c5542782
+msgid "Leaflet is updated to latest: 1.9.4"
+msgstr ""
+
+#: ../../../CHANGELOG.md:531 f68f68eb8cbc4e89b37ececa727f72a4
+msgid ""
+"Symbols (Symbol extension) is now up-scaled in print to counter the down-"
+"scale of the actual map."
+msgstr ""
+
+#: ../../../CHANGELOG.md:532 bb9da68dee104188ad2a0180c814251c
+msgid "Fixed issue with JSON types in Editor."
+msgstr ""
+
+#: ../../../CHANGELOG.md:533 d6c09e04367e4c47837743f786f0f4d4
+msgid "Session cookies set through the URL is now Secure and sameSite: none."
+msgstr ""
+
+#: ../../../CHANGELOG.md:536 acb4cbbbb0b841bbba41fa51159c1e38
+msgid "[2024.10.0] - 2024-4-10"
+msgstr ""
+
+#: ../../../CHANGELOG.md:542 8ace0aab8b5341abac052c5ec27f2bd7
+msgid ""
+"Conflict search module: Non ascii characters in SELECT statements caused "
+"a low level un-catchable error. Now statements are base64url encoded."
+msgstr ""
+
+#: ../../../CHANGELOG.md:545 d3d8b931ff4740389886610e4a5e5a2a
+msgid "[2024.9.0] - 2024-19-9"
+msgstr ""
+
+#: ../../../CHANGELOG.md:551 1aa13a35ef7a4d06a0da36549c8d3a2e
 msgid ""
 "Incorporated handling for ``text`` type fields with a new ``textarea`` UI"
 " widget in Editor."
 msgstr ""
 
-#: ../../../CHANGELOG.md:18 9e66ce8191a94ec0a1d0d4efa6b68b54
+#: ../../../CHANGELOG.md:552 2b9e8e8027a347668b3c049bc6c36b4e
 msgid ""
 "Updated the js/embed.js script to handle 'data-vidi-title' attribute, "
 "which will set the 'title' attribute for iframes."
 msgstr ""
 
-#: ../../../CHANGELOG.md:21 e3d2f078c14e4c3793e628497e074831
+#: ../../../CHANGELOG.md:555 5ca6a2511110451f8050151b359b4db5
 msgid "[2024.8.1] - 2024-29-8"
 msgstr ""
 
-#: ../../../CHANGELOG.md:24 ../../../CHANGELOG.md:34 ../../../CHANGELOG.md:51
-#: ../../../CHANGELOG.md:89 ../../../CHANGELOG.md:125 ../../../CHANGELOG.md:167
-#: ../../../CHANGELOG.md:176 ../../../CHANGELOG.md:194
-#: ../../../CHANGELOG.md:203 ../../../CHANGELOG.md:212
-#: ../../../CHANGELOG.md:221 ../../../CHANGELOG.md:239
-#: ../../../CHANGELOG.md:267 ../../../CHANGELOG.md:319
-#: ../../../CHANGELOG.md:405 ../../../CHANGELOG.md:450
-#: ../../../CHANGELOG.md:473 ../../../CHANGELOG.md:506
-#: ../../../CHANGELOG.md:533 ../../../CHANGELOG.md:560
-#: ../../../CHANGELOG.md:569 ../../../CHANGELOG.md:578
-#: ../../../CHANGELOG.md:588 ../../../CHANGELOG.md:628
-#: ../../../CHANGELOG.md:649 ../../../CHANGELOG.md:659
-#: ../../../CHANGELOG.md:669 ../../../CHANGELOG.md:678
-#: ../../../CHANGELOG.md:756 ../../../CHANGELOG.md:765
-#: ../../../CHANGELOG.md:822 ../../../CHANGELOG.md:844
-#: ../../../CHANGELOG.md:864 ../../../CHANGELOG.md:891
-#: ../../../CHANGELOG.md:906 ../../../CHANGELOG.md:917
-#: ../../../CHANGELOG.md:961 ../../../CHANGELOG.md:976
-#: ../../../CHANGELOG.md:986 ../../../CHANGELOG.md:995
-#: ../../../CHANGELOG.md:1061 ../../../CHANGELOG.md:1120
-#: ../../../CHANGELOG.md:1172 ../../../CHANGELOG.md:1351
-#: ../../../CHANGELOG.md:1427 ../../../CHANGELOG.md:1453
-#: ../../../CHANGELOG.md:1492 ../../../CHANGELOG.md:1584
-#: ../../../CHANGELOG.md:1606 ../../../CHANGELOG.md:1657
-#: 027a2465aa9d48139a200c0f1ed94dc9 0526b5ec8323486a8aae60975acc4aaf
-#: 06861e5a7d664c00827dc7266e6cec0d 0cdedbba3baa4f9cb32774e237852732
-#: 152028786e7a446e9a7ef1e07982722f 18c3cf67aef64ecca045a36faa156839
-#: 1f01f137d45e42bdb4539b411a540142 205aff0bca0742ca9dfc4c69fda0c87b
-#: 23080d8303504b38ada38ec68087b8ef 2c99fea622774e8cb6a22a4822ce4e2c
-#: 30203ae6426d496fae89f9c7c8a6a3a3 348cfe501c7e4637a59d8e618d3b51b2
-#: 3d54584b7b8c4ee8894bca555ebf4f60 3da61aaccbb04f02b9ab14ae57830023
-#: 463bbb8d8338441dafd5cc940612260f 48f37cdbf09a4782b4cac34edb33c0c3
-#: 492d33793d8c49a4ab756a783409056a 4d4764b9d44d4cb9896b2da85f0eea71
-#: 626d57fb276f478cb97d7e199fc99bdb 703c0990318948999ea137a09736c6e9
-#: 728af9155a5a4d70a4b7a4d29902ab1e 75418e5d40294c1d8ec54ea668c9b60b
-#: 7b48979600cc4e8aa49001e809d67849 89c66e9e0a8b43caa5a3e335aa4ec209
-#: 8e46ba81a2df4123b763ad6ad26a4b46 8e74e2709c5c4f2aa6cfc152ec67aff8
-#: 918385715b2140c2b5956a4e17df63d7 956d92927d6142bdbb2395188b1420dd
-#: 9b2c818714fc4e81b6a47a0118e8a800 a8aff7d1aba94b9c9b2ae2aa24b819da
-#: a92418ac39f34787b9c20ab0aa9c1de3 b5bfe9e7cbe54547a8edc40f8b91de5b
-#: b7ade0055cd4483c912154cc7fa8cba5 c70d57e264f943458f38f950e5dfdc63
-#: c9b082abbef54ad3a01b6c6197e37d9d cb100f7f946b4a01876b3c0b17ba7469
-#: cdaec6c04dc448049931cb8cc07c6596 d40877aa89fb41cfa6741f8705642d70
-#: d62fbc246fa04c849f3ea01d6fb89640 d766eadca2be4db28b77db668eca5d3a
-#: d8aa484cc50f4ecb9ca7d39013bf0c6c e6ac348bf82444b9820acd81956af922
-#: ea1c558859f44a83b1237b8bfda545bb ee4882e076c84602898b6406c2b86743
-#: f2b85796d4694563a65d34f0a20b005b f4e08507e3fa405d814fd4b641a03415
-#: f6959701dbc24dd9818ff373e3a5e9c1 f7106a03b3ec42daace5c191f2b6b3e4
-#: f8a5d373232b4f1db2b05629e007541b f9a6711874d74fa58cc2721deee0fdc7
-msgid "Fixed"
-msgstr ""
-
-#: ../../../CHANGELOG.md:27 6ac292ba6112426984af5926d65ebe7a
+#: ../../../CHANGELOG.md:561 508665e900e04c8fba8df178bc927c14
 msgid "Remove Polyfill.js from Service Worker cache"
 msgstr ""
 
-#: ../../../CHANGELOG.md:28 5b775315609e4f3ebbd5f6040d121a55
+#: ../../../CHANGELOG.md:562 b392bac6eb894b319e0d38691cde5cdf
 msgid ""
 "Fixes in Conflict search: If response from GC2 is not JSON, the search "
 "will proceed and the raw body text is shown in errors dialog."
 msgstr ""
 
-#: ../../../CHANGELOG.md:31 f16a35bff4ce4bf69caa1ed36b221f4c
+#: ../../../CHANGELOG.md:565 53a6566d29a4492eaaaa3ec1bdd54f3e
 msgid "[2024.8.0] - 2024-12-8"
 msgstr ""
 
-#: ../../../CHANGELOG.md:37 0a866fa60476402cb20ef95e50d66bf1
+#: ../../../CHANGELOG.md:571 22981680053242858477a07b53ebc810
 msgid "Group check boxes now works with vector layers."
 msgstr ""
 
-#: ../../../CHANGELOG.md:38 84aaf253ffe340a1ac13a46fad425fad
+#: ../../../CHANGELOG.md:572 781660597ac740529d3fbb9d4d752b74
 msgid "Reverse sorting in groups. This was a regression from last version."
 msgstr ""
 
-#: ../../../CHANGELOG.md:39 334774dcf31848fea452934ce763fdee
+#: ../../../CHANGELOG.md:573 c500d24bc744411a99cc46499ed0ecfe
 msgid "Multi select tag widgets will now close on blur."
 msgstr ""
 
-#: ../../../CHANGELOG.md:42 24c364c14ebf4b579225f3ba8cb56b7d
+#: ../../../CHANGELOG.md:576 d98726c8425042168894ed72cc60dd75
 msgid "[2024.6.1] - 2024-25-6"
 msgstr ""
 
-#: ../../../CHANGELOG.md:48 30867c1a2ae04e35b34a56392b7c99be
+#: ../../../CHANGELOG.md:582 f7c5972e18cd4c44b1121db61f6e1a47
 msgid ""
 "The config ``showOffcanvas`` now has a third option ``\"mobile\"`` "
 "(besides ``true`` and ``false``\\ ), which means that the off canvas menu"
 " is only shown if the screen is wider than 720px."
 msgstr ""
 
-#: ../../../CHANGELOG.md:54 461a31048c3548d0b6580699af2185e2
+#: ../../../CHANGELOG.md:588 94fa89f87dfa4475aa078ea44d345658
 msgid ""
 "Huge performance increase in the layer switcher. Switching a layer on now"
 " takes ~20ms comparing to ~500ms before. This is gained by caching the "
 "cloned metadata object during a single event."
 msgstr ""
 
-#: ../../../CHANGELOG.md:55 075dd7e4f7614e3ca64783a8d4b4f2bb
+#: ../../../CHANGELOG.md:589 08907fdd3ed74e53932bc316fbc67adf
 msgid ""
 "Layers are removed from the Leaflet layer control when turned off. "
 "Turning on/off a lot of layers could hog down performance before."
 msgstr ""
 
-#: ../../../CHANGELOG.md:58 da95e4b3caf441399a88be5e2b184a7a
+#: ../../../CHANGELOG.md:592 6e2accedbc974986bcd88616848b892b
 msgid "[2024.6.0] - 2024-21-6"
 msgstr ""
 
-#: ../../../CHANGELOG.md:61 ../../../CHANGELOG.md:108 ../../../CHANGELOG.md:117
-#: ../../../CHANGELOG.md:161 ../../../CHANGELOG.md:185
-#: ../../../CHANGELOG.md:230 ../../../CHANGELOG.md:304
-#: ../../../CHANGELOG.md:347 ../../../CHANGELOG.md:381
-#: ../../../CHANGELOG.md:415 ../../../CHANGELOG.md:434
-#: ../../../CHANGELOG.md:460 ../../../CHANGELOG.md:484
-#: ../../../CHANGELOG.md:527 ../../../CHANGELOG.md:598
-#: ../../../CHANGELOG.md:637 ../../../CHANGELOG.md:739
-#: ../../../CHANGELOG.md:781 ../../../CHANGELOG.md:853
-#: ../../../CHANGELOG.md:926 ../../../CHANGELOG.md:941
-#: ../../../CHANGELOG.md:1041 ../../../CHANGELOG.md:1098
-#: ../../../CHANGELOG.md:1152 ../../../CHANGELOG.md:1189
-#: ../../../CHANGELOG.md:1369 ../../../CHANGELOG.md:1436
-#: ../../../CHANGELOG.md:1463 ../../../CHANGELOG.md:1504
-#: ../../../CHANGELOG.md:1521 ../../../CHANGELOG.md:1568
-#: ../../../CHANGELOG.md:1596 ../../../CHANGELOG.md:1617
-#: 01705f444dae4f368608bf52cb52426e 022ad15daadb41d8aa6e0150b08cb126
-#: 0ad417f611ea4cf79d357e874578d0f8 0e156375a032465bb73286880dd2cbe0
-#: 1d8f6dcf03d1471dbf4c4a0993450990 1fdfc908f6984a4c88327f5963ca82e3
-#: 280de9b2327c479d836d7fab03bf99a2 2fa1f9855ae3499d872e74ece82fd4a2
-#: 311385f27ead45aaa8193d72f1864630 3d3f430200a045c1b364a6f64b2352f2
-#: 41a5971cb4c647438c5693b02da5bf47 4518f7be7cef4610bb7f4a8766ef3c76
-#: 4b0031d96c3c40b2a845f81dc2739ee3 52956dbd95464f349f989998076e17d8
-#: 5cd026abbb404f5d98e290229e003ade 61500775c57b48cca799043aa7af6385
-#: 6e443c5ddfe645b6b7111f0ab1f841df 76d9f6a89d1942d6a5d97a9436cd9185
-#: 8f57854f6cbf4aecae8120cd26674e22 8fef492828984f59817efc2d2805e494
-#: a5ff5ede00f04de7a26ade78c882381c aec2785d8ac948f5a2349fb80614651e
-#: c4646f5f21e94984bec7415a4395719a d65221a5b5f6487280e9c7950b8de3f6
-#: e1fd686f78ab44d8a06ed2bfb0dd5bde e404f6a9a26d4dcb9172c224499868b3
-#: e573c12e4b4348e38e04e4a11edc5d1a e7ec2885841444d9928d5af3461041ca
-#: ea04b6932ec144b5a7e0f6540e326cd3 ed3bdbc75e014de092af5acefee9b9e0
-#: f22aaba121994d5292318ca0eb641f0c f733f6e2a4a3469d9e54167861fb2005
-#: fcc4a7d37d6540abbe323b8375dda841
-msgid "Added"
-msgstr ""
-
-#: ../../../CHANGELOG.md:64 fb3f065266024e33b0a01f82b8c54efe
+#: ../../../CHANGELOG.md:598 3af9dc01842c428a903f8467ef932537
 msgid ""
 "``infoCallback`` and ``emptyInfoCallback`` can be used in configs. The "
 "value should be a stringified function. The former callback is fired when"
@@ -251,326 +1001,327 @@ msgid ""
 " code-block:: json"
 msgstr ""
 
-#: ../../../CHANGELOG.md:67 c761d02afede4f3793fc8da6c8d13128
+#: ../../../CHANGELOG.md:601 3cdcd96011a54ca883cd8808377da6f0
+#, python-brace-format
 msgid ""
 "{ \"infoCallback\": \"function(layers){console.log('You hit:', layers)}\""
 " }"
 msgstr ""
 
-#: ../../../CHANGELOG.md:77 6e5592056ebb475f9ab68edce21c8df1
+#: ../../../CHANGELOG.md:611 4f4abed2488f4cbe8741fea3ca5cff96
 msgid ""
 "The parameter ``config=...`` is added to WMS url, so better analytics can"
 " be performed on the usages of configs and layers."
 msgstr ""
 
-#: ../../../CHANGELOG.md:78 3c8009312bfc42a58effc9ac5efbc160
+#: ../../../CHANGELOG.md:612 14d37d0eb0664913841ca7ae50e137ae
 msgid ""
 "A new api method ``api.turOff('schema.layer')`` which turns the passed "
 "layer off."
 msgstr ""
 
-#: ../../../CHANGELOG.md:84 220f9e04a2074b86945d07269d95f909
+#: ../../../CHANGELOG.md:618 e65679e0dbee42a6afb86d10fd12adc0
 msgid "The snapshot tag list is now sorted alphanumeric."
 msgstr ""
 
-#: ../../../CHANGELOG.md:85 6d6e388b39524227bbc1a40006ef3781
+#: ../../../CHANGELOG.md:619 6c2cb38c161846f1b177d8a6dbb5186f
 msgid "Hits in accordion popup are now sorted according to layer 'sort id'."
 msgstr ""
 
-#: ../../../CHANGELOG.md:86 f36cc187d4f44df4b175d15079220430
+#: ../../../CHANGELOG.md:620 d201e9ad8bc841d6a72d4470fa594757
 msgid ""
 "A class attribute ``vidi-draw-tooltip`` is added to the label tool in "
 "Draw. This kan be used to change the style of the content in e.g. print."
 msgstr ""
 
-#: ../../../CHANGELOG.md:92 1ed8bbc37965473f99d42cc1173e7082
+#: ../../../CHANGELOG.md:626 6a7798b613224da991163aab16546484
 msgid ""
 "UTFgrids are now requested with filter, so mouseover doesn't catch "
 "filtered features (require GC2 2024.6.1 or later)."
 msgstr ""
 
-#: ../../../CHANGELOG.md:93 32d01855139b450f8dad595b8eccda0f
+#: ../../../CHANGELOG.md:627 ca50735f4e964fac9966e6598b2b5879
 msgid "The dropdown menu (three vertical dots) now aligned to left."
 msgstr ""
 
-#: ../../../CHANGELOG.md:96 13815306d6f54103a98c7bc2f6f7ceae
+#: ../../../CHANGELOG.md:630 edd5f503d9684f62b11d1b4ff3138718
 msgid "[2024.5.2] - 2024-29-5"
 msgstr ""
 
-#: ../../../CHANGELOG.md:102 1bef476fcb8e43a7b7d07d096e3aac37
+#: ../../../CHANGELOG.md:636 c4a2951db48b42dc9a89b62b77bfd5fc
 msgid ""
 "Layer group checkboxes now reflects the state of the layer tree. An "
 "indeterminate state is shown when some layer but not all are active in a "
 "group."
 msgstr ""
 
-#: ../../../CHANGELOG.md:105 12c9312a6c3f4695a8039ea9c052cfc3
+#: ../../../CHANGELOG.md:639 2004a369a82540b2b69fc6b3e4c892b3
 msgid "[2024.5.1] - 2024-22-5"
 msgstr ""
 
-#: ../../../CHANGELOG.md:111 e0c50d75bc3e4c67b35d1df13f110046
+#: ../../../CHANGELOG.md:645 de3c4ada5b2944ffa34484e830bf3945
 msgid ""
 "Support for 'data-vidi-schemata' attribute in embedded maps. When this "
 "attribute is set to a schemata text string, auto retrieval of matching "
 "layers alongside any specified in the config is enabled."
 msgstr ""
 
-#: ../../../CHANGELOG.md:114 ab4c4f0a51134e69aaf44885149cb211
+#: ../../../CHANGELOG.md:648 2f34fe479cda47f1b9bc3f6328c09804
 msgid "[2024.5.0] - 2024-15-5"
 msgstr ""
 
-#: ../../../CHANGELOG.md:120 3b1bf5cebf304e75bbdf6dd71b717e1f
+#: ../../../CHANGELOG.md:654 f0cad13ee8924480adfb02fb14d1329e
 msgid ""
 "Display filter for snapshots. Free test filtering of snapshots titles, so"
 " it becomes easier to manage long lists of snapshots"
 msgstr ""
 
-#: ../../../CHANGELOG.md:121 98290f6320304a5d93c852590a0ad909
+#: ../../../CHANGELOG.md:655 efff3a51253b49d5bbac999e843f79c5
 msgid ""
 "Tagging system for snapshots. A snapshot can be tagged and used for "
 "filtering snapshots."
 msgstr ""
 
-#: ../../../CHANGELOG.md:122 51c429faa7784acca5f17a20f2516c6b
+#: ../../../CHANGELOG.md:656 6995da3d2afe4643b18a07451084ef7d
 msgid ""
 "New native API for getting configs from GC2 instead of using the "
 "requestProxy API."
 msgstr ""
 
-#: ../../../CHANGELOG.md:128 82a5fd8c0dae4d11ba587d0824197282
+#: ../../../CHANGELOG.md:662 538c63e59e294c3483a56651e5e97753
 msgid "Module title is now set for extensions."
 msgstr ""
 
-#: ../../../CHANGELOG.md:131 92867fd78e5a405580a94ccb401fb6d3
+#: ../../../CHANGELOG.md:665 dba4a64b246b4436b0d9ac6b7aa1b9ca
 msgid "[2024.2.2] - 2024-20-2"
 msgstr ""
 
-#: ../../../CHANGELOG.md:137 384ef1d0aabe4f62b4aa74931ea4dc80
+#: ../../../CHANGELOG.md:671 d0d8936814bb4d6d84fa7a0df4efe813
 msgid ""
 "Added the ``dfi`` url parameter, which if set, will disable fast init "
 "regardless other evaluated parameters."
 msgstr ""
 
-#: ../../../CHANGELOG.md:138 5f184e198a1c4438b8c8a4892d8b448c
+#: ../../../CHANGELOG.md:672 ee7268cede9341b0bacbbdb4cd34d093
 msgid ""
 "Set the default boolean property to false in the "
 "extensions/editor/browser/index.js. This pertains to user interface "
 "properties where a checkbox is either checked or unchecked."
 msgstr ""
 
-#: ../../../CHANGELOG.md:139 8e98b2a4b5ce4916b8ec7c05bedaa214
+#: ../../../CHANGELOG.md:673 1807865837df4cb4b46e3a536ddbc6ec
 msgid ""
 "The polyfill script for IE compatibility was removed from the "
 "index.html.default file."
 msgstr ""
 
-#: ../../../CHANGELOG.md:140 656412221d6c4da099240baedec9224d
+#: ../../../CHANGELOG.md:674 4eb4697e86454de0b1540d7b4186262a
 msgid ""
 "The repetitive code in Gruntfile.js related to browserify options and "
 "transformations have been extracted to constants."
 msgstr ""
 
-#: ../../../CHANGELOG.md:143 0177befee116426db1243e60cc3333cb
+#: ../../../CHANGELOG.md:677 3cd12ce0212b41ffa0d0e4c38d3be585
 msgid "[2024.2.1] - 2024-7-2"
 msgstr ""
 
-#: ../../../CHANGELOG.md:149 8ca77fa540774d548235c076ef28d808
+#: ../../../CHANGELOG.md:683 6a5789872f5b4da98b05535e15dbf2b9
 msgid ""
 "New config option ``themes``\\ , which will set the Bootstrap theme. "
 "``light`` and ``dark`` are build in and custom ones can be added to "
 "``/scss/themes.scss``."
 msgstr ""
 
-#: ../../../CHANGELOG.md:152 1bfcb2acbc4e4a77b3f1ba895af5e446
+#: ../../../CHANGELOG.md:686 a86b97adc9d4469b87c2747ec7ae6483
 msgid "[2024.2.0] - 2024-2-2"
 msgstr ""
 
-#: ../../../CHANGELOG.md:158 04751227b3af4de4b3a4d8036e1b933c
+#: ../../../CHANGELOG.md:692 f468aaf64fee4154b5c228eb48a89b63
 msgid "The entire GUI is rewritten in Bootstrap 5.3."
 msgstr ""
 
-#: ../../../CHANGELOG.md:164 154f797b1b1b4fc282df436022b3d232
+#: ../../../CHANGELOG.md:698 b557df5172a8404eb82ea8479c427561
 msgid ""
 "New startup modal with config-switcher, which will show if Vidi is "
 "started with database in URL."
 msgstr ""
 
-#: ../../../CHANGELOG.md:170 4e92835cc5364cbeb8419fe0ca94e644
+#: ../../../CHANGELOG.md:704 2a39fa23144d4810b2813ef0516d2b95
 msgid "A lot!"
 msgstr ""
 
-#: ../../../CHANGELOG.md:173 509cc72637d4406ba06b5e2a29e32eb8
+#: ../../../CHANGELOG.md:707 352bd6d909e6407ba64017928ad81dfd
 msgid "[2024.1.0] - 2024-4-1"
 msgstr ""
 
-#: ../../../CHANGELOG.md:179 3c8cbc882a3a42fa9ac77505968508e2
+#: ../../../CHANGELOG.md:713 b8b52c4b7eb54052af0d17c7646f3d2b
 msgid "Small fix to conflict.tmpl"
 msgstr ""
 
-#: ../../../CHANGELOG.md:182 da1532372e3c4e64a8d1b979db938ea6
+#: ../../../CHANGELOG.md:716 777831d2dbd743a5a32690fc74bc5cb9
 msgid "[2023.12.0] - 2023-15-12"
 msgstr ""
 
-#: ../../../CHANGELOG.md:188 2d97c884d04e4b0a92b21ebf2d57e954
+#: ../../../CHANGELOG.md:722 0280234948194ca2adebb8ccb593d106
 msgid "Errors in conflict module will now be shown on reports."
 msgstr ""
 
-#: ../../../CHANGELOG.md:191 81bf7181ab4a4434a9d0f30edb47fbe3
+#: ../../../CHANGELOG.md:725 db546fb8f866400b89a84f5eac498488
 msgid "[2023.11.0] - 2023-2-11"
 msgstr ""
 
-#: ../../../CHANGELOG.md:197 485de4431cf5452c96b5f43c017a7616
+#: ../../../CHANGELOG.md:731 d788e37b5e3a42e2809c85428e78471f
 msgid "Bug in ConflictSearch when stateless mode is enabled."
 msgstr ""
 
-#: ../../../CHANGELOG.md:200 04ea8d8ee0434b77a1d3c1acd21dfb57
+#: ../../../CHANGELOG.md:734 a1c43e0781d746eb97e2585fa10eedb9
 msgid "[2023.6.0] - 2023-20-6"
 msgstr ""
 
-#: ../../../CHANGELOG.md:206 47130772d1674879aff90cd8797feabf
+#: ../../../CHANGELOG.md:740 0055beb414094654962b2dd696259d44
 msgid ""
 "Bug: The GC2 Open tools meta setting didn't work after tools were moved "
 "into at collapsable element."
 msgstr ""
 
-#: ../../../CHANGELOG.md:209 92fee79e941b4dc78f33e03dd9228d41
+#: ../../../CHANGELOG.md:743 30b0f98716e94bd1b0a27df2842b940f
 msgid "[2023.3.0] - 2023-6-3"
 msgstr ""
 
-#: ../../../CHANGELOG.md:215 b08ddc19190f489e8b311a648ed818be
+#: ../../../CHANGELOG.md:749 3b9bc657b1e1446cb23e22d9deec08f5
 msgid ""
 "Regression bug: Zoom to default extent when using a state didn't zoom to "
 "state extent but to config extent."
 msgstr ""
 
-#: ../../../CHANGELOG.md:218 29cbf31b1e9d485397c1598f8da5f05b
+#: ../../../CHANGELOG.md:752 9df7985e463c4851b694339abb3e66da
 msgid "[2023.2.1] - 2023-21-2"
 msgstr ""
 
-#: ../../../CHANGELOG.md:224 3f71db1756674e54ae31b5be83c381ec
+#: ../../../CHANGELOG.md:758 5c849705a028498ba018b6afe072c32f
 msgid ""
 "Use \"geography\" distance when doing feature info on points and lines "
 "stored in EPSG:4326. Otherwise the distance will be in degrees and "
 "capture anything inside the map extent."
 msgstr ""
 
-#: ../../../CHANGELOG.md:227 eb4eebbfaa54481ea3b3c3951994adb8
+#: ../../../CHANGELOG.md:761 7c32e0e4a22a45b2aa4e3ad21517a983
 msgid "[2023.2.0] - 2023-14-2"
 msgstr ""
 
-#: ../../../CHANGELOG.md:233 b8940c0694c945178914392b566a931e
+#: ../../../CHANGELOG.md:767 5c7ac021094448fa904b8bce8fe658d2
 msgid ""
 "New config option ``title`` which will set the HTML document title. The "
 "title is set dynamically after Vidi has started and therefore the title "
 "will be set to the standard text for a moment during start-up."
 msgstr ""
 
-#: ../../../CHANGELOG.md:236 7dd4fd677b3e4e9fafa9b63362adc03b
+#: ../../../CHANGELOG.md:770 36278bf5a05c404b9ee4260aa841a581
 msgid "[2023.1.0] - 2023-18-1"
 msgstr ""
 
-#: ../../../CHANGELOG.md:242 b8923a3dea6740d7887491cd5adeb7db
+#: ../../../CHANGELOG.md:776 5e13cc53a82d46709a8b4c76f2fea226
 msgid "Update to new Skråfoto viewer in Streetview module."
 msgstr ""
 
-#: ../../../CHANGELOG.md:245 cfb1e9cd5f9446d39d369d7e4d619cb8
+#: ../../../CHANGELOG.md:779 34f109ca69f64afab8fb01f46369996a
 msgid "[2022.12.0] - 2022-8-12"
 msgstr ""
 
-#: ../../../CHANGELOG.md:251 b17e571e11cb40e5964f1cff5728d685
+#: ../../../CHANGELOG.md:785 bb66230a0e614cfebbfb1e7cb8cb4f52
 msgid ""
 "Cookie set in URL are now set with Expires. Also code moved from init.js "
 "to extensions/session."
 msgstr ""
 
-#: ../../../CHANGELOG.md:252 539f656878444af3bc72071aa8d87647
+#: ../../../CHANGELOG.md:786 445159276092420caa18e1354413358d
 msgid "Redesign of layer element in layer tree. Extensive use of flex-boxes."
 msgstr ""
 
-#: ../../../CHANGELOG.md:253 e67a0a37e34e4eeda998f96d8b642a59
+#: ../../../CHANGELOG.md:787 75057908acef4e4aa3f95db6e95a176e
 msgid "Merge of WebGL layer branch."
 msgstr ""
 
-#: ../../../CHANGELOG.md:256 c25bb0c4340142e697c38b0a2fdf9680
+#: ../../../CHANGELOG.md:790 0772f4cf772f4425914da8ad7cf267e8
 msgid "[2022.11.3] - 2022-22-11"
 msgstr ""
 
-#: ../../../CHANGELOG.md:262 b4f12b1f5d444066b5720b93a85e003e
+#: ../../../CHANGELOG.md:796 e3ebae3619894a5880b34892dcb12ee4
 msgid ""
 "Removed Jsts as a dependency. Now using Turf in ``advancedInfo`` and "
 "``conflict``."
 msgstr ""
 
-#: ../../../CHANGELOG.md:263 57c26094ee53427cbb674df2c1dbe241
+#: ../../../CHANGELOG.md:797 fc039a864de14dbdaddb8594615bc8bd
 msgid "Upgrade of Grunt."
 msgstr ""
 
-#: ../../../CHANGELOG.md:264 60b5bab9352b481aaa61ca82ca88f6df
+#: ../../../CHANGELOG.md:798 886fbbbd92e64530b925e65acbee8448
 msgid "Upgrade to bullseye in Dockerfile."
 msgstr ""
 
-#: ../../../CHANGELOG.md:270 ea655d68efc342dea4b55d7595fcb4f8
+#: ../../../CHANGELOG.md:804 c029c86bcce34e599d77cf17f5b2490c
 msgid "Bug in ``conflict`` module after change to native range input slider."
 msgstr ""
 
-#: ../../../CHANGELOG.md:273 c8029be0bc5e4e2985dee92a2df2b194
+#: ../../../CHANGELOG.md:807 2e0f688f9ef34ed490604d9669316db8
 msgid "[2022.11.2] - 2022-17-11"
 msgstr ""
 
-#: ../../../CHANGELOG.md:279 ef53fcd7c3f1430c93b1012c16a6fd4c
+#: ../../../CHANGELOG.md:813 1570f9946e674ed5889d8bc4ed8eac6f
 msgid ""
 "Changed from noUiSlider to native HTML range input in these modules. "
 "noUiSlider packages is no longer installed:"
 msgstr ""
 
-#: ../../../CHANGELOG.md:281 04d6b22a728e4c979264e55f107679d5
+#: ../../../CHANGELOG.md:815 d1baf30a97a44c409aba8488640c40ee
 msgid "Base layers"
 msgstr ""
 
-#: ../../../CHANGELOG.md:282 d1f084594dad48af923df87d7ce30ed2
+#: ../../../CHANGELOG.md:816 d85d2d076d054aa6b729116687400a6a
 msgid "Advanced info"
 msgstr ""
 
-#: ../../../CHANGELOG.md:283 616c99c69bf04b63ab2dc2039040ad78
+#: ../../../CHANGELOG.md:817 aaf25a8330b940e1840e7bd6e5e9d8d1
 msgid "Conflict"
 msgstr ""
 
-#: ../../../CHANGELOG.md:285 38b3c9ff50c04ba1aa19b6cd9be90652
+#: ../../../CHANGELOG.md:819 f87d7a0ca2124ba89fdccd3ab0e005bc
 msgid "jQuery upgraded to 3.6.1"
 msgstr ""
 
-#: ../../../CHANGELOG.md:288 395c303e2b6e4abf8bc5c64251d11bbf
+#: ../../../CHANGELOG.md:822 8541c62cc6984f23a918853de04102de
 msgid "[2022.11.1] - 2022-16-11"
 msgstr ""
 
-#: ../../../CHANGELOG.md:294 5ccf95ffe2444129b1c2c27c82f88430
+#: ../../../CHANGELOG.md:828 cc96d970499a4180984bb389a97253db
 msgid ""
 "Reworked editor tools in popups. Now a central listner in the Editor "
 "module will invoke editing. Vector and raster now use the same markup "
 "definition for the editor tools."
 msgstr ""
 
-#: ../../../CHANGELOG.md:295 c00c589780204e9e83ed29868cb0faf1
+#: ../../../CHANGELOG.md:829 77b46dd84d3e4a48a6638feacac8deb1
 msgid "Editing can now be invoked from the accordion popup."
 msgstr ""
 
-#: ../../../CHANGELOG.md:296 3f2e1d2f2e5d4d16ba6bc3d69dc3f4b9
+#: ../../../CHANGELOG.md:830 ac1821efbf134bf6bb83a0ec2324f003
 msgid "The editor geometry for raster is now blue."
 msgstr ""
 
-#: ../../../CHANGELOG.md:297 0b3362a412a34fab90c02b52df05f1f9
+#: ../../../CHANGELOG.md:831 91ebae85a6864c5eaa337d0fc81bdd66
 msgid "The same marker is now used for both editing and adding points."
 msgstr ""
 
-#: ../../../CHANGELOG.md:298 e2ef735ef8d34d89999b98d80b455529
+#: ../../../CHANGELOG.md:832 9822de1d9b104cacb529871f91319af3
 msgid "Geometry from Draw module is no longer dashed when selected."
 msgstr ""
 
-#: ../../../CHANGELOG.md:301 ab127465b5714929b60e49c76e6a9a4e
+#: ../../../CHANGELOG.md:835 494e7de0b50b41e5871cfa5473b9ac67
 msgid "[2022.11.0] - 2022-8-11"
 msgstr ""
 
-#: ../../../CHANGELOG.md:307 ba988edcb13e4004adabc2f6977ff2d6
+#: ../../../CHANGELOG.md:841 c1639e41498c4c5f98608374c622eb98
 msgid ""
 "The url parameter ``dps=1`` will prevent browser state from being pushed "
 "to history. This parameter will be set by embed.js, so the browser "
@@ -578,7 +1329,7 @@ msgid ""
 "have this parameter set."
 msgstr ""
 
-#: ../../../CHANGELOG.md:308 53094689a93d4a61ab898bc1dd960e17
+#: ../../../CHANGELOG.md:842 e8c70ec7fff3426692a7bcd7a48a1914
 #, python-format
 msgid ""
 "A new faster init process is implemented which cuts about 50% of startup "
@@ -586,50 +1337,50 @@ msgid ""
 "URL achor is used - when the old process will be invoked."
 msgstr ""
 
-#: ../../../CHANGELOG.md:314 793035cf2c094cfe8805eec7143196b0
+#: ../../../CHANGELOG.md:848 814f25a3ebb44e62a8278760a23ba02a
 msgid ""
 "When using ``crossMultiSelect`` the geometry for the open accordion panel"
 " will now get the 'selected' style."
 msgstr ""
 
-#: ../../../CHANGELOG.md:315 5b8e016895b6417da4786d149842cb02
+#: ../../../CHANGELOG.md:849 0f989dca1bb9459988d20b0d115a25e6
 msgid ""
 "When using ``featureInfoTableOnMap`` the Back button will reset the "
 "'selected' style."
 msgstr ""
 
-#: ../../../CHANGELOG.md:316 788c40bef7744c8dbc3ef5a27eed2220
+#: ../../../CHANGELOG.md:850 2eab955265f94496a4b1f8fa50f24270
 msgid ""
 "When clicking/tapping on the map, geometry with 'selected' style will be "
 "reset if any."
 msgstr ""
 
-#: ../../../CHANGELOG.md:322 84fb67ad60434af3acbb2f75231592a6
+#: ../../../CHANGELOG.md:856 584e05abb60e4e469076823632da45de
 msgid ""
 "Update the editor queue statistics when group panel is opened in case of "
 "the layer tree component is not rendered yet. Before the queue statistics"
 " was not shown after a refresh."
 msgstr ""
 
-#: ../../../CHANGELOG.md:323 38e2b049e32d4872946698a7b52ada60
+#: ../../../CHANGELOG.md:857 fa683e1043034292a6019322dbf09648
 msgid "Click on set default extent button will now set initZoomCenter if present."
 msgstr ""
 
-#: ../../../CHANGELOG.md:324 ce3e383339124c24a632e8a465a46ccc
+#: ../../../CHANGELOG.md:858 24e7fda562be448eab4964dd70bf3712
 msgid ""
 "It's now possible to use WMS overlays in base layer definitions. Before "
 "is was only possible to use GC2 layers for this."
 msgstr ""
 
-#: ../../../CHANGELOG.md:325 c48f8d84f14c4b5ebff9876e952ae80f
+#: ../../../CHANGELOG.md:859 af8e80b769854c91af41325840ed715f
 msgid "Komkode filter on esr/sfe search."
 msgstr ""
 
-#: ../../../CHANGELOG.md:328 4a6562ff32af43039dc541f1dbe450dc
+#: ../../../CHANGELOG.md:862 032c276a44af4e53831d94c4d1a209b4
 msgid "[2022.10.0] - 2022-5-10"
 msgstr ""
 
-#: ../../../CHANGELOG.md:334 a8af7c0a85064ce281d52410c3034502
+#: ../../../CHANGELOG.md:868 f72e1c5efceb4eb88c705fa064910cdf
 msgid ""
 "Session cookie is now set with an ``Expires`` attribute, which can be set"
 " in ``config/config.js``. Before it was set as a non-persistent cookie, "
@@ -637,43 +1388,45 @@ msgid ""
 ".. code-block:: json"
 msgstr ""
 
-#: ../../../CHANGELOG.md:337 664f46b4d12b4a47bac2acc322b84c7a
+#: ../../../CHANGELOG.md:871 808b579c59a8479c80819ca36b92e79b
+#, python-brace-format
 msgid "{ \"sessionMaxAge\": 86400 }"
 msgstr ""
 
-#: ../../../CHANGELOG.md:340 e0701a5ba77f4c27b9b4286063644fff
+#: ../../../CHANGELOG.md:874 eca23e00bd9649b28592105530856b1a
 msgid "### Fixed"
 msgstr ""
 
-#: ../../../CHANGELOG.md:341 f7bdb6fd0b874485ab5bdd972039c8d7
+#: ../../../CHANGELOG.md:875 4fb6bed1f6b24b0b9b4f05875418a5e1
 msgid ""
 "When Vidi was started with URL layers in offline mode, the layers was not"
 " set to offline because the layertree was yet not created. Now offline "
 "mode is retrived form state on upstart."
 msgstr ""
 
-#: ../../../CHANGELOG.md:344 c6d15e4593a644a1b88b01f8532cfaf3
+#: ../../../CHANGELOG.md:878 370c1ec828634a34b0e3149927b197a8
 msgid "[2022.9.2] - 2022-19-9"
 msgstr ""
 
-#: ../../../CHANGELOG.md:350 ded684ddbebd4ff692b0ffdb121a417a
+#: ../../../CHANGELOG.md:884 bc0fdef840d446cdac90ba3c0a47ee1a
 msgid ""
 "New config option added ``popupDraggable``. Makes feature-info popups "
 "draggable. Can be set in run-tim config. .. code-block:: json"
 msgstr ""
 
-#: ../../../CHANGELOG.md:353 d37e83cb97f949cb9b7e5d3c61103728
+#: ../../../CHANGELOG.md:887 6bd3398e4f774d149260c5c59d0a7659
+#, python-brace-format
 msgid "{ \"popupDraggable\": true }"
 msgstr ""
 
-#: ../../../CHANGELOG.md:357 2af9556018fa4ac69799495f357f5786
+#: ../../../CHANGELOG.md:891 1eb0f6b13dc546549ffd6834040c5dd9
 msgid ""
 "Geometry created by feature-info module now stick after the module is "
 "swtiched off. So now it's possible to print maps with feature-info "
 "results. To clear the map the \"Clear map\" tool button can be used."
 msgstr ""
 
-#: ../../../CHANGELOG.md:358 0a21fd8838744b218c1f00e4a3ff44d1
+#: ../../../CHANGELOG.md:892 0384240f64714cbf8848d7e482b46e52
 msgid ""
 "A sort-by-score mode is added to Danish search module. The setting will "
 "sort the address list by a calculated score, so most relavant suggestions"
@@ -681,102 +1434,102 @@ msgid ""
 " For now only works for address not cadastre. .. code-block:: json"
 msgstr ""
 
-#: ../../../CHANGELOG.md:361 bb67606c0b6c440ca86a8c5f9eeb9777
+#: ../../../CHANGELOG.md:895 fe7a94f4f1c9409392b6ad18813c8962
 msgid "{ \"searchConfig\": {"
 msgstr ""
 
-#: ../../../CHANGELOG.md:363 141906bec95048b2921781ae4591fd17
+#: ../../../CHANGELOG.md:897 08aae78f1c8b434480f50afe6a7957be
 msgid "\"komkode\": \"*\", \"sortByScore\": true"
 msgstr ""
 
-#: ../../../CHANGELOG.md:369 638851cf91104dd3ac04ba0f36df6f41
+#: ../../../CHANGELOG.md:903 52f639f5eae844d1a5d7f383eda78015
 msgid "[2022.9.1] - 2022-7-9"
 msgstr ""
 
-#: ../../../CHANGELOG.md:375 a1c59c743d734dcfa6e3c6ab56990ab9
+#: ../../../CHANGELOG.md:909 2325f72b7d954fb5883ebeb6a1e58982
 msgid ""
 "The url parameter ``initialFilter`` must now be Base64URL encoded, which "
 "is safe to use in urls. If filter can't be decoded a alert will tell the "
 "user. https://base64.guru/standards/base64url"
 msgstr ""
 
-#: ../../../CHANGELOG.md:378 7f637bd4b79242db8bad780dc7b35be1
+#: ../../../CHANGELOG.md:912 6005e17dd7ef4b13b41ca0bd62d34318
 msgid "[2022.9.0] - 2022-5-9"
 msgstr ""
 
-#: ../../../CHANGELOG.md:384 b3d432de6e4b4e3d8bc169fb8a0f921a
+#: ../../../CHANGELOG.md:918 8323e7e096c0468aaf62aa5277038881
 msgid ""
 "In addition to the embed attributes ``data-vidi-search`` and ``data-vidi-"
 "history`` some more attributes are added to hide the buttons the embed-"
 "template. The attrubutes can be set to ``none``\\ :"
 msgstr ""
 
-#: ../../../CHANGELOG.md:385 7136a10a616d403a9b22cae5ca52d1f1
+#: ../../../CHANGELOG.md:919 a990d3a31cd94c30833f8642197bca5d
 msgid "data-vidi-legend"
 msgstr ""
 
-#: ../../../CHANGELOG.md:386 8390b64b0b0743dba1963b7463ae3540
+#: ../../../CHANGELOG.md:920 3023ed4ab99448a1a589fe9b3ee32cf2
 msgid "data-vidi-layer"
 msgstr ""
 
-#: ../../../CHANGELOG.md:387 9716b67bb2e648cfb4167223e8ffff58
+#: ../../../CHANGELOG.md:921 ec8588229bb94630a1821ece5287465a
 msgid "data-vidi-background"
 msgstr ""
 
-#: ../../../CHANGELOG.md:388 d4d0c33875f7480ca487eef909b52bba
+#: ../../../CHANGELOG.md:922 f7b97bde6dfb4973b3793e00af997016
 msgid "data-vidi-fullscreen"
 msgstr ""
 
-#: ../../../CHANGELOG.md:389 a110e58ef6f74f9480288e1b55c392c1
+#: ../../../CHANGELOG.md:923 7071f8952389481db55bac6edce19586
 msgid "data-vidi-about"
 msgstr ""
 
-#: ../../../CHANGELOG.md:390 ce9adeba48fa49628a4dfeb1a4701886
+#: ../../../CHANGELOG.md:924 3c7a89bc47eb4bb386a17a5dfeb5c597
 msgid "data-vidi-location"
 msgstr ""
 
-#: ../../../CHANGELOG.md:393 683aa9e89bbc43d98133516d3aeab5cb
+#: ../../../CHANGELOG.md:927 0df551e4e5564d9b9db2b51408b491c2
 msgid "[2022.8.4] - 2022-31-8"
 msgstr ""
 
-#: ../../../CHANGELOG.md:399 a79d28e4358742bea841a5c08ac7ad44
+#: ../../../CHANGELOG.md:933 c3e4653b80994e98baab1bc9d2818b08
 msgid ""
 "conflictSearch now prints with concurrency when selecting a multiple page"
 " report."
 msgstr ""
 
-#: ../../../CHANGELOG.md:402 097ad465e3d64ffcab4d3331f8411612
+#: ../../../CHANGELOG.md:936 845048ad4c134b0a853cdc2ec5a083b1
 msgid "[2022.8.3] - 2022-29-8"
 msgstr ""
 
-#: ../../../CHANGELOG.md:408 20617db36c4842b587190f1fe304d278
+#: ../../../CHANGELOG.md:942 883b59be4d3b4d789587876ff63fbc61
 msgid ""
 "State loaded from snapshot now is set in localforage. This was a "
 "regression bug."
 msgstr ""
 
-#: ../../../CHANGELOG.md:409 00a86f9d6ac34d6aabfab0d8d67909b3
+#: ../../../CHANGELOG.md:943 ad4a87f012ec42d5859e696a889c1016
 msgid ""
 "Drawings made in Measurements now is stored in state and will stick "
 "between refreshes and in snapshots."
 msgstr ""
 
-#: ../../../CHANGELOG.md:412 be8be68abaad4ccba62bac249efb3072
+#: ../../../CHANGELOG.md:946 73cab2d528e64c478026aa9244cadeab
 msgid "[2022.8.2] - 2022-17-8"
 msgstr ""
 
-#: ../../../CHANGELOG.md:418 33d65a0350054b1fa0c3b6cc43217172
+#: ../../../CHANGELOG.md:952 1e002182236b4d0da5eaf55c6bfcfb96
 msgid ""
 "New runtime config ``initZoomCenter``\\ , which will locks Vidi to a "
 "specific zoom/center. This will override zoom/center in URL and snapshot "
 "link."
 msgstr ""
 
-#: ../../../CHANGELOG.md:421 5c37b2f1a01140ff9a0f75e2b8813056
+#: ../../../CHANGELOG.md:955 83e641fa9ab6452e9d09c8f73c6c66ff
 msgid "[2022.8.1] - 2022-10-8"
 msgstr ""
 
-#: ../../../CHANGELOG.md:427 b2d1027558d940fdbea393d1e159fcbb
+#: ../../../CHANGELOG.md:961 d4eca1a812284704a85aec8dda813826
 msgid ""
 "Lazy load of snapshot data. The loaded snapshot list now only includes "
 "metadata - not the snapshot data itself. When activating a snapshot the "
@@ -784,33 +1537,33 @@ msgid ""
 "fill the memory."
 msgstr ""
 
-#: ../../../CHANGELOG.md:428 b309dc5e48144e73a4538ea40e5b6c59
+#: ../../../CHANGELOG.md:962 96a3b055d44645e1b6b8864ca93440c3
 msgid "Added config options to the symbol module."
 msgstr ""
 
-#: ../../../CHANGELOG.md:431 41fa051a991842eb91abb6ed450c0075
+#: ../../../CHANGELOG.md:965 ff76b8baf92e4587a3596c8dd7f00797
 msgid "[2022.8.0] - 2022-2-8"
 msgstr ""
 
-#: ../../../CHANGELOG.md:437 3b318e7b4a544ab39c3cf4480069c465
+#: ../../../CHANGELOG.md:971 5d94559eb07e4838a4cd0cc27aa455a6
 msgid ""
 "New GC2 meta settings for controlling zoom level visibility for vector "
 "layers: ``vector_min_zoom`` and ``vector_max_zoom``. The values must be "
 "tile set zoom levels."
 msgstr ""
 
-#: ../../../CHANGELOG.md:438 fae8091534d641c6a2e2c0ab2d2cfcfe
+#: ../../../CHANGELOG.md:972 1bcc5e32cc594dddab8c5ec41b62f5bd
 msgid ""
 "New GC2 meta setting for bind a tooltip to vector layers: "
 "``tooltip_template``. This is a mustache/handlebars template where "
 "feature properties can be uses: .. code-block:: handlebars"
 msgstr ""
 
-#: ../../../CHANGELOG.md:441 7fe7a7c04f164a558987a65af7f578a2
+#: ../../../CHANGELOG.md:975 db8a1765d1e34802a48d1232f7c2ec74
 msgid "This is a label for feature <b>{{gid}}</b>"
 msgstr ""
 
-#: ../../../CHANGELOG.md:447 afec58681e7245cd88022beb3503e0b3
+#: ../../../CHANGELOG.md:981 b7bdfd7b2dbf4271b53e07041046e643
 msgid ""
 "For each activated layer there is now created a map pane named "
 "``[schema]-[layer]`` and the layer is added to this. The sort layer "
@@ -818,158 +1571,125 @@ msgid ""
 " vector layers can be sorted between each other."
 msgstr ""
 
-#: ../../../CHANGELOG.md:453 0b47a1cf9fb54124984ed7dfcf969629
+#: ../../../CHANGELOG.md:987 57ced268500a4785a86b3d1ac0e9acbc
 msgid ""
 "Issue regarding side-by-side base layers: https://github.com/digidem"
 "/leaflet-side-by-side/issues/43"
 msgstr ""
 
-#: ../../../CHANGELOG.md:454 c7f00ccf317641f1923d3fe42f9ebc58
+#: ../../../CHANGELOG.md:988 b5de6bf53bfa4f0d80ca8077df5bc09d
 msgid ""
 "Issue regarding ``featureInfoTableOnMap`` and pop-up error when single "
 "feature is selected."
 msgstr ""
 
-#: ../../../CHANGELOG.md:457 5a95dde530004c03a15e5c131cc404eb
+#: ../../../CHANGELOG.md:991 210472a93a47457d9f6c1a86d1a449a1
 msgid "[2022.6.1] - 2022-28-6"
 msgstr ""
 
-#: ../../../CHANGELOG.md:463 e85b7c34caa54e6fb88e6ad02352a4c4
+#: ../../../CHANGELOG.md:997 d533b3e363ce4c05849a369516fc8d07
 msgid ""
 "In pop-ups and vector tables values are now replaced with rendered "
 "mustache template if provided through GC2."
 msgstr ""
 
-#: ../../../CHANGELOG.md:469 58b59ca4d582411bbc0c1b65207210cc
+#: ../../../CHANGELOG.md:1003 5fdfd19822a348498c67a0d96eba193d
 msgid ""
 "Legend moved to upper right corner in embed.tmpl, so it doesn't coflict "
 "with the bottom aligned vector table."
 msgstr ""
 
-#: ../../../CHANGELOG.md:470 15e047afba7b48ae99f0171cf8682bee
+#: ../../../CHANGELOG.md:1004 3ed5649e8caa48548a7e00cf4cfae2a1
 msgid ""
 "Pop-ups are not longer opened when selecting a row in table, because this"
 " will let gc2table control the pop-up and here editing tools are not "
 "supported."
 msgstr ""
 
-#: ../../../CHANGELOG.md:476 a309bc9f043846d2be54a3499543e664
+#: ../../../CHANGELOG.md:1010 2dc7529c4502431d95990d5a7330016e
 msgid "Full Danish translation of ``coordinates`` module."
 msgstr ""
 
-#: ../../../CHANGELOG.md:477 488f0cf29bc345b794e6798c72da5147
+#: ../../../CHANGELOG.md:1011 bd03db54df0446a391edfc0a72b796b0
 msgid "Bug regarding nested double mark-up in pop-ups links fixed."
 msgstr ""
 
-#: ../../../CHANGELOG.md:478 faee0a9e7f404abbaa784b66b1daaae5
+#: ../../../CHANGELOG.md:1012 08c96629a88d4dfabd835777a148dcc4
 msgid ""
 "Links in pop-ups and tables will not be generated if value is null or "
 "empty string."
 msgstr ""
 
-#: ../../../CHANGELOG.md:481 aa1666f4a7074acc8425d2f33fa37623
+#: ../../../CHANGELOG.md:1015 704711c157ef4423aa214b296f96e562
 msgid "[2022.6.0] - 2022-15-6"
 msgstr ""
 
-#: ../../../CHANGELOG.md:487 89619058b1d344fb8cc94947935ccc8b
+#: ../../../CHANGELOG.md:1021 2adc517d46ab4be3ba36e52ca58bb693
 msgid ""
 "The URL parameters ``var_matrikelnr`` and ``var_landsejerlavskode`` will "
 "trigger search on the specified cadastral number using ``danish`` module."
 " These parameters are already used in module ``conflictSearch``."
 msgstr ""
 
-#: ../../../CHANGELOG.md:493 7aa03d5669824491847c5de0928ef9cc
+#: ../../../CHANGELOG.md:1027 394db69e32e74c31a07f1018102689d8
 msgid ""
 "UTFgrids are now single tiled for better performance due to fewer network"
 " reqeusts. But MapCache can't \"untile\" raw data, so the GC2 Meta "
 "setting ``cache_utf_grid`` will be ignorred."
 msgstr ""
 
-#: ../../../CHANGELOG.md:494 bc96747c83c64a8991284a5ecafe378d
+#: ../../../CHANGELOG.md:1028 9b30c5afa2e24b6489e5d613730f34d9
 msgid "Upgraded to Leafletjs 1.8 and Bootstrap Table 1.2.0."
 msgstr ""
 
-#: ../../../CHANGELOG.md:497 ce536026ee8a4e2ab71006ca7a4cb1ac
+#: ../../../CHANGELOG.md:1031 5582884de8274be89c20b243494a8e02
 msgid "[2022.5.2] - 2022-27-5"
 msgstr ""
 
-#: ../../../CHANGELOG.md:503 1a261d5b806c45068544e2fb644d129d
+#: ../../../CHANGELOG.md:1037 80c2da07e3a84566be10311314029bc5
 msgid ""
 "``crossMultiSelect`` on vector features now used ``@turf/boolean-"
 "intersects`` instead of comparing the bounds of features with Leafletjs. "
 "This gives the expected result when clicking on stacked vector features."
 msgstr ""
 
-#: ../../../CHANGELOG.md:509 a903f9acd5114bf3a33d86a700c97d0d
+#: ../../../CHANGELOG.md:1043 17e0c8160eb949eebbb8085d2027449e
 msgid ""
 "When signed in as a sub-user, cached tile layers wouldn't work but give a"
 " 404 error. Vidi changed the 'db' URI part to 'user@db' but the URI for "
 "cached layers can't be dynamic."
 msgstr ""
 
-#: ../../../CHANGELOG.md:510 e4d6522d4642402faffd1e46e2f12bfd
+#: ../../../CHANGELOG.md:1044 112f3e372ce641d790ced1d221ba627b
 msgid ""
 "Added some auto-pan-padding to accordion popups, so they don't open up "
 "outside the map."
 msgstr ""
 
-#: ../../../CHANGELOG.md:511 9adfb5652ed547dbaaa0da6e9a68d153
+#: ../../../CHANGELOG.md:1045 9a25a58d263e4cdeb7724a29148ae8ed
 msgid ""
 "When selecting a vector feature it will now get the below shown style. "
 "Colors will not be changed. Get Feature info on raster tile layer will "
 "use the same style, but get a red outline. .. code-block:: json"
 msgstr ""
 
-#: ../../../CHANGELOG.md:-1 ../../../CHANGELOG.md:517 ../../../CHANGELOG.md:718
-#: ../../../CHANGELOG.md:859 ../../../CHANGELOG.md:875
-#: ../../../CHANGELOG.md:1106 ../../../CHANGELOG.md:1226
-#: ../../../CHANGELOG.md:1228 ../../../CHANGELOG.md:1278
-#: ../../../CHANGELOG.md:1293 2a897a38677a421798967889f8e45f00
-#: 2e4c70653d824cb89ff6095628c2b327 5bd0b968b5a140969980c490535e9019
-#: 678ebc6e590246a19d43ba4d88b9bb46 6b36a9430b43420b9fa65ad2c56ccc78
-#: a0bcc19b9d314ad48333e75fa7f772ce a4a4557f45a14529be43b218bf826641
-#: a9642cedd9354b46b515856b696061d3 c7b495f3bf0849d5bc682c2565f92ba3
-#: f2f7a79482344d30ad8c645e524b28b1
-msgid "{"
-msgstr ""
-
-#: ../../../CHANGELOG.md:515 e38821cdb6c64c83b725732caceaa039
+#: ../../../CHANGELOG.md:1049 b818e1f50a414addb29cf23905537d6c
 msgid ""
 "\"opacity\": 1, \"weight\": 5, \"dashArray\": \"8 5\", \"lineCap\": "
 "\"butt\""
 msgstr ""
 
-#: ../../../CHANGELOG.md:519 ../../../CHANGELOG.md:555
-#: ../../../CHANGELOG.md:704 ../../../CHANGELOG.md:734
-#: ../../../CHANGELOG.md:861 ../../../CHANGELOG.md:876
-#: ../../../CHANGELOG.md:877 ../../../CHANGELOG.md:951
-#: ../../../CHANGELOG.md:958 ../../../CHANGELOG.md:1107
-#: ../../../CHANGELOG.md:1108 ../../../CHANGELOG.md:1228
-#: ../../../CHANGELOG.md:1230 ../../../CHANGELOG.md:1280
-#: ../../../CHANGELOG.md:1295 ../../../CHANGELOG.md:1339
-#: ../../../CHANGELOG.md:1340 0886498554204deb8d44cf87e43de98a
-#: 22b6d6bd8cc640ccb12098687994d9fc 22fb2335ae8e431f8f2687fed44d3ff1
-#: 42c7ff8d35874e8bbc6ad816a16b39c9 481a794c35f44e8ebd034906684ef401
-#: 4c9c0f587301474dbf0ea270e9ac9f5b 68aa4404afb643a58517c10b0b5790c7
-#: 8e7404e9765c48f5b58bbae9b06f5026 924b823f3ea34375a7fef9f13a67809e
-#: 9c0fa421b35d47af8e80db7cd77ba46a af2fcb22abea480d8ce332981e77a509
-#: c6ad9846f7f640798530ff6957054c9c d6ac9e94199a4287a275beb0ecc63ae6
-#: de5e59499bfb47319c27d43cdc77f5bc e2627e6501714b329ebe36a120ff1e55
-#: ef010e31301047f69738fbc8896e6f6d f8eab41a1d5143a6a152845a90d81234
-msgid "}"
-msgstr ""
-
-#: ../../../CHANGELOG.md:521 686bfa209e3c4f1abcfcbd59c7438de4
+#: ../../../CHANGELOG.md:1055 476c1e61754f44e387b628a165cdeb63
 msgid ""
 "If all cookies are blocked in the browser, Vidi will now still startup, "
 "but with a blank state."
 msgstr ""
 
-#: ../../../CHANGELOG.md:524 5ebec0eb6a03423b9b2ff75021cb1b1c
+#: ../../../CHANGELOG.md:1058 7eb5af6eeb69479299255801442582e3
 msgid "[2022.5.1] - 2022-12-5"
 msgstr ""
 
-#: ../../../CHANGELOG.md:530 42e3c4ec723d401cb451944cbf3c754f
+#: ../../../CHANGELOG.md:1064 f4ed42952ff842f3a98301414146c1f0
 msgid ""
 "The layer tree now has a \"Layer filter\" function. This makes it "
 "possible to filter layers according to inputted text in a form field "
@@ -978,7 +1698,7 @@ msgid ""
 " a case-insentive substring search."
 msgstr ""
 
-#: ../../../CHANGELOG.md:536 7ebb0461025641eebabe6e76eb026532
+#: ../../../CHANGELOG.md:1070 5618ba71860842c8970136bb5092b8ca
 msgid ""
 "When editing a raster tile layer the altered properties for the feature-"
 "info template is also send to the editor. So e.g. HTML tags for links and"
@@ -986,7 +1706,7 @@ msgid ""
 "instead."
 msgstr ""
 
-#: ../../../CHANGELOG.md:537 cf5029820cbe48f09c0013b22fdc3146
+#: ../../../CHANGELOG.md:1071 6f5cd42e8b354e04939dab75f84e5f4b
 msgid ""
 "A block/unblock event is added in ``infoClick`` module, så other modules "
 "can block feature-info clicks from happening. This is implemented in "
@@ -994,11 +1714,11 @@ msgid ""
 "features."
 msgstr ""
 
-#: ../../../CHANGELOG.md:540 6dab9f8b737d4bd9b4f69bf03428fd47
+#: ../../../CHANGELOG.md:1074 2d53c8ce758c4a0a9dc5f31626cb49ad
 msgid "[2022.5.0] - 2022-5-5"
 msgstr ""
 
-#: ../../../CHANGELOG.md:546 0df7ac0ef223461e8d07120fa07de5c2
+#: ../../../CHANGELOG.md:1080 2f965a3c52e942b7954a25f23b07408b
 msgid ""
 "In conflictSearch requests to the GC2 SQL API now happens concurrently. "
 "This is done by implementing a promise pool. The default size of the pool"
@@ -1006,48 +1726,44 @@ msgid ""
 "can't be changed in a run-time config."
 msgstr ""
 
-#: ../../../CHANGELOG.md:547 0ea7eb69bd4948cfa28cd6b833f79f2b
+#: ../../../CHANGELOG.md:1081 a3ba63ed64af4e2ba268f550160f2d52
 msgid ""
 "conflictSearch now has a ``stateless`` option, which can be set in both "
 "build and run-time config. In stateless mode the state of the module will"
 " not be kept. Default ``false``. .. code-block:: json"
 msgstr ""
 
-#: ../../../CHANGELOG.md:550 4a4e4a6ddcbb4c47bc0905fd7cbb503e
-msgid "{ \"extensionConfig\": {"
-msgstr ""
-
-#: ../../../CHANGELOG.md:553 a267b495e7e04b23b1ffcba90a2c4e3d
+#: ../../../CHANGELOG.md:1087 a27407f7f2bf4f1cb40ff3a4f3a77cab
 msgid "\"conflictSearch\": {"
 msgstr ""
 
-#: ../../../CHANGELOG.md:553 bbf02706911342b5aa58f62bfa889ae6
+#: ../../../CHANGELOG.md:1087 c6c0878d289d4a5db1ec0b5b00308a4a
 msgid "\"poolSize\": 40, \"stateless\": true"
 msgstr ""
 
-#: ../../../CHANGELOG.md:563 6c4de7c2c21e423197d413066f8d346c
+#: ../../../CHANGELOG.md:1097 fae50ddeb37f484d9d36044618cbf311
 msgid "Tile layer opacity state now is kept betweens browser refreshes."
 msgstr ""
 
-#: ../../../CHANGELOG.md:566 673f72153aeb4f4abc0d5291da66907d
+#: ../../../CHANGELOG.md:1100 409d277525de4a52b5f365855a3266d4
 msgid "[2022.4.0] - 2022-8-4"
 msgstr ""
 
-#: ../../../CHANGELOG.md:572 b4926547a31a4b18b0045409734408b5
+#: ../../../CHANGELOG.md:1106 5025988a17e7470bba2a3d4d4952f286
 msgid ""
 "Now uses sfe_ejendomsnummer instead of esr_ejendomsnummer in search of "
 "'adresser' and 'matrikel'."
 msgstr ""
 
-#: ../../../CHANGELOG.md:575 5125e7dfdfcc4db7bda8620d3b13e5b6
+#: ../../../CHANGELOG.md:1109 2750bcaa6c074260aa562d4a315ed083
 msgid "[2022.3.3] - 2022-24-3"
 msgstr ""
 
-#: ../../../CHANGELOG.md:581 6b02e00d3e284206b4035b4f466fea92
+#: ../../../CHANGELOG.md:1115 31aa2313dc0d47a2913731e0344fce6f
 msgid "Regression bug, which kept the right side-panel closed after load of app."
 msgstr ""
 
-#: ../../../CHANGELOG.md:582 784437742ece44628b388d1fab05f06b
+#: ../../../CHANGELOG.md:1116 ec17580318c445f8b5473bf2cda23fc3
 msgid ""
 "The Leaflet method ``toGeoJSON`` rounds of coordinates with 6 decimals by"
 " default. But this may result in up to 10 cm on the map (tested at about "
@@ -1056,25 +1772,25 @@ msgid ""
 "through out the app."
 msgstr ""
 
-#: ../../../CHANGELOG.md:585 e38953a1fec146a1a6fb9ca45dac0ffb
+#: ../../../CHANGELOG.md:1119 f59d096fbb2f403f92e387678759a1b4
 msgid "[2022.3.2] - 2022-18-3"
 msgstr ""
 
-#: ../../../CHANGELOG.md:591 d35199bbf3be4bc2bf458069561e91ae
+#: ../../../CHANGELOG.md:1125 2e0c543a4ec84894a12ebb4ed1e55d19
 msgid "Bug in sqlQuery.js, which rendered feature-info inoperable."
 msgstr ""
 
-#: ../../../CHANGELOG.md:592 f2069bcfc4b5439e8c48234d1222d1dc
+#: ../../../CHANGELOG.md:1126 65cf91d1c3c84e4dbb341977adb4c9a1
 msgid ""
 "Added ``geolocation`` to the ``allow`` attribut on the created iframe in "
 "embed.js."
 msgstr ""
 
-#: ../../../CHANGELOG.md:595 a65bf8043f2a492cbae2af188e293324
+#: ../../../CHANGELOG.md:1129 e3e20a0124954f9cba76aa3a518d5d2f
 msgid "[2022.3.1] - 2022-15-3"
 msgstr ""
 
-#: ../../../CHANGELOG.md:601 2cf09e219eb846369eddd9e56120a03f
+#: ../../../CHANGELOG.md:1135 b7669bff329b425ebf912cb5c38d803e
 msgid ""
 "Added GC2 Meta option for tiled raster layer: ``tiled``. If set to "
 "``true`` the layer will be fetched in tiles instead of one big single "
@@ -1083,21 +1799,21 @@ msgid ""
 "will always be false visible."
 msgstr ""
 
-#: ../../../CHANGELOG.md:604 b48a33318715449abeb35df1691041bd
+#: ../../../CHANGELOG.md:1138 803eabec2dc540d09d4368414da40950
 msgid ""
 "A new option in embed.js: ``data-vidi-no-tracking``\\ , which will "
 "disable the Vidi tracking cookie used for advanced functions like state-"
 "snapshots and printing."
 msgstr ""
 
-#: ../../../CHANGELOG.md:611 ebed6c18dfd44d7b9bf6e0bb0501dd13
+#: ../../../CHANGELOG.md:1145 7d2ce9237d25440c8829c2e01c885875
 msgid ""
 "Tracking cookie will now be set as ``secure=true`` and ``sameSite=none`` "
 "if env var NODE_ENV is set to 'production'. This will fix issues with "
 "embeding Vidi and setting the cookie."
 msgstr ""
 
-#: ../../../CHANGELOG.md:613 06acddc6daf74fdf97194ef61ded6e87
+#: ../../../CHANGELOG.md:1147 034bc179c8bd492eb34caec4c101eb00
 msgid ""
 "Vector feature table can now be placed to the right or at the bottom of "
 "the screen. The table is removed when layer is switched off. Only one "
@@ -1108,81 +1824,81 @@ msgid ""
 "code-block:: json"
 msgstr ""
 
-#: ../../../CHANGELOG.md:619 3ea2b566eab14bc989ab2f4c003252b9
+#: ../../../CHANGELOG.md:1153 ec3dc34280e34042a6113482eab8b898
 msgid "{ \"vectorTable\": {"
 msgstr ""
 
-#: ../../../CHANGELOG.md:621 f73b0bbc90bf44ca95cda0a039249ea3
+#: ../../../CHANGELOG.md:1155 9a45c9eaa2614874819eb3ffd68f1050
 msgid "\"position\": \"right\", \"width\": \"30%\", \"height\": \"250px\""
 msgstr ""
 
-#: ../../../CHANGELOG.md:631 6304ab4e15934e02819fc354f2d7181e
+#: ../../../CHANGELOG.md:1165 1aa8c6678ec448719c4bd9ff35e10648
 msgid "Some bugs regarding vector feature table and dynamic load."
 msgstr ""
 
-#: ../../../CHANGELOG.md:634 02ce20c30db343f1a51b462375b68426
+#: ../../../CHANGELOG.md:1168 4f953839f46f463885627a3a889f242f
 msgid "[2022.3.0] - 2022-4-3"
 msgstr ""
 
-#: ../../../CHANGELOG.md:640 d8de537587054d919a4447a0744e439c
+#: ../../../CHANGELOG.md:1174 390decd59c664f62aadab47009ecc9c9
 msgid ""
 "Added config setting for auto panning the map when pop-up's opens, so "
 "they don't stay outside the map: ``autoPanPopup: false|true``"
 msgstr ""
 
-#: ../../../CHANGELOG.md:646 7656ed30d8ad4e8f9b84d393df3d3253
+#: ../../../CHANGELOG.md:1180 ec494abbbb15432982faf778e1c69d9d
 msgid ""
 "Pop-ups on vector layers will use simple pop-ups when "
 "``crossMultiSelect`` is ``false`` instead of the accordion template. This"
 " make pop-up behaviours similar on tile and vector layers."
 msgstr ""
 
-#: ../../../CHANGELOG.md:652 d635a74b83a148a287e9c511942f8b9c
+#: ../../../CHANGELOG.md:1186 a462ec9670d44c15847da442701e5dce
 msgid ""
 "Some issues regarding pop-up behaviours when ``crossMultiSelect`` is "
 "``true`` and editor is enabled: ``crossMultiSelect`` will be set to "
 "``false`` when editor is enabled."
 msgstr ""
 
-#: ../../../CHANGELOG.md:653 77588da0015b4900b4ee2da730fa0fa0
+#: ../../../CHANGELOG.md:1187 c33150603006410389460918408919ae
 msgid ""
 "Config defaults are now handle one place in the source and all settings "
 "have defaults. No longer need for testing if a setting is undefined."
 msgstr ""
 
-#: ../../../CHANGELOG.md:656 d8ece275e1a14821b603349ecdc08567
+#: ../../../CHANGELOG.md:1190 019396fcc98c4fa18542b5fcdbfc78e7
 msgid "[2022.2.2] - 2022-18-2"
 msgstr ""
 
-#: ../../../CHANGELOG.md:662 eb2058912c954437b3144431e393fdf7
+#: ../../../CHANGELOG.md:1196 8f1ac9ae517e48a9bbdc8384926b0731
 msgid ""
 "Better support for special characters and upper case in layer names. "
 "Fixes a UTF8 error in WMS requests and quotes schema/relation names in "
 "feature info requests."
 msgstr ""
 
-#: ../../../CHANGELOG.md:663 75e65a155b21404ea7221722a8697293
+#: ../../../CHANGELOG.md:1197 4f90a583dfa94da5bc9d58adee9c7645
 msgid ""
 "In the editor the counting of vertices in LineString features failed with"
 " NaN and it was impossible to edit. This is fixed with implementing a "
 "proper counting rutine."
 msgstr ""
 
-#: ../../../CHANGELOG.md:666 0eee805501474d28904f6367d695b695
+#: ../../../CHANGELOG.md:1200 dfb5ba4b832d45f3974ab45ca417cd5a
 msgid "[2022.2.1] - 2022-3-2"
 msgstr ""
 
-#: ../../../CHANGELOG.md:672 c4e2a794c00c46f58722444a95faece3
+#: ../../../CHANGELOG.md:1206 c2d45def51c94fa1b00444c8e8a16cc6
 msgid ""
 "Use UTM instead of web-mercator when projeting/unprojecting the print "
 "frame or the different will be to big."
 msgstr ""
 
-#: ../../../CHANGELOG.md:675 90e9748803d24d7084b906a875592b3b
+#: ../../../CHANGELOG.md:1209 4a69fd9a280b455ab6ecfeb70b0d91f0
 msgid "[2022.2.0] - 2022-3-2"
 msgstr ""
 
-#: ../../../CHANGELOG.md:681 8dcf5af0d82b4f8abc49f0d515636bac
+#: ../../../CHANGELOG.md:1215 f3a6fad0fdf846ca870bfefb9910161f
 msgid ""
 "Fix for buggy print recreation from state. The print frame was re-"
 "calculated each time the state was applied making a small change in "
@@ -1190,48 +1906,48 @@ msgid ""
 " on big geographical frames."
 msgstr ""
 
-#: ../../../CHANGELOG.md:684 b221ab387593405391d83a7f8c435a8a
+#: ../../../CHANGELOG.md:1218 5704b435d78c43ca80e4870c734bba5f
 msgid "[2021.12.1] - 2021-29-12"
 msgstr ""
 
-#: ../../../CHANGELOG.md:690 0c5a9600bceb463aae6a1d1857fbdf9b
+#: ../../../CHANGELOG.md:1224 3c3f1c4de3904c3ca6bd8a5a0458683d
 msgid ""
 "The ``df`` extension is changed, so it can use both Dataforsyningen and "
 "Datafordeler. New setup (token has precedence): .. code-block:: json"
 msgstr ""
 
-#: ../../../CHANGELOG.md:693 31d242ee40944765804d706cc96d9d9f
+#: ../../../CHANGELOG.md:1227 1b2abe86240846439250e9b909332d04
 msgid "{ \"df\" : {"
 msgstr ""
 
-#: ../../../CHANGELOG.md:697 0bbd1013fa904a6fbbfc29100fee59c0
+#: ../../../CHANGELOG.md:1231 815cabd8f4f046b0bc50e2450a174f00
 msgid "\"datafordeler\""
 msgstr ""
 
-#: ../../../CHANGELOG.md:696 ../../../CHANGELOG.md:701
-#: 0839c28d1e7f4753908f94b01c1b4619 1c30f863627b411d902043d41897482c
+#: ../../../CHANGELOG.md:1230 ../../../CHANGELOG.md:1235
+#: 08325ef40fb349e0a761491bbd6ed130 8ae9e044b210454c9e389a23ef1d3f74
 msgid "\"username\": \"...\", \"password\": \"...\", \"token\": \"...\""
 msgstr ""
 
-#: ../../../CHANGELOG.md:699 35fc3d92178a4bb6b2e71548366fafa7
+#: ../../../CHANGELOG.md:1233 e91a5b4c4ca24991b2e73a7efae9707b
 msgid "}, \"dataforsyningen\" : {"
 msgstr ""
 
-#: ../../../CHANGELOG.md:705 f87b17c0180b4ea4a28b8949478d0e78
+#: ../../../CHANGELOG.md:1239 9d5d36760e3646c68438cc3abf5de721
 msgid "}, \"baseLayers\": ["
 msgstr ""
 
-#: ../../../CHANGELOG.md:708 09e738e937bf4131b8764ed36658b148
+#: ../../../CHANGELOG.md:1242 98093cfba9814344b422cc641b8f5da2
 msgid ""
 "\"type\": \"wms\", \"url\": "
 "\"/api/datafordeler/GeoDanmarkOrto/orto_foraar/1.0.0/WMS\", \"layers\": ["
 msgstr ""
 
-#: ../../../CHANGELOG.md:711 cc2bcd0da32743af9c41cc4ff05ab619
+#: ../../../CHANGELOG.md:1245 2c693f3f04ce47c19b605c39e91d882b
 msgid "\"geodanmark_2020_12_5cm\""
 msgstr ""
 
-#: ../../../CHANGELOG.md:712 9dd307f7e5094861a7bcbc2f5c94a2fc
+#: ../../../CHANGELOG.md:1246 961c7cb623c340318373fd2267b22ea8
 msgid ""
 "], \"id\": \"geodanmark_2020_12_5cm\", \"name\": \"TEST "
 "geodanmark_2020_12_5cm\", \"description\": \"geodanmark_2020_12_5cm\", "
@@ -1239,90 +1955,85 @@ msgid ""
 "\"minZoom\": 8, \"maxZoom\": 22, \"maxNativeZoom\": 22"
 msgstr ""
 
-#: ../../../CHANGELOG.md:720 ../../../CHANGELOG.md:1213
-#: 303af965598544cb8d38fd6cd3ad210c 816c6bf3ed0c4409a509150f8708b9cd
-msgid "}, {"
-msgstr ""
-
-#: ../../../CHANGELOG.md:722 6810380f02734ee2945e2c85173929da
+#: ../../../CHANGELOG.md:1256 fb2c00310bac4b0d97f03e53576ee880
 msgid ""
 "\"type\": \"wms\", \"url\": \"/api/dataforsyningen/topo_skaermkort_DAF\","
 " \"layers\": ["
 msgstr ""
 
-#: ../../../CHANGELOG.md:725 92f6343481da440ea8bc9ef19f028952
+#: ../../../CHANGELOG.md:1259 90d76ecbce3d426aa528642a27b25a8a
 msgid "\"dtk_skaermkort\""
 msgstr ""
 
-#: ../../../CHANGELOG.md:726 fba9459f30824e3f8819d669c9ae309d
+#: ../../../CHANGELOG.md:1260 c75dcb9638c04eaeb5e859f355ee1ccc
 msgid ""
 "], \"id\": \"dtk_skaermkort\", \"name\": \"Skærmkort\", \"description\": "
 "\"DTK/Skærmkort\", \"attribution\": \"Styrelsen for Dataforsyning og "
 "Effektivisering\", \"minZoom\": 8, \"maxZoom\": 22, \"maxNativeZoom\": 22"
 msgstr ""
 
-#: ../../../CHANGELOG.md:742 ccc8ae904e5f44b9a9652129ab72dd55
+#: ../../../CHANGELOG.md:1276 d79568f605fe466493765a4135d0561e
 msgid ""
 "Field ignore setting from GC2 will now exclude the field from being "
 "queried in sqlQuery module (feature info)."
 msgstr ""
 
-#: ../../../CHANGELOG.md:745 271c178f465b44589ec49def0a72a429
+#: ../../../CHANGELOG.md:1279 07005849fb84401c922396840e654c62
 msgid "[2021.12.0] - 2021-6-12"
 msgstr ""
 
-#: ../../../CHANGELOG.md:751 ac8f072d991145eaa538a1ee4e91253a
+#: ../../../CHANGELOG.md:1285 357d1d07c5994b50a561dd941126b100
 msgid ""
 "The location circle marker is now orange in follow-mode and blue when not"
 " following. Location now works the same in both embed and default "
 "templates."
 msgstr ""
 
-#: ../../../CHANGELOG.md:752 882d6704f97745c9884d362fe8f9a53f
+#: ../../../CHANGELOG.md:1286 056f215dca434dba867e321e8ffeba4c
 msgid ""
 "The legend toast dialog in embed template will now be pushed to the right"
 " when sliding out the layer tree. This way the elements will not be "
 "stacked."
 msgstr ""
 
-#: ../../../CHANGELOG.md:753 309d543e99cd4219b823ca710212a84b
+#: ../../../CHANGELOG.md:1287 96fa1abf7beb47c7a47b91d81d53dc09
 msgid ""
 "The search-result element in ``conflict.tmpl`` now has a dynamic height, "
 "so it will fit the parent window."
 msgstr ""
 
-#: ../../../CHANGELOG.md:759 f85df8c3314e4a4298479e22d8d99419
+#: ../../../CHANGELOG.md:1293 25aad83a6b1f487a9ba505d8be16274b
 msgid ""
 "``slideOutLayerTree`` is now inwoked after vidi is ready making it more "
 "stable."
 msgstr ""
 
-#: ../../../CHANGELOG.md:762 ed2741d248c2441db8eaf7275c8b8f23
+#: ../../../CHANGELOG.md:1296 b57fe645cd4c4ab99b21ef8164f4e097
 msgid "[2021.11.2] - 2021-17-11"
 msgstr ""
 
-#: ../../../CHANGELOG.md:768 95a15fa934e1430ea42a84835c4daadc
+#: ../../../CHANGELOG.md:1302 f17fe5b00a0c48378a6c068fac86d208
 msgid ""
 "``layerTree`` state was not updated when Vidi was initiated with layers "
 "in URL anchor, resulting in no active layers in state until some changes "
 "was done by user afterward."
 msgstr ""
 
-#: ../../../CHANGELOG.md:771 be1b8a8ed4d849d188532aebed899af6
+#: ../../../CHANGELOG.md:1305 f3179b53c6564854ba6b1d4abc845b5b
 msgid "[2021.11.1] - 2021-16-11"
 msgstr ""
 
-#: ../../../CHANGELOG.md:777 c18ab17c2e3244e2be1b3a97a5dafc1b
+#: ../../../CHANGELOG.md:1311 9460afe169ce4e5ca743c3f76ae268ee
 msgid ""
 "Hit count added to the \"Data fra konflikter\" tab in ``conflictSearch`` "
 "module."
 msgstr ""
 
-#: ../../../CHANGELOG.md:778 d669a73a436c4131a9d70997719e2f5e
+#: ../../../CHANGELOG.md:1312 e5e09e646a8547aba09538bd9b6e6227
 msgid "Some changes in ``conflict.tmpl``\\ , so it's easier to customize it."
 msgstr ""
 
-#: ../../../CHANGELOG.md:784 ef66c8f632d644b18b75db661bca4fe1
+#: ../../../CHANGELOG.md:1318 8b4679c7e6fc48da9ef80d9129f2d8b4
 msgid ""
 "API endpoint for proxify base layer requests to Datafordeler.dk. The API "
 "rewrites the URL and adds ``username`` and ``password``. The base layer "
@@ -1330,25 +2041,25 @@ msgid ""
 "in ``config/config.js``\\ :"
 msgstr ""
 
-#: ../../../CHANGELOG.md:813 afe6dc70e1a44a37bc9647a9bc5f0426
+#: ../../../CHANGELOG.md:1347 94e29ee81f1b4d5bbf8e87b3dd5d059a
 msgid "[2021.11.0] - 2021-3-11"
 msgstr ""
 
-#: ../../../CHANGELOG.md:819 d3fdc1da518744fc9521ac65f130ea5a
+#: ../../../CHANGELOG.md:1353 7aef21a0f4834575b236617a450f188e
 msgid ""
 "Draw tool bar will now be positioned beside the main tools, if screen "
 "height is below 700px."
 msgstr ""
 
-#: ../../../CHANGELOG.md:825 e323131904ec4acaba607c9661f77b48
+#: ../../../CHANGELOG.md:1359 aa02dd312ef4496ea4290ad05ea29ee3
 msgid "Vector table now only shows in ``embed.tmpl``."
 msgstr ""
 
-#: ../../../CHANGELOG.md:828 6e31c91b7d844835b20cecfaeaccc6bd
+#: ../../../CHANGELOG.md:1362 8668b58c542547ed93f834f866e3bd88
 msgid "[2021.10.3] - 2021-11-10"
 msgstr ""
 
-#: ../../../CHANGELOG.md:834 0c9a064ee5584ef8a7cbad6096fef8be
+#: ../../../CHANGELOG.md:1368 2906844103d04d2f8cab9943efcffb3c
 msgid ""
 "Session cookie (connect.gc2) will now be set as ``secure=true`` and "
 "``sameSite=none`` if enviromental variable NODE_ENV is set to "
@@ -1357,274 +2068,271 @@ msgid ""
 " yaml"
 msgstr ""
 
-#: ../../../CHANGELOG.md:838 720a015ad9a04d599706877e8f46e6f5
+#: ../../../CHANGELOG.md:1372 f1ea37de2f3d451a9c51fedbcefbc6a3
 msgid "environment:"
 msgstr ""
 
-#: ../../../CHANGELOG.md:838 ded2b572383447d88cc26b945a016e4a
+#: ../../../CHANGELOG.md:1372 603a01dc1ff047a9871a908d1b3856e5
 msgid "NODE_ENV=production"
 msgstr ""
 
-#: ../../../CHANGELOG.md:841 50e3714d74264173a7db24580254d098
+#: ../../../CHANGELOG.md:1375 8282d85d54d04884b3649d1eef3fbfe9
 msgid "[2021.10.2] - 2021-7-10"
 msgstr ""
 
-#: ../../../CHANGELOG.md:847 e5793c83b1b340ddb3ca3e268ef92297
+#: ../../../CHANGELOG.md:1381 d7063aa9284340a19db3107d023ecab0
 msgid "Intended code error removed from ``conflict`` module in excel function."
 msgstr ""
 
-#: ../../../CHANGELOG.md:850 b8a6b0ad4a2d4b74a8100130cfd8e2f3
+#: ../../../CHANGELOG.md:1384 233eafdd57044da78dd049143947acc9
 msgid "[2021.10.1] - 2021-7-10"
 msgstr ""
 
-#: ../../../CHANGELOG.md:856 42f054a8a3a84d08aa40f8a0c3fc53ac
+#: ../../../CHANGELOG.md:1390 e808462309514e2f9078c92c36c5b11c
 msgid ""
 "A new config ``initFunction``\\ , which holds a JavaScript function as a "
 "string. When Vidi is fully loaded this function will be run: .. code-"
 "block:: json"
 msgstr ""
 
-#: ../../../CHANGELOG.md:860 d08cb751335745288d9a2d0bf8f384f2
+#: ../../../CHANGELOG.md:1394 713cff488f0b4c87ba75f7730b7dc6c2
+#, python-brace-format
 msgid "\"initFunction\": \"function(){alert(\\\"Hello\\\")}\""
 msgstr ""
 
-#: ../../../CHANGELOG.md:867 72bac743d2714692900ab863489a907c
+#: ../../../CHANGELOG.md:1401 83621a39089546c6b6f79e3ac3296feb
 msgid ""
 "The ``reportRender`` issue in ``conflict`` module regarding state "
 "resolving is fixed."
 msgstr ""
 
-#: ../../../CHANGELOG.md:868 5450ae86bdbb41869f3f5db76fc8da78
+#: ../../../CHANGELOG.md:1402 cc4173ffabc0452eafc3fc16694933c6
 msgid ""
 "The alternative ``reportRenderAlt`` module for ``conflictSearch`` can now"
 " be set in config: .. code-block:: json"
 msgstr ""
 
-#: ../../../CHANGELOG.md:874 a813204f63a74ebe9db9f4d84821d761
+#: ../../../CHANGELOG.md:1408 e5d75429e3844aea9fe18c9529783bf2
 msgid "\"extensions\": {"
 msgstr ""
 
-#: ../../../CHANGELOG.md:873 1b9fe1a3dd514187a19167271ff97c9f
+#: ../../../CHANGELOG.md:1407 e15f1cba128f4fa595dee683192f8a9f
 msgid "\"browser\": ["
 msgstr ""
 
-#: ../../../CHANGELOG.md:874 07c741e532134a188588793fa20b0a55
+#: ../../../CHANGELOG.md:1408 c76e78e0fc7c488e93c64eb4c29ed4b3
+#, python-brace-format
 msgid ""
 "{\"conflictSearch\": [\"index\", \"reportRenderAlt\", \"infoClick\", "
 "\"controller\"]}"
 msgstr ""
 
-#: ../../../CHANGELOG.md:875 ../../../CHANGELOG.md:1229
-#: 222b3f45efbf470f9b8072134379fbb3 e850aa12f26b4b0e8d63d50e51d1d8e1
-msgid "]"
-msgstr ""
-
-#: ../../../CHANGELOG.md:880 295f58c33bce488db624f405b0e33b52
+#: ../../../CHANGELOG.md:1414 1e806e844aac4791840333381dd1fd15
 msgid "[2021.10.0] - 2021-6-10"
 msgstr ""
 
-#: ../../../CHANGELOG.md:886 24772b05df154f74913b084eb82f9ea7
+#: ../../../CHANGELOG.md:1420 18df82b9fe5c46dfb85e3192cb4e894f
 msgid ""
 "Legend added in blank.tmpl (which is used in static maps). Also the "
 "legend checkboxes are removed from legends in blank.tmpl and print.tmpl."
 msgstr ""
 
-#: ../../../CHANGELOG.md:887 c0b7f2cfe5d84b8a97493b17fef9924f
+#: ../../../CHANGELOG.md:1421 879a2125d2754137855abe60ab081dbf
 msgid ""
 "Extensions are initiated before state resolves, so extensions work in "
 "state urls."
 msgstr ""
 
-#: ../../../CHANGELOG.md:888 58645ec1405249bbb836352b09aeb040
+#: ../../../CHANGELOG.md:1422 3615e7e4c2134f41aed560458bd781ea
 msgid ""
 "Measurement tooltip will now show one decimal instead of none when "
 "showing meters."
 msgstr ""
 
-#: ../../../CHANGELOG.md:894 268c13ecf66f45eea652d0fd3565279f
+#: ../../../CHANGELOG.md:1428 efa5ee75504d4207bbd93114bfde6f37
 msgid ""
 "Serialization of line extremities was buggy when lines was recreated "
 "after applying state causing extremities not to be drawn."
 msgstr ""
 
-#: ../../../CHANGELOG.md:897 e24eada2a966477cae6dc76d4c59c3a1
+#: ../../../CHANGELOG.md:1431 380574e630344a4ab27c547103d33a2b
 msgid "[2021.9.0] - 2021-22-9"
 msgstr ""
 
-#: ../../../CHANGELOG.md:903 682c88717f8043d48cfdcd2ba89747b2
+#: ../../../CHANGELOG.md:1437 76b8a983665547329185364a9676e5e1
 msgid ""
 "Links in pop-ups now gets the primary color of the theme instead of the "
 "fixed cyan color."
 msgstr ""
 
-#: ../../../CHANGELOG.md:909 0954526efb2d40b1ab3298b226b50565
+#: ../../../CHANGELOG.md:1443 f09badb6ba38436c8d107f47f7a54ca8
 msgid "Serveral smaller fixes for the Editor extension."
 msgstr ""
 
-#: ../../../CHANGELOG.md:910 23891665bc054d5c9a37f0d37f6ea516
+#: ../../../CHANGELOG.md:1444 bf0c6ed324a34df8bcccf1153850e99d
 msgid "embed.js API: Only fire snapshotLayersCallback once."
 msgstr ""
 
-#: ../../../CHANGELOG.md:911 05abade9a3d64c7c87a92c74f4590163
+#: ../../../CHANGELOG.md:1445 ff37c5d912614fa29c959aa17130c5bc
 msgid ""
 "Excel write erors in conflict module is now handled, so Vidi doesn't "
 "crash."
 msgstr ""
 
-#: ../../../CHANGELOG.md:914 e44f4988e4a64801973897be6e1bd0f1
+#: ../../../CHANGELOG.md:1448 3dbf07b46dc949ce81b6a9132f8b7d6e
 msgid "[2021.8.3] - 2021-30-8"
 msgstr ""
 
-#: ../../../CHANGELOG.md:920 ee09fc993ee54e3daa17b3b11aa2daee
+#: ../../../CHANGELOG.md:1454 213582d1715547bd88e489edbdc42436
 msgid ""
 "Regression bug regarding print. The metadata object was stripped from the"
 " payload in ealier release, but was necessary for recreation of layers. "
 "Now a slim downed version of meta are send."
 msgstr ""
 
-#: ../../../CHANGELOG.md:923 7344065e2759407aa912ea2ce699c6d2
+#: ../../../CHANGELOG.md:1457 13c1eae9bfa94ddda66ee73efc169415
 msgid "[2021.8.2] - 2021-30-8"
 msgstr ""
 
-#: ../../../CHANGELOG.md:929 0456b9904ec8494cbd2e406eb62f3b41
+#: ../../../CHANGELOG.md:1463 37c6b37a212945f29ce04de6b115693b
 msgid ""
 "The layer-group-checkboxes now have id's, so it's easier to apply css "
 "rules. Ids follow this pattern: ``group-check-box-[group-id]``. Use the "
 "dev tool inspector to get the id."
 msgstr ""
 
-#: ../../../CHANGELOG.md:932 6c141a5c368c431abb4239a4d31e08c3
+#: ../../../CHANGELOG.md:1466 f9b8483985f545c6ad60768ce3d289ba
 msgid "[2021.8.1] - 2021-25-8"
 msgstr ""
 
-#: ../../../CHANGELOG.md:938 459f469f4db0483395fba1caeb63b53f
+#: ../../../CHANGELOG.md:1472 f246205df274492d9e04c0bfb793c9ae
 msgid "Docker base image update to debian:bullseye-slim."
 msgstr ""
 
-#: ../../../CHANGELOG.md:944 6fb4412cc7024c70b783a555cd7e1cd2
+#: ../../../CHANGELOG.md:1478 2ccfc528276a49f280d4857d1fbf67a9
 msgid ""
 "Callback functions in embed.js. Two functions kan be defined in the "
 "parent page like this (with ``data-vidi-frame-name=\"map1\"``\\ ):"
 msgstr ""
 
-#: ../../../CHANGELOG.md:946 f7d1ceda3af7459f8b61ff06dc41cd15
+#: ../../../CHANGELOG.md:1480 cad5637daa9a449aa8e662f937ce9f4a
 msgid "When Vidi is ready: .. code-block:: JavaScript"
 msgstr ""
 
-#: ../../../CHANGELOG.md:949 3f2a2daf9ace4163a7a3a31303fadb1b
+#: ../../../CHANGELOG.md:1483 b3b5b273c5fe443185f749e2ec647804
 msgid "embedApi.vidiReady[\"map1\"] = () => {"
 msgstr ""
 
-#: ../../../CHANGELOG.md:950 c06f762101db42ff9931c734a33cd0ab
+#: ../../../CHANGELOG.md:1484 28c6082da6164ee59f4eabd319f289ce
 msgid "console.log(\"Vidi is ready\")"
 msgstr ""
 
-#: ../../../CHANGELOG.md:953 d0c7cceb04394dc495cfa69f49baa3a6
+#: ../../../CHANGELOG.md:1487 a3afe2d50b0847a1a9e07497d34c682d
 msgid "When active layers from the snapshot is ready: .. code-block:: JavaScript"
 msgstr ""
 
-#: ../../../CHANGELOG.md:956 c578527dd2ac4bdfbdc9e06760a151c8
+#: ../../../CHANGELOG.md:1490 ab05d4162175467588d03bde8aee1c93
 msgid "embedApi.activeLayersReady[\"map1\"] = () => {"
 msgstr ""
 
-#: ../../../CHANGELOG.md:957 dcc14f129b9d48049e9386eb67cde034
+#: ../../../CHANGELOG.md:1491 596d246576d3451b8517f85bcf1c764a
 msgid "console.log(\"Active layers are ready\")"
 msgstr ""
 
-#: ../../../CHANGELOG.md:964 ec88dfbf29c64e0ebf97013cf578b058
+#: ../../../CHANGELOG.md:1498 c3011622c0ef4471a971add70fb024d1
 msgid ""
 "In conflictSearch module, the adding of sheets to excel is now in a "
 "try/catch so invalid sheet names won't crash the Node process."
 msgstr ""
 
-#: ../../../CHANGELOG.md:967 91dc694ec8e54fb4812cbe58d0feeb22
+#: ../../../CHANGELOG.md:1501 cb4ca719f2e0495189e15d9b6a48e7f5
 msgid "[2021.8.0] - 2021-12-8"
 msgstr ""
 
-#: ../../../CHANGELOG.md:973 f31d383dcbba462a982e85910e128bca
+#: ../../../CHANGELOG.md:1507 dec4da694192495d9931964eaed47f5b
 msgid ""
 "``select_function`` is now called when opening a panel in a accordion "
 "pop-up."
 msgstr ""
 
-#: ../../../CHANGELOG.md:979 958b8c42fe654decb7fcd0f3ba5fecab
+#: ../../../CHANGELOG.md:1513 765258165f704dc79601ed82b4595d2e
 msgid ""
 "Print and Conflict modules will not longer keep unnecessary Meta data in "
 "state. This reduce the data volume."
 msgstr ""
 
-#: ../../../CHANGELOG.md:980 a8720019435f40ae877a5f99936e4dd0
+#: ../../../CHANGELOG.md:1514 96992effd7b64caa9da1c6118165be62
 msgid ""
 "Layer tree will now build with all valid layers. Before it would start "
 "building as soon an invalid layer was proccess leaving out the rest."
 msgstr ""
 
-#: ../../../CHANGELOG.md:983 37d3398d8cc54e50a8b75663551806af
+#: ../../../CHANGELOG.md:1517 288d6c1a32014978a0e1675d0813dfe4
 msgid "[2021.7.1] - 2021-8-7"
 msgstr ""
 
-#: ../../../CHANGELOG.md:989 406e306063224a858fa5ac74e0ac5a09
+#: ../../../CHANGELOG.md:1523 edbb2ae805d848d1a5437e1777f98692
 msgid ""
 "Regression bug. Draw module labels are now again serialized as labels - "
 "not markers."
 msgstr ""
 
-#: ../../../CHANGELOG.md:992 f8f6f553fa404e84aa979889ffebacf1
+#: ../../../CHANGELOG.md:1526 56f76b0952484e029e63f3211a310cbf
 msgid "[2021.7.0] - 2021-5-7"
 msgstr ""
 
-#: ../../../CHANGELOG.md:998 9aa3621887c245ba849027ecb9f178bc
+#: ../../../CHANGELOG.md:1532 ff7d5969b67846d1be2019d9a11cf442
 msgid ""
 "Conflict Excel output: Two sheets can't have the same name, which will "
 "result in error. In case of same names, the last char is changed to a "
 "number."
 msgstr ""
 
-#: ../../../CHANGELOG.md:999 7a5370fa1f1f46458c07f430b0b78135
+#: ../../../CHANGELOG.md:1533 5bb1b26acc98405b8890808bfbbe7677
 msgid "Conflict report will now default to \"Compact\" if none is choosen."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1002 08b90c45628e4fe296a76874093c499f
+#: ../../../CHANGELOG.md:1536 1c1738a3a1204d7aa15a8562e1b576b2
 msgid "[2021.6.0] - 2021-2-7"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1008 75bd424f98b74819a88611dddfcb9580
+#: ../../../CHANGELOG.md:1542 3a82d4cb7c6f4947a3c4468e4a287f07
 msgid ""
 "No MapCentia logo in default and conflict print template. Logo can be set"
 " with external css sheet. Some thing like this: .. code-block:: css"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1011 b2ccd6fab4b04438bb647b9ee2f5ea2b
-#, python-format
+#: ../../../CHANGELOG.md:1545 0dabaee7ffc8463c8d103472f2b5a780
+#, python-brace-format, python-format
 msgid ""
 "#print-header-logo{ background-image: url('https://.....'); background-"
 "repeat: no-repeat; background-position: 50% 50%; background-size: 80%; }"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1018 5c36a92636a84d1ea61c7f40ae0a47ef
+#: ../../../CHANGELOG.md:1552 60fa4740a8164e1a84c41a158b6dfbd0
 msgid ""
 "embed.js: If host in token is http, then make it protocol relative, so "
 "tokens created on http still works when embedded on https sites."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1019 b98c0bf6a4ca4bb09c7edc0e25253b62
+#: ../../../CHANGELOG.md:1553 0ba778dcdbe14db19484f964705df876
 msgid ""
 "It's now possible to switch all layers on/off in a layer (sub)group. "
 "Enable the checkboxes with the ``showLayerGroupCheckbox`` conflig."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1020 78d6d39c01d5409f837d487959b776cf
+#: ../../../CHANGELOG.md:1554 ea2451bcc3d740e496899eeb8d9522aa
 msgid "Some visual improvements to the display of sub-groups in the layer tree."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1021 f1a6aad6e26843a3aa16f4a608c3e6c1
+#: ../../../CHANGELOG.md:1555 08228a0853174e0eb5abe1e315ba25ba
 msgid ""
 "Editing of geometry is not possible when number of nodes exceed 1.000. "
 "But attribut data can still be edited. A high amount of nodes will hog "
 "down the browser and it can crash."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1022 9edc7c71fa72485d8b0c8668164d0659
+#: ../../../CHANGELOG.md:1556 883f2efc0c4f48d194f6d7bc8f090d49
 msgid ""
 "The Snapshot module will now use base64url encoded body for getting, "
 "creating and updating snapshots. This way will a JSON value ``ILIKE "
@@ -1632,66 +2340,66 @@ msgid ""
 "update of GC2."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1023 621fae3b5e0446a0ac7659869b287b41
+#: ../../../CHANGELOG.md:1557 569d95c408b343efa65085c52ed1a9ef
 msgid ""
 "Snapshot list is now ordered by update date/time and this is also what's "
 "displayed instead of create date/time."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1024 92e2a5e7192b4fefae7c5b5b5ceb8ba3
+#: ../../../CHANGELOG.md:1558 4edea9f12d0649b6839aeacedeb70d49
 msgid ""
 "Frame number on prints will not be shown when only one frame is printed. "
 "Custom print needs an update: ::"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1029 9ad03028c9a147abbd82a5ff396222b7
+#: ../../../CHANGELOG.md:1563 b33a00b527754f7a959bd3aa18224791
 msgid "Frame numbers starts with 1 instead of 0."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1030 127449beae6940e3bc8517763fdc00aa
+#: ../../../CHANGELOG.md:1564 558eefbc2eb04989b52ba2582f366ed2
 msgid ""
 "New format for setting redis host. Now the database number can be set: .."
 " code-block:: JSON"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1033 9b108c66122b411095fb81df42403c52
+#: ../../../CHANGELOG.md:1567 e2f673a5d02e4fabbdd321a522fe38b8
 msgid "{ \"redis\": {"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1035 cd3d2955e93f479b8570700f3d8055b5
+#: ../../../CHANGELOG.md:1569 a7af7923dba345349f3c78eb12622b43
 msgid "\"host\": \"127.0.0.1:6379\", \"db\": 2"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1044 c4e4f0cdc3b24b34955ccc1699d7f9a3
+#: ../../../CHANGELOG.md:1578 d0b4d2d1510b4a38b9dce8e889c7e63e
 msgid ""
 "An API loaded with the ``embed.js`` script. Two methods are available: "
 "``embedApi.switchLayer`` and ``embedApi.allOff``. See docs for details."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1045 a678b0f43fd747a2ba0ed3e1dd655100
+#: ../../../CHANGELOG.md:1579 81d0655a7f324c5fb91b537ed061ad6a
 msgid ""
 "Mouse over on vector and raster tile layers. The latter using UTF Grid. "
 "These GC2 Meta properties are controling the mouse over:"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1046 63f7247ec8c64efa802f6b99941afa8d
+#: ../../../CHANGELOG.md:1580 ee23ad38f5b142cc8b2813b1dd998dc8
 msgid "``hover_active`` Boolean. Should mouse over be switch on?"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1047 376c0a7a13c146e88f8cc9462feeb2f6
+#: ../../../CHANGELOG.md:1581 455d6c10c21b401eafc275aed8482724
 msgid ""
 "``info_template_hover`` String. Handlebars template to use in label. If "
 "not set a default template will be used, which loops through fields with "
 "the ``Show in mouse-over`` property checked."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1048 8c57ca5d58b7409c8cf4d61e50ef9451
+#: ../../../CHANGELOG.md:1582 21fbbc0a3a0b4f0c889fab62930e417d
 msgid ""
 "``cache_utf_grid`` Boolean. Wether to cache UTF grid tiles. Only apply to"
 " raster tile layers."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1049 ca0d526e3e734aec9e67d630951b57d6
+#: ../../../CHANGELOG.md:1583 7fe87e4667e447169174a78518448046
 msgid ""
 "Excel report is now available in conflict module. Each layer with hits "
 "will have its own sheet. For for sheets to get populated with hits the "
@@ -1699,7 +2407,7 @@ msgid ""
 "Structur tab in GC2 Admin."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1050 149f268d79234610a27ab46c66891e41
+#: ../../../CHANGELOG.md:1584 d01124554ce24525be8b175839bb9b27
 msgid ""
 "New config option ``activeLayers``. This option is a array of schema "
 "qualified layers with any type prefix (:v, :mvt, :w), which should be "
@@ -1707,78 +2415,78 @@ msgid ""
 "this option will be ignored. .. code-block:: json"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1053 64f3f468663a47c8b813bd77b8317a67
+#: ../../../CHANGELOG.md:1587 2ff75b6223b54210985792ff0f10f7a7
 msgid "{ \"activeLayers\": ["
 msgstr ""
 
-#: ../../../CHANGELOG.md:1055 cca6ab662ff2419e83a82e2a13702139
+#: ../../../CHANGELOG.md:1589 037a014804474a989dce4fdb3b56c9bf
 msgid "\"schema.layer1\", \"v:schema.layer2\""
 msgstr ""
 
-#: ../../../CHANGELOG.md:1064 c9e5bc2a50f0424f9730f293765ae039
+#: ../../../CHANGELOG.md:1598 5769d31bf3b544b3ad59d0ff5abc4345
 msgid ""
 "Feature info click wouldn't open the pop-up if multiple layers was switch"
 " on."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1065 36ccde947f234741a5fb62f98b80cac5
+#: ../../../CHANGELOG.md:1599 7f4bd355f5234c95bb0d7329b19805c2
 msgid "Drawings are not longer dashed, when selected."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1066 66e531a9c9c942a49ee66437799e0fa7
+#: ../../../CHANGELOG.md:1600 2fc78ec0bf3e4305a2b89999afa55cb0
 msgid ""
 "Conflict search module will now search protected layers if user is signed"
 " in."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1067 0a76593d6b30449eb6656b3ed06c7719
+#: ../../../CHANGELOG.md:1601 363a66d1072043aea97b12efc7320baa
 msgid ""
 "On ``zoomToExtentOfgeoJsonStore`` in geocloud.js pan map one pixel to "
 "defeat a strange bug, which causes a browser freeze."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1068 d6dd4cde6e4e4d688e7772624f94fa9a
+#: ../../../CHANGELOG.md:1602 ef9059afecdd44a18343afcbe2adc45c
 msgid ""
 "Layer filter auto complete menu is now postioned absolute instead of "
 "fixed, so it will not hang in the same place when scrolling layer tree."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1069 c0b1032103a648fd9ee594e147ac7aa1
+#: ../../../CHANGELOG.md:1603 647b33146bd343cfa6a9533811bb4384
 msgid ""
 "Composit QGIS Layers now work. They are not longer bypassed by MapServer "
 "where the merge request is done."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1072 8b874b0209fa40bd890c19dfd5100fdc
+#: ../../../CHANGELOG.md:1606 5e17411054894a2eb9e5111632a29a05
 msgid "[2021.5.0] - 2021-4-5"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1078 444b95c7946245ddb57995458f0be4fa
+#: ../../../CHANGELOG.md:1612 4b2235dc2f254113b1db4e112809c073
 msgid "Node >= 14 er required."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1079 6123ff39e3b247679fa28fbbe9884864
+#: ../../../CHANGELOG.md:1613 2b1b947828e7474193b4cc18271bf78e
 msgid "Docker files are added to the project."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1080 f5602826581a486eaeddae9a84839b7b
+#: ../../../CHANGELOG.md:1614 51d95b0f3bbc4e7caa8ec244576cb48a
 msgid ""
 "It's now possible to set ``gc2.host`` through the environment variable "
 "``GC2_HOST``. If set in ``config/config.js`` it will have precedence."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1081 177a061b28904a0297da2a998f1d617e
+#: ../../../CHANGELOG.md:1615 366867fd43854e6abb9e95787032312c
 msgid ""
 "ConflictSearch is now controlled by state module. It will keep state "
 "between on/off and browser refreshes. State in conflictSearch is also "
 "applied when running a state-snapshot."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1082 053cdac574f44528a84cb3f6cff72ab5
+#: ../../../CHANGELOG.md:1616 6a8dfd7114a84b5c8d0df5dcaeafb66c
 msgid "Changes in Snapshot UI. The UI is now more clean."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1083 8a60d2f1212b4dbfad4238104efc00e9
+#: ../../../CHANGELOG.md:1617 bec964542e6a4902aa7c6c8f2e31695a
 msgid ""
 "When the ``session=[id]`` URL key/value is used, it will now reset the "
 "``connect.gc2`` session cookie, even if it's set through the sign-in UI. "
@@ -1787,51 +2495,51 @@ msgid ""
 "removed when sign-out is done through the UI."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1084 3a5cf2a92bf24720a7f2b6d2ad9bbfd6
+#: ../../../CHANGELOG.md:1618 9c9d756897d446e99eb3a8f222bbc2bd
 msgid ""
 "CSS and templates files can now be placed in a sub-folder on the "
 "``configUrl`` host. Only one level deep like ``styles/custom.css``."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1085 74d2b21e17774d8ca368f50f92ee32e6
+#: ../../../CHANGELOG.md:1619 2e0c87c8c8734eb5b95a7bad1ec272bb
 msgid ""
 "Layer tools in the layer tree now have parent span elements with theese "
 "ids, so it's easier to to set a css display rule on them:"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1087 881b509413564e47b8443bfae25ea384
+#: ../../../CHANGELOG.md:1621 401bfb4d5601465a99656b75b8561e41
 msgid "``#layer-tools-offline``"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1088 e4178907a769437795c8d70fd97f10fd
+#: ../../../CHANGELOG.md:1622 300533f4426544538fde67ed41f5cb39
 msgid "``#layer-tools-search``"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1089 7b921bf8f83b4de88cde658d66b59457
+#: ../../../CHANGELOG.md:1623 829ec6bc093446d281cf74df61b80800
 msgid "``#layer-tools-opacity``"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1090 47bd74a7abbc4c7db4b5f075d87d3860
+#: ../../../CHANGELOG.md:1624 f554501ee50041b3aefee65f4ddeaeeb
 msgid "``#layer-tools-labels``"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1091 6baeec6d1a324f10acc467c20cd552c4
+#: ../../../CHANGELOG.md:1625 8aa91272c8034d84a9a6bc1ab4520a9f
 msgid "``#layer-tools-tables``"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1092 3c2f0dc08a6b4e859a647052a2e034a4
+#: ../../../CHANGELOG.md:1626 646a2a5ccb5f44ac9704778873781904
 msgid "``#layer-tools-load``"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1093 b6a4a74d9f364684927075b0968dab10
+#: ../../../CHANGELOG.md:1627 f248304b4dcc4541ace2b747ca3b7cc6
 msgid "``#layer-tools-filters``"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1095 2a78d998aaa64aaf9fc98e681208bf9b
+#: ../../../CHANGELOG.md:1629 d32ce83ab23b462083241de08b686418
 msgid "``repeatMode`` is set to ``true`` for tools in Draw, so tools stay active."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1101 9e14a30c741b49518f79fcf95e611f02
+#: ../../../CHANGELOG.md:1635 133124b377624700befb9afd84bbfbdc
 msgid ""
 "It's possible to lock UTM zone in coordinate module, so it's possible to "
 "project to a specific zone outside the actual zone. Useful for e.g. "
@@ -1839,195 +2547,196 @@ msgid ""
 "both 32 and 33. .. code-block:: JSON"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1105 acff43668c3c4dc597420f54d84ace50
+#: ../../../CHANGELOG.md:1639 71eb809acaa74f008639b25c356c268b
 msgid "\"coordinates\": {"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1106 952cc36af1674cd08523c2567980c00c
+#: ../../../CHANGELOG.md:1640 5953bda27af4489c9651f52c404737b7
 msgid "\"lockUtmZoneTo\": 32"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1110 9624e7743180492eab2bcbb062d23984
+#: ../../../CHANGELOG.md:1644 6b4f14748e3d4a919643108091b3e056
 msgid ""
 "A new build configuration for setting widths for the left slide-out panel"
 " in default template."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1117 cbbecc2ec45e4dfb9ee24ec40776e4e3
+#: ../../../CHANGELOG.md:1651 d032358651a8480bbf893e31d02aee20
 msgid ""
 "Under filters in the layer tree it's now possible to download the layer "
 "as either: GeoJSON, Excel or CSV"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1123 3364a9b4602f4b7ba460cb717b44d4ff
+#: ../../../CHANGELOG.md:1657 21971a37d6994d9d9d76c156ba36a991
 msgid ""
 "Base64url are now used to encode filters instead of base64, so + and / "
 "sign doesn't mess things up."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1124 078848a2cc7d41229803293687f6be2f
+#: ../../../CHANGELOG.md:1658 458085cb89f3401591e7a48bb15ecce2
 msgid ""
 "Changes to Snapshot UI, which fixes an issue with wrong URLs in input "
 "fields."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1125 cd8b6f9fd16240f0bf09acad37739ee8
+#: ../../../CHANGELOG.md:1659 e1742b72c6a24f8497c372216f089619
 msgid ""
 "Drawing is stored in state, but was not recreated after refresh of "
 "browser. This could get \"invisible\" drawings stored in snapshots."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1126 5aa1ec6bb1cc4eeb902a2cc7405a4c53
+#: ../../../CHANGELOG.md:1660 dbe30329fb594e1cb48362204b7bba06
 msgid ""
 "If a layer in a state snapshot is for some reason not available "
 "(protected, deleted), the build of the layer tree was ever resolved. Now "
 "it'll resolve."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1127 ebfd7cd21c2f4524afee359c898f3539
+#: ../../../CHANGELOG.md:1661 2c1df41e43f944589f58938e9fc8bab5
 msgid ""
 "The queueStatisticsWatcher and Service Worker now uses 3. party module "
 "for base64 decoding, because windows.btoa fails on non-latin characters."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1128 e96f01c5b72049a0a8439f632a565634
+#: ../../../CHANGELOG.md:1662 0f3961e8ffe64357b22fb81e60abcb12
 msgid "COWI Gade foto named properly in Streetview module."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1129 0c7a412013854e2ca401b12edffc3d36
+#: ../../../CHANGELOG.md:1663 58642ed26022425ca97a94274cd1226f
 msgid "A lot of fixes in the Editor module."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1132 9c034a1aab234402a44209a24c6ff204
+#: ../../../CHANGELOG.md:1666 33c9fe1efb754060ab50894dc0047ac0
 msgid "[2020.12.0] - 2020-8-12"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1138 e4a6951ce3ac4b60969d73380223cf84
+#: ../../../CHANGELOG.md:1672 d94cb65c92084753acf05297f8f46f2d
 msgid ""
 "The standard template for feature info is changed, so empty fields are "
 "omitted. It's now: .. code-block:: handlebars"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1147 0bbcece4624447b3aaa73fde3f8bd83d
+#: ../../../CHANGELOG.md:1681 025a006a17f040d6b9e1a4b694043e18
 msgid "<div class=\"vidi-popup-content\">"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1142 e626c9eb84b249c6b18de50fb92b58ba
+#: ../../../CHANGELOG.md:1676 9e7449a195034c3597500bdb09c61630
 msgid ""
 "<h3 class=\"popup-title\">{{_vidi_content.title}}</h3> "
 "{{#_vidi_content.fields}}"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1145 094f89299f644b85a04af8aa4db508fe
+#: ../../../CHANGELOG.md:1679 3312864175634e5a942d073abd02f671
 msgid "{{#if value}}"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1145 2a8585b86db74a49abdd45b557473dd3
+#: ../../../CHANGELOG.md:1679 c1494de3adf448e99f494cb74d97c5de
+#, python-brace-format
 msgid ""
 "<h4>{{title}}</h4> <p {{#if "
 "type}}class=\"{{type}}\"{{/if}}>{{{value}}}</p>"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1147 6533bc812c8447e196a6694bc3aea89b
+#: ../../../CHANGELOG.md:1681 ecd3718388ef4fa39886ba351f977e99
 msgid "{{/if}}"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1148 6ce944b850ec4b4296d43d96b20e4c1d
+#: ../../../CHANGELOG.md:1682 dd176b639bf749ab8d576454675d785a
 msgid "{{/_vidi_content.fields}}"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1149 c2264952bc4044bcaeb13050f2bd9fde
+#: ../../../CHANGELOG.md:1683 befb66ec77854e928819511668738c86
 msgid "</div>"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1155 7c2bafb553194d64becdd84ac2240909
+#: ../../../CHANGELOG.md:1689 cfe0a0c406a94060b914c53484024be9
 msgid ""
 "``searchConfig.placeholderText`` added to config, so the search "
 "placeholder can be customized."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1156 51c35ddaf4cf412fb094288df7ad12a5
+#: ../../../CHANGELOG.md:1690 6c15560a9a1940e5bc86905ee715c6c2
 msgid ""
 "A callback function can now be added to interval reload of vector layers."
 " The callback will be fires when layer changes. Meta option is "
 "``reload_callback``\\ : .. code-block:: javascript"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1159 39cd2d8964d241d987665237be800f11
+#: ../../../CHANGELOG.md:1693 d1f777ff2ec246bab4e929a83a2cce51
 msgid ""
 "function(store, map) { var audio = new "
 "Audio('https://ccrma.stanford.edu/~jos/mp3/gtr-nylon22.mp3'); "
 "audio.play(); var latest; store.geoJsonLayer.eachLayer(function (layer) {"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1164 ec13caaa35364b538f60000b9797b291
+#: ../../../CHANGELOG.md:1698 2da7571afdfc4ffeba65db72b16bb9ee
 msgid "latest = layer"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1165 50956d36bbc74ea69968e3034da96ebe
+#: ../../../CHANGELOG.md:1699 be8b639418de46eaae4a7c62159b0e69
 msgid "}) map.setView(latest.getLatLng(), 18) }"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1169 7b22e72698774a738d8d6eef58641de3
+#: ../../../CHANGELOG.md:1703 67fac5b5abf94d1e98b9cdc09a2097f2
 msgid ""
 "The max zoom level when selecting a row in a layer table can be with "
 "``setmax_zoom_level_table_click``. If not set or is NaN the max zoom "
 "level will default to 17."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1175 62351df0097c454691a692b6e18935f0
+#: ../../../CHANGELOG.md:1709 f5d7f7c287844d75b7bb91ca4b39e4a8
 msgid "MapCache layers now work. Both raster and vector tiles."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1176 2d521c51636e4057aa9094af91ee5708
+#: ../../../CHANGELOG.md:1710 26cbad65634f456483872189c1c07683
 msgid ""
 "Timeout (10.000ms) on sqlStore. Feature info will now handle errors or "
 "cancels (e.g. due to timeout) on SQL requests and a \"toast\" will inform"
 " the user. If timeout happens the request will be re-tried."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1177 8eae97eaa99045b4a8af1d9180951677
+#: ../../../CHANGELOG.md:1711 fe1e30d705aa46fdab623c706864301e
 msgid ""
 "``crossMultiSelect`` will always show vector feature info if a "
 "simultaneous raster SQL request fails or timeouts."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1178 627626999f72472bb052f82379af8ced
+#: ../../../CHANGELOG.md:1712 262e8ec1ced94b45ad9bd8138efa86af
 msgid "Memory leak fixed when reloading vector layers."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1179 9b754a1b59454ee3b7e5593ae8a1cd66
+#: ../../../CHANGELOG.md:1713 15d57868caed4d06a50a2816f73d351e
 msgid ""
 "Interval reload of vector layers are now done with the ``load`` method "
 "instead of switching the layer off and on."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1180 668e4ad00e904a178d14112078bbc03c
+#: ../../../CHANGELOG.md:1714 c2dd4f81f7e44e4fbee9c89eebd5edf5
 msgid ""
 "Update of interval reloaded vector layers happens only if data has "
 "changed."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1181 f4436a88e17e42088f203d43cf00936a
+#: ../../../CHANGELOG.md:1715 41fd01d6ad56412fbff8af00e0406226
 msgid "Use native URL API instead of uriJs module."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1182 f49ace34d4d748678d3e21b34b7be824
+#: ../../../CHANGELOG.md:1716 d784efcd1d1c47cd89e224c29d2f63e5
 msgid ""
 "Still resolve promise in ``localforage.setItem``\\ , to avoid a "
 "net:ERR_FAILED in the browser when e.g. getting feature info. The issue "
 "about error on setItem persist."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1183 d1a276145a1b4c1281ba0d2e70697f40
+#: ../../../CHANGELOG.md:1717 1adfb407365744efbcc5d9ca71c1f090
 msgid "Some fixes regarding Internet Explorer."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1186 90e214ec46dc4297a0eeb4bdcb8b21d0
+#: ../../../CHANGELOG.md:1720 1691a9928c0e436b8b83ebfb8c23b878
 msgid "[2020.11.0] - 2020-18-11"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1192 5ed03d73afbe421f8aa73e1923da4d2d
+#: ../../../CHANGELOG.md:1726 3857c6fef8974bb98ebf08ac2d54c97a
 msgid ""
 "The awesome Leaflet plugin Leaflet.markercluster is added, so by setting "
 "the meta property ``use_clustering`` to ``true`` clustering can be "
@@ -2035,21 +2744,21 @@ msgid ""
 "Leaflet.markercluster is available for now."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1193 30a0561805fa466e9452a2ffe56eb5b7
+#: ../../../CHANGELOG.md:1727 e0a01ae936454a658e473840e50c82da
 msgid ""
 "With the ``cssFiles`` config it's possible to load external css file from"
 " the ``configUrl``. E.g.: .. code-block:: json"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1196 159f48fcde9147f0b3b836278fb637c3
+#: ../../../CHANGELOG.md:1730 86053a606d8c4b95a277a043c9e21f39
 msgid "{ \"cssFiles\": ["
 msgstr ""
 
-#: ../../../CHANGELOG.md:1198 36ef265b43f84e0f9eb0a29c179fc885
+#: ../../../CHANGELOG.md:1732 1b91c0351b974278a64f67bbcd5c8eba
 msgid "\"myStyles1.css\", \"myStyles2.css\""
 msgstr ""
 
-#: ../../../CHANGELOG.md:1203 7603928c52384f2e990129fb6f9042ee
+#: ../../../CHANGELOG.md:1737 2e59cdae68514a17b0f1e16dd83f3415
 msgid ""
 "Conflict is now using ``sqlQuery.js`` to show info-click result. So now "
 "are multiple results possible. The ``sqlQuery.js`` module now has a "
@@ -2057,99 +2766,99 @@ msgid ""
 " selecting a row."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1204 8a5b71bd3c7d4a2085e75c06b8e1ca96
+#: ../../../CHANGELOG.md:1738 a07433b3afad4a58abc766240cace33a
 msgid ""
 "New config setting ``dontUseAdvancedBaseLayerSwitcher`` which will "
 "disable the 'Display two layers at once' option in the base layer "
 "switcher."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1205 48f170a16a8e467cbbb6e5f6a740bd4c
+#: ../../../CHANGELOG.md:1739 fcf55fe154f4428cae5091e69586e804
 msgid ""
 "New GC2 Meta properties ``select_function`` which adds an onSelect "
 "callback to the result list in click-for-info."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1206 6aa8271175104d8fb39dc8089ad3ba82
+#: ../../../CHANGELOG.md:1740 57fb2a3fa6924568bc2817cee08d8c50
 msgid ""
 "It now possible to render an image carousel in popups from a click-for-"
 "info. Create a JSON field with a value like this and set Content to "
 "Image: .. code-block:: json"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1211 aa4169ef1d934ca2966448e1042067a7
+#: ../../../CHANGELOG.md:1745 c6d53a24349e44d5ae5c32b7237a4fed
 msgid "\"src\": \"https://image1.jpeg\", \"att\": \"It's an image!\""
 msgstr ""
 
-#: ../../../CHANGELOG.md:1215 a5391803b51e4d32984eb28f9c696e5c
+#: ../../../CHANGELOG.md:1749 b1d60bf53aa14d968ff499a1c2f03ee1
 msgid "\"src\": \"https://image1.jpeg\", \"att\": \"It's another image!!\""
 msgstr ""
 
-#: ../../../CHANGELOG.md:1220 cad043f86bf34ca79867e79bba8dda9e
+#: ../../../CHANGELOG.md:1754 f8e3a3fc68a04e38b132671cd3eb8848
 msgid ""
 "URL's can now be ignored for caching in Service Worker by using the "
 "``urlsIgnoredForCaching`` setting in ``config/config.js``. This setting "
 "can only be set in build time. E.g.: .. code-block:: json"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1227 a68ffa3f3358475080fe7780288fec32
+#: ../../../CHANGELOG.md:1761 86029aebd683403289dfe166f57902a0
 msgid "\"urlsIgnoredForCaching\": ["
 msgstr ""
 
-#: ../../../CHANGELOG.md:1226 b79c30c40a3448938ad8117ceee9a091
+#: ../../../CHANGELOG.md:1760 1938ead37e2946c2b7605034fa35eea7
 msgid "\"regExp\": true, \"requested\": \"part_of_the_url\""
 msgstr ""
 
-#: ../../../CHANGELOG.md:1232 80aa536bc80d4cf7b99d53ce32e94255
+#: ../../../CHANGELOG.md:1766 bc8136e5c31b4528815fcef44b92583f
 msgid ""
 "Print setup can now be \"sticky\" (by using the state module), so it will"
 " not reset when re-activating the module. Stickiness can be toggled and "
 "off. Off is default."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1233 823511ac600e468db37022dd14b3a624
+#: ../../../CHANGELOG.md:1767 2a053f6cc7404982a6a4121abd692520
 msgid ""
 "Print setup is now stored in state snapshots. After state snapshot is "
 "activated the print setup will use the stored settings. The sticky toggle"
 " must be set to on or else the default print settings will be used."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1234 0314bbfdd6ab4dc2a5f945cec68e7087
+#: ../../../CHANGELOG.md:1768 be92abe4073e41d9b9b80163e1c3a463
 msgid ""
 "New print API ``/api/print/[database]/?state=[state id]`` which will "
 "return the stored print from a snapshot as PNG (PDF is coming). The print"
 " will be created on the fly."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1235 16db196e6fff438293b128f435bdebdd
+#: ../../../CHANGELOG.md:1769 811c5bece9db454698e3a99c36fa3185
 msgid ""
 "``embed.js`` has two new attributes: ``data-vidi-use-config`` and ``data-"
 "vidi-use-schema``. These will trigger the use of schema and/or config "
 "from the token if present."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1236 9043553d5d7449cf8b37a54c07bafd15
+#: ../../../CHANGELOG.md:1770 2cf28b2b2de24e1ebea3f5b2eff4efae
 msgid ""
 "New GC2 Meta property which automatically can open a layer tool when the "
 "layer is switched on:"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1238 4cd733ca7ed74f4499670048cbb3e8fc
+#: ../../../CHANGELOG.md:1772 ae9faa93a2e54dcf9695b2973fdbc4c3
 msgid ""
 "*default_open_tools*\\ : JSON array with tools to open. Available "
 "options: ``[\"filters\",\"opacity\",\"load-strategy\",\"search\"]`` "
 "(\"table\" are not supported)"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1240 82c7be55eda5481da455ebf1410910d6
+#: ../../../CHANGELOG.md:1774 83ceb29e0e6d4ae08eee036d9993a871
 msgid "New GC2 Meta properties:"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1242 b697826f870d4136aca53299968be2da
+#: ../../../CHANGELOG.md:1776 68ee54289445420abeac941bb938f15b
 msgid "*disable_check_box*\\ : boolean, disables the layer check box:"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1244 bfb267f29e0148b18bd24eb5c1bb5f78
+#: ../../../CHANGELOG.md:1778 629b1854395a4fad8cbef72a1703ebdf
 msgid ""
 "When filtering a layer all its child layers with this property set to "
 "true will have their check boxes enabled. And when the filters are "
@@ -2157,57 +2866,57 @@ msgid ""
 "boxes disabled again."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1245 8994286be9734516b948e2e9516bfe8b
+#: ../../../CHANGELOG.md:1779 4d555f9f61f64ba3a83ccf75872fe140
 msgid ""
 "This makes it possible to setup child layers, which can only be viewed "
 "when filtered by its parent layer."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1247 d489c9f624e346ee9a9fbc9aa6a80ad8
+#: ../../../CHANGELOG.md:1781 eb182853aa1e4366b5b4e5c1a07151b9
 msgid "*filter_immutable*\\ : boolean, makes the filter setup immutable."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1249 8e955a882314491f980540507ffdf7da
+#: ../../../CHANGELOG.md:1783 d94f1914fab14c7498344420f76fa47e
 msgid ""
 "Then set, the arbitrary filter setup can't be changes. Only values can. "
 "Should be used together with ``filter_config``."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1251 4e42e00a6135488d9e7b053e3293c975
+#: ../../../CHANGELOG.md:1785 ac1d603ff1a34a31b17dfe68e1893e81
 msgid ""
 "*reload_interval* integer, set a reload interval for vector layers. Can "
 "be used to autoload fresh data from live data sources. Units are "
 "milliseconds."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1252 34c1510bc68d408bacb63eff8cac3c72
+#: ../../../CHANGELOG.md:1786 8d59c6cb3a324c8196ba2c77b5664cb3
 msgid ""
 "*show_table_on_side*\\ : boolean, render the vector list of the layer in "
 "an injected element with id ``vector-side-table``\\ , so you get a map "
 "and list side-by-side."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1253 65a0e266a78f4876a0aee2ffd1ce89f5
+#: ../../../CHANGELOG.md:1787 5347af83308441a89091f52ac4323bc5
 msgid ""
 "*zoom_on_table_click*\\ : boolean, whether the map should zoom to vector "
 "feature or not when clicked in table. Is set on both vector layer tables "
 "and feature info result tables."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1255 fb0fe8e710fe4ba391e34bf78748ef88
+#: ../../../CHANGELOG.md:1789 aea25df9674b40499561bc71f8bd4d0e
 msgid ""
 "A Reset filter button is added, which will reset the filter to the "
 "original state."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1256 7745c8dea19840da859c185074341843
+#: ../../../CHANGELOG.md:1790 00669e85e04e4952a2afea66f505c8a6
 msgid ""
 "The ``infoClickCursorStyle`` setting will set cursor style when using "
 "feature info click. Can be set to ``pointer`` or ``crosshair``. The "
 "setting can be set in ``config/config.js`` or in a runtime config."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1257 1f0f0ad7f4444fae8a12c432088aeede
+#: ../../../CHANGELOG.md:1791 ad8fbf14e92d4fa4a967c08020fd51b9
 msgid ""
 "New Autocomplete control in filters. The control will fetch distinct "
 "values from PostgreSQL for use in the autocomplete field. All distinct "
@@ -2216,7 +2925,7 @@ msgid ""
 "tab."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1258 c54f46313f0747a8b985702f491a0cf3
+#: ../../../CHANGELOG.md:1792 cef361c77bf14cf78c1a8ee41087739b
 msgid ""
 "The attribute ``data-vidi-host`` is added to ``embed.js``\\ , so it's "
 "possible to override the host from the token. This makes it possible to "
@@ -2224,24 +2933,24 @@ msgid ""
 "internal/external setups."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1259 c312aa2ba6b84c7ab88995607c53f486
+#: ../../../CHANGELOG.md:1793 314fed0da037456786584e841b3ae44b
 msgid ""
 "The Coordinate module now has a Pan To input field. The user can input a "
 "coordinate in the chosen system and the map will pan to the point."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1260 4995b16d2c23460088e0d0d10f40120c
+#: ../../../CHANGELOG.md:1794 72c1056572254c10891a95baba1de66d
 msgid "Modules now has title headings."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1261 78602c11095f4cbdbfd56c48cb968c00
+#: ../../../CHANGELOG.md:1795 8b7a2da4490e4d0da8939e7d87a6df18
 msgid ""
 "Added boolean config ``vectorMultiSelect`` in ``config/config.js``. This "
 "will enable multi select on vector layers. Works cross layer too. Can be "
 "set in runtime config."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1262 d46ad3f3f62c4650b4507f293455ba9b
+#: ../../../CHANGELOG.md:1796 bdb181091abe4d07a87a50fa6d78e6d8
 msgid ""
 "Added boolean config ``featureInfoTableOnMap`` in ``config/config.js``. "
 "This is a shortcut to set ``info_template``\\ , ``info_element_selector``"
@@ -2249,20 +2958,20 @@ msgid ""
 "instead of the right slide panel. Great for the ``embed.tmpl``"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1263 f9349a004959455caa5fd370ea9b59fd
+#: ../../../CHANGELOG.md:1797 5a1888f1a5594053b3e6e523f92ff778
 msgid ""
 "New button \"Fit bounds to filter\" in layer filters, which will set the "
 "view extent to the bounds of the filtered layer."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1264 1c37588d3bee47da98e8a7021f640f7f
+#: ../../../CHANGELOG.md:1798 c8f3febdb74e4fe181471db28fe92bae
 msgid ""
 "New \"Labels\" panel for raster tile layers with a checkbox for "
 "hiding/showing labels on the layer. Works for both MapServer and QGIS "
 "back-end (GC2 must support this)."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1265 ce826fc5b85c465eaa1d57b12a8ecb23
+#: ../../../CHANGELOG.md:1799 d742d84c9c2b4afa885fdedbcb915cec
 msgid ""
 "Added boolean config ``crossMultiSelect`` in ``config/config.js``. This "
 "will enable cross multi select on both vector and raster tile layers. "
@@ -2274,13 +2983,13 @@ msgid ""
 "config."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1266 c12ca7944ccc4dd7b943e3b35a3090d9
+#: ../../../CHANGELOG.md:1800 fc74e35d36854dcea9e2981d54c959c0
 msgid ""
 "WMS layers can now be added directly as base layers. A WMS base layer "
 "example: .. code-block:: json"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1270 1c671d503d714259ab25773f7a366104
+#: ../../../CHANGELOG.md:1804 394f41958ac147f7a3dcae06a8884bd4
 msgid ""
 "\"type\": \"wms\", \"url\": "
 "\"https://services.kortforsyningen.dk/service?SERVICENAME=forvaltning2&\","
@@ -2290,13 +2999,14 @@ msgid ""
 " 4, \"maxZoom\": 22, \"maxNativeZoom\": 22"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1282 dea96a06d0444ef6ae19739ae96d10f8
+#: ../../../CHANGELOG.md:1816 6fddbaee4b4848f487f84bd56aa92802
 msgid ""
 "XYZ layer can be added as base layer like this (old feature but was "
 "undocumented and buggy): .. code-block:: json"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1286 bcaaba058f414c3d8f7aacf421356882
+#: ../../../CHANGELOG.md:1820 6c87f9f2ef034a1a81c4417bc54a5f64
+#, python-brace-format
 msgid ""
 "\"type\": \"XYZ\", \"url\": "
 "\"https://m3.mapserver.mapy.cz/base-m/{z}-{x}-{y}?s=0.3&dm=Luminosity\", "
@@ -2305,66 +3015,66 @@ msgid ""
 "\"maxNativeZoom\": 19"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1301 c1a76bb5d52d4360902d9c3c23c65865
+#: ../../../CHANGELOG.md:1835 b9e78ccb32ea475d8d72456a8d5de087
 msgid ""
 "``public\\js\\vidi.js``\\ is now required instead of loaded in a script "
 "tag. This way it's transpiled and can contain new JavaScript syntax."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1303 59f79f59ecba4b4fbc2f2dafe7cb82a2
+#: ../../../CHANGELOG.md:1837 a2382a702c7147e6b0edf50ac735d600
 msgid "A lot of improvements in the ``conflictSearch`` module:"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1306 a3dfbd235d4946d9b9e9036034be735f
+#: ../../../CHANGELOG.md:1840 2ddd7a16f47b4e379e759fa292403ab8
 msgid ""
 "Results are now alpha sorted within layers groups (which is also sorted)."
 " Both in web and PDF."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1307 ade3f72b2ad3407092d23d137ec3d9f4
+#: ../../../CHANGELOG.md:1841 187b0cb458d84a25bd5f14803ca33914
 msgid ""
 "A short and long description can be added for each layer, which is shown "
 "the result list. Use GC2 Meta properties: ``short_conflict_meta_desc "
 "and``\\ long_conflict_meta_desc`."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1308 888d54c0616c463bad0f4bf122380150
+#: ../../../CHANGELOG.md:1842 046809e19f1d4e12ade4e2eaca7f18aa
 msgid ""
 "The styling of both web and PDF results is better. Tables can't overflow "
 "the PDF page."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1309 7229d3b5c3d14dbe80259e620fdf7308
+#: ../../../CHANGELOG.md:1843 b229e91eb28d4e92a8d18b848aec88bd
 msgid ""
 "Ellipsis is used both in web and PDF when fields names / results are too "
 "long."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1310 793fc2a82cd64377a0ebf02856977779
+#: ../../../CHANGELOG.md:1844 1c7b12bca89b47a9a5ac9067f002b06b
 msgid "Empty link fields will now just be blank."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1311 5896734e30824397a23d26a9ec4a5164
+#: ../../../CHANGELOG.md:1845 1e91d778c1b54ea1b99fd1e16bb34eaf
 msgid ""
 "Layers with only one report column will be printed as a ``|`` separated "
 "string and not a table with one column."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1312 d13b6fcbede146b4a9e75dd37f8ffee0
+#: ../../../CHANGELOG.md:1846 053c158080f74b1ba1f95f8ae73faa5d
 msgid "New button for setting the print extent before creating a PDF."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1313 7c1853e78cb644aeaff7966c10f90aa3
+#: ../../../CHANGELOG.md:1847 5eb09301db5b4f9c8be71d1169ca4cc9
 msgid "Mouse click when releasing a rectangle/circle drag is suppressed."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1314 01d3c399fdbc4d5aaa97c6516f14b8d2
+#: ../../../CHANGELOG.md:1848 e942ae83aecb4feeaa6a74af394700e9
 msgid ""
 "Multiple results from a Select-Object-To-Search-With is now possible. The"
 " standard ``sqlQuery`` is used to create list."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1317 395cf8d5cc614a3f80d4a1c8d238597a
+#: ../../../CHANGELOG.md:1851 d3b9e886ff134b92ba251be6af8eafe4
 msgid ""
 "Indicator in layer tree showing if a tile layer (MapServer or QGIS "
 "Server) is visible in the view extent. The Leaflet layer canvas element "
@@ -2374,19 +3084,19 @@ msgid ""
 "payload like this:"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1326 d0f05348085b4f5aa82ee994a7871e85
+#: ../../../CHANGELOG.md:1860 5c2c0e990e824573950437d18c915e0c
 msgid ""
 "Handlebars are now use instead of Mustache for rendering click-for-info "
 "templates. Handlebars is more feature rich than Mustache."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1327 c5c465742e35469a803a4fb1e3177f4c
+#: ../../../CHANGELOG.md:1861 21fc0d3f43c9493f9fdbc15d08d0f820
 msgid ""
 "The load screen is now being dismissed on ``ready:meta`` instead of "
 "``allDoneLoading:layers``. This makes the application interactive sooner."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1328 3a06b54a54d947e6abc318da30f5990a
+#: ../../../CHANGELOG.md:1862 4cadddc89a40481c961bd62650e3f7a6
 msgid ""
 "Predefined filters are now processes as one string. Instead of sending "
 "something like this ``[\"foo=1\",\"foo=2\"]`` to GC2, it is now "
@@ -2396,13 +3106,13 @@ msgid ""
 " the operator between the predefined and arbitrary filters."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1329 1934d16ac75e4c9a894aac04fa11cf43
+#: ../../../CHANGELOG.md:1863 fec43f2e44bd4684af19449a6e80e2de
 msgid ""
 "The filters from the layer tree are now set on the Click-For-Info module,"
 " so you only get filtered hits."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1330 9aa8e5eaaf9e4841a78454106a5a01d3
+#: ../../../CHANGELOG.md:1864 e2975972b2a04f61b9e1840a565aad04
 msgid ""
 "The applied filters will now be shown as a WHERE clause in an Ace editor "
 "under the filter widgets. It's possible to mutate the clause and apply "
@@ -2410,44 +3120,44 @@ msgid ""
 " until the editor is disabled. All filters settings are stored in state."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1331 f106e79f1ec247b4b5984abcc6a35315
+#: ../../../CHANGELOG.md:1865 94b8936d367647e2bf762f4a515c240a
 msgid "In arbitrary filters, the field alias is now being used if set."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1332 aa007b709a104981bc36eedec540110d
+#: ../../../CHANGELOG.md:1866 737a609b6d184b4cb5766ead76d90acf
 msgid ""
 "Limits for puppeteer processes can now be set with this in "
 "``config/config.js``\\ : .. code-block:: json"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1335 0a6de69c35ed43e0989f504763273143
+#: ../../../CHANGELOG.md:1869 e90a34de3c6547cc8fc2d05fa8f0cfed
 msgid "{ \"puppeteerProcesses\": {"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1337 24ff5f35497a4b6ca844a52e809a15f3
+#: ../../../CHANGELOG.md:1871 68b8e19c0ea744d2a1ead9f71be7f9e4
 msgid "\"min\": 1, \"max\": 5"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1342 efa870940afe4cb38e8161bc21cfeb04
+#: ../../../CHANGELOG.md:1876 6ab8fd57d1944133830a1ab1c365b5ea
 msgid ""
 "The ``Enable filtering`` property of the Structure tab in GC2 is now "
 "called ``Disable filtering`` and will if check omit the field in Vidi "
 "filtering. The property was not used before."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1343 475ebbaf9d724fb3a892e0819a84d902
+#: ../../../CHANGELOG.md:1877 aecbca8450b1414582f393dd280ee58e
 msgid "Babel bumped to version 7"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1344 abbc98a371b7474583de6dae12adeff4
+#: ../../../CHANGELOG.md:1878 5a9af969bf25400b9cfaa5075e9168bc
 msgid "Local GC2 config files are now fetched through the server back-end."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1345 4f946c452c084d41b1996c1a26280a66
+#: ../../../CHANGELOG.md:1879 448d0db1fc6a431f943995f6307e50de
 msgid "``embed.tmpl`` will now show login button if session module is enabled."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1346 fb4b66c93b064d34a5024f01c21c219a
+#: ../../../CHANGELOG.md:1880 f23642ab1f494611bf6bb77370274ffc
 msgid ""
 "The WMS requests now has a ``qgs`` parameter for QGIS backed layers. The "
 "value is path to the qgs file for the layer (base64 encoded). In GC2 the "
@@ -2455,33 +3165,33 @@ msgid ""
 "cascading it through MapServer."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1347 049717bc64ea484c9c80f87c09290486
+#: ../../../CHANGELOG.md:1881 74e84d4000414723b8b3a573508edfc4
 msgid ""
 "Raster tile layers without pixels (invisible in the map) are now not "
 "queried by feature info."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1348 26f799d6ea1742e7b5718673072d8529
+#: ../../../CHANGELOG.md:1882 73dfe8af73ac461f9402c2ee7eb38741
 msgid ""
 "Turning on a vector layer will now load the legend of the raster tile "
 "representation of the layer"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1354 98a83d1def49402793c8fe8848e0153a
+#: ../../../CHANGELOG.md:1888 3e4fb42247c44ee8a87d3f3d0e8f88e6
 msgid ""
 "Using ``indexOf`` instead of ``includes``\\ , because the latter is not "
 "transpiled in Babel. It's an Internet Explorer issue."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1355 9c7aa077915347d6999aa7c0955efc5d
+#: ../../../CHANGELOG.md:1889 487a6c7e6b9c4d179197c0fc0a529026
 msgid "``embed.js`` now works in IE11."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1356 a52cd139a7dc48f189493a580de0a702
+#: ../../../CHANGELOG.md:1890 a08e75c0ec7342c3b770c7661e14e299
 msgid "Accept 'da' locale in request headers. Only da-DK worked so far."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1357 f35dee587cb04992abde88a57dc43970
+#: ../../../CHANGELOG.md:1891 78ffe516efc843eb80c74f6f30d1e310
 msgid ""
 "If the Service Worker doesn't get registered when Vidi will now start "
 "anyways without the Service Worker. On a hard refresh (Ctrl-f5) the "
@@ -2489,64 +3199,64 @@ msgid ""
 "unregister Service Worker, but the cache will be deleted."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1358 0933cfb438984c279cf5feb6e228cd86
+#: ../../../CHANGELOG.md:1892 51475219a0a84c6892e01435ef54640d
 msgid "Text in editor is now url encoded."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1359 3ffd7a85c9304ca4a02cee8031ff54ad
+#: ../../../CHANGELOG.md:1893 28c253a4d641432a918af60531db5067
 msgid "Quotes are now escaped for text in the editor."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1360 b3658184760640b7868dfe3c8fa682e3
+#: ../../../CHANGELOG.md:1894 961cb2b0b97548989ef452e7ad38bb1b
 msgid "All numeric Postgres types are now handled correct in the editor."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1361 f72a46a501dc43a4b247f6ed1b756521
+#: ../../../CHANGELOG.md:1895 062bf5b20c7741d3b18674db1d512311
 msgid ""
 "Puppeteer processes are now destroyed, if an exception is thrown during "
 "print. This prevents leak of processes."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1362 5a45cf98483e46a092961edc0cf076e8
+#: ../../../CHANGELOG.md:1896 c082e1d0f2ff41ba90fd50fc2a6174aa
 msgid ""
 "Re-acquirement of a Puppeteer process is done if timeout, so the print "
 "will eventual be finished."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1363 e052099fea67497e92d0e7b3ce632586
+#: ../../../CHANGELOG.md:1897 141e5c015c3a49a6bfd28c2ef678aaee
 msgid ""
 "Puppeteer processes will be destroyed after 60 seconds. This prevents "
 "hanging processes, which blocks further prints."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1366 db2d377395504d9abef6155b8ebd516f
+#: ../../../CHANGELOG.md:1900 3545daf181e5413a85b225ff9aba5908
 msgid "[2020.2.0]"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1372 40fce81d0823400888701cbc214e1ee4
+#: ../../../CHANGELOG.md:1906 121dbe47379d4cca8cffdfc00e136602
 msgid "Custom user data from GC2 is now added to session the object."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1373 ec8073eed3254f66835ae42815461950
+#: ../../../CHANGELOG.md:1907 1e8cc15a42224d02b9afd5832b880b28
 msgid "Handling of invalid JSON configs."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1379 66696c01afef4c2f903197c931eab3ab
+#: ../../../CHANGELOG.md:1913 d6e5afeeba434fe2b481088c0ecee2a9
 msgid "CalVer is now used with month identifier like this: YYYY.MM.Minor.Modifier"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1380 5118b68663f64d55ab34cc59edcb2f07
+#: ../../../CHANGELOG.md:1914 5591dcf19b974058a617fefef1b36e7e
 msgid "Custom searches can now be added to danish search module."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1381 d695c32677f0400b995a318797706f4e
+#: ../../../CHANGELOG.md:1915 c7460b25ff6548709da9e338aec92619
 msgid ""
 "``embed.js`` will wait with loading Vidi until target element is visible "
 "in the DOM. This way, Vidi can be embedded in a element with "
 "``display:none``."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1383 2749f82ac1714304821271856d65d5d3
+#: ../../../CHANGELOG.md:1917 8cc2c8c03c35416696a26c098a9f66a5
 msgid ""
 "Its now possible to add custom extra searches to ``danish.js``. A search "
 "needs an Elasticsearch index, which must have an id and string property. "
@@ -2554,309 +3264,309 @@ msgid ""
 "geometries is required. An example of a setup:"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1414 c2f7957e8b1d48b3956aefa38b866641
+#: ../../../CHANGELOG.md:1959 8a351acbf07544929a7107b369cbf679
 msgid ""
 "New GC2 Meta properties which controls the info pop-up and styling of "
 "vector layers:"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1417 0b2778d9e94f4315a704261d92fc8948
+#: ../../../CHANGELOG.md:1962 9c29b45d6ffc4d89a7b8b53ea4bf33fd
 msgid "*info_template*\\ : Mustache template for use in pop-up."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1418 df35d969079c4b9ba7bb6252f62a3af0
+#: ../../../CHANGELOG.md:1963 e941d74c9042439da6f037cac4c57a38
 msgid ""
 "*info_element_selector*\\ : Which element to render info template in? "
 "Defaults to pop-up."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1419 7cedce7e99ec44d48cb246baac7ece56
+#: ../../../CHANGELOG.md:1964 0db6605df1d448dab62d8390f7e5a321
 msgid ""
 "*info_function*\\ : Function which is run when clicking on a vector "
 "feature. Takes five args: feature (Leaflet), layer (Leaflet), layer key "
 "(Vidi), SQL store (Vidi) and map (Leaflet)."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1420 ca7731f4cd79416ba15de50e56cd84ea
+#: ../../../CHANGELOG.md:1965 63535b82a7094cf28a196c75139068b6
 msgid "*point_to_layer*\\ : Leaflet pointToLayer function."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1421 fd1d14875ce04ebaab8b9f2dc503931c
+#: ../../../CHANGELOG.md:1966 70ff3aba7fc140059855f633edf9ff63
 msgid "*vector_style*\\ : Leaflet vector styling function."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1424 2865997f1efe468db6cf75269d5cc252
+#: ../../../CHANGELOG.md:1969 0e5676e41a3c4416a799e3c12bd5a84a
 msgid ""
 "The help buttons now work like toggles, so a second click will close the "
 "help box."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1430 1f61cdb5609e431fb5b5ff3a9b57ef2d
+#: ../../../CHANGELOG.md:1975 6a40ceebff784759ad176b33f8579c1a
 msgid "Handling of invalid JSON configs, so Node doesn't crash."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1433 366a40e403204afda288ed5c8857e144
+#: ../../../CHANGELOG.md:1978 54705c80f8544690b71575e4f02f6a09
 msgid "[2019.1.0] - 2019-20-12"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1439 2d47f9c4bdb345758cd8f3cd771e7312
+#: ../../../CHANGELOG.md:1984 e40a2b7cd0cc4346ae0918d3d632a5dc
 msgid ""
 "Implemented a generic pool for puppeteer processes, so there is always a "
 "warm chromium browser ready for print."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1440 0960946875664b5590a322610cad913c
+#: ../../../CHANGELOG.md:1985 8537748c05e246d38774cbc989b0056f
 msgid ""
 "Node clustering implemented with default count of workers, which is the "
 "cpu core count."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1441 7aadfafe8d1b4e4396315e9f9ff72f95
+#: ../../../CHANGELOG.md:1986 2f038288db46456ea1b41ea2e7af9049
 msgid "Sticky sessions implemented so Socket.io works with clustering."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1442 7f21c971c9d34e0fbca0156b068f58f6
+#: ../../../CHANGELOG.md:1987 c6af7681c876479f927bc09f7103222a
 msgid ""
 "Redis added as storage for sessions. Just set ``redisHost`` in "
 "``config/config.js``. If not set then file storage will be used."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1448 020918acfbcc4810bc27f3a02f9a0989
+#: ../../../CHANGELOG.md:1993 a541443f174a4520b30eb5b87f5bef4a
 msgid "A lot of optimization of Javascript code. Code that can is lazy loaded."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1449 56d38eb7cfb64ea1a665b8416838f730
+#: ../../../CHANGELOG.md:1994 fedd9a38611b4e419440d16fd379cfc2
 msgid "The server is now using gzip compression."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1450 5f8ddc2e57bc40cf82642d1a2bdc5f88
+#: ../../../CHANGELOG.md:1995 ba478dff0773461ea6cc1932eae75953
 msgid ""
 "Meets the requirements for a Progressive Web App (PWA) according to "
 "Google Lighthouse."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1456 18ad4551b4774a6db7c1a8203665cec3
+#: ../../../CHANGELOG.md:2001 cd5a6119a65f4376a7e46c3e4ccf8a1c
 msgid "The startup message set by ``startUpModal`` is ever shown in print."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1457 6f48ccdebcc34997a0d715bf6d00a0dc
+#: ../../../CHANGELOG.md:2002 59c7b2bb367547248fdec9068950c483
 msgid "Images in pop-ups will now open in new tab when using Chrome."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1460 657037fa52d945f1b829ca044b1d3731
+#: ../../../CHANGELOG.md:2005 9ff52f2dd6714e2ca22c09687a17cafb
 msgid "[2019.1.0.rc3] - 2019-06-11"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1466 251aae1da7274d00b3324575ea42a2bd
+#: ../../../CHANGELOG.md:2011 e9ee7569e2c140018fb30ff18bc22dcb
 msgid ""
 "Embed script for easy embedding of Vidi in web pages using a snap-shot "
 "token."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1467 64dda6bb516a45f7a5b53eb935fb6028
+#: ../../../CHANGELOG.md:2012 bf1685e5336846d2b63342bc288843d9
 msgid ""
 "A corresponding UTFGrid layer is now switch on when a raster tile layer "
 "is switch on. The UTFGrid layer is providing mouse over on features. "
 "Which fields are displayed in mouse over is set in GC2 field properties."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1468 83e71defb65648d08bfb344fd0bbaace
+#: ../../../CHANGELOG.md:2013 06d46934b73d4615821c6142e8cfb07e
 msgid "Download drawings as GeoJSON."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1469 1b34250bc0e947759917ff83146a5e21
+#: ../../../CHANGELOG.md:2014 11cdf1bcba2e47d5ae6adf9da680ee64
 msgid "Comment with version in index.html"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1470 7bf4c030a3e944d6ad0ed9f91fb4b584
+#: ../../../CHANGELOG.md:2015 9a2dbf8d1009491f839474992efd6e30
 msgid ""
 "Support of time, date and datetime fields in editor. Only time will be "
 "handled in a text field."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1471 b34ba63426c0491bb830afd9c17e6056
+#: ../../../CHANGELOG.md:2016 9b06b54b23d148c68b32a50d3fb1a3cd
 msgid ""
 "Auto login. WARNING: Insecure and sets cookie with login creds. A build "
 "time setting ``autoLoginPossible`` must be set to ``true`` to make "
 "activation possible. Activation is done in:"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1473 dde4e9e71fb4406baa4044d682393f2c
+#: ../../../CHANGELOG.md:2018 c6b91f3b819247e4b7c7a215630def8c
 msgid ""
 "``extensionConfig.session.autoLogin = true`` and optional "
 "``extensionConfig.session.autoLoginMaxAge = 3600 * 1000``. The latter "
 "defaults to ``null``"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1475 5d41d67228904238a17d3bf13bfa2ea8
+#: ../../../CHANGELOG.md:2020 fe9a0419a0e74245902e79249ceae1a6
 msgid ""
 "Static Map API. Generate PNGs of state snapshot. URL to PNG is available "
 "from the Snapshot module."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1476 86d4538ef6df42a69e71e73506412bef
+#: ../../../CHANGELOG.md:2021 941cdd1b03434fbaac6dc923aecb4443
 msgid ""
 "Possible to set a welcome message by using ``startUpModal`` in a config. "
 "The user can dismiss the message by either ``Close`` or ``Close and do "
 "not show in future``. The latter choise is stored in a cookie."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1482 02030e1d75db4cf8b6039a869bedb390
+#: ../../../CHANGELOG.md:2027 3fc329a6b243450c86750b316fdd3abe
 msgid ""
 "Layers which have been switch off, will not be removed from legend (old "
 "behavior can be set in config)"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1483 b9ea4426486e4cd9b441de7af003fb96
+#: ../../../CHANGELOG.md:2028 86a9779098784809a03507b593da25c6
 msgid "No re-load of legend if its not necessary."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1484 20b2e19d51f54689adfff0716c11e6ba
+#: ../../../CHANGELOG.md:2029 f965cacfa7c04bf296aa533fe2c29e13
 msgid "``embed.tmpl`` is now a minimal template for embedding in web pages."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1485 5033f22d0e74476586c2f5a443e903eb
+#: ../../../CHANGELOG.md:2030 0400b1683f8349d4bb0572cf55077f37
 msgid ""
 "Home button on ``embed.tmpl`` will set the map to the initial extent if a"
 " snapshot-state is invoked."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1486 b19e8d379d2042f195bf3ff66531a299
+#: ../../../CHANGELOG.md:2031 8208145d14ed414892450bdc67956496
 msgid ""
 "Use file based sessions instead of memory based, so sessions can be "
 "shared between nodes in a cluster setup."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1487 a00aac5cbd4b4597aff1cffae8c0ec9d
+#: ../../../CHANGELOG.md:2032 bb380de2372a41fabb70ca74adf39863
 msgid ""
 "Standard template for pop-up can now render videos from URLs in data. Can"
 " be set up in GC2."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1488 1fa53b88e72e4702a97f9a0eb8598c71
+#: ../../../CHANGELOG.md:2033 328eefe76fbf4762a1d8e076b295bbcd
 msgid ""
 "Infinity levels in layer tree. The levels are set with the "
 "``vidi_sub_group`` Meta property in GC2 like: ``sub-group 1|sub-group 2"
 "|sub-group 3``"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1489 d5463e5b20424c6ca54700e158124e9d
+#: ../../../CHANGELOG.md:2034 f35386eb61314e00a283acfa736addc5
 msgid ""
 "Smaller padding of dynamic loaded vector layers, so less features has to "
 "be handled. Padding is set to 0.3 from 1."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1495 7d5750efd2d141b49b0e15e9d03d061e
+#: ../../../CHANGELOG.md:2040 a79276b0c3ca4b208bf5f2037b2bb88c
 msgid "Better wrapping of layer tools when side panel is narrow."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1496 3b4c08f8f760454d886c2baacf2113dc
+#: ../../../CHANGELOG.md:2041 d6cf49f3f7934757ae9e1c65891c8f04
 msgid "Snapping bugs."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1497 4ae380294e8c443c9a25be901b9a1d7f
+#: ../../../CHANGELOG.md:2042 6db415a470b9463cb6c10e2db5173610
 #, python-format
 msgid ""
 "SELECT statements like ``SELECT * FROM foo WHERE bar LIKE '%foo'`` will "
 "not longer give problems."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1498 80e34850158f4c7cb0b3557eb7be8466
+#: ../../../CHANGELOG.md:2043 c300f5e4112a476493809f48a5d82f50
 msgid "All Postgres types are now recognized in editor."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1501 c176d80e664b4f1fb450209d1599f561
+#: ../../../CHANGELOG.md:2046 a20eb28064c74f239edb09c0c9f40b2b
 msgid "[2019.1.0.rc2] - 2019-01-03"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1507 e26eff69a6e44993add3816817663e31
+#: ../../../CHANGELOG.md:2052 f9594a8afd224610826d92e0ee0baca8
 msgid "Tentative support of WebGL layer type added."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1508 fa06ea4d85fe4c2bb07fd8177deade18
+#: ../../../CHANGELOG.md:2053 eecdb504c89f40f19997dfd63067fe92
 msgid "Support of MVT base layers."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1514 85092d5b4e0b45aab01b052a92f3397a
+#: ../../../CHANGELOG.md:2059 e9e0532cc40e4a9d97e1239910720ce1
 msgid ""
 "Optimized rendering of layer tree. Implemented lazy rendering of layer "
 "groups and tools."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1515 c5b671230f9b4057b92854e1ba55d4e0
+#: ../../../CHANGELOG.md:2060 d1bd8b11523f44c383b90e53f0261e39
 msgid "Hide login button if session module is disabled."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1518 1ca69ec2f4ca4b898659914a7ed9144c
+#: ../../../CHANGELOG.md:2063 3c3be572588c4871beb182c891f05e3e
 msgid "[2019.1.0.rc1] - 2019-14-02"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1524 11614d24bdca48e19b9472a175ac4efe
+#: ../../../CHANGELOG.md:2069 7ca2da4a15a84781ac83a510aedc41d7
 msgid ""
 "Fall back mechanism for base layers. If the current base layer responses "
 "with error codes the next one is switched no."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1525 aae90241bda048c5a8738a974113653f
+#: ../../../CHANGELOG.md:2070 9d9b3452501541e2a7575ec628bbe32b
 msgid "Touch drag enabled in layer tree."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1526 4df7d2e99f9545388ca6592acf4ac017
+#: ../../../CHANGELOG.md:2071 be62c3d7cc19457e9616c54da3c3c467
 msgid ""
 "Config ``activateMainTab`` added, which tells Vidi to activate a tab on "
 "startup."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1527 76c69e64b67b4ea88cb802df80cdab43
+#: ../../../CHANGELOG.md:2072 44e6d78b67c34112bf7f40a389c593c2
 msgid "Visual grouping of map tools in GUI."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1528 05de9a3940fe479b99dbf729bdfa2292
+#: ../../../CHANGELOG.md:2073 200e444159a943d083eba2e07edd45f4
 msgid ""
 "Tentative support of Mapbox Vector Tiles (MVT). Needs latest version of "
 "GC2 with MVT support."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1529 10c8993e6f114434adbaab6901da2350
+#: ../../../CHANGELOG.md:2074 95ddd82d0578451a955134655af50947
 msgid "Cross hair cursor when info click is on."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1530 6b4ceed9b8ec4f7da31a43ccddb1b408
+#: ../../../CHANGELOG.md:2075 e661bc3bc9a6447ea7d643d77434277a
 msgid ""
 "When drawing or editing with the Editor module, snapping to other vector "
 "layers is added."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1531 2d3cc4dd6fe8421083e2c23dd500beea
+#: ../../../CHANGELOG.md:2076 3da8a430edb84a109fdeb711f969684c
 msgid "Unify filter methods for vector and tile layers."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1532 f7d70490c12c438ea19b0da716d9810b
+#: ../../../CHANGELOG.md:2077 df152e57d985408eb503f5c184825e0f
 msgid ""
 "After a query with the sqlQuery module is made, its now possible to store"
 " the query as a new \"virtual\" layer. The new layer is a vector layer, "
 "which acts like any other vector layer."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1538 ca8291629274403999f30db785c64eac
+#: ../../../CHANGELOG.md:2083 e54d974dd40a4e0da218019df5851f32
 msgid "State shots are now stored in GC2 database using the new keyvalue API."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1539 e0b8bc574a524a0689b7283df8512938
+#: ../../../CHANGELOG.md:2084 171a482d68ac4053b2b850d0612b7001
 msgid ""
 "Protected WMS layers requests result in ``401`` being routed through the "
 "WMS backend. A authentication is implemented in order to request "
 "protected WMS layers correctly."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1540 3c591c0fc4d942a4957d50eab7178e50
+#: ../../../CHANGELOG.md:2085 b9a1f0861f96443caf13e051e7b6b576
 msgid ""
 "One click activation scheme where the module is activated when clicking "
 "the Tab. All others modules will be reset. A typical module should look "
 "like this:"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1542 9ccfeb993eb141da9c228751cf1becd2
+#: ../../../CHANGELOG.md:2087 599a07acc99e4595acb76d0a4705530c
 msgid ""
 "Google API files are no longer requested locally, because things break "
 "when Google makes updates. The files are requested remotely and are not "
@@ -2865,72 +3575,72 @@ msgid ""
 "kay ``"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1565 93f37ea53d6b4e38b65fddbaa0f84e03
+#: ../../../CHANGELOG.md:2110 d1a3a94e44114700bd81c1506f76fa4c
 msgid "[2018.2.0.rc1] - 2018-07-12"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1571 9e554dafae024afbb6cd490eec2075ef
+#: ../../../CHANGELOG.md:2116 b4a70463595f4f459145af525d8b55b4
 msgid ""
 "New mode for double base-layers: Overlay base-layers, where the opacity "
 "of the top one can be changed"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1572 0dc8cdc3b21e42b192804e6ccfb007b6
+#: ../../../CHANGELOG.md:2117 1a792ee6ac674a93bc64232f80b52631
 msgid ""
 "Filters for WMS single tile layers. Predefine filters in GC2 Meta, which "
 "will be displayed as checkboxes in a layertree panel. For now only "
 "supports QGIS layers."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1578 c8543992711546bbaf0e144c97a42cd8
+#: ../../../CHANGELOG.md:2123 ca241dbd95b84749909d6b735042af3c
 msgid "Vector filters can now be applied before switching a vector layer on."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1579 71f43b3df23c413c940a1165cc101577
+#: ../../../CHANGELOG.md:2124 6bf9e78a636f498686ed8d31b5e17d7b
 msgid ""
 "Table view are moved inside the layer tree, which makes it possible to "
 "see more than one table at a time."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1580 812874e78af9476babad1ac376b4a3a7
+#: ../../../CHANGELOG.md:2125 a7289efa2569444c84935d6b32cd5c0d
 msgid "Table view clicks now pan to feature - not zooming."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1581 b7701bc1ef5547b7a52446fb2d36ff9d
+#: ../../../CHANGELOG.md:2126 1e4786cdbf464169a9f335d9a4ef1256
 msgid "Popups for raster and vectors are now similar."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1587 f2e921d47e1c475b9cfee113d1f8fa8b
+#: ../../../CHANGELOG.md:2132 aef5ade6c37c45fb987e56001348d7b1
 msgid "When clicking in a table with points, panning now works."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1588 0d86ceb2d0fd48dbb1e6a5f5a29a7fe8
+#: ../../../CHANGELOG.md:2133 b3d8e87a7ded465cb752d8db00117ebd
 msgid "Workaround missing Service Workers features in Edge 17/18."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1589 d6b2ac25dbd54c0d8946e50056b4a9ef
+#: ../../../CHANGELOG.md:2134 a99ddef0c94f46d5b8a33299dabfebcd
 msgid "Filters work in Edge 17/18."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1590 19ddea0f03824719b3aee6d10268679a
+#: ../../../CHANGELOG.md:2135 94c0bb22d36d44b286e511c0f4603545
 msgid "A lot of smaller issues were fixed."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1593 5ccfc99468284ad0a1ce156c9c7aeb39
+#: ../../../CHANGELOG.md:2138 d67d0096eca34f7fb6ea25802f6ee387
 msgid "[2018.1] - 2018-07-12"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1599 4fb57a772f1d4a88a1b4bd15bd33cd0f
+#: ../../../CHANGELOG.md:2144 9f45cf2460f84c66a0397ce9ccfaffb8
 msgid ""
 "Specific vector layers can be set to offline. If offline the cached "
 "version of the vector layer is always used. Also if browser is reloaded."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1600 5c698097499d4327a7a64cb795742181
+#: ../../../CHANGELOG.md:2145 58a8b541dee34f47828d9923d92f2b29
 msgid "Control to switch all vector layers on and off. See above."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1601 7647670e63b5439a89362592e06e027c
+#: ../../../CHANGELOG.md:2146 48c9ed4ca80f4fce97702a25a64c6779
 msgid ""
 "Vector layers can now be set to two different load strategies: Static and"
 " Dynamic. The former is default and will load the entire layer at once. "
@@ -2940,51 +3650,51 @@ msgid ""
 " or ``d``."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1602 ad2168b238124740b3543f93fb40105f
+#: ../../../CHANGELOG.md:2147 da108b6c0511451ca206f1ccf69282f6
 msgid ""
 "New map controls: Reset zoom, set previous/next extent and box-zoom. The "
 "latter now has a button, before this could only be achieved by holding "
 "shift down and drag the zoom box."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1603 aa0e6757a80c495695bbe393a23e8427
+#: ../../../CHANGELOG.md:2148 35eaae09b25e42b1a3a5ab4799efe198
 msgid "Opacity slider for all tile layers."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1609 8c332e1d37ed4ea1a8b24eb081e5eabe
+#: ../../../CHANGELOG.md:2154 24a1d78c73c3443fa7e996571269c884
 msgid ""
 "Preset base layer in URL will not longer change to ``undefined`` when "
 "resizing browser during refresh."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1610 30e47a118f94449c92764224f2061044
+#: ../../../CHANGELOG.md:2155 5c2e7a7c7c7c4004b329403c18797e3e
 msgid ""
 "System field with prefix ``gc2_`` is no longer displayed in Editor "
 "attribute form."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1611 6bc4b8ec2f5642369fa43aac05d24498
+#: ../../../CHANGELOG.md:2156 beebf160b28b4d6cba1dea0e305cfcf3
 msgid "Stalling of print is fixed."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1614 b3d6f793e9ab41539660b854ac216f95
+#: ../../../CHANGELOG.md:2159 c3f4ab136bcd4a6a9ca655f0926b074e
 msgid "[2018.1.0.RC1] - 2018-10-9"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1620 c2931065f1a54405a09ffecfade74f72
+#: ../../../CHANGELOG.md:2165 3a3035e15ad6411fa55f17987ad0225f
 msgid ""
 "Drag'n'drop sorting of layers in layer tree. Sorting can be done between "
 "layers in a group and groups between groups. Sorting sticks after refresh"
 " of browser."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1621 496898f686de4bc586ade46bc4d971a9
+#: ../../../CHANGELOG.md:2166 b07f2b8832dc46f09a69e09d48973a49
 msgid ""
 "Third level in layer tree. The third sub-group is set with the "
 "``vidi_sub_group`` Meta property in GC2."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1622 e26de73ad3dd4664829f36a99fda2be7
+#: ../../../CHANGELOG.md:2167 871b3b799ad94f7a8b9352c7a4d638cb
 msgid ""
 "Vector layers are now treated equally with tile layers. With the "
 "``vidi_layer_type`` Meta property set GC2 a layer can be displayed as "
@@ -2992,53 +3702,53 @@ msgid ""
 "vector directly in the layer tree."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1623 9ffc6ec31cbc44e9bf9b0b551fbc42c8
+#: ../../../CHANGELOG.md:2168 3dff26067f6845fcaea7eb2617b743ac
 msgid ""
 "Vector layers can be filtered. An arbitrary number of filter expressions "
 "can be applied."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1624 75eb6d59d22b4c4d8e3049068be54799
+#: ../../../CHANGELOG.md:2169 396cbdf16fad44ea868596cd7c337454
 msgid ""
 "Table view of vector layers. See the attributes and link to the geometry "
 "on the map."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1625 31e6e95db249456d9999692365dd5756
+#: ../../../CHANGELOG.md:2170 4012cd297ed947d384ece170dbdad333
 msgid "Service Workers. Vidi is becoming a Progressive Web App (PWA)."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1627 0f170e92f7fe451d8d2e5ec84499056b
+#: ../../../CHANGELOG.md:2172 4d1cba954bea46869cd2b47081298680
 msgid "Vidi starts without network. And always starts quick."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1628 c28687ab3153450d9baa72d85ed9ed59
+#: ../../../CHANGELOG.md:2173 e8c14f3fe4d4412c8da3d8078ff6fd67
 msgid "Vector layers are cached, so they can be used without network."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1629 8e3d59ad0acb437b8a4c751b50fbdc38
+#: ../../../CHANGELOG.md:2174 232e2f851d6a406e8b2ebd0933324470
 msgid ""
 "A change in source code will generated a new version hash, which will "
 "trigger the Service Workers to re-install the application."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1630 17431116dd3044509ed8e246409814da
+#: ../../../CHANGELOG.md:2175 24dcba280d584662bd23354634670a76
 msgid ""
 "Offline base layers. Base layers can be partial caches in browser for use"
 " without network."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1631 fddd6be3fd48485cb30ba96fff82383f
+#: ../../../CHANGELOG.md:2176 d0d959e1df124c2d82df33b74cd0ba21
 msgid ""
 "Editor. Both tile and vector layers can be edited. Edits can be done "
 "without network."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1633 cf79f5e25da7465db5dc2bae3e0ebb7b
+#: ../../../CHANGELOG.md:2178 b44ef47f26674ff1b11e6bd0ef7e7feb
 msgid "Side-by-side base layers. Swipe between two base layers."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1634 8fea353ac0b046038aff245952810e6f
+#: ../../../CHANGELOG.md:2179 7d0277534a4845278a03507e79914888
 msgid ""
 "Save, restore and share projects. A project comprises the extent of the "
 "map, which background map is visible and which layers are turned on, "
@@ -3049,62 +3759,58 @@ msgid ""
 "login."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1635 1801dc9673a748b1aadeb927a675f534
+#: ../../../CHANGELOG.md:2180 2ba78d1ae7c7478eb4b12043ddc898db
 msgid ""
 "New Kepler.gl module. Select layers in Vidi and start Kepler.gl with "
 "them. Kepler.gl is embedded in Vidi."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1636 3340d2bc4c894174af00d5023dd235fd
+#: ../../../CHANGELOG.md:2181 cb5474cff43c4712b432f9c1f4f264e2
 msgid ""
 "Proper implementation of non-tiled layers, which is well suited for layer"
 " with live data and heat- and cluster maps."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1642 76e114f4bcbe426fa795a87760df5de1
+#: ../../../CHANGELOG.md:2187 ab6aadc3d1f94b16af893cf540c7bbb5
 msgid ""
 "New user interface layout in default template. Where are now more space "
 "for the module dialogs."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1643 8325a725e5154b22a65903797e370ec6
+#: ../../../CHANGELOG.md:2188 20da3a2a88f44c24ad102554eb3afee6
 msgid "Leaflet.js updated to newest."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1644 f47c001a7840492497c0da7fdd9adba6
+#: ../../../CHANGELOG.md:2189 e22fbed8b1ac4abfb706ca8c3ac79806
 msgid ""
 "Print now uses Puppeteer instead of Wkhtmltopdf. Puppeteer can be "
 "installed and updated with npm as any other module and its easier to "
 "debug."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1645 1e038ce5bec540a1a4a3eed9a5859808
+#: ../../../CHANGELOG.md:2190 b128db571134464b82ec8d2cb0dc4ed0
 msgid "Is fully supported only in browsers with Service Workers."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1648 9384411f711d40e0a8fd633e57fe8866
+#: ../../../CHANGELOG.md:2193 9af6fe09bf7c418eb4374e6ab84429f8
 msgid "Deprecated"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1651 a07c3daae1ae4c16809489be917c80b0
+#: ../../../CHANGELOG.md:2196 e38d35b23bf748e39cd5d0102d838316
 msgid "Removed"
 msgstr ""
 
-#: ../../../CHANGELOG.md:1654 7b6078268c7f4ba39fd049f407044c66
+#: ../../../CHANGELOG.md:2199 bab7a893bc7b4f4aafae11dcb3eb9641
 msgid ""
 "Layers Search module. This function is now moved to the contrib module "
 "vidiSearch."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1660 9c30e70082b84b568ac88f7b121f05f2
+#: ../../../CHANGELOG.md:2205 9eec1297f67c4429a39e719503a0f120
 msgid "Calculation of area on drawing module now works."
 msgstr ""
 
-#: ../../../CHANGELOG.md:1663 c570bab216da4e38abddb51d0604b639
-msgid "Security"
-msgstr ""
-
-#: ../../../CHANGELOG.md:1666 bb1a39c0a8444792bd9d58560a15073c
+#: ../../../CHANGELOG.md:2211 d6310d6617e24adabbc5b705c94ac9f1
 msgid "A lot of modules where updated."
 msgstr ""
 

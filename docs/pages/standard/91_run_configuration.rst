@@ -625,11 +625,46 @@ vil kun ``width`` have effekt og tabellen vil altid fylde højden ud. Hvis posit
 initFunction
 *****************************************************************
 
-Her kan angives en JavaScript funktion, som bliver kørt når Vidi er klar. Funktionen skal skrives som en linje tekst startende med `function()` og den efterfølgende blok er den, som bliver eksekveret:
+Her kan angives en JavaScript funktion eller kommandoer, som bliver kørt når Vidi er klar.
+
+``initFunction`` angives på forskellige måder:
+
+Som et funktions-kald startende med `function()` og den efterfølgende blok er den, som bliver eksekveret. Her er der mulighed for at skrive flere statements, som er afhængige af hinanden:
 
 .. code-block:: json
 
-    "initFunction": "function(){alert('Hello world')}"
+    "initFunction": "function(){let text = 'Hello world'; alert(text)}"
+
+Som en enkelt kommando:
+
+.. code-block:: json
+
+    "initFunction": "alert('Hello world')"
+
+Som en liste af kommandoer uafhængige kommandoer:
+
+.. code-block:: json
+
+    "initFunction": [
+        "alert('Hello')",
+        "alert('world')"
+    ]
+
+Nedenstående vil IKKE virke. Her skal den øverste metode med at wrappe det hele i et samlet funktionskald anvendes:
+
+.. code-block:: json
+
+    "initFunction": [
+        "let text='Hello world'",
+        "alert(text)"
+    ]
+
+En typisk brug af ``initFunction`` er at lave "virtuelle" klik på i brugergrænsefalden. Fx tænd signaturen automatisk fra start:
+
+.. code-block:: json
+
+    "initFunction": "document.querySelector('#btn-show-legend-in-map').click()"
+
 
 .. _configjs_initZoomCenter:
 

@@ -307,17 +307,13 @@ module.exports = module.exports = {
      * Initiates the module
      */
     init: function () {
-        var metaData, me = this, startBuffer, getProperty;
+        var metaData, me = this, startBuffer, getProperty, searchTxt;
 
         // Set Defaults
-        startBuffer = config.extensionConfig?.conflictSearch?.startBuffer || 40;
-        getProperty = config.extensionConfig?.conflictSearch?.getProperty || false;
-        searchStr = config.extensionConfig?.conflictSearch?.searchString || "";
-        searchLoadedLayers = config.extensionConfig?.conflictSearch?.searchLoadedLayers;
-        if (searchLoadedLayers === undefined) {
-            searchLoadedLayers = true;
-        }
-
+        startBuffer = config.extensionConfig?.conflictSearch?.startBuffer ?? 0;
+        getProperty = config.extensionConfig?.conflictSearch?.getProperty ?? false;
+        searchStr = config.extensionConfig?.conflictSearch?.searchString ?? "";
+        searchLoadedLayers = config.extensionConfig?.conflictSearch?.searchLoadedLayers ?? true;
 
         // Set up draw module for conflict
         draw.setConflictSearch(this);
@@ -328,9 +324,15 @@ module.exports = module.exports = {
         cloud.map.addLayer(bufferItems);
         cloud.map.addLayer(dataItems);
 
+
+
         // Create a new tab in the main tab bar
         utils.createMainTab("conflict", "Konfliktsøgning", "Lav en konfliktsøgning ned igennem alle lag. Der kan søges med en adresse/matrikelnr., en tegning eller et objekt fra et lag. Det sidste gøres ved at klikke på et objekt i et tændt lag og derefter på \'Søg med dette objekt\'", require('./../../../browser/modules/height')().max, "bi-check2-square", false, "conflictSearch");
         $("#conflict").append(dom);
+
+        // adjust search text
+        let placeholder = window.vidiConfig?.searchConfig?.placeholderText ?? "Adresse eller matrikelnr.";
+        $(".custom-search-conflict.typeahead.form-control:not(.tt-hint)").attr("placeholder", placeholder);
         $("body").append(`
             <div class="toast-container bottom-0 end-0 p-3 me-5">
             <div id="${TOAST_ID}" class="toast align-items-center text-bg-primary border-0" role="alert" aria-live="assertive"
@@ -806,6 +808,8 @@ module.exports = module.exports = {
         }
     },
     handleResult: function (response) {
+        let _self = this;
+
         visibleLayers = cloud.getAllTypesOfVisibleLayers().split(";"); // Must be set here also, if result is coming from state
         let hitsCount = 0, noHitsCount = 0, errorCount = 0, extraCount = 0, resultOrigin, groups = [];
         _result = response;
@@ -846,11 +850,11 @@ module.exports = module.exports = {
                     let metaData = v.meta;
                     let bufferValue = '';
                     if (v.bufferValue > 0) {
-                        bufferValue = "<span class='text-secondary'>Buffer</span> " + L.GeometryUtil.readableDistance(v.bufferValue, true, false, false, {m: 1}).replace('.', decimalSeparator);
+                        bufferValue = "<span class='text-secondary'>Buffer</span> " + readableDistance(v.bufferValue, true, false, false, {m: 1});
                     }
                     if (metaData.layergroup === groups[i]) {
                         count++;
-                        row = "<tr><td>" + v.title + "</td><td>" + v.hits + "</td><td>" + bufferValue + "</td><td>" + (v.totalLength > 0 ? "<span class='text-secondary'>Total</span> " + L.GeometryUtil.readableDistance(v.totalLength, true, false, false, {m: 1}).replace('.', decimalSeparator) : v.totalArea > 0 ? "<span class='text-secondary'>Total</span> " + L.GeometryUtil.readableArea(v.totalArea, true) : '') + "</td><td><div class='form-check form-switch text-end'><label class='form-check-label'><input class='form-check-input' type='checkbox' data-gc2-id='" + v.table + "' " + (visibleLayers.includes(v.table) ? "checked" : "") + "></label></div></td></tr>";
+                        row = "<tr><td>" + v.title + "</td><td>" + v.hits + "</td><td>" + bufferValue + "</td><td>" + (v.totalLength > 0 ? "<span class='text-secondary'>Total</span> " + readableDistance(v.totalLength, true, false, false, {m: 1}) : v.totalArea > 0 ? "<span class='text-secondary'>Total</span> " + L.GeometryUtil.readableArea(v.totalArea, true) : '') + "</td><td><div class='form-check form-switch text-end'><label class='form-check-label'><input class='form-check-input' type='checkbox' data-gc2-id='" + v.table + "' " + (visibleLayers.includes(v.table) ? "checked" : "") + "></label></div></td></tr>";
                         hitsTable.append(row);
                     }
                 }
@@ -937,6 +941,7 @@ module.exports = module.exports = {
                             noHitsCount++;
                         }
                         if (v.extra !== null && typeof v.extra === 'object' && Object.keys(v.extra).length > 0) {
+                            let parsedMeta = metaData.meta !== null ? JSON.parse(metaData.meta) : null;
                             extraCount++;
                             const el = $(`<table class="extra-table" data-extra-table-id="${extraCount}" id="extra-table-${extraCount}" data-show-columns="true" data-show-fullscreen="false"></table>`); // Add bootstrap classes for basic styling
                             const thead = $("<thead></thead>");
@@ -960,7 +965,7 @@ module.exports = module.exports = {
                             const headers = Array.from(allHeadersSet); // Convert Set to Array for consistent order
 
                             // --- Build Header Row ---
-                            headerRow.append("<th data-sortable=\"true\">Column A</th>"); // First column for the main key (e.g., 'solidFuels')
+                            headerRow.append(`<th data-sortable="true">${parsedMeta?.sql_conflict_header || 'Header'}</th>`); // First column for the main key (e.g., 'solidFuels')
                             headers.forEach(header => {
                                 // Simple capitalization for headers (optional)
                                 const displayHeader = header.charAt(0).toUpperCase() + header.slice(1);
@@ -997,7 +1002,7 @@ module.exports = module.exports = {
                             el.append(thead);
                             el.append(tbody);
                             if (v.totalLength || v.totalArea) {
-                                tcaption.append((v.totalLength > 0 ? "<span class='text-secondary'>Total</span> " + L.GeometryUtil.readableDistance(v.totalLength, true, false, false, {m: 1}).replace('.', decimalSeparator) : v.totalArea > 0 ? "<span class='text-secondary'>Total</span> " + L.GeometryUtil.readableArea(v.totalArea, true) : '') );
+                                tcaption.append((v.totalLength > 0 ? "<span class='text-secondary'>Total</span> " + readableDistance(v.totalLength, true, false, false, {m: 1}) : v.totalArea > 0 ? "<span class='text-secondary'>Total</span> " + L.GeometryUtil.readableArea(v.totalArea, true) : '') );
                                 el.append(tcaption);
                             }
                             extraTable.append("<h4 class='mb-0 mt-3'>" + title + "</h4>");
@@ -1053,6 +1058,7 @@ module.exports = module.exports = {
             callBack();
         }
     },
+
     addDrawing: function (layer) {
         drawnItems.addLayer(layer);
     },
@@ -1100,12 +1106,77 @@ module.exports = module.exports = {
     TOAST_ID,
 };
 
+const readableDistance = function (distance, isMetric, isFeet, isNauticalMile, precision) {
+    const defaultPrecision = {
+        km: 2,
+        ha: 2,
+        m: 0,
+        mi: 2,
+        ac: 2,
+        yd: 0,
+        ft: 0,
+        nm: 2
+    };
+
+    const formattedNumber = function (n, precision) {
+        const formatted = Math.round(n * Math.pow(10, precision)) / Math.pow(10, precision);
+        const local = _vidiLocale.replace(/_/g, '-');
+        return formatted.toLocaleString(local);
+    };
+
+    let distanceStr;
+    let units;
+
+    precision = L.Util.extend({}, defaultPrecision, precision);
+
+    if (isMetric) {
+        units = typeof isMetric == 'string' ? isMetric : 'metric';
+    } else if (isFeet) {
+        units = 'feet';
+    } else if (isNauticalMile) {
+        units = 'nauticalMile';
+    } else {
+        units = 'yards';
+    }
+
+    switch (units) {
+        case 'metric':
+            // show metres when distance is < 1km, then show km
+            if (distance > 100000) {
+                distanceStr = L.GeometryUtil.formattedNumber(distance / 1000, precision['km']) + ' km';
+            } else {
+                distanceStr = formattedNumber(distance, precision['m']) + ' m';
+            }
+            break;
+        case 'feet':
+            distance *= 1.09361 * 3;
+            distanceStr = L.GeometryUtil.formattedNumber(distance, precision['ft']) + ' ft';
+
+            break;
+        case 'nauticalMile':
+            distance *= 0.53996;
+            distanceStr = L.GeometryUtil.formattedNumber(distance / 1000, precision['nm']) + ' nm';
+            break;
+        case 'yards':
+        default:
+            distance *= 1.09361;
+
+            if (distance > 1760) {
+                distanceStr = L.GeometryUtil.formattedNumber(distance / 1760, precision['mi']) + ' miles';
+            } else {
+                distanceStr = L.GeometryUtil.formattedNumber(distance, precision['yd']) + ' yd';
+            }
+            break;
+    }
+    return distanceStr;
+}
+
 let dom = `
 <div role="tabpanel">
     <div class="d-flex flex-column gap-4 mb-4">
         <div id="conflict-places" class="places" style="display: none">
             <div class="input-group mb-3">
-                <input class="typeahead form-control custom-search-conflict" type="text" placeholder="Adresse eller matrikelnr.">
+                <input class="typeahead form-control custom-search-conflict" type="text" placeholder="">
                 <button class="btn btn-outline-secondary searchclear" type="button">
                     <i class="bi bi-x-lg"></i>
                 </button>
