@@ -5,8 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [2025.10.3] - 2025-22-10
-### Changed
+## [2025.11.0] - 2025-7-11
+### Fixed
+- Add dynamic placeholder support for the conflict search input field.
+- Assign unique IDs (`_vidi_id`) to drawings created from the search module.
+- Update button style to `btn-outline-warning` in conflict Info section for improved visibility.
+
+_## [2025.10.3] - 2025-22-10
+### Changed_
 - Upgrade React and ReactDOM to v17.0.2.
 - Replace react-autocomplete with react-widgets Combobox in layer tree controls to support React 17.
 - Remove unused packages from package.json (react-addons, react-button, rc-slider, react-color, mutationobserver-shim, grunt-bower-task, esmify, install, npm).
