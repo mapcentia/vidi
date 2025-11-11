@@ -143,6 +143,12 @@ function print(key, q, req, response, outputPng = false, frame = 0, count, retur
         let delay = 1000;
         const func = () => {
             headless.acquire().then(browser => {
+
+                    // Set status variables
+                    var vidiIsReady = false;
+                    var layersAreLoaded = false;
+                    var legendIsReady = false;
+
                     setTimeout(() => {
                         if (headless.isBorrowedResource(browser)) {
                             headless.destroy(browser);
@@ -166,7 +172,28 @@ function print(key, q, req, response, outputPng = false, frame = 0, count, retur
                                 }
 
                                 console.log(msg.text());
+
+                                // Check statuses 
                                 if (msg.text().indexOf(`Vidi is now loaded`) !== -1) {
+                                    vidiIsReady = true;
+                                } else if (msg.text().indexOf(`Layers all loaded`) !== -1) {
+                                    layersAreLoaded = true;
+                                // If no layers are active, we skip waiting for layers to load
+                                } else if (msg.text().indexOf(`0 active layers in saved state`) !== -1) {
+                                    layersAreLoaded = true;
+                                } else if (msg.text().indexOf(`Legend is ready`) !== -1) {
+                                    legendIsReady = true;
+                                }
+
+                                // Make sure we dont wait forever
+                                if (msg.text().indexOf(`Versioning:`) !== -1) {
+                                    vidiIsReady = true;
+                                    layersAreLoaded = true;
+                                    legendIsReady = true;
+                                }
+
+                                // for each console line, check if all are ready - then print
+                                if (layersAreLoaded && legendIsReady && vidiIsReady) {
                                     if (!check) {
                                         check = true;
                                         console.log('App was loaded, generating PDF');
@@ -299,7 +326,28 @@ function print(key, q, req, response, outputPng = false, frame = 0, count, retur
                             }).then(() => {
                                 page.on('console', msg => {
                                     console.log(msg.text());
+
+                                    // Check statuses 
                                     if (msg.text().indexOf(`Vidi is now loaded`) !== -1) {
+                                        vidiIsReady = true;
+                                    } else if (msg.text().indexOf(`Layers all loaded`) !== -1) {
+                                        layersAreLoaded = true;
+                                    // If no layers are active, we skip waiting for layers to load
+                                    } else if (msg.text().indexOf(`0 active layers in saved state`) !== -1) {
+                                        layersAreLoaded = true;
+                                    } else if (msg.text().indexOf(`Legend is ready`) !== -1) {
+                                        legendIsReady = true;
+                                    }
+
+                                    // Make sure we dont wait forever
+                                    if (msg.text().indexOf(`Versioning:`) !== -1) {
+                                        vidiIsReady = true;
+                                        layersAreLoaded = true;
+                                        legendIsReady = true;
+                                    }
+
+                                    // for each console line, check if all are ready - then print
+                                    if (layersAreLoaded && legendIsReady && vidiIsReady) {
                                         console.log('App was loaded, generating PNG');
                                         setTimeout(() => {
                                             page.evaluate(`$('.leaflet-top').remove();$('#loadscreen').remove();`).then(() => {

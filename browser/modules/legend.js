@@ -114,6 +114,7 @@ module.exports = module.exports = {
                         }
                     });
                     $(el ? el : '#legend').html(list);
+                    console.log("Legend is ready");
                     resolve();
                 },
                 error: function (err) {
