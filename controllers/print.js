@@ -176,7 +176,7 @@ function print(key, q, req, response, outputPng = false, frame = 0, count, retur
                                 // Check statuses 
                                 if (msg.text().indexOf(`Vidi is now loaded`) !== -1) {
                                     vidiIsReady = true;
-                                } else if (msg.text().indexOf(`Layers all loaded`) !== -1) {
+                                } else if (msg.text().indexOf(`Layers all loaded L`) !== -1) {
                                     layersAreLoaded = true;
                                 // If no layers are active, we skip waiting for layers to load
                                 } else if (msg.text().indexOf(`0 active layers in saved state`) !== -1) {
@@ -330,7 +330,7 @@ function print(key, q, req, response, outputPng = false, frame = 0, count, retur
                                     // Check statuses 
                                     if (msg.text().indexOf(`Vidi is now loaded`) !== -1) {
                                         vidiIsReady = true;
-                                    } else if (msg.text().indexOf(`Layers all loaded`) !== -1) {
+                                    } else if (msg.text().indexOf(`Layers all loaded L`) !== -1) {
                                         layersAreLoaded = true;
                                     // If no layers are active, we skip waiting for layers to load
                                     } else if (msg.text().indexOf(`0 active layers in saved state`) !== -1) {
