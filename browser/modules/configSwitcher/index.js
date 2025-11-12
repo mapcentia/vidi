@@ -6,6 +6,8 @@
 
 'use strict';
 
+import {createRoot} from "react-dom/client";
+
 var utils, urlparser, backboneEvents;
 
 import ConfigSwitcher from './components/ConfigSwitcher';
@@ -47,12 +49,6 @@ module.exports = {
             if (switcherInstance) switcherInstance.updateConfigurationsList();
         });
 
-        /**
-         *
-         */
-        var ReactDOM = require(`react-dom`);
-
-
         const modalStr = `
                     <div class="modal" id="config-switcher-modal" tabindex="-1" role="dialog">
                         <div class="modal-dialog modal-fullscreen" role="document">
@@ -77,7 +73,10 @@ module.exports = {
 
         if (document.getElementById(exId)) {
             try {
-                switcherInstance = ReactDOM.render(<ConfigSwitcher urlparser={urlparser}/>, document.getElementById(exId));
+                createRoot(document.getElementById(exId)).render(<ConfigSwitcher
+                    ref={(instance) => { switcherInstance = instance; }}
+                    urlparser={urlparser}
+                />);
             } catch (e) {
                 console.log(e);
             }

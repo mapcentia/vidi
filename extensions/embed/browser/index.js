@@ -10,6 +10,7 @@ import React from 'react';
 import {useState, useEffect, useRef} from "react";
 import ReactDOM from 'react-dom';
 import styled from "styled-components";
+import {createRoot} from "react-dom/client";
 
 
 let backboneEvents;
@@ -17,6 +18,7 @@ let meta;
 let state;
 let layers;
 let layerTree;
+let altRoot;
 
 module.exports = {
 
@@ -162,19 +164,18 @@ module.exports = {
 
                 if (alt) {
                     const altNode = document.getElementById("layersAlt");
+                    if (!altRoot) {
+                        altRoot = createRoot(altNode);
+                    }
                     try {
-                        ReactDOM.render(
-                            <div className="accordion">{groupsComps}</div>,
-                            altNode
+                        altRoot.render(
+                            <div className="accordion">{groupsComps}</div>
                         );
                     } catch (e) {
                         console.error(e)
                     }
                     backboneEvents.get().on("layerTree:ready", () => {
-                        ReactDOM.render(
-                            <div className="accordion">{groupsComps}</div>,
-                            altNode
-                        );
+                        altRoot.render(<div className="accordion">{groupsComps}</div>)
                     })
                 }
             }, 0)

@@ -8,6 +8,7 @@
 
 
 import StateSnapshotsDashboard from './components/StateSnapshotsDashboard';
+import {createRoot} from "react-dom/client";
 
 let anchor, state, urlparser, backboneEvents;
 const API_URL = `/api/state-snapshots`;
@@ -40,7 +41,6 @@ module.exports = {
      */
     init: function () {
         const React = require('react');
-        const ReactDOM = require('react-dom');
 
         if (vidiConfig.enabledExtensions.indexOf(`watsonc`) > -1) {
             customSetOfTitles = true;
@@ -48,12 +48,13 @@ module.exports = {
 
         if (document.getElementById(exId)) {
             try {
-                ReactDOM.render(<StateSnapshotsDashboard
+                createRoot(document.getElementById(exId)).render(<StateSnapshotsDashboard
                     anchor={anchor}
                     customSetOfTitles={customSetOfTitles}
                     state={state}
                     urlparser={urlparser}
-                    backboneEvents={backboneEvents}/>, document.getElementById(exId));
+                    backboneEvents={backboneEvents}/>
+                );
             } catch (e) {
                 console.log(e);
             }
@@ -66,12 +67,9 @@ module.exports = {
         // It's placed here, so the MultiSelect tag widgets not are effected by the hack
         const current = document.addEventListener;
         document.addEventListener = function (type, listener) {
-            if(type === "focusin")
-            {
+            if (type === "focusin") {
                 //do nothing
-            }
-            else
-            {
+            } else {
                 let args = [];
                 args[0] = type;
                 args[1] = listener;

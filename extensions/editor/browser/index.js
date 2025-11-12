@@ -15,6 +15,7 @@ import validator from "@rjsf/validator-ajv8";
 import SelectWidget from "./SelectWidget.jsx";
 import TimeWidget from "./TimeWidget.jsx";
 import {coordAll} from "@turf/turf";
+import {createRoot} from "react-dom/client";
 
 /**
  *
@@ -30,7 +31,7 @@ const alwaysActivate = config?.extensionConfig?.editor?.alwaysActivate ?? true;
  *
  * @type {*|exports|module.exports}
  */
-let utils, backboneEvents, layerTree, meta, cloud, sqlQuery, layers;
+let utils, backboneEvents, layerTree, meta, cloud, sqlQuery, layers, editorFormRoot;
 
 let apiBridgeInstance = false;
 
@@ -161,6 +162,7 @@ module.exports = {
             console.log(`Editor extension is disabled due to the enabled watsonc`);
             return;
         }
+        editorFormRoot = createRoot(EDITOR_FORM_CONTAINER_ID);
 
         if (drawTooltip) {
             $("body").append(`<div id="editor-tooltip" style="position: fixed; float: left; display: none">${drawTooltip}</div>`);
@@ -452,17 +454,10 @@ module.exports = {
 
                 // Properties have priority over default types
                 if (fields[key]?.restriction?.length > 0) {
-
-                    // If there is a restriction, then convert the field to a select
-                    uiSchema[key] = {
-                        'ui:widget': 'select'
-                    };
-
                     // if the type is text, change the field to string to get a select
                     if (fields[key].type === `text`) {
                         properties[key].type = `string`;
                     }
-
                     let restrictions = fields[key].restriction;
                     let enumNames = [];
                     let enumValues = [];
@@ -471,9 +466,12 @@ module.exports = {
                         enumValues.push(restrictions[i].value);
                     }
                     if (enumNames.length === enumValues.length) {
-                        properties[key].enumNames = enumNames;
                         properties[key].enum = enumValues;
                     }
+                    // If there is a restriction, then convert the field to a select
+                    uiSchema[key] = {
+                        'ui:enumNames': enumNames
+                    };
                 }
             }
         });
@@ -628,8 +626,7 @@ module.exports = {
             };
 
             // Slide panel with attributes in and render form component
-            ReactDOM.unmountComponentAtNode(document.querySelector(`#${EDITOR_OFFCANVAS_CONTAINER_ID} .offcanvas-body`));
-            ReactDOM.render((
+            editorFormRoot.render(
                 <Form
                     validator={validator}
                     className="feature-attribute-editing-form"
@@ -645,8 +642,7 @@ module.exports = {
                                 className="btn btn btn-outline-secondary mb-2 mt-2 w-100">{__("Cancel")}</button>
                     </div>
                 </Form>
-            ), EDITOR_FORM_CONTAINER_ID);
-
+            );
             _self.openAttributesDialog();
         };
 
@@ -1034,7 +1030,6 @@ module.exports = {
             const uiSchema = formBuildInformation.uiSchema;
 
             cloud.get().map.closePopup();
-            ReactDOM.unmountComponentAtNode(EDITOR_FORM_CONTAINER_ID);
             let eventFeatureParsed = {};
             for (let [key, value] of Object.entries(eventFeatureCopy.properties)) {
                 if (fields[key].type.includes("timestamp with time zone")) {
@@ -1044,7 +1039,7 @@ module.exports = {
                 }
                 eventFeatureParsed[key] = value;
             }
-            ReactDOM.render((
+            editorFormRoot.render(
                 <Form
                     validator={validator}
                     className="feature-attribute-editing-form"
@@ -1060,7 +1055,7 @@ module.exports = {
                                 className="btn btn btn-outline-secondary mb-2 mt-2 w-100">{__("Cancel")}</button>
                     </div>
                 </Form>
-            ), EDITOR_FORM_CONTAINER_ID);
+            );
             _self.openAttributesDialog();
         };
         let confirmMessage = __(`Application is offline, tiles will not be updated. Proceed?`);

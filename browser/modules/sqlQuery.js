@@ -473,6 +473,7 @@ module.exports = {
                                 try {
                                     s(id, layer, key, sqlQuery);
                                     selectCallBack(id, layer, key, sqlQuery);
+                                    backboneEvents.get().trigger("feature:selected", layer, key);
                                 } catch (e) {
                                     console.info("Error in select function for: " + _key_, e.message);
                                 }
@@ -482,6 +483,7 @@ module.exports = {
                                 try {
                                     s(id, layer, key, sqlQuery);
                                     selectCallBack(id, layer, key, sqlQuery);
+                                    backboneEvents.get().trigger("feature:selected", layer, key)
                                 } catch (e) {
                                     console.info("Error in select function for: " + _key_, e.message);
                                 }
