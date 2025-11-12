@@ -162,6 +162,7 @@ module.exports = {
             console.log(`Editor extension is disabled due to the enabled watsonc`);
             return;
         }
+        editorFormRoot = createRoot(EDITOR_FORM_CONTAINER_ID);
 
         if (drawTooltip) {
             $("body").append(`<div id="editor-tooltip" style="position: fixed; float: left; display: none">${drawTooltip}</div>`);
@@ -453,17 +454,10 @@ module.exports = {
 
                 // Properties have priority over default types
                 if (fields[key]?.restriction?.length > 0) {
-
-                    // If there is a restriction, then convert the field to a select
-                    uiSchema[key] = {
-                        'ui:widget': 'select'
-                    };
-
                     // if the type is text, change the field to string to get a select
                     if (fields[key].type === `text`) {
                         properties[key].type = `string`;
                     }
-
                     let restrictions = fields[key].restriction;
                     let enumNames = [];
                     let enumValues = [];
@@ -472,9 +466,12 @@ module.exports = {
                         enumValues.push(restrictions[i].value);
                     }
                     if (enumNames.length === enumValues.length) {
-                        properties[key].enumNames = enumNames;
                         properties[key].enum = enumValues;
                     }
+                    // If there is a restriction, then convert the field to a select
+                    uiSchema[key] = {
+                        'ui:enumNames': enumNames
+                    };
                 }
             }
         });
@@ -629,7 +626,7 @@ module.exports = {
             };
 
             // Slide panel with attributes in and render form component
-            createRoot(document.querySelector(`#${EDITOR_OFFCANVAS_CONTAINER_ID} .offcanvas-body`)).render(
+            editorFormRoot.render(
                 <Form
                     validator={validator}
                     className="feature-attribute-editing-form"
@@ -1033,10 +1030,6 @@ module.exports = {
             const uiSchema = formBuildInformation.uiSchema;
 
             cloud.get().map.closePopup();
-            if (editorFormRoot) {
-                editorFormRoot.unmount();
-                editorFormRoot = null;
-            }
             let eventFeatureParsed = {};
             for (let [key, value] of Object.entries(eventFeatureCopy.properties)) {
                 if (fields[key].type.includes("timestamp with time zone")) {
@@ -1046,7 +1039,6 @@ module.exports = {
                 }
                 eventFeatureParsed[key] = value;
             }
-            editorFormRoot = createRoot(EDITOR_FORM_CONTAINER_ID);
             editorFormRoot.render(
                 <Form
                     validator={validator}
