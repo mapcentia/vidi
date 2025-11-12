@@ -15,6 +15,7 @@ import validator from "@rjsf/validator-ajv8";
 import SelectWidget from "./SelectWidget.jsx";
 import TimeWidget from "./TimeWidget.jsx";
 import {coordAll} from "@turf/turf";
+import {createRoot} from "react-dom/client";
 
 /**
  *
@@ -30,7 +31,7 @@ const alwaysActivate = config?.extensionConfig?.editor?.alwaysActivate ?? true;
  *
  * @type {*|exports|module.exports}
  */
-let utils, backboneEvents, layerTree, meta, cloud, sqlQuery, layers;
+let utils, backboneEvents, layerTree, meta, cloud, sqlQuery, layers, editorFormRoot;
 
 let apiBridgeInstance = false;
 
@@ -628,8 +629,7 @@ module.exports = {
             };
 
             // Slide panel with attributes in and render form component
-            ReactDOM.unmountComponentAtNode(document.querySelector(`#${EDITOR_OFFCANVAS_CONTAINER_ID} .offcanvas-body`));
-            ReactDOM.render((
+            createRoot(document.querySelector(`#${EDITOR_OFFCANVAS_CONTAINER_ID} .offcanvas-body`)).render(
                 <Form
                     validator={validator}
                     className="feature-attribute-editing-form"
@@ -645,8 +645,7 @@ module.exports = {
                                 className="btn btn btn-outline-secondary mb-2 mt-2 w-100">{__("Cancel")}</button>
                     </div>
                 </Form>
-            ), EDITOR_FORM_CONTAINER_ID);
-
+            );
             _self.openAttributesDialog();
         };
 
@@ -1034,7 +1033,10 @@ module.exports = {
             const uiSchema = formBuildInformation.uiSchema;
 
             cloud.get().map.closePopup();
-            ReactDOM.unmountComponentAtNode(EDITOR_FORM_CONTAINER_ID);
+            if (editorFormRoot) {
+                editorFormRoot.unmount();
+                editorFormRoot = null;
+            }
             let eventFeatureParsed = {};
             for (let [key, value] of Object.entries(eventFeatureCopy.properties)) {
                 if (fields[key].type.includes("timestamp with time zone")) {
@@ -1044,7 +1046,8 @@ module.exports = {
                 }
                 eventFeatureParsed[key] = value;
             }
-            ReactDOM.render((
+            editorFormRoot = createRoot(EDITOR_FORM_CONTAINER_ID);
+            editorFormRoot.render(
                 <Form
                     validator={validator}
                     className="feature-attribute-editing-form"
@@ -1060,7 +1063,7 @@ module.exports = {
                                 className="btn btn btn-outline-secondary mb-2 mt-2 w-100">{__("Cancel")}</button>
                     </div>
                 </Form>
-            ), EDITOR_FORM_CONTAINER_ID);
+            );
             _self.openAttributesDialog();
         };
         let confirmMessage = __(`Application is offline, tiles will not be updated. Proceed?`);

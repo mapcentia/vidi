@@ -46,6 +46,8 @@ import {
 import MetaSettingForm from "./MetaSettingForm";
 import Download from './Download';
 import {getResolutions} from "../crs";
+import { createRoot } from 'react-dom/client';
+
 
 
 let _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEvents,
@@ -55,7 +57,6 @@ let _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEv
 
 const {v4: uuidv4} = require('uuid');
 const React = require('react');
-const ReactDOM = require('react-dom');
 const base64url = require('base64url');
 
 const urlparser = require('./../urlparser');
@@ -2283,6 +2284,7 @@ module.exports = {
             }
             // Set select call when opening a panel
             let selectCallBack = () => {
+                backboneEvents.get().trigger("feature:selected", layer, layerKey, feature);
             };
             if (typeof parsedMeta.select_function !== "undefined" && parsedMeta.select_function !== "") {
                 try {
@@ -2296,7 +2298,7 @@ module.exports = {
                     selectCallBack = Function('"use strict";return (' + f + ')')();
                 }
             }
-            let func = selectCallBack.bind(this, null, layer, layerKey, _self);
+            let func = selectCallBack.bind(this, null, layer, layerKey, _self, feature);
             $(document).arrive(`#a-collapse${randText}`, function () {
                 const e = $(`#collapse${randText}`);
                 const bsCollapse = document.getElementById(`collapse${randText}`);
@@ -3439,11 +3441,10 @@ module.exports = {
                     $(layerContainer).find('.js-layer-settings-labels').append(`<div id="${componentContainerId}"></div>`);
                     setTimeout(() => {
                         if (document.getElementById(componentContainerId)) {
-                            ReactDOM.render(<LabelSettingToggle
+                            createRoot(document.getElementById(componentContainerId)).render(<LabelSettingToggle
                                     layerKey={layerKey}
                                     initialValue={value}
-                                    onChange={_self.onChangeLabelsHandler}/>,
-                                document.getElementById(componentContainerId));
+                                    onChange={_self.onChangeLabelsHandler}/>);
                             $(layerContainer).find('.js-layer-settings-labels').hide(0);
                             $(layerContainer).find(`.js-toggle-labels`).click(() => {
                                 _self._selectIcon($(layerContainer).find('.js-toggle-labels'));
@@ -3521,8 +3522,9 @@ module.exports = {
                     _self.activeFiltersChange(layerKey)
                     setTimeout(() => {
                         if (document.getElementById(componentContainerId)) {
-                            filterComp[layerKey] = ReactDOM.render(
+                            createRoot(document.getElementById(componentContainerId)).render(
                                 <LayerFilter
+                                    ref={instance => { filterComp[layerKey] = instance }}
                                     layer={layer}
                                     layerMeta={meta.parseLayerMeta(layerKey)}
                                     presetFilters={presetFilters}
@@ -3542,7 +3544,7 @@ module.exports = {
                                     isFilterImmutable={isFilterImmutable}
                                     db={db}
                                     getActiveLayerFilters={_self.getActiveLayerFilters}
-                                />, document.getElementById(componentContainerId));
+                                />);
                             $(layerContainer).find('.js-layer-settings-filters').hide(0);
 
                             $(layerContainer).find(`.js-toggle-filters`).click(() => {
@@ -3566,11 +3568,11 @@ module.exports = {
                         $(layerContainer).find('.js-layer-settings-load-strategy').append(`<div id="${componentContainerId}"></div>`);
                         setTimeout(() => {
                             if (document.getElementById(componentContainerId)) {
-                                ReactDOM.render(<LoadStrategyToggle
+                                createRoot(document.getElementById(componentContainerId)).render(<LoadStrategyToggle
                                         layerKey={layerKey}
                                         initialValue={value}
-                                        onChange={_self.onChangeLoadStrategyHandler}/>,
-                                    document.getElementById(componentContainerId));
+                                        onChange={_self.onChangeLoadStrategyHandler}/>
+                                );
                                 $(layerContainer).find('.js-layer-settings-load-strategy').hide(0);
                                 $(layerContainer).find(`.js-toggle-load-strategy`).click(() => {
                                     _self._selectIcon($(layerContainer).find('.js-toggle-load-strategy'));
@@ -3618,11 +3620,11 @@ module.exports = {
 
                 setTimeout(() => {
                     if (document.getElementById(componentContainerId)) {
-                        ReactDOM.render(<MetaSettingForm
+                        createRoot(document.getElementById(componentContainerId)).render(<MetaSettingForm
                                 layerKey={layerKey}
                                 initialValues={values}
-                                onChange={_self.onChangeStylesHandler}/>,
-                            document.getElementById(componentContainerId));
+                                onChange={_self.onChangeStylesHandler}/>
+                        );
                     } else {
                         console.error(`Unable to find the labels control container`);
                     }
@@ -3692,11 +3694,11 @@ module.exports = {
                     let componentContainerId = `layer-settings-download-${layerKey.replace('.', '-')}`;
                     $(layerContainer).find('.js-layer-settings-download').append(`<div id="${componentContainerId}"></div>`);
                     if (document.getElementById(componentContainerId)) {
-                        ReactDOM.render(<Download
+                        createRoot(document.getElementById(componentContainerId)).render(<Download
                                 layer={layer}
                                 onApplyDownload={_self.onApplyDownloadHandler}
-                            />,
-                            document.getElementById(componentContainerId));
+                            />
+                        );
                     } else {
                         console.error(`Unable to find the download container`);
                     }

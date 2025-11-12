@@ -18,6 +18,7 @@ const urlparser = require('./../../../browser/modules/urlparser');
 const urlVars = urlparser.urlVars;
 const cookie = require('js-cookie');
 const React = require("react");
+const {createRoot} = require("react-dom/client");
 
 /**
  *
@@ -249,7 +250,7 @@ module.exports = {
         }
 
         if (document.getElementById(exId)) {
-            sessionInstance = ReactDOM.render(<Session/>, document.getElementById(exId));
+            createRoot(document.getElementById(exId)).render(<Session/>)
         } else {
             console.warn(`Unable to find the container for session extension (element id: ${exId})`);
         }
@@ -262,6 +263,21 @@ module.exports = {
             return false;
         }
     },
+
+    isAuthenticatedPromise: function () {
+        return new Promise((resolve, reject) => {
+            fetch("/api/session/status").then(response => {
+                response.json().then(data => {
+                    if (data.status.authenticated) {
+                        resolve(true);
+                    } else {
+                        resolve(false);
+                    }
+                })
+            })
+        })
+    },
+
 
     update: function () {
         backboneEvents.get().trigger("refresh:auth");

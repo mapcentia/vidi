@@ -4,6 +4,9 @@
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
+import {createRoot} from 'react-dom/client';
+import React from 'react';
+
 'use strict';
 
 /**
@@ -69,17 +72,6 @@ module.exports = {
      *
      */
     init: function () {
-
-        /**
-         *
-         */
-        var React = require('react');
-
-        /**
-         *
-         */
-        var ReactDOM = require('react-dom');
-
 
         var dict = {
 
@@ -320,7 +312,8 @@ module.exports = {
                             <label>
                                 <input className="form-check-input" onClick={this.onCoordinatesSystemClick} type="radio"
                                        id="coordinates-system-dd"
-                                       name="coordinates-system" value="dd" defaultChecked={this.state.coordinatesSystem === 'dd'}/>
+                                       name="coordinates-system" value="dd"
+                                       defaultChecked={this.state.coordinatesSystem === 'dd'}/>
                                 {utils.__("Latitude/Longitude, decimal degrees", dict)}
                             </label>
                         </div>
@@ -329,7 +322,8 @@ module.exports = {
                             <label>
                                 <input className="form-check-input" onClick={this.onCoordinatesSystemClick} type="radio"
                                        id="coordinates-system-dms"
-                                       name="coordinates-system" value="dms" defaultChecked={this.state.coordinatesSystem === 'dms'}/>
+                                       name="coordinates-system" value="dms"
+                                       defaultChecked={this.state.coordinatesSystem === 'dms'}/>
                                 {utils.__("Latitude/Longitude, degrees, minutes and seconds", dict)}
                             </label>
                         </div>
@@ -337,7 +331,8 @@ module.exports = {
                         <div className="form-check">
                             <label>
                                 <input className="form-check-input" onClick={this.onCoordinatesSystemClick} type="radio"
-                                       id="coordinates-system-utm" defaultChecked={this.state.coordinatesSystem === 'utm'}
+                                       id="coordinates-system-utm"
+                                       defaultChecked={this.state.coordinatesSystem === 'utm'}
                                        name="coordinates-system" value="utm"/>
                                 UTM
                             </label>
@@ -375,8 +370,8 @@ module.exports = {
                                 </div>
 
                                 <div style={this.centerFloat}>
-                                        <div style={this.left}>←</div>
-                                        <div style={this.right}>→</div>
+                                    <div style={this.left}>←</div>
+                                    <div style={this.right}>→</div>
                                 </div>
 
                             </div>
@@ -405,20 +400,9 @@ module.exports = {
                 );
             }
         }
-
         try {
-            ReactDOM
-                .render(
-                    <Coordinates/>,
-                    document
-                        .getElementById(exId)
-                )
-            ;
-        } catch
-            (e) {
-
-        }
-
+            createRoot(document.getElementById(exId)).render(<Coordinates/>)
+        } catch (e) {}
     }
 };
 
