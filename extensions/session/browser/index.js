@@ -250,7 +250,9 @@ module.exports = {
         }
 
         if (document.getElementById(exId)) {
-            createRoot(document.getElementById(exId)).render(<Session/>)
+            createRoot(document.getElementById(exId)).render(<Session
+                ref={instance => { sessionInstance = instance }}
+            />)
         } else {
             console.warn(`Unable to find the container for session extension (element id: ${exId})`);
         }
