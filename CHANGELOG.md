@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2025.11.1] - 2025-13-11
+### Changed
+- Upgrade `react` dependencies to version 18.3.1.
+- Replace `ReactDOM.render` with `createRoot` for React 18 compatibility across modules.
+
 ## [2025.11.0] - 2025-7-11
 ### Fixed
 - Add dynamic placeholder support for the conflict search input field.
