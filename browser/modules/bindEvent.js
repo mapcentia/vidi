@@ -170,9 +170,9 @@ module.exports = {
             $(this).on('change', function (e) {
                 let prefix = '';
                 let isChecked = $(e.target).prop(`checked`);
-                let subGroupName = $(this).data(`gc2-subgroup-name`);
-                let subGroupLevel = $(this).data(`gc2-subgroup-level`);
-                let layerGroup = $(this).closest('.card-body').data('gc2-group-id');
+                let subGroupName = $(this).data(`gc2-subgroup-name`).toString();
+                let subGroupLevel = $(this).data(`gc2-subgroup-level`).toString();
+                let layerGroup = $(this).closest('.card-body').data('gc2-group-id').toString();
                 meta.getMetaData().data.forEach(e => {
                     let parsedMeta = layerTree.parseLayerMeta(e);
                     if (parsedMeta?.vidi_sub_group?.split("|")[subGroupLevel] === subGroupName && e.layergroup === layerGroup) {
