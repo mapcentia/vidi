@@ -162,7 +162,9 @@ module.exports = {
             console.log(`Editor extension is disabled due to the enabled watsonc`);
             return;
         }
-        editorFormRoot = createRoot(EDITOR_FORM_CONTAINER_ID);
+        try {
+            editorFormRoot = createRoot(EDITOR_FORM_CONTAINER_ID);
+        } catch (e) {}
 
         if (drawTooltip) {
             $("body").append(`<div id="editor-tooltip" style="position: fixed; float: left; display: none">${drawTooltip}</div>`);
