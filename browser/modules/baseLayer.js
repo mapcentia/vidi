@@ -155,6 +155,7 @@ module.exports = module.exports = {
             } else {
                 _self.destroyLeafletTwoLayersAtOnceControls();
                 setBaseLayer.init(activeBaseLayer);
+                _self.setOpacity();
             }
 
             backboneEvents.get().trigger(`${MODULE_NAME}:side-by-side-mode-change`);
@@ -305,7 +306,7 @@ module.exports = module.exports = {
                             data-baselayer-info="${abstract}"
                             class="info-label btn btn-sm btn-outline-secondary"><i class="bi bi-info-square pe-none"></i></button>
                     </div>
-                    <div class="range">
+                    <div class="range" style="display: ${sideBySideLayerControl === '' ? 'inline': 'none' }">
                         <input data-gc2-base-id="${layerId}" type="range" min="1" max="100" value="${moduleState.baseOpacity[layerId] ?? 100}" class="js-opacity-slider-base form-range">
                     </div>
                 </li>`;
@@ -436,7 +437,7 @@ module.exports = module.exports = {
 
                     cloud.get().map.invalidateSize();
                     sideBySideControl = L.control.sideBySide(layer1, layer2).addTo(cloud.get().map);
-
+                    _self.resetOpacity()
                     backboneEvents.get().trigger(`${MODULE_NAME}:side-by-side-mode-change`);
                 } else if (currentTwoLayersAtOnceMode === TWO_LAYERS_AT_ONCE_MODES[1]) {
                     let layer1 = _self.addBaseLayer(activeBaseLayer);
@@ -453,7 +454,7 @@ module.exports = module.exports = {
 
                     overlayLayer = layer2;
                     overlayLayer.setOpacity(overlayOpacity / 100);
-
+                    _self.resetOpacity()
                     backboneEvents.get().trigger(`${MODULE_NAME}:side-by-side-mode-change`);
                 } else {
                     throw new Error(`Invalid two layers at once mode value (${currentTwoLayersAtOnceMode})`);
@@ -575,7 +576,6 @@ module.exports = module.exports = {
                     moduleState.baseOpacity[layerKey] = e.target.value;
                     backboneEvents.get().trigger(`${MODULE_NAME}:opacity-change`);
                 }))
-                _self.setOpacity();
                 resolve();
             });
         });
