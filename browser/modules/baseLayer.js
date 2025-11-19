@@ -8,7 +8,6 @@
 
 const MODULE_NAME = `baseLayer`;
 
-import {LAYER} from './layerTree/constants';
 import layerTreeUtils from './layerTree/utils';
 import {booleanIntersects, polygon} from '@turf/turf'
 
@@ -47,6 +46,10 @@ let mode;
 let defaultMode;
 let bindEvent;
 let bounds;
+
+let moduleState = {
+    baseOpacity: {}
+}
 
 /**
  * Checks if the module state has correct structure
@@ -90,7 +93,7 @@ module.exports = module.exports = {
     init: () => {
         state.listenTo('baseLayer', _self);
 
-        mode =  window.vidiConfig?.advancedBaseLayerSwitcher?.mode ? window.vidiConfig.advancedBaseLayerSwitcher.mode : 3;
+        mode = window.vidiConfig?.advancedBaseLayerSwitcher?.mode ? window.vidiConfig.advancedBaseLayerSwitcher.mode : 3;
         active = window.vidiConfig?.advancedBaseLayerSwitcher?.active;
         defaultMode = mode === 1 ? 1 : mode === 2 ? 2 : window.vidiConfig?.advancedBaseLayerSwitcher?.default ? window.vidiConfig.advancedBaseLayerSwitcher.default : 1
         currentTwoLayersAtOnceMode = TWO_LAYERS_AT_ONCE_MODES[defaultMode - 1];
@@ -105,7 +108,6 @@ module.exports = module.exports = {
                 } catch (e) {
                     console.log(e)
                 }
-                console.log(outside)
                 if (outside) {
                     utils.showInfoToast(__("The selected map has no content in the current map extent"), {delay: 150000000})
                 } else {
@@ -160,6 +162,8 @@ module.exports = module.exports = {
 
         backboneEvents.get().once(`allDoneLoading:layers`, () => {
             _self.getSideBySideModeStatus().then(lastState => {
+                moduleState.baseOpacity = lastState.baseOpacity ?? {};
+                _self.setOpacity();
                 if (validateModuleState(lastState)) {
                     _self.toggleSideBySideControl(lastState);
                 } else if (active) {
@@ -169,7 +173,7 @@ module.exports = module.exports = {
         })
 
         state.listen(MODULE_NAME, `side-by-side-mode-change`);
-
+        state.listen(MODULE_NAME, `opacity-change`);
     },
 
     getAvailableBaseLayers: () => {
@@ -228,7 +232,7 @@ module.exports = module.exports = {
         if (sideBySideControl) sideBySideControl.remove();
         sideBySideControl = false;
         overlayLayer = false;
-
+        backboneEvents.get().trigger(`${MODULE_NAME}:side-by-side-mode-change`);
         // Delete previously initialized side-by-side layers
         for (let key in cloud.get().map._layers) {
             if (`_vidi_twolayersatonce_sidebyside` in cloud.get().map._layers[key] && cloud.get().map._layers[key]._vidi_twolayersatonce_sidebyside) {
@@ -259,7 +263,6 @@ module.exports = module.exports = {
     },
 
 
-
     // returns a array of groupName from
     baseLayerGroupNames() {
         if (!_self.hasBaseLayerGroup())
@@ -282,7 +285,7 @@ module.exports = module.exports = {
         }
         return false;
     },
-    buildLayerHtmlNode(layerId, layerName, tooltip, displayInfo, abstract, ingroup=false) {
+    buildLayerHtmlNode(layerId, layerName, tooltip, displayInfo, abstract, ingroup = false) {
         const sideBySideLayerControl = _self.getSideBySideLayerControl(layerId);
         return `<li class="list-group-item js-base-layer-control d-flex align-items-center${ingroup ? `px-3 border-start-0 border-end-0` : ``}">
                     <div class="d-flex align-items-center gap-1 me-auto">
@@ -301,6 +304,9 @@ module.exports = module.exports = {
                             data-baselayer-name="${layerName}"
                             data-baselayer-info="${abstract}"
                             class="info-label btn btn-sm btn-outline-secondary"><i class="bi bi-info-square pe-none"></i></button>
+                    </div>
+                    <div class="range">
+                        <input data-gc2-base-id="${layerId}" type="range" min="1" max="100" value="${moduleState.baseOpacity[layerId] ?? 100}" class="js-opacity-slider-base form-range">
                     </div>
                 </li>`;
 
@@ -347,7 +353,7 @@ module.exports = module.exports = {
         return (twoLayersAtOnceEnabled) ?
             `<div class='base-layer-item' data-gc2-side-by-side-base-id='${layerId}' style='float: left;'>
                     <input type='radio' class="form-check-input" name='side-by-side-baselayers' value='${layerId}' ${valueContent}>
-            </div>`:
+            </div>` :
             ``;
     },
 
@@ -363,8 +369,6 @@ module.exports = module.exports = {
             // Add base layers controls, not in group
             let appendedCode = ``;
             for (const bl of window.setBaseLayers) {
-
-
                 let layerId = false;
                 let layerName = false;
                 if (typeof bl.type !== "undefined" && bl.type === "XYZ") {
@@ -386,7 +390,6 @@ module.exports = module.exports = {
                 let displayInfo = (bl.abstract ? `visible` : `hidden`);
                 let tooltip = (bl.abstract ? $(bl.abstract).text() : ``);
                 appendedCode += _self.buildLayerHtmlNode(layerId, layerName, tooltip, displayInfo, bl.abstract);
-
             }
             appendedCode += _self.buildLayerHtmlInGroup();
 
@@ -563,7 +566,16 @@ module.exports = module.exports = {
 
                     drawTwoLayersAtOnce();
                 });
-
+                // Opacity slider
+                const slider = document.querySelectorAll(`.js-opacity-slider-base`);
+                slider.forEach(s => s.addEventListener('input', (e) => {
+                    const sliderValue = (parseFloat(e.target.value) / 100);
+                    const layerKey = s.dataset.gc2BaseId;
+                    layerTreeUtils.applyOpacityToLayer(sliderValue, layerKey, cloud, backboneEvents);
+                    moduleState.baseOpacity[layerKey] = e.target.value;
+                    backboneEvents.get().trigger(`${MODULE_NAME}:opacity-change`);
+                }))
+                _self.setOpacity();
                 resolve();
             });
         });
@@ -575,13 +587,11 @@ module.exports = module.exports = {
      * @return {Promise}
      */
     getSideBySideModeStatus: () => {
-        let result = new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             state.getModuleState(MODULE_NAME).then(initialState => {
                 resolve(initialState);
             });
         });
-
-        return result;
     },
 
     /**
@@ -616,6 +626,7 @@ module.exports = module.exports = {
             }
         }
 
+        state.baseOpacity = moduleState.baseOpacity;
         return state;
     },
 
@@ -623,6 +634,9 @@ module.exports = module.exports = {
      * Applies externally provided state
      */
     applyState: (newState) => {
+        moduleState.baseOpacity = newState.baseOpacity ?? {};
+        _self.resetOpacity();
+        _self.setOpacity();
         if (newState === false) {
             let availableBaseLayers = _self.getAvailableBaseLayers();
             if (Array.isArray(availableBaseLayers) && availableBaseLayers.length > 0) {
@@ -669,10 +683,10 @@ module.exports = module.exports = {
             if (bl.id === id) {
 
                 // Set defaults for base layers
-                let BLattribution = bl.attribution? bl.attribution : "";
-                let BLminZoom = bl.minZoom? bl.minZoom : 0;
-                let BLmaxZoom = bl.maxZoom? bl.maxZoom : 20;
-                let BLmaxNativeZoom = bl.maxNativeZoom? bl.maxNativeZoom : 18;
+                let BLattribution = bl.attribution ? bl.attribution : "";
+                let BLminZoom = bl.minZoom ? bl.minZoom : 0;
+                let BLmaxZoom = bl.maxZoom ? bl.maxZoom : 20;
+                let BLmaxNativeZoom = bl.maxNativeZoom ? bl.maxNativeZoom : 18;
 
 
                 if (bl?.type === "WMTS") {
@@ -730,6 +744,22 @@ module.exports = module.exports = {
             bounds = polygon(arr);
         } else {
             bounds = null;
+        }
+    },
+    setOpacity: () => {
+        for (const [layerKey, value] of Object.entries(moduleState.baseOpacity)) {
+            layerTreeUtils.applyOpacityToLayer((parseFloat(value) / 100), layerKey, cloud, backboneEvents);
+            try {
+                document.querySelector(`[data-gc2-base-id="${layerKey}"].js-opacity-slider-base`).value = value;
+            } catch (e) {}
+        }
+    },
+    resetOpacity: () => {
+        for (const layerKey of baseLayers) {
+            layerTreeUtils.applyOpacityToLayer(1, layerKey, cloud, backboneEvents);
+            try {
+                document.querySelector(`[data-gc2-base-id="${layerKey}"].js-opacity-slider-base`).value = 100;
+            } catch (e) {}
         }
     }
 };
