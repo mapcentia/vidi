@@ -815,6 +815,7 @@ module.exports = {
                     });
                 } else {
                     $.each(sortObject(fieldConf), (name, property) => {
+                        let metaDataForField = metaDataKeys[keyWithOutPrefix].fields[property.key] ? metaDataKeys[keyWithOutPrefix].fields[property.key] : null;
                         if (property.value.querable) {
                             let value = feature.properties[property.key];
                             // Only set field template if property is set or not empty string OR if 'replaceNull' helper is used, which will replace nulls
@@ -912,10 +913,18 @@ module.exports = {
                                     }
                                 }
                             }
+                            // If metaDataForField.restrictions has an array, we get the related values
+                            else if (metaDataForField && metaDataForField.restriction && Array.isArray(metaDataForField.restriction)) {
+                                property.restrictions = metaDataForField.restriction;
+                                let restriction = property.restrictions.find(restriction => restriction.value === value);
+                                if (restriction) {
+                                    value = restriction.alias;
+                                }
+                            }
                             fields.push({title: property.value.alias || property.key, value});
                             fieldLabel = (property.value.alias !== null && property.value.alias !== "") ? property.value.alias : property.key;
                             if (feature.properties[property.key] !== undefined) {
-                                out.push([property.key, property.value.sort_id, fieldLabel, property.value.link, property.value.template, property.value.content]);
+                                out.push([property.key, property.value.sort_id, fieldLabel, property.value.link, property.value.template, property.value.content, property.restrictions || null]);
                             }
                         }
                     });
@@ -937,6 +946,7 @@ module.exports = {
                             link: property[3],
                             template: property[4],
                             content: property[5],
+                            restrictions: property[6]
                         })
                     });
                     first = false;
@@ -1012,17 +1022,29 @@ module.exports = {
      */
     makeDraggable: (popup) => {
         const map = cloud.get().map
+        const wrapper = '.leaflet-popup-content-wrapper'
+        const popupContent = popup._container.querySelector(wrapper);
+        
+        // Only apply dragging behavior to content wrapper, not children
+        popupContent.style.cursor = 'move';
+        popupContent.children[0].style.cursor = 'auto';
+        
         const draggable = new L.Draggable(popup._container, popup._wrapper);
-        // change cursor class
-        $(".leaflet-popup-content-wrapper").css('cursor', 'move');
+        
+        // Handle mousedown event to check if it should start dragging
+        popup._container.addEventListener('mousedown', function(e) {
+            // drag only on the wrapper class
+            if (!e.target.classList.contains(wrapper.replace('.', ''))) {
+                draggable.disable();
+                setTimeout(() => draggable.enable(), 100); // Re-enable after interaction
+            }
+        });
         draggable.on('dragstart', function (e) {
-            //on first drag, remove the pop-up tip
             $(".leaflet-popup-tip-container").hide();
         });
         draggable.on('dragend', function (e) {
-            // set the new position
             popup.setLatLng(map.layerPointToLatLng(e.target._newPos));
-        });
+        });     
         draggable.enable();
     },
 
