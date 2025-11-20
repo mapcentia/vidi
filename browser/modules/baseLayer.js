@@ -375,6 +375,7 @@ module.exports = module.exports = {
             // Add base layers controls, not in group
             let appendedCode = ``;
             for (const bl of window.setBaseLayers) {
+                moduleState.baseOpacity[bl.id] = moduleState.baseOpacity[bl.id] ?? bl.opacity;
                 let layerId = false;
                 let layerName = false;
                 if (typeof bl.type !== "undefined" && bl.type === "XYZ") {
