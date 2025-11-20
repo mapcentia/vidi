@@ -46,10 +46,7 @@ let mode;
 let defaultMode;
 let bindEvent;
 let bounds;
-
-let moduleState = {
-    baseOpacity: {}
-}
+let baseOpacity = {}
 
 /**
  * Checks if the module state has correct structure
@@ -163,7 +160,7 @@ module.exports = module.exports = {
 
         backboneEvents.get().once(`allDoneLoading:layers`, () => {
             _self.getSideBySideModeStatus().then(lastState => {
-                moduleState.baseOpacity = lastState.baseOpacity ?? {};
+                baseOpacity = lastState.baseOpacity ?? {};
                 _self.setOpacity();
                 if (validateModuleState(lastState)) {
                     _self.toggleSideBySideControl(lastState);
@@ -288,7 +285,7 @@ module.exports = module.exports = {
     },
     buildLayerHtmlNode(layerId, layerName, tooltip, displayInfo, abstract, ingroup = false) {
         const sideBySideLayerControl = _self.getSideBySideLayerControl(layerId);
-        const opacity = moduleState.baseOpacity[layerId] ?? 100;
+        const opacity = baseOpacity[layerId] ?? 100;
         return `<li class="list-group-item js-base-layer-control d-flex flex-column gap-1">
                     <div class="d-flex align-items-center${ingroup ? `px-3 border-start-0 border-end-0` : ``}">
                         <div class="d-flex align-items-center gap-1 me-auto">
@@ -375,8 +372,8 @@ module.exports = module.exports = {
             // Add base layers controls, not in group
             let appendedCode = ``;
             for (const bl of window.setBaseLayers) {
-                if (typeof moduleState.baseOpacity[bl.id] === "undefined") {
-                    moduleState.baseOpacity[bl.id] = bl.opacity ?? 100;
+                if (typeof baseOpacity[bl.id] === "undefined") {
+                    baseOpacity[bl.id] = bl.opacity ?? 100;
                 }
                 let layerId = false;
                 let layerName = false;
@@ -581,7 +578,7 @@ module.exports = module.exports = {
                     const sliderValue = (parseFloat(e.target.value) / 100);
                     const layerKey = s.dataset.gc2BaseId;
                     layerTreeUtils.applyOpacityToLayer(sliderValue, layerKey, cloud, backboneEvents);
-                    moduleState.baseOpacity[layerKey] = e.target.value;
+                    baseOpacity[layerKey] = e.target.value;
                     backboneEvents.get().trigger(`${MODULE_NAME}:opacity-change`);
                 }))
                 resolve();
@@ -635,7 +632,7 @@ module.exports = module.exports = {
             }
         }
 
-        state.baseOpacity = moduleState.baseOpacity;
+        state.baseOpacity = baseOpacity;
         return state;
     },
 
@@ -643,7 +640,7 @@ module.exports = module.exports = {
      * Applies externally provided state
      */
     applyState: (newState) => {
-        moduleState.baseOpacity = newState.baseOpacity ?? {};
+        baseOpacity = newState.baseOpacity ?? {};
         _self.resetOpacity();
         _self.setOpacity();
         if (newState === false) {
@@ -756,7 +753,7 @@ module.exports = module.exports = {
         }
     },
     setOpacity: () => {
-        for (const [layerKey, value] of Object.entries(moduleState.baseOpacity)) {
+        for (const [layerKey, value] of Object.entries(baseOpacity)) {
             layerTreeUtils.applyOpacityToLayer((parseFloat(value) / 100), layerKey, cloud, backboneEvents);
             try {
                 document.querySelector(`[data-gc2-base-id="${layerKey}"].js-opacity-slider-base`).value = value;
@@ -775,7 +772,7 @@ module.exports = module.exports = {
         }
     },
     showOpacityControl: () => {
-        for (const [layerKey, value] of Object.entries(moduleState.baseOpacity)) {
+        for (const [layerKey, value] of Object.entries(baseOpacity)) {
             try {
                 if (parseInt(value) < 100) {
                     document.getElementById(`collapse-${layerKey}`).classList.add('show');
