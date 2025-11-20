@@ -20,6 +20,7 @@ var cloud, setting, baseLayer, setBaseLayer, switchLayer, legend, print, draw, a
  * @type {*|exports|module.exports}
  */
 var urlparser = require('./urlparser');
+const layerTreeUtils = require("./layerTree/utils");
 
 /**
  * @type {string}
@@ -297,6 +298,13 @@ module.exports = {
                             dataType: "json", method: "get", url: '/api/postdata/', data: {
                                 k: parr.join()
                             }, scriptCharset: "utf-8", success: function (response) {
+                                // Set base layer opacity
+                                backboneEvents.get().once(`layerTree:ready`, () => {
+                                    for (const [layerKey, value] of Object.entries(response.data.state.modules.baseLayer.baseOpacity)) {
+                                        layerTreeUtils.applyOpacityToLayer((parseFloat(value) / 100), layerKey, cloud, backboneEvents);
+                                        console.log(layerKey, value);
+                                    }
+                                });
                                 // Server replies have different structure
                                 if (!(`anchor` in response.data) && !(`bounds` in response.data) && `data` in response.data && response.data.data) {
                                     if (`anchor` in response.data.data && `bounds` in response.data.data) {

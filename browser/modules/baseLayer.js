@@ -288,7 +288,7 @@ module.exports = module.exports = {
     },
     buildLayerHtmlNode(layerId, layerName, tooltip, displayInfo, abstract, ingroup = false) {
         const sideBySideLayerControl = _self.getSideBySideLayerControl(layerId);
-        const opacity = moduleState.baseOpacity[layerId] ?? "100";
+        const opacity = moduleState.baseOpacity[layerId] ?? 100;
         return `<li class="list-group-item js-base-layer-control d-flex flex-column gap-1">
                     <div class="d-flex align-items-center${ingroup ? `px-3 border-start-0 border-end-0` : ``}">
                         <div class="d-flex align-items-center gap-1 me-auto">
@@ -375,7 +375,9 @@ module.exports = module.exports = {
             // Add base layers controls, not in group
             let appendedCode = ``;
             for (const bl of window.setBaseLayers) {
-                moduleState.baseOpacity[bl.id] = moduleState.baseOpacity[bl.id] ?? bl.opacity;
+                if (typeof moduleState.baseOpacity[bl.id] === "undefined") {
+                    moduleState.baseOpacity[bl.id] = bl.opacity ?? 100;
+                }
                 let layerId = false;
                 let layerName = false;
                 if (typeof bl.type !== "undefined" && bl.type === "XYZ") {
