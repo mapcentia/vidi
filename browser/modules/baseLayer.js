@@ -288,15 +288,17 @@ module.exports = module.exports = {
     },
     buildLayerHtmlNode(layerId, layerName, tooltip, displayInfo, abstract, ingroup = false) {
         const sideBySideLayerControl = _self.getSideBySideLayerControl(layerId);
-        return `<li class="list-group-item js-base-layer-control d-flex align-items-center${ingroup ? `px-3 border-start-0 border-end-0` : ``}">
-                    <div class="d-flex align-items-center gap-1 me-auto">
-                        <div class='base-layer-item' data-gc2-base-id='${layerId}'>
-                            <input type='radio' class="form-check-input" name='baselayers' value='${layerId}' ${layerId === activeBaseLayer ? `checked=""` : ``}> 
+        const opacity = moduleState.baseOpacity[layerId] ?? "100";
+        return `<li class="list-group-item js-base-layer-control d-flex flex-column gap-1">
+                    <div class="d-flex align-items-center${ingroup ? `px-3 border-start-0 border-end-0` : ``}">
+                        <div class="d-flex align-items-center gap-1 me-auto">
+                            <div class='base-layer-item' data-gc2-base-id='${layerId}'>
+                                <input type='radio' class="form-check-input" name='baselayers' value='${layerId}' ${layerId === activeBaseLayer ? `checked=""` : ``}> 
+                            </div>
+                            ${sideBySideLayerControl}
+                            <div>${layerName}</div>
                         </div>
-                        ${sideBySideLayerControl}
-                        <div>${layerName}</div>
-                    </div>
-                    <div>
+                        <button style="display: ${sideBySideLayerControl === '' ? 'inline' : 'none'}" class="btn btn-outline-secondary btn-sm me-1" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-${layerId}" aria-expanded="true"><i class="bi bi-droplet"></i></button>
                         <button
                             data-toggle="tooltip"
                             data-bs-placement="right"
@@ -304,11 +306,14 @@ module.exports = module.exports = {
                             style="visibility: ${displayInfo};"
                             data-baselayer-name="${layerName}"
                             data-baselayer-info="${abstract}"
-                            class="info-label btn btn-sm btn-outline-secondary"><i class="bi bi-info-square pe-none"></i></button>
+                            class="info-label btn btn-sm btn-outline-secondary"><i class="bi bi-info-square pe-none"></i>
+                        </button>
                     </div>
-                    <div class="range" style="display: ${sideBySideLayerControl === '' ? 'inline': 'none' }">
-                        <input data-gc2-base-id="${layerId}" type="range" min="1" max="100" value="${moduleState.baseOpacity[layerId] ?? 100}" class="js-opacity-slider-base form-range">
-                    </div>
+                    <div id="collapse-${layerId}" class="collapse">
+                        <div class="range" style="display: ${sideBySideLayerControl === '' ? 'inline' : 'none'}">
+                            <input data-gc2-base-id="${layerId}" type="range" min="1" max="100" value="${opacity}" class="js-opacity-slider-base form-range">
+                        </div>
+                  </div>
                 </li>`;
 
     },
@@ -578,6 +583,7 @@ module.exports = module.exports = {
                 }))
                 resolve();
             });
+            _self.setOpacity();
         });
     },
 
@@ -751,15 +757,28 @@ module.exports = module.exports = {
             layerTreeUtils.applyOpacityToLayer((parseFloat(value) / 100), layerKey, cloud, backboneEvents);
             try {
                 document.querySelector(`[data-gc2-base-id="${layerKey}"].js-opacity-slider-base`).value = value;
-            } catch (e) {}
+            } catch (e) {
+            }
         }
+        _self.showOpacityControl();
     },
     resetOpacity: () => {
         for (const layerKey of baseLayers) {
             layerTreeUtils.applyOpacityToLayer(1, layerKey, cloud, backboneEvents);
             try {
                 document.querySelector(`[data-gc2-base-id="${layerKey}"].js-opacity-slider-base`).value = 100;
-            } catch (e) {}
+            } catch (e) {
+            }
+        }
+    },
+    showOpacityControl: () => {
+        for (const [layerKey, value] of Object.entries(moduleState.baseOpacity)) {
+            try {
+                if (parseInt(value) < 100) {
+                    document.getElementById(`collapse-${layerKey}`).classList.add('show');
+                }
+            } catch (e) {
+            }
         }
     }
 };
