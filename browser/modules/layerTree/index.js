@@ -718,7 +718,7 @@ module.exports = {
             let layer = cloud.get().map._layers[key];
             if (`id` in layer && layer.id) {
                 if (`options` in layer && layer.options && `opacity` in layer.options) {
-                    if (isNaN(layer.options.opacity) === false) {
+                    if (isNaN(layer.options.opacity) === false && typeof opacitySettings !== 'undefined') {
                         opacitySettings[layer.id] = layer.options.opacity;
                     }
                 }
