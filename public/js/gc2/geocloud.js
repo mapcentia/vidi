@@ -2001,7 +2001,10 @@ geocloud = (function () {
         };
         this.addMVTBaselayer = function (style, conf) {
             var l = new L.maplibreGL({
-                style
+                style,
+                canvasContextAttributes: {
+                    preserveDrawingBuffer: true
+                }
             });
             l.id = conf.name;
             l.baseLayer = true;
