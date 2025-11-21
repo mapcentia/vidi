@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2025.11.2] - 2025-21-11
+### Added
+- Opacity control for base layers with sliders and manage state persistence
+
 ## [2025.11.1] - 2025-13-11
 ### Changed
 - Upgrade `react` dependencies to version 18.3.1.
