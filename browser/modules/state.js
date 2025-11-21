@@ -302,7 +302,6 @@ module.exports = {
                                 backboneEvents.get().once(`layerTree:ready`, () => {
                                     for (const [layerKey, value] of Object.entries(response.data.state.modules.baseLayer.baseOpacity)) {
                                         layerTreeUtils.applyOpacityToLayer((parseFloat(value) / 100), layerKey, cloud, backboneEvents);
-                                        console.log(layerKey, value);
                                     }
                                 });
                                 // Server replies have different structure

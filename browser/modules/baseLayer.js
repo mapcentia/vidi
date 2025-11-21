@@ -286,6 +286,7 @@ module.exports = module.exports = {
     buildLayerHtmlNode(layerId, layerName, tooltip, displayInfo, abstract, ingroup = false) {
         const sideBySideLayerControl = _self.getSideBySideLayerControl(layerId);
         const opacity = baseOpacity[layerId] ?? 100;
+        const layerType = window.setBaseLayers.find(bl => bl.id === layerId).type;
         return `<li class="list-group-item js-base-layer-control d-flex flex-column gap-1">
                     <div class="d-flex align-items-center${ingroup ? `px-3 border-start-0 border-end-0` : ``}">
                         <div class="d-flex align-items-center gap-1 me-auto">
@@ -295,7 +296,9 @@ module.exports = module.exports = {
                             ${sideBySideLayerControl}
                             <div>${layerName}</div>
                         </div>
-                        <button style="display: ${sideBySideLayerControl === '' ? 'inline' : 'none'}" class="btn btn-outline-secondary btn-sm me-1" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-${layerId}" aria-expanded="true"><i class="bi bi-droplet"></i></button>
+                        <button style="display: ${sideBySideLayerControl === '' ? 'inline' : 'none'}" class="btn btn-outline-secondary btn-sm me-1 ${layerType === 'MVT' ? 'd-none' : ''}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-${layerId}" aria-expanded="true">
+                            <i class="bi bi-droplet"></i>
+                        </button>
                         <button
                             data-toggle="tooltip"
                             data-bs-placement="right"
@@ -306,8 +309,8 @@ module.exports = module.exports = {
                             class="info-label btn btn-sm btn-outline-secondary"><i class="bi bi-info-square pe-none"></i>
                         </button>
                     </div>
-                    <div id="collapse-${layerId}" class="collapse">
-                        <div class="range" style="display: ${sideBySideLayerControl === '' ? 'inline' : 'none'}">
+                    <div id="collapse-${layerId}" class="collapse ${sideBySideLayerControl === '' ? '' : 'd-none'}">
+                        <div class="range">
                             <input data-gc2-base-id="${layerId}" type="range" min="1" max="100" value="${opacity}" class="js-opacity-slider-base form-range">
                         </div>
                   </div>
