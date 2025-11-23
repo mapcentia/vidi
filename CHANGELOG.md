@@ -9,6 +9,9 @@ and this project adheres to [CalVer](https://calver.org/).
 ### Added
 - Opacity control for base layers with sliders and manage state persistence
 
+### Fixed
+- Printing and screenshotting now works with MapLibre GL base layers.
+
 ## [2025.11.1] - 2025-13-11
 ### Changed
 - Upgrade `react` dependencies to version 18.3.1.
