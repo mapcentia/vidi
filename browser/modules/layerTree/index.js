@@ -762,6 +762,7 @@ module.exports = {
     /**
      * Applies externally provided state
      * @param newState
+     * @param dt
      * @returns {newState}
      */
     applyState: (newState, dt = false) => {
@@ -845,6 +846,9 @@ module.exports = {
      * @param {Object} forcedState             Externally provided state of the layerTree
      * @param {Array}  ignoredInitialStateKeys Keys of the initial state that should be ignored
      *
+     * @param dontRegisterEvents
+     * @param filter
+     * @param dt
      * @returns {Promise}
      */
     create: (forcedState = false, ignoredInitialStateKeys = [], dontRegisterEvents = false, filter = null, dt = false) => {
@@ -1068,6 +1072,7 @@ module.exports = {
                                 if (`activeLayers` in forcedState) {
                                     activeLayers = forcedState.activeLayers;
                                 }
+                                console.log("activeLayers", activeLayers)
 
                                 let existingMeta = meta.getMetaData(filter);
                                 if (`data` in existingMeta) {

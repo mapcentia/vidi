@@ -166,7 +166,19 @@ function print(key, q, req, response, outputPng = false, frame = 0, count, retur
                                 }
 
                                 console.log(msg.text());
-                                if (msg.text().indexOf(`Vidi is now loaded`) !== -1) {
+                                if (msg.text().indexOf(`No active layers in print`) !== -1) { // Print as soon Vidi is loaded
+                                    go = true;
+                                }
+                                if (msg.text().indexOf(`Active layers in print`) !== -1) { // Wait until layers from snapshot is loaded
+                                    go = false; // Wait for overlays to load
+                                }
+
+                                if (
+                                    // Print as soon Vidi is done loading
+                                    (msg.text().indexOf(`Vidi is now loaded`) !== -1 && go) ||
+                                    // Wait until all overlays and basemap are loaded
+                                    (msg.text().indexOf(`Layers all loaded L`) !== -1 && !go)
+                                ) {
                                     if (!check) {
                                         check = true;
                                         console.log('App was loaded, generating PDF');

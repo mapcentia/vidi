@@ -525,6 +525,12 @@ module.exports = {
 
                                 if (`state` in response.data && response.data.state) {
                                     if (`modules` in response.data.state && `layerTree` in response.data.state.modules && `order` in response.data.state.modules.layerTree) {
+                                        if (response.data.state.modules.layerTree.activeLayers.length === 0) {
+                                            console.log("No active layers in print");
+                                        } else {
+                                            console.log("Active layers in print");
+                                            activeLayersInSnapshot = true;
+                                        }
                                         layerTree.applyState(response.data.state.modules.layerTree);
                                     }
                                 }
