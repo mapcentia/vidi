@@ -129,12 +129,18 @@ module.exports = {
                                 </div>`;
         document.querySelector('body').insertAdjacentHTML('beforeend', html);
         const toast = new bootstrap.Toast(document.getElementById('load-checking-toast'),  {delay: 99999999, autohide: false});
-        document.querySelector('.close-info-toast').onclick = function () {toast.hide()}
-        window.loadCheckingInterval = setInterval(() => {
-            if (!toast.isShown()) {
-                toast.show();
-            }
-        }, window.vidiConfig.loadCheckingInterval)
+        const pauseTimer = () => {
+            window.loadCheckingInterval = setTimeout(() => {
+                if (!toast.isShown()) {
+                    toast.show();
+                }
+            }, window.vidiConfig.loadCheckingInterval)
+        }
+        document.querySelector('.close-info-toast').onclick = function () {
+            toast.hide();
+            pauseTimer();
+        }
+        pauseTimer();
         // Set session from URL
         if (typeof urlVars.session === "string") {
             const MAXAGE = (config?.sessionMaxAge || 86400) / 86400; // In days

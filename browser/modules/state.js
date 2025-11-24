@@ -185,7 +185,7 @@ module.exports = {
                 backboneEvents.get().once("allDoneLoading:layers", function (e) {
                     legend.init().then(function () {
                         console.log("Vidi is now loaded");// Vidi is now fully loaded
-                        clearTimeout(window.loadingTimeout)
+                        // clearTimeout(window.loadingTimeout)
                         window.status = "all_loaded";
                         if (window.vidiConfig?.initFunction) {
                             let func = Function('"use strict";return (' + window.vidiConfig.initFunction + ')')();
@@ -579,7 +579,7 @@ module.exports = {
 
                 // At this point we believe that Vidi is started successfully
                 console.log('Clear load checking interval');
-                clearInterval(window.loadCheckingInterval)
+                clearTimeout(window.loadCheckingInterval)
                 try {
                     new bootstrap.Toast(document.getElementById('load-checking-toast')).hide();
                 } catch (e) {}
