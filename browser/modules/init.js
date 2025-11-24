@@ -113,6 +113,7 @@ module.exports = {
         // If Vidi loads, the timeout will be cleared in State
         window.loadingTimeout = setTimeout(() => {
             console.log("Timeout reached. Sending 'Vidi is now loaded' message");
+            console.log("Layers all loaded L");
         },  window.vidiConfig.loadingTimeout);
 
         // In a interval of x seconds, check if the app is still loading. If it is, send the 'still loading' message.

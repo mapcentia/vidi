@@ -1072,7 +1072,6 @@ module.exports = {
                                 if (`activeLayers` in forcedState) {
                                     activeLayers = forcedState.activeLayers;
                                 }
-                                console.log("activeLayers", activeLayers)
 
                                 let existingMeta = meta.getMetaData(filter);
                                 if (`data` in existingMeta) {
