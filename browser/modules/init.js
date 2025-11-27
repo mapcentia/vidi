@@ -101,7 +101,7 @@ module.exports = {
             statelessDraw: false,
             openLayerTreeGroups: [],
             crs: 'EPSG:3857',
-            loadingTimeout: 30000,
+            loadingTimeout: 45000,
             loadCheckingInterval: 15000,
             mode: 0,
         };
