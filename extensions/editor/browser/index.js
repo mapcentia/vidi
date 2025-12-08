@@ -164,7 +164,8 @@ module.exports = {
         }
         try {
             editorFormRoot = createRoot(EDITOR_FORM_CONTAINER_ID);
-        } catch (e) {}
+        } catch (e) {
+        }
 
         if (drawTooltip) {
             $("body").append(`<div id="editor-tooltip" style="position: fixed; float: left; display: none">${drawTooltip}</div>`);
@@ -275,6 +276,7 @@ module.exports = {
                         }, 200)
                     }
                 }
+
                 poll();
             }
         });
@@ -383,7 +385,7 @@ module.exports = {
      * @param f_geometry_column
      * @returns {{}}
      */
-    createFormObj: function (fields, pkey, f_geometry_column, fieldConf) {
+    createFormObj: function (fields, pkey, f_geometry_column, fieldConf, relType) {
         let required = [];
         let properties = {};
         let uiSchema = {};
@@ -395,8 +397,15 @@ module.exports = {
                     title = fieldConf[key].alias;
                 }
                 properties[key] = {title, type: `string`};
-                if (fields[key]?.is_nullable === false) {
-                    required.push(key);
+                if (relType === 'TABLE' || relType === 'MATVIEW') {
+
+                    if (fields[key]?.is_nullable === false) {
+                        required.push(key);
+                    }
+                } else {
+                    if (fieldConf[key]?.is_nullable === false) {
+                        required.push(key);
+                    }
                 }
 
                 if (fields[key]) {
@@ -509,7 +518,8 @@ module.exports = {
         let me = this, React = require('react'), ReactDOM = require('react-dom'),
             schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
             metaDataKeys = meta.getMetaDataKeys(),
-            type = metaDataKeys[schemaQualifiedName].type;
+            type = metaDataKeys[schemaQualifiedName].type,
+            relType = metaDataKeys[schemaQualifiedName].rel_type;
 
         let fields = false;
         if (metaDataKeys[schemaQualifiedName].fields) {
@@ -534,7 +544,7 @@ module.exports = {
 
             backboneEvents.get().trigger('block:infoClick');
             // Create schema for attribute form
-            let formBuildInformation = this.createFormObj(fields, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column, fieldconf);
+            let formBuildInformation = this.createFormObj(fields, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column, fieldconf, relType);
             const schema = formBuildInformation.schema;
             const uiSchema = formBuildInformation.uiSchema;
 
@@ -798,10 +808,10 @@ module.exports = {
             serviceWorkerCheck();
             let React = require('react');
 
-            let ReactDOM = require('react-dom');
-
             let me = this, schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
-                metaDataKeys = meta.getMetaDataKeys();
+                metaDataKeys = meta.getMetaDataKeys(),
+                relType = metaDataKeys[schemaQualifiedName].rel_type;
+
 
             let fields = false;
             if (metaDataKeys[schemaQualifiedName].fields) {
@@ -1027,7 +1037,7 @@ module.exports = {
             };
 
             // Create schema for attribute form
-            let formBuildInformation = this.createFormObj(fields, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column, fieldconf);
+            let formBuildInformation = this.createFormObj(fields, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column, fieldconf, relType);
             const schema = formBuildInformation.schema;
             const uiSchema = formBuildInformation.uiSchema;
 
