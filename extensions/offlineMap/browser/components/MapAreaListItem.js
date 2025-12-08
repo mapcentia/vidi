@@ -56,7 +56,7 @@ class MapAreaListItem extends React.Component {
                     }
                 ]
             };
-    
+
             this.extentLayer = L.geoJSON(extentFeature).addTo(this.mapObj);
         } else {
             this.mapObj.removeLayer(this.extentLayer);
@@ -67,19 +67,19 @@ class MapAreaListItem extends React.Component {
 
     render() {
         let smallButtonStyle = {
-            paddingLeft: '0px',
-            paddingRight: '0px'
+            paddingLeft: '3px',
+            paddingRight: '3px'
         };
 
         let date = new Date(this.data.created_at.toString());
         let dateFormatted = (date.getMonth() + 1) + "-" + date.getDate() + "-" + date.getFullYear();
 
         let showExtentButton = (<button type="button" onClick={this.onToggleShowExtent} className="btn btn-sm btn-primary" style={smallButtonStyle} title={__("Show extent")}>
-            <i className="material-icons">&#xE8F4;</i>
+            <i className="bi bi-eye"></i>
         </button>);
         if (this.state.showExtent === true) {
             showExtentButton = (<button type="button" onClick={this.onToggleShowExtent} className="btn btn-sm btn-primary" style={smallButtonStyle} title={__("Hide extent")}>
-                <i className="material-icons">&#xE8F5;</i>
+                <i className="bi-eye-slash"></i>
             </button>);
         }
 
@@ -90,10 +90,10 @@ class MapAreaListItem extends React.Component {
                 <div className="btn-group" role="group">
                     {showExtentButton}
                     <button type="button" onClick={this.props.onRefresh} className="btn btn-sm btn-primary" style={smallButtonStyle} title={__("Refresh")}>
-                        <i className="material-icons">&#xE5D5;</i>
+                        <i className="bi bi-arrow-clockwise"></i>
                     </button>
                     <button type="button" onClick={this.props.onDelete} className="btn btn-sm btn-primary" style={smallButtonStyle} title={__("Delete")}>
-                        <i className="material-icons">&#xE872;</i>
+                        <i className="bi bi-trash"></i>
                     </button>
                 </div>
             </td>

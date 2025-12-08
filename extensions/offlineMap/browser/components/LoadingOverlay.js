@@ -34,7 +34,7 @@ class MapAreaListItem extends React.Component {
         let content = false;
         if (this.props.tilesLoaded === this.props.tilesLeftToLoad) {
             content = (<div>
-                <h4><i className="material-icons" style={{color: 'green'}}>&#xE5CA;</i> {__("Done")}</h4>
+                <h4><i className="bi bi-check" style={{color: 'green'}}></i> {__("Done")}</h4>
                 {this.props.children}
             </div>);
         } else {
