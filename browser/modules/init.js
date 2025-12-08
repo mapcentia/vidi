@@ -104,6 +104,7 @@ module.exports = {
             loadingTimeout: 45000,
             loadCheckingInterval: 15000,
             mode: 0,
+            layerTreeFilterPlaceholder: null,
         };
         // Set default for unset props
         for (let prop in defaults) {
