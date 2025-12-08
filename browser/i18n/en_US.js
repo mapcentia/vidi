@@ -245,6 +245,8 @@ module.exports = {
         "Layer filter": "Layer filter",
         "New block": "New block",
         "Filter is required for showing data": "Filter is required for showing data",
+        "More tools": "More tools",
+        "Change layer type": "Change layer type",
 
         // Base layers
         "Side-by-side mode": "Side-by-side mode",
@@ -279,6 +281,7 @@ module.exports = {
         "You need to plot at least two points": "You need to plot at least two points",
         "You need to plot at least three points": "You need to plot at least three points",
         "Required": "Required",
+        "Add new feature to layer": "Add new feature to layer",
 
         // Editor - ImageUploadWidget
         "Drop file here, or click to select file to upload": "Drop file here, or click to select file to upload",

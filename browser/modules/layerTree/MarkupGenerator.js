@@ -21,7 +21,7 @@ class MarkupGenerator {
 
     getAddButton(layerKeyWithGeom) {
         return (`<button type="button" data-gc2-key="${layerKeyWithGeom}" style="display: none;" 
-            data-toggle="tooltip" data-bs-placement="left" title="Add new feature to layer" data-layer-type="tile" class="btn btn-secondary btn-sm gc2-add-feature gc2-edit-tools">
+            data-toggle="tooltip" data-bs-placement="top" title="${__("Add new feature to layer")}" data-layer-type="tile" class="btn btn-secondary btn-sm gc2-add-feature gc2-edit-tools">
             <i class="bi bi-plus-square"></i>
         </button>`);
     }
@@ -131,12 +131,12 @@ class MarkupGenerator {
                     <div class="d-flex align-items-center gap-1"> 
                                                                         <div>${layerTypeSelector}</div>
                                                                         ${addButton}
-                                                                        <button data-toggle="tooltip" data-bs-placement="left" title="${tooltip}" style="display: ${displayInfo};" class="btn btn-secondary btn-sm info-label" data-gc2-id="${layerKey}"><i class="bi bi-info-square"></i></a></button>
+                                                                        <button data-toggle="tooltip" data-bs-placement="top" title="${__(`Info`)}" style="display: ${displayInfo};" class="btn btn-outline-secondary btn-sm info-label" data-gc2-id="${layerKey}"><i class="bi bi-info-square"></i></a></button>
                                                     </div>
      
                 </div>
                 <div class="d-flex align-items-center align-self-baseline ms-1">
-                    <button data-bs-animation="0" disabled class="btn btn-outline-secondary btn-sm js-settings-panel-btn" role="button" data-bs-toggle="collapse" id="settings-${layer.f_table_schema}-${layer.f_table_name}-btn" data-bs-target="#settings-${layer.f_table_schema}-${layer.f_table_name}" aria-expanded="false" aria-controls="collapseExample"><i class="bi bi-three-dots"></i></button>
+                    <button data-toggle="tooltip" data-bs-placement="top" title="${__(`More tools`)}" disabled class="btn btn-secondary btn-sm js-settings-panel-btn" role="button" data-bs-toggle="collapse" id="settings-${layer.f_table_schema}-${layer.f_table_name}-btn" data-bs-target="#settings-${layer.f_table_schema}-${layer.f_table_name}" aria-expanded="false" aria-controls="collapseExample"><i class="bi bi-three-dots"></i></button>
                     <i class="bi-grip-vertical ms-auto layer-move-vert"></i>
                 </div>
             </div>  
@@ -145,46 +145,46 @@ class MarkupGenerator {
                                                                                                   <div class="js-toggles-container" style="display: none;">
                                                                                                   <div style="display: flex; align-items: center;" class="gap-1">
                                                                                                   <span id="layer-tools-search">
-                                                                                                  <button href="javascript:void(0);" class="${toolBtnClass} js-toggle-search js-toggle-btn" >
-                                                                                                  <i data-container="body" data-toggle="tooltip" data-bs-placement="right" title="${__(`Search`)}" class="bi bi-search"></i>
+                                                                                                  <button href="javascript:void(0);" class="${toolBtnClass} js-toggle-search js-toggle-btn" data-toggle="tooltip" data-bs-placement="right" title="${__(`Search`)}">
+                                                                                                  <i data-container="body" class="bi bi-search"></i>
                                                                                                   </button>
                                                                                                   </span>
                                                                                                   <span id="layer-tools-opacity">
-                                                                                                  <button href="javascript:void(0);" class="${toolBtnClass} js-toggle-opacity js-toggle-btn">
-                                                                                                  <i data-container="body" data-toggle="tooltip" data-bs-placement="right" title="${__(`Opacity`)}" class="bi bi-droplet"></i>
+                                                                                                  <button href="javascript:void(0);" class="${toolBtnClass} js-toggle-opacity js-toggle-btn" data-toggle="tooltip" data-bs-placement="right" title="${__(`Opacity`)}">
+                                                                                                  <i data-container="body" class="bi bi-droplet"></i>
                                                                                                   </button>
                                                                                                   </span>
                                                                                                   <span id="layer-tools-labels">
-                                                                                                  <button href="javascript:void(0);" class="${toolBtnClass} js-toggle-labels js-toggle-btn">
-                                                                                                  <i data-container="body" data-toggle="tooltip" data-bs-placement="right" title="${__(`Labels`)}" class="bi bi-tag"></i>
+                                                                                                  <button href="javascript:void(0);" class="${toolBtnClass} js-toggle-labels js-toggle-btn" data-toggle="tooltip" data-bs-placement="right" title="${__(`Labels`)}">
+                                                                                                  <i data-container="body" class="bi bi-tag"></i>
                                                                                                   </button>
                                                                                                   </span>
                                                                                                   <span id="layer-tools-table">
-                                                                                                  <button href="javascript:void(0);" class="${toolBtnClass} js-toggle-table js-toggle-btn">
-                                                                                                  <i data-container="body" data-toggle="tooltip" data-bs-placement="right" title="${__(`Table view`)}" class="bi bi-table"></i>
+                                                                                                  <button href="javascript:void(0);" class="${toolBtnClass} js-toggle-table js-toggle-btn" data-toggle="tooltip" data-bs-placement="right" title="${__(`Table view`)}">
+                                                                                                  <i data-container="body" class="bi bi-table"></i>
                                                                                                   </button>
                                                                                                   </span>
                                                                                                   <span id="layer-tools-style">
-                                                                                                  <button href="javascript:void(0);" class="${toolBtnClass} js-toggle-style js-toggle-btn">
-                                                                                                  <i data-container="body" data-toggle="tooltip" data-bs-placement="right" title="${__(`Style function`)}" class="bi bi-palette"></i>
+                                                                                                  <button href="javascript:void(0);" class="${toolBtnClass} js-toggle-style js-toggle-btn" data-toggle="tooltip" data-bs-placement="right" title="${__(`Style function`)}">
+                                                                                                  <i data-container="body" class="bi bi-palette"></i>
                                                                                                   </button>
                                                                                                   </span>
                                                                                                   <span id="layer-tools-load">
-                                                                                                  <button href="javascript:void(0);" class="${toolBtnClass} js-toggle-load-strategy js-toggle-btn">
-                                                                                                  <i data-container="body" data-toggle="tooltip" data-bs-placement="right" title="${__(`Load strategy`)}" class="bi bi-cloud"></i>
+                                                                                                  <button href="javascript:void(0);" class="${toolBtnClass} js-toggle-load-strategy js-toggle-btn" data-toggle="tooltip" data-bs-placement="right" title="${__(`Load strategy`)}">
+                                                                                                  <i data-container="body" class="bi bi-cloud"></i>
                                                                                                   </button>
                                                                                                   </span>
                                                                                                   <span id="layer-tools-filters">
-                                                                                                  <button href="javascript:void(0);" class="${toolBtnClass} js-toggle-filters position-relative js-toggle-btn">
-                                                                                                  <i data-container="body" data-toggle="tooltip" data-bs-placement="right" title="${__(`Filters`)}" class="bi bi-filter"></i>
+                                                                                                  <button href="javascript:void(0);" class="${toolBtnClass} js-toggle-filters position-relative js-toggle-btn" data-toggle="tooltip" data-bs-placement="right" title="${__(`Filters`)}">
+                                                                                                  <i data-container="body" class="bi bi-filter"></i>
                                                                                                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none">
                                                                                                   <span class="js-toggle-filters-number-of-filters">!</span>
                                                                                                                     </span>
                                                                                                   </button>
                                                                                                   </span>
                                                                                                   <span id="layer-tools-download">
-                                                                                                  <button href="javascript:void(0);" class="${toolBtnClass} js-toggle-download js-toggle-btn">
-                                                                                                  <i data-container="body" data-toggle="tooltip" data-bs-placement="right" title="${__(`Download`)}" class="bi bi-download"></i>
+                                                                                                  <button href="javascript:void(0);" class="${toolBtnClass} js-toggle-download js-toggle-btn" data-toggle="tooltip" data-bs-placement="right" title="${__(`Download`)}">
+                                                                                                  <i data-container="body" class="bi bi-download"></i>
                                                                                                   </button>
                                                                                                   </span>
                                                                                                   </div>
@@ -262,7 +262,7 @@ class MarkupGenerator {
             selectors.push(`<li><a class="js-layer-type-selector dropdown-item" data-layer-type="webgl" href="javascript:void(0)">${ICONS[LAYER.WEBGL]} ${__('WebGL')}</a></li>`);
         }
 
-        return (`<div class="dropdown">
+        return (`<div class="dropdown" data-toggle="tooltip" data-bs-placement="top" title="${__(`Change layer type`)}">
             <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button"
                 data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                 <span class="js-dropdown-label">${selectorLabel}</span>

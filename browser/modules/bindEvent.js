@@ -209,7 +209,7 @@ module.exports = {
 
         backboneEvents.get().on("allDoneLoading:layers", function () {
             const openFirstIfNotOpen = () => {
-                setTimeout(()=> {
+                setTimeout(() => {
                     const e = document.querySelector('.js-toggle-layer-panel');
                     if (window.vidiConfig.expandFirstInLayerTree === true && e?.classList?.contains("collapsed")) {
                         e.click();
@@ -217,7 +217,7 @@ module.exports = {
                 }, 0)
             }
             const openLayerTreeGroupsIfNotOpen = () => {
-                setTimeout(()=> {
+                setTimeout(() => {
                     if (window.vidiConfig.openLayerTreeGroups.length > 0) {
                         window.vidiConfig.openLayerTreeGroups.forEach(g => {
                             const e = document.querySelector(`[data-gc2-group-id="${g}"] .js-toggle-layer-panel`);
@@ -367,7 +367,7 @@ module.exports = {
 
         // Init some GUI stuff after modules are loaded
         // ============================================
-        // $('[data-toggle=tooltip]').tooltip();
+        $('[data-toggle=tooltip]').tooltip();
 
         touchScroll('.tab-pane');
         touchScroll('#info-modal-body-wrapper');
