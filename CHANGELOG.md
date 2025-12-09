@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2025.12.0] - 2025-9-12
+### Added
+- New config option `layerTreeFilterPlaceholder` for setting the placeholder text in the layer tree filter input field.
+- Editor: New config option for setting default values in newly created objects. A value can be set directly or from a user property:
+```json
+{
+    "extensionConfig": {
+        "editor": {
+            "defaultValues": {
+                "my_dynamic_field": "$user.properties.my_property",
+                "my_static_field": "some value"
+            }
+        }
+    }
+}
+```
+- Editor: If a `character varying` field has max length > 255, then a `textarea` widget is used instead of `input`.
+
+### Fixed
+- Tooltips in embed template is now above the layer tree and can be seen.
+- Missing tooltips added.
+
 ## [2025.11.3] - 2025-24-11
 ### Fixed
 - Print now always waits for overlay to load, instead of relying on the timeout.
