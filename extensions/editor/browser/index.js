@@ -461,7 +461,7 @@ module.exports = {
                             };
                             break;
                         case `character varying`:
-                            if (fields[key].character_maximum_length > 255) {
+                            if (fields[key].character_maximum_length > 1024) {
                                 uiSchema[key] = {
                                     'ui:widget': 'textarea'
                                 };
