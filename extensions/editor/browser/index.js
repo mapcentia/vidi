@@ -383,6 +383,7 @@ module.exports = {
      * @param fieldConf
      * @param pkey
      * @param f_geometry_column
+     * @param relType
      * @returns {{}}
      */
     createFormObj: function (fields, pkey, f_geometry_column, fieldConf, relType) {
@@ -637,6 +638,25 @@ module.exports = {
                 });
             };
 
+            const defaultValuesConf = window.vidiConfig?.extensionConfig?.editor?.defaultValues;
+            let defaultValues = {};
+            if (defaultValuesConf) {
+                for (const [key, value] of Object.entries(defaultValuesConf)) {
+                    let v;
+                    if (typeof value === 'string' && value.startsWith("$user.properties.")) {
+                        v = session.getProperties()[value.split(".")[2]];
+                    } else {
+                        v = defaultValuesConf[key];
+                    }
+                    if (!v) {
+                        defaultValues[key] = "";
+                        console.warn(`No default value for ${key}`);
+                    } else {
+                        defaultValues[key] = v;
+                    }
+
+                }
+            }
             // Slide panel with attributes in and render form component
             editorFormRoot.render(
                 <Form
@@ -646,7 +666,8 @@ module.exports = {
                     uiSchema={uiSchema}
                     widgets={widgets}
                     onSubmit={onSubmit}
-                    transformErrors={transformErrors}>
+                    transformErrors={transformErrors}
+                    formData={defaultValues}>
                     <div className="buttons">
                         <button type="submit"
                                 className="btn btn btn-success mb-2 mt-2 w-100">{__("Submit")}</button>
@@ -1051,6 +1072,7 @@ module.exports = {
                 }
                 eventFeatureParsed[key] = value;
             }
+            console.log('Editor: eventFeatureParsed', eventFeatureParsed);
             editorFormRoot.render(
                 <Form
                     validator={validator}

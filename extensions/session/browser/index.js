@@ -11,6 +11,7 @@ let backboneEvents;
 let layerTree;
 let sessionInstance = false;
 let userName = null;
+let properties = null;
 let isStatusChecked = false;
 let exId = `login-modal-body`;
 const config = require('./../../../config/config.js');
@@ -34,7 +35,6 @@ module.exports = {
     init: function () {
         let parent = this;
         let React = require('react');
-        let ReactDOM = require('react-dom');
         let modal;
         try {
             modal = new bootstrap.Offcanvas('#login-modal');
@@ -115,6 +115,7 @@ module.exports = {
                             $(".gc2-session-unlock").hide();
                             $(".gc2-session-btn-text").html(data.screen_name)
                             userName = data.screen_name;
+                            properties = data.properties;
                             parent.update();
                             // Close the off canvas
                             setTimeout(() => modal.hide(), 400);
@@ -168,6 +169,7 @@ module.exports = {
                             $(".gc2-session-lock").show();
                             $(".gc2-session-unlock").hide();
                             userName = data.status.screen_name;
+                            properties = data.status.properties;
                             $(".gc2-session-btn-text").html(userName);
                             // True if auto login happens. When reload meta
                             if (data?.screen_name && data?.status?.authenticated) {
@@ -288,6 +290,10 @@ module.exports = {
 
     getUserName: function () {
         return userName;
+    },
+
+    getProperties: function () {
+        return properties;
     },
 
     isStatusChecked: () => {
