@@ -438,13 +438,11 @@ module.exports = {
                             uiSchema[key] = {
                                 'ui:widget': 'datetime'
                             };
-                            properties[key].default = dayjs().format("YYYY-MM-DDTHH:mm"); // Default is required in IOS Safari
                             break;
                         case `timestamp with time zone`:
                             uiSchema[key] = {
                                 'ui:widget': 'datetime'
                             };
-                            properties[key].default = dayjs().format("YYYY-MM-DDTHH:mmZ"); // Default is required in IOS Safari
                             break;
                         case `boolean`:
                             properties[key].type = `boolean`;
@@ -651,7 +649,7 @@ module.exports = {
                 for (const [key, value] of Object.entries(defaultValuesConf)) {
                     let v;
                     if (typeof value === 'string' && value.startsWith("$user.properties.")) {
-                        v = session.getProperties()[value.split(".")[2]];
+                        v = session.getProperties()?.[value.split(".")[2]];
                     } else {
                         v = defaultValuesConf[key];
                     }
@@ -1072,11 +1070,6 @@ module.exports = {
             cloud.get().map.closePopup();
             let eventFeatureParsed = {};
             for (let [key, value] of Object.entries(eventFeatureCopy.properties)) {
-                if (fields[key].type.includes("timestamp with time zone")) {
-                    value = value ? dayjs(value).format("YYYY-MM-DDTHH:mmZ") : dayjs().format("YYYY-MM-DDTHH:mmZ"); // Default is required in IOS Safari
-                } else if (fields[key].type.includes("timestamp without time zone")) {
-                    value = value ? dayjs(value).format("YYYY-MM-DDTHH:mm") : dayjs().format("YYYY-MM-DDTHH:mm"); // Default is required in IOS Safari
-                }
                 eventFeatureParsed[key] = value;
             }
             console.log('Editor: eventFeatureParsed', eventFeatureParsed);
