@@ -460,6 +460,13 @@ module.exports = {
                                 'ui:widget': 'textarea'
                             };
                             break;
+                        case `character varying`:
+                            if (fields[key].character_maximum_length > 255) {
+                                uiSchema[key] = {
+                                    'ui:widget': 'textarea'
+                                };
+                            }
+                            break;
                     }
                     uiSchema[key]["ui:placeholder"] = fieldConf[key]?.desc;
                 }
