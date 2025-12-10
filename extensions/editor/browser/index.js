@@ -597,7 +597,7 @@ module.exports = {
                     if (geoJson.properties[key] === undefined) {
                         geoJson.properties[key] = null;
                     }
-                    if ((fields[key].type === "bytea" ||
+                    if (fields[key]?.type && (fields[key].type === "bytea" ||
                             fields[key].type.startsWith("time") ||
                             fields[key].type.startsWith("time") ||
                             fields[key].type.startsWith("character") ||
@@ -1018,7 +1018,7 @@ module.exports = {
                         if (GeoJSON.properties[key] === undefined) {
                             GeoJSON.properties[key] = null;
                         }
-                        if ((fields[key].type === "bytea" ||
+                        if (fields[key]?.type && (fields[key].type === "bytea" ||
                                 fields[key].type.startsWith("time") ||
                                 fields[key].type.startsWith("time") ||
                                 fields[key].type.startsWith("character") ||
