@@ -2033,7 +2033,8 @@ geocloud = (function () {
         };
 
         this.addWmsBaseLayer = function (url, conf) {
-            var l = new L.TileLayer.WMS(url, conf);
+            var l = new L.nonTiledLayer.wms(url, conf);
+            // var l = new L.TileLayer.WMS(url, conf);
             l.id = conf.name;
             l.baseLayer = true;
             lControl.addBaseLayer(l, conf.name);

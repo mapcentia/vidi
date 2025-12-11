@@ -24,7 +24,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - Editor: If a `character varying` field has max length > 255, then a `textarea` widget is used instead of `input`.
 
 ### Fixed
-- Tooltips in embed template is now above the layer tree and can be seen.
+- Tooltips in embed template are now above the layer tree and can be seen.
 - Missing tooltips added.
 
 ## [2025.11.3] - 2025-24-11

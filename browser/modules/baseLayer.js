@@ -738,6 +738,8 @@ module.exports = module.exports = {
                         minZoom: BLminZoom,
                         maxZoom: BLmaxZoom,
                         maxNativeZoom: BLmaxNativeZoom,
+                        singleTile: true,
+                        pane: 'tilePane',
                     });
                 } else {
                     result = cloud.get().addBaseLayer(bl.id, bl.db, bl.config, bl.host || null);
