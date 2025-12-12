@@ -1896,103 +1896,69 @@ geocloud = (function () {
                 if (((baseLayerName.search("google") > -1 && googleMapAdded[baseLayerName] !== undefined)) ||
                     ((baseLayerName.search("yandex") > -1 && yandexMapAdded[baseLayerName] !== undefined)) ||
                     (baseLayerName.search("google") === -1 && baseLayerName.search("yandex") === -1)) {
-                    switch (MAPLIB) {
-                        case "ol2":
-                            me.showLayer(baseLayerName);
-                            me.map.setBaseLayer(me.getLayersByName(baseLayerName));
-                            break;
-                        case "ol3":
-                            layers = me.map.getLayers();
-                            for (var i = 0; i < layers.getLength(); i++) {
-                                if (layers.a[i].baseLayer === true) {
-                                    layers.a[i].set("visible", false);
-                                }
+
+                    layers = lControl._layers;
+
+                    // Remove every base layer from the map and layer control
+                    for (let key in layers) {
+                        if (layers.hasOwnProperty(key)) {
+                            if (layers[key].layer.baseLayer === true && me.map.hasLayer(layers[key].layer)) {
+                                me.map.removeLayer(layers[key].layer);
                             }
-                            me.getLayersByName(baseLayerName).set("visible", true);
-                            break;
-                        case "leaflet":
-                            layers = lControl._layers;
+                        }
+                    }
 
-                            // Remove every base layer from the map and layer control
-                            for (var key in layers) {
-                                if (layers.hasOwnProperty(key)) {
-                                    if (layers[key].layer.baseLayer === true && me.map.hasLayer(layers[key].layer)) {
-                                        me.map.removeLayer(layers[key].layer);
-                                    }
-                                }
+                    // Removing duplicated layers from the layer control, so no extra events of deleted layers will be called
+                    var existingLayer = [];
+                    for (let key in layers) {
+                        if (layers[key].layer.baseLayer === true) {
+                            if (existingLayer.indexOf(layers[key].name) === -1) {
+                                existingLayer.push(layers[key].name);
+                            } else {
+                                lControl.removeLayer(layers[key].layer);
                             }
+                        }
+                    }
 
-                            // Removing duplicated layers from the layer control, so no extra events of deleted layers will be called
-                            var existingLayer = [];
-                            for (var key in layers) {
-                                if (layers[key].layer.baseLayer === true) {
-                                    if (existingLayer.indexOf(layers[key].name) === -1) {
-                                        existingLayer.push(layers[key].name);
-                                    } else {
-                                        lControl.removeLayer(layers[key].layer);
-                                    }
-                                }
-                            }
+                    var layerWasFound = false;
+                    // Adding specified layer to map
+                    for (let key in layers) {
+                        if (layers.hasOwnProperty(key)) {
+                            if (layers[key].layer.baseLayer === true) {
+                                if (layers[key].layer.id === baseLayerName) {
+                                    layerWasFound = true;
 
-                            var layerWasFound = false;
-                            // Adding specified layer to map
-                            for (var key in layers) {
-                                if (layers.hasOwnProperty(key)) {
-                                    if (layers[key].layer.baseLayer === true) {
-                                        if (layers[key].layer.id === baseLayerName) {
-                                            layerWasFound = true;
-
-                                            if (!loadEvent) {
-                                                loadEvent = function () {
-                                                }
-                                            }
-
-                                            if (!loadingEvent) {
-                                                loadingEvent = function () {
-                                                }
-                                            }
-
-                                            if (!tileErrorEvent) {
-                                                tileErrorEvent = function () {
-                                                }
-                                            }
-
-                                            layers[key].layer.off("load");
-                                            layers[key].layer.on("load", loadEvent);
-
-                                            layers[key].layer.off("loading");
-                                            layers[key].layer.on("loading", loadingEvent);
-
-                                            layers[key].layer.off("tileerror");
-                                            layers[key].layer.on("tileerror", tileErrorEvent);
-
-                                            me.map.addLayer(layers[key].layer);
-
-                                            if (layers[key]?.layer?._glMap) {
-                                                let libreMap = layers[key].layer.getMaplibreMap();
-                                                if (libreMap) {
-                                                    libreMap.off("sourcedata");
-                                                    libreMap.on("sourcedata", (e) => {
-                                                            if (e.isSourceLoaded) {
-                                                                loadEvent();
-                                                            } else {
-                                                                // console.log('LOADING');
-                                                                // loadingEvent();
-                                                            }
-                                                        }
-                                                    )
-                                                }
-                                            }
+                                    if (!loadEvent) {
+                                        loadEvent = function () {
                                         }
                                     }
+
+                                    if (!loadingEvent) {
+                                        loadingEvent = function () {
+                                        }
+                                    }
+
+                                    if (!tileErrorEvent) {
+                                        tileErrorEvent = function () {
+                                        }
+                                    }
+
+                                    layers[key].layer.off("load");
+                                    layers[key].layer.on("load", loadEvent);
+
+                                    layers[key].layer.off("loading");
+                                    layers[key].layer.on("loading", loadingEvent);
+
+                                    layers[key].layer.off("tileerror");
+                                    layers[key].layer.on("tileerror", tileErrorEvent);
+
+                                    me.map.addLayer(layers[key].layer);
                                 }
                             }
-
-                            if (layerWasFound === false && layerNotFoundEvent) {
-                                layerNotFoundEvent();
-                            }
-
-                            break;
+                        }
+                    }
+                    if (layerWasFound === false && layerNotFoundEvent) {
+                        layerNotFoundEvent();
                     }
                 } else {
                     setTimeout(poll, 200);
@@ -2009,7 +1975,6 @@ geocloud = (function () {
             l.id = conf.name;
             l.baseLayer = true;
             lControl.addBaseLayer(l, conf.name);
-            this.showLayer(conf.name)
             return [l];
         };
 
@@ -2018,7 +1983,6 @@ geocloud = (function () {
             l.id = conf.name;
             l.baseLayer = true;
             lControl.addBaseLayer(l, conf.name);
-            this.showLayer(conf.name)
             return [l];
         };
 
@@ -2027,7 +1991,6 @@ geocloud = (function () {
             l.id = conf.name;
             l.baseLayer = true;
             lControl.addBaseLayer(l, conf.name);
-            this.showLayer(conf.name)
             return [l];
 
         };
@@ -2038,7 +2001,6 @@ geocloud = (function () {
             l.id = conf.name;
             l.baseLayer = true;
             lControl.addBaseLayer(l, conf.name);
-            this.showLayer(conf.name)
             return [l];
         }
 
