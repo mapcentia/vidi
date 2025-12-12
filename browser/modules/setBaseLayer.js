@@ -147,7 +147,7 @@ module.exports = module.exports = {
                     return true;
                 }
             }).map(v => v.id)
-            let layerListItems = window.vidiConfig.baseLayers.map(v => v.id)
+            let layerListItems = window.vidiConfig.baseLayers.map(v => v.id);
             cloud.get().setBaseLayer(str, (e) => {
                 // _tileReady() in src/layer/tile/GridLayer.js@879 is firing more than once on first load for
                 // MVT layers, so the single time event firing guard was added
