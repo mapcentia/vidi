@@ -1996,8 +1996,13 @@ geocloud = (function () {
         };
 
         this.addWmsBaseLayer = function (url, conf) {
-            var l = new L.nonTiledLayer.wms(url, conf);
-            // var l = new L.TileLayer.WMS(url, conf);
+            let l;
+            if (conf?.singleTile) {
+                conf.pane = 'tilePane';
+                l = new L.nonTiledLayer.wms(url, conf);
+            } else {
+                l = new L.TileLayer.WMS(url, conf);
+            }
             l.id = conf.name;
             l.baseLayer = true;
             lControl.addBaseLayer(l, conf.name);
