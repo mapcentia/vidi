@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2025.12.1] - 2025-12-12
+### Added
+- WMS base layers can now be configured with a `singleTile` option. If set to `true`, the layer will be fetched as a single tile.
+
 ## [2025.12.0] - 2025-9-12
 ### Added
 - New config option `layerTreeFilterPlaceholder` for setting the placeholder text in the layer tree filter input field.
