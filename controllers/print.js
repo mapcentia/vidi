@@ -166,6 +166,7 @@ function print(key, q, req, response, outputPng = false, frame = 0, count, retur
                                 }
 
                                 console.log(msg.text());
+                                let go;
                                 if (msg.text().indexOf(`No active layers in print`) !== -1) { // Print as soon Vidi is loaded
                                     go = true;
                                 }
@@ -177,7 +178,7 @@ function print(key, q, req, response, outputPng = false, frame = 0, count, retur
                                     // Print as soon Vidi is done loading
                                     (msg.text().indexOf(`Vidi is now loaded`) !== -1 && go) ||
                                     // Wait until all overlays and basemap are loaded
-                                    (msg.text().indexOf(`Layers all loaded L`) !== -1 && !go)
+                                    (msg.text().startsWith(`Layers all loaded`) && !go)
                                 ) {
                                     if (!check) {
                                         check = true;
