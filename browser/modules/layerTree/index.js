@@ -3297,16 +3297,20 @@ module.exports = {
                 let html,
                     name = layer.f_table_name || null,
                     title = layer.f_table_title || null,
+                    lastmodified = layer.lastmodified || null,
                     abstract = layer.f_table_abstract || null;
+
+                if (lastmodified) {
+                    dayjs.locale('da');
+                    lastmodified = dayjs(lastmodified).format('DD.MM.YYYY HH:mm');
+                }
 
                 html = (parsedMeta !== null
                     && typeof parsedMeta.meta_desc !== "undefined"
                     && parsedMeta.meta_desc !== "") ?
                     marked(parsedMeta.meta_desc) : abstract;
 
-                dayjs.locale('da');
-
-                html = html ? mustache.render(html, parsedMeta) : "";
+                html = html ? mustache.render(html, {lastmodified}) : "";
 
                 $("#offcanvas-layer-desc-container").html(html);
                 $("#offcanvasLayerDesc h5").html(title || name);

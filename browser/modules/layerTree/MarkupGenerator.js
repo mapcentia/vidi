@@ -131,7 +131,7 @@ class MarkupGenerator {
                     <div class="d-flex align-items-center gap-1"> 
                                                                         <div>${layerTypeSelector}</div>
                                                                         ${addButton}
-                                                                        <button data-toggle="tooltip" data-bs-placement="top" title="${__(`Info`)}" style="display: ${displayInfo};" class="btn btn-outline-secondary btn-sm info-label" data-gc2-id="${layerKey}"><i class="bi bi-info-square"></i></a></button>
+                                                                        <button data-toggle="tooltip" data-bs-placement="top" title="${tooltip}" style="display: ${displayInfo};" class="btn btn-outline-secondary btn-sm info-label" data-gc2-id="${layerKey}"><i class="bi bi-info-square"></i></a></button>
                                                     </div>
      
                 </div>
