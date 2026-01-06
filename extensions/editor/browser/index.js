@@ -513,6 +513,7 @@ module.exports = {
     add: function (k, doNotRemoveEditor, isVector = false) {
         if (editedFeature) {
             alert("Ongoing edit. Please stop editing before starting a new one");
+            layerTree.getInfoOffCanvas().hide();
             return;
         }
 
@@ -822,8 +823,10 @@ module.exports = {
     edit: function (e, k, isVector = false) {
         if (editedFeature) {
             alert("Ongoing edit. Please stop editing before starting a new one");
+            layerTree.getInfoOffCanvas().hide();
             return;
         }
+        layerTree.getInfoOffCanvas().hide();
         isVectorLayer = isVector;
         _self.stopEdit();
         editedFeature = e;
@@ -1109,6 +1112,8 @@ module.exports = {
             }).catch(() => {
                 if (confirm(confirmMessage)) {
                     editFeature();
+                } else {
+                    _self.stopEdit();
                 }
             });
         }
