@@ -280,6 +280,7 @@ geocloud = (function () {
 
 
         this.load = function (doNotShowAlertOnError) {
+            me.dataHasChanged = false;
             try {
                 me.abort();
             } catch (e) {
@@ -315,82 +316,98 @@ geocloud = (function () {
             }
 
             me.loading();
-            xhr = $.ajax({
-                dataType: (this.defaults.jsonp) ? 'jsonp' : 'json',
-                async: this.defaults.async,
-                data: ('q=' + (this.base64 ? base64url(sql) + "&base64=true" : encodeURIComponent(sql)) +
-                    '&srs=' + this.defaults.projection + '&lifetime=' + this.defaults.lifetime + '&client_encoding=' + this.defaults.clientEncoding +
-                    '&key=' + this.defaults.key + '&custom_data=' + this.custom_data),
-                jsonp: (this.defaults.jsonp) ? 'jsonp_callback' : false,
-                url: this.host + this.uri + '/' + this.db,
-                type: this.defaults.method,
-                timeout: 10000,
-                success: function (response) {
+            let retries = 3;
+            const makeRequest = function () {
+                let isRetrying = false;
+                xhr = $.ajax({
+                    dataType: (me.defaults.jsonp) ? 'jsonp' : 'json',
+                    async: me.defaults.async,
+                    data: ('q=' + (me.base64 ? base64url(sql) + "&base64=true" : encodeURIComponent(sql)) +
+                        '&srs=' + me.defaults.projection + '&lifetime=' + me.defaults.lifetime + '&client_encoding=' + me.defaults.clientEncoding +
+                        '&key=' + me.defaults.key + '&custom_data=' + me.custom_data),
+                    jsonp: (me.defaults.jsonp) ? 'jsonp_callback' : false,
+                    url: me.host + me.uri + '/' + me.db,
+                    type: me.defaults.method,
+                    timeout: 5000,
+                    success: function (response) {
 
-                    if (response.success === false && doNotShowAlertOnError === undefined) {
-                        alert(response.message);
-                    }
+                        if (response.success === false && doNotShowAlertOnError === undefined) {
+                            alert(response.message);
+                        }
 
-                    if (response.success === true) {
-                        if (response.features !== null) {
-                            response = me.transformResponse(response, me.id);
+                        if (response.success === true) {
+                            if (response.features !== null) {
+                                response = me.transformResponse(response, me.id);
 
-                            let clone = JSON.parse(JSON.stringify(response));
-                            delete clone.peak_memory_usage;
-                            delete clone._execution_time;
-                            let newHash = md5(JSON.stringify(clone));
-                            if (me.currentGeoJsonHash && me.currentGeoJsonHash === newHash) {
-                                console.log("Hashes match. Not reloading");
-                                me.dataHasChanged = false;
-                                return
-                            }
-                            me.geoJSON = clone;
-                            me.currentGeoJsonHash = newHash
-                            me.dataHasChanged = true;
+                                let clone = JSON.parse(JSON.stringify(response));
+                                delete clone.peak_memory_usage;
+                                delete clone._execution_time;
+                                let newHash = md5(JSON.stringify(clone));
+                                if (me.currentGeoJsonHash && me.currentGeoJsonHash === newHash) {
+                                    console.log("Hashes match. Not reloading");
+                                    me.dataHasChanged = false;
+                                    return
+                                }
+                                me.geoJSON = clone;
+                                me.currentGeoJsonHash = newHash
+                                me.dataHasChanged = true;
 
-                            //if (dynamicQueryIsUsed) {
-                            me.layer.clearLayers();
-                            //}
+                                //if (dynamicQueryIsUsed) {
+                                me.layer.clearLayers();
+                                //}
 
-                            if (me.maxFeaturesLimit !== false && me.onMaxFeaturesLimitReached !== false && parseInt(me.maxFeaturesLimit) > 0) {
-                                if (me.geoJSON.features.length >= parseInt(me.maxFeaturesLimit)) {
-                                    console.warn('SQL store: number of received features exceeds the specified limit (' + me.maxFeaturesLimit + '). Please use filters or adjust the limit.');
-                                    me.geoJSON.features = [];
-                                    response.features = [];
-                                    me.featuresLimitReached = true;
-                                    me.onMaxFeaturesLimitReached();
+                                if (me.maxFeaturesLimit !== false && me.onMaxFeaturesLimitReached !== false && parseInt(me.maxFeaturesLimit) > 0) {
+                                    if (me.geoJSON.features.length >= parseInt(me.maxFeaturesLimit)) {
+                                        console.warn('SQL store: number of received features exceeds the specified limit (' + me.maxFeaturesLimit + '). Please use filters or adjust the limit.');
+                                        me.geoJSON.features = [];
+                                        response.features = [];
+                                        me.featuresLimitReached = true;
+                                        me.onMaxFeaturesLimitReached();
+                                    } else {
+                                        me.featuresLimitReached = false;
+                                    }
                                 } else {
                                     me.featuresLimitReached = false;
                                 }
-                            } else {
-                                me.featuresLimitReached = false;
-                            }
 
-                            if (!me.clustering) {
-                                // In this case me.layer is L.geoJson
-                                if (me.hl) {
-                                    me.layerHL.addData(clone);
+                                if (!me.clustering) {
+                                    // In this case me.layer is L.geoJson
+                                    if (me.hl) {
+                                        me.layerHL.addData(clone);
+                                    }
+                                    me.layer.addData(clone);
+                                } else {
+                                    // In this case me.layer is L.markerClusterGroup
+                                    me.geoJsonLayer.addData(clone);
+                                    me.layer.addLayer(me.geoJsonLayer);
                                 }
-                                me.layer.addData(clone);
+                                me.layer.defaultOptions = me.layer.options; // So layer can be reset
+                                response = null;
                             } else {
-                                // In this case me.layer is L.markerClusterGroup
-                                me.geoJsonLayer.addData(clone);
-                                me.layer.addLayer(me.geoJsonLayer);
+                                me.geoJSON = null;
                             }
-                            me.layer.defaultOptions = me.layer.options; // So layer can be reset
-                            response = null;
+                        }
+                    },
+                    error: function (x, t, e) {
+                        if (retries > 0) {
+                            retries--;
+                            isRetrying = true;
+                            console.warn("SQL request failed, retrying... (" + retries + " retries left)");
+                            makeRequest();
                         } else {
-                            me.geoJSON = null;
+                            me.defaults.error.apply(me, [me, x, t, e]);
+                        }
+                    },
+                    complete: function (e) {
+                        if (!isRetrying) {
+                            if (me.dataHasChanged) {
+                                me.onLoad(me);
+                            }
                         }
                     }
-                },
-                error: this.defaults.error.bind(this, me),
-                complete: function (e) {
-                    if (me.dataHasChanged) {
-                        me.onLoad(me);
-                    }
-                }
-            });
+                });
+            };
+            makeRequest();
 
             return xhr;
         };
