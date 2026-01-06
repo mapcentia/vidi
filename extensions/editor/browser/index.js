@@ -665,6 +665,7 @@ module.exports = {
             // Slide panel with attributes in and render form component
             editorFormRoot.render(
                 <Form
+                    key={Date.now()}
                     validator={validator}
                     className="feature-attribute-editing-form"
                     schema={schema} noHtml5Validate
@@ -1075,6 +1076,7 @@ module.exports = {
             console.log('Editor: eventFeatureParsed', eventFeatureParsed);
             editorFormRoot.render(
                 <Form
+                    key={Date.now()}
                     validator={validator}
                     className="feature-attribute-editing-form"
                     schema={schema} noHtml5Validate
