@@ -317,7 +317,9 @@ geocloud = (function () {
 
             me.loading();
             let retries = 3;
+            let timeoutBase = 9000;
             const makeRequest = function () {
+                const timeout = timeoutBase / retries;
                 let isRetrying = false;
                 xhr = $.ajax({
                     dataType: (me.defaults.jsonp) ? 'jsonp' : 'json',
@@ -328,7 +330,7 @@ geocloud = (function () {
                     jsonp: (me.defaults.jsonp) ? 'jsonp_callback' : false,
                     url: me.host + me.uri + '/' + me.db,
                     type: me.defaults.method,
-                    timeout: 5000,
+                    timeout: timeout,
                     success: function (response) {
 
                         if (response.success === false && doNotShowAlertOnError === undefined) {
@@ -389,6 +391,9 @@ geocloud = (function () {
                         }
                     },
                     error: function (x, t, e) {
+                        if (t === 'abort') {
+                            return;
+                        }
                         if (retries > 0) {
                             retries--;
                             isRetrying = true;
@@ -408,7 +413,6 @@ geocloud = (function () {
                 });
             };
             makeRequest();
-
             return xhr;
         };
 
