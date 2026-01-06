@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2026.1.0] - 2026-6-1
+### Added
+- Added retry logic with exponential backoff to SQL requests in `geocloud.js` and improve error handling.
+
+### Fixed
+- Make editor form re-render again between adding/editing features. This was an unwanted effect from upgrading Reactjs to 18 and use of createRoot.
+
 ## [2025.12.1] - 2025-12-12
 ### Added
 - WMS base layers can now be configured with a `singleTile` option. If set to `true`, the layer will be fetched as a single tile.
