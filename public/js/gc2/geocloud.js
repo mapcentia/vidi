@@ -1974,6 +1974,12 @@ geocloud = (function () {
                                     layers[key].layer.on("tileerror", tileErrorEvent);
 
                                     me.map.addLayer(layers[key].layer);
+                                    try {
+                                        layers[key].layer.getMaplibreMap().off("load", loadEvent);
+                                        layers[key].layer.getMaplibreMap().on("load", loadEvent);
+                                    } catch (e) {
+                                        // Pass
+                                    }
                                 }
                             }
                         }

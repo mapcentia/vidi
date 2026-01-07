@@ -75,7 +75,7 @@ module.exports = module.exports = {
                         throw new Error(`Please set at least one base layer in configuration`);
                     }
 
-                    if (str.split(".")[1] && layerTreeUtils.isVectorTileLayerId(str) === false) {
+                    if (str.split(".")[1]) {
                         /*
                         // @todo Remove in next releases, currently if the GC2 layer is set as a base one, it should have been already added above
                         // If this is enabled, keep in mind that GC2 layers, enabled as base ones, should emit base layers events upon loading
@@ -141,7 +141,6 @@ module.exports = module.exports = {
             }
 
             let numberOfErroredTiles = 0, timerHasStarted = false;
-            let alreadyLoaded = false;
             let drawerItems = window.vidiConfig.baseLayers.filter(v => {
                 if (v?.inDrawer) {
                     return true;
@@ -149,12 +148,6 @@ module.exports = module.exports = {
             }).map(v => v.id)
             let layerListItems = window.vidiConfig.baseLayers.map(v => v.id);
             cloud.get().setBaseLayer(str, (e) => {
-                // _tileReady() in src/layer/tile/GridLayer.js@879 is firing more than once on first load for
-                // MVT layers, so the single time event firing guard was added
-                if (layerTreeUtils.isVectorTileLayerId(str)) {
-                    if (alreadyLoaded) return;
-                    alreadyLoaded = true;
-                }
                 // Re-arrange the fail-over arrays
                 let i1 = drawerItems.indexOf(str);
                 drawerItems = [...drawerItems.slice(i1), ...drawerItems.slice(0, i1)];
@@ -165,7 +158,6 @@ module.exports = module.exports = {
                 if (numberOfErroredTiles > 100) {
                     const message = `Base layer ${str} was loaded with errors (${numberOfErroredTiles} tiles failed to load), trying to load next layer`;
                     utils.showInfoToast(message);
-                    let alternativeLayer = false;
                     failedLayers.push(str);
                     if (utils.isEmbedEnabled()) {
                         if (window.vidiConfig.baselayerDrawer) {
@@ -188,9 +180,6 @@ module.exports = module.exports = {
                     }
                 }
             }, () => {
-                if (layerTreeUtils.isVectorTileLayerId(str)) {
-                    alreadyLoaded = false;
-                }
                 backboneEvents.get().trigger("startLoading:setBaselayer", str);
             }, () => {
                 numberOfErroredTiles++;
