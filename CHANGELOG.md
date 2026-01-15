@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2026.1.1] - 2026-15-1
+### Fixed
+- Regressions in print.
+
 ## [2026.1.0] - 2026-6-1
 ### Added
 - Added retry logic with exponential backoff to SQL requests in `geocloud.js` and improve error handling.
