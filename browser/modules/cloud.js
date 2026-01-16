@@ -69,6 +69,9 @@ module.exports = {
             maxBoundsViscosity: 1.0,
             preferCanvas: false,
             crs: getProjection(window.vidiConfig.crs),
+            // TODO set in config
+            // minZoom: 8,
+            // maxZoom: 19
         });
 
         let map = cloud.map;

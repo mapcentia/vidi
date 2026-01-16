@@ -1974,6 +1974,18 @@ geocloud = (function () {
                                     layers[key].layer.on("tileerror", tileErrorEvent);
 
                                     me.map.addLayer(layers[key].layer);
+                                    try {
+                                        // This does not mimic leaflet events, but good enough to get print to work
+                                        // "load" is only fired once when the map loads the first time and is ready.
+                                        // "sourcedataloading" is fired for each tile, not the layer as one.
+
+                                        // layers[key].layer.getMaplibreMap().off("sourcedataloading", loadingEvent);
+                                        // layers[key].layer.getMaplibreMap().on("sourcedataloading", loadingEvent);
+                                        layers[key].layer.getMaplibreMap().off("load", loadEvent);
+                                        layers[key].layer.getMaplibreMap().on("load", loadEvent);
+                                    } catch (e) {
+                                        // Pass
+                                    }
                                 }
                             }
                         }
