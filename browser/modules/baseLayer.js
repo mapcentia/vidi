@@ -284,6 +284,7 @@ module.exports = module.exports = {
         return false;
     },
     buildLayerHtmlNode(layerId, layerName, tooltip, displayInfo, abstract, ingroup = false) {
+        const layerIdEncoded = Base64.encode(layerId).replace(/=/g, "");
         const sideBySideLayerControl = _self.getSideBySideLayerControl(layerId);
         const opacity = baseOpacity[layerId] ?? 100;
         const layerType = window.setBaseLayers.find(bl => bl.id === layerId).type;
@@ -296,7 +297,7 @@ module.exports = module.exports = {
                             ${sideBySideLayerControl}
                             <div>${layerName}</div>
                         </div>
-                        <button style="display: ${sideBySideLayerControl === '' ? 'inline' : 'none'}" class="btn btn-outline-secondary btn-sm me-1 ${layerType === 'MVT' ? 'd-none' : ''}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-${layerId}" aria-expanded="true">
+                        <button style="display: ${sideBySideLayerControl === '' ? 'inline' : 'none'}" class="btn btn-outline-secondary btn-sm me-1 ${layerType === 'MVT' ? 'd-none' : ''}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-${layerIdEncoded}" aria-expanded="true">
                             <i class="bi bi-droplet"></i>
                         </button>
                         <button
@@ -309,7 +310,7 @@ module.exports = module.exports = {
                             class="info-label btn btn-sm btn-outline-secondary"><i class="bi bi-info-square pe-none"></i>
                         </button>
                     </div>
-                    <div id="collapse-${layerId}" class="collapse ${sideBySideLayerControl === '' ? '' : 'd-none'}">
+                    <div id="collapse-${layerIdEncoded}" class="collapse ${sideBySideLayerControl === '' ? '' : 'd-none'}">
                         <div class="range">
                             <input data-gc2-base-id="${layerId}" type="range" min="1" max="100" value="${opacity}" class="js-opacity-slider-base form-range">
                         </div>
@@ -779,7 +780,7 @@ module.exports = module.exports = {
         for (const [layerKey, value] of Object.entries(baseOpacity)) {
             try {
                 if (parseInt(value) < 100) {
-                    document.getElementById(`collapse-${layerKey}`).classList.add('show');
+                    document.getElementById(`collapse-${Base64.encode(layerKey).replace(/=/g, "")}`).classList.add('show');
                 }
             } catch (e) {
             }
