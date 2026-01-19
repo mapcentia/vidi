@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2026.1.2] - 2026-19-1
+### Fixed
+- Print now always waits for legend to load.
+- `api.filter` will not try to set widget state, if the widget is not rendered yet in the layer tree. This resulted in an error.
+
 ## [2026.1.1] - 2026-15-1
 ### Fixed
 - Regressions in print.
