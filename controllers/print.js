@@ -176,7 +176,7 @@ function print(key, q, req, response, outputPng = false, frame = 0, count, retur
                                     // Print as soon Vidi is done loading
                                     (msg.text().indexOf(`Vidi is now loaded`) !== -1 && go) ||
                                     // Wait until all overlays and basemap are loaded
-                                    (msg.text().indexOf(`Layers all loaded L`) !== -1 && !go)
+                                    (msg.text().indexOf(`Legend loaded`) !== -1 && !go)
                                 ) {
                                     if (!check) {
                                         check = true;

@@ -523,6 +523,7 @@ module.exports = {
                                     }
                                 });
 
+                                // Apply leyertree state
                                 if (`state` in response.data && response.data.state) {
                                     if (`modules` in response.data.state && `layerTree` in response.data.state.modules && `order` in response.data.state.modules.layerTree) {
                                         if (response.data.state.modules.layerTree.activeLayers.length === 0) {
@@ -533,8 +534,12 @@ module.exports = {
                                         }
                                         backboneEvents.get().once("allDoneLoading:layers", (e) => {
                                             setTimeout(() => {
-                                                console.log("STARTING LAYERS APPLY STATE");
                                                 layerTree.applyState(response.data.state.modules.layerTree);
+                                                backboneEvents.get().once("allDoneLoading:layers", (e) => {
+                                                    legend.init().then(function () {
+                                                        console.log("Legend loaded");
+                                                    })
+                                                });
                                             }, 0);
                                         });
                                     }
