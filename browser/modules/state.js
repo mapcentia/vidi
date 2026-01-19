@@ -531,7 +531,12 @@ module.exports = {
                                             console.log("Active layers in print");
                                             activeLayersInSnapshot = true;
                                         }
-                                        layerTree.applyState(response.data.state.modules.layerTree);
+                                        backboneEvents.get().once("allDoneLoading:layers", (e) => {
+                                            setTimeout(() => {
+                                                console.log("STARTING LAYERS APPLY STATE");
+                                                layerTree.applyState(response.data.state.modules.layerTree);
+                                            }, 0);
+                                        });
                                     }
                                 }
 
