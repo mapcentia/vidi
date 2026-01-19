@@ -132,7 +132,9 @@ module.exports = {
         // expose api
         api.filter = (l, f) => {
             _self.onApplyArbitraryFiltersHandler({"layerKey": l, "filters": f});
-            filterComp[l].setState({"arbitraryFilters": f});
+            if (typeof filterComp[l] === "object") {
+                filterComp[l].setState({"arbitraryFilters": f});
+            }
         }
 
         return this;
