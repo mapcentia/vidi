@@ -547,11 +547,6 @@ module.exports = {
 
                                 // If any added layers, then add them
                                 if (addedLayers.length > 0) {
-                                    // @todo Review
-                                    console.error(`Consider reviewing`);
-
-                                    meta.addMetaData({data: addedLayers});
-                                    layerTree.init();
                                     if (arr) {
                                         for (i = 0; i < arr.length; i++) {
                                             switchLayer.init(arr[i], true, true);
