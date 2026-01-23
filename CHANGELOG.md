@@ -7,7 +7,7 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ## [2026.1.3] - 2026-22-1
 ### Fixed
-- Dynamically added layer would not be filtered on print. E.g., from a snapshot where the layer was not added to the layer tree.
+- Dynamically added layer would not be filtered on print. E.g., from a snapshot where the layer was not in the layer tree before.
 
 ## [2026.1.2] - 2026-19-1
 ### Fixed
