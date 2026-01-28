@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2026.1.4] - 2026-28-1
+### Added
+- Symbols module: Support for deleting symbols in storage and tracking deletions in state sync.
+
 ## [2026.1.3] - 2026-22-1
 ### Fixed
 - Dynamically added layer would not be filtered on print. E.g., from a snapshot where the layer was not in the layer tree before.
