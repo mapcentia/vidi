@@ -83,21 +83,20 @@ let recreateStores = true;
 
 /**
  * Waits for an element to be available in the DOM using MutationObserver
- * @param {string} elementId - The ID of the element to wait for
+ * @param {string} selector - The ID of the element to wait for
  * @param {number} timeout - Maximum time to wait in milliseconds (default: 5000)
  * @returns {Promise<HTMLElement>} Promise that resolves with the element
  */
-const waitForElement = (elementId, timeout = 100) => {
-    console.log(elementId, timeout)
+const waitForElement = (selector, timeout = 100) => {
     return new Promise((resolve, reject) => {
-        const element = document.querySelector(elementId);
+        const element = document.querySelector(selector);
         if (element) {
             resolve(element);
             return;
         }
 
         const observer = new MutationObserver(() => {
-            const element = document.querySelector(elementId);
+            const element = document.querySelector(selector);
             if (element) {
                 observer.disconnect();
                 clearTimeout(timeoutId);
@@ -112,7 +111,7 @@ const waitForElement = (elementId, timeout = 100) => {
 
         const timeoutId = setTimeout(() => {
             observer.disconnect();
-            resolve(new Error(`Timeout waiting for element with id: ${elementId}`));
+            resolve(new Error(`Timeout waiting for element with id: ${selector}`));
         }, timeout);
     });
 };
