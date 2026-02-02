@@ -82,6 +82,41 @@ let filterComp = {};
 let lastFilter;
 let utils;
 let recreateStores = true;
+
+/**
+ * Waits for an element to be available in the DOM using MutationObserver
+ * @param {string} elementId - The ID of the element to wait for
+ * @param {number} timeout - Maximum time to wait in milliseconds (default: 5000)
+ * @returns {Promise<HTMLElement>} Promise that resolves with the element
+ */
+const waitForElement = (elementId, timeout = 5000) => {
+    return new Promise((resolve, reject) => {
+        const element = document.getElementById(elementId);
+        if (element) {
+            resolve(element);
+            return;
+        }
+
+        const observer = new MutationObserver(() => {
+            const element = document.getElementById(elementId);
+            if (element) {
+                observer.disconnect();
+                clearTimeout(timeoutId);
+                resolve(element);
+            }
+        });
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+
+        const timeoutId = setTimeout(() => {
+            observer.disconnect();
+            reject(new Error(`Timeout waiting for element with id: ${elementId}`));
+        }, timeout);
+    });
+};
 let moduleState = {
     isReady: false,
     wasBuilt: false,
@@ -3327,16 +3362,18 @@ module.exports = {
             // Toggle settings button active on/off
             // This is necessary bacause data-bs-toggle is already set to "collapse"
             // and can not be used to "button" also.
-            setTimeout(() => {
-                const settingsCollapsible = document.getElementById(`settings-${layer.f_table_schema}-${layer.f_table_name}`);
-                const btn = document.getElementById(`settings-${layer.f_table_schema}-${layer.f_table_name}-btn`);
-                settingsCollapsible?.addEventListener('shown.bs.collapse', event => {
-                    btn.classList.add('active');
+            const settingsId = `settings-${layer.f_table_schema}-${layer.f_table_name}`;
+            const btnId = `settings-${layer.f_table_schema}-${layer.f_table_name}-btn`;
+            Promise.all([waitForElement(settingsId), waitForElement(btnId)])
+                .then(([settingsCollapsible, btn]) => {
+                    settingsCollapsible.addEventListener('shown.bs.collapse', event => {
+                        btn.classList.add('active');
+                    });
+                    settingsCollapsible.addEventListener('hidden.bs.collapse', event => {
+                        btn.classList.remove('active');
+                    });
                 })
-                settingsCollapsible?.addEventListener('hidden.bs.collapse', event => {
-                    btn.classList.remove('active');
-                })
-            }, 100)
+                .catch(err => console.error('Error setting up settings toggle:', err));
         }
     },
 
