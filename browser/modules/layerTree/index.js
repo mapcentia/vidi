@@ -46,8 +46,10 @@ import {
 import MetaSettingForm from "./MetaSettingForm";
 import Download from './Download';
 import {getResolutions} from "../crs";
-import {createRoot} from 'react-dom/client';
+import { createRoot } from 'react-dom/client';
 import config from '../../../config/config';
+
+
 
 
 let _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEvents,
@@ -80,41 +82,6 @@ let filterComp = {};
 let lastFilter;
 let utils;
 let recreateStores = true;
-
-/**
- * Waits for an element to be available in the DOM using MutationObserver
- * @param {string} selector - The ID of the element to wait for
- * @param {number} timeout - Maximum time to wait in milliseconds (default: 5000)
- * @returns {Promise<HTMLElement>} Promise that resolves with the element
- */
-const waitForElement = (selector, timeout = 100) => {
-    return new Promise((resolve, reject) => {
-        const element = document.querySelector(selector);
-        if (element) {
-            resolve(element);
-            return;
-        }
-
-        const observer = new MutationObserver(() => {
-            const element = document.querySelector(selector);
-            if (element) {
-                observer.disconnect();
-                clearTimeout(timeoutId);
-                resolve(element);
-            }
-        });
-
-        observer.observe(document.body, {
-            childList: true,
-            subtree: true
-        });
-
-        const timeoutId = setTimeout(() => {
-            observer.disconnect();
-            resolve(new Error(`Timeout waiting for element with id: ${selector}`));
-        }, timeout);
-    });
-};
 let moduleState = {
     isReady: false,
     wasBuilt: false,
@@ -469,239 +436,238 @@ module.exports = {
         layerKey = layerTreeUtils.stripPrefix(layerKey);
         let layerMeta = meta.getMetaByKey(layerKey);
 
-        const containerId = `[data-gc2-layer-key="${layerKey}.${layerMeta.f_geometry_column}"]`;
-        waitForElement(containerId).then(() => {
-            let container = $(containerId);
-            if ($(container).length === 0 && virtualContainer) {
-                container = virtualContainer;
+        let container = $(`[data-gc2-layer-key="${layerKey}.${layerMeta.f_geometry_column}"]`);
+        if ($(container).length === 0 && virtualContainer) {
+            container = virtualContainer;
+        }
+
+        if (layerIsEnabled) {
+            _self._setupLayerWidgets(layerMeta, isVirtual, container);
+        }
+
+        if (container.length === 1) {
+            if (!$(container).attr(`data-gc2-layer-key`)) {
+                console.error(`Invalid container was provided`);
             }
-            if (layerIsEnabled) {
-                _self._setupLayerWidgets(layerMeta, isVirtual, container);
-            }
-            if (container.length === 1) {
-                if (!$(container).attr(`data-gc2-layer-key`)) {
-                    console.error(`Invalid container was provided`);
-                }
 
-                if ($(container).is(`:visible`) || forced) {
-                    moduleState.setLayerStateRequests[layerKey] = false;
-                    setTimeout(() => {
-                        let parsedMeta = meta.parseLayerMeta(layerKey);
+            if ($(container).is(`:visible`) || forced) {
+                moduleState.setLayerStateRequests[layerKey] = false;
+                setTimeout(() => {
+                    let parsedMeta = meta.parseLayerMeta(layerKey);
 
-                        const hideFilters = () => {
-                            $(container).find('.js-layer-settings-filters').hide(0);
-                        };
+                    const hideFilters = () => {
+                        $(container).find('.js-layer-settings-filters').hide(0);
+                    };
 
-                        const hideOpacity = () => {
-                            $(container).find(`.js-toggle-opacity`).hide(0);
-                            $(container).find('.js-layer-settings-opacity').hide(0);
-                        };
+                    const hideOpacity = () => {
+                        $(container).find(`.js-toggle-opacity`).hide(0);
+                        $(container).find('.js-layer-settings-opacity').hide(0);
+                    };
 
-                        const hideLabels = () => {
-                            $(container).find(`.js-toggle-labels`).hide(0);
-                            $(container).find('.js-layer-settings-labels').hide(0);
-                        };
+                    const hideLabels = () => {
+                        $(container).find(`.js-toggle-labels`).hide(0);
+                        $(container).find('.js-layer-settings-labels').hide(0);
+                    };
 
-                        const hideLoadStrategy = () => {
-                            $(container).find(`.js-toggle-load-strategy`).hide(0);
-                            $(container).find('.js-layer-settings-load-strategy').hide(0);
-                        };
+                    const hideLoadStrategy = () => {
+                        $(container).find(`.js-toggle-load-strategy`).hide(0);
+                        $(container).find('.js-layer-settings-load-strategy').hide(0);
+                    };
 
-                        const hideTableView = () => {
-                            $(container).find(`.js-toggle-table`).hide(0);
-                            $(container).find('.js-layer-settings-table').hide(0);
-                        };
+                    const hideTableView = () => {
+                        $(container).find(`.js-toggle-table`).hide(0);
+                        $(container).find('.js-layer-settings-table').hide(0);
+                    };
 
-                        const hideStyleFn = () => {
-                            $(container).find(`.js-toggle-style`).hide(0);
-                            $(container).find('.js-layer-settings-style').hide(0);
-                        };
+                    const hideStyleFn = () => {
+                        $(container).find(`.js-toggle-style`).hide(0);
+                        $(container).find('.js-layer-settings-style').hide(0);
+                    };
 
-                        const hideOfflineMode = () => {
-                            $(container).find(`.js-toggle-layer-offline-mode-container`).css(`display`, `none`);
-                        };
+                    const hideOfflineMode = () => {
+                        $(container).find(`.js-toggle-layer-offline-mode-container`).css(`display`, `none`);
+                    };
 
-                        const hideSearch = () => {
-                            $(container).find(`.js-toggle-search`).hide(0);
-                            $(container).find('.js-layer-settings-search').hide(0);
-                        };
+                    const hideSearch = () => {
+                        $(container).find(`.js-toggle-search`).hide(0);
+                        $(container).find('.js-layer-settings-search').hide(0);
+                    };
 
-                        const hideAddFeature = () => {
-                            $(container).find('.gc2-add-feature').css(`display`, `none`);
-                        };
-                        const hideSettingsBtn = () => {
-                            $(container).find('.js-settings-panel-btn').prop(`disabled`, true);
-                            $(container).find('.collapse').collapse('hide');
-                        };
-                        const hideDownload = () => {
-                            $(container).find(`.js-toggle-download`).hide(0);
-                            $(container).find('.js-layer-settings-download').hide(0);
-                        };
+                    const hideAddFeature = () => {
+                        $(container).find('.gc2-add-feature').css(`display`, `none`);
+                    };
+                    const hideSettingsBtn = () => {
+                        $(container).find('.js-settings-panel-btn').prop(`disabled`, true);
+                        $(container).find('.collapse').collapse('hide');
+                    };
+                    const hideDownload = () => {
+                        $(container).find(`.js-toggle-download`).hide(0);
+                        $(container).find('.js-layer-settings-download').hide(0);
+                    };
 
-                        const deactivateAll = () => {
-                            $(container).find('.js-toggle-btn').removeClass(`active`);
+                    const deactivateAll = () => {
+                        $(container).find('.js-toggle-btn').removeClass(`active`);
+                    }
+                    const getLayerSwitchControl = () => {
+                        let controlElement = $('input[class="js-show-layer-control"][data-gc2-id="' + layerKey + '"]');
+                        if (!controlElement || controlElement.length !== 1) {
+                            return false;
+                        } else {
+                            return controlElement;
                         }
-                        const getLayerSwitchControl = () => {
-                            let controlElement = $('input[class="js-show-layer-control"][data-gc2-id="' + layerKey + '"]');
-                            if (!controlElement || controlElement.length !== 1) {
-                                return false;
-                            } else {
-                                return controlElement;
-                            }
-                        };
+                    };
 
-                        let el = getLayerSwitchControl();
-                        if (el) {
-                            el.prop('checked', layerIsEnabled);
+                    let el = getLayerSwitchControl();
+                    if (el) {
+                        el.prop('checked', layerIsEnabled);
+                    }
+
+                    if (desiredSetupType === LAYER.VECTOR) {
+                        // Load strategy and filters should be kept opened after setLayerState()
+                        if ($(container).attr(`data-last-layer-type`) !== desiredSetupType) {
+                            hideOpacity();
+                            hideLabels();
                         }
 
-                        if (desiredSetupType === LAYER.VECTOR) {
-                            // Load strategy and filters should be kept opened after setLayerState()
-                            if ($(container).attr(`data-last-layer-type`) !== desiredSetupType) {
-                                hideOpacity();
-                                hideLabels();
-                            }
-
-                            if (layerIsEnabled) {
-                                $(container).find('.gc2-add-feature').css(`display`, `inline`);
-                                $(container).find('.js-settings-panel-btn').prop(`disabled`, false);
-                                $(container).find(`.js-toggle-search`).show(0);
-                                $(container).find(`.js-toggle-load-strategy`).show(0);
-                                $(container).find(`.js-toggle-layer-offline-mode-container`).css(`display`, `inline-block`);
-                                $(container).find(`.js-toggle-table`).show(0);
-                                $(container).find(`.js-toggle-style`).show(0);
-                                $(container).find(`.js-toggle-download`).show(0);
-                            } else {
-                                hideAddFeature();
-                                hideFilters();
-                                hideOfflineMode();
-                                hideLoadStrategy();
-                                hideOpacity();
-                                hideLabels();
-                                hideTableView();
-                                hideSearch();
-                                hideStyleFn();
-                                hideSettingsBtn();
-                                deactivateAll();
-                                hideDownload();
-                            }
-                        } else if (desiredSetupType === LAYER.RASTER_TILE || desiredSetupType === LAYER.VECTOR_TILE) {
-                            // Opacity and filters should be kept opened after setLayerState()
-                            if ($(container).attr(`data-last-layer-type`) !== desiredSetupType) {
-                                hideLoadStrategy();
-                                hideTableView();
-                                hideStyleFn();
-                                hideSettingsBtn();
-                            }
-
-                            hideOfflineMode();
-                            if (layerIsEnabled) {
-                                $(container).find('.gc2-add-feature').css(`display`, `inline`);
-                                $(container).find('.js-settings-panel-btn').prop(`disabled`, false);
-                                $(container).find(`.js-toggle-opacity`).show(0);
-                                $(container).find(`.js-toggle-labels`).show(0);
-                                $(container).find(`.js-toggle-filters`).show(0);
-                                $(container).find(`.js-toggle-search`).show(0);
-                                $(container).find(`.js-toggle-download`).show(0);
-                            } else {
-                                hideAddFeature();
-                                hideFilters();
-                                hideOpacity();
-                                hideLabels();
-                                hideSearch();
-                                hideSettingsBtn();
-                                deactivateAll();
-                                hideDownload();
-                            }
-
-                            // Hide filters if cached, but not if layer has a valid predefined filter
-                            if (parsedMeta && parsedMeta.single_tile) {
-                                try {
-                                    if (!parsedMeta && parsedMeta.predefined_filters || typeof JSON.parse(parsedMeta.predefined_filters) !== "object") {
-                                        hideFilters();
-                                    }
-                                } catch (e) {
-                                    console.error(e)
-                                    hideFilters();
-                                }
-                            }
-
-                            $(container).find('.js-layer-settings-filters').hide(0);
-                            if (desiredSetupType === LAYER.VECTOR_TILE) {
-                                hideOpacity();
-                                hideLabels();
-                                hideFilters();
-                            }
-                        } else if (desiredSetupType === LAYER.WEBGL) {
+                        if (layerIsEnabled) {
+                            $(container).find('.gc2-add-feature').css(`display`, `inline`);
+                            $(container).find('.js-settings-panel-btn').prop(`disabled`, false);
+                            $(container).find(`.js-toggle-search`).show(0);
+                            $(container).find(`.js-toggle-load-strategy`).show(0);
+                            $(container).find(`.js-toggle-layer-offline-mode-container`).css(`display`, `inline-block`);
+                            $(container).find(`.js-toggle-table`).show(0);
+                            $(container).find(`.js-toggle-style`).show(0);
+                            $(container).find(`.js-toggle-download`).show(0);
+                        } else {
                             hideAddFeature();
                             hideFilters();
                             hideOfflineMode();
                             hideLoadStrategy();
+                            hideOpacity();
+                            hideLabels();
+                            hideTableView();
+                            hideSearch();
+                            hideStyleFn();
+                            hideSettingsBtn();
+                            deactivateAll();
+                            hideDownload();
+                        }
+                    } else if (desiredSetupType === LAYER.RASTER_TILE || desiredSetupType === LAYER.VECTOR_TILE) {
+                        // Opacity and filters should be kept opened after setLayerState()
+                        if ($(container).attr(`data-last-layer-type`) !== desiredSetupType) {
+                            hideLoadStrategy();
                             hideTableView();
                             hideStyleFn();
+                            hideSettingsBtn();
+                        }
+
+                        hideOfflineMode();
+                        if (layerIsEnabled) {
+                            $(container).find('.gc2-add-feature').css(`display`, `inline`);
+                            $(container).find('.js-settings-panel-btn').prop(`disabled`, false);
+                            $(container).find(`.js-toggle-opacity`).show(0);
+                            $(container).find(`.js-toggle-labels`).show(0);
+                            $(container).find(`.js-toggle-filters`).show(0);
+                            $(container).find(`.js-toggle-search`).show(0);
+                            $(container).find(`.js-toggle-download`).show(0);
+                        } else {
+                            hideAddFeature();
+                            hideFilters();
                             hideOpacity();
                             hideLabels();
                             hideSearch();
                             hideSettingsBtn();
                             deactivateAll();
-                        } else {
-                            throw new Error(`${desiredSetupType} control setup is not supported yet`);
+                            hideDownload();
                         }
-                        _self.activeFiltersChange(layerKey)
 
-                        // Open filter dialog.
-                        if (desiredSetupType === LAYER.RASTER_TILE || desiredSetupType === LAYER.VECTOR_TILE || desiredSetupType === LAYER.VECTOR) {
-                            if (layerIsEnabled) {
-                                if (parsedMeta?.default_open_tools) {
-                                    try {
-                                        let arr = JSON.parse(parsedMeta.default_open_tools);
-                                        arr.forEach((i) => {
-                                            setTimeout(() => {
-                                                $(container).find('.collapse').collapse('show')
-                                                if ($(container).find(`.js-toggle-${i}`).is(':visible')) {
-                                                    if (i !== "table") {
-                                                        $(container).find(`.js-layer-settings-${i}`).show(0);
-                                                        $(container).find(`.js-toggle-${i}`).addClass('active');
-                                                    } else {
-                                                        console.info("'table is not supported in default open tools'")
-                                                    }
-                                                }
-                                            }, 100);
-                                        })
-                                    } catch (e) {
-                                        console.warn(`Unable to open tools for ${layerKey}`, parsedMeta[`default_open_tools`]);
-                                    }
+                        // Hide filters if cached, but not if layer has a valid predefined filter
+                        if (parsedMeta && parsedMeta.single_tile) {
+                            try {
+                                if (!parsedMeta && parsedMeta.predefined_filters || typeof JSON.parse(parsedMeta.predefined_filters) !== "object") {
+                                    hideFilters();
                                 }
+                            } catch (e) {
+                                console.error(e)
+                                hideFilters();
                             }
                         }
 
-                        // For all layer types
-                        if (!layerIsEnabled) {
-                            // Refresh all tables when closing one panel, because DOM changes can make the tables un-aligned
-                            $(`.js-layer-settings-table table`).bootstrapTable('resetView');
-                            // Remove active class from all buttons
-                            $(container).find('a').removeClass('active');
+                        $(container).find('.js-layer-settings-filters').hide(0);
+                        if (desiredSetupType === LAYER.VECTOR_TILE) {
+                            hideOpacity();
+                            hideLabels();
+                            hideFilters();
                         }
+                    } else if (desiredSetupType === LAYER.WEBGL) {
+                        hideAddFeature();
+                        hideFilters();
+                        hideOfflineMode();
+                        hideLoadStrategy();
+                        hideTableView();
+                        hideStyleFn();
+                        hideOpacity();
+                        hideLabels();
+                        hideSearch();
+                        hideSettingsBtn();
+                        deactivateAll();
+                    } else {
+                        throw new Error(`${desiredSetupType} control setup is not supported yet`);
+                    }
+                    _self.activeFiltersChange(layerKey)
 
-                        $(container).attr(`data-last-layer-type`, desiredSetupType);
-
-                    }, 10);
-                } else {
-                    if (layerKey in moduleState.setLayerStateRequests === false) {
-                        moduleState.setLayerStateRequests[layerKey] = false;
+                    // Open filter dialog.
+                    if (desiredSetupType === LAYER.RASTER_TILE || desiredSetupType === LAYER.VECTOR_TILE || desiredSetupType === LAYER.VECTOR) {
+                        if (layerIsEnabled) {
+                            if (parsedMeta?.default_open_tools) {
+                                try {
+                                    let arr = JSON.parse(parsedMeta.default_open_tools);
+                                    arr.forEach((i) => {
+                                        setTimeout(() => {
+                                            $(container).find('.collapse').collapse('show')
+                                            if ($(container).find(`.js-toggle-${i}`).is(':visible')) {
+                                                if (i !== "table") {
+                                                    $(container).find(`.js-layer-settings-${i}`).show(0);
+                                                    $(container).find(`.js-toggle-${i}`).addClass('active');
+                                                } else {
+                                                    console.info("'table is not supported in default open tools'")
+                                                }
+                                            }
+                                        }, 100);
+                                    })
+                                } catch (e) {
+                                    console.warn(`Unable to open tools for ${layerKey}`, parsedMeta[`default_open_tools`]);
+                                }
+                            }
+                        }
                     }
 
-                    moduleState.setLayerStateRequests[layerKey] = {
-                        desiredSetupType,
-                        ignoreErrors,
-                        layerIsEnabled,
-                        createdAt: new Date()
-                    };
+                    // For all layer types
+                    if (!layerIsEnabled) {
+                        // Refresh all tables when closing one panel, because DOM changes can make the tables un-aligned
+                        $(`.js-layer-settings-table table`).bootstrapTable('resetView');
+                        // Remove active class from all buttons
+                        $(container).find('a').removeClass('active');
+                    }
+
+                    $(container).attr(`data-last-layer-type`, desiredSetupType);
+
+                }, 10);
+            } else {
+                if (layerKey in moduleState.setLayerStateRequests === false) {
+                    moduleState.setLayerStateRequests[layerKey] = false;
                 }
-            } else if (ignoreErrors === false) {
-                throw new Error(`Unable to find layer container`);
+
+                moduleState.setLayerStateRequests[layerKey] = {
+                    desiredSetupType,
+                    ignoreErrors,
+                    layerIsEnabled,
+                    createdAt: new Date()
+                };
             }
-        });
+        } else if (ignoreErrors === false) {
+            throw new Error(`Unable to find layer container`);
+        }
     },
 
     /**
@@ -3361,18 +3327,16 @@ module.exports = {
             // Toggle settings button active on/off
             // This is necessary bacause data-bs-toggle is already set to "collapse"
             // and can not be used to "button" also.
-            const settingsId = `#settings-${layer.f_table_schema}-${layer.f_table_name}`;
-            const btnId = `#settings-${layer.f_table_schema}-${layer.f_table_name}-btn`;
-            Promise.all([waitForElement(settingsId), waitForElement(btnId)])
-                .then(([settingsCollapsible, btn]) => {
-                    settingsCollapsible.addEventListener('shown.bs.collapse', event => {
-                        btn.classList.add('active');
-                    });
-                    settingsCollapsible.addEventListener('hidden.bs.collapse', event => {
-                        btn.classList.remove('active');
-                    });
+            setTimeout(() => {
+                const settingsCollapsible = document.getElementById(`settings-${layer.f_table_schema}-${layer.f_table_name}`);
+                const btn = document.getElementById(`settings-${layer.f_table_schema}-${layer.f_table_name}-btn`);
+                settingsCollapsible?.addEventListener('shown.bs.collapse', event => {
+                    btn.classList.add('active');
                 })
-                .catch(err => console.error('Error setting up settings toggle:', err));
+                settingsCollapsible?.addEventListener('hidden.bs.collapse', event => {
+                    btn.classList.remove('active');
+                })
+            }, 100)
         }
     },
 
@@ -3572,9 +3536,7 @@ module.exports = {
                         if (document.getElementById(componentContainerId)) {
                             createRoot(document.getElementById(componentContainerId)).render(
                                 <LayerFilter
-                                    ref={instance => {
-                                        filterComp[layerKey] = instance
-                                    }}
+                                    ref={instance => { filterComp[layerKey] = instance }}
                                     layer={layer}
                                     layerMeta={meta.parseLayerMeta(layerKey)}
                                     presetFilters={presetFilters}

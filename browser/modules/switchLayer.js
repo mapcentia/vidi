@@ -605,13 +605,13 @@ module.exports = module.exports = {
     _toggleLayerControl: (enable = false, layerName, doNotLegend, setupControls) => {
         if (setupControls) {
             if (layerName.indexOf(LAYER.VECTOR + `:`) === 0) {
-                layerTree.setLayerState(LAYER.VECTOR, layerName, true, enable);
+                layerTree.setLayerState(LAYER.VECTOR, layerName, true, enable, true);
             } else if (layerName.indexOf(LAYER.VECTOR_TILE + `:`) === 0) {
-                layerTree.setLayerState(LAYER.VECTOR_TILE, layerName, true, enable);
+                layerTree.setLayerState(LAYER.VECTOR_TILE, layerName, true, enable, true);
             } else if (layerName.indexOf(LAYER.WEBGL + `:`) === 0) {
-                layerTree.setLayerState(LAYER.WEBGL, layerName, true, enable);
+                layerTree.setLayerState(LAYER.WEBGL, layerName, true, enable, true);
             } else {
-                layerTree.setLayerState(LAYER.RASTER_TILE, layerName, true, enable);
+                layerTree.setLayerState(LAYER.RASTER_TILE, layerName, true, enable, true);
             }
         }
 
