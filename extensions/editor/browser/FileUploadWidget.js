@@ -12,10 +12,7 @@ import {splitBase64} from '../../../browser/modules/utils';
 
 const MAX_WIDTH = 1600;
 const MAX_HEIGHT = 1200;
-const MAX_SIZE = 10000000;
-
-
-
+const MAX_SIZE = 30_000_000;
 
 /**
  * Image field widget
