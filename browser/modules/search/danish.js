@@ -1347,6 +1347,7 @@ return baseScore %2B boundaryBonus %2B letterSuffixBonus %2B prefixBonus %2B hou
                         placeStores[key] = getPlaceStore();
                         placeStores[key].db = MDB;
                         placeStores[key].host = MHOST;
+                        // TODO "getCadastraral"
                         if (getProperty) {
                             placeStores[key].sql = "SELECT sfe_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE sfe_ejendomsnummer = (SELECT sfe_ejendomsnummer FROM matrikel.jordstykke WHERE gid=" + gids[type2][datum.value] + ") group by sfe_ejendomsnummer";
                         } else {
