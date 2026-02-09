@@ -16,6 +16,7 @@ import SelectWidget from "./SelectWidget.jsx";
 import TimeWidget from "./TimeWidget.jsx";
 import {coordAll} from "@turf/turf";
 import {createRoot} from "react-dom/client";
+import config from "../../../config/config";
 
 /**
  *
@@ -23,7 +24,6 @@ import {createRoot} from "react-dom/client";
  */
 let APIBridgeSingletone = require('../../../browser/modules/api-bridge');
 
-const config = require('../../../config/config.js');
 const drawTooltip = config?.extensionConfig?.editor?.tooltip;
 const alwaysActivate = config?.extensionConfig?.editor?.alwaysActivate ?? true;
 
