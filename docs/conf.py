@@ -264,7 +264,3 @@ texinfo_documents = [
 
 gettext_uuid = True
 gettext_compact = False
-
-locale_dirs = ["locales"]   # relativt til conf.py (altså ./docs/locale)
-gettext_compact = False    # anbefalet, så der bliver LC_MESSAGES-struktur
-
