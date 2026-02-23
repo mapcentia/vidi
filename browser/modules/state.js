@@ -20,6 +20,7 @@ var cloud, setting, baseLayer, setBaseLayer, switchLayer, legend, print, draw, a
  * @type {*|exports|module.exports}
  */
 var urlparser = require('./urlparser');
+const layerTreeUtils = require("./layerTree/utils");
 
 /**
  * @type {string}
@@ -184,7 +185,7 @@ module.exports = {
                 backboneEvents.get().once("allDoneLoading:layers", function (e) {
                     legend.init().then(function () {
                         console.log("Vidi is now loaded");// Vidi is now fully loaded
-                        clearTimeout(window.loadingTimeout)
+                        // clearTimeout(window.loadingTimeout)
                         window.status = "all_loaded";
                         if (window.vidiConfig?.initFunction) {
                             let func = Function('"use strict";return (' + window.vidiConfig.initFunction + ')')();
@@ -297,6 +298,12 @@ module.exports = {
                             dataType: "json", method: "get", url: '/api/postdata/', data: {
                                 k: parr.join()
                             }, scriptCharset: "utf-8", success: function (response) {
+                                // Set base layer opacity
+                                backboneEvents.get().once(`layerTree:ready`, () => {
+                                    for (const [layerKey, value] of Object.entries(response.data.state.modules.baseLayer.baseOpacity)) {
+                                        layerTreeUtils.applyOpacityToLayer((parseFloat(value) / 100), layerKey, cloud, backboneEvents);
+                                    }
+                                });
                                 // Server replies have different structure
                                 if (!(`anchor` in response.data) && !(`bounds` in response.data) && `data` in response.data && response.data.data) {
                                     if (`anchor` in response.data.data && `bounds` in response.data.data) {
@@ -516,19 +523,30 @@ module.exports = {
                                     }
                                 });
 
+                                // Apply leyertree state
                                 if (`state` in response.data && response.data.state) {
                                     if (`modules` in response.data.state && `layerTree` in response.data.state.modules && `order` in response.data.state.modules.layerTree) {
-                                        layerTree.applyState(response.data.state.modules.layerTree);
+                                        if (response.data.state.modules.layerTree.activeLayers.length === 0) {
+                                            console.log("No active layers in print");
+                                        } else {
+                                            console.log("Active layers in print");
+                                            activeLayersInSnapshot = true;
+                                        }
+                                        backboneEvents.get().once("allDoneLoading:layers", (e) => {
+                                            setTimeout(() => {
+                                                layerTree.applyState(response.data.state.modules.layerTree);
+                                                backboneEvents.get().once("allDoneLoading:layers", (e) => {
+                                                    legend.init().then(function () {
+                                                        console.log("Legend loaded");
+                                                    })
+                                                });
+                                            }, 0);
+                                        });
                                     }
                                 }
 
                                 // If any added layers, then add them
                                 if (addedLayers.length > 0) {
-                                    // @todo Review
-                                    console.error(`Consider reviewing`);
-
-                                    meta.addMetaData({data: addedLayers});
-                                    layerTree.init();
                                     if (arr) {
                                         for (i = 0; i < arr.length; i++) {
                                             switchLayer.init(arr[i], true, true);
@@ -572,7 +590,7 @@ module.exports = {
 
                 // At this point we believe that Vidi is started successfully
                 console.log('Clear load checking interval');
-                clearInterval(window.loadCheckingInterval)
+                clearTimeout(window.loadCheckingInterval)
                 try {
                     new bootstrap.Toast(document.getElementById('load-checking-toast')).hide();
                 } catch (e) {}

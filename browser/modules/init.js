@@ -101,9 +101,10 @@ module.exports = {
             statelessDraw: false,
             openLayerTreeGroups: [],
             crs: 'EPSG:3857',
-            loadingTimeout: 30000,
+            loadingTimeout: 45000,
             loadCheckingInterval: 15000,
             mode: 0,
+            layerTreeFilterPlaceholder: null,
         };
         // Set default for unset props
         for (let prop in defaults) {
@@ -113,6 +114,7 @@ module.exports = {
         // If Vidi loads, the timeout will be cleared in State
         window.loadingTimeout = setTimeout(() => {
             console.log("Timeout reached. Sending 'Vidi is now loaded' message");
+            console.log("Layers all loaded L");
         },  window.vidiConfig.loadingTimeout);
 
         // In a interval of x seconds, check if the app is still loading. If it is, send the 'still loading' message.
@@ -129,12 +131,18 @@ module.exports = {
                                 </div>`;
         document.querySelector('body').insertAdjacentHTML('beforeend', html);
         const toast = new bootstrap.Toast(document.getElementById('load-checking-toast'),  {delay: 99999999, autohide: false});
-        document.querySelector('.close-info-toast').onclick = function () {toast.hide()}
-        window.loadCheckingInterval = setInterval(() => {
-            if (!toast.isShown()) {
-                toast.show();
-            }
-        }, window.vidiConfig.loadCheckingInterval)
+        const pauseTimer = () => {
+            window.loadCheckingInterval = setTimeout(() => {
+                if (!toast.isShown()) {
+                    toast.show();
+                }
+            }, window.vidiConfig.loadCheckingInterval)
+        }
+        document.querySelector('.close-info-toast').onclick = function () {
+            toast.hide();
+            pauseTimer();
+        }
+        pauseTimer();
         // Set session from URL
         if (typeof urlVars.session === "string") {
             const MAXAGE = (config?.sessionMaxAge || 86400) / 86400; // In days

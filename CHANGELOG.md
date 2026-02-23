@@ -5,8 +5,88 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [2025.10.3] - 2025-22-10
+## [2026.2.1] - 2026-9-2
+### Added
+- Support for not scaling images when uploading to editor using the config option `editor.doNotScaleImages`.
+
+## [2026.2.0] - 2026-2-2
+### Fixed
+It could happen that the 'More tools' was not activated when using the 'activateLayers' config option.
+
+## [2026.1.4] - 2026-28-1
+### Added
+- Symbols module: Support for deleting symbols in storage and tracking deletions in state sync.
+
+## [2026.1.3] - 2026-22-1
+### Fixed
+- Dynamically added layer would not be filtered on print. E.g., from a snapshot where the layer was not in the layer tree before.
+
+## [2026.1.2] - 2026-19-1
+### Fixed
+- Print now always waits for legend to load.
+- `api.filter` will not try to set widget state, if the widget is not rendered yet in the layer tree. This resulted in an error.
+
+## [2026.1.1] - 2026-15-1
+### Fixed
+- Regressions in print.
+
+## [2026.1.0] - 2026-6-1
+### Added
+- Added retry logic with exponential backoff to SQL requests in `geocloud.js` and improve error handling.
+
+### Fixed
+- Make editor form re-render again between adding/editing features. This was an unwanted effect from upgrading Reactjs to 18 and use of createRoot.
+
+## [2025.12.1] - 2025-12-12
+### Added
+- WMS base layers can now be configured with a `singleTile` option. If set to `true`, the layer will be fetched as a single tile.
+
+## [2025.12.0] - 2025-9-12
+### Added
+- New config option `layerTreeFilterPlaceholder` for setting the placeholder text in the layer tree filter input field.
+- Editor: New config option for setting default values in newly created objects. A value can be set directly or from a user property:
+```json
+{
+    "extensionConfig": {
+        "editor": {
+            "defaultValues": {
+                "my_dynamic_field": "$user.properties.my_property",
+                "my_static_field": "some value"
+            }
+        }
+    }
+}
+```
+- Editor: If a `character varying` field has max length > 255, then a `textarea` widget is used instead of `input`.
+
+### Fixed
+- Tooltips in embed template are now above the layer tree and can be seen.
+- Missing tooltips added.
+
+## [2025.11.3] - 2025-24-11
+### Fixed
+- Print now always waits for overlay to load, instead of relying on the timeout.
+
+## [2025.11.2] - 2025-21-11
+### Added
+- Opacity control for base layers with sliders and manage state persistence
+
+### Fixed
+- Printing and screenshotting now works with MapLibre GL base layers.
+
+## [2025.11.1] - 2025-13-11
 ### Changed
+- Upgrade `react` dependencies to version 18.3.1.
+- Replace `ReactDOM.render` with `createRoot` for React 18 compatibility across modules.
+
+## [2025.11.0] - 2025-7-11
+### Fixed
+- Add dynamic placeholder support for the conflict search input field.
+- Assign unique IDs (`_vidi_id`) to drawings created from the search module.
+- Update button style to `btn-outline-warning` in conflict Info section for improved visibility.
+
+_## [2025.10.3] - 2025-22-10
+### Changed_
 - Upgrade React and ReactDOM to v17.0.2.
 - Replace react-autocomplete with react-widgets Combobox in layer tree controls to support React 17.
 - Remove unused packages from package.json (react-addons, react-button, rc-slider, react-color, mutationobserver-shim, grunt-bower-task, esmify, install, npm).

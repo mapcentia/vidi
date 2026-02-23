@@ -11,6 +11,7 @@ let backboneEvents;
 let layerTree;
 let sessionInstance = false;
 let userName = null;
+let properties = null;
 let isStatusChecked = false;
 let anchor;
 let exId = `login-modal-body`;
@@ -19,6 +20,7 @@ const urlparser = require('./../../../browser/modules/urlparser');
 const urlVars = urlparser.urlVars;
 const cookie = require('js-cookie');
 const React = require("react");
+const {createRoot} = require("react-dom/client");
 
 
 /**
@@ -36,7 +38,6 @@ module.exports = {
     init: function () {
         let parent = this;
         let React = require('react');
-        let ReactDOM = require('react-dom');
         let modal;
         try {
             modal = new bootstrap.Offcanvas('#login-modal');
@@ -134,6 +135,7 @@ module.exports = {
                             $(".gc2-session-unlock").hide();
                             $(".gc2-session-btn-text").html(data.screen_name)
                             userName = data.screen_name;
+                            properties = data.properties;
                             parent.update();
                             // Close the off canvas
                             setTimeout(() => modal.hide(), 400);
@@ -189,6 +191,7 @@ module.exports = {
                             $(".gc2-session-lock").show();
                             $(".gc2-session-unlock").hide();
                             userName = data.status.screen_name;
+                            properties = data.status.properties;
                             $(".gc2-session-btn-text").html(userName);
                             // True if auto login happens. When reload meta
                             if (data?.screen_name && data?.status?.authenticated) {
@@ -242,7 +245,9 @@ module.exports = {
         }
 
         if (document.getElementById(exId)) {
-            sessionInstance = ReactDOM.render(<Session/>, document.getElementById(exId));
+            createRoot(document.getElementById(exId)).render(<Session
+                ref={instance => { sessionInstance = instance }}
+            />)
         } else {
             console.warn(`Unable to find the container for session extension (element id: ${exId})`);
         }
@@ -256,6 +261,21 @@ module.exports = {
         }
     },
 
+    isAuthenticatedPromise: function () {
+        return new Promise((resolve, reject) => {
+            fetch("/api/session/status").then(response => {
+                response.json().then(data => {
+                    if (data.status.authenticated) {
+                        resolve(true);
+                    } else {
+                        resolve(false);
+                    }
+                })
+            })
+        })
+    },
+
+
     update: function () {
         backboneEvents.get().trigger("refresh:auth");
         backboneEvents.get().trigger("refresh:meta");
@@ -263,6 +283,10 @@ module.exports = {
 
     getUserName: function () {
         return userName;
+    },
+
+    getProperties: function () {
+        return properties;
     },
 
     isStatusChecked: () => {

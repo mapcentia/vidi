@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2023 MapCentia ApS
+ * @copyright  2013-2026 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -15,6 +15,7 @@ let cloud;
 let markers = {};
 let symbolState = {}
 let state;
+let deleted = [];
 let backboneEvents;
 let _self;
 let mouseDown = false;
@@ -78,13 +79,15 @@ const store = (tag) => {
                 userId: window?._userId || null,
                 props: window?._props || null,
                 tag,
-                symbolState
+                symbolState,
+                deleted
             }),
         }).then(res => {
             if (!res.ok) {
                 reject(res);
             }
             res.json().then(json => {
+                deleted = []
                 resolve(json);
             })
         });
@@ -331,6 +334,7 @@ const createSymbol = (innerHtml, id, coord, ro = 0, sc = 1, zoomLevel, file, gro
         map.removeLayer(markers[id]);
         delete markers[e.target.id];
         delete symbolState[e.target.id];
+        deleted.push(e.target.id);
         setState();
         handleChange();
         try {
@@ -498,6 +502,7 @@ module.exports = {
                                     <input id="vidi-symbols-autoscale" class="form-check-input" type="checkbox">${__("Auto scale")}
                                 </label>
                             </div>
+                            <!-- <button class="btn" id="vidi-symbols-store">${__("Save in db")}</button> -->
                     </div>
                     
                     <div id="vidi_symbols"></div>
@@ -518,6 +523,8 @@ module.exports = {
             }
             setState();
         })
+
+        $('#vidi-symbols-store').on('click', store);
 
         let symbols = {};
         let descs = {};
@@ -642,7 +649,7 @@ module.exports = {
      * @returns {{}}
      */
     getState: () => {
-        return {symbolState, autoScale, locked};
+        return {symbolState, autoScale, locked, deleted};
     },
 
     /**
@@ -665,6 +672,7 @@ module.exports = {
             if (newState) {
                 _self.recreateSymbolsFromState(newState.symbolState);
                 autoScale = newState.autoScale;
+                deleted = newState.deleted ?? [];
                 $("#vidi-symbols-autoscale").prop("checked", newState.autoScale);
                 locked = newState.locked;
                 $("#vidi-symbols-lock").prop("checked", newState.locked);

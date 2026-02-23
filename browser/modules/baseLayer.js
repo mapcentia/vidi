@@ -8,7 +8,6 @@
 
 const MODULE_NAME = `baseLayer`;
 
-import {LAYER} from './layerTree/constants';
 import layerTreeUtils from './layerTree/utils';
 import {booleanIntersects, polygon} from '@turf/turf'
 
@@ -47,6 +46,7 @@ let mode;
 let defaultMode;
 let bindEvent;
 let bounds;
+let baseOpacity = {}
 
 /**
  * Checks if the module state has correct structure
@@ -90,7 +90,7 @@ module.exports = module.exports = {
     init: () => {
         state.listenTo('baseLayer', _self);
 
-        mode =  window.vidiConfig?.advancedBaseLayerSwitcher?.mode ? window.vidiConfig.advancedBaseLayerSwitcher.mode : 3;
+        mode = window.vidiConfig?.advancedBaseLayerSwitcher?.mode ? window.vidiConfig.advancedBaseLayerSwitcher.mode : 3;
         active = window.vidiConfig?.advancedBaseLayerSwitcher?.active;
         defaultMode = mode === 1 ? 1 : mode === 2 ? 2 : window.vidiConfig?.advancedBaseLayerSwitcher?.default ? window.vidiConfig.advancedBaseLayerSwitcher.default : 1
         currentTwoLayersAtOnceMode = TWO_LAYERS_AT_ONCE_MODES[defaultMode - 1];
@@ -105,7 +105,6 @@ module.exports = module.exports = {
                 } catch (e) {
                     console.log(e)
                 }
-                console.log(outside)
                 if (outside) {
                     utils.showInfoToast(__("The selected map has no content in the current map extent"), {delay: 150000000})
                 } else {
@@ -153,6 +152,7 @@ module.exports = module.exports = {
             } else {
                 _self.destroyLeafletTwoLayersAtOnceControls();
                 setBaseLayer.init(activeBaseLayer);
+                _self.setOpacity();
             }
 
             backboneEvents.get().trigger(`${MODULE_NAME}:side-by-side-mode-change`);
@@ -160,6 +160,8 @@ module.exports = module.exports = {
 
         backboneEvents.get().once(`allDoneLoading:layers`, () => {
             _self.getSideBySideModeStatus().then(lastState => {
+                baseOpacity = lastState.baseOpacity ?? {};
+                _self.setOpacity();
                 if (validateModuleState(lastState)) {
                     _self.toggleSideBySideControl(lastState);
                 } else if (active) {
@@ -169,7 +171,7 @@ module.exports = module.exports = {
         })
 
         state.listen(MODULE_NAME, `side-by-side-mode-change`);
-
+        state.listen(MODULE_NAME, `opacity-change`);
     },
 
     getAvailableBaseLayers: () => {
@@ -228,7 +230,7 @@ module.exports = module.exports = {
         if (sideBySideControl) sideBySideControl.remove();
         sideBySideControl = false;
         overlayLayer = false;
-
+        backboneEvents.get().trigger(`${MODULE_NAME}:side-by-side-mode-change`);
         // Delete previously initialized side-by-side layers
         for (let key in cloud.get().map._layers) {
             if (`_vidi_twolayersatonce_sidebyside` in cloud.get().map._layers[key] && cloud.get().map._layers[key]._vidi_twolayersatonce_sidebyside) {
@@ -259,7 +261,6 @@ module.exports = module.exports = {
     },
 
 
-
     // returns a array of groupName from
     baseLayerGroupNames() {
         if (!_self.hasBaseLayerGroup())
@@ -282,17 +283,23 @@ module.exports = module.exports = {
         }
         return false;
     },
-    buildLayerHtmlNode(layerId, layerName, tooltip, displayInfo, abstract, ingroup=false) {
+    buildLayerHtmlNode(layerId, layerName, tooltip, displayInfo, abstract, ingroup = false) {
+        const layerIdEncoded = Base64.encode(layerId).replace(/=/g, "");
         const sideBySideLayerControl = _self.getSideBySideLayerControl(layerId);
-        return `<li class="list-group-item js-base-layer-control d-flex align-items-center${ingroup ? `px-3 border-start-0 border-end-0` : ``}">
-                    <div class="d-flex align-items-center gap-1 me-auto">
-                        <div class='base-layer-item' data-gc2-base-id='${layerId}'>
-                            <input type='radio' class="form-check-input" name='baselayers' value='${layerId}' ${layerId === activeBaseLayer ? `checked=""` : ``}> 
+        const opacity = baseOpacity[layerId] ?? 100;
+        const layerType = window.setBaseLayers.find(bl => bl.id === layerId).type;
+        return `<li class="list-group-item js-base-layer-control d-flex flex-column gap-1">
+                    <div class="d-flex align-items-center${ingroup ? `px-3 border-start-0 border-end-0` : ``}">
+                        <div class="d-flex align-items-center gap-1 me-auto">
+                            <div class='base-layer-item' data-gc2-base-id='${layerId}'>
+                                <input type='radio' class="form-check-input" name='baselayers' value='${layerId}' ${layerId === activeBaseLayer ? `checked=""` : ``}> 
+                            </div>
+                            ${sideBySideLayerControl}
+                            <div>${layerName}</div>
                         </div>
-                        ${sideBySideLayerControl}
-                        <div>${layerName}</div>
-                    </div>
-                    <div>
+                        <button style="display: ${sideBySideLayerControl === '' ? 'inline' : 'none'}" class="btn btn-outline-secondary btn-sm me-1 ${layerType === 'MVT' ? 'd-none' : ''}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-${layerIdEncoded}" aria-expanded="true">
+                            <i class="bi bi-droplet"></i>
+                        </button>
                         <button
                             data-toggle="tooltip"
                             data-bs-placement="right"
@@ -300,8 +307,14 @@ module.exports = module.exports = {
                             style="visibility: ${displayInfo};"
                             data-baselayer-name="${layerName}"
                             data-baselayer-info="${abstract}"
-                            class="info-label btn btn-sm btn-outline-secondary"><i class="bi bi-info-square pe-none"></i></button>
+                            class="info-label btn btn-sm btn-outline-secondary"><i class="bi bi-info-square pe-none"></i>
+                        </button>
                     </div>
+                    <div id="collapse-${layerIdEncoded}" class="collapse ${sideBySideLayerControl === '' ? '' : 'd-none'}">
+                        <div class="range">
+                            <input data-gc2-base-id="${layerId}" type="range" min="1" max="100" value="${opacity}" class="js-opacity-slider-base form-range">
+                        </div>
+                  </div>
                 </li>`;
 
     },
@@ -347,7 +360,7 @@ module.exports = module.exports = {
         return (twoLayersAtOnceEnabled) ?
             `<div class='base-layer-item' data-gc2-side-by-side-base-id='${layerId}' style='float: left;'>
                     <input type='radio' class="form-check-input" name='side-by-side-baselayers' value='${layerId}' ${valueContent}>
-            </div>`:
+            </div>` :
             ``;
     },
 
@@ -363,8 +376,9 @@ module.exports = module.exports = {
             // Add base layers controls, not in group
             let appendedCode = ``;
             for (const bl of window.setBaseLayers) {
-
-
+                if (typeof baseOpacity[bl.id] === "undefined") {
+                    baseOpacity[bl.id] = bl.opacity ?? 100;
+                }
                 let layerId = false;
                 let layerName = false;
                 if (typeof bl.type !== "undefined" && bl.type === "XYZ") {
@@ -386,7 +400,6 @@ module.exports = module.exports = {
                 let displayInfo = (bl.abstract ? `visible` : `hidden`);
                 let tooltip = (bl.abstract ? $(bl.abstract).text() : ``);
                 appendedCode += _self.buildLayerHtmlNode(layerId, layerName, tooltip, displayInfo, bl.abstract);
-
             }
             appendedCode += _self.buildLayerHtmlInGroup();
 
@@ -433,7 +446,7 @@ module.exports = module.exports = {
 
                     cloud.get().map.invalidateSize();
                     sideBySideControl = L.control.sideBySide(layer1, layer2).addTo(cloud.get().map);
-
+                    _self.resetOpacity()
                     backboneEvents.get().trigger(`${MODULE_NAME}:side-by-side-mode-change`);
                 } else if (currentTwoLayersAtOnceMode === TWO_LAYERS_AT_ONCE_MODES[1]) {
                     let layer1 = _self.addBaseLayer(activeBaseLayer);
@@ -450,7 +463,7 @@ module.exports = module.exports = {
 
                     overlayLayer = layer2;
                     overlayLayer.setOpacity(overlayOpacity / 100);
-
+                    _self.resetOpacity()
                     backboneEvents.get().trigger(`${MODULE_NAME}:side-by-side-mode-change`);
                 } else {
                     throw new Error(`Invalid two layers at once mode value (${currentTwoLayersAtOnceMode})`);
@@ -563,9 +576,18 @@ module.exports = module.exports = {
 
                     drawTwoLayersAtOnce();
                 });
-
+                // Opacity slider
+                const slider = document.querySelectorAll(`.js-opacity-slider-base`);
+                slider.forEach(s => s.addEventListener('input', (e) => {
+                    const sliderValue = (parseFloat(e.target.value) / 100);
+                    const layerKey = s.dataset.gc2BaseId;
+                    layerTreeUtils.applyOpacityToLayer(sliderValue, layerKey, cloud, backboneEvents);
+                    baseOpacity[layerKey] = e.target.value;
+                    backboneEvents.get().trigger(`${MODULE_NAME}:opacity-change`);
+                }))
                 resolve();
             });
+            _self.setOpacity();
         });
     },
 
@@ -575,13 +597,11 @@ module.exports = module.exports = {
      * @return {Promise}
      */
     getSideBySideModeStatus: () => {
-        let result = new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             state.getModuleState(MODULE_NAME).then(initialState => {
                 resolve(initialState);
             });
         });
-
-        return result;
     },
 
     /**
@@ -616,6 +636,7 @@ module.exports = module.exports = {
             }
         }
 
+        state.baseOpacity = baseOpacity;
         return state;
     },
 
@@ -623,6 +644,9 @@ module.exports = module.exports = {
      * Applies externally provided state
      */
     applyState: (newState) => {
+        baseOpacity = newState.baseOpacity ?? {};
+        _self.resetOpacity();
+        _self.setOpacity();
         if (newState === false) {
             let availableBaseLayers = _self.getAvailableBaseLayers();
             if (Array.isArray(availableBaseLayers) && availableBaseLayers.length > 0) {
@@ -669,10 +693,10 @@ module.exports = module.exports = {
             if (bl.id === id) {
 
                 // Set defaults for base layers
-                let BLattribution = bl.attribution? bl.attribution : "";
-                let BLminZoom = bl.minZoom? bl.minZoom : 0;
-                let BLmaxZoom = bl.maxZoom? bl.maxZoom : 20;
-                let BLmaxNativeZoom = bl.maxNativeZoom? bl.maxNativeZoom : 18;
+                let BLattribution = bl.attribution ? bl.attribution : "";
+                let BLminZoom = bl.minZoom ? bl.minZoom : 0;
+                let BLmaxZoom = bl.maxZoom ? bl.maxZoom : 20;
+                let BLmaxNativeZoom = bl.maxNativeZoom ? bl.maxNativeZoom : 18;
 
 
                 if (bl?.type === "WMTS") {
@@ -715,6 +739,7 @@ module.exports = module.exports = {
                         minZoom: BLminZoom,
                         maxZoom: BLmaxZoom,
                         maxNativeZoom: BLmaxNativeZoom,
+                        singleTile: bl?.singleTile,
                     });
                 } else {
                     result = cloud.get().addBaseLayer(bl.id, bl.db, bl.config, bl.host || null);
@@ -730,6 +755,35 @@ module.exports = module.exports = {
             bounds = polygon(arr);
         } else {
             bounds = null;
+        }
+    },
+    setOpacity: () => {
+        for (const [layerKey, value] of Object.entries(baseOpacity)) {
+            layerTreeUtils.applyOpacityToLayer((parseFloat(value) / 100), layerKey, cloud, backboneEvents);
+            try {
+                document.querySelector(`[data-gc2-base-id="${layerKey}"].js-opacity-slider-base`).value = value;
+            } catch (e) {
+            }
+        }
+        _self.showOpacityControl();
+    },
+    resetOpacity: () => {
+        for (const layerKey of baseLayers) {
+            layerTreeUtils.applyOpacityToLayer(1, layerKey, cloud, backboneEvents);
+            try {
+                document.querySelector(`[data-gc2-base-id="${layerKey}"].js-opacity-slider-base`).value = 100;
+            } catch (e) {
+            }
+        }
+    },
+    showOpacityControl: () => {
+        for (const [layerKey, value] of Object.entries(baseOpacity)) {
+            try {
+                if (parseInt(value) < 100) {
+                    document.getElementById(`collapse-${Base64.encode(layerKey).replace(/=/g, "")}`).classList.add('show');
+                }
+            } catch (e) {
+            }
         }
     }
 };

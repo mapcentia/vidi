@@ -245,6 +245,8 @@ module.exports = {
         "Filter": "Filter",
         "New block": "Ny blok",
         "Filter is required for showing data": "Filter skal anvendes før data vises",
+        "More tools": "Flere værktøjer",
+        "Change layer type": "Skift lagtype",
 
         // Base layers
         "Side-by-side mode": "Dobbelt baggrundskort",
@@ -279,6 +281,7 @@ module.exports = {
         "You need to plot at least two points": "Du skal plotte mindst to punkter",
         "You need to plot at least three points": "Du skal plotte mindst tre punkter",
         "Required": "Skal udfyldes",
+        "Add new feature to layer": "Tiføj nyt objekt til lag",
 
         // Editor - ImageUploadWidget
         "Drop file here, or click to select file to upload": "Slip fil her, eller klik for at vælge fil, der skal uploades",

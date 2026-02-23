@@ -1,6 +1,6 @@
 /*
  * @author     Alexander Shumilov
- * @copyright  2013-2023 MapCentia ApS
+ * @copyright  2013-2026 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -9,17 +9,13 @@ import Dropzone from 'react-dropzone';
 
 import {MIME_TYPES_APPS, MIME_TYPES_IMAGES} from '../../../browser/modules/constants';
 import {splitBase64} from '../../../browser/modules/utils';
+import config from "../../../config/config";
 
 const MAX_WIDTH = 1600;
 const MAX_HEIGHT = 1200;
-const MAX_SIZE = 10000000;
+const MAX_SIZE = 30_000_000;
+const doNotScaleImages = config?.extensionConfig?.editor?.doNotScaleImages ?? false;
 
-
-
-
-/**
- * Image field widget
- */
 class FileUploadWidget extends React.Component {
     constructor(props) {
         super(props);
@@ -104,13 +100,16 @@ class FileUploadWidget extends React.Component {
                     const ctx = canvas.getContext('2d');
                     let width = img.width;
                     let height = img.height;
-                    if (width > MAX_WIDTH) {
-                        height *= MAX_WIDTH / width;
-                        width = MAX_WIDTH;
-                    }
-                    if (height > MAX_HEIGHT) {
-                        width *= MAX_HEIGHT / height;
-                        height = MAX_HEIGHT
+                    // Scale image
+                    if (!doNotScaleImages) {
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+                        if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / height;
+                            height = MAX_HEIGHT
+                        }
                     }
                     canvas.width = width;
                     canvas.height = height;

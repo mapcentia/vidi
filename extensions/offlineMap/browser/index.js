@@ -125,7 +125,7 @@ module.exports = {
          */
         var ReactDOM = require('react-dom');
 
-        utils.createMainTab(exId, __("Offline map"), __("OfflineMap block description"), require('./../../../browser/modules/height')().max, "get_app");
+        utils.createMainTab(exId, __("Offline map"), __("OfflineMap instructions"), require('./../../../browser/modules/height')().max, "bi bi-cloud-arrow-down");
 
         // Allowed zoom levels
         const minimalZoomLevel = 10;
@@ -601,7 +601,8 @@ module.exports = {
                 }
 
                 //let pageIsSecured = true;
-                let pageIsSecured = ((document.location.protocol.indexOf('https') === 0) || (document.location.href.indexOf('http://127.0.0.1') === 0));
+                // let pageIsSecured = ((document.location.protocol.indexOf('https') === 0) || (document.location.href.indexOf('http://127.0.0.1') === 0));
+                let pageIsSecured = true;
                 let securedPageNotification = false;
                 let cacheNotification = false;
                 let addCachedMapFormPanel = false;
@@ -625,49 +626,47 @@ module.exports = {
                     }
 
                     if (this.state.cacheIsAvailable === 1) {
-                        addCachedMapFormPanel = (<div className="panel panel-default">
-                            <div className="panel-heading" role="tab">
-                                <h4 className="panel-title">
-                                    <a
-                                        style={{display: 'block'}}
-                                        className="accordion-toggle"
-                                        data-toggle="collapse"
-                                        data-parent="#layers"
-                                        id="collapseOfflineMap1-trigger"
-                                        href="#collapseOfflineMap1"
-                                        aria-expanded="true"><i
-                                        className="material-icons">&#xE906;</i> {__("Store map area")}</a>
-                                </h4>
-                            </div>
-                            <ul className="list-group" id="group-collapseOfflineMap1" role="tabpanel">
-                                <div id="collapseOfflineMap1" className="accordion-body collapse" aria-expanded="true"
-                                     style={{position: 'relative'}}>
+                        addCachedMapFormPanel = (<div className="accordion-item">
+                            <h2 className="accordion-header">
+                                <button
+                                    className="accordion-button collapsed"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#collapseOfflineMap1"
+                                    aria-expanded="false"
+                                    aria-controls="collapseOfflineMap1"
+                                    id="collapseOfflineMap1-trigger">
+                                    <i className="bi bi-arrow-down"></i> {__("Store map area")}
+                                </button>
+                            </h2>
+                            <div id="collapseOfflineMap1" className="accordion-collapse collapse" aria-labelledby="collapseOfflineMap1-trigger">
+                                <div className="accordion-body" style={{position: 'relative'}}>
                                     {loadingOverlay}
                                     <div className="container-fluid">
                                         <div className="row">
                                             <div className="col-lg-12">
                                                 <div>
-                                                    <h4>{__("Extent")} {required}</h4>
+                                                    <h5>{__("Extent")} {required}</h5>
                                                     {showExtentButton}
                                                 </div>
                                                 <div>
-                                                    <h4>{__("Comment")}</h4>
+                                                    <h5>{__("Comment")}</h5>
                                                     <textarea className="form-control" id="offline-map-comment"
                                                               onChange={this.setComment}
                                                               placeholder={__('Saved tiles will be used in...')}></textarea>
                                                 </div>
                                                 <div>
-                                                    <h4>{__("Zoom")} {required}</h4>
+                                                    <h5>{__("Zoom")} {required}</h5>
                                                     <div className="container-fluid">
                                                         <div className="row">
                                                             <div className="col-md-6">
-                                                                <select className="form-control"
+                                                                <select className="form-select"
                                                                         id="offline-map-zoom_min"
                                                                         onChange={this.setMinZoom}
                                                                         value={this.state.newAreaZoomMin}>{zoomMinOptions}</select>
                                                             </div>
                                                             <div className="col-md-6">
-                                                                <select className="form-control"
+                                                                <select className="form-select"
                                                                         id="offline-map-zoom_max"
                                                                         onChange={this.setMaxZoom}
                                                                         defaultValue={this.state.newAreaZoomMax}>{zoomMaxOptions}</select>
@@ -677,37 +676,35 @@ module.exports = {
                                                 </div>
                                                 <div>
                                                     <button type="button"
-                                                            className={"btn btn-primary btn-block " + (this.formIsValid() ? '' : 'disabled')}
+                                                            className={"btn btn-primary w-100 mt-2 " + (this.formIsValid() ? '' : 'disabled')}
                                                             onClick={this.onSave}>
-                                                        <i className="material-icons">&#xE906;</i> {__("Store")}
+                                                        <i className="bi bi-arrow-down"></i> {__("Store")}
                                                     </button>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </ul>
+                            </div>
                         </div>);
                     }
 
                     if (this.state.cacheIsAvailable === 1) {
-                        existingCachedMapListBlock = (<div className="panel panel-default">
-                            <div className="panel-heading" role="tab">
-                                <h4 className="panel-title">
-                                    <a
-                                        style={{display: 'block'}}
-                                        className="accordion-toggle"
-                                        data-toggle="collapse"
-                                        data-parent="#layers"
-                                        id="collapseOfflineMap2-trigger"
-                                        href="#collapseOfflineMap2"
-                                        aria-expanded="true"><i
-                                        className="material-icons">&#xE896;</i> {__("Stored map areas")}</a>
-                                </h4>
-                            </div>
-                            <ul className="list-group" id="group-collapseOfflineMap2" role="tabpanel">
-                                <div id="collapseOfflineMap2" className="accordion-body collapse in"
-                                     aria-expanded="true">
+                        existingCachedMapListBlock = (<div className="accordion-item">
+                            <h2 className="accordion-header">
+                                <button
+                                    className="accordion-button"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#collapseOfflineMap2"
+                                    aria-expanded="true"
+                                    aria-controls="collapseOfflineMap2"
+                                    id="collapseOfflineMap2-trigger">
+                                    <i className="bi bi-database"></i> {__("Stored map areas")}
+                                </button>
+                            </h2>
+                            <div id="collapseOfflineMap2" className="accordion-collapse collapse show" aria-labelledby="collapseOfflineMap2-trigger">
+                                <div className="accordion-body">
                                     {mapAreasRefreshOverlay}
                                     <MapAreaList
                                         onMapAreaRefresh={(item) => {
@@ -719,7 +716,7 @@ module.exports = {
                                         mapObj={mapObj}
                                         items={this.state.existingCachedAreas}/>
                                 </div>
-                            </ul>
+                            </div>
                         </div>);
                     }
                 } else {
@@ -744,12 +741,10 @@ module.exports = {
 
                 return (
                     <div role="tabpanel">
-                        <div className="panel panel-default">
-                            <div className="panel-body offline-map-extension">
+                        <div className="card mb-2">
+                            <div className="card-body offline-map-extension">
                                 {/* Available storage notification */}
                                 {availableSpaceNotification}
-
-                                <p>{__("OfflineMap instructions")}</p>
                             </div>
                         </div>
 
@@ -759,11 +754,11 @@ module.exports = {
                         {/* Cache availability notification */}
                         {cacheNotification}
 
-                        {/* Add cached map form */}
-                        {addCachedMapFormPanel}
-
-                        {/* Existing cached map list */}
-                        {existingCachedMapListBlock}
+                        {/* Add cached map form and Existing cached map list */}
+                        <div className="accordion" id="offlineMapAccordion">
+                            {addCachedMapFormPanel}
+                            {existingCachedMapListBlock}
+                        </div>
                     </div>
                 );
             }

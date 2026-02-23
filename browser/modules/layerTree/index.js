@@ -46,6 +46,10 @@ import {
 import MetaSettingForm from "./MetaSettingForm";
 import Download from './Download';
 import {getResolutions} from "../crs";
+import { createRoot } from 'react-dom/client';
+import config from '../../../config/config';
+
+
 
 
 let _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEvents,
@@ -55,7 +59,6 @@ let _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEv
 
 const {v4: uuidv4} = require('uuid');
 const React = require('react');
-const ReactDOM = require('react-dom');
 const base64url = require('base64url');
 
 const urlparser = require('./../urlparser');
@@ -129,7 +132,9 @@ module.exports = {
         // expose api
         api.filter = (l, f) => {
             _self.onApplyArbitraryFiltersHandler({"layerKey": l, "filters": f});
-            filterComp[l].setState({"arbitraryFilters": f});
+            if (typeof filterComp[l] === "object") {
+                filterComp[l].setState({"arbitraryFilters": f});
+            }
         }
 
         return this;
@@ -216,7 +221,7 @@ module.exports = {
         });
         $("#layers").before(`
                                 <div class="input-group mb-3 layer-filter">
-                                    <input placeholder="${__('Filter')}" class="form-control" type="text" id="layers-filter" autocomplete="off">
+                                    <input placeholder="${window.vidiConfig?.layerTreeFilterPlaceholder ?? __('Filter')}" class="form-control" type="text" id="layers-filter" autocomplete="off">
                                     <button id="layers-filter-reset" class="btn btn-outline-secondary" type="button" id="button-addon2">
                                         <i class="bi bi-x-lg"></i>
                                         <div id="layers-filter-busy" style="display: none" class="spinner-border spinner-border-sm text-primary" role="status"></div>
@@ -717,7 +722,7 @@ module.exports = {
             let layer = cloud.get().map._layers[key];
             if (`id` in layer && layer.id) {
                 if (`options` in layer && layer.options && `opacity` in layer.options) {
-                    if (isNaN(layer.options.opacity) === false) {
+                    if (isNaN(layer.options.opacity) === false && typeof opacitySettings !== 'undefined') {
                         opacitySettings[layer.id] = layer.options.opacity;
                     }
                 }
@@ -761,6 +766,7 @@ module.exports = {
     /**
      * Applies externally provided state
      * @param newState
+     * @param dt
      * @returns {newState}
      */
     applyState: (newState, dt = false) => {
@@ -844,6 +850,9 @@ module.exports = {
      * @param {Object} forcedState             Externally provided state of the layerTree
      * @param {Array}  ignoredInitialStateKeys Keys of the initial state that should be ignored
      *
+     * @param dontRegisterEvents
+     * @param filter
+     * @param dt
      * @returns {Promise}
      */
     create: (forcedState = false, ignoredInitialStateKeys = [], dontRegisterEvents = false, filter = null, dt = false) => {
@@ -2284,6 +2293,7 @@ module.exports = {
             }
             // Set select call when opening a panel
             let selectCallBack = () => {
+                backboneEvents.get().trigger("feature:selected", layer, layerKey, feature);
             };
             if (typeof parsedMeta.select_function !== "undefined" && parsedMeta.select_function !== "") {
                 try {
@@ -2297,7 +2307,7 @@ module.exports = {
                     selectCallBack = Function('"use strict";return (' + f + ')')();
                 }
             }
-            let func = selectCallBack.bind(this, null, layer, layerKey, _self);
+            let func = selectCallBack.bind(this, null, layer, layerKey, _self, feature);
             $(document).arrive(`#a-collapse${randText}`, function () {
                 const e = $(`#collapse${randText}`);
                 const bsCollapse = document.getElementById(`collapse${randText}`);
@@ -3290,16 +3300,20 @@ module.exports = {
                 let html,
                     name = layer.f_table_name || null,
                     title = layer.f_table_title || null,
+                    lastmodified = layer.lastmodified || null,
                     abstract = layer.f_table_abstract || null;
+
+                if (lastmodified) {
+                    dayjs.locale('da');
+                    lastmodified = dayjs(lastmodified).format('DD.MM.YYYY HH:mm');
+                }
 
                 html = (parsedMeta !== null
                     && typeof parsedMeta.meta_desc !== "undefined"
                     && parsedMeta.meta_desc !== "") ?
                     marked(parsedMeta.meta_desc) : abstract;
 
-                dayjs.locale('da');
-
-                html = html ? mustache.render(html, parsedMeta) : "";
+                html = html ? mustache.render(html, {lastmodified}) : "";
 
                 $("#offcanvas-layer-desc-container").html(html);
                 $("#offcanvasLayerDesc h5").html(title || name);
@@ -3440,11 +3454,10 @@ module.exports = {
                     $(layerContainer).find('.js-layer-settings-labels').append(`<div id="${componentContainerId}"></div>`);
                     setTimeout(() => {
                         if (document.getElementById(componentContainerId)) {
-                            ReactDOM.render(<LabelSettingToggle
-                                    layerKey={layerKey}
-                                    initialValue={value}
-                                    onChange={_self.onChangeLabelsHandler}/>,
-                                document.getElementById(componentContainerId));
+                            createRoot(document.getElementById(componentContainerId)).render(<LabelSettingToggle
+                                layerKey={layerKey}
+                                initialValue={value}
+                                onChange={_self.onChangeLabelsHandler}/>);
                             $(layerContainer).find('.js-layer-settings-labels').hide(0);
                             $(layerContainer).find(`.js-toggle-labels`).click(() => {
                                 _self._selectIcon($(layerContainer).find('.js-toggle-labels'));
@@ -3522,8 +3535,9 @@ module.exports = {
                     _self.activeFiltersChange(layerKey)
                     setTimeout(() => {
                         if (document.getElementById(componentContainerId)) {
-                            filterComp[layerKey] = ReactDOM.render(
+                            createRoot(document.getElementById(componentContainerId)).render(
                                 <LayerFilter
+                                    ref={instance => { filterComp[layerKey] = instance }}
                                     layer={layer}
                                     layerMeta={meta.parseLayerMeta(layerKey)}
                                     presetFilters={presetFilters}
@@ -3543,7 +3557,7 @@ module.exports = {
                                     isFilterImmutable={isFilterImmutable}
                                     db={db}
                                     getActiveLayerFilters={_self.getActiveLayerFilters}
-                                />, document.getElementById(componentContainerId));
+                                />);
                             $(layerContainer).find('.js-layer-settings-filters').hide(0);
 
                             $(layerContainer).find(`.js-toggle-filters`).click(() => {
@@ -3567,11 +3581,11 @@ module.exports = {
                         $(layerContainer).find('.js-layer-settings-load-strategy').append(`<div id="${componentContainerId}"></div>`);
                         setTimeout(() => {
                             if (document.getElementById(componentContainerId)) {
-                                ReactDOM.render(<LoadStrategyToggle
-                                        layerKey={layerKey}
-                                        initialValue={value}
-                                        onChange={_self.onChangeLoadStrategyHandler}/>,
-                                    document.getElementById(componentContainerId));
+                                createRoot(document.getElementById(componentContainerId)).render(<LoadStrategyToggle
+                                    layerKey={layerKey}
+                                    initialValue={value}
+                                    onChange={_self.onChangeLoadStrategyHandler}/>
+                                );
                                 $(layerContainer).find('.js-layer-settings-load-strategy').hide(0);
                                 $(layerContainer).find(`.js-toggle-load-strategy`).click(() => {
                                     _self._selectIcon($(layerContainer).find('.js-toggle-load-strategy'));
@@ -3619,11 +3633,11 @@ module.exports = {
 
                 setTimeout(() => {
                     if (document.getElementById(componentContainerId)) {
-                        ReactDOM.render(<MetaSettingForm
-                                layerKey={layerKey}
-                                initialValues={values}
-                                onChange={_self.onChangeStylesHandler}/>,
-                            document.getElementById(componentContainerId));
+                        createRoot(document.getElementById(componentContainerId)).render(<MetaSettingForm
+                            layerKey={layerKey}
+                            initialValues={values}
+                            onChange={_self.onChangeStylesHandler}/>
+                        );
                     } else {
                         console.error(`Unable to find the labels control container`);
                     }
@@ -3693,11 +3707,11 @@ module.exports = {
                     let componentContainerId = `layer-settings-download-${layerKey.replace('.', '-')}`;
                     $(layerContainer).find('.js-layer-settings-download').append(`<div id="${componentContainerId}"></div>`);
                     if (document.getElementById(componentContainerId)) {
-                        ReactDOM.render(<Download
+                        createRoot(document.getElementById(componentContainerId)).render(<Download
                                 layer={layer}
                                 onApplyDownload={_self.onApplyDownloadHandler}
-                            />,
-                            document.getElementById(componentContainerId));
+                            />
+                        );
                     } else {
                         console.error(`Unable to find the download container`);
                     }

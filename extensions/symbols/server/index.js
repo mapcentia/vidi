@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2021 MapCentia ApS
+ * @copyright  2013-2026 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -37,7 +37,8 @@ router.get('/api/symbols/:file', function (req, response) {
 });
 
 router.post('/api/symbols/:db', function (req, response) {
-    let db = req.params.db, symbolState = req.body.symbolState, tag = req.body.tag, props = req.body.props;
+    let db = req.params.db, symbolState = req.body.symbolState, deleted = req.body.deleted, tag = req.body.tag,
+        props = req.body.props;
     let {browserId, userId} = shared.getCurrentUserIdentifiers(req);
     // Check for overrides of browser and user ids
     if (req.body.browserId) {
@@ -47,28 +48,26 @@ router.post('/api/symbols/:db', function (req, response) {
         userId = req.body.userId;
     }
     let anonymous = !userId;
-    let arr = [];
+    let updates = [];
     let properties;
     try {
         properties = JSON.stringify(props);
     } catch (e) {
         properties = null
     }
-    try {
-        for (const id in symbolState) {
-            let p = symbolState[id];
-            let sql = `INSERT INTO settings.symbols (id,rotation,scale,zoom,svg,browserid,userid,anonymous,file,the_geom,tag,properties) VALUES ('${id}',${p.rotation},${p.scale},${p.zoomLevel},'${p.svg}','${browserId}','${userId}',${anonymous},'${p.file}',ST_geomfromtext('POINT(${p.coord.lng} ${p.coord.lat})', 4326),'${tag}','${properties}') ON CONFLICT (id) DO UPDATE SET rotation=${p.rotation},scale=${p.scale},zoom=${p.zoomLevel},svg='${p.svg}',browserid='${browserId}',userid='${userId}',anonymous=${anonymous},file='${p.file}',the_geom=ST_geomfromtext('POINT(${p.coord.lng} ${p.coord.lat})', 4326), tag='${tag}',properties='${properties}'`;
-            arr.push(sql);
-        }
-    } catch (e) {
-        response.header('content-type', 'application/json');
-        response.status(500).send({
-            success: false,
-            message: e.message
-        });
-        return;
+
+    for (const id of deleted) {
+        let sql = `UPDATE settings.symbols set deleted = true WHERE id='${id}'`;
+        updates.push(sql);
     }
-    const newlineSql = arr.join("\n");
+
+    for (const id in symbolState) {
+        let p = symbolState[id];
+        let sql = `INSERT INTO settings.symbols (id,rotation,scale,zoom,svg,browserid,userid,anonymous,file,the_geom,tag,properties) VALUES ('${id}',${p.rotation},${p.scale},${p.zoomLevel},'${p.svg}','${browserId}','${userId}',${anonymous},'${p.file}',ST_geomfromtext('POINT(${p.coord.lng} ${p.coord.lat})', 4326),'${tag}','${properties}') ON CONFLICT (id) DO UPDATE SET rotation=${p.rotation},scale=${p.scale},zoom=${p.zoomLevel},svg='${p.svg}',browserid='${browserId}',userid='${userId}',anonymous=${anonymous},file='${p.file}',the_geom=ST_geomfromtext('POINT(${p.coord.lng} ${p.coord.lat})', 4326), tag='${tag}',properties='${properties}'`;
+        updates.push(sql);
+    }
+
+    const newlineSql = updates.join("\n");
     const uri = "/api/v2/sql/" + db;
     const options = {
         method: 'POST',

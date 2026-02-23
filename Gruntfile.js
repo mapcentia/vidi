@@ -253,7 +253,6 @@ module.exports = function (grunt) {
                         'public/js/lib/Leaflet.utfgrid/L.NonTiledUTFGrid.js',
                         'public/js/lib/leaflet-plugins/Bing.js',
                         'public/js/lib/Leaflet.GridLayer.GoogleMutant/Leaflet.GoogleMutant.js',
-                        'public/js/lib/Leaflet.NonTiledLayer/NonTiledLayer.js',
                         'public/js/lib/leaflet-vector-grid/Leaflet.VectorGrid.bundled.min.js',
                         'public/js/lib/Leaflet.markercluster/leaflet.markercluster.js',
                         'public/js/lib/Leaflet.extra-markers/leaflet.extra-markers.js',
@@ -279,6 +278,7 @@ module.exports = function (grunt) {
                         'public/js/lib/typeahead.js/typeahead.jquery.js',
                         'node_modules/bootstrap/dist/js/bootstrap.bundle.js',
 
+                        'node_modules/leaflet.nontiledlayer/dist/NonTiledLayer.js',
                         'node_modules/leaflet.glify/dist/glify-browser.js',
                         'node_modules/maplibre-gl/dist/maplibre-gl.js',
                         'node_modules/@maplibre/maplibre-gl-leaflet/leaflet-maplibre-gl.js',

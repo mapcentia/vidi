@@ -10,34 +10,26 @@ const puppeteer = require('puppeteer');
 
 const config = require('../config/config.js')
 
-let puppeteerProcesses = {};
+const puppeteerProcesses = {
+    min: config?.puppeteerProcesses?.min ?? 0,
+    max: config?.puppeteerProcesses?.max ?? 2,
+};
 
-if (typeof config.puppeteerProcesses !== "undefined") {
-    puppeteerProcesses.min = typeof config.puppeteerProcesses.min !== "undefined" ? config.puppeteerProcesses.min : 0;
-    puppeteerProcesses.max = typeof config.puppeteerProcesses.max !== "undefined" ? config.puppeteerProcesses.max : 2;
-} else {
-    puppeteerProcesses = {min: 0, max: 2};
-}
 
 const startupParameters = {
     headless: true,
     timeout: 10000,
     ignoreHTTPSErrors: true,
     args: [
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-        "--enable-features=NetworkService",
-      //   '--use-gl=angle',
-      //   '--enable-webgl',
-      //   '--ignore-gpu-blocklist',
-      //   '--use-gl=egl',
-      //   '--enable-accelerated-2d-canvas',
-      //   '--disable-software-rasterizer',
-      //   '--disable-gpu-sandbox',
-      //   '--enable-webgl-draft-extensions',
-      //   '--enable-es3-apis',
-    ],
-    //userDataDir: '/tmp/chromeSession'
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        // WebGL + SwiftShader
+        '--use-gl=angle',
+        '--use-angle=swiftshader-webgl',
+        '--enable-unsafe-swiftshader',
+        '--ignore-gpu-blocklist',
+    ]
 };
 
 const pool = genericPool.createPool({
