@@ -15,10 +15,11 @@
 
 </div>
 <script>
+    // Deafult to GC2 OAuth2 configuration
     const DEFAULTS = {
-        redirectUri: 'http://localhost:3000/openid.html',
+        redirectUri: window.location.origin + '/openid.html',
         clientId: 'gc2-cli',
-        host: 'http://localhost:8080',
+        host: window.gc2host,
     };
     const extractOidcConfig = () => {
         const oidc = window.gc2Options?.openIdConfig;
@@ -153,7 +154,7 @@
 
     codeFlow.redirectHandle().then(async isSignedIn => {
         if (isSignedIn) {
-            const token = JSON.parse(localStorage.getItem('gc2_tokens') || '{}')['idToken']
+            const token = JSON.parse(localStorage.getItem('gc2_tokens') || '{}')['accessToken']
             //const token = JSON.parse(localStorage.getItem('gc2_tokens') || '{}')['accessToken']
             const nonce = localStorage.getItem('gc2_nonce')
             const {database, superuser} = jwtDecode(token)
@@ -238,7 +239,7 @@
         // location.reload()
     })
     const getDatabases =  () => {
-        return fetch('/api/v2/database/search?userIdentifier=*').then(res => res.json()).then(data =>
+        return fetch(oidcConfig.host + '/api/v2/database/search?userIdentifier=*').then(res => res.json()).then(data =>
             data.databases.map(item => item.screenname)
         )
     }
