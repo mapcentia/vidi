@@ -267,7 +267,7 @@ module.exports = function (grunt) {
                         'public/js/lib/leaflet.editable/Leaflet.Editable.js',
                         'public/js/lib/leaflet-geometryutil/leaflet.geometryutil.js',
                         'public/js/lib/Path.Drag.js/src/Path.Drag.js',
-                        'public/js/lib/leaflet-side-by-side/leaflet-side-by-side.min.js',
+                        'public/js/lib/leaflet-side-by-side/leaflet-side-by-side.js',
 
                         'node_modules/jquery-ui/dist/jquery-ui.js',
                         'node_modules/jquery-ui-touch-punch-c/jquery.ui.touch-punch.js',

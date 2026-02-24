@@ -35,6 +35,22 @@ function asArray (arg) {
 
 function noop () {}
 
+// Try to get a DOM element for a given Leaflet layer, supporting both GridLayer (getContainer)
+// and ImageOverlay/VideoOverlay (getElement).
+function getLayerElement (layer) {
+  if (!layer) return null
+  if (typeof layer.getContainer === 'function') {
+    return layer.getContainer()
+  }
+  if (typeof layer.getElement === 'function') {
+    return layer.getElement()
+  }
+  // Fallbacks for some custom layers
+  if (layer._container) return layer._container
+  if (layer._image) return layer._image
+  return null
+}
+
 L.Control.SideBySide = L.Control.extend({
   options: {
     thumbSize: 42,
@@ -81,10 +97,12 @@ L.Control.SideBySide = L.Control.extend({
       return this
     }
     if (this._leftLayer) {
-      this._leftLayer.getContainer().style.clip = ''
+      var _leftEl = getLayerElement(this._leftLayer)
+      if (_leftEl && _leftEl.style) _leftEl.style.clip = ''
     }
     if (this._rightLayer) {
-      this._rightLayer.getContainer().style.clip = ''
+      var _rightEl = getLayerElement(this._rightLayer)
+      if (_rightEl && _rightEl.style) _rightEl.style.clip = ''
     }
     this._removeEvents()
     L.DomUtil.remove(this._container)
@@ -118,10 +136,12 @@ L.Control.SideBySide = L.Control.extend({
     var clipLeft = 'rect(' + [nw.y, clipX, se.y, nw.x].join('px,') + 'px)'
     var clipRight = 'rect(' + [nw.y, se.x, se.y, clipX].join('px,') + 'px)'
     if (this._leftLayer) {
-      this._leftLayer.getContainer().style.clip = clipLeft
+      var leftEl = getLayerElement(this._leftLayer)
+      if (leftEl && leftEl.style) leftEl.style.clip = clipLeft
     }
     if (this._rightLayer) {
-      this._rightLayer.getContainer().style.clip = clipRight
+      var rightEl = getLayerElement(this._rightLayer)
+      if (rightEl && rightEl.style) rightEl.style.clip = clipRight
     }
   },
 
