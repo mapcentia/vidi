@@ -138,7 +138,7 @@
     "leaflet.nontiledlayer": "^1.0.9",
     "localforage": "^1.7.4",
     "lodash": "^4.17.15",
-    "maplibre-gl": "^5.19.0",
+    "maplibre-gl": "^5.7.2",
     "marked": "4.0.10",
     "md5": "^2.2.1",
     "mobile-drag-drop": "^3.0.0-rc.0",

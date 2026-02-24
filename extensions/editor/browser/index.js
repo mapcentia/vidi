@@ -651,6 +651,8 @@ module.exports = {
                     let v;
                     if (typeof value === 'string' && value.startsWith("$user.properties.")) {
                         v = session.getProperties()?.[value.split(".")[2]];
+                    } else  if (typeof value === 'string' && value.startsWith("$user.name")) {
+                        v = session.getUserName();
                     } else {
                         v = defaultValuesConf[key];
                     }
