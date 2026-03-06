@@ -67,13 +67,13 @@ module.exports = module.exports = {
         // Expose init in global scope
         api.turnOn = (l) => {
             const status = _self.getLayersEnabledStatus();
-            if (!status?.[l] || !status[l].enabled) {
+            if (!status?.[l] || !status?.[l]?.enabled) {
                 _self.init(l, true);
             }
         }
         api.turnOff = (l) => {
             const status = _self.getLayersEnabledStatus();
-            if (status[l].enabled) {
+            if (status?.[l]?.enabled) {
                 _self.init(l, false);
             }
         }
