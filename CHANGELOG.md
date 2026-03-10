@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2026.3.0] - 2026-10-3
+### Changed
+- Login now uses OAuth2.
+
+### Fixed
+- Printing now works with MapLibre GL base layers. MapLibre GL is fixed to version 5.7.x.
+- Side-by-side base layer switcher regression.
+
 ## [2026.2.1] - 2026-9-2
 ### Added
 - Support for not scaling images when uploading to editor using the config option `editor.doNotScaleImages`.
