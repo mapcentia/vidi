@@ -19,7 +19,6 @@ router.use(require('./gc2/elasticsearch'));
 router.use(require('./gc2/feature'));
 router.use(require('./gc2/bulk'));
 router.use(require('./gc2/config'));
-router.use(require('./gc2/oauth'));
 router.use(require('./print'));
 router.use(require('./locale'));
 router.use(require('./config'));

@@ -26,9 +26,9 @@
         const redirectUri = oidc?.redirectUris?.vidi ?? DEFAULTS.redirectUri;
         const clientId = oidc?.clientId ?? DEFAULTS.clientId;
         const host = oidc?.host ?? DEFAULTS.host;
-        const tokenUri = oidc?.tokenUri ?? window.location.origin + '/api/gc2/oauth';
+        const tokenUri = oidc?.tokenUri ?? undefined;
         const authUri = oidc?.authUri ?? undefined;
-        const logoutUri = oidc?.logoutUri ?? window.location.origin + '/api/gc2/oauth/logout';
+        const logoutUri = oidc?.logoutUri ?? undefined;
         const scope = oidc?.scope ?? DEFAULTS.scope;
         return {redirectUri, clientId, host, tokenUri, authUri, scope, logoutUri};
     }
