@@ -125,7 +125,7 @@ let urlsIgnoredForCaching = [{
 }, {
     regExp: true,
     requested: '/api/v2/(?!configuration)'
-},{
+}, {
     regExp: true,
     requested: '/api/v1/decodeimg'
 }, {
@@ -137,6 +137,9 @@ let urlsIgnoredForCaching = [{
 }, {
     regExp: true,
     requested: 'socket\.io'
+}, {
+    regExp: true,
+    requested: "/oauth"
 }];
 
 if (typeof CONFIG.urlsIgnoredForCaching === "object") {
