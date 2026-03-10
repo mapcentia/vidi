@@ -19,16 +19,16 @@
     const DEFAULTS = {
         redirectUri: window.location.origin + '/openid.html',
         clientId: 'gc2-cli',
-        host: window.gc2host,
+        host: window.host,
     };
     const extractOidcConfig = () => {
         const oidc = window.gc2Options?.openIdConfig;
         const redirectUri = oidc?.redirectUris?.vidi ?? DEFAULTS.redirectUri;
         const clientId = oidc?.clientId ?? DEFAULTS.clientId;
         const host = oidc?.host ?? DEFAULTS.host;
-        const tokenUri = oidc?.tokenUri ?? undefined;
+        const tokenUri = oidc?.tokenUri ?? window.location.origin + '/api/gc2/oauth';
         const authUri = oidc?.authUri ?? undefined;
-        const logoutUri = oidc?.logoutUri ?? undefined;
+        const logoutUri = oidc?.logoutUri ?? window.location.origin + '/api/gc2/oauth/logout';
         const scope = oidc?.scope ?? DEFAULTS.scope;
         return {redirectUri, clientId, host, tokenUri, authUri, scope, logoutUri};
     }
