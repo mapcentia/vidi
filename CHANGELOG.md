@@ -7,7 +7,7 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ## [2026.3.0] - 2026-10-3
 ### Changed
-- Login now uses OAuth2.
+- Login now uses OAuth2. It might be necessary to set the `host` config in GC2, if behind a proxy. The `host` config is the URL of the GC2 instance.
 
 ### Fixed
 - Printing now works with MapLibre GL base layers. MapLibre GL is fixed to version 5.7.x.
