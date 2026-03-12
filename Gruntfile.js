@@ -268,6 +268,7 @@ module.exports = function (grunt) {
                         'public/js/lib/leaflet-geometryutil/leaflet.geometryutil.js',
                         'public/js/lib/Path.Drag.js/src/Path.Drag.js',
                         'public/js/lib/leaflet-side-by-side/leaflet-side-by-side.js',
+                        'public/js/lib/Leaflet.NonTiledLayer/NonTiledLayer.js',
 
                         'node_modules/jquery-ui/dist/jquery-ui.js',
                         'node_modules/jquery-ui-touch-punch-c/jquery.ui.touch-punch.js',
@@ -278,7 +279,6 @@ module.exports = function (grunt) {
                         'public/js/lib/typeahead.js/typeahead.jquery.js',
                         'node_modules/bootstrap/dist/js/bootstrap.bundle.js',
 
-                        'node_modules/leaflet.nontiledlayer/dist/NonTiledLayer.js',
                         'node_modules/leaflet.glify/dist/glify-browser.js',
                         'node_modules/maplibre-gl/dist/maplibre-gl.js',
                         'node_modules/@maplibre/maplibre-gl-leaflet/leaflet-maplibre-gl.js',
