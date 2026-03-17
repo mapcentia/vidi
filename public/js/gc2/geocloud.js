@@ -322,21 +322,25 @@ geocloud = (function () {
                 const timeout = timeoutBase / retries;
                 let isRetrying = false;
                 xhr = $.ajax({
-                    dataType: (me.defaults.jsonp) ? 'jsonp' : 'json',
+                    dataType: 'json',
+                    contentType: "application/json; charset=utf-8",
                     async: me.defaults.async,
-                    data: ('q=' + (me.base64 ? base64url(sql) + "&base64=true" : encodeURIComponent(sql)) +
-                        '&srs=' + me.defaults.projection + '&lifetime=' + me.defaults.lifetime + '&client_encoding=' + me.defaults.clientEncoding +
-                        '&key=' + me.defaults.key + '&custom_data=' + me.custom_data),
-                    jsonp: (me.defaults.jsonp) ? 'jsonp_callback' : false,
+                    data: JSON.stringify({
+                        q: me.base64 ? base64url(sql): sql,
+                        base64: me.base64,
+                        srs: me.defaults.projection,
+                        lifetime: me.defaults.lifetime,
+                        client_encoding: me.defaults.clientEncoding,
+                        key: me.defaults.key,
+                        custom_data: me.custom_data
+                    }),
                     url: me.host + me.uri + '/' + me.db,
                     type: me.defaults.method,
                     timeout: timeout,
                     success: function (response) {
-
                         if (response.success === false && doNotShowAlertOnError === undefined) {
                             alert(response.message);
                         }
-
                         if (response.success === true) {
                             if (response.features !== null) {
                                 response = me.transformResponse(response, me.id);

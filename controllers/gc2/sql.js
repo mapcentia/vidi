@@ -32,7 +32,17 @@ var query = function (req, response) {
             return v.toString(16);
         });
 
-    var postData = "q=" + (base64 === "true" ? q : encodeURIComponent(q)) + "&base64=" + (base64 === "true" ? "true" : "false") + "&srs=" + srs + "&lifetime=" + lifetime + "&client_encoding=" + (client_encoding || "UTF8") + "&format=" + (format ? format : "geojson") + "&key=" + (typeof req?.session?.gc2ApiKey !=="undefined" ? req.session.gc2ApiKey : "xxxxx" /*Dummy key is sent to prevent start of session*/) + "&custom_data=" + (custom_data || ""),
+    var postData = {
+            convert_types: true,
+            q: base64 ? q : encodeURIComponent(q),
+            base64,
+            srs,
+            lifetime,
+            client_encoding: client_encoding || "UTF8",
+            format: format ? format : "geojson",
+            key: typeof req?.session?.gc2ApiKey !== "undefined" ? req.session.gc2ApiKey : "xxxxx", //Dummy key is sent to prevent start of session
+            custom_data: custom_data || ""
+        },
         options;
 
     // Check if user is a sub user
@@ -42,10 +52,6 @@ var query = function (req, response) {
         userName = db;
     }
 
-    if (req.body.key && !req?.session?.gc2ApiKey) {
-        postData = postData + "&key=" + req.body.key;
-    }
-
     uri = custom_data !== null && custom_data !== undefined && custom_data !== "null" ? config.host + "/api/v2/sqlwrapper/" + userName : config.host + "/api/v2/sql/" + userName;
 
     console.log(uri);
@@ -53,7 +59,7 @@ var query = function (req, response) {
     options = {
         method: 'POST',
         uri: uri,
-        form: postData
+        json: postData
     };
 
     if (format === "excel") {
@@ -85,7 +91,7 @@ var query = function (req, response) {
         writeStream = fs.createWriteStream(__dirname + "/../../public/tmp/stored_results/" + fileName);
     }
 
-    rem.on('response', function(res) {
+    rem.on('response', function (res) {
         if (!store) {
             response.writeHead(res.statusCode, headers);
         }
