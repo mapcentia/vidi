@@ -268,7 +268,7 @@ module.exports = {
             });
         }
 
-        queueStatistsics = new QueueStatisticsWatcher({switchLayer, offlineModeControlsManager, layerTree: _self});
+        queueStatistsics = new QueueStatisticsWatcher({switchLayer, offlineModeControlsManager, layerTree: _self, extensions});
         apiBridgeInstance = APIBridgeSingletone((statistics, forceLayerUpdate) => {
             _self._statisticsHandler(statistics, forceLayerUpdate);
         });

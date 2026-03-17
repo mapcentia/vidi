@@ -21,7 +21,8 @@ let accumulatedDiff = [];
 
 let lastStatistics = false;
 
-let switchLayer = false, layerTree = false, offlineModeControlsManager = false;
+let switchLayer = false, layerTree = false, offlineModeControlsManager = false,
+    extensions = false;
 
 
 const base64url = require('base64url');
@@ -31,6 +32,7 @@ class QueueStatisticsWatcher {
     constructor(o) {
         switchLayer = o.switchLayer;
         layerTree = o.layerTree;
+        extensions = o.extensions;
         offlineModeControlsManager = o.offlineModeControlsManager;
     }
 
@@ -117,18 +119,31 @@ class QueueStatisticsWatcher {
                     if (rejectedByServerRequests > 0) {
                         $(layerControlContainer).find('.js-rejectedByServerItems').removeClass('d-none');
                         statistics[key]['rejectedByServer'].items.map(item => {
-                            let copiedItem = Object.assign({}, item.feature.features[0]);
-                            let copiedItemProperties = Object.assign({}, item.feature.features[0].properties);
-                            delete copiedItemProperties.gid;
-
+                            const copiedItem = Object.assign({}, item.feature.features[0]);
+                            const copiedItemProperties = Object.assign({}, item.feature.features[0].properties);
+                            const copiedItemMeta = Object.assign({}, item.meta);
                             let errorMessage = item.serverErrorMessage;
                             if (item.serverErrorType && item.serverErrorType === `AUTHORIZATION_ERROR`) {
                                 errorMessage = __(`Not authorized to perform this action`);
                             }
-
-                            let errorRecord = $(`
-                            <div class="d-flex align-items-center gap-2">
-                                <button data-feature-geometry='${JSON.stringify(copiedItem.geometry)}' class="btn btn-sm btn-outline-secondary js-center-map-on-item" type="button">
+                            const layerKey = key.split('.')[0] + '.' + key.split('.')[1];
+                            const layer = cloud.get().getLayersByName('v:' + layerKey);
+                            let id;
+                            let fragment;
+                            if (layer) {
+                                id = L.stamp(layer.getLayers().find(l => l.feature?.meta && l.feature.properties[copiedItemMeta.pkey] === copiedItemProperties[copiedItemMeta.pkey]));
+                                fragment = `<div class="d-flex align-items-center gap-2 gc2-edit-tools" 
+                                data-edit-layer-id="${id}"
+                                data-edit-layer-name="${layerKey}"
+                                data-edit-vector="true">`;
+                            } else {
+                                fragment = `<div class="d-flex align-items-center gap-2">`;
+                            }
+                            delete copiedItemProperties[copiedItemMeta.pkey];
+                            let errorRecord = $(`${fragment}
+                                <button 
+                                    data-feature-geometry='${JSON.stringify(copiedItem.geometry)}'
+                                    class="btn btn-sm btn-outline-secondary js-center-map-on-item popup-edit-btn" type="button">
                                     <i class="bi bi-pin-map text-danger"></i>
                                 </button>
                                 <div class="text-danger">${errorMessage}</div>
