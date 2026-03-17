@@ -191,13 +191,19 @@ router.post('/api/extension/conflictSearch', function (req, response) {
             const $sqlConflict = JSON.parse(metaDataKeys[table].meta)?.sql_conflict ? "(" + JSON.parse(metaDataKeys[table].meta)?.sql_conflict?.replace("@WHERE@", where) + ") as _extra," : "";
             const sql = "SELECT " + $sqlConflict + fieldStr + ", ST_AsGeoJSON(" + searchBuffer + ") as _buffer, ST_LENGTH(ST_Intersection(" + geomField + ", ST_Transform(" + searchBuffer + "," + srid + "))) as _length, ST_AREA(ST_Intersection(" + geomField + ", ST_Transform(" + searchBuffer + "," + srid + "))) as _area FROM " + quotedTableName + " WHERE " + where;
             const queryables = JSON.parse(metaDataKeys[table].fieldconf);
-            let postData = "client_encoding=UTF8&srs=4326&lifetime=0&base64=true&q=" + base64url.encode(sql) + "&key=" + "&key=" + (typeof req.session.gc2ApiKey !== "undefined" ? req.session.gc2ApiKey : "xxxxx" /*Dummy key is sent to prevent start of session*/),
+            let postData = {
+                    client_encoding: 'UTF8',
+                    srs: 4326,
+                    lifetime: 0,
+                    base64: true,
+                    q: base64url.encode(sql),
+                    key: (typeof req.session.gc2ApiKey !== "undefined" ? req.session.gc2ApiKey : "xxxxx" /*Dummy key is sent to prevent start of session*/)
+                },
                 options = {
                     method: 'POST',
-                    body: postData,
+                    body: JSON.stringify(postData),
                     headers: {
-                        "Content-Type": 'application/x-www-form-urlencoded',
-                        'Content-Length': postData.length,
+                        "Content-Type": 'application/json; charset=utf-8'
                     }
                 },
                 uri = config.gc2.host + "/api/v2/sql/" + (req.session.subUser ? req.session.screenName + "@" + req.session.parentDb : db);

@@ -32,11 +32,15 @@ class AutocompleteControl extends React.Component {
                             FROM ${this.props.layerKey}`);
             $.ajax({
                 url: '/api/sql/' + this.props.db,
-                contentType: 'application/x-www-form-urlencoded',
-                scriptCharset: "utf-8",
+                contentType: 'application/json; charset=utf-8',
                 dataType: 'json',
                 type: 'POST',
-                data: 'base64=true&lifetime=0&client_encoding=UTF8&q=' + sql,
+                data: JSON.stringify({
+                    base64: true,
+                    lifetime: 0,
+                    client_encoding: 'UTF8',
+                    q: sql
+                }),
                 success: function (response) {
                     let items = [];
                     response.features.forEach((e) => {

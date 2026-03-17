@@ -3863,11 +3863,10 @@ module.exports = {
         }
         $.ajax({
             url: '/api/sql/' + urlparser.db,
-            contentType: 'application/x-www-form-urlencoded',
-            scriptCharset: "utf-8",
+            contentType: 'application/json; charset=utf-8',
             dataType: 'json',
             type: 'POST',
-            data: q,
+            data: JSON.stringify(q),
             success: function (response) {
                 let e = response.features[0].properties;
                 cloud.get().map.fitBounds([[e.tymin, e.txmin], [e.tymax, e.txmax]], {maxZoom: 18})

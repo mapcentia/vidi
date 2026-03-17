@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [UNRELEASED] - 2026-17-3
+### Changed
+- Refactor SQL query handling in `geocloud.js` and `sql.js` to switch from URL-encoded form data to JSON payloads. GC2 must be upgraded to latest version.
+
 ## [2026.3.3] - 2026-12-3
 ### Added
 - Re-try logic on error for non-tiled WMS layers. 1000 ms delay between 3 retries.

@@ -14,7 +14,7 @@ module.exports = {
     download: (sql, format) => {
         let request = new XMLHttpRequest();
         request.open('POST', '/api/sql/' + db, true);
-        request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charseselectt=UTF-8');
+        request.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
         request.responseType = 'blob';
         request.onload = function () {
             if (request.status === 200) {
@@ -50,7 +50,13 @@ module.exports = {
             // some error handling should be done here...
         };
 
-        let uri = 'geoformat=wkt&format=' + format + '&client_encoding=UTF8&&srs=4326&q=' + sql;
-        request.send(uri);
+        let data = {
+            geoformat: 'wkt',
+            format: format,
+            client_encoding: 'UTF8',
+            srs: 4326,
+            q: sql
+        };
+        request.send(JSON.stringify(data));
     }
 };

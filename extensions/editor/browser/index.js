@@ -453,6 +453,23 @@ module.exports = {
                                 'ui:widget': 'fileupload'
                             };
                             break;
+                        case `bytea[]`:
+                            properties[key].type = `array`;
+                            properties[key].items = {
+                                type: 'string',
+                            };
+                            uiSchema[key] = {
+                                items: {
+                                    'ui:widget': 'fileupload'
+                                }
+                            };
+                            break;
+                        case `integer[]`:
+                            properties[key].type = `array`;
+                            properties[key].items = {
+                                type: 'integer',
+                            };
+                            break;
                         case `text`:
                             uiSchema[key] = {
                                 'ui:widget': 'textarea'
@@ -605,7 +622,6 @@ module.exports = {
                             fields[key].type.startsWith("json") ||
                             fields[key].type.startsWith("text")) &&
                         geoJson.properties[key] !== null) {
-                        geoJson.properties[key] = encodeURIComponent(geoJson.properties[key]);
                     }
                 });
 
@@ -651,7 +667,7 @@ module.exports = {
                     let v;
                     if (typeof value === 'string' && value.startsWith("$user.properties.")) {
                         v = session.getProperties()?.[value.split(".")[2]];
-                    } else  if (typeof value === 'string' && value.startsWith("$user.name")) {
+                    } else if (typeof value === 'string' && value.startsWith("$user.name")) {
                         v = session.getUserName();
                     } else {
                         v = defaultValuesConf[key];
@@ -956,26 +972,10 @@ module.exports = {
                             eventFeatureCopy.properties[key] = parseFloat(eventFeatureCopy.properties[key]);
                         }
                         break
-                    case `date`:
-                    case `bytea`:
-                    case `timestamp with time zone`:
-                    case `timestamp without time zone`:
-                    case `time with time zone`:
-                    case `time without time zone`:
-                        if (eventFeatureCopy.properties[key]) {
-                            eventFeatureCopy.properties[key] = decodeURIComponent(eventFeatureCopy.properties[key]);
-                        }
-                        break;
-                    case `text`:
-                    case `character varying`:
-                    case `json`:
-                    case `jsonb`:
-                        if (eventFeatureCopy.properties[key]) {
-                            try { // If string is not
-                                eventFeatureCopy.properties[key] = decodeURIComponent(eventFeatureCopy.properties[key]);
-                            } catch (e) {
-                            }
-                            eventFeatureCopy.properties[key] = eventFeatureCopy.properties[key].replace(/\\"/g, '"');
+                    case `bytea[]`:
+                    case `integer[]`:
+                        if (typeof eventFeatureCopy.properties[key] !== 'object') {
+                            eventFeatureCopy.properties[key] = "[" + eventFeatureCopy.properties[key].slice(1, -1) + "]";
                         }
                         break;
                 }
@@ -1031,7 +1031,6 @@ module.exports = {
                                 fields[key].type.startsWith("json") ||
                                 fields[key].type.startsWith("text")) &&
                             GeoJSON.properties[key] !== null) {
-                            GeoJSON.properties[key] = encodeURIComponent(GeoJSON.properties[key]);
                         }
                     } else {
                         // Remove system fields, which should not be updated by the user

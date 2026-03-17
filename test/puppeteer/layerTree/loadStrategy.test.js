@@ -38,7 +38,7 @@ describe('Layer tree load strategy', () => {
         await page.setRequestInterception(true);
         page.on('request', request => {
             if (request.method() === `POST`) {
-                let decodedQuery = Buffer.from(request.postData().split(`&`)[0].split(`=`)[1], 'base64').toString('ascii');
+                let decodedQuery = Buffer.from(JSON.parse(request.postData()).q, 'base64').toString('ascii');
                 if (decodedQuery.indexOf(`ST_Intersects(ST_Force2D`) > -1) {
                     lastLoadStrategyUsedWasDynamic = true;
                 } else {
@@ -76,7 +76,7 @@ describe('Layer tree load strategy', () => {
         await newPage.setRequestInterception(true);
         newPage.on('request', request => {
             if (request.method() === `POST`) {
-                let decodedQuery = Buffer.from(request.postData().split(`&`)[0].split(`=`)[1], 'base64').toString('ascii');
+                let decodedQuery = Buffer.from(JSON.parse(request.postData()).q, 'base64').toString('ascii');
                 if (decodedQuery.indexOf(`ST_Intersects(ST_Force2D`) > -1) {
                     lastLoadStrategyUsedWasDynamic = true;
                 } else {
