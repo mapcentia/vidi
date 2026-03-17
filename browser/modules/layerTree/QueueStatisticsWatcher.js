@@ -130,8 +130,12 @@ class QueueStatisticsWatcher {
                             const layer = cloud.get().getLayersByName('v:' + layerKey);
                             let id;
                             let fragment;
-                            if (layer) {
+                            try {
                                 id = L.stamp(layer.getLayers().find(l => l.feature?.meta && l.feature.properties[copiedItemMeta.pkey] === copiedItemProperties[copiedItemMeta.pkey]));
+                            } catch (e) {
+                                id = false;
+                            }
+                            if (id) {
                                 fragment = `<div class="d-flex align-items-center gap-2 gc2-edit-tools" 
                                 data-edit-layer-id="${id}"
                                 data-edit-layer-name="${layerKey}"
