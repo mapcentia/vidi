@@ -12,7 +12,7 @@
 /*global _:false */
 import {
     SELECTED_STYLE
-} from './../../../browser/modules/layerTree/constants';
+} from './layerTree/constants';
 
 var Backbone = require('backbone');
 var debounce = require('lodash/debounce');

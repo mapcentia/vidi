@@ -7,9 +7,9 @@
 
 'use strict';
 
-require('./../public/js/gc2/geocloud.js');
-require('./../public/js/gc2/gc2table.js');
-require('./../public/js/vidi.js');
+require('./modules/geocloud.js');
+require('./modules/gc2table.js');
+require('./modules/vidi.js');
 
 window.$ = window.jQuery = require('jquery');
 
