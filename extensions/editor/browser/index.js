@@ -10,7 +10,7 @@ import {LAYER, SYSTEM_FIELD_PREFIX} from '../../../browser/modules/layerTree/con
 import {GEOJSON_PRECISION} from '../../../browser/modules/constants';
 import dayjs from 'dayjs';
 import {withTheme} from '@rjsf/core';
-import {Theme} from '@rjsf/bootstrap-4';
+import {Theme} from '@rjsf/react-bootstrap';
 import validator from "@rjsf/validator-ajv8";
 import SelectWidget from "./SelectWidget.jsx";
 import TimeWidget from "./TimeWidget.jsx";
@@ -38,12 +38,7 @@ let apiBridgeInstance = false;
 let multiply = require('geojson-multiply');
 
 
-const Theme5 = {
-    ...Theme,
-    widgets: {...Theme.widgets, SelectWidget}
-}
-
-const Form = withTheme(Theme5);
+const Form = withTheme(Theme);
 
 let markers = [];
 
@@ -62,7 +57,7 @@ let session;
 
 const FileUploadWidget = require('./FileUploadWidget');
 
-const widgets = {'fileupload': FileUploadWidget, 'time': TimeWidget};
+const widgets = {'fileupload': FileUploadWidget, 'time': TimeWidget, 'SelectWidget': SelectWidget};
 
 const MODULE_NAME = `editor`;
 const PLACEMENT = window.screen.width >= 768 ? "start" : "bottom"

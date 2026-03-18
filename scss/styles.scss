@@ -51,6 +51,24 @@
   //padding-left: 0;
 }
 
+.feature-attribute-editing-form .row {
+  --bs-gutter-x: 0;
+}
+
+.feature-attribute-editing-form .d-flex.flex-row > .btn-sm,
+.feature-attribute-editing-form .d-flex.flex-row .btn-sm {
+  padding-left: 4px;
+  padding-right: 4px;
+
+}
+
+.feature-attribute-editing-form .d-flex.flex-row  {
+  gap: .25rem;
+  margin-left: .25rem;
+}
+
+
+
 .feature-attribute-editing-form > .buttons {
   background-color: var(--bs-body-bg);
   bottom: -20px;

@@ -13,6 +13,11 @@ module.exports = function (grunt) {
     const transform = [['babelify', {
         presets: ["@babel/preset-env", "@babel/preset-react"],
         plugins: ["@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread"]
+    }], ['babelify', {
+        presets: ["@babel/preset-env", "@babel/preset-react"],
+        plugins: ["@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread"],
+        global: true,
+        only: [/node_modules\/@x0k/, /node_modules\/fast-uri/, /node_modules\/@rjsf/]
     }], 'require-globify', 'windowify', 'envify', ['browserify-css', {global: true}]];
     const transform_sw = [['babelify', {
         presets: ["@babel/preset-env", "@babel/preset-react"],
@@ -164,8 +169,15 @@ module.exports = function (grunt) {
                 options: {
                     transform,
                     alias: {
-                        react: 'react/cjs/react.production.min.js',
-                        'react-dom': 'react-dom/cjs/react-dom.production.min.js'
+                        react: 'react',
+                        'react-dom': 'react-dom',
+                        '@rjsf/core': './node_modules/@rjsf/core/dist/index.cjs',
+                        '@rjsf/react-bootstrap': './node_modules/@rjsf/react-bootstrap/lib/index.js',
+                        '@rjsf/validator-ajv8': './node_modules/@rjsf/validator-ajv8/dist/index.cjs',
+                        '@rjsf/utils': './node_modules/@rjsf/utils/dist/index.cjs',
+                        '@x0k/json-schema-merge/lib/array': './node_modules/@x0k/json-schema-merge/dist/lib/array.js',
+                        '@x0k/json-schema-merge/dist/lib/array.js': './node_modules/@x0k/json-schema-merge/dist/lib/array.js',
+                        '@x0k/json-schema-merge': './node_modules/@x0k/json-schema-merge/dist/index.js'
                     }
                 }
             },
@@ -173,7 +185,18 @@ module.exports = function (grunt) {
                 files,
                 options: {
                     browserifyOptions,
-                    transform
+                    transform,
+                    alias: {
+                        react: 'react',
+                        'react-dom': 'react-dom',
+                        '@rjsf/core': './node_modules/@rjsf/core/dist/index.cjs',
+                        '@rjsf/react-bootstrap': './node_modules/@rjsf/react-bootstrap/lib/index.js',
+                        '@rjsf/validator-ajv8': './node_modules/@rjsf/validator-ajv8/dist/index.cjs',
+                        '@rjsf/utils': './node_modules/@rjsf/utils/dist/index.cjs',
+                        '@x0k/json-schema-merge/lib/array': './node_modules/@x0k/json-schema-merge/dist/lib/array.js',
+                        '@x0k/json-schema-merge/dist/lib/array.js': './node_modules/@x0k/json-schema-merge/dist/lib/array.js',
+                        '@x0k/json-schema-merge': './node_modules/@x0k/json-schema-merge/dist/index.js'
+                    }
                 }
             },
             publish_sw: {
@@ -201,7 +224,17 @@ module.exports = function (grunt) {
                     transform,
                     watch: true,
                     keepAlive: true,
-
+                    alias: {
+                        react: 'react',
+                        'react-dom': 'react-dom',
+                        '@rjsf/core': './node_modules/@rjsf/core/dist/index.cjs',
+                        '@rjsf/react-bootstrap': './node_modules/@rjsf/react-bootstrap/lib/index.js',
+                        '@rjsf/validator-ajv8': './node_modules/@rjsf/validator-ajv8/dist/index.cjs',
+                        '@rjsf/utils': './node_modules/@rjsf/utils/dist/index.cjs',
+                        '@x0k/json-schema-merge/lib/array': './node_modules/@x0k/json-schema-merge/dist/lib/array.js',
+                        '@x0k/json-schema-merge/dist/lib/array.js': './node_modules/@x0k/json-schema-merge/dist/lib/array.js',
+                        '@x0k/json-schema-merge': './node_modules/@x0k/json-schema-merge/dist/index.js'
+                    }
                 }
             }
         },
