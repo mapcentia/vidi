@@ -687,7 +687,9 @@ module.exports = {
                     widgets={widgets}
                     onSubmit={onSubmit}
                     transformErrors={transformErrors}
-                    formData={defaultValues}>
+                    formData={defaultValues}
+                    experimental_defaultFormStateBehavior={{emptyObjectFields: 'skipDefaults'}}
+                    focusOnFirstError={false}>
                     <div className="buttons">
                         <button type="submit"
                                 className="btn btn btn-success mb-2 mt-2 w-100">{__("Submit")}</button>
@@ -1083,7 +1085,9 @@ module.exports = {
                     uiSchema={uiSchema}
                     formData={eventFeatureParsed}
                     onSubmit={onSubmit}
-                    transformErrors={transformErrors}>
+                    transformErrors={transformErrors}
+                    experimental_defaultFormStateBehavior={{emptyObjectFields: 'skipDefaults'}}
+                    focusOnFirstError={false}>
                     <div className="buttons">
                         <button type="submit" className="btn btn btn-success mb-2 mt-2 w-100">{__("Submit")}</button>
                         <button type="button" onClick={_self.stopEditWithConfirm}
