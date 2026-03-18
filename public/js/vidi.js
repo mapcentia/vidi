@@ -189,6 +189,16 @@ var Base64 = {
     }
 };
 
+// Expose globals on window (replaces windowify)
+if (typeof window !== "undefined") {
+    window.detailFormatter = detailFormatter;
+    window.isTouchDevice = isTouchDevice;
+    window.touchScroll = touchScroll;
+    window.array_unique = array_unique;
+    window.Base64 = Base64;
+    window.createAlert = createAlert;
+}
+
 function createAlert(el, text) {
     if (el.next().children().length === 0) {
         el.next().html(`<div class="alert alert-dismissible alert-info" role="alert">

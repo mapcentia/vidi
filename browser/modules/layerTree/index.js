@@ -1536,6 +1536,7 @@ module.exports = {
         let layerKey = layer.f_table_schema + '.' + layer.f_table_name;
         const layerSpecificQueryLimit = layerTreeUtils.getQueryLimit(meta.parseLayerMeta(layerKey));
         const metaDataKeys = meta.getMetaDataKeys();
+        let fieldConf = {};
         let fields = metaDataKeys?.[layerKey]?.fields || null;
         let fieldStr;
         let fieldNames = [];
@@ -1620,7 +1621,6 @@ module.exports = {
             template = defaultTemplate;
         }
         tooltipTemplate = typeof moduleState.vectorStyles?.[layerKey]?.tooltipTmpl !== 'undefined' ? moduleState.vectorStyles[layerKey].tooltipTmpl === '' ? undefined : moduleState.vectorStyles[layerKey].tooltipTmpl : parsedMeta?.tooltip_template && parsedMeta.tooltip_template !== "" ? parsedMeta.tooltip_template : null;
-        let fieldConf;
         try {
             fieldConf = JSON.parse(metaData[layerKey].fieldconf);
         } catch (e) {

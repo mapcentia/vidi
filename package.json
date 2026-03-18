@@ -4,6 +4,9 @@
   "description": "Vidi (View) is a new map viewer for GC2 and CartoDB",
   "main": "index.js",
   "scripts": {
+    "build": "node build.mjs",
+    "build:production": "node build.mjs --production",
+    "watch": "node build.mjs --watch",
     "serve": "grunt && grunt browserify:watch",
     "serve:watsonc": "grunt --theme=watsonc && grunt --theme=watsonc browserify:watch",
     "test": "nyc mocha -t 100000 --recursive test/unit && nyc mocha -t 100000 --recursive test/api && nyc mocha test/puppeteer/bootstrap.js -t 100000 --recursive test/puppeteer",
@@ -45,10 +48,12 @@
     "@babel/plugin-syntax-import-meta": "^7.0.0",
     "@babel/preset-env": "^7.16.11",
     "@babel/preset-react": "^7.0.0",
+    "@vitejs/plugin-react": "^4.7.0",
     "babelify": "^10.0.0",
     "browserify-css": "^0.15.0",
     "chai": "^4.1.2",
     "envify": "^4.1.0",
+    "esbuild": "^0.27.4",
     "grunt-browserify": "^5.3.0",
     "grunt-cache-bust": "^1.5.0",
     "grunt-contrib-cssmin": "^5.0.0",
@@ -70,6 +75,7 @@
     "mocha": "^5.1.1",
     "nyc": "^12.0.2",
     "terser": "^5.44.0",
+    "vite": "^6.4.1",
     "windowify": "^0.3.0"
   },
   "dependencies": {

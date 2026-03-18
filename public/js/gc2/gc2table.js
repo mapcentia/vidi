@@ -14,6 +14,7 @@ import {
     SELECTED_STYLE
 } from './../../../browser/modules/layerTree/constants';
 
+var Backbone = require('backbone');
 var debounce = require('lodash/debounce');
 const marked = require('marked');
 const mustache = require('mustache');
@@ -524,3 +525,6 @@ var gc2table = (function () {
         isLoaded: isLoaded
     };
 }());
+
+// Expose gc2table on window (replaces windowify)
+if (typeof window !== "undefined") window.gc2table = gc2table;

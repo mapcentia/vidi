@@ -14,6 +14,7 @@ require('dom-shims');
 require('arrive');
 const layerTreeUtils = require('./layerTree/utils');
 const APIBridgeSingletone = require('./api-bridge');
+const urlparser = require('./urlparser');
 let advancedInfo, cloud, switchLayer, meta, utils;
 let apiBridgeInstance = false;
 let backboneEvents;

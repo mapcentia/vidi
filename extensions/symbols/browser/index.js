@@ -405,9 +405,11 @@ class SVGContainer extends HTMLElement {
     }
 }
 
-//customElements.define('svg-container', SVGContainer);
-customElements.define("svg-container", () => {
-}, {extends: "div"});
+try {
+    customElements.define('svg-container', SVGContainer);
+} catch(e) {
+    // May already be defined
+}
 
 
 module.exports = {

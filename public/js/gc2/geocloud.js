@@ -17,6 +17,7 @@
 /*global document:false */
 /*global window:false */
 import ndjsonStream from 'can-ndjson-stream';
+import md5 from 'md5';
 
 var geocloud;
 geocloud = (function () {
@@ -2759,3 +2760,6 @@ geocloud = (function () {
     }
 
 })(typeof exports === "undefined" ? this : exports);
+
+// Expose geocloud on window (replaces windowify)
+if (typeof window !== "undefined") window.geocloud = geocloud;
