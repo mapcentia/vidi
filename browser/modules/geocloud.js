@@ -18,6 +18,8 @@
 /*global window:false */
 import ndjsonStream from 'can-ndjson-stream';
 import md5 from 'md5';
+import {Buffer} from 'buffer';
+globalThis.Buffer = Buffer;
 
 var geocloud;
 geocloud = (function () {

@@ -26,7 +26,14 @@ router.get('/api/legend/:db', function (req, response) {
     request.get(options,
         function (err, res, body) {
             if (err) console.error(err);
-            if (res.statusCode !== 200) {
+            let error = false;
+            try {
+                JSON.parse(body);
+            } catch (e) {
+                error = true;
+                console.error(e);
+            }
+            if (res.statusCode !== 200 || error) {
                 response.header('content-type', 'application/json');
                 response.status(400).send({
                     success: false,

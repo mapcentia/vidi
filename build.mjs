@@ -91,7 +91,7 @@ const buildOptions = {
         'process.env.NODE_ENV': isProd ? '"production"' : '"development"',
         'process.env': '{}',
     },
-    inject: ['browser/buffer-shim.js'],
+    inject: [],
     alias: {
         '@rjsf/react-bootstrap': './node_modules/@rjsf/react-bootstrap/lib/index.js',
         '@x0k/json-schema-merge/lib/array': './node_modules/@x0k/json-schema-merge/dist/lib/array.js',
