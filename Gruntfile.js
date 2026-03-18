@@ -9,7 +9,6 @@ var fs = require('fs');
 module.exports = function (grunt) {
     "use strict";
 
-    const lessConfig = {"public/css/styles.css": "public/less/styles.default.less"};
     const transform = [['babelify', {
         presets: ["@babel/preset-env", "@babel/preset-react"],
         plugins: ["@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread"]
@@ -52,24 +51,6 @@ module.exports = function (grunt) {
                 src: ['public/version.json']
             }
         },
-        less: {
-            publish: {
-                options: {
-                    compress: false,
-                    optimization: 2
-                },
-                files: [
-                    lessConfig,
-                    {
-                        expand: true,        // Enable dynamic expansion.
-                        cwd: 'extensions',  // Src matches are relative to this path.
-                        src: ['**/less/*.less',],     // Actual pattern(s) to match.
-                        dest: 'public/css/extensions',  // Destination path prefix.
-                        ext: '.css',         // Dest filepaths will have this extension.
-                    }
-                ]
-            }
-        },
         cssmin: {
             build: {
                 options: {
@@ -108,7 +89,7 @@ module.exports = function (grunt) {
                 },
                 files: {
                     'public/css/styles.min.css': [
-                        'public/css/styles.css',
+                        'scss/main.css',
                         'public/css/extensions/**/less/*.css'
                     ]
                 }
@@ -402,7 +383,6 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-browserify');
     grunt.loadNpmTasks('grunt-shell');
     grunt.loadNpmTasks('grunt-terser');
-    grunt.loadNpmTasks('grunt-contrib-less');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-processhtml');
     grunt.loadNpmTasks('grunt-cache-bust');
@@ -416,5 +396,5 @@ module.exports = function (grunt) {
     grunt.registerTask('default', ['prepareAssets', 'browserify:publish', 'browserify:publish_sw_dev', 'css', 'hogan', 'version']);
     grunt.registerTask('production', ['env:prod', 'hogan', 'prepareAssets', 'browserify:publish', 'browserify:publish_sw', 'css', 'terser', 'processhtml', 'cssmin:build', 'cacheBust', 'version', 'appendBuildHashToVersion']);
     grunt.registerTask('production-test', ['env:prod', 'browserify:publish']);
-    grunt.registerTask('css', ['less', 'sass', 'cssmin']);
+    grunt.registerTask('css', ['sass', 'cssmin']);
 };

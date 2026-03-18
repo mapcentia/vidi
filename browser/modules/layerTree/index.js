@@ -793,7 +793,7 @@ module.exports = {
         }
 
         // Setting tile filters
-        if (newState !== false && `predefinedFilters` in newState && typeof newState.predefinedFilters === `array`) {
+        if (newState !== false && `predefinedFilters` in newState && typeof newState.predefinedFilters === `object`) {
             moduleState.predefinedFilters = newState.predefinedFilters;
         } else {
             moduleState.predefinedFilters = {};
