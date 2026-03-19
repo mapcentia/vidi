@@ -93,9 +93,19 @@ async function buildCss() {
     fs.mkdirSync('public/css/build/fonts', {recursive: true});
     fs.writeFileSync('public/css/build/all.min.css', allMin.code);
 
-    // Copy font files referenced by CSS
-    for (const font of globSync('node_modules/bootstrap-icons/font/fonts/*')) {
-        fs.copyFileSync(font, path.join('public/css/build/fonts', path.basename(font)));
+    // Copy assets referenced by CSS (fonts, images)
+    const assetCopies = [
+        ['node_modules/bootstrap-icons/font/fonts/*', 'public/css/build/fonts'],
+        ['node_modules/leaflet/dist/images/*', 'public/css/build/images'],
+        ['public/js/lib/leaflet-draw/images/*', 'public/css/build/images'],
+        ['public/js/lib/Leaflet.awesome-markers/images/*', 'public/css/build/images'],
+        ['public/js/lib/Leaflet.extra-markers/img/*', 'public/css/img'],
+    ];
+    for (const [pattern, dest] of assetCopies) {
+        fs.mkdirSync(dest, {recursive: true});
+        for (const file of globSync(pattern)) {
+            fs.copyFileSync(file, path.join(dest, path.basename(file)));
+        }
     }
 
     console.log(`[css] Done (${(allMin.code.length / 1024).toFixed(0)} kB)`);
