@@ -320,8 +320,6 @@ geocloud = (function () {
             let retries = 3;
             let timeoutBase = 9000;
             const makeRequest = function () {
-                console.error(me.host + me.uri + '/' + me.db);
-
                 const timeout = timeoutBase / retries;
                 let isRetrying = false;
                 xhr = $.ajax({

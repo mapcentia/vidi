@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [UNRELEASED] - 2026-19-3
+### Changed
+- Update `@rjsf` dependencies to version 6.4.1 and migrate from `@rjsf/bootstrap-4` to `@rjsf/react-bootstrap`
+- Remove LESS assets and dependencies; migrate styling to SCSS.
+- ESBuild script is added (/build.mjs) and minimum changes are done in source code to support ESBuild. Like removing `windowify` usage. Bundle is now built in about 300 ms. Browserify is still supported.
+- Replace `base64url` package with custom module.
+
 ## [2026.3.4] - 2026-17-3
 ### Changed
 - Refactor SQL query handling in `geocloud.js` and `sql.js` to switch from URL-encoded form data to JSON payloads. GC2 must be upgraded to latest version.
