@@ -89,8 +89,13 @@ async function buildCss() {
     ];
     const allCss = allCssFiles.map(f => fs.readFileSync(f, 'utf8')).join('\n');
     const allMin = await esbuild.transform(allCss, {loader: 'css', minify: true});
-    fs.mkdirSync('public/css/build', {recursive: true});
+    fs.mkdirSync('public/css/build/fonts', {recursive: true});
     fs.writeFileSync('public/css/build/all.min.css', allMin.code);
+
+    // Copy font files referenced by CSS
+    for (const font of globSync('node_modules/bootstrap-icons/font/fonts/*')) {
+        fs.copyFileSync(font, path.join('public/css/build/fonts', path.basename(font)));
+    }
 
     console.log(`[css] Done (${(allMin.code.length / 1024).toFixed(0)} kB)`);
 }
