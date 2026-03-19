@@ -105,6 +105,7 @@ let moduleState = {
     labelSettings: {},
     vectorStyles: {}
 };
+window.moduleState = moduleState;
 let infoOffCanvas;
 let bindEvent;
 let initialFilterIsApplied = false;
