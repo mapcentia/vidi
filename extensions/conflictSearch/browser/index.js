@@ -6,6 +6,8 @@
 
 'use strict';
 
+import {GEOJSON_PRECISION} from "../../../browser/modules/constants";
+
 /**
  *
  * @type {*|exports|module.exports}
