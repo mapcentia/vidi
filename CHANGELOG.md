@@ -14,7 +14,8 @@ and this project adheres to [CalVer](https://calver.org/).
   - npm run build — dev build (JS + CSS + templates, ~2s total)
   - npm run build:production — production build (+ minification + cache bust + version hash)
   - npm run build:css — only CSS
-  - npm run watch — watch med livereload (JS + CSS + templates)
+  - npm run build:libs — minify libs, ~2s
+  - npm run watch — watch with livereload (JS + CSS + templates)
 
 ## [2026.3.4] - 2026-17-3
 ### Changed

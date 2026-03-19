@@ -9,6 +9,7 @@ import {execSync} from 'child_process';
 const isProd = process.argv.includes('--production');
 const isWatch = process.argv.includes('--watch');
 const isCssOnly = process.argv.includes('--css');
+const isLibsOnly = process.argv.includes('--libs');
 
 // ---------------------------------------------------------------------------
 // Plugin: resolve require-globify patterns
@@ -305,6 +306,12 @@ const buildOptions = {
 // CSS-only mode
 if (isCssOnly) {
     await buildCss();
+    process.exit(0);
+}
+
+// Libs-only mode
+if (isLibsOnly) {
+    await buildLibs();
     process.exit(0);
 }
 
