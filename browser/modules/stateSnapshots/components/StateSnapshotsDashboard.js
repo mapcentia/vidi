@@ -12,7 +12,7 @@ import LoadingOverlay from './../../shared/LoadingOverlay';
 
 const {v4: uuidv4} = require('uuid');
 const cookie = require('js-cookie');
-const base64url = require('base64url');
+import base64url from '../../base64url.js';
 const utils = require('../../utils')
 
 

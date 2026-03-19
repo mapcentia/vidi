@@ -15,7 +15,7 @@ const API_URL = `/api/state-snapshots`;
 const exId = `state-snapshots`;
 let customSetOfTitles = false;
 let extensions;
-const base64url = require('base64url');
+import base64url from '../base64url.js';
 
 /**
  *

@@ -47,7 +47,7 @@ let ignoredExtensionsRegExps = [];
 let forceIgnoredExtensionsCaching = false;
 
 const urlsToCache = require(`urls-to-cache`);
-const base64url = require("base64url");
+import base64url from "../modules/base64url.js";
 
 const urlSubstitution = [{
     requested: 'https://netdna.bootstrapcdn.com/font-awesome/4.5.0/fonts/fontawesome-webfont.ttf?v=4.5.0',

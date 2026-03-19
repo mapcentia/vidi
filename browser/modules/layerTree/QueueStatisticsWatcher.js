@@ -25,7 +25,7 @@ let switchLayer = false, layerTree = false, offlineModeControlsManager = false,
     extensions = false;
 
 
-const base64url = require('base64url');
+import base64url from '../base64url.js';
 const cloud = require('./../cloud');
 
 class QueueStatisticsWatcher {

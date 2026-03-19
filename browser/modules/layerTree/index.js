@@ -59,7 +59,7 @@ let _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEv
 
 const {v4: uuidv4} = require('uuid');
 const React = require('react');
-const base64url = require('base64url');
+import base64url from '../base64url.js';
 
 const urlparser = require('./../urlparser');
 const download = require('./../download');

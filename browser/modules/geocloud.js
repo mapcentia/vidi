@@ -18,13 +18,11 @@
 /*global window:false */
 import ndjsonStream from 'can-ndjson-stream';
 import md5 from 'md5';
-import {Buffer} from 'buffer';
-globalThis.Buffer = Buffer;
+import base64url from './base64url.js';
 
 var geocloud;
 geocloud = (function () {
     "use strict";
-    const base64url = require('base64url');
     var scriptSource = (function (scripts) {
             scripts = document.getElementsByTagName('script');
             var script = scripts[scripts.length - 1];
@@ -322,6 +320,8 @@ geocloud = (function () {
             let retries = 3;
             let timeoutBase = 9000;
             const makeRequest = function () {
+                console.error(me.host + me.uri + '/' + me.db);
+
                 const timeout = timeoutBase / retries;
                 let isRetrying = false;
                 xhr = $.ajax({
