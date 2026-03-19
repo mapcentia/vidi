@@ -10,7 +10,8 @@ and this project adheres to [CalVer](https://calver.org/).
 - Update `@rjsf` dependencies to version 6.4.1 and migrate from `@rjsf/bootstrap-4` to `@rjsf/react-bootstrap`
 - Remove LESS assets and dependencies; migrate styling to SCSS.
 - Replace `base64url` package with custom module.
-- Build script is added (/build.mjs) and minimum changes are done in source code to support ESBuild. Like removing `windowify` usage. Bundle is now built in about 300 ms. Browserify is still supported.
+- Build script is added (/build.mjs), which can replace Grunt entirely. Minimum changes are done in source code to support ESBuild. Like removing `windowify` usage. 
+  Bundle is now built in about 300 ms. Browserify is still supported.
   - npm run build — dev build (JS + CSS + templates, ~2s total)
   - npm run build:production — production build (+ minification + cache bust + version hash)
   - npm run build:css — only CSS
