@@ -1598,11 +1598,7 @@ module.exports = {
             }
         }
 
-        let custom_data = ``;
-        if (`virtual_layer` in layer && layer.virtual_layer) {
-            custom_data = {virtual_layer: layerKey};
-        }
-
+        let custom_data = null;
         let trackingLayerKey = (LAYER.VECTOR + ':' + layerKey);
 
         /*
