@@ -156,7 +156,7 @@ class StateSnapshotsDashboard extends React.Component {
                 method: 'POST',
                 contentType: 'text/plain; charset=utf-8',
                 dataType: 'text',
-                data: base64url(JSON.stringify(data))
+                data: base64url.encode(JSON.stringify(data))
             }).then((response) => {
                 _self.setState({loading: false});
                 _self.refreshSnapshotsList();
@@ -224,7 +224,7 @@ class StateSnapshotsDashboard extends React.Component {
                 method: 'PUT',
                 contentType: 'text/plain; charset=utf-8',
                 dataType: 'text',
-                data: base64url(JSON.stringify(data))
+                data: base64url.encode(JSON.stringify(data))
             }).then(() => {
                 if (refresh) {
                     _self.refreshSnapshotsList();
@@ -256,7 +256,7 @@ class StateSnapshotsDashboard extends React.Component {
             method: 'PATCH',
             contentType: 'text/plain; charset=utf-8',
             dataType: 'text',
-            data: base64url(JSON.stringify({tags: data.tags}))
+            data: base64url.encode(JSON.stringify({tags: data.tags}))
         }).then(() => {
             _self.setState({
                 updatedItemId: false,

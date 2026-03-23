@@ -34,7 +34,7 @@ var query = function (req, response) {
 
     var postData = {
             convert_types: true,
-            q: base64 ? q : encodeURIComponent(q),
+            q,
             base64,
             srs,
             lifetime,

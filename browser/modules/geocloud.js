@@ -1,4 +1,4 @@
-/*
+/**
  * @author     Martin Høgh <mh@mapcentia.com>
  * @copyright  2013-2023 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
@@ -327,7 +327,7 @@ geocloud = (function () {
                     contentType: "application/json; charset=utf-8",
                     async: me.defaults.async,
                     data: JSON.stringify({
-                        q: me.base64 ? base64url(sql): sql,
+                        q: me.base64 ? base64url.encode(sql): sql,
                         base64: me.base64,
                         srs: me.defaults.projection,
                         lifetime: me.defaults.lifetime,

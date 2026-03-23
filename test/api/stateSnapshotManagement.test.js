@@ -70,7 +70,7 @@ describe('State snapshot management API', () => {
 
     it('should be able to create anonymous state snapshot for unauthorized user', (done) => {
         let cookie = request.cookie(`${TRACKER_COOKIE}`);
-        let data = base64url(JSON.stringify({
+        let data = base64url.encode(JSON.stringify({
             host: "https://exampdffdfle.com",
             database: "database",
             schema: "schema",
@@ -182,7 +182,7 @@ describe('State snapshot management API', () => {
                 Cookie: cookie,
                 'Content-type': 'text/plain'
             },
-            body: base64url(JSON.stringify({
+            body: base64url.encode(JSON.stringify({
                         host: `https://example.com`,
                         database: `database`,
                         schema: `schema`,
@@ -253,7 +253,7 @@ describe('State snapshot management API', () => {
                 Cookie: cookie,
                 'Content-type': 'text/plain'
             },
-            body: base64url(JSON.stringify({a: '1'}))
+            body: base64url.encode(JSON.stringify({a: '1'}))
         };
 
         request(options, (error, response, body) => {
@@ -272,7 +272,7 @@ describe('State snapshot management API', () => {
                 Cookie: cookie,
                 'Content-type': 'text/plain'
             },
-            body: base64url(JSON.stringify({
+            body: base64url.encode(JSON.stringify({
                         host: `https://example.com`,
                         database: `database`,
                         schema: `schema`,
@@ -304,7 +304,7 @@ describe('State snapshot management API', () => {
                 Cookie: cookie,
                 'Content-type': 'text/plain'
             },
-            body: base64url(JSON.stringify({
+            body: base64url.encode(JSON.stringify({
                         host: `https://example.com`,
                         database: `database`,
                         schema: `schema`,
@@ -364,7 +364,7 @@ describe('State snapshot management API', () => {
                 'Content-type': 'text/plain'
             },
             json: true,
-            body: base64url(JSON.stringify({
+            body: base64url.encode(JSON.stringify({
                         host: `https://example.com`,
                         database: `database`,
                         schema: `schema`,
@@ -413,7 +413,7 @@ describe('State snapshot management API', () => {
                         Cookie: cookie,
                         'Content-type': 'text/plain'
                     },
-                    body: base64url(JSON.stringify(foundItem))
+                    body: base64url.encode(JSON.stringify(foundItem))
                 };
 
                 request(options, (error, response) => {
@@ -461,7 +461,7 @@ describe('State snapshot management API', () => {
                 Cookie: cookie,
                 'Content-type': 'text/plain'
             },
-            body: base64url(JSON.stringify(body))
+            body: base64url.encode(JSON.stringify(body))
         };
 
         request(options, (error, response, body) => {
@@ -495,7 +495,7 @@ describe('State snapshot management API', () => {
                         'Content-type': 'text/plain'
                     },
                     json: true,
-                    body: base64url(JSON.stringify(foundItem))
+                    body: base64url.encode(JSON.stringify(foundItem))
                 };
 
                 request(options, (error, response, body) => {
@@ -518,7 +518,7 @@ describe('State snapshot management API', () => {
                 Cookie: cookie,
                 'Content-type': 'text/plain'
             },
-            body: base64url(JSON.stringify({
+            body: base64url.encode(JSON.stringify({
                         host: `https://example.com`,
                         database: `database`,
                         schema: `schema`,
@@ -684,7 +684,7 @@ describe('State snapshot management API', () => {
                 Cookie: cookie,
                 'Content-type': 'text/plain'
             },
-            body: base64url(JSON.stringify(data))
+            body: base64url.encode(JSON.stringify(data))
         };
 
         request(options, (error, response, body) => {
@@ -707,7 +707,7 @@ describe('State snapshot management API', () => {
                     Cookie: cookie,
                     'Content-type': 'text/plain'
                 },
-                body: base64url(JSON.stringify(data))
+                body: base64url.encode(JSON.stringify(data))
             }, (error, response) => {
                 expect(response.statusCode).to.equal(200);
                 request({

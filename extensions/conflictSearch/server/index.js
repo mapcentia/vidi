@@ -16,7 +16,7 @@ const POOL_SIZE = config?.extensionConfig?.conflictSearch?.poolSize || 30;
 const utf8 = require('utf8');
 // Set locale for date/time string
 dayjs.locale("da_DK");
-const base64url = require('base64url');
+const base64url = require('../../../browser/modules/base64url');
 
 router.post('/api/extension/conflictSearch', function (req, response) {
     req.setTimeout(0); // no timeout

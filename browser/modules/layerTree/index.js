@@ -384,7 +384,7 @@ module.exports = {
         if (overallFilters.length > 0) {
             let data = {};
             data[layerKey] = overallFilters;
-            parameterString = `filters=` + base64url(JSON.stringify(data));
+            parameterString = `filters=` + base64url.encode(JSON.stringify(data));
         }
         _self.activeFiltersChange(layerKey)
 
@@ -733,7 +733,7 @@ module.exports = {
         let preparedVirtualLayers = [];
         moduleState.virtualLayers.map(layer => {
             let localLayer = Object.assign({}, layer);
-            localLayer.store.sqlEncoded = base64url(localLayer.store.sql);
+            localLayer.store.sqlEncoded = base64url.encode(localLayer.store.sql);
             preparedVirtualLayers.push(localLayer);
         });
 
@@ -1600,7 +1600,7 @@ module.exports = {
 
         let custom_data = ``;
         if (`virtual_layer` in layer && layer.virtual_layer) {
-            custom_data = encodeURIComponent(JSON.stringify({virtual_layer: layerKey}));
+            custom_data = {virtual_layer: layerKey};
         }
 
         let trackingLayerKey = (LAYER.VECTOR + ':' + layerKey);
@@ -3859,7 +3859,7 @@ module.exports = {
                          FROM ${layerKey}
                          WHERE ${whereClause}) as foo`;
         let q = {
-            q: base64url(sql),
+            q: base64url.encode(sql),
             base64: true
         }
         $.ajax({

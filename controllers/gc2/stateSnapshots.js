@@ -7,7 +7,7 @@
 let config = require('./../../config/config');
 let express = require('express');
 let router = express.Router();
-const base64url = require('base64url');
+const base64url = require('../../browser/modules/base64url.js');
 const { v1: uuidv1 } = require('uuid');
 const request = require('request');
 const shared = require('./shared');
@@ -116,7 +116,7 @@ router.get('/api/state-snapshots/:dataBase', (req, res) => {
                 }
             });
 
-            res.send(base64url(JSON.stringify(results)));
+            res.send(base64url.encode(JSON.stringify(results)));
         } else {
             shared.throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', {
                 body: response.body,
@@ -157,7 +157,7 @@ router.get('/api/state-snapshots/:dataBase/:id', (req, res, next) => {
                 res.status(404);
                 res.json({error: `NOT_FOUND`});
             } else {
-                res.send(base64url(JSON.stringify(result)));
+                res.send(base64url.encode(JSON.stringify(result)));
             }
         } else {
             shared.throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', {body: response.body});
@@ -199,7 +199,7 @@ router.post('/api/state-snapshots/:dataBase', (req, res, next) => {
                     encoding: 'utf8',
                     uri: API_LOCATION + `/` + req.params.dataBase + `/` + generatedKey,
                     json: false,
-                    body: base64url(JSON.stringify(stateSnapshotCopy)),
+                    body: base64url.encode(JSON.stringify(stateSnapshotCopy)),
                     headers: {
                         'Content-Type': 'text/plain',
                         'Accept': 'text/plain'
@@ -267,7 +267,7 @@ router.put('/api/state-snapshots/:dataBase/:stateSnapshotKey/seize', (req, res, 
                         method: 'PUT',
                         encoding: 'utf8',
                         uri: API_LOCATION + `/` + req.params.dataBase + `/` + req.params.stateSnapshotKey,
-                        body: base64url(JSON.stringify(parsedSnapshotData)),
+                        body: base64url.encode(JSON.stringify(parsedSnapshotData)),
                         headers: {
                             'Content-Type': 'text/plain',
                             'Accept': 'text/plain'
@@ -327,7 +327,7 @@ router.put('/api/state-snapshots/:dataBase/:stateSnapshotKey', (req, res, next) 
                             method: 'PUT',
                             encoding: 'utf8',
                             uri: API_LOCATION + `/` + req.params.dataBase + `/` + req.params.stateSnapshotKey,
-                            body: base64url(JSON.stringify(parsedSnapshotData)),
+                            body: base64url.encode(JSON.stringify(parsedSnapshotData)),
                             headers: {
                                 'Content-Type': 'text/plain',
                                 'Accept': 'text/plain'
@@ -388,7 +388,7 @@ router.patch('/api/state-snapshots/:dataBase/:stateSnapshotKey', (req, res, next
                         method: 'PUT',
                         encoding: 'utf8',
                         uri: API_LOCATION + `/` + req.params.dataBase + `/` + req.params.stateSnapshotKey,
-                        body: base64url(JSON.stringify(parsedSnapshotData)),
+                        body: base64url.encode(JSON.stringify(parsedSnapshotData)),
                         headers: {
                             'Content-Type': 'text/plain',
                             'Accept': 'text/plain'

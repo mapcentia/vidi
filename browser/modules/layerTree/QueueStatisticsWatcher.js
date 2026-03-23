@@ -52,8 +52,8 @@ class QueueStatisticsWatcher {
      */
     processStatisticsUpdate(statistics, forceLayerUpdate = false, skipLastStatisticsCheck = false, userPreferredForceOfflineMode, apiBridgeInstance) {
         let _self = this;
-        let currentStatisticsHash = base64url(JSON.stringify(statistics));
-        let lastStatisticsHash = base64url(JSON.stringify(lastStatistics));
+        let currentStatisticsHash = base64url.encode(JSON.stringify(statistics));
+        let lastStatisticsHash = base64url.encode(JSON.stringify(lastStatistics));
 
         if (skipLastStatisticsCheck || (currentStatisticsHash !== lastStatisticsHash || theStatisticsPanelWasDrawn === false)) {
             let diff = _self.getStatisticsDiff(statistics, lastStatistics);
