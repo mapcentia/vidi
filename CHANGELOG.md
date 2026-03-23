@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
 ## [UNRELEASED] - 2026-19-3
+### Added
+- Editor: Support for Postgres arrays types. For now only `bytea[]` is supported for image/file fields.
+
 ### Changed
 - Update `@rjsf` dependencies to version 6.4.1 and migrate from `@rjsf/bootstrap-4` to `@rjsf/react-bootstrap`
 - Remove LESS assets and dependencies; migrate styling to SCSS.
@@ -16,7 +19,7 @@ and this project adheres to [CalVer](https://calver.org/).
   - npm run build:production — production build (+ minification + cache bust + version hash)
   - npm run build:css — only CSS
   - npm run build:libs — minify libs, ~2s
-  - npm run watch — watch with livereload (JS + CSS + templates)
+  - npm run watch — watch with livereload (JS + CSS + templates) 
 
 ## [2026.3.4] - 2026-17-3
 ### Changed
