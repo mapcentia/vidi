@@ -688,7 +688,6 @@ module.exports = {
                     onSubmit={onSubmit}
                     transformErrors={transformErrors}
                     formData={defaultValues}
-                    experimental_defaultFormStateBehavior={{emptyObjectFields: 'skipDefaults'}}
                     focusOnFirstError={false}>
                     <div className="buttons">
                         <button type="submit"
