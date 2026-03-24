@@ -30,13 +30,12 @@ router.get('/api/meta/:db/:schema', function (req, response) {
     };
     request.get(options,
         function (err, res, body) {
-            if (err) {
+            if (err || res.statusCode !== 200) {
                 response.header('content-type', 'application/json');
                 response.status(400).send({
                     success: false,
-                    message: "Could not get the meta data."
+                    message: body ? JSON.parse(body).message : "Could not get the meta data."
                 });
-
                 return;
             }
             response.send(JSON.parse(body));

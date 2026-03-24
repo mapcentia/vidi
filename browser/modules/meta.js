@@ -135,10 +135,11 @@ module.exports = {
                 const loadMeta = (schemata) => {
                     fetch('/api/meta/' + db + '/' + schemata).then(
                         response => {
-                            if (!response.ok) {
-                                throw new Error("Not 2xx response", {cause: response});
-                            }
+
                             response.json().then(data => {
+                                if (!response.ok) {
+                                    reject(data.message);
+                                }
                                 $('#layer-filter-container').css('pointer-events', 'auto').css('opacity', 1.0);
                                 $('.layer-loading-indicator').hide();
                                 if (data.data && data.data.length > 0) {
@@ -153,7 +154,6 @@ module.exports = {
                         }
                     ).catch((error) => {
                         reject(error)
-                        console.error(error);
                     });
                 };
 

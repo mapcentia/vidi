@@ -634,8 +634,7 @@ module.exports = {
                             });
                         })
                     }).catch((error) => {
-                        console.log(error); // Stacktrace
-                        backboneEvents.get().trigger("ready:meta");
+                        alert(error)
                     })
                 }
             }).catch((error) => {
@@ -645,9 +644,8 @@ module.exports = {
             console.log("Disable fast init")
             modules.meta.init().then((schemataStr) => {
                 return modules.setting.init(schemataStr);
-            }).catch((error) => {
-                console.log(error); // Stacktrace
-                backboneEvents.get().trigger("ready:meta");
+            }).catch(error => {
+                alert(error)
             }).then(() => {
                 initExtensions();
                 return modules.layerTree.create();
