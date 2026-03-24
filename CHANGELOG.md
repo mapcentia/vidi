@@ -19,7 +19,10 @@ and this project adheres to [CalVer](https://calver.org/).
   - npm run build:production — production build (+ minification + cache bust + version hash)
   - npm run build:css — only CSS
   - npm run build:libs — minify libs, ~2s
-  - npm run watch — watch with livereload (JS + CSS + templates) 
+  - npm run watch — watch with livereload (JS + CSS + templates)
+- Show alert for unauthorized database access. If a user is not authorized to access the database, an alert is shown and layertree is not shown.
+  Anonymous access is still possible.
+- Signing out will now also sign out from GC2.
 
 ## [2026.3.4] - 2026-17-3
 ### Changed

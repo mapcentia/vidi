@@ -91,61 +91,13 @@ module.exports = {
                 let me = this;
                 event.preventDefault();
                 if (!me.state.auth) {
-
-                    const uri = encodeURIComponent(anchor.getUri() + '?' + anchor.getParam() + anchor.getAnchor());
-                    console.log(uri);
-
-
-                    //window.location.href = "/openid.html?" + uri;
                     const win = utils.popupCenter("/openid.html", 600, 800, "Sign in");
-                    console.log(win)
-                    var timer = setInterval(function() {
+                    const timer = setInterval(function() {
                         if(win.closed) {
                             clearInterval(timer);
                             window.location.reload()
                         }
                     }, 1000);
-
-                    return;
-
-                    let dataToAuthorizeWith = {
-                        "user": me.state.sessionScreenName,
-                        "password": me.state.sessionPassword,
-                        "schema": "public"
-                    };
-
-                    if (vidiConfig.appDatabase) {
-                        dataToAuthorizeWith.database = vidiConfig.appDatabase;
-                    }
-
-                    $.ajax({
-                        dataType: 'json',
-                        url: "/api/session/start",
-                        type: "POST",
-                        contentType: "application/json; charset=utf-8",
-                        scriptCharset: "utf-8",
-                        data: JSON.stringify(dataToAuthorizeWith),
-                        success: function (data) {
-                            backboneEvents.get().trigger(`session:authChange`, true);
-                            me.setState({statusText: `Signed in as ${data.screen_name} (${data.email})`});
-                            me.setState({alertClass: "success"});
-                            me.setState({btnText: __("Sign out")});
-                            me.setState({auth: true});
-                            $(".gc2-session-lock").show();
-                            $(".gc2-session-unlock").hide();
-                            $(".gc2-session-btn-text").html(data.screen_name)
-                            userName = data.screen_name;
-                            properties = data.properties;
-                            parent.update();
-                            // Close the off canvas
-                            setTimeout(() => modal.hide(), 400);
-                        },
-
-                        error: function () {
-                            me.setState({statusText: __("Wrong user name or password")});
-                            me.setState({alertClass: "danger"});
-                        }
-                    });
                 } else {
                     $.ajax({
                         dataType: 'json',
@@ -165,6 +117,7 @@ module.exports = {
                             $(".gc2-session-btn-text").html(__("Sign in"))
                             userName = null;
                             parent.update();
+                            utils.popupCenter(window.host + '/signout?redirect_uri=' + decodeURIComponent( window.location.origin + '/openid.html'), 600, 800, "Sign out");
                         },
                         error: function (error) {
                             console.error(error.responseJSON);
