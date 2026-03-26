@@ -23,6 +23,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - Show alert for unauthorized database access. If a user is not authorized to access the database, an alert is shown and layertree is not shown.
   Anonymous access is still possible.
 - Signing out will now also sign out from GC2.
+- After auth, Vidi will not refresh the page.
 
 ## [2026.3.4] - 2026-17-3
 ### Changed
