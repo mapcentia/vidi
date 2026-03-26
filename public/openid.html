@@ -19,7 +19,7 @@
     const DEFAULTS = {
         redirectUri: window.location.origin + '/openid.html',
         clientId: 'gc2-cli',
-        host: window.host,
+        host: window.gc2Options.host,
     };
     const extractOidcConfig = () => {
         const oidc = window.gc2Options?.openIdConfig;
@@ -63,14 +63,7 @@
         if (typeof superuserLogin !== 'undefined') {
             localStorage.setItem('gc2_selected_superuser', superuserLogin ? '1' : '0');
         }
-        try {
-            // Notify opener if present
-            if (window.opener) {
-                window.opener.postMessage({ type: 'gc2-auth-complete' }, '*');
-            }
-        } catch (e) {
-            console.error(e.message)
-        }
+
         fetch('/api/session/start', {
             method: 'POST',
             headers: {"Content-Type": "application/json;charset=UTF-8",},
@@ -78,7 +71,14 @@
         }).then(res => res.json()).then(data => {
             codeFlow.clear()
             document.querySelector('#container').innerHTML = 'Signed in'
-            setTimeout(() => window.close(), 500)
+            try {
+                // Notify opener if present
+                if (window.opener) {
+                    window.opener.postMessage({type: 'gc2-auth-complete', data}, '*');
+                }
+            } catch (e) {
+                console.error(e.message)
+            }
         })
     }
     function renderSelectionUI(allowedDatabases, databasesWithSuperuser, token, nonce, preselectedDb) {
@@ -225,7 +225,7 @@
         } else {
             // If nonce is not set, get it from the server, so it can be used in the sign-in request
             if (!localStorage.getItem('gc2_nonce')) {
-                fetch(oidcConfig.host +'/api/v2/session/nonce').then(res => res.json()).then(data => {
+                fetch(oidcConfig.host + '/api/v2/session/nonce').then(res => res.json()).then(data => {
                     const nonce = data.nonce
                     localStorage.setItem('gc2_nonce', nonce)
                     codeFlow.signIn()
@@ -238,7 +238,7 @@
         alert(err)
         // location.reload()
     })
-    const getDatabases =  () => {
+    const getDatabases = () => {
         return fetch(oidcConfig.host + '/api/v2/database/search?userIdentifier=*').then(res => res.json()).then(data =>
             data.databases.map(item => item.screenname)
         )

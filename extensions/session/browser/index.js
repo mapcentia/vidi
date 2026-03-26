@@ -15,13 +15,9 @@ let properties = null;
 let isStatusChecked = false;
 let anchor;
 let exId = `login-modal-body`;
-const config = require('./../../../config/config.js');
-const urlparser = require('./../../../browser/modules/urlparser');
-const urlVars = urlparser.urlVars;
-const cookie = require('js-cookie');
 const React = require("react");
 const {createRoot} = require("react-dom/client");
-
+let authWin;
 
 /**
  *
@@ -29,10 +25,34 @@ const {createRoot} = require("react-dom/client");
  */
 module.exports = {
     set: function (o) {
+        let parent = this;
         utils = o.utils;
         backboneEvents = o.backboneEvents;
         layerTree = o.layerTree;
         anchor = o.anchor;
+        window.addEventListener("message", (event) => {
+            if (event.data.type === 'gc2-auth-complete') {
+                const data = event.data.data;
+                backboneEvents.get().trigger(`session:authChange`, true);
+                if (sessionInstance) {
+                    sessionInstance.setState({
+                        statusText: `${__("Signed in as")} ${data.screen_name} (${data.email})`,
+                        alertClass: "success",
+                        btnText: __("Sign out"),
+                        auth: true
+                    });
+                }
+                $(".gc2-session-lock").show();
+                $(".gc2-session-unlock").hide();
+                $(".gc2-session-btn-text").html(data.screen_name)
+                userName = data.screen_name;
+                properties = data.properties;
+                parent.update();
+                if (authWin) {
+                    authWin.close();
+                }
+            }
+        });
         return this;
     },
     init: function () {
@@ -91,13 +111,7 @@ module.exports = {
                 let me = this;
                 event.preventDefault();
                 if (!me.state.auth) {
-                    const win = utils.popupCenter("/openid.html", 600, 800, "Sign in");
-                    const timer = setInterval(function() {
-                        if(win.closed) {
-                            clearInterval(timer);
-                            window.location.reload()
-                        }
-                    }, 1000);
+                    authWin = utils.popupCenter("/openid.html", 600, 800, "Sign in");
                 } else {
                     $.ajax({
                         dataType: 'json',
@@ -117,7 +131,7 @@ module.exports = {
                             $(".gc2-session-btn-text").html(__("Sign in"))
                             userName = null;
                             parent.update();
-                            utils.popupCenter(window.host + '/signout?redirect_uri=' + decodeURIComponent( window.location.origin + '/openid.html'), 600, 800, "Sign out");
+                            authWin = utils.popupCenter(window.gc2Options.host + '/signout?redirect_uri=' + decodeURIComponent( window.location.origin + '/openid.html'), 600, 800, "Sign out");
                         },
                         error: function (error) {
                             console.error(error.responseJSON);
