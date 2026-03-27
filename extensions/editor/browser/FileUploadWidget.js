@@ -11,8 +11,8 @@ import {MIME_TYPES_APPS, MIME_TYPES_IMAGES} from '../../../browser/modules/const
 import {splitBase64} from '../../../browser/modules/utils';
 import config from "../../../config/config";
 
-const MAX_WIDTH = 1600;
-const MAX_HEIGHT = 1200;
+const MAX_WIDTH = 2400;
+const MAX_HEIGHT = 1800;
 const MAX_SIZE = 30_000_000;
 const doNotScaleImages = config?.extensionConfig?.editor?.doNotScaleImages ?? false;
 
