@@ -8,6 +8,7 @@
 import {getResolutions} from './crs'
 import {booleanIntersects as turfIntersects, buffer as turfBuffer} from "@turf/turf";
 import {feature as turfFeature, point as turfPoint} from "@turf/helpers";
+import {LAYER} from "./layerTree/constants";
 
 const MODULE_ID = `infoClick`;
 

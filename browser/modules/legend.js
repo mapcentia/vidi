@@ -6,6 +6,8 @@
 
 'use strict';
 
+import {LAYER} from "./layerTree/constants";
+
 let cloud;
 let meta;
 let _layers;
@@ -13,7 +15,6 @@ let urlparser = require('./urlparser');
 let db = urlparser.db;
 let hasBeenVisible = [];
 let hasBeenVisibleTmp = [];
-let constants = require('./layerTree/constants')
 
 let arrayUnique = (array) => {
     let a = array.concat();
@@ -74,7 +75,7 @@ module.exports = module.exports = {
                     var list = $('<div class="p-0"/>'), li, classUl, title, className;
                     $.each(response, function (i, v) {
                         if (typeof v.id !== "undefined") {
-                            let id = v.id.replace(constants.LAYER.VECTOR + ':', '')
+                            let id = v.id.replace(LAYER.VECTOR + ':', '')
                             title = metaDataKeys[id].f_table_title ? metaDataKeys[id].f_table_title : metaDataKeys[id].f_table_name;
                         }
                         var u, showLayer = false;
@@ -98,8 +99,8 @@ module.exports = module.exports = {
                                         }
                                     }
                                 }
-                                let id = v.id.replace(constants.LAYER.VECTOR + ':', '')
-                                let type = v.id.startsWith(constants.LAYER.VECTOR + ':') ? 'v' : 't';
+                                let id = v.id.replace(LAYER.VECTOR + ':', '')
+                                let type = v.id.startsWith(LAYER.VECTOR + ':') ? 'v' : 't';
                                 checked = ($.inArray(v.id, visibleLayers ? visibleLayers.split(";") : "") > -1) ? "checked" : "";
 
                                 // Get the current display of element, so it can be set again after re-render of legend
