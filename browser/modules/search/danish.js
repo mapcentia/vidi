@@ -1350,7 +1350,6 @@ return baseScore %2B boundaryBonus %2B letterSuffixBonus %2B prefixBonus %2B hou
                         placeStores[key] = getPlaceStore();
                         placeStores[key].db = MDB;
                         placeStores[key].host = MHOST;
-                        // TODO "getCadastraral"
                         if (getProperty) {
                             placeStores[key].sql = "SELECT sfe_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE sfe_ejendomsnummer = (SELECT sfe_ejendomsnummer FROM matrikel.jordstykke WHERE gid=" + gids[type2][datum.value] + ") group by sfe_ejendomsnummer";
                         } else {
@@ -1359,10 +1358,13 @@ return baseScore %2B boundaryBonus %2B letterSuffixBonus %2B prefixBonus %2B hou
                         placeStores[key].load();
                         break;
                     case "adresse" :
+                        const getParcelFromAddress = window.vidiConfig.extensionConfig?.conflictSearch?.getParcelFromAddress ?? false;
                         placeStores[key] = getPlaceStore();
                         placeStores[key].db = ADB;
                         placeStores[key].host = AHOST;
-                        if (getProperty) {
+                        if (getParcelFromAddress) {
+                            placeStores[key].sql = "SELECT the_geom,ST_asgeojson(ST_transform(the_geom,4326)) as geojson FROM matrikel.jordstykke WHERE the_geom && (SELECT ST_transform(the_geom, 25832) FROM dar.adgangsadresser WHERE id='" + gids[type1][datum.value] + "') AND ST_Intersects(the_geom, (SELECT ST_transform(the_geom, 25832) FROM dar.adgangsadresser WHERE id='" + gids[type1][datum.value] + "'))";
+                        } else if (getProperty) {
                             placeStores[key].sql = "SELECT sfe_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE sfe_ejendomsnummer = (SELECT sfe_ejendomsnummer FROM matrikel.jordstykke WHERE (the_geom && (SELECT ST_transform(the_geom, 25832) FROM dar.adgangsadresser WHERE id='" + gids[type1][datum.value] + "')) AND ST_Intersects(the_geom, (SELECT ST_transform(the_geom, 25832) FROM dar.adgangsadresser WHERE id='" + gids[type1][datum.value] + "'))) group by sfe_ejendomsnummer";
                         } else {
                             placeStores[key].sql = "SELECT id,husnr,postnr,kommunekode,the_geom,ST_asgeojson(ST_transform(the_geom,4326)) as geojson FROM dar.adgangsadresser WHERE id='" + gids[type1][datum.value] + "'";
