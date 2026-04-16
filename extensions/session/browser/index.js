@@ -131,7 +131,11 @@ module.exports = {
                             $(".gc2-session-btn-text").html(__("Sign in"))
                             userName = null;
                             parent.update();
-                            authWin = utils.popupCenter(window.gc2Options.host + '/signout?redirect_uri=' + decodeURIComponent( window.location.origin + '/openid.html'), 600, 800, "Sign out");
+                            if (window?.gc2Options?.openIdConfig?.logoutUri) {
+                                authWin = utils.popupCenter(window.gc2Options.openIdConfig.logoutUri + '?client_id=', 600, 800, "Sign out");
+                            } else {
+                                authWin = utils.popupCenter(window.gc2Options.host + '/signout?redirect_uri=' + decodeURIComponent(window.location.origin + '/openid.html'), 600, 800, "Sign out");
+                            }
                         },
                         error: function (error) {
                             console.error(error.responseJSON);
