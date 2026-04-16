@@ -764,6 +764,7 @@ geocloud = (function () {
                 if (defaults.singleTile) {
                     // Insert in tile pane, so non-tiled and tiled layers can be sorted
                     // options.pane = ;
+                    url = url + '&cachebust=' + Math.random();
                     l = new L.nonTiledLayer.wms(url, options);
                 } else {
                     l = new L.TileLayer.WMS(url, options);
