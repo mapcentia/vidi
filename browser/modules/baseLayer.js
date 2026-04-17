@@ -734,12 +734,13 @@ module.exports = module.exports = {
                         name: bl.id,
                         layers: bl.layers,
                         format: 'image/png',
-                        transparent: false,
+                        transparent: bl?.transparent ?? false,
                         attribution: BLattribution,
                         minZoom: BLminZoom,
                         maxZoom: BLmaxZoom,
                         maxNativeZoom: BLmaxNativeZoom,
                         singleTile: bl?.singleTile,
+                        version: bl?.version ?? '1.1.1',
                     });
                 } else {
                     result = cloud.get().addBaseLayer(bl.id, bl.db, bl.config, bl.host || null);
