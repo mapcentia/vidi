@@ -970,7 +970,7 @@ module.exports = {
                         break
                     case `bytea[]`:
                     case `integer[]`:
-                        if (typeof eventFeatureCopy.properties[key] !== 'object') {
+                        if (typeof eventFeatureCopy.properties[key] !== 'undefined' && typeof eventFeatureCopy.properties[key] !== 'object') {
                             eventFeatureCopy.properties[key] = "[" + eventFeatureCopy.properties[key].slice(1, -1) + "]";
                         }
                         break;
