@@ -19,9 +19,9 @@ module.exports = {
     // Host can be set through the environment variable GC2_HOST
     // ==========================================
 
-    //"gc2": {
-    //    "host": "http://gc2core"
-    //},
+    "gc2": {
+       "host": "http://gc2core"
+    },
 
     // ==========================================
     // Redis host for session storage.

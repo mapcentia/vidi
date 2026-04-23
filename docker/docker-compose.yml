@@ -1,11 +1,7 @@
-version: '3'
-
 services:
-  base:
-    build: ./base
-    image: mapcentia/vidi:base18
   vidi:
-    build: ./stable
-    image: mapcentia/vidi
-    depends_on:
-      - base
+    image: mapcentia/vidi:base
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: base
