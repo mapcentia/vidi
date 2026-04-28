@@ -36,7 +36,6 @@ const config = require('../../../config/config.js');
 const urlVars = urlparser.urlVars;
 
 
-
 /**
  *
  * @returns {string}
@@ -406,8 +405,9 @@ class SVGContainer extends HTMLElement {
 }
 
 try {
-    customElements.define('svg-container', SVGContainer);
-} catch(e) {
+    customElements.define("svg-container", () => {
+    }, {extends: "div"});
+} catch (e) {
     // May already be defined
 }
 
