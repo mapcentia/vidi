@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2019 MapCentia ApS
+ * @copyright  2013-2026 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -11,7 +11,8 @@
  */
 
 module.exports = {
-    download: (sql, format) => {
+    download: (sql, format, db, fileName) => {
+        fileName = fileName || 'file';
         let request = new XMLHttpRequest();
         request.open('POST', '/api/sql/' + db, true);
         request.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
@@ -21,19 +22,19 @@ module.exports = {
                 let filename, type;
                 switch (format) {
                     case "csv":
-                        filename = 'file.csv';
+                        filename = `${fileName}.csv`;
                         type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
                         break;
                     case "excel":
-                        filename = 'file.xlsx';
+                        filename = `${fileName}.xlsx`;
                         type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
                         break;
                     case "geojson":
-                        filename = 'file.geojson';
+                        filename = `${fileName}.geojson`;
                         type = 'application/json';
                         break;
                     default:
-                        filename = 'file.zip';
+                        filename = `${fileName}.zip`;
                         type = 'application/zip';
                         break;
                 }

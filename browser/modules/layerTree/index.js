@@ -3880,7 +3880,7 @@ module.exports = {
         if (whereClause) {
             sql += ` WHERE ${whereClause}`;
         }
-        download.download(sql, format)
+        download.download(sql, format, urlparser.db, layerKey.replace('.', '_'));
     },
 
     onApplyPredefinedFiltersHandler: ({layerKey, filters}, forcedReloadLayerType = false) => {
