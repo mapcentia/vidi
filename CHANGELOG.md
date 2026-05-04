@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2026.5.0] - 2026-4-5
+### Fixed
+- The download widget in layertree was broken and is fixed now. Also, Dowbload file name is set to the layer name.
+
 ## [2026.4.2] - 2026-28-4
 ### Fixed
 - Regressions in Symbols
