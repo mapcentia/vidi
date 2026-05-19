@@ -53,7 +53,9 @@ class FileUploadWidget extends React.Component {
         // Avoid multiple concurrent conversions for the same URL
         if (this._convertingUrl === val) return;
         this._convertingUrl = val;
-        fetch(val)
+        // Remove query string, as the decoder doesn't use it
+        const cleanUrl = val.split('?')[0];
+        fetch(cleanUrl)
             .then(res => {
                 if (res.status === 404) {
                     this.setState({ loadedImageData: false });

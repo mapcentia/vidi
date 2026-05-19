@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2026.5.7] - 2026-19-5
+### Fixed
+- Strip query strings from URLs before passing them to the decoder in FileUploadWidget, as the deocoder doesn't use them.
+
 ## [2026.5.6] - 2026-19-5
 ### Fixed
 - Replaced FontAwesome with Bootstrap Icons for draw control icon.
