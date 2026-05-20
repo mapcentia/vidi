@@ -233,10 +233,27 @@ class Queue {
     }
 
     /**
-     * Returns current items
+     * Returns current items.
+     *
+     * Structurally-shallow clone: each item, its feature wrapper, and the inner
+     * features array are shallow-copied so callers can safely mutate the wrappers
+     * (e.g. transformResponseHandler sets `feature.features[0].meta = {}`)
+     * without affecting the queue itself. The `properties` object — and the
+     * heavy bytea payloads inside it — is referenced, not duplicated.
      */
     getItems() {
-        return JSON.parse(JSON.stringify(this._queue));
+        return this._queue.map(item => {
+            if (!item) return item;
+            const cloned = {...item};
+            if (item.feature) {
+                const featureCloned = {...item.feature};
+                if (Array.isArray(item.feature.features)) {
+                    featureCloned.features = item.feature.features.map(f => f ? {...f} : f);
+                }
+                cloned.feature = featureCloned;
+            }
+            return cloned;
+        });
     }
 
     /**

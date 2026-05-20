@@ -14,6 +14,43 @@ const { LOG, QUEUE_DEFAULT_PKEY } = require('./constants');
 
 let singletoneInstance = false;
 
+// Vidi internal property keys that must never be sent to the server. They are
+// added client-side for popup rendering, edit tracking, etc. Stripping at the
+// apiBridge boundary protects against later mutations of the shared layer
+// properties object (e.g. prepareDataForTableView re-adding _vidi_content
+// after the editor's onSubmit ran).
+const VIDI_INTERNAL_FIELDS = [
+    '_vidi_content',
+    '_id',
+    '_vidi_edit_layer_id',
+    '_vidi_edit_layer_name',
+    '_vidi_edit_vector',
+    '_vidi_edit_display',
+    '_vidi_blob_urls'
+];
+
+/**
+ * Structurally-shallow clone of a FeatureCollection that strips Vidi-internal
+ * properties. Wrapper layers are cloned (so the queue cannot be mutated by
+ * later writes to the layer's properties), but nested values inside properties
+ * (e.g. bytea[] arrays) keep their reference so we don't duplicate large
+ * payloads in memory.
+ */
+function sanitizeFeatureCollectionForPayload(featureCollection) {
+    if (!featureCollection || !Array.isArray(featureCollection.features)) return featureCollection;
+    const cleanedFeatures = featureCollection.features.map(f => {
+        if (!f) return f;
+        const cleanedFeature = {...f};
+        if (f.properties) {
+            const cleanProps = {...f.properties};
+            for (const key of VIDI_INTERNAL_FIELDS) delete cleanProps[key];
+            cleanedFeature.properties = cleanProps;
+        }
+        return cleanedFeature;
+    });
+    return {...featureCollection, features: cleanedFeatures};
+}
+
 /**
  * Bridge pattern implementation for interaction with the API.
  * 
@@ -322,11 +359,21 @@ class APIBridge {
                     if (item.serverErrorType) item.feature.features[0].meta.serverErrorType = item.serverErrorType;
                 }
 
+                // Shallow-clone properties too: response.features later flows
+                // through prepareDataForTableView which mutates properties (sets
+                // _vidi_content). Without this isolation the mutation would
+                // propagate back into the queue's stored item via the shared
+                // properties reference and end up in the next POST/PUT payload.
+                // Nested values inside properties (bytea[] arrays) stay shared
+                // so we don't duplicate large payloads.
                 let feature = Object.assign({}, item.feature.features[0]);
+                if (feature.properties) {
+                    feature.properties = {...feature.properties};
+                }
                 if (itemParentTable === tableId) {
                     switch (item.type) {
                         case Queue.ADD_REQUEST:
-                            
+
                             if (LOG) console.log('APIBridge: ## ADD', item);
 
                             response.features.push(Object.assign({}, feature));
@@ -365,7 +412,10 @@ class APIBridge {
      * @param {Object} data    Meta data
      */
     addFeature(feature, db, meta) {
-        let copiedFeature = JSON.parse(JSON.stringify(feature));
+        // Sanitize strips Vidi-internal fields and structurally-shallow-clones
+        // wrapper layers so the queue cannot be mutated by later writes to the
+        // layer's shared properties object. Bytea payloads stay shared.
+        let copiedFeature = sanitizeFeatureCollectionForPayload(feature);
         let date = new Date();
         let timestamp = date.getTime();
         const pkey = (meta && meta.pkey ? meta.pkey : QUEUE_DEFAULT_PKEY);
@@ -385,8 +435,12 @@ class APIBridge {
      * @param meta
      */
     updateFeature(feature, db, meta) {
-        this._validateFeatureData(db, meta, feature);
-        return this._queue.pushAndProcess({ type: Queue.UPDATE_REQUEST, feature, db, meta });
+        // Sanitize: snapshot now so later mutations to the layer's shared
+        // properties (e.g. prepareDataForTableView re-adding _vidi_content
+        // after layer reload) don't leak into the PUT payload.
+        const sanitized = sanitizeFeatureCollectionForPayload(feature);
+        this._validateFeatureData(db, meta, sanitized);
+        return this._queue.pushAndProcess({ type: Queue.UPDATE_REQUEST, feature: sanitized, db, meta });
     }
 
     /**
@@ -398,8 +452,11 @@ class APIBridge {
      * @param meta
      */
     deleteFeature(feature, db, meta) {
-        this._validateFeatureData(db, meta, feature);
-        return this._queue.pushAndProcess({ type: Queue.DELETE_REQUEST, feature, db, meta });
+        // Delete only sends the pkey in the URL, but sanitize for consistency
+        // and to avoid retaining base64 payloads in the queue for delete ops.
+        const sanitized = sanitizeFeatureCollectionForPayload(feature);
+        this._validateFeatureData(db, meta, sanitized);
+        return this._queue.pushAndProcess({ type: Queue.DELETE_REQUEST, feature: sanitized, db, meta });
     }
 
     /**
