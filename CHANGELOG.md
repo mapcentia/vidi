@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2026.5.8] - 2026-20-5
+### Fixed
+- Editor: Optimize blob handling: reduce memory consumption by replacing base64 strings with blob URLs, 
+  clean up unused references, and prevent leaks. Enhance FileUploadWidget to efficiently manage 
+  data URLs and async HTTP URL conversion.
+
 ## [2026.5.7] - 2026-19-5
 ### Fixed
 - Strip query strings from URLs before passing them to the decoder in FileUploadWidget, as the deocoder doesn't use them.
