@@ -8,7 +8,6 @@ import React from 'react';
 import Dropzone from 'react-dropzone';
 
 import {MIME_TYPES_APPS, MIME_TYPES_IMAGES} from '../../../browser/modules/constants';
-import {splitBase64} from '../../../browser/modules/utils';
 import config from "../../../config/config";
 
 const MAX_WIDTH = 2400;
@@ -16,105 +15,188 @@ const MAX_HEIGHT = 1800;
 const MAX_SIZE = 30_000_000;
 const doNotScaleImages = config?.extensionConfig?.editor?.doNotScaleImages ?? false;
 
+/**
+ * Pull "image/jpeg" out of "data:image/jpeg;base64,..." without splitting the
+ * whole base64 payload (which would allocate a large string copy).
+ */
+function extractContentType(dataUrl) {
+    if (typeof dataUrl !== 'string' || !dataUrl.startsWith('data:')) return null;
+    const semi = dataUrl.indexOf(';');
+    return semi > 5 ? dataUrl.substring(5, semi) : null;
+}
+
+/**
+ * Decode a data URL to a Blob synchronously so the widget can render the image
+ * on first paint without a Loading flash. The base64 string itself is not
+ * retained — only the resulting Blob + a short blob: URL.
+ */
+function dataUrlToBlob(dataUrl) {
+    const semi = dataUrl.indexOf(';');
+    if (semi < 5) return null;
+    const contentType = dataUrl.substring(5, semi);
+    const comma = dataUrl.indexOf(',', semi);
+    if (comma < 0) return null;
+    try {
+        const binary = atob(dataUrl.substring(comma + 1));
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        return new Blob([bytes], {type: contentType});
+    } catch (e) {
+        console.warn('FileUploadWidget: failed to decode data URL', e);
+        return null;
+    }
+}
+
+function isHttpUrl(str) {
+    return typeof str === 'string' && !str.startsWith('data:') &&
+        (str.startsWith('http://') || str.startsWith('https://'));
+}
+
+function cleanQuotes(value) {
+    return value && value.includes('"') ? value.replaceAll('"', '') : value;
+}
+
 class FileUploadWidget extends React.Component {
     constructor(props) {
         super(props);
 
+        const initial = this.buildDisplayState(props.value);
         this.state = {
-            // Clean up if there is double qoutes from relations names
-            loadedImageData: (props.value ? props.value.replaceAll('"', '') : false)
+            displayUrl: initial.displayUrl,
+            contentType: initial.contentType,
+            isHttpPending: initial.isHttpPending
         };
 
         this.deleteFile = this.deleteFile.bind(this);
     }
 
+    /**
+     * Decide what to render for a given form value. data:-URLs are converted
+     * synchronously to a blob URL; HTTP URLs are flagged for async fetch.
+     */
+    buildDisplayState(rawValue) {
+        if (!rawValue) {
+            return {displayUrl: null, contentType: null, isHttpPending: false};
+        }
+        const value = cleanQuotes(rawValue);
+        if (value.startsWith('data:')) {
+            const blob = dataUrlToBlob(value);
+            if (blob) {
+                return {
+                    displayUrl: URL.createObjectURL(blob),
+                    contentType: blob.type || extractContentType(value),
+                    isHttpPending: false
+                };
+            }
+            return {displayUrl: null, contentType: null, isHttpPending: false};
+        }
+        if (isHttpUrl(value)) {
+            return {displayUrl: null, contentType: null, isHttpPending: true};
+        }
+        return {displayUrl: null, contentType: null, isHttpPending: false};
+    }
+
     componentDidMount() {
-        let promises = [];
-        this.ensureDataUrlFromHttp(promises);
-        Promise.all(promises).finally(()=>{
-            console.log("All promises resolved");
-            document.querySelector('.editor-save-btn').disabled = false;
-            document.querySelector('.editor-save-btn-label').classList.remove('d-none');
-            document.querySelector('.editor-save-btn-loading').classList.add('d-none');
+        if (this.state.isHttpPending) {
+            this.fetchHttpUrl(cleanQuotes(this.props.value));
+        }
+    }
+
+    componentDidUpdate(prevProps) {
+        if (prevProps.value === this.props.value) return;
+
+        const previousDisplayUrl = this.state.displayUrl;
+        const next = this.buildDisplayState(this.props.value);
+        this.setState(next, () => {
+            // Revoke the old blob URL only after the new one has rendered, so
+            // the browser never holds a reference to a revoked URL.
+            if (typeof previousDisplayUrl === 'string'
+                && previousDisplayUrl.startsWith('blob:')
+                && previousDisplayUrl !== this.state.displayUrl) {
+                URL.revokeObjectURL(previousDisplayUrl);
+            }
+            if (next.isHttpPending) {
+                this.fetchHttpUrl(cleanQuotes(this.props.value));
+            }
         });
     }
 
-    componentDidUpdate(prevProps, prevState) {
-        if (prevProps.value !== this.props.value && this.state.loadedImageData !== this.props.value) {
-            this.setState({ loadedImageData: this.props.value });
-            return;
-        }
-        if (prevState.loadedImageData !== this.state.loadedImageData) {
-            this.ensureDataUrlFromHttp();
+    componentWillUnmount() {
+        const url = this.state.displayUrl;
+        if (typeof url === 'string' && url.startsWith('blob:')) {
+            URL.revokeObjectURL(url);
         }
     }
 
-    isHttpUrl(str) {
-        return typeof str === 'string' && !str.startsWith('data:') && (str.startsWith('http://') || str.startsWith('https://'));
+    setSaveButtonPending(pending) {
+        const btn = document.querySelector('.editor-save-btn');
+        const label = document.querySelector('.editor-save-btn-label');
+        const loading = document.querySelector('.editor-save-btn-loading');
+        if (!btn || !label || !loading) return;
+        btn.disabled = pending;
+        label.classList.toggle('d-none', pending);
+        loading.classList.toggle('d-none', !pending);
     }
 
-    ensureDataUrlFromHttp(promises) {
-        const val = this.state.loadedImageData;
-        if (!val || !this.isHttpUrl(val)) return;
-        document.querySelector('.editor-save-btn').disabled = true;
-        document.querySelector('.editor-save-btn-label').classList.add('d-none');
-        document.querySelector('.editor-save-btn-loading').classList.remove('d-none');
-        // Fetch the resource and convert to data URL for preview/embed
-        // Avoid multiple concurrent conversions for the same URL
-        if (this._convertingUrl === val) return;
-        this._convertingUrl = val;
-        // Remove query string, as the decoder doesn't use it
-        const cleanUrl = val.split('?')[0];
-        promises.push(fetch(cleanUrl)
+    fetchHttpUrl(url) {
+        if (this._convertingUrl === url) return;
+        this._convertingUrl = url;
+        this.setSaveButtonPending(true);
+        const cleanUrl = url.split('?')[0];
+
+        fetch(cleanUrl)
             .then(res => {
                 if (res.status === 404) {
-                    this.setState({ loadedImageData: false });
+                    this.props.onChange(undefined);
                     throw new Error('404 Not Found');
                 }
                 if (!res.ok) throw new Error('Network response was not ok');
                 return res.blob();
             })
-            .then(blob => new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = reject;
-                reader.readAsDataURL(blob);
-            }))
-            .then(dataUrl => {
-                // Only update if the URL hasn't changed in the meantime
-                if (this.state.loadedImageData === val || this.isHttpUrl(this.state.loadedImageData)) {
-                    this.setState({ loadedImageData: dataUrl });
-                    this.props.onChange(dataUrl);
-                }
+            .then(blob => {
+                // Show the image immediately via blob URL while we async-convert
+                // to base64 for the form state.
+                const blobUrl = URL.createObjectURL(blob);
+                this.setState({
+                    displayUrl: blobUrl,
+                    contentType: blob.type,
+                    isHttpPending: false
+                });
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(blob);
+                });
             })
-            .catch((e) => {
+            .then(dataUrl => {
+                this.props.onChange(dataUrl);
+            })
+            .catch(e => {
                 console.warn(e && e.message ? e.message : e);
             })
             .finally(() => {
                 this._convertingUrl = null;
-                console.log("Done converting", cleanUrl);
-            })
-        )
+                this.setSaveButtonPending(false);
+            });
     }
 
     onDrop(files) {
-        let _self = this;
         const file = files[0];
-        console.log("Dropping", file.type)
-        if (file && file.size > MAX_SIZE) {
+        if (!file) return;
+        if (file.size > MAX_SIZE) {
             alert(__("File is too big! Maximum size is") + " " + (MAX_SIZE / 1000000) + " " + __("MB"));
             return;
         }
-        if (file && MIME_TYPES_IMAGES.includes(file.type)) {
+        if (MIME_TYPES_IMAGES.includes(file.type)) {
             const reader = new FileReader();
             reader.onload = (e) => {
                 const img = new Image();
-                img.onload = function () {
+                img.onload = () => {
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
                     let width = img.width;
                     let height = img.height;
-                    // Scale image
                     if (!doNotScaleImages) {
                         if (width > MAX_WIDTH) {
                             height *= MAX_WIDTH / width;
@@ -122,17 +204,14 @@ class FileUploadWidget extends React.Component {
                         }
                         if (height > MAX_HEIGHT) {
                             width *= MAX_HEIGHT / height;
-                            height = MAX_HEIGHT
+                            height = MAX_HEIGHT;
                         }
                     }
                     canvas.width = width;
                     canvas.height = height;
                     ctx.drawImage(img, 0, 0, width, height);
                     const data = canvas.toDataURL(file.type);
-                    _self.setState({
-                        loadedImageData: data
-                    });
-                    _self.props.onChange(data);
+                    this.props.onChange(data);
                 };
                 img.src = e.target.result;
             };
@@ -140,41 +219,28 @@ class FileUploadWidget extends React.Component {
         } else {
             const reader = new FileReader();
             reader.onload = (e) => {
-                const data = e.target.result;
-                _self.setState({
-                    loadedImageData: data
-                });
-                _self.props.onChange(data);
+                this.props.onChange(e.target.result);
             };
             reader.readAsDataURL(file);
         }
     }
 
     deleteFile() {
-        this.setState({
-            loadedImageData: false
-        });
         this.props.onChange(undefined);
     }
 
 
     render() {
-        let control = false;
-        if (this.state.loadedImageData) {
-            let type;
-            try {
-                type = splitBase64(this.state.loadedImageData).contentType;
-            } catch (e) {
-                return false;
-            }
-            console.log("Viewing", type);
+        const {displayUrl, contentType, isHttpPending} = this.state;
+
+        if (displayUrl) {
             let el;
-            if (MIME_TYPES_IMAGES.includes(type)) {
-                el = (<img src={this.state.loadedImageData} alt=''/>);
-            } else if (MIME_TYPES_APPS.includes(type)) {
+            if (MIME_TYPES_IMAGES.includes(contentType)) {
+                el = (<img src={displayUrl} alt=''/>);
+            } else if (MIME_TYPES_APPS.includes(contentType)) {
                 el = (<embed
-                    src={this.state.loadedImageData}
-                    type={type}
+                    src={displayUrl}
+                    type={contentType}
                     width="100%"
                     height="600px"
                 />);
@@ -182,29 +248,39 @@ class FileUploadWidget extends React.Component {
                 el = (
                     <div>
                         <div className="alert alert-warning" role="alert">
-                            <i className="bi bi-exclamation-triangle-fill"></i> {__("The file type can't be shown but you can download it")}  : <a download href={this.state.loadedImageData}>{type}</a>
+                            <i className="bi bi-exclamation-triangle-fill"></i> {__("The file type can't be shown but you can download it")} : <a download href={displayUrl}>{contentType}</a>
                         </div>
                     </div>
-                )
+                );
             }
-            control = (<div>
-                <div className="mb-3">{el}</div>
+            return (
                 <div>
-                    <button type="button" className="btn btn-outline-danger btn-block" onClick={this.deleteFile}>
-                        <i className="bi bi-slash-circle"></i>
-                    </button>
+                    <div className="mb-3">{el}</div>
+                    <div>
+                        <button type="button" className="btn btn-outline-danger btn-block" onClick={this.deleteFile}>
+                            <i className="bi bi-slash-circle"></i>
+                        </button>
+                    </div>
                 </div>
-            </div>);
-        } else {
-            control = (<div>
+            );
+        }
+
+        if (isHttpPending) {
+            return (
+                <div className="mb-3 text-muted small">
+                    <i className="spinner-border spinner-border-sm me-1"></i>{__("Loading")}
+                </div>
+            );
+        }
+
+        return (
+            <div>
                 <Dropzone onDrop={this.onDrop.bind(this)}
                           style={{width: '100%', height: '50px', padding: '5px', border: '1px green dashed'}}>
                     <p>{__("Drop file here, or click to select file to upload")}</p>
                 </Dropzone>
-            </div>);
-        }
-
-        return (control);
+            </div>
+        );
     }
 }
 

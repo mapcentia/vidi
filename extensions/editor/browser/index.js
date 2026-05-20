@@ -928,8 +928,11 @@ module.exports = {
             }
 
             _self.enableSnapping(e.feature.geometry.type, true, e);
-            // Delete some system attributes
-            let eventFeatureCopy = JSON.parse(JSON.stringify(e.feature));
+            // Shallow copy: bytea/bytea[] payloads are referenced, not duplicated.
+            let eventFeatureCopy = {
+                geometry: e.feature.geometry,
+                properties: {...e.feature.properties}
+            };
             delete eventFeatureCopy.properties._vidi_content;
             delete eventFeatureCopy.properties._id;
             delete eventFeatureCopy.properties._vidi_edit_layer_id;
@@ -1054,10 +1057,6 @@ module.exports = {
             const uiSchema = formBuildInformation.uiSchema;
 
             cloud.get().map.closePopup();
-            let eventFeatureParsed = {};
-            for (let [key, value] of Object.entries(eventFeatureCopy.properties)) {
-                eventFeatureParsed[key] = value;
-            }
             editorFormRoot.render(
                 <Form
                     key={Date.now()}
@@ -1066,7 +1065,7 @@ module.exports = {
                     schema={schema} noHtml5Validate
                     widgets={widgets}
                     uiSchema={uiSchema}
-                    formData={eventFeatureParsed}
+                    formData={eventFeatureCopy.properties}
                     onSubmit={onSubmit}
                     transformErrors={transformErrors}
                     experimental_defaultFormStateBehavior={{emptyObjectFields: 'skipDefaults', constAsDefaults: 'skipOneOf'}}
@@ -1219,6 +1218,17 @@ module.exports = {
 
         editedFeature = false;
         sqlQuery.resetAll();
+
+        // Unmount the React form tree so RJSF formData (including any base64
+        // payloads converted from bytea URLs by FileUploadWidget) is released.
+        // Without this, every open-then-cancel/submit leaks the form's data.
+        if (editorFormRoot) {
+            try {
+                editorFormRoot.render(null);
+            } catch (e) {
+                console.warn('Editor: failed to unmount form tree', e);
+            }
+        }
     },
 
     stopEditWithConfirm: () => {

@@ -2029,8 +2029,10 @@ module.exports = {
 
             let metaDataKeys = meta.getMetaDataKeys();
             let template = sqlQuery.getVectorTemplate(layerKey);
+            // prepareDataForTableView only reads properties; the other call sites
+            // (lines 1728, 1839) also pass features directly without cloning.
             let tableHeaders = sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + layerKey,
-                JSON.parse(JSON.stringify(layerWithData[0].toGeoJSON(GEOJSON_PRECISION).features)));
+                layerWithData[0].toGeoJSON(GEOJSON_PRECISION).features);
 
             window.filterFormatter = (value, row, index) => {
                 return `
@@ -2205,7 +2207,9 @@ module.exports = {
 
             let parsedMeta = _self.parseLayerMeta(meta.getMetaByKey(layerKey, false));
             let editDisplay = parsedMeta.vidi_layer_editable ? 'inline' : 'none';
-            let properties = JSON.parse(JSON.stringify(feature.properties));
+            // Shallow copy: we only add a few _vidi_edit_* top-level keys below;
+            // nested objects (including bytea payloads) are referenced, not duplicated.
+            let properties = {...feature.properties};
             for (const key in properties) {
                 if (properties.hasOwnProperty(key)) {
                     if (key.indexOf(SYSTEM_FIELD_PREFIX) === 0) {
@@ -2219,6 +2223,12 @@ module.exports = {
             properties._vidi_edit_vector = vector;
             properties._vidi_edit_display = editDisplay;
 
+            // Ensure _vidi_content exists so the popup template can iterate fields
+            // even when prepareDataForTableView hasn't run for this feature yet
+            // (e.g. on freshly added features before reload).
+            if (!properties._vidi_content) {
+                properties._vidi_content = {title: layerKey, fields: []};
+            }
 
             let i = properties._vidi_content.fields.length;
             while (i--) {

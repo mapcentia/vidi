@@ -19,6 +19,7 @@
 import ndjsonStream from 'can-ndjson-stream';
 import md5 from 'md5';
 import base64url from './base64url.js';
+import apiBridgeInstance from "./api-bridge/Queue";
 
 var geocloud;
 geocloud = (function () {
@@ -346,7 +347,10 @@ geocloud = (function () {
                             if (response.features !== null) {
                                 response = me.transformResponse(response, me.id);
 
-                                let clone = JSON.parse(JSON.stringify(response));
+                                // Shallow clone: only top-level keys are mutated below
+                                // (delete + features reassignment). Sharing nested feature
+                                // references avoids duplicating bytea payloads in memory.
+                                let clone = {...response};
                                 delete clone.peak_memory_usage;
                                 delete clone._execution_time;
                                 let newHash = md5(JSON.stringify(clone));
@@ -355,6 +359,10 @@ geocloud = (function () {
                                     me.dataHasChanged = false;
                                     return
                                 }
+                                console.log('fotos[0] type/len:', typeof clone.features?.[3]?.properties?.fotos?.[0], (clone.features?.[3]?.properties?.fotos?.[0] || '').length);
+                                console.log('clone.features fotos[0] lengths:', clone.features.map((f, i) => i + ':' + (f.properties?.fotos?.[0] || '').length));
+                                console.log('queue items:', apiBridgeInstance._queue?.getItems?.()?.length ?? '?');
+
                                 me.geoJSON = clone;
                                 me.currentGeoJsonHash = newHash
                                 me.dataHasChanged = true;
