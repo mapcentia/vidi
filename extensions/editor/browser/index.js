@@ -678,7 +678,7 @@ module.exports = {
                     focusOnFirstError={false}>
                     <div className="buttons">
                         <button type="submit"
-                                className="btn btn btn-success mb-2 mt-2 w-100">{__("Submit")}</button>
+                                className="btn btn btn-success mb-2 mt-2 w-100 editor-save-btn">{__("Submit")}</button>
                         <button type="button" onClick={_self.stopEditWithConfirm}
                                 className="btn btn btn-outline-secondary mb-2 mt-2 w-100">{__("Cancel")}</button>
                     </div>
@@ -1072,7 +1072,10 @@ module.exports = {
                     experimental_defaultFormStateBehavior={{emptyObjectFields: 'skipDefaults', constAsDefaults: 'skipOneOf'}}
                     focusOnFirstError={false}>
                     <div className="buttons">
-                        <button type="submit" className="btn btn btn-success mb-2 mt-2 w-100">{__("Submit")}</button>
+                        <button type="submit" className="btn btn btn-success mb-2 mt-2 w-100 editor-save-btn d-flex align-items-center justify-content-center">
+                            <span className="editor-save-btn-label">{__("Submit")}</span>
+                            <span className="editor-save-btn-loading d-none">{__("Loading files")}<i className="spinner-border spinner-border-sm ms-1"></i></span>
+                        </button>
                         <button type="button" onClick={_self.stopEditWithConfirm}
                                 className="btn btn btn-outline-secondary mb-2 mt-2 w-100">{__("Cancel")}</button>
                     </div>

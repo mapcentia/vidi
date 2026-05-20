@@ -29,7 +29,14 @@ class FileUploadWidget extends React.Component {
     }
 
     componentDidMount() {
-        this.ensureDataUrlFromHttp();
+        let promises = [];
+        this.ensureDataUrlFromHttp(promises);
+        Promise.all(promises).finally(()=>{
+            console.log("All promises resolved");
+            document.querySelector('.editor-save-btn').disabled = false;
+            document.querySelector('.editor-save-btn-label').classList.remove('d-none');
+            document.querySelector('.editor-save-btn-loading').classList.add('d-none');
+        });
     }
 
     componentDidUpdate(prevProps, prevState) {
@@ -46,16 +53,19 @@ class FileUploadWidget extends React.Component {
         return typeof str === 'string' && !str.startsWith('data:') && (str.startsWith('http://') || str.startsWith('https://'));
     }
 
-    ensureDataUrlFromHttp() {
+    ensureDataUrlFromHttp(promises) {
         const val = this.state.loadedImageData;
         if (!val || !this.isHttpUrl(val)) return;
+        document.querySelector('.editor-save-btn').disabled = true;
+        document.querySelector('.editor-save-btn-label').classList.add('d-none');
+        document.querySelector('.editor-save-btn-loading').classList.remove('d-none');
         // Fetch the resource and convert to data URL for preview/embed
         // Avoid multiple concurrent conversions for the same URL
         if (this._convertingUrl === val) return;
         this._convertingUrl = val;
         // Remove query string, as the decoder doesn't use it
         const cleanUrl = val.split('?')[0];
-        fetch(cleanUrl)
+        promises.push(fetch(cleanUrl)
             .then(res => {
                 if (res.status === 404) {
                     this.setState({ loadedImageData: false });
@@ -82,7 +92,9 @@ class FileUploadWidget extends React.Component {
             })
             .finally(() => {
                 this._convertingUrl = null;
-            });
+                console.log("Done converting", cleanUrl);
+            })
+        )
     }
 
     onDrop(files) {
