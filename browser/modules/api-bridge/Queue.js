@@ -76,12 +76,14 @@ class Queue {
         this._online = false;
         this._locked = false;
         this._onUpdateListener = () => {};
-        this._queue = [];
+        // Lightweight metadata index in RAM. Full items live in this._storage.
+        this._metadataIndex = [];
+        this._storage = new QueueStorage(this._getCurrentDatabaseAndSchema());
         this._processor = processor;
         this._lastStats = false;
 
         const processQueue = () => {
-            if (LOG) console.log(`Queue interval, total items in queue: ${_self._queue.length}, locked: ${_self._locked}`);
+            if (LOG) console.log(`Queue interval, total items in queue: ${_self._metadataIndex.length}, locked: ${_self._locked}`);
 
             const scheduleNextQueueProcessingRun = () => {
                 if (_self._terminated !== true) {
@@ -139,7 +141,7 @@ class Queue {
                     }
                 }
             }).always(() => {
-                if (_self._queue.length > 0 && _self._locked === false) {
+                if (_self._metadataIndex.length > 0 && _self._locked === false) {
                     _self._locked = true;
 
                     if (LOG) console.log(`Queue: not empty, trying to push changes`);
@@ -179,7 +181,7 @@ class Queue {
         let _self = this;
 
         let itemsClassifiedByPrimaryKey = {};
-        for (let i = 0; i < _self._queue.length; i++) {
+        for (let i = 0; i < _self._metadataIndex.length; i++) {
             let itemPrimaryKey = getItemPrimaryKey(_self._queue[i]);
             if (!itemsClassifiedByPrimaryKey[`gid_${itemPrimaryKey}`]) {
                 itemsClassifiedByPrimaryKey[`gid_${itemPrimaryKey}`] = [];
@@ -190,7 +192,7 @@ class Queue {
 
         for (let key in itemsClassifiedByPrimaryKey) {
             if (itemsClassifiedByPrimaryKey[key].length === 2) {
-                let initialNumberOfItemsInQueue = _self._queue.length;
+                let initialNumberOfItemsInQueue = _self._metadataIndex.length;
 
                 let initialItemImage = Object.assign({}, itemsClassifiedByPrimaryKey[key][0]);
                 let latestItemImage = Object.assign({}, itemsClassifiedByPrimaryKey[key][1]);
@@ -227,7 +229,7 @@ class Queue {
                 }
 
                 let numberOfItemsRemoved = 0;
-                for (let j = (_self._queue.length - 1); j >= 0; j--) {
+                for (let j = (_self._metadataIndex.length - 1); j >= 0; j--) {
                     if (getItemPrimaryKey(_self._queue[j]) === itemPrimaryKey) {
                         numberOfItemsRemoved++;
                         _self._queue.splice(j, 1);
@@ -257,7 +259,7 @@ class Queue {
                 }
 
                 if (LOG) console.log(`Queue: queue items with primary key ${itemPrimaryKey} were managed,
-                    (${initialNumberOfItemsInQueue} queue items before, ${_self._queue.length} now, ${numberOfItemsRemoved} removed)`);
+                    (${initialNumberOfItemsInQueue} queue items before, ${_self._metadataIndex.length} now, ${numberOfItemsRemoved} removed)`);
             } else if (itemsClassifiedByPrimaryKey[key].length > 2) {
                 throw new Error('Queue: more than 2 queue items with same primary key');
             }
@@ -352,30 +354,18 @@ class Queue {
     /**
      * Restores previous queue state from browser storage
      */
-    _restoreState() {
-        let _self = this;
-
-        if (LOG) console.log('Queue: before getting state');
-
-        let result = new Promise((resolve, reject) => {
-            let location = _self._getCurrentDatabaseAndSchema();
-            localforage.getItem(`${QUEUE_STORE_NAME}:${location.database}:${location.schema}`, (error, value) => {
-
-                if (LOG) console.log('Queue: after getting state');
-
-                if (error) {
-                    throw new Error('Queue: error occured while accessing the store');
-                }
-
-                if (value) {
-                    _self._queue = JSON.parse(value);
-                }
-
-                resolve();
-            });
-        });
-
-        return result;
+    async _restoreState() {
+        if (LOG) console.log('Queue: restoring state');
+        // Migrate legacy single-blob format into per-item records.
+        await this._storage.migrateLegacyBlob(generateId);
+        const ids = await this._storage.loadIndex();
+        const index = [];
+        for (const id of ids) {
+            const fullItem = await this._storage.loadItem(id);
+            if (fullItem) index.push(projectMetadata(id, fullItem));
+        }
+        this._metadataIndex = index;
+        if (LOG) console.log(`Queue: restored ${index.length} items`);
     }
 
     _getCurrentDatabaseAndSchema() {
@@ -390,25 +380,16 @@ class Queue {
     }
 
     /**
-     * Saves current queue state to disk
+     * Deprecated. Per-item writes happen inside push/remove/setSkip directly.
+     * Kept as a no-op so older internal callers don't crash before they're updated.
      */
-    _saveState() {
-        let location = this._getCurrentDatabaseAndSchema();
-        localforage.setItem(`${QUEUE_STORE_NAME}:${location.database}:${location.schema}`, JSON.stringify(this._queue), (error) => {
-
-            if (LOG) console.log('Queue: saving state');
-
-            if (error) {
-                throw new Error('Queue: error occured while storing the queue');
-            }
-        });
-    }
+    _saveState() {}
 
     _getOldestNonSkippedItem(offset) {
         let _self = this;
 
         let result = false;
-        for (let i = offset; i < _self._queue.length; i++) {
+        for (let i = offset; i < _self._metadataIndex.length; i++) {
             if (!_self._queue[i].skip) {
                 result = {
                     item: _self._queue[i],
@@ -475,7 +456,7 @@ class Queue {
                             _self._queue.splice(itemToProcessData.index, 1);
 
                             if (LOG) console.log('Queue: item was processed');
-                            if (LOG) console.log('Queue: items left to process', (_self._queue.length - queueSearchOffset));
+                            if (LOG) console.log('Queue: items left to process', (_self._metadataIndex.length - queueSearchOffset));
 
                             let oldestNonSkippedItemData = _self._getOldestNonSkippedItem(queueSearchOffset);
 
@@ -491,7 +472,7 @@ class Queue {
                             }
                         }).catch(error => {
                             if (LOG) console.log('Queue: item was not processed', oldestNonSkippedItem);
-                            if (LOG) console.log('Queue: stopping processing, items left', _self._queue.length);
+                            if (LOG) console.log('Queue: stopping processing, items left', _self._metadataIndex.length);
 
                             if (error && error.rejectedByServer) {
 
@@ -555,7 +536,7 @@ class Queue {
                 then older elements have to be processed first.
             */
 
-            if (_self._queue.length === 1 && _self._locked === false && PROCESS_FIRST_ELEMENT_IMMEDIATELY) {
+            if (_self._metadataIndex.length === 1 && _self._locked === false && PROCESS_FIRST_ELEMENT_IMMEDIATELY) {
                 
                 if (LOG) console.log('Queue: processing pushAndProcess item right away');
 
@@ -572,7 +553,7 @@ class Queue {
                 });
             } else {
 
-                if (LOG) console.log('Queue: queue is busy', _self._queue.length, _self._locked);
+                if (LOG) console.log('Queue: queue is busy', _self._metadataIndex.length, _self._locked);
 
                 _self._onUpdateListener(_self._generateCurrentStatistics());
                 resolve();
@@ -595,9 +576,9 @@ class Queue {
      * @param {Array<Number>} primaryKeys
      */
     removeByPrimaryKeys(primaryKeys = []) {
-        let initialNumberOfItems = this._queue.length;
+        let initialNumberOfItems = this._metadataIndex.length;
         for (let j = 0; j < primaryKeys.length; j++) {
-            let i = this._queue.length;
+            let i = this._metadataIndex.length;
             while (i--) {
                 const pkey = (this._queue[i].meta && this._queue[i].meta.pkey ? this._queue[i].meta.pkey : QUEUE_DEFAULT_PKEY);
                 if (this._queue[i].feature.features[0].properties[pkey] === primaryKeys[j]) {
@@ -609,7 +590,7 @@ class Queue {
             }
         }
 
-        if (this._queue.length !== (initialNumberOfItems - primaryKeys.length)) {
+        if (this._metadataIndex.length !== (initialNumberOfItems - primaryKeys.length)) {
             throw new Error('Queue: some elements have not been deleted');
         }
 
@@ -621,7 +602,7 @@ class Queue {
      * Makes queue try to push skipped items as well 
      */
     resubmitSkippedFeatures() {
-        for (let i = 0; i < this._queue.length; i++) {
+        for (let i = 0; i < this._metadataIndex.length; i++) {
             this._queue[i].skip = false;
         }
 
@@ -639,7 +620,7 @@ class Queue {
             throw new Error(`Queue: layer identifier can not be empty`);
         }
 
-        let i = this._queue.length;
+        let i = this._metadataIndex.length;
         while (i--) {
             if ((this._queue[i].meta.f_table_schema + '.' + this._queue[i].meta.f_table_name) === layerId) {
 
@@ -659,7 +640,7 @@ class Queue {
      * @return {Number}
      */
     get length() {
-        return this._queue.length;
+        return this._metadataIndex.length;
     }
 
     /**
