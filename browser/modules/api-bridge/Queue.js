@@ -7,6 +7,38 @@
 'use strict';
 
 const { QUEUE_PROCESSING_INTERVAL, ONLINE_STATUS_CHECK_LIMIT, QUEUE_STORE_NAME, ADD_REQUEST, UPDATE_REQUEST, DELETE_REQUEST, LOG, QUEUE_DEFAULT_PKEY } = require('./constants');
+const QueueStorage = require('./QueueStorage');
+
+/**
+ * Returns the lightweight metadata projection of a full queue item.
+ * This is the only shape that lives in the in-memory index — heavy payloads
+ * inside item.feature.features[0].properties stay in IndexedDB.
+ */
+function projectMetadata(id, fullItem) {
+    const pkeyField = (fullItem.meta && fullItem.meta.pkey) ? fullItem.meta.pkey : QUEUE_DEFAULT_PKEY;
+    const pkeyValue = fullItem.feature?.features?.[0]?.properties?.[pkeyField];
+    return {
+        id,
+        type: fullItem.type,
+        table: (fullItem.meta?.f_table_schema || '') + '.' + (fullItem.meta?.f_table_name || ''),
+        pkeyField,
+        pkey: pkeyValue,
+        skip: fullItem.skip === true,
+        serverErrorMessage: fullItem.serverErrorMessage || null,
+        serverErrorType: fullItem.serverErrorType || null
+    };
+}
+
+/**
+ * Returns a fresh id string. Counter is monotonic within a tab session, and
+ * combined with Date.now() to avoid collisions across sessions if items
+ * persist across page reloads.
+ */
+let _idCounter = 0;
+function generateId() {
+    _idCounter += 1;
+    return `${Date.now().toString(36)}-${_idCounter.toString(36)}`;
+}
 
 /*
 Specifies if the first and only element of the queue should
