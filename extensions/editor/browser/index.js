@@ -847,7 +847,7 @@ module.exports = {
         if (!isVector) {
             e.setStyle(EDIT_STYLE)
         }
-        const editFeature = () => {
+        const editFeature = async () => {
             serviceWorkerCheck();
             let React = require('react');
 
@@ -940,10 +940,28 @@ module.exports = {
             }
 
             _self.enableSnapping(e.feature.geometry.type, true, e);
+            // Check if there's a pending queue item for this feature (e.g. user already
+            // edited and submitted, but the request hasn't gone through to the server
+            // yet). Use the queue's snapshot in that case, so the user resumes editing
+            // their pending change instead of overwriting it with fresh DB data.
+            const pkeyField = (metaDataKeys[schemaQualifiedName].pkey) ? metaDataKeys[schemaQualifiedName].pkey : 'gid';
+            const pkeyValue = e.feature.properties?.[pkeyField];
+            let basisProperties = e.feature.properties;
+            if (pkeyValue !== undefined && pkeyValue !== null) {
+                try {
+                    const pendingItem = await apiBridgeInstance.findPendingItemByPkey(schemaQualifiedName, pkeyValue);
+                    if (pendingItem?.feature?.features?.[0]?.properties) {
+                        console.log('Editor: using pending queue item for re-edit', schemaQualifiedName, pkeyValue);
+                        basisProperties = pendingItem.feature.features[0].properties;
+                    }
+                } catch (err) {
+                    console.warn('Editor: failed to look up pending queue item, falling back to fresh data', err);
+                }
+            }
             // Shallow copy: bytea/bytea[] payloads are referenced, not duplicated.
             let eventFeatureCopy = {
                 geometry: e.feature.geometry,
-                properties: {...e.feature.properties}
+                properties: {...basisProperties}
             };
             // Stash on module-level holder so onSubmit reads via indirection.
             // stopEdit() nulls the holder, breaking retention from React's
