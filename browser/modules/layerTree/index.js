@@ -2197,7 +2197,11 @@ module.exports = {
 
         $(".vector-feature-info-panel").remove();
         if (typeof vectorPopUp !== "undefined") {
+            // Detach all event listeners so the closure context (which captures
+            // the previous call's features incl. any bytea payloads) can be GC'd.
+            vectorPopUp.off();
             vectorPopUp.closePopup();
+            vectorPopUp = undefined;
         }
         features.forEach((f) => {
             let layerKey = f.layerKey;
@@ -2360,7 +2364,7 @@ module.exports = {
                             minWidth: 300,
                             className: `js-vector-layer-popup custom-popup`
                         }).setLatLng(event.latlng).setContent(`${additionalControls}${accordion}`).openOn(cloud.get().map)
-                            .on('remove', () => {
+                            .on('remove', function onPopupRemove() {
                                 if (`editor` in extensions) {
                                     editor = extensions.editor.index;
                                     if (!editor.getEditedFeature()) {
@@ -2368,6 +2372,12 @@ module.exports = {
                                     }
                                 }
                                 _self.resetAllVectorLayerStyles();
+                                // Detach this handler so the popup object becomes GC-able
+                                // (the closure context retains the call-site's features).
+                                if (vectorPopUp) {
+                                    vectorPopUp.off('remove', onPopupRemove);
+                                    vectorPopUp = undefined;
+                                }
                             });
                     }
                 }
