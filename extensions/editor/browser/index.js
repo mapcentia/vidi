@@ -16,6 +16,7 @@ import SelectWidget from "./SelectWidget.jsx";
 import TimeWidget from "./TimeWidget.jsx";
 import {coordAll} from "@turf/turf";
 import {createRoot} from "react-dom/client";
+import {flushSync} from "react-dom";
 import config from "../../../config/config";
 
 /**
@@ -46,6 +47,14 @@ let editor;
 
 let editedFeature = false;
 let isVectorLayer = false;
+
+// Holder for the current edit session's state. The form's onSubmit closure
+// captures *this object* (a stable module-level reference) rather than the
+// per-call locals `e`/`eventFeatureCopy`, so when stopEdit() nulls the holder
+// the closure can no longer reach the Leaflet layer or its feature.properties.
+// React 18 sometimes retains the unmounted Form's onSubmit via alternate
+// fiber state; this indirection makes that retention harmless.
+let editSession = null;
 
 let featureWasEdited = false;
 
@@ -936,6 +945,19 @@ module.exports = {
                 geometry: e.feature.geometry,
                 properties: {...e.feature.properties}
             };
+            // Stash on module-level holder so onSubmit reads via indirection.
+            // stopEdit() nulls the holder, breaking retention from React's
+            // potentially-leaked alternate fiber.
+            editSession = {
+                e,
+                eventFeatureCopy,
+                markers,
+                metaDataKeys,
+                schemaQualifiedName,
+                fields,
+                isVectorLayer,
+                me: this
+            };
             delete eventFeatureCopy.properties._vidi_content;
             delete eventFeatureCopy.properties._id;
             delete eventFeatureCopy.properties._vidi_edit_layer_id;
@@ -981,7 +1003,14 @@ module.exports = {
              * @param formData
              */
             const onSubmit = (formData) => {
-                let GeoJSON = e.toGeoJSON(GEOJSON_PRECISION), featureCollection;
+                // Read state via the module-level holder so this closure does
+                // not directly capture `e` / `eventFeatureCopy` (Leaflet layer
+                // + shared properties incl. bytea). stopEdit() nulls the
+                // holder, allowing GC even if React 18 retains this onSubmit
+                // via an alternate fiber.
+                const s = editSession;
+                if (!s || !s.e) return; // session torn down
+                let GeoJSON = s.e.toGeoJSON(GEOJSON_PRECISION), featureCollection;
                 delete GeoJSON.properties._vidi_content;
                 delete GeoJSON.properties._id;
                 delete GeoJSON.properties._vidi_edit_layer_id;
@@ -991,14 +1020,14 @@ module.exports = {
 
                 // HACK to handle (Multi)Point layers
                 // Update the GeoJSON from markers
-                switch (eventFeatureCopy.geometry.type) {
+                switch (s.eventFeatureCopy.geometry.type) {
                     case "Point":
-                        GeoJSON.geometry.coordinates = [markers[0].getLatLng().lng, markers[0].getLatLng().lat];
+                        GeoJSON.geometry.coordinates = [s.markers[0].getLatLng().lng, s.markers[0].getLatLng().lat];
                         break;
 
                     case "MultiPoint":
-                        markers.map(function (v, i) {
-                            GeoJSON.geometry.coordinates[i] = [markers[i].getLatLng().lng, markers[i].getLatLng().lat];
+                        s.markers.map(function (v, i) {
+                            GeoJSON.geometry.coordinates[i] = [s.markers[i].getLatLng().lng, s.markers[i].getLatLng().lat];
                         });
                         break;
 
@@ -1009,11 +1038,11 @@ module.exports = {
 
                 // Set GeoJSON properties from form values
                 let fieldConf = false;
-                if (metaDataKeys[schemaQualifiedName].fieldconf) {
-                    fieldConf = JSON.parse(metaDataKeys[schemaQualifiedName].fieldconf);
+                if (s.metaDataKeys[s.schemaQualifiedName].fieldconf) {
+                    fieldConf = JSON.parse(s.metaDataKeys[s.schemaQualifiedName].fieldconf);
                 }
-                Object.keys(fields).map(function (key) {
-                    if ((!key.startsWith("gc2_") && fields[key].type !== "geometry" && !fieldConf[key]?.filter) || metaDataKeys[schemaQualifiedName].pkey === key) {
+                Object.keys(s.fields).map(function (key) {
+                    if ((!key.startsWith("gc2_") && s.fields[key].type !== "geometry" && !fieldConf[key]?.filter) || s.metaDataKeys[s.schemaQualifiedName].pkey === key) {
                         GeoJSON.properties[key] = formData.formData[key];
                         // Set undefined values back to NULL
                         if (GeoJSON.properties[key] === undefined) {
@@ -1025,7 +1054,7 @@ module.exports = {
                     }
                 });
 
-                if (eventFeatureCopy.geometry.type === `Polygon`) {
+                if (s.eventFeatureCopy.geometry.type === `Polygon`) {
                     GeoJSON = _self.removeDuplicates(GeoJSON);
                 }
 
@@ -1038,17 +1067,18 @@ module.exports = {
                     ]
                 };
 
+                const sIsVectorLayer = s.isVectorLayer;
+                const sSchemaQualifiedName = s.schemaQualifiedName;
+                const sMeta = s.metaDataKeys[s.schemaQualifiedName];
+                const sMe = s.me;
                 const featureIsUpdated = () => {
-                    // switchLayer.registerLayerDataAlternation(schemaQualifiedName);
-                    me.stopEdit();
-
-                    // Reloading only vector layers, as uncommited changes can be displayed only for vector layers
-                    if (isVectorLayer) {
-                        layerTree.reloadLayer("v:" + schemaQualifiedName, true);
+                    sMe.stopEdit();
+                    if (sIsVectorLayer) {
+                        layerTree.reloadLayer("v:" + sSchemaQualifiedName, true);
                     }
                 };
 
-                apiBridgeInstance.updateFeature(featureCollection, db, metaDataKeys[schemaQualifiedName]).then(featureIsUpdated).catch(error => {
+                apiBridgeInstance.updateFeature(featureCollection, db, sMeta).then(featureIsUpdated).catch(error => {
                     console.log('Editor: error occured while performing updateFeature()');
                     throw new Error(error);
                 });
@@ -1226,18 +1256,33 @@ module.exports = {
         sqlQuery.resetAll();
 
         // Fully tear down the React root so the previous Form's element tree,
-        // memoizedState/Props, and onSubmit closure (which retains feature
-        // data and any base64 payloads converted by FileUploadWidget) are
-        // released. render(null) leaves React's internal alternate fiber
-        // alive in some cases; unmount() guarantees full teardown. The root
-        // is recreated lazily on the next add()/edit() call.
+        // memoizedState/Props, and onSubmit closure are released. flushSync
+        // forces any pending React updates to commit before unmount, otherwise
+        // React 18 may retain the alternate fiber via its internal scheduler.
         if (editorFormRoot) {
             try {
-                editorFormRoot.unmount();
+                const rootToUnmount = editorFormRoot;
+                editorFormRoot = null;
+                flushSync(() => {
+                    rootToUnmount.unmount();
+                });
             } catch (e) {
                 console.warn('Editor: failed to unmount form tree', e);
             }
-            editorFormRoot = null;
+        }
+
+        // Null the edit session holder. The form's onSubmit closure reads via
+        // `editSession`; clearing it here means any retained closure (e.g.
+        // from a leaked React alternate fiber) can no longer reach the
+        // Leaflet layer or its feature.properties (bytea payloads).
+        if (editSession) {
+            editSession.e = null;
+            editSession.eventFeatureCopy = null;
+            editSession.markers = null;
+            editSession.metaDataKeys = null;
+            editSession.fields = null;
+            editSession.me = null;
+            editSession = null;
         }
     },
 
