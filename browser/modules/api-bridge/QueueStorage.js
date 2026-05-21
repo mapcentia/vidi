@@ -60,6 +60,41 @@ class QueueStorage {
             });
         });
     }
+
+    /**
+     * Returns the full item by id, or null if not present.
+     */
+    loadItem(id) {
+        return new Promise((resolve, reject) => {
+            global.localforage.getItem(this._itemKey(id), (error, value) => {
+                if (error) return reject(error);
+                if (!value) return resolve(null);
+                try {
+                    resolve(JSON.parse(value));
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        });
+    }
+
+    saveItem(id, fullItem) {
+        return new Promise((resolve, reject) => {
+            global.localforage.setItem(this._itemKey(id), JSON.stringify(fullItem), (error) => {
+                if (error) return reject(error);
+                resolve();
+            });
+        });
+    }
+
+    deleteItem(id) {
+        return new Promise((resolve, reject) => {
+            global.localforage.removeItem(this._itemKey(id), (error) => {
+                if (error) return reject(error);
+                resolve();
+            });
+        });
+    }
 }
 
 module.exports = QueueStorage;

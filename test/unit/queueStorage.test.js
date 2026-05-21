@@ -35,4 +35,29 @@ describe("QueueStorage", () => {
             expect(ids).to.deep.equal(['a', 'b', 'c']);
         });
     });
+
+    describe("loadItem / saveItem / deleteItem", () => {
+        it("returns null for unknown id", async () => {
+            global.localforage = makeLocalforageMock();
+            const storage = new QueueStorage({database: 'd', schema: 's'});
+            expect(await storage.loadItem('missing')).to.equal(null);
+        });
+
+        it("round-trips an item", async () => {
+            global.localforage = makeLocalforageMock();
+            const storage = new QueueStorage({database: 'd', schema: 's'});
+            const item = {type: 1, feature: {features: [{properties: {gid: 1}}]}};
+            await storage.saveItem('id1', item);
+            const loaded = await storage.loadItem('id1');
+            expect(loaded).to.deep.equal(item);
+        });
+
+        it("deleteItem removes the record", async () => {
+            global.localforage = makeLocalforageMock();
+            const storage = new QueueStorage({database: 'd', schema: 's'});
+            await storage.saveItem('id1', {x: 1});
+            await storage.deleteItem('id1');
+            expect(await storage.loadItem('id1')).to.equal(null);
+        });
+    });
 });
