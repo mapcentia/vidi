@@ -654,7 +654,7 @@ class Queue {
     async removeByLayerId(layerId) {
         if (!layerId) throw new Error(`Queue: layer identifier can not be empty`);
         const toDelete = this._metadataIndex
-            .filter(m => `v:${m.table}` === layerId)
+            .filter(m => m.table === layerId)
             .map(m => m.id);
         for (const id of toDelete) {
             await this._storage.deleteItem(id);

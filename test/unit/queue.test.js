@@ -32,7 +32,12 @@ const localforageMock = {
 	getItem: (data, callback) => {
 		callback(false, false);
 	},
-	setItem: () => {}
+	setItem: (key, value, callback) => {
+		if (callback) callback(null);
+	},
+	removeItem: (key, callback) => {
+		if (callback) callback(null);
+	}
 };
 global.localforage = localforageMock;
 
@@ -184,16 +189,16 @@ describe("Queue", () => {
 			return result;
 		});
 
-		// Adding add feature request
-		queue.pushAndProcess(helpers.duplicate(dummyRequest));
+		await queue.ready();
 
-		await helpers.sleep(1000);
+		// Adding add feature request
+		await queue.push(helpers.duplicate(dummyRequest));
 
 		expect(queue.length).to.equal(1);
-		await queue.removeByLayerId('v:another_schema.table');
-		expect(queue.getItems().length).to.equal(1);
-		await queue.removeByLayerId('v:schema.table');
-		expect(queue.getItems().length).to.equal(0);
+		await queue.removeByLayerId('another_schema.table');
+		expect(queue.length).to.equal(1);
+		await queue.removeByLayerId('schema.table');
+		expect(queue.length).to.equal(0);
 		queue.terminate();
 	});
 
