@@ -359,9 +359,6 @@ geocloud = (function () {
                                     me.dataHasChanged = false;
                                     return
                                 }
-                                console.log('fotos[0] type/len:', typeof clone.features?.[3]?.properties?.fotos?.[0], (clone.features?.[3]?.properties?.fotos?.[0] || '').length);
-                                console.log('clone.features fotos[0] lengths:', clone.features.map((f, i) => i + ':' + (f.properties?.fotos?.[0] || '').length));
-                                console.log('queue items:', apiBridgeInstance._queue?.getItems?.()?.length ?? '?');
 
                                 me.geoJSON = clone;
                                 me.currentGeoJsonHash = newHash
@@ -402,6 +399,14 @@ geocloud = (function () {
                                 me.geoJSON = null;
                             }
                         }
+                        // Trigger onLoad at the end of the async success body.
+                        // Previously fired from `complete`, but `success` is now
+                        // async so `complete` runs before our await chain finishes
+                        // — me.dataHasChanged would be stale and prepareDataForTableView
+                        // never runs, leaving _vidi_content unset on features.
+                        if (!isRetrying && me.dataHasChanged) {
+                            me.onLoad(me);
+                        }
                     },
                     error: function (x, t, e) {
                         if (t === 'abort') {
@@ -414,13 +419,6 @@ geocloud = (function () {
                             makeRequest();
                         } else {
                             me.defaults.error.apply(me, [me, x, t, e]);
-                        }
-                    },
-                    complete: function (e) {
-                        if (!isRetrying) {
-                            if (me.dataHasChanged) {
-                                me.onLoad(me);
-                            }
                         }
                     }
                 });
