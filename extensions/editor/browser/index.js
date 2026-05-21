@@ -1255,17 +1255,20 @@ module.exports = {
         editedFeature = false;
         sqlQuery.resetAll();
 
-        // Fully tear down the React root so the previous Form's element tree,
-        // memoizedState/Props, and onSubmit closure are released. flushSync
-        // forces any pending React updates to commit before unmount, otherwise
-        // React 18 may retain the alternate fiber via its internal scheduler.
+        // React 18 retains the previous tree via the fiber's `alternate` even
+        // after unmount() unless we commit a sentinel render first. The
+        // `render(null)` causes React to reconcile against an empty tree,
+        // committing unmounts for every child synchronously inside flushSync.
+        // Then unmount() can fully release the root including the alternate
+        // fiber's memoizedState (which holds RJSF's initialFormState).
         if (editorFormRoot) {
             try {
                 const rootToUnmount = editorFormRoot;
                 editorFormRoot = null;
                 flushSync(() => {
-                    rootToUnmount.unmount();
+                    rootToUnmount.render(null);
                 });
+                rootToUnmount.unmount();
             } catch (e) {
                 console.warn('Editor: failed to unmount form tree', e);
             }
