@@ -56,14 +56,7 @@ function cleanQuotes(value) {
     return value && value.includes('"') ? value.replaceAll('"', '') : value;
 }
 
-/**
- * PureComponent: shallow-compares props and state, skipping re-render when
- * unchanged. Important here because RJSF re-renders the whole form on every
- * keystroke in any field. Without this, the bytea widget (with its potentially
- * large props.value and blob URL) re-renders unnecessarily on every keystroke,
- * making forms with images noticeably sluggish.
- */
-class FileUploadWidget extends React.PureComponent {
+class FileUploadWidget extends React.Component {
     constructor(props) {
         super(props);
 
@@ -75,6 +68,25 @@ class FileUploadWidget extends React.PureComponent {
         };
 
         this.deleteFile = this.deleteFile.bind(this);
+    }
+
+    /**
+     * Render output depends only on props.value and our state. RJSF re-renders
+     * the whole form on every keystroke and passes a fresh `onChange` reference
+     * each time — PureComponent's shallow prop compare would still see a diff
+     * and re-render this widget (which holds a potentially MB-sized blob URL
+     * and an <img> tag — relatively expensive to reconcile).
+     *
+     * componentDidUpdate still fires when we return true, so prop-value changes
+     * are still processed.
+     */
+    shouldComponentUpdate(nextProps, nextState) {
+        return (
+            nextProps.value !== this.props.value ||
+            nextState.displayUrl !== this.state.displayUrl ||
+            nextState.contentType !== this.state.contentType ||
+            nextState.isHttpPending !== this.state.isHttpPending
+        );
     }
 
     /**
