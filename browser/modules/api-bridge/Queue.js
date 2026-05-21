@@ -661,7 +661,7 @@ class Queue {
         }
         this._metadataIndex = this._metadataIndex.filter(m => !toDelete.includes(m.id));
         await this._storage.saveIndex(this._metadataIndex.map(m => m.id));
-        this._onUpdateListener(this._generateCurrentStatistics());
+        this._onUpdateListener(this._generateCurrentStatistics(), true);
     }
 
     /**
