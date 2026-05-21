@@ -39,7 +39,7 @@ class QueueStorage {
      */
     loadIndex() {
         return new Promise((resolve, reject) => {
-            global.localforage.getItem(this._indexKey(), (error, value) => {
+            localforage.getItem(this._indexKey(), (error, value) => {
                 if (error) return reject(error);
                 if (!value) return resolve([]);
                 try {
@@ -54,7 +54,7 @@ class QueueStorage {
 
     saveIndex(ids) {
         return new Promise((resolve, reject) => {
-            global.localforage.setItem(this._indexKey(), JSON.stringify(ids), (error) => {
+            localforage.setItem(this._indexKey(), JSON.stringify(ids), (error) => {
                 if (error) return reject(error);
                 resolve();
             });
@@ -66,7 +66,7 @@ class QueueStorage {
      */
     loadItem(id) {
         return new Promise((resolve, reject) => {
-            global.localforage.getItem(this._itemKey(id), (error, value) => {
+            localforage.getItem(this._itemKey(id), (error, value) => {
                 if (error) return reject(error);
                 if (!value) return resolve(null);
                 try {
@@ -80,7 +80,7 @@ class QueueStorage {
 
     saveItem(id, fullItem) {
         return new Promise((resolve, reject) => {
-            global.localforage.setItem(this._itemKey(id), JSON.stringify(fullItem), (error) => {
+            localforage.setItem(this._itemKey(id), JSON.stringify(fullItem), (error) => {
                 if (error) return reject(error);
                 resolve();
             });
@@ -89,7 +89,7 @@ class QueueStorage {
 
     deleteItem(id) {
         return new Promise((resolve, reject) => {
-            global.localforage.removeItem(this._itemKey(id), (error) => {
+            localforage.removeItem(this._itemKey(id), (error) => {
                 if (error) return reject(error);
                 resolve();
             });
@@ -105,7 +105,7 @@ class QueueStorage {
      */
     migrateLegacyBlob(idGenerator) {
         return new Promise((resolve, reject) => {
-            global.localforage.getItem(this._legacyKey(), async (error, value) => {
+            localforage.getItem(this._legacyKey(), async (error, value) => {
                 if (error) return reject(error);
                 if (value === null || value === undefined) return resolve(false);
                 let legacyItems;
@@ -125,7 +125,7 @@ class QueueStorage {
                     }
                     await this.saveIndex(ids);
                     await new Promise((res, rej) => {
-                        global.localforage.removeItem(this._legacyKey(), (err) => err ? rej(err) : res());
+                        localforage.removeItem(this._legacyKey(), (err) => err ? rej(err) : res());
                     });
                     resolve(true);
                 } catch (e) {
