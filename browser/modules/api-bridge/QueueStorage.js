@@ -33,6 +33,33 @@ class QueueStorage {
     _itemKey(id) {
         return `${ITEM_PREFIX}:${this._database}:${this._schema}:${id}`;
     }
+
+    /**
+     * Returns the array of item ids currently stored, or [] if none.
+     */
+    loadIndex() {
+        return new Promise((resolve, reject) => {
+            global.localforage.getItem(this._indexKey(), (error, value) => {
+                if (error) return reject(error);
+                if (!value) return resolve([]);
+                try {
+                    const parsed = JSON.parse(value);
+                    resolve(Array.isArray(parsed) ? parsed : []);
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        });
+    }
+
+    saveIndex(ids) {
+        return new Promise((resolve, reject) => {
+            global.localforage.setItem(this._indexKey(), JSON.stringify(ids), (error) => {
+                if (error) return reject(error);
+                resolve();
+            });
+        });
+    }
 }
 
 module.exports = QueueStorage;
