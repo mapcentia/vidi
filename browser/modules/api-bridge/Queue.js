@@ -165,104 +165,125 @@ class Queue {
     }
 
     /**
-     * Eliminates items with same identifier in the queue
-     * 
+     * Eliminates items with same identifier in the queue.
+     *
      * This is needed to ensure that queue does not have more than
-     * one data manipulation with any feature
-     * 
-     * @returns {void}
+     * one data manipulation with any feature. Operates on the
+     * metadata index, loading full items from storage only when a
+     * pair needs to be resolved.
+     *
+     * @returns {Promise<void>}
      */
-    _eliminateItemsWithSameIdentifier() {
-        const getItemPrimaryKey = (item) => {
-            const pkey = (item.meta && item.meta.pkey ? item.meta.pkey : QUEUE_DEFAULT_PKEY);
-            return item.feature.features[0].properties[pkey];
-        };
-
-        let _self = this;
-
-        let itemsClassifiedByPrimaryKey = {};
-        for (let i = 0; i < _self._metadataIndex.length; i++) {
-            let itemPrimaryKey = getItemPrimaryKey(_self._queue[i]);
-            if (!itemsClassifiedByPrimaryKey[`gid_${itemPrimaryKey}`]) {
-                itemsClassifiedByPrimaryKey[`gid_${itemPrimaryKey}`] = [];
-            }
-
-            itemsClassifiedByPrimaryKey[`gid_${itemPrimaryKey}`].push(_self._queue[i]);
+    async _eliminateItemsWithSameIdentifier() {
+        // Group metadata entries by (table, pkey) to find duplicates.
+        const groups = new Map();
+        for (const m of this._metadataIndex) {
+            const key = `${m.table}::gid_${m.pkey}`;
+            if (!groups.has(key)) groups.set(key, []);
+            groups.get(key).push(m);
         }
 
-        for (let key in itemsClassifiedByPrimaryKey) {
-            if (itemsClassifiedByPrimaryKey[key].length === 2) {
-                let initialNumberOfItemsInQueue = _self._metadataIndex.length;
+        let mutated = false;
 
-                let initialItemImage = Object.assign({}, itemsClassifiedByPrimaryKey[key][0]);
-                let latestItemImage = Object.assign({}, itemsClassifiedByPrimaryKey[key][1]);
-
-                let itemPrimaryKey = getItemPrimaryKey(initialItemImage);
-
-                // Merging two items in one, leaving only the initial one
-                let itemsHaveToBeMerged = false;
-
-                // Deleting both items
-                let itemsHaveToBeDeleted = false;
-
-                // Leaving only the latest item
-                let itemsHaveToBeCleaned = false;
-
-                // Guards
-                if (initialItemImage.type === UPDATE_REQUEST && itemPrimaryKey < 0) {
-                    throw new Error(`Queue: cannot update item that does not exists on backend`);
-                }
-
-                if (initialItemImage.type === ADD_REQUEST && latestItemImage.type === UPDATE_REQUEST ||
-                    initialItemImage.type === UPDATE_REQUEST && latestItemImage.type === UPDATE_REQUEST) {
-                    itemsHaveToBeMerged = true;
-                } else if (initialItemImage.type === ADD_REQUEST && latestItemImage.type === DELETE_REQUEST ||
-                    initialItemImage.type === UPDATE_REQUEST && latestItemImage.type === DELETE_REQUEST) {
-                    // Item is virtual, delete everything that is related to it
-                    if (itemPrimaryKey > 0) {
-                        itemsHaveToBeCleaned = true;
-                    } else {
-                        itemsHaveToBeDeleted = true;
-                    }
-                } else {
-                    throw new Error(`Queue: erroneous queue item pairs, ${initialItemImage.type} followed by ${latestItemImage.type}`);
-                }
-
-                let numberOfItemsRemoved = 0;
-                for (let j = (_self._metadataIndex.length - 1); j >= 0; j--) {
-                    if (getItemPrimaryKey(_self._queue[j]) === itemPrimaryKey) {
-                        numberOfItemsRemoved++;
-                        _self._queue.splice(j, 1);
-                    }
-                }
-
-                if (itemsHaveToBeMerged) {
-
-                    if (LOG) console.log(`Queue: more than one queue item with primary key ${itemPrimaryKey}, items have to be merged`);
-
-                    // Giving the item another chance
-                    initialItemImage.skip = false;
-                    initialItemImage.feature.features[0].geometry = latestItemImage.feature.features[0].geometry;
-                    initialItemImage.feature.features[0].properties = latestItemImage.feature.features[0].properties;
-                    _self._queue.push(initialItemImage);
-                } else if (itemsHaveToBeDeleted) {
-
-                    if (LOG) console.log(`Queue: items with primary key ${itemPrimaryKey} have to be deleted`);
-
-                } else if (itemsHaveToBeCleaned) {
-
-                    if (LOG) console.log(`Queue: any changes for primary key ${itemPrimaryKey} were cleared, item has to be deleted`);
-
-                    _self._queue.push(latestItemImage);
-                } else {
-                    throw new Error(`Queue: no action was selected`);
-                }
-
-                if (LOG) console.log(`Queue: queue items with primary key ${itemPrimaryKey} were managed,
-                    (${initialNumberOfItemsInQueue} queue items before, ${_self._metadataIndex.length} now, ${numberOfItemsRemoved} removed)`);
-            } else if (itemsClassifiedByPrimaryKey[key].length > 2) {
+        for (const [, group] of groups) {
+            if (group.length === 1) continue;
+            if (group.length > 2) {
                 throw new Error('Queue: more than 2 queue items with same primary key');
             }
+
+            // Exactly 2 items with the same primary key.
+            const firstMd = group[0];
+            const lastMd = group[1];
+            const itemPrimaryKey = firstMd.pkey;
+
+            // Merging two items in one, leaving only the initial one
+            let itemsHaveToBeMerged = false;
+
+            // Deleting both items
+            let itemsHaveToBeDeleted = false;
+
+            // Leaving only the latest item (as DELETE request)
+            let itemsHaveToBeCleaned = false;
+
+            // Guards
+            if (firstMd.type === UPDATE_REQUEST && itemPrimaryKey < 0) {
+                throw new Error(`Queue: cannot update item that does not exists on backend`);
+            }
+
+            if (firstMd.type === ADD_REQUEST && lastMd.type === UPDATE_REQUEST ||
+                firstMd.type === UPDATE_REQUEST && lastMd.type === UPDATE_REQUEST) {
+                itemsHaveToBeMerged = true;
+            } else if (firstMd.type === ADD_REQUEST && lastMd.type === DELETE_REQUEST ||
+                firstMd.type === UPDATE_REQUEST && lastMd.type === DELETE_REQUEST) {
+                // Item is virtual, delete everything that is related to it
+                if (itemPrimaryKey > 0) {
+                    itemsHaveToBeCleaned = true;
+                } else {
+                    itemsHaveToBeDeleted = true;
+                }
+            } else {
+                throw new Error(`Queue: erroneous queue item pairs, ${firstMd.type} followed by ${lastMd.type}`);
+            }
+
+            const initialNumberOfItemsInQueue = this._metadataIndex.length;
+
+            // Load full items now that we know we need to act on them.
+            const initialFull = await this._storage.loadItem(firstMd.id);
+            const latestFull = await this._storage.loadItem(lastMd.id);
+            if (!initialFull || !latestFull) continue;
+
+            // Remove both metadata entries; we'll re-insert one if needed.
+            this._metadataIndex = this._metadataIndex.filter(m => m.id !== firstMd.id && m.id !== lastMd.id);
+            await this._storage.deleteItem(firstMd.id);
+            await this._storage.deleteItem(lastMd.id);
+
+            if (itemsHaveToBeMerged) {
+
+                if (LOG) console.log(`Queue: more than one queue item with primary key ${itemPrimaryKey}, items have to be merged`);
+
+                // Keep first item's type; reset skip; take latest geometry and properties.
+                const mergedFull = {
+                    ...initialFull,
+                    skip: false,
+                    feature: {
+                        ...initialFull.feature,
+                        features: [{
+                            ...initialFull.feature.features[0],
+                            geometry: latestFull.feature.features[0].geometry,
+                            properties: latestFull.feature.features[0].properties
+                        }]
+                    }
+                };
+                const newId = generateId();
+                await this._storage.saveItem(newId, mergedFull);
+                this._metadataIndex.push(projectMetadata(newId, mergedFull));
+
+            } else if (itemsHaveToBeDeleted) {
+
+                if (LOG) console.log(`Queue: items with primary key ${itemPrimaryKey} have to be deleted`);
+                // Both already deleted above — nothing more to do.
+
+            } else if (itemsHaveToBeCleaned) {
+
+                if (LOG) console.log(`Queue: any changes for primary key ${itemPrimaryKey} were cleared, item has to be deleted`);
+
+                // Keep only the latest item (the DELETE request) as-is.
+                const newId = generateId();
+                await this._storage.saveItem(newId, latestFull);
+                this._metadataIndex.push(projectMetadata(newId, latestFull));
+
+            } else {
+                throw new Error(`Queue: no action was selected`);
+            }
+
+            if (LOG) console.log(`Queue: queue items with primary key ${itemPrimaryKey} were managed, (${initialNumberOfItemsInQueue} queue items before, ${this._metadataIndex.length} now)`);
+
+            mutated = true;
+        }
+
+        if (mutated) {
+            await this._storage.saveIndex(this._metadataIndex.map(m => m.id));
+            this._onUpdateListener(this._generateCurrentStatistics());
         }
     }
 
@@ -421,27 +442,18 @@ class Queue {
      */
     _saveState() {}
 
-    _getOldestNonSkippedItem(offset) {
-        let _self = this;
-
-        let result = false;
-        for (let i = offset; i < _self._metadataIndex.length; i++) {
-            if (!_self._queue[i].skip) {
-                result = {
-                    item: _self._queue[i],
-                    index: i
-                };
-
-                break;
+    _getOldestNonSkippedItem(offset = 0) {
+        for (let i = offset; i < this._metadataIndex.length; i++) {
+            if (!this._metadataIndex[i].skip) {
+                return {metadata: this._metadataIndex[i], index: i};
             }
         }
-
-        return result;
+        return null;
     }
 
     /**
      * Iterate over queue and perform request in FIFO manner
-     * 
+     *
      * @param {Function} dispatcher Function that perfroms actual request
      */
     _dispatch(emitQueueStateChangeBeforeCommit = true) {
@@ -461,35 +473,49 @@ class Queue {
 
                 _self._saveState();
 
+                // The inner promise drives the loop: localResolve() → next iteration,
+                // localReject() → propagates out. When there are no items left we call
+                // the outer resolve() and leave the inner promise pending so the loop stops.
                 new Promise((localResolve, localReject) => {
                     let itemToProcessData = _self._getOldestNonSkippedItem(queueSearchOffset);
-                    if (itemToProcessData === false) {
+                    if (itemToProcessData === null) {
 
                         if (LOG) console.log('Queue: no queue items to process');
 
                         resolve();
-                    } else {
+                        // Inner promise stays pending — loop stops.
+                        return;
+                    }
 
-                        let oldestNonSkippedItem = Object.assign({}, itemToProcessData.item);
+                    // Load the full item from storage on demand.
+                    _self._storage.loadItem(itemToProcessData.metadata.id).then(oldestNonSkippedItem => {
+                        if (!oldestNonSkippedItem) {
+                            // Item disappeared from storage (concurrent deletion) — advance offset
+                            // and continue the loop without processing.
+                            if (LOG) console.log('Queue: item disappeared from storage, skipping', itemToProcessData.metadata.id);
+                            localResolve();
+                            return;
+                        }
 
                         if (LOG) console.log('Queue: processing oldest non-skipped item', oldestNonSkippedItem);
 
-                        let queueItems = _self.getItems();
-
+                        // Duplicate primary-key guard using the metadata index.
                         let numberOfItemsWithCurrentPrimaryKey = 0;
-                        queueItems.map(queueItem => {
-                            const pkey = (queueItem.meta && queueItem.meta.pkey ? queueItem.meta.pkey : QUEUE_DEFAULT_PKEY);
-                            if (queueItem.feature.features[0].properties[pkey] === oldestNonSkippedItem.feature.features[0].properties[pkey]) {
+                        for (const m of _self._metadataIndex) {
+                            if (m.pkey === itemToProcessData.metadata.pkey && m.table === itemToProcessData.metadata.table) {
                                 numberOfItemsWithCurrentPrimaryKey++;
                             }
-
                             if (numberOfItemsWithCurrentPrimaryKey > 1) {
                                 throw new Error('Queue: multiple queue element with the same primary key');
                             }
-                        });
+                        }
 
-                        _self._processor(oldestNonSkippedItem, _self).then((result) => {
-                            _self._queue.splice(itemToProcessData.index, 1);
+                        _self._processor(oldestNonSkippedItem, _self).then(async () => {
+                            // Remove the processed item from the index and storage.
+                            const processedId = itemToProcessData.metadata.id;
+                            await _self._storage.deleteItem(processedId);
+                            _self._metadataIndex = _self._metadataIndex.filter(m => m.id !== processedId);
+                            await _self._storage.saveIndex(_self._metadataIndex.map(m => m.id));
 
                             if (LOG) console.log('Queue: item was processed');
                             if (LOG) console.log('Queue: items left to process', (_self._metadataIndex.length - queueSearchOffset));
@@ -506,21 +532,32 @@ class Queue {
                                 _self._onUpdateListener(_self._generateCurrentStatistics(), true);
                                 resolve();
                             }
-                        }).catch(error => {
+                        }).catch(async error => {
                             if (LOG) console.log('Queue: item was not processed', oldestNonSkippedItem);
                             if (LOG) console.log('Queue: stopping processing, items left', _self._metadataIndex.length);
 
                             if (error && error.rejectedByServer) {
 
-                                if (LOG) console.log('Queue: item was rejected by server, setting as skipped', _self._queue[itemToProcessData.index]);
+                                if (LOG) console.log('Queue: item was rejected by server, setting as skipped', itemToProcessData.metadata.id);
 
-                                _self._queue[itemToProcessData.index].skip = true;
-                                if (error.serverErrorMessage) {
-                                    _self._queue[itemToProcessData.index].serverErrorMessage = error.serverErrorMessage;
-                                }
-
-                                if (error.serverErrorType) {
-                                    _self._queue[itemToProcessData.index].serverErrorType = error.serverErrorType;
+                                // Update metadata entry and persist the skip flag to storage.
+                                const skippedId = itemToProcessData.metadata.id;
+                                const skippedFull = await _self._storage.loadItem(skippedId);
+                                if (skippedFull) {
+                                    skippedFull.skip = true;
+                                    if (error.serverErrorMessage) {
+                                        skippedFull.serverErrorMessage = error.serverErrorMessage;
+                                    }
+                                    if (error.serverErrorType) {
+                                        skippedFull.serverErrorType = error.serverErrorType;
+                                    }
+                                    await _self._storage.saveItem(skippedId, skippedFull);
+                                    const md = _self._metadataIndex.find(m => m.id === skippedId);
+                                    if (md) {
+                                        md.skip = true;
+                                        md.serverErrorMessage = skippedFull.serverErrorMessage || null;
+                                        md.serverErrorType = skippedFull.serverErrorType || null;
+                                    }
                                 }
 
                                 _self._onUpdateListener(_self._generateCurrentStatistics(), true);
@@ -536,7 +573,7 @@ class Queue {
                                 localReject();
                             }
                         });
-                    }
+                    }).catch(localReject);
                 }).then(processOldestItem.bind(null)).catch(reject);
             };
 
@@ -560,52 +597,81 @@ class Queue {
             throw new Error('Queue: item has to have a certain type');
         }
 
-        let _self = this;
-        this.push(item);
-        _self._eliminateItemsWithSameIdentifier();
-
-        let result = new Promise((resolve, reject) => {
-            /*
-                If there is only one element in the queue (the one that
-                was inserted just now) then try to process it and return
-                result back. If there are more than one element in the queue,
-                then older elements have to be processed first.
-            */
-
-            if (_self._metadataIndex.length === 1 && _self._locked === false && PROCESS_FIRST_ELEMENT_IMMEDIATELY) {
-                
-                if (LOG) console.log('Queue: processing pushAndProcess item right away');
-
-                _self._locked = true;
-                _self._dispatch(false).then(() => {
-                    _self._locked = false;
-
-                    resolve();
-                }).catch(error => {
-                    _self._locked = false;
-
-                    if (LOG) console.warn('Request failed and was postponed');
-                    resolve();
-                });
-            } else {
-
-                if (LOG) console.log('Queue: queue is busy', _self._metadataIndex.length, _self._locked);
-
-                _self._onUpdateListener(_self._generateCurrentStatistics());
-                resolve();
+        // Synchronous pre-validation: detect invalid type-pair combinations and
+        // the "update non-existent" guard before any async work.  This preserves
+        // the original synchronous-throw behaviour that callers and tests rely on.
+        {
+            const pkeyField = (item.meta && item.meta.pkey) ? item.meta.pkey : QUEUE_DEFAULT_PKEY;
+            const pkeyValue = item.feature?.features?.[0]?.properties?.[pkeyField];
+            const table = (item.meta?.f_table_schema || '') + '.' + (item.meta?.f_table_name || '');
+            const existing = this._metadataIndex.find(m => m.table === table && m.pkey === pkeyValue);
+            if (existing) {
+                if (existing.type === UPDATE_REQUEST && pkeyValue < 0) {
+                    throw new Error(`Queue: cannot update item that does not exists on backend`);
+                }
+                const initial = existing.type;
+                const latest = item.type;
+                const isMerge = (initial === ADD_REQUEST && latest === UPDATE_REQUEST) ||
+                                (initial === UPDATE_REQUEST && latest === UPDATE_REQUEST);
+                const isCleanOrDelete = (initial === ADD_REQUEST && latest === DELETE_REQUEST) ||
+                                       (initial === UPDATE_REQUEST && latest === DELETE_REQUEST);
+                if (!isMerge && !isCleanOrDelete) {
+                    throw new Error(`Queue: erroneous queue item pairs, ${initial} followed by ${latest}`);
+                }
             }
-        });
+        }
 
-        return result;
+        let _self = this;
+
+        // push() and _eliminateItemsWithSameIdentifier() are now async.
+        // We chain them so the queue is consistent before dispatching.
+        return this.push(item)
+            .then(() => _self._eliminateItemsWithSameIdentifier())
+            .then(() => new Promise((resolve, reject) => {
+                /*
+                    If there is only one element in the queue (the one that
+                    was inserted just now) then try to process it and return
+                    result back. If there are more than one element in the queue,
+                    then older elements have to be processed first.
+                */
+
+                if (_self._metadataIndex.length === 1 && _self._locked === false && PROCESS_FIRST_ELEMENT_IMMEDIATELY) {
+
+                    if (LOG) console.log('Queue: processing pushAndProcess item right away');
+
+                    _self._locked = true;
+                    _self._dispatch(false).then(() => {
+                        _self._locked = false;
+
+                        resolve();
+                    }).catch(error => {
+                        _self._locked = false;
+
+                        if (LOG) console.warn('Request failed and was postponed');
+                        resolve();
+                    });
+                } else {
+
+                    if (LOG) console.log('Queue: queue is busy', _self._metadataIndex.length, _self._locked);
+
+                    _self._onUpdateListener(_self._generateCurrentStatistics());
+                    resolve();
+                }
+            }));
     }
 
     /**
-     * Add item to the queue
+     * Add item to the queue.
+     * The metadata index is updated synchronously before the first await so that
+     * callers can rely on the new item being visible in _metadataIndex immediately
+     * (e.g. for duplicate-detection in pushAndProcess).
      */
     async push(item) {
         const id = generateId();
-        await this._storage.saveItem(id, item);
+        // Eagerly register the item in the metadata index so that synchronous
+        // callers (like pushAndProcess's pre-validation) can see it right away.
         this._metadataIndex.push(projectMetadata(id, item));
+        await this._storage.saveItem(id, item);
         await this._storage.saveIndex(this._metadataIndex.map(m => m.id));
     }
 
