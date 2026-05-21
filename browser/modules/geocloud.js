@@ -339,13 +339,13 @@ geocloud = (function () {
                     url: me.host + me.uri + '/' + me.db,
                     type: me.defaults.method,
                     timeout: timeout,
-                    success: function (response) {
+                    success: async function (response) {
                         if (response.success === false && doNotShowAlertOnError === undefined) {
                             alert(response.message);
                         }
                         if (response.success === true) {
                             if (response.features !== null) {
-                                response = me.transformResponse(response, me.id);
+                                response = await me.transformResponse(response, me.id);
 
                                 // Shallow clone: only top-level keys are mutated below
                                 // (delete + features reassignment). Sharing nested feature
