@@ -663,6 +663,9 @@ module.exports = {
                 }
             }
             // Slide panel with attributes in and render form component
+            if (!editorFormRoot) {
+                editorFormRoot = createRoot(EDITOR_FORM_CONTAINER_ID);
+            }
             editorFormRoot.render(
                 <Form
                     key={Date.now()}
@@ -1057,6 +1060,9 @@ module.exports = {
             const uiSchema = formBuildInformation.uiSchema;
 
             cloud.get().map.closePopup();
+            if (!editorFormRoot) {
+                editorFormRoot = createRoot(EDITOR_FORM_CONTAINER_ID);
+            }
             editorFormRoot.render(
                 <Form
                     key={Date.now()}
@@ -1219,15 +1225,19 @@ module.exports = {
         editedFeature = false;
         sqlQuery.resetAll();
 
-        // Unmount the React form tree so RJSF formData (including any base64
-        // payloads converted from bytea URLs by FileUploadWidget) is released.
-        // Without this, every open-then-cancel/submit leaks the form's data.
+        // Fully tear down the React root so the previous Form's element tree,
+        // memoizedState/Props, and onSubmit closure (which retains feature
+        // data and any base64 payloads converted by FileUploadWidget) are
+        // released. render(null) leaves React's internal alternate fiber
+        // alive in some cases; unmount() guarantees full teardown. The root
+        // is recreated lazily on the next add()/edit() call.
         if (editorFormRoot) {
             try {
-                editorFormRoot.render(null);
+                editorFormRoot.unmount();
             } catch (e) {
                 console.warn('Editor: failed to unmount form tree', e);
             }
+            editorFormRoot = null;
         }
     },
 
