@@ -2319,9 +2319,17 @@ module.exports = {
                 }
             }
             let func = selectCallBack.bind(this, null, layer, layerKey, _self, feature);
-            $(document).arrive(`#a-collapse${randText}`, function () {
+            const arriveSelector = `#a-collapse${randText}`;
+            const arriveHandler = function () {
+                // Unbind immediately: a fresh arrive handler is registered per
+                // popup-open, and each one captures `func` → `feature` → bytea
+                // payloads. Without unbinding, the document accumulates one
+                // permanent retainer per feature ever shown.
+                $(document).unbindArrive(arriveSelector, arriveHandler);
+
                 const e = $(`#collapse${randText}`);
                 const bsCollapse = document.getElementById(`collapse${randText}`);
+                if (!bsCollapse) return;
                 bsCollapse.addEventListener('hidden.bs.collapse', event => {
                     // Do something
                 })
@@ -2348,7 +2356,8 @@ module.exports = {
                         });
                     })
                 });
-            });
+            };
+            $(document).arrive(arriveSelector, arriveHandler);
             if (count > 0) {
                 if (count2 === features.length) {
                     if (multi) {
