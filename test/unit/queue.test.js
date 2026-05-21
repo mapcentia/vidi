@@ -559,4 +559,27 @@ describe("Queue", () => {
         expect(queue.getMetadataLength()).to.equal(0);
         expect([...store.keys()].some(k => k.startsWith('queueItem:'))).to.equal(false);
     });
+
+    it("push → process → success removes both metadata and storage record", async () => {
+        const store = new Map();
+        global.localforage = {
+            getItem: (k, cb) => setTimeout(() => cb(null, store.has(k) ? store.get(k) : null), 0),
+            setItem: (k, v, cb) => setTimeout(() => { store.set(k, v); cb && cb(null, v); }, 0),
+            removeItem: (k, cb) => setTimeout(() => { store.delete(k); cb && cb(null); }, 0),
+        };
+
+        // Processor that always resolves (simulating successful POST).
+        const queue = new Queue((item, q) => Promise.resolve());
+        await queue.ready();
+
+        await queue.pushAndProcess(dummyRequest);
+
+        // Wait for the queue's periodic dispatch interval (QUEUE_PROCESSING_INTERVAL = 5000ms)
+        // plus a buffer for the async processor and storage cleanup to complete.
+        await new Promise(r => setTimeout(r, 6000));
+
+        // After successful processing, metadata and storage should both be empty.
+        expect(queue.getMetadataLength()).to.equal(0);
+        expect([...store.keys()].some(k => k.startsWith('queueItem:'))).to.equal(false);
+    });
 });
