@@ -2381,6 +2381,23 @@ module.exports = {
                                     }
                                 }
                                 _self.resetAllVectorLayerStyles();
+
+                                // Bootstrap 5 components hold static Map<DOMelement, instance>
+                                // for instance tracking. Without dispose(), the detached
+                                // accordion DOM stays referenced — and its event listeners
+                                // (which close over the popup's features) prevent GC.
+                                // Replacing each .accordion-collapse with a clone strips
+                                // all attached listeners before dispose() releases the map.
+                                const popupEl = vectorPopUp?.getElement();
+                                if (popupEl) {
+                                    popupEl.querySelectorAll('.accordion-collapse').forEach(el => {
+                                        if (typeof bootstrap !== 'undefined' && bootstrap.Collapse) {
+                                            try { bootstrap.Collapse.getInstance(el)?.dispose(); } catch (e) {}
+                                        }
+                                        el.replaceWith(el.cloneNode(false));
+                                    });
+                                }
+
                                 // Detach this handler so the popup object becomes GC-able
                                 // (the closure context retains the call-site's features).
                                 if (vectorPopUp) {
