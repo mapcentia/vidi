@@ -219,14 +219,14 @@ describe("Queue", () => {
 
 		await helpers.sleep(1000);
 
-		expect(queue.getItems().length).to.equal(1);
-		expect(queue.getItems()[0].skip).to.equal(true);
-		expect(queue.getItems()[0].serverErrorMessage).to.equal('Test rejection message');
+		expect(queue.getMetadataLength()).to.equal(1);
+		expect(queue.getMetadataItems()[0].skip).to.equal(true);
+		expect(queue.getMetadataItems()[0].serverErrorMessage).to.equal('Test rejection message');
 
-		queue.resubmitSkippedFeatures();
+		await queue.resubmitSkippedFeatures();
 
-		expect(queue.getItems().length).to.equal(1);
-		expect(queue.getItems()[0].skip).to.equal(false);
+		expect(queue.getMetadataLength()).to.equal(1);
+		expect(queue.getMetadataItems()[0].skip).to.equal(false);
 
 		queue.terminate();
 	});
@@ -260,7 +260,7 @@ describe("Queue", () => {
 
 		await helpers.sleep(8000);
 
-		expect(queue.getItems().length).to.equal(0);
+		expect(queue.length).to.equal(0);
 		queue.terminate();
 	});
 
@@ -391,8 +391,8 @@ describe("Queue", () => {
 
             await helpers.sleep(1000);
 
-            expect(queue.getItems().length).to.equal(1);
-			expect(queue.getItems()[0].feature.features[0].properties.gid).to.equal(-1);
+            expect(queue.getMetadataLength()).to.equal(1);
+			expect((await queue.getFullItem(queue.getMetadataItems()[0].id)).feature.features[0].properties.gid).to.equal(-1);
 
 			// Adding update feature request
 			let updateRequest = helpers.duplicate(dummyRequest);
@@ -403,9 +403,9 @@ describe("Queue", () => {
 
 			await helpers.sleep(1000);
 
-			expect(queue.getItems().length).to.equal(1);
-			expect(queue.getItems()[0].type).to.equal(Queue.ADD_REQUEST);
-			expect(queue.getItems()[0].feature.features[0].properties.name).to.equal('test_test_test');
+			expect(queue.getMetadataLength()).to.equal(1);
+			expect(queue.getMetadataItems()[0].type).to.equal(Queue.ADD_REQUEST);
+			expect((await queue.getFullItem(queue.getMetadataItems()[0].id)).feature.features[0].properties.name).to.equal('test_test_test');
 
 			await helpers.sleep(1000);
 
@@ -419,8 +419,8 @@ describe("Queue", () => {
 			deleteRequest.feature.features[0].properties.gid = 2;
 			queue.pushAndProcess(deleteRequest);
 
-			expect(queue.getItems().length).to.equal(2);
-			expect(queue.getItems()[1].type).to.equal(Queue.DELETE_REQUEST);
+			expect(queue.getMetadataLength()).to.equal(2);
+			expect(queue.getMetadataItems()[1].type).to.equal(Queue.DELETE_REQUEST);
 
 			queue.terminate();
 		});
@@ -442,8 +442,8 @@ describe("Queue", () => {
 
             await helpers.sleep(1000);
 
-            expect(queue.getItems().length).to.equal(1);
-			expect(queue.getItems()[0].feature.features[0].properties.gid).to.equal(1);
+            expect(queue.getMetadataLength()).to.equal(1);
+			expect((await queue.getFullItem(queue.getMetadataItems()[0].id)).feature.features[0].properties.gid).to.equal(1);
 
 			// Adding update feature request
 			let updateRequest = helpers.duplicate(dummyRequest);
@@ -455,9 +455,9 @@ describe("Queue", () => {
 
 			await helpers.sleep(1000);
 
-			expect(queue.getItems().length).to.equal(1);
-			expect(queue.getItems()[0].type).to.equal(Queue.UPDATE_REQUEST);
-			expect(queue.getItems()[0].feature.features[0].properties.name).to.equal('test_test_test');
+			expect(queue.getMetadataLength()).to.equal(1);
+			expect(queue.getMetadataItems()[0].type).to.equal(Queue.UPDATE_REQUEST);
+			expect((await queue.getFullItem(queue.getMetadataItems()[0].id)).feature.features[0].properties.name).to.equal('test_test_test');
 			queue.terminate();
 		});
 		
@@ -482,7 +482,7 @@ describe("Queue", () => {
 
 			await helpers.sleep(1000);
 
-			expect(queue.getItems().length).to.equal(0);
+			expect(queue.length).to.equal(0);
 			queue.terminate();
 		});
 
@@ -511,8 +511,8 @@ describe("Queue", () => {
 
 			await helpers.sleep(1000);
 
-			expect(queue.getItems().length).to.equal(1);
-			expect(queue.getItems()[0].type).to.equal(Queue.DELETE_REQUEST);
+			expect(queue.getMetadataLength()).to.equal(1);
+			expect(queue.getMetadataItems()[0].type).to.equal(Queue.DELETE_REQUEST);
 			queue.terminate();
 		});
 	});
