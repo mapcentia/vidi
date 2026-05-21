@@ -47,4 +47,8 @@ function SelectWidget(_a) {
             })}
         </select>);
 }
-exports.default = SelectWidget;
+// Memoize: RJSF re-renders the whole form on every keystroke; this widget
+// can have hundreds of enum options (e.g. all Danish postnumre), which makes
+// each re-render expensive. Shallow-compare skips re-renders when props
+// haven't actually changed.
+exports.default = react_1.memo(SelectWidget);

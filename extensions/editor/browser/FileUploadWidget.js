@@ -56,7 +56,14 @@ function cleanQuotes(value) {
     return value && value.includes('"') ? value.replaceAll('"', '') : value;
 }
 
-class FileUploadWidget extends React.Component {
+/**
+ * PureComponent: shallow-compares props and state, skipping re-render when
+ * unchanged. Important here because RJSF re-renders the whole form on every
+ * keystroke in any field. Without this, the bytea widget (with its potentially
+ * large props.value and blob URL) re-renders unnecessarily on every keystroke,
+ * making forms with images noticeably sluggish.
+ */
+class FileUploadWidget extends React.PureComponent {
     constructor(props) {
         super(props);
 
