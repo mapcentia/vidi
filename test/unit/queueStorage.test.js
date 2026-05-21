@@ -60,4 +60,42 @@ describe("QueueStorage", () => {
             expect(await storage.loadItem('id1')).to.equal(null);
         });
     });
+
+    describe("migrateLegacyBlob", () => {
+        it("returns false when no legacy blob exists", async () => {
+            global.localforage = makeLocalforageMock();
+            const storage = new QueueStorage({database: 'd', schema: 's'});
+            expect(await storage.migrateLegacyBlob(() => 'gen-id')).to.equal(false);
+        });
+
+        it("migrates a legacy array into per-item records and an index, then removes the legacy key", async () => {
+            const lf = makeLocalforageMock({
+                'queue:d:s': JSON.stringify([
+                    {type: 1, feature: {features: [{properties: {gid: 1}}]}},
+                    {type: 2, feature: {features: [{properties: {gid: 2}}]}}
+                ])
+            });
+            global.localforage = lf;
+
+            let counter = 0;
+            const storage = new QueueStorage({database: 'd', schema: 's'});
+            const migrated = await storage.migrateLegacyBlob(() => `id-${++counter}`);
+
+            expect(migrated).to.equal(true);
+            expect(lf.store.has('queue:d:s')).to.equal(false);
+            expect(JSON.parse(lf.store.get('queueIndex:d:s'))).to.deep.equal(['id-1', 'id-2']);
+            expect(JSON.parse(lf.store.get('queueItem:d:s:id-1'))).to.deep.equal({type: 1, feature: {features: [{properties: {gid: 1}}]}});
+            expect(JSON.parse(lf.store.get('queueItem:d:s:id-2'))).to.deep.equal({type: 2, feature: {features: [{properties: {gid: 2}}]}});
+        });
+
+        it("is a no-op when the legacy blob is empty array", async () => {
+            const lf = makeLocalforageMock({'queue:d:s': '[]'});
+            global.localforage = lf;
+            const storage = new QueueStorage({database: 'd', schema: 's'});
+            const migrated = await storage.migrateLegacyBlob(() => 'gen');
+            expect(migrated).to.equal(true);
+            expect(lf.store.has('queue:d:s')).to.equal(false);
+            expect(JSON.parse(lf.store.get('queueIndex:d:s'))).to.deep.equal([]);
+        });
+    });
 });

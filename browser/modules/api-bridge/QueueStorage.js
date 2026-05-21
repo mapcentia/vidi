@@ -95,6 +95,45 @@ class QueueStorage {
             });
         });
     }
+
+    /**
+     * If a legacy single-blob queue exists, split it into per-item records,
+     * write the index, and remove the legacy key. Returns true if migration
+     * ran (even for an empty array), false if no legacy blob was found.
+     *
+     * idGenerator: a function returning a fresh unique id (string) on each call.
+     */
+    migrateLegacyBlob(idGenerator) {
+        return new Promise((resolve, reject) => {
+            global.localforage.getItem(this._legacyKey(), async (error, value) => {
+                if (error) return reject(error);
+                if (value === null || value === undefined) return resolve(false);
+                let legacyItems;
+                try {
+                    legacyItems = JSON.parse(value);
+                    if (!Array.isArray(legacyItems)) legacyItems = [];
+                } catch (e) {
+                    return reject(e);
+                }
+
+                try {
+                    const ids = [];
+                    for (const item of legacyItems) {
+                        const id = idGenerator();
+                        ids.push(id);
+                        await this.saveItem(id, item);
+                    }
+                    await this.saveIndex(ids);
+                    await new Promise((res, rej) => {
+                        global.localforage.removeItem(this._legacyKey(), (err) => err ? rej(err) : res());
+                    });
+                    resolve(true);
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        });
+    }
 }
 
 module.exports = QueueStorage;
