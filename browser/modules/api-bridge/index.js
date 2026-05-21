@@ -403,6 +403,28 @@ class APIBridge {
     }
 
     /**
+     * Look up a pending queue item by table + primary key. Used by editor
+     * to surface a user's not-yet-committed edits when re-opening edit on
+     * the same feature (e.g. from a WMS popup which fetches fresh DB data
+     * and doesn't go through the vector layer's transformResponse merge).
+     *
+     * @param {String} table  schema-qualified table name like "public.punkt" (no "v:" prefix)
+     * @param {*} pkey         the primary key value
+     * @returns {Promise<Object|null>} the full queue item, or null
+     */
+    async findPendingItemByPkey(table, pkey) {
+        const metadata = this._queue.getMetadataItems();
+        const matches = metadata.filter(md =>
+            md.table === table &&
+            md.pkey === pkey &&
+            (md.type === Queue.ADD_REQUEST || md.type === Queue.UPDATE_REQUEST)
+        );
+        if (matches.length === 0) return null;
+        const latest = matches[matches.length - 1];
+        return await this._queue.getFullItem(latest.id);
+    }
+
+    /**
      * Updates feature from specific vector layer
      * Proxy method for Queue.pushAndProcess()
      *
