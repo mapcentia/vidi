@@ -17,16 +17,23 @@ const QueueStorage = require('./QueueStorage');
 function projectMetadata(id, fullItem) {
     const pkeyField = (fullItem.meta && fullItem.meta.pkey) ? fullItem.meta.pkey : QUEUE_DEFAULT_PKEY;
     const pkeyValue = fullItem.feature?.features?.[0]?.properties?.[pkeyField];
-    return {
+    const md = {
         id,
         type: fullItem.type,
         table: (fullItem.meta?.f_table_schema || '') + '.' + (fullItem.meta?.f_table_name || ''),
+        geomColumn: fullItem.meta?.f_geometry_column || '',
         pkeyField,
         pkey: pkeyValue,
         skip: fullItem.skip === true,
         serverErrorMessage: fullItem.serverErrorMessage || null,
-        serverErrorType: fullItem.serverErrorType || null
+        serverErrorType: fullItem.serverErrorType || null,
+        // displayData is populated only for server-rejected (skip) items so that
+        // QueueStatisticsWatcher can render the error panel without re-fetching
+        // from IndexedDB.  It is intentionally kept off non-skipped items to
+        // avoid holding feature payloads in memory.
+        displayData: fullItem.skip === true ? {feature: fullItem.feature, meta: fullItem.meta} : null
     };
+    return md;
 }
 
 /**
@@ -295,45 +302,49 @@ class Queue {
             online: this._online
         };
 
-        for (let key in this._queue) {
-            let currentItem = this._queue[key];
-            if (currentItem.meta && currentItem.meta.f_table_schema && currentItem.meta.f_table_name && currentItem.meta.f_geometry_column) {
-                let layer = `${currentItem.meta.f_table_schema}.${currentItem.meta.f_table_name}.${currentItem.meta.f_geometry_column}`;
-                if (('' + layer) in stats === false) {
-                    stats[layer] = {
-                        failed: {
-                            ADD: 0,
-                            UPDATE: 0,
-                            DELETE: 0
-                        },
-                        rejectedByServer: {
-                            ADD: 0,
-                            UPDATE: 0,
-                            DELETE: 0,
-                            items: []
-                        }
-                    };
-                }
-
-                let category = 'failed';
-                if (currentItem.skip) {
-                    category = 'rejectedByServer';
-                    stats[layer][category].items.push(Object.assign({}, currentItem));
-                }
-
-                switch (currentItem.type) {
-                    case ADD_REQUEST:
-                        stats[layer][category].ADD++;
-                        break;
-                    case UPDATE_REQUEST:
-                        stats[layer][category].UPDATE++;
-                        break;
-                    case DELETE_REQUEST:
-                        stats[layer][category].DELETE++;
-                        break;
-                }
-            } else {
+        for (const md of this._metadataIndex) {
+            if (!md.table || !md.geomColumn) {
                 throw new Error('Queue: invalid meta object');
+            }
+            const layer = `${md.table}.${md.geomColumn}`;
+            if (!(layer in stats)) {
+                stats[layer] = {
+                    failed: {
+                        ADD: 0,
+                        UPDATE: 0,
+                        DELETE: 0
+                    },
+                    rejectedByServer: {
+                        ADD: 0,
+                        UPDATE: 0,
+                        DELETE: 0,
+                        items: []
+                    }
+                };
+            }
+
+            const category = md.skip ? 'rejectedByServer' : 'failed';
+            if (md.skip && md.displayData) {
+                // Reconstruct a partial item shape that QueueStatisticsWatcher
+                // expects: { feature, meta, serverErrorMessage, serverErrorType }
+                stats[layer][category].items.push({
+                    feature: md.displayData.feature,
+                    meta: md.displayData.meta,
+                    serverErrorMessage: md.serverErrorMessage,
+                    serverErrorType: md.serverErrorType
+                });
+            }
+
+            switch (md.type) {
+                case ADD_REQUEST:
+                    stats[layer][category].ADD++;
+                    break;
+                case UPDATE_REQUEST:
+                    stats[layer][category].UPDATE++;
+                    break;
+                case DELETE_REQUEST:
+                    stats[layer][category].DELETE++;
+                    break;
             }
         }
 
@@ -345,7 +356,16 @@ class Queue {
      * Reports current queue state to listener
      */
     setOnUpdate(listener) {
-        this._onUpdateListener = listener;
+        // Wrap in try-catch so a misbehaving listener does not corrupt internal
+        // Queue state (e.g. when it accesses a stats key that doesn't exist yet
+        // because the queue is still empty on the first processQueue tick).
+        this._onUpdateListener = (stats, flag) => {
+            try {
+                listener(stats, flag);
+            } catch (e) {
+                if (LOG) console.warn('Queue: _onUpdateListener threw', e);
+            }
+        };
     }
 
     /**
@@ -396,6 +416,13 @@ class Queue {
         for (const id of ids) {
             const fullItem = await this._storage.loadItem(id);
             if (fullItem) index.push(projectMetadata(id, fullItem));
+        }
+        // Preserve any items that were eagerly added via push() before this
+        // restore completed (e.g. when pushAndProcess is called immediately
+        // after construction without awaiting ready()).
+        const existingIds = new Set(index.map(m => m.id));
+        for (const m of this._metadataIndex) {
+            if (!existingIds.has(m.id)) index.push(m);
         }
         this._metadataIndex = index;
         if (LOG) console.log(`Queue: restored ${index.length} items`);
@@ -533,6 +560,9 @@ class Queue {
                                         md.skip = true;
                                         md.serverErrorMessage = skippedFull.serverErrorMessage || null;
                                         md.serverErrorType = skippedFull.serverErrorType || null;
+                                        // Cache display data so _generateCurrentStatistics can
+                                        // build rejectedByServer.items without async storage reads.
+                                        md.displayData = {feature: skippedFull.feature, meta: skippedFull.meta};
                                     }
                                 }
 
@@ -682,6 +712,7 @@ class Queue {
                     fullItem.skip = false;
                     await this._storage.saveItem(m.id, fullItem);
                     m.skip = false;
+                    m.displayData = null;
                 }
             }
         }
