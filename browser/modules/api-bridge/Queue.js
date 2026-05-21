@@ -611,66 +611,57 @@ class Queue {
 
     /**
      * Removes all queue items with specific primary key
-     * 
+     *
      * @param {Array<Number>} primaryKeys
      */
-    removeByPrimaryKeys(primaryKeys = []) {
-        let initialNumberOfItems = this._metadataIndex.length;
-        for (let j = 0; j < primaryKeys.length; j++) {
-            let i = this._metadataIndex.length;
-            while (i--) {
-                const pkey = (this._queue[i].meta && this._queue[i].meta.pkey ? this._queue[i].meta.pkey : QUEUE_DEFAULT_PKEY);
-                if (this._queue[i].feature.features[0].properties[pkey] === primaryKeys[j]) {
-
-                    if (LOG) console.log('Queue: deleting item by primary key', primaryKeys[j], this._queue[i]);
-
-                    this._queue.splice(i, 1);
-                }
-            }
+    async removeByPrimaryKeys(primaryKeys = []) {
+        const initial = this._metadataIndex.length;
+        const targets = new Set(primaryKeys);
+        const toDelete = this._metadataIndex.filter(m => targets.has(m.pkey)).map(m => m.id);
+        for (const id of toDelete) {
+            await this._storage.deleteItem(id);
         }
-
-        if (this._metadataIndex.length !== (initialNumberOfItems - primaryKeys.length)) {
+        this._metadataIndex = this._metadataIndex.filter(m => !toDelete.includes(m.id));
+        if (this._metadataIndex.length !== (initial - primaryKeys.length)) {
             throw new Error('Queue: some elements have not been deleted');
         }
-
-        this._saveState();
+        await this._storage.saveIndex(this._metadataIndex.map(m => m.id));
         this._onUpdateListener(this._generateCurrentStatistics());
     }
 
     /**
-     * Makes queue try to push skipped items as well 
+     * Makes queue try to push skipped items as well
      */
-    resubmitSkippedFeatures() {
-        for (let i = 0; i < this._metadataIndex.length; i++) {
-            this._queue[i].skip = false;
+    async resubmitSkippedFeatures() {
+        for (const m of this._metadataIndex) {
+            if (m.skip) {
+                const fullItem = await this._storage.loadItem(m.id);
+                if (fullItem) {
+                    fullItem.skip = false;
+                    await this._storage.saveItem(m.id, fullItem);
+                    m.skip = false;
+                }
+            }
         }
-
-        this._saveState();
         this._onUpdateListener(this._generateCurrentStatistics());
     }
 
     /**
      * Removes all requests by layer identifier
-     * 
-     * @param {String} layerId 
+     *
+     * @param {String} layerId
      */
-    removeByLayerId(layerId) {
-        if (!layerId) {
-            throw new Error(`Queue: layer identifier can not be empty`);
+    async removeByLayerId(layerId) {
+        if (!layerId) throw new Error(`Queue: layer identifier can not be empty`);
+        const toDelete = this._metadataIndex
+            .filter(m => `v:${m.table}` === layerId)
+            .map(m => m.id);
+        for (const id of toDelete) {
+            await this._storage.deleteItem(id);
         }
-
-        let i = this._metadataIndex.length;
-        while (i--) {
-            if ((this._queue[i].meta.f_table_schema + '.' + this._queue[i].meta.f_table_name) === layerId) {
-
-                if (LOG) console.log('Queue: deleting item by layerId', layerId, this._queue[i]);
-
-                this._queue.splice(i, 1);
-            } 
-        }
-
-        this._saveState();
-        this._onUpdateListener(this._generateCurrentStatistics(), true);
+        this._metadataIndex = this._metadataIndex.filter(m => !toDelete.includes(m.id));
+        await this._storage.saveIndex(this._metadataIndex.map(m => m.id));
+        this._onUpdateListener(this._generateCurrentStatistics());
     }
 
     /**

@@ -190,9 +190,9 @@ describe("Queue", () => {
 		await helpers.sleep(1000);
 
 		expect(queue.length).to.equal(1);
-		queue.removeByLayerId('another_schema.table');
+		await queue.removeByLayerId('v:another_schema.table');
 		expect(queue.getItems().length).to.equal(1);
-		queue.removeByLayerId('schema.table');
+		await queue.removeByLayerId('v:schema.table');
 		expect(queue.getItems().length).to.equal(0);
 		queue.terminate();
 	});
@@ -534,5 +534,24 @@ describe("Queue", () => {
 
         const fullItem = await queue.getFullItem(md.id);
         expect(fullItem.feature.features[0].properties.id).to.equal('1');
+    });
+
+    it("removeByPrimaryKeys deletes the storage record and the metadata entry", async () => {
+        const store = new Map();
+        global.localforage = {
+            getItem: (k, cb) => setTimeout(() => cb(null, store.has(k) ? store.get(k) : null), 0),
+            setItem: (k, v, cb) => setTimeout(() => { store.set(k, v); cb && cb(null, v); }, 0),
+            removeItem: (k, cb) => setTimeout(() => { store.delete(k); cb && cb(null); }, 0),
+        };
+
+        const queue = new Queue(() => new Promise((resolve) => resolve()));
+        await queue.ready();
+        await queue.push(dummyRequest);
+        const id = queue.getMetadataItems()[0].id;
+
+        await queue.removeByPrimaryKeys([-1]);
+
+        expect(queue.getMetadataLength()).to.equal(0);
+        expect([...store.keys()].some(k => k.startsWith('queueItem:'))).to.equal(false);
     });
 });
