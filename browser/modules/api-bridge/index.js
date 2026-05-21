@@ -52,8 +52,19 @@ function sanitizeFeatureCollectionForPayload(featureCollection) {
 }
 
 /**
+ * Returns a shallow-cloned copy of an array where each element is a
+ * shallow-cloned object. Used by transformResponseHandler to produce a
+ * mutable snapshot of response.features without aliasing the originals.
+ */
+function copyArray(items) {
+    const result = [];
+    items.map(item => { result.push(Object.assign({}, item)); });
+    return result;
+}
+
+/**
  * Bridge pattern implementation for interaction with the API.
- * 
+ *
  * The client-side code, when it comes to interacting with the backend,
  * needs to use this class (singleton) to abstract the interaction. This
  * allows centralized API error processing, caching and offline data
@@ -275,126 +286,74 @@ class APIBridge {
      * Transforms responses for geocloud
      * Adds, updates or removes features according to corresponding
      * requests made in the offline mode. Assumes that in offline mode
-     * the API response is cached through the service worker. 
+     * the API response is cached through the service worker.
      */
-    transformResponseHandler(response, tableId) {
-        if (LOG) console.log('APIBridge: running transformResponse handler', JSON.stringify(response.features));
+    async transformResponseHandler(response, tableId) {
+        if (LOG) console.log('APIBridge: running transformResponse handler');
 
-        if (this._queue.length > 0) {
+        if (this._queue.getMetadataLength() > 0) {
+            const metadata = this._queue.getMetadataItems();
 
-            if (LOG) console.log('APIBridge: transformResponse handler', response.features.length, tableId);
-
-            const copyArray = (items) => {
-                let result = [];
-                items.map(item => {
-                    result.push(Object.assign({} , item));
-                });
-
-                return result;
+            // 1) DELETE pending requests: remove matching features from the response.
+            for (const md of metadata) {
+                if (`v:${md.table}` !== tableId) continue;
+                if (md.type !== Queue.DELETE_REQUEST) continue;
+                const features = copyArray(response.features);
+                for (let i = 0; i < features.length; i++) {
+                    if (features[i].properties[md.pkeyField] === md.pkey) {
+                        features.splice(i, 1);
+                        break;
+                    }
+                }
+                response.features = features;
             }
 
-            let features;
+            // 2) Skip-virtual-pkey cleanup: stays the same logic but reads only metadata.
+            for (const md of metadata) {
+                if (`v:${md.table}` !== tableId) continue;
+                if (md.type !== Queue.DELETE_REQUEST) continue;
+                if (md.pkey < 0) {
+                    const virtual = md.pkey;
+                    const toRemove = metadata
+                        .filter(o => [Queue.ADD_REQUEST, Queue.UPDATE_REQUEST].indexOf(o.type) !== -1 && o.pkey === virtual)
+                        .map(o => o.pkey);
+                    await this._queue.removeByPrimaryKeys(toRemove);
+                }
+            }
 
-            // Deleting regular features from response
-            let currentQueueItems = this._queue.getItems();
-            currentQueueItems.map(item => {
-                let itemParentTable = 'v:' + item.meta.f_table_schema + '.' + item.meta.f_table_name;
-                const pkey = (item.meta && item.meta.pkey ? item.meta.pkey : QUEUE_DEFAULT_PKEY);
+            // 3) ADD / UPDATE: load each full item from storage and inject into response.
+            const refreshedMetadata = this._queue.getMetadataItems();
+            for (const md of refreshedMetadata) {
+                if (`v:${md.table}` !== tableId) continue;
+                if (md.type !== Queue.ADD_REQUEST && md.type !== Queue.UPDATE_REQUEST) continue;
 
-                if (itemParentTable === tableId) {
-                    switch (item.type) {
-                        case Queue.DELETE_REQUEST:
-                            features = copyArray(response.features);
-                            for (let i = 0; i < features.length; i++) {
-                                if (features[i].properties[pkey] === item.feature.features[0].properties[pkey]) {
+                const fullItem = await this._queue.getFullItem(md.id);
+                if (!fullItem) continue;
 
-                                    if (LOG) console.log('APIBridge: ## DELETE', item);
+                // The injected feature must be isolated from the stored item so
+                // later mutations (e.g. prepareDataForTableView setting _vidi_content)
+                // don't propagate back into storage.
+                const isolatedFeature = {
+                    ...fullItem.feature.features[0],
+                    meta: {apiRecognitionStatus: md.skip ? 'rejected_by_server' : 'pending',
+                           ...(md.serverErrorMessage ? {serverErrorMessage: md.serverErrorMessage} : {}),
+                           ...(md.serverErrorType ? {serverErrorType: md.serverErrorType} : {})},
+                    properties: {...fullItem.feature.features[0].properties}
+                };
 
-                                    features.splice(i, 1);
-                                    break;
-                                }
-                            }
-
-                            response.features = features;
+                if (md.type === Queue.ADD_REQUEST) {
+                    response.features.push(isolatedFeature);
+                } else {
+                    const features = copyArray(response.features);
+                    for (let i = 0; i < features.length; i++) {
+                        if (features[i].properties[md.pkeyField] === md.pkey) {
+                            features[i] = isolatedFeature;
                             break;
+                        }
                     }
+                    response.features = features;
                 }
-            });
-
-            // Deleting non-commited feature management requests
-            currentQueueItems.map(item => {
-                let itemParentTable = 'v:' + item.meta.f_table_schema + '.' + item.meta.f_table_name;
-                const pkey = (item.meta && item.meta.pkey ? item.meta.pkey : QUEUE_DEFAULT_PKEY);
-
-                let localQueueItems = this._queue.getItems();
-                let primaryKeysToRemove = [];
-                if (itemParentTable === tableId) {
-                    if (item.type === Queue.DELETE_REQUEST && item.feature.features[0].properties[pkey] < 0) {
-                        let virtualPrimaryKey = item.feature.features[0].properties[pkey];
-                        localQueueItems.map(localItem => {
-                            if ([Queue.ADD_REQUEST, Queue.UPDATE_REQUEST].indexOf(localItem.type) !== -1
-                                && localItem.feature.features[0].properties[pkey] === virtualPrimaryKey) {
-                                    primaryKeysToRemove.push(virtualPrimaryKey);
-                            }
-                        });
-                    }
-                }
-
-                this._queue.removeByPrimaryKeys(primaryKeysToRemove);
-            });
-
-            currentQueueItems = this._queue.getItems();
-            currentQueueItems.map(item => {
-                let itemParentTable = 'v:' + item.meta.f_table_schema + '.' + item.meta.f_table_name;
-                const pkey = (item.meta && item.meta.pkey ? item.meta.pkey : QUEUE_DEFAULT_PKEY);
-
-                item.feature.features[0].meta = {};
-                item.feature.features[0].meta.apiRecognitionStatus = 'pending';
-                if (item.skip) {
-
-                    if (LOG) console.log('APIBridge: skipped item was detected');
-
-                    item.feature.features[0].meta.apiRecognitionStatus = 'rejected_by_server';
-                    if (item.serverErrorMessage) item.feature.features[0].meta.serverErrorMessage = item.serverErrorMessage;
-                    if (item.serverErrorType) item.feature.features[0].meta.serverErrorType = item.serverErrorType;
-                }
-
-                // Shallow-clone properties too: response.features later flows
-                // through prepareDataForTableView which mutates properties (sets
-                // _vidi_content). Without this isolation the mutation would
-                // propagate back into the queue's stored item via the shared
-                // properties reference and end up in the next POST/PUT payload.
-                // Nested values inside properties (bytea[] arrays) stay shared
-                // so we don't duplicate large payloads.
-                let feature = Object.assign({}, item.feature.features[0]);
-                if (feature.properties) {
-                    feature.properties = {...feature.properties};
-                }
-                if (itemParentTable === tableId) {
-                    switch (item.type) {
-                        case Queue.ADD_REQUEST:
-
-                            if (LOG) console.log('APIBridge: ## ADD', item);
-
-                            response.features.push(Object.assign({}, feature));
-                            break;
-                        case Queue.UPDATE_REQUEST:
-                            features = copyArray(response.features);
-                            for (let i = 0; i < features.length; i++) {
-                                if (features[i].properties[pkey] === item.feature.features[0].properties[pkey]) {
-
-                                    if (LOG) console.log('APIBridge: ## UPDATE', item);
-
-                                    features[i] = Object.assign({}, feature);
-                                    break;
-                                }
-                            }
-
-                            response.features = features;
-                            break;
-                    }
-                }
-            });
+            }
 
             if (LOG) console.log('APIBridge: # Result of transformResponse handler', response.features.length);
         }
@@ -411,7 +370,7 @@ class APIBridge {
      * @param {String} db      Database name
      * @param {Object} data    Meta data
      */
-    addFeature(feature, db, meta) {
+    async addFeature(feature, db, meta) {
         // Sanitize strips Vidi-internal fields and structurally-shallow-clones
         // wrapper layers so the queue cannot be mutated by later writes to the
         // layer's shared properties object. Bytea payloads stay shared.
@@ -423,7 +382,7 @@ class APIBridge {
         copiedFeature.features[0].properties[pkey] = (-1 * timestamp);
 
         this._validateFeatureData(db, meta, copiedFeature);
-        return this._queue.pushAndProcess({ type: Queue.ADD_REQUEST, feature: copiedFeature, db, meta });
+        return await this._queue.pushAndProcess({ type: Queue.ADD_REQUEST, feature: copiedFeature, db, meta });
     }
 
     /**
@@ -434,13 +393,13 @@ class APIBridge {
      * @param db
      * @param meta
      */
-    updateFeature(feature, db, meta) {
+    async updateFeature(feature, db, meta) {
         // Sanitize: snapshot now so later mutations to the layer's shared
         // properties (e.g. prepareDataForTableView re-adding _vidi_content
         // after layer reload) don't leak into the PUT payload.
         const sanitized = sanitizeFeatureCollectionForPayload(feature);
         this._validateFeatureData(db, meta, sanitized);
-        return this._queue.pushAndProcess({ type: Queue.UPDATE_REQUEST, feature: sanitized, db, meta });
+        return await this._queue.pushAndProcess({ type: Queue.UPDATE_REQUEST, feature: sanitized, db, meta });
     }
 
     /**
@@ -451,12 +410,12 @@ class APIBridge {
      * @param db
      * @param meta
      */
-    deleteFeature(feature, db, meta) {
+    async deleteFeature(feature, db, meta) {
         // Delete only sends the pkey in the URL, but sanitize for consistency
         // and to avoid retaining base64 payloads in the queue for delete ops.
         const sanitized = sanitizeFeatureCollectionForPayload(feature);
         this._validateFeatureData(db, meta, sanitized);
-        return this._queue.pushAndProcess({ type: Queue.DELETE_REQUEST, feature: sanitized, db, meta });
+        return await this._queue.pushAndProcess({ type: Queue.DELETE_REQUEST, feature: sanitized, db, meta });
     }
 
     /**
