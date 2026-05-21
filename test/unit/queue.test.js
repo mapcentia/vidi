@@ -511,4 +511,28 @@ describe("Queue", () => {
 			queue.terminate();
 		});
 	});
+
+    it("push() persists to storage and exposes metadata synchronously", async () => {
+        const store = new Map();
+        global.localforage = {
+            getItem: (k, cb) => setTimeout(() => cb(null, store.has(k) ? store.get(k) : null), 0),
+            setItem: (k, v, cb) => setTimeout(() => { store.set(k, v); cb && cb(null, v); }, 0),
+            removeItem: (k, cb) => setTimeout(() => { store.delete(k); cb && cb(null); }, 0),
+        };
+
+        const queue = new Queue(() => new Promise((resolve) => resolve()));
+        await queue.ready();
+
+        await queue.push(dummyRequest);
+
+        expect(queue.getMetadataLength()).to.equal(1);
+        const md = queue.getMetadataItems()[0];
+        expect(md.type).to.equal(Queue.ADD_REQUEST);
+        expect(md.table).to.equal('schema.table');
+        // The full item is in storage, not in the metadata projection
+        expect(md.feature).to.equal(undefined);
+
+        const fullItem = await queue.getFullItem(md.id);
+        expect(fullItem.feature.features[0].properties.id).to.equal('1');
+    });
 });

@@ -159,7 +159,7 @@ class Queue {
             });
         };
 
-        this._restoreState().then(() => {
+        this._readyPromise = this._restoreState().then(() => {
             processQueue();
         });
     }
@@ -349,6 +349,42 @@ class Queue {
      */
     setOnUpdate(listener) {
         this._onUpdateListener = listener;
+    }
+
+    /**
+     * Resolves once initial state has been restored from IndexedDB.
+     */
+    ready() {
+        return this._readyPromise;
+    }
+
+    getMetadataItems() {
+        // Defensive shallow clone so callers can't mutate the index.
+        return this._metadataIndex.map(m => ({...m}));
+    }
+
+    getMetadataLength() {
+        return this._metadataIndex.length;
+    }
+
+    /**
+     * Async: returns the full queue item for a given id, or null.
+     */
+    getFullItem(id) {
+        return this._storage.loadItem(id);
+    }
+
+    /**
+     * Async: returns full items for all current metadata entries, in order.
+     * Use sparingly — this re-hydrates every payload.
+     */
+    async getFullItems() {
+        const result = [];
+        for (const m of this._metadataIndex) {
+            const full = await this._storage.loadItem(m.id);
+            if (full) result.push(full);
+        }
+        return result;
     }
 
     /**
@@ -566,8 +602,11 @@ class Queue {
     /**
      * Add item to the queue
      */
-    push(item) {
-        this._queue.push(item);
+    async push(item) {
+        const id = generateId();
+        await this._storage.saveItem(id, item);
+        this._metadataIndex.push(projectMetadata(id, item));
+        await this._storage.saveIndex(this._metadataIndex.map(m => m.id));
     }
 
     /**
