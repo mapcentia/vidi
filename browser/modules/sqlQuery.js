@@ -1051,9 +1051,20 @@ module.exports = {
     reset: function (qstore) {
         $.each(qstore, function (index, store) {
             if (store) {
-                store.abort();
-                store.reset();
-                cloud.get().removeGeoJsonStore(store);
+                try { store.abort(); } catch (e) {}
+                try { store.reset(); } catch (e) {}
+                try { cloud.get().removeGeoJsonStore(store); } catch (e) {}
+                // Defensive: explicitly drop everything that could retain features
+                // (incl. bytea payloads) even if store.reset() partially failed.
+                try { store.geoJSON = null; } catch (e) {}
+                try {
+                    if (store.layer && typeof store.layer.clearLayers === 'function') {
+                        store.layer.clearLayers();
+                    }
+                } catch (e) {}
+                try { store.currentGeoJsonHash = null; } catch (e) {}
+                // Null the array slot so the sqlStore object itself becomes GC-able.
+                qstore[index] = null;
             }
         });
         $(`#${elementPrefix}info-tab`).empty();
