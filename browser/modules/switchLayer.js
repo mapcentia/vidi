@@ -575,6 +575,12 @@ module.exports = module.exports = {
                         }
                     }
                     stores[name].geoJSON = null;
+                    // Drop the entry from moduleState.vectorStores. destroy()
+                    // releases the Leaflet layer, but leaving the sqlStore in
+                    // the map keeps it (and any retained features incl. bytea
+                    // payloads) reachable from any closure that holds layerTree
+                    // module state (e.g. jQuery click handlers).
+                    delete stores[name];
                     // If vector table is enabled for layer the remove and set pane with back to 100%
                     const vectorTableEl = $(`*[data-vidi-vector-table-id="${name}"]`);
                     if (vectorTableEl.length) {
