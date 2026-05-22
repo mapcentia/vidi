@@ -2345,6 +2345,18 @@ geocloud = (function () {
                     break;
                 case "leaflet":
                     this.map.removeLayer(store.layer);
+                    // Also remove from the layer control. addGeoJsonStore adds
+                    // via lControl.addOverlay; without the matching removeLayer
+                    // the control retains an entry that holds the Leaflet layer
+                    // (and its onEachFeature closure → captured features incl.
+                    // bytea payloads).
+                    try {
+                        if (typeof lControl !== 'undefined' && lControl && typeof lControl.removeLayer === 'function') {
+                            lControl.removeLayer(store.layer);
+                        }
+                    } catch (e) {
+                        console.warn('removeGeoJsonStore: failed to remove layer from lControl', e);
+                    }
                     break;
             }
 
