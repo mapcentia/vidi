@@ -562,6 +562,14 @@ module.exports = module.exports = {
                 if (webGLLayer) cloud.get().map.removeLayer(webGLLayer);
 
                 if (name.startsWith(LAYER.VECTOR + ':')) {
+                    // Close any open feature popup for this layer first.
+                    // The popup's accordion DOM holds event listeners that
+                    // close over Leaflet features (incl. bytea payloads);
+                    // without explicit cleanup they survive layer destruction
+                    // via Bootstrap's static Collapse instance map.
+                    if (typeof layerTree.closeVectorPopup === 'function') {
+                        layerTree.closeVectorPopup();
+                    }
                     let tables = layerTree.getTables();
                     let stores = layerTree.getStores();
                     stores[name].destroy();

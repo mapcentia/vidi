@@ -46,10 +46,8 @@ import {
 import MetaSettingForm from "./MetaSettingForm";
 import Download from './Download';
 import {getResolutions} from "../crs";
-import { createRoot } from 'react-dom/client';
+import {createRoot} from 'react-dom/client';
 import config from '../../../config/config';
-
-
 
 
 let _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEvents,
@@ -269,7 +267,12 @@ module.exports = {
             });
         }
 
-        queueStatistsics = new QueueStatisticsWatcher({switchLayer, offlineModeControlsManager, layerTree: _self, extensions});
+        queueStatistsics = new QueueStatisticsWatcher({
+            switchLayer,
+            offlineModeControlsManager,
+            layerTree: _self,
+            extensions
+        });
         apiBridgeInstance = APIBridgeSingletone((statistics, forceLayerUpdate) => {
             _self._statisticsHandler(statistics, forceLayerUpdate);
         });
@@ -328,6 +331,28 @@ module.exports = {
 
     getTables: () => {
         return tables;
+    },
+
+    /**
+     * Force-close any open vector-feature popup and release its event handlers
+     * and detached accordion DOM. Called when a vector layer is turned off so
+     * its features (and any retained bytea payloads) become GC-able.
+     */
+    closeVectorPopup: () => {
+        if (typeof vectorPopUp !== "undefined" && vectorPopUp) {
+            const popupEl = vectorPopUp.getElement?.();
+            if (popupEl) {
+                popupEl.querySelectorAll('.accordion-collapse').forEach(el => {
+                    if (typeof bootstrap !== 'undefined' && bootstrap.Collapse) {
+                        try { bootstrap.Collapse.getInstance(el)?.dispose(); } catch (e) {}
+                    }
+                    el.replaceWith(el.cloneNode(false));
+                });
+            }
+            try { vectorPopUp.off(); } catch (e) {}
+            try { vectorPopUp.closePopup(); } catch (e) {}
+            vectorPopUp = undefined;
+        }
     },
 
     /**
@@ -2330,12 +2355,25 @@ module.exports = {
                 const e = $(`#collapse${randText}`);
                 const bsCollapse = document.getElementById(`collapse${randText}`);
                 if (!bsCollapse) return;
+                const map = cloud.get().map;
                 bsCollapse.addEventListener('hidden.bs.collapse', event => {
-                    // Do something
+                    let geoJsonLayer;
+                    map.eachLayer(layer => {
+                        if (layer.id === 'v:' + layerKey) {
+                            geoJsonLayer = map._layers[layer._leaflet_id];
+                        }
+                    })
+                    map.eachLayer(layer => {
+                        if (parseInt(layer._leaflet_id) === parseInt(e[0].dataset.layerId)) {
+                            if (geoJsonLayer) {
+                                geoJsonLayer.resetStyle(layer);
+                            }
+                        }
+                    })
                 })
                 bsCollapse.addEventListener('shown.bs.collapse', event => {
                     func();
-                    cloud.get().map.eachLayer(layer => {
+                    map.eachLayer(layer => {
                         if (parseInt(layer._leaflet_id) === parseInt(e[0].dataset.layerId)) {
                             if (layer?.setStyle) {
                                 layer.setStyle(SELECTED_STYLE);
@@ -2346,16 +2384,6 @@ module.exports = {
                         }
                     })
                 })
-                $(this).on('click', function () {
-                    _self.resetAllVectorLayerStyles();
-                    sqlQuery.getQstore()?.forEach(store => {
-                        $.each(store.layer._layers, function (i, v) {
-                            if (store.layer && store.layer.resetStyle) {
-                                store.layer.resetStyle(v);
-                            }
-                        });
-                    })
-                });
             };
             $(document).arrive(arriveSelector, arriveHandler);
             if (count > 0) {
@@ -2392,7 +2420,10 @@ module.exports = {
                                 if (popupEl) {
                                     popupEl.querySelectorAll('.accordion-collapse').forEach(el => {
                                         if (typeof bootstrap !== 'undefined' && bootstrap.Collapse) {
-                                            try { bootstrap.Collapse.getInstance(el)?.dispose(); } catch (e) {}
+                                            try {
+                                                bootstrap.Collapse.getInstance(el)?.dispose();
+                                            } catch (e) {
+                                            }
                                         }
                                         el.replaceWith(el.cloneNode(false));
                                     });
@@ -2987,7 +3018,8 @@ module.exports = {
         // Setup active / added layers indicators
         layerTreeUtils.setupLayerNumberIndicator(base64GroupName, localNumberOfActiveLayers, localNumberOfAddedLayers);
 
-        $("#layer-panel-" + base64GroupName).find(`.js-toggle-layer-panel`).click((e) => {
+        const layerPanelToggleEl = $("#layer-panel-" + base64GroupName).find(`.js-toggle-layer-panel`);
+        layerPanelToggleEl.on('click', (e) => {
             if ($("#group-" + base64GroupName).find(`#collapse${base64GroupName}`).children().length === 0) {
                 let virtualLayerTreeNode = $('<div></div>');
                 const name = $("#layer-panel-" + base64GroupName).find('.card-body').data('gc2-group-id')
@@ -3580,7 +3612,9 @@ module.exports = {
                         if (document.getElementById(componentContainerId)) {
                             createRoot(document.getElementById(componentContainerId)).render(
                                 <LayerFilter
-                                    ref={instance => { filterComp[layerKey] = instance }}
+                                    ref={instance => {
+                                        filterComp[layerKey] = instance
+                                    }}
                                     layer={layer}
                                     layerMeta={meta.parseLayerMeta(layerKey)}
                                     presetFilters={presetFilters}
@@ -3921,7 +3955,8 @@ module.exports = {
     },
     onApplyDownloadHandler: (layerKey, format) => {
         let whereClause = _self.getActiveLayerFilters(layerKey)[0];
-        let sql = `SELECT * FROM ${layerKey}`
+        let sql = `SELECT *
+                   FROM ${layerKey}`
         if (whereClause) {
             sql += ` WHERE ${whereClause}`;
         }
