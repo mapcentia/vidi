@@ -91,129 +91,138 @@ class APIBridge {
         this._forcedOfflineLayers = {};
         this._queue = new Queue((queueItem, queue) => {
             return new Promise((resolve, reject) => {
-                let schemaQualifiedName = queueItem.meta.f_table_schema + "." + queueItem.meta.f_table_name;
+                // Hoist into primitives so the success/error callbacks below do
+                // not close over `queueItem` itself. jQuery's deferred chain
+                // (and any service-worker fetch wrapper) keeps a reference to
+                // the ajax settings — and thus the callbacks — for the lifetime
+                // of the jqXHR. If the callback closure captured queueItem the
+                // base64-laden feature would live until the jqXHR is GC'd,
+                // which can persist long after the queue is empty.
+                const schemaQualifiedName = queueItem.meta.f_table_schema + "." + queueItem.meta.f_table_name;
                 const pkey = (queueItem.meta && queueItem.meta.pkey ? queueItem.meta.pkey : QUEUE_DEFAULT_PKEY);
+                const queueItemType = queueItem.type;
+                const queueDb = queueItem.db;
+                const geomColumn = queueItem.meta.f_geometry_column;
+                const pkeyValue = queueItem.feature.features[0].properties[pkey];
 
                 if (LOG) {
                     console.log('APIBridge: in queue processor', queueItem);
                     console.log('APIBridge: offline mode is enforced:', singletoneInstance.offlineModeIsEnforcedForLayer(schemaQualifiedName));
                 }
 
-                let generalRequestParameters = {
-                    dataType: 'json',
-                    contentType: 'application/json',
-                    scriptCharset: "utf-8",
-                    success: (response) => {
+                const onSuccess = (response) => {
+                    if (LOG) console.log('APIBridge: request succeeded', JSON.stringify(response));
 
-                        if (LOG) console.log('APIBridge: request succeeded', JSON.stringify(response));
+                    if (queueItemType === Queue.ADD_REQUEST) {
+                        const featureIdRaw = response.message['wfs:InsertResults']['wfs:Feature']['ogc:FeatureId']['fid'].split(".");
+                        if (featureIdRaw.length !== 2) {
+                            throw new Error('Unable to detect the pushed feature id');
+                        }
+                    }
 
-                        if (queueItem.type === Queue.ADD_REQUEST) {
-                            let newFeatureId = false;
-                            let featureIdRaw = response.message['wfs:InsertResults']['wfs:Feature']['ogc:FeatureId']['fid'].split(".");
-                            if (featureIdRaw.length === 2) {
-                                newFeatureId = featureIdRaw[1];
-                            } else {
-                                throw new Error('Unable to detect the pushed feature id');
+                    resolve();
+                };
+
+                const onError = (error) => {
+                    let itemWasReqectedByServer = false;
+                    let serverErrorMessage = '';
+                    let serverErrorType = `REGULAR_ERROR`;
+                    if (error.status === 500 && error.responseJSON) {
+                        if (error.responseJSON.message && error.responseJSON.message.success === false) {
+                            itemWasReqectedByServer = true;
+                            if (error.responseJSON.message.message['ows:Exception']) {
+                                serverErrorMessage = error.responseJSON.message.message['ows:Exception']['ows:ExceptionText'];
+                            } else if (error.responseJSON.message.code === 403) {
+                                serverErrorType = `AUTHORIZATION_ERROR`;
+                            } else if (typeof error.responseJSON.message.message === 'string') {
+                                serverErrorMessage = error.responseJSON.message.message;
                             }
                         }
+                    }
 
-                        resolve();
-                    },
-                    error: (error) => {
-                        let itemWasReqectedByServer = false;
-                        let serverErrorMessage = '';
-                        let serverErrorType = `REGULAR_ERROR`;
-                        if (error.status === 500 && error.responseJSON) {
-                            if (error.responseJSON.message && error.responseJSON.message.success === false) {
-                                itemWasReqectedByServer = true;
-                                if (error.responseJSON.message.message['ows:Exception']) {
-                                    serverErrorMessage = error.responseJSON.message.message['ows:Exception']['ows:ExceptionText'];
-                                } else if (error.responseJSON.message.code === 403) {
-                                    serverErrorType = `AUTHORIZATION_ERROR`;
-                                } else if (typeof error.responseJSON.message.message === 'string') {
-                                    serverErrorMessage = error.responseJSON.message.message;
-                                }
-                            }
-                        }
-
-                        if (itemWasReqectedByServer) {
-                            if (LOG) console.warn(`APIBridge: request was rejected by server, error: `, serverErrorMessage);
-
-                            reject({
-                                rejectedByServer: true,
-                                serverErrorMessage,
-                                serverErrorType
-                            });
-                        } else {
-                            if (LOG) console.warn('APIBridge: request failed');
-                            reject({
-                                rejectedByServer: false
-                            });
-                        }
+                    if (itemWasReqectedByServer) {
+                        if (LOG) console.warn(`APIBridge: request was rejected by server, error: `, serverErrorMessage);
+                        reject({rejectedByServer: true, serverErrorMessage, serverErrorType});
+                    } else {
+                        if (LOG) console.warn('APIBridge: request failed');
+                        reject({rejectedByServer: false});
                     }
                 };
 
-                switch (queueItem.type) {
-                    case Queue.ADD_REQUEST:
-                        let queueItemCopy = JSON.parse(JSON.stringify(queueItem));
-                        delete queueItemCopy.feature.features[0].properties[pkey];
+                const baseSettings = {
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    scriptCharset: "utf-8",
+                    success: onSuccess,
+                    error: onError
+                };
 
+                switch (queueItemType) {
+                    case Queue.ADD_REQUEST: {
                         if (singletoneInstance.offlineModeIsEnforcedForLayer(schemaQualifiedName)) {
-
                             if (LOG) console.log('APIBridge: offline mode is enforced, add request was not performed');
-
                             reject();
-                        } else {
-                            $.ajax(Object.assign(generalRequestParameters, {
-                                url: "/api/feature/" + queueItemCopy.db + "/" + schemaQualifiedName + "." + queueItemCopy.meta.f_geometry_column + "/4326",
-                                type: "POST",
-                                data: JSON.stringify(queueItemCopy.feature),
-                            }));
+                            break;
                         }
+                        // Strip the synthetic pkey for ADD without deep-cloning the
+                        // whole feature (which would duplicate bytea payloads).
+                        // We build a shallow clone down to .properties only, then
+                        // serialize. The intermediate `featureForPost` falls out
+                        // of scope immediately; only the JSON string survives on
+                        // the ajax settings' `data` field.
+                        const srcFeature = queueItem.feature.features[0];
+                        const cleanedProps = {...srcFeature.properties};
+                        delete cleanedProps[pkey];
+                        const featureForPost = {
+                            ...queueItem.feature,
+                            features: [{...srcFeature, properties: cleanedProps}]
+                        };
+                        $.ajax({
+                            ...baseSettings,
+                            url: "/api/feature/" + queueDb + "/" + schemaQualifiedName + "." + geomColumn + "/4326",
+                            type: "POST",
+                            data: JSON.stringify(featureForPost)
+                        });
                         break;
-                    case Queue.UPDATE_REQUEST:
-                        if (queueItem.feature.features[0].properties[pkey] < 0) {
-
+                    }
+                    case Queue.UPDATE_REQUEST: {
+                        if (pkeyValue < 0) {
                             console.warn(`APIBridge: feature with virtual ${pkey} is not supposed to be commited to server (update), skipping`);
-
                             resolve();
-                        } else {
-                            if (singletoneInstance.offlineModeIsEnforcedForLayer(schemaQualifiedName)) {
-
-                                if (LOG) console.log('APIBridge: offline mode is enforced, update request was not performed');
-
-                                reject();
-                            } else {
-                                $.ajax(Object.assign(generalRequestParameters, {
-                                    url: "/api/feature/" + queueItem.db + "/" + schemaQualifiedName + "." + queueItem.meta.f_geometry_column + "/4326",
-                                    type: "PUT",
-                                    data: JSON.stringify(queueItem.feature),
-                                }));
-                            }
+                            break;
                         }
-
+                        if (singletoneInstance.offlineModeIsEnforcedForLayer(schemaQualifiedName)) {
+                            if (LOG) console.log('APIBridge: offline mode is enforced, update request was not performed');
+                            reject();
+                            break;
+                        }
+                        const dataString = JSON.stringify(queueItem.feature);
+                        $.ajax({
+                            ...baseSettings,
+                            url: "/api/feature/" + queueDb + "/" + schemaQualifiedName + "." + geomColumn + "/4326",
+                            type: "PUT",
+                            data: dataString
+                        });
                         break;
-                    case Queue.DELETE_REQUEST:
-                        if (queueItem.feature.features[0].properties[pkey] < 0) {
-
+                    }
+                    case Queue.DELETE_REQUEST: {
+                        if (pkeyValue < 0) {
                             if (LOG) console.warn(`APIBridge: feature with virtual ${pkey} is not supposed to be commited to server (delete), skipping`);
-
                             resolve();
-                        } else {
-                            if (singletoneInstance.offlineModeIsEnforcedForLayer(schemaQualifiedName)) {
-
-                                if (LOG) console.log(`APIBridge: offline mode is enforced, delete request was not performed`);
-
-                                reject();
-                            } else {
-                                $.ajax(Object.assign(generalRequestParameters, {
-                                    url: "/api/feature/" + queueItem.db + "/" + schemaQualifiedName + "." + queueItem.meta.f_geometry_column + "/" + queueItem.feature.features[0].properties[pkey],
-                                    type: "DELETE"
-                                }));
-                            }
+                            break;
                         }
-
+                        if (singletoneInstance.offlineModeIsEnforcedForLayer(schemaQualifiedName)) {
+                            if (LOG) console.log(`APIBridge: offline mode is enforced, delete request was not performed`);
+                            reject();
+                            break;
+                        }
+                        $.ajax({
+                            ...baseSettings,
+                            url: "/api/feature/" + queueDb + "/" + schemaQualifiedName + "." + geomColumn + "/" + pkeyValue,
+                            type: "DELETE"
+                        });
                         break;
+                    }
                 }
             });
         });
