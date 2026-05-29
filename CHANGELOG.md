@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2026.5.9] - 2026-29-5
+### Fixed
+- Memory-leaks in Editor.
+
 ## [2026.5.8] - 2026-20-5
 ### Fixed
 - Editor: Optimize blob handling: reduce memory consumption by replacing base64 strings with blob URLs, 
