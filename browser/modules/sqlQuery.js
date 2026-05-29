@@ -1070,6 +1070,14 @@ module.exports = {
         $(`#${elementPrefix}info-tab`).empty();
         $(`#${elementPrefix}info-pane`).empty();
         cloud.get().map.closePopup();
+        // Drop references to the displayed FeatureCollections. `result` holds
+        // {data: layerObj.geoJSON, ...} entries whose features carry bytea
+        // payloads (base64 images). It was previously only re-initialized at the
+        // start of the next init(), so after a vector-layer reload that runs
+        // reset()/resetAll() without a fresh query, the prior FeatureCollection
+        // — and its base64 — stayed reachable via the page-lifetime
+        // MutationObserver closure and was never collected.
+        result = [];
     },
 
     resetAll: function () {
