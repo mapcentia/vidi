@@ -37,7 +37,11 @@
             }
             const url = L.Util.template(this._url, {s: this._getSubdomain(coords)});
             const params = {...this.wmtsParams, tileRow: coords.y, tileCol: coords.x};
-            return url + L.Util.getParamString(params);
+            let query = L.Util.getParamString(params);
+            if (url.endsWith("&")) {
+                query = query.substring(1);
+            }
+            return url + query;
         },
         setParams: function (params, noRedraw) {
             L.extend(this.wmtsParams, params);
