@@ -112,6 +112,7 @@
     "dotenv": "^16.0.3",
     "es6-promise": "^4.2.8",
     "express": "^4.17.1",
+    "express-async-errors": "^3.1.1",
     "express-cluster": "0.0.5",
     "express-session": "^1.17.1",
     "fetch": "^1.1.0",

@@ -11,6 +11,7 @@ let path = require('path');
 require('dotenv').config({path: path.join(__dirname, ".env")});
 
 let express = require('express');
+require('express-async-errors'); // forward async route rejections to the central error handler
 let http = require('http');
 let cluster = require('cluster');
 let sticky = require('sticky-session');
@@ -115,6 +116,18 @@ app.use('/', express.static(path.join(__dirname, 'public'), {maxage: '100d'}));
 app.use('/node_modules', express.static(path.join(__dirname, 'node_modules'), {maxage: '100d'}));
 app.use(require('./controllers'));
 app.use(require('./extensions'));
+
+// Central error handler — must be registered after all routes.
+// express-async-errors forwards rejections from async handlers here.
+app.use((err, req, res, next) => {
+    console.error(err);
+    if (res.headersSent) return next(err);
+    res.status(err.status || 500).json({
+        success: false,
+        message: err.message || 'Internal server error'
+    });
+});
+
 app.enable('trust proxy');
 
 const port = process.env.PORT ? process.env.PORT : 3000;
