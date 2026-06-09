@@ -11,7 +11,7 @@ const config = require('../../config/config.js').gc2;
 router.get('/api/legend/:db', async function (req, response) {
 
     const l = req.query.l, db = req.params.db;
-    const url = config.host + "/api/v1d/legend/json/" + db + "?l=" + encodeURIComponent(l);
+    const url = config.host + "/api/v1/legend/json/" + db + "?l=" + encodeURIComponent(l);
 
     // Network errors reject here and are forwarded to the central
     // error handler by express-async-errors (async handler).
