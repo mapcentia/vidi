@@ -11,7 +11,6 @@ const router = express.Router();
 const fs = require('fs');
 const headless = require('./headlessBrowserPool').pool;
 const shared = require('./gc2/shared');
-const request = require('request');
 const PDFMerge = require('pdf-merge');
 const AdmZip = require('adm-zip');
 const config = require("../config/config.js");
@@ -74,34 +73,34 @@ router.post('/api/print', function (req, response) {
     }
 );
 
-router.get('/api/print/:database', function (req, res) {
+router.get('/api/print/:database', async function (req, res) {
     const port = process.env.PORT ? process.env.PORT : 3000;
     let uri = "http://127.0.0.1:" + port + '/api/state-snapshots/' + req.params.database + '/' + req.query.state;
-    request({
-        method: 'GET',
-        encoding: 'utf8',
-        uri: uri
-    }, (error, response) => {
-        if (error) {
-            shared.throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', {error});
-            return;
+
+    let responseBody;
+    try {
+        const r = await fetch(uri);
+        responseBody = await r.text();
+    } catch (error) {
+        shared.throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', {error});
+        return;
+    }
+
+    try {
+        let parsedBody = JSON.parse(responseBody);
+        if (!'print' in parsedBody.snapshot.modules) {
+            shared.throwError(res, 'NO_PRINT_IN_SNAPSHOT');
         }
-        try {
-            let parsedBody = JSON.parse(response.body);
-            if (!'print' in parsedBody.snapshot.modules) {
-                shared.throwError(res, 'NO_PRINT_IN_SNAPSHOT');
-            }
-            let key = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-                let r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
-                return v.toString(16);
-            });
-            // We need to set add necessary modules for printing
-            parsedBody.snapshot.modules.print.state = {"modules": {"layerTree": parsedBody.snapshot.modules.layerTree}};
-            return print(key, parsedBody.snapshot.modules.print, req, res, true);
-        } catch (e) {
-            console.log(e.message)
-        }
-    })
+        let key = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            let r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+        // We need to set add necessary modules for printing
+        parsedBody.snapshot.modules.print.state = {"modules": {"layerTree": parsedBody.snapshot.modules.layerTree}};
+        return print(key, parsedBody.snapshot.modules.print, req, res, true);
+    } catch (e) {
+        console.log(e.message)
+    }
 });
 
 router.get('/api/postdata', function (req, response) {

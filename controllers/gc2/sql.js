@@ -1,16 +1,16 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2026 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 var express = require('express');
 var router = express.Router();
 var config = require('../../config/config.js').gc2;
-var request = require('request');
 var fs = require('fs');
+const {Readable} = require('stream');
 
-var query = function (req, response) {
+var query = async function (req, response) {
     req.setTimeout(0); // no timeout
     var db = req.params.db,
         q = req.body.q || req.query.q,
@@ -23,8 +23,6 @@ var query = function (req, response) {
         store = req.body.store || req.query.store,
         userName,
         fileName,
-        writeStream,
-        rem,
         headers,
         uri,
         key = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -33,17 +31,16 @@ var query = function (req, response) {
         });
 
     var postData = {
-            convert_types: true,
-            q,
-            base64,
-            srs,
-            lifetime,
-            client_encoding: client_encoding || "UTF8",
-            format: format ? format : "geojson",
-            key: typeof req?.session?.gc2ApiKey !== "undefined" ? req.session.gc2ApiKey : "xxxxx", //Dummy key is sent to prevent start of session
-            custom_data: custom_data || ""
-        },
-        options;
+        convert_types: true,
+        q,
+        base64,
+        srs,
+        lifetime,
+        client_encoding: client_encoding || "UTF8",
+        format: format ? format : "geojson",
+        key: typeof req?.session?.gc2ApiKey !== "undefined" ? req.session.gc2ApiKey : "xxxxx", //Dummy key is sent to prevent start of session
+        custom_data: custom_data || ""
+    };
 
     // Check if user is a sub user
     if (req?.session?.screenName && req?.session?.subUser) {
@@ -55,12 +52,6 @@ var query = function (req, response) {
     uri = custom_data !== null && custom_data !== undefined && custom_data !== "null" ? config.host + "/api/v2/sqlwrapper/" + userName : config.host + "/api/v2/sql/" + userName;
 
     console.log(uri);
-
-    options = {
-        method: 'POST',
-        uri: uri,
-        json: postData
-    };
 
     if (format === "excel") {
         fileName = key + ".xlsx";
@@ -81,38 +72,45 @@ var query = function (req, response) {
         }
     }
 
-    // if (!store) {
-    //     //response.writeHead(200, headers);
-    // }
-
-    rem = request(options);
-
-    if (store) {
-        writeStream = fs.createWriteStream(__dirname + "/../../public/tmp/stored_results/" + fileName);
+    let upstream;
+    try {
+        upstream = await fetch(uri, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(postData)
+        });
+    } catch (err) {
+        console.error(err);
+        if (!response.headersSent) response.status(500).send({success: false, message: err.message});
+        return;
     }
 
-    rem.on('response', function (res) {
-        if (!store) {
-            response.writeHead(res.statusCode, headers);
-        }
-    });
+    const nodeStream = upstream.body ? Readable.fromWeb(upstream.body) : Readable.from([]);
 
-    rem.on('data', function (chunk) {
-        if (store) {
-            writeStream.write(chunk, 'binary');
-        } else {
-            response.write(chunk);
-        }
-    });
-    rem.on('end', function () {
-        if (store) {
+    if (store) {
+        const writeStream = fs.createWriteStream(__dirname + "/../../public/tmp/stored_results/" + fileName);
+        nodeStream.on('error', (e) => {
+            console.error(e);
+            writeStream.destroy();
+            if (!response.headersSent) response.status(500).send({success: false, message: e.message});
+        });
+        writeStream.on('error', (e) => {
+            console.error(e);
+            if (!response.headersSent) response.status(500).send({success: false, message: e.message});
+        });
+        writeStream.on('finish', function () {
             console.log("Result saved");
             response.send({"success": true, "file": fileName});
-        } else {
+        });
+        nodeStream.pipe(writeStream);
+    } else {
+        response.writeHead(upstream.status, headers);
+        nodeStream.on('error', (e) => {
+            console.error(e);
             response.end();
-        }
-    });
-
+        });
+        nodeStream.pipe(response);
+    }
 };
 router.all('/api/sql/:db', query);
 router.all('/api/sql/nocache/:db', query);
