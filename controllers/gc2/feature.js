@@ -33,7 +33,7 @@ router.all('/api/feature/:db/:layer/:param', async function (req, response) {
         headers,
         body: hasBody ? JSON.stringify(body) : undefined
     });
-    const text = await res.text();
+    const text = await res.json();
 
     if (res.status !== 200) {
         response.header('content-type', 'application/json');
