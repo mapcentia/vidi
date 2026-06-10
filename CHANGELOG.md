@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2026.6.1] - 2026-10-6
+### Fixed
+- Editor: Boolean fields default to `false` again when creating new features. The `skipDefaults` form
+  option suppressed the schema's explicit `default: false`, so unchecked checkboxes were submitted as
+  `null`. Changed to `skipEmptyDefaults`, which still applies defaults explicitly defined in the schema.
+
+### Changed
+- Refactor(controllers): Replace deprecated `request` library with modern `fetch` across controllers (not extensions yet).
+- Integrate `express-async-errors` to forward async route rejections in controllers to a central error handler. 
+  Implemented a middleware-based error handler for consistent error responses.
+
 ## [2026.6.0] - 2026-8-6
 ### Fixed
 - Prevent redundant '?' when appending query parameters to WMTS URL.
