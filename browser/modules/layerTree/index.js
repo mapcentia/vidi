@@ -3954,7 +3954,11 @@ module.exports = {
         moduleState.fitBoundsActiveOnLayers[layerKey] = true;
     },
     onApplyDownloadHandler: (layerKey, format) => {
-        let whereClause = _self.getActiveLayerFilters(layerKey)[0];
+        let whereClause = _self.getActiveLayerFilters(layerKey)[0] ?? '1=1';
+        const versioning = meta.getMetaByKey(layerKey)['versioning'];
+        if (versioning) {
+            whereClause+=` AND gc2_version_end_date is null`;
+        }
         let sql = `SELECT *
                    FROM ${layerKey}`
         if (whereClause) {
