@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2026.6.2] - 2026-16-6
+### Fixed
+- Add versioning check to filter out ended versions in downloads.
+
 ## [2026.6.1] - 2026-10-6
 ### Fixed
 - Editor: Boolean fields default to `false` again when creating new features. The `skipDefaults` form
