@@ -1,6 +1,6 @@
 services:
   vidi:
-    image: mapcentia/vidi:base
+    image: mapcentia/vidi:node24-1
     build:
       context: .
       dockerfile: Dockerfile
