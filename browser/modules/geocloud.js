@@ -327,7 +327,7 @@ geocloud = (function () {
                     dataType: 'json',
                     contentType: "application/json; charset=utf-8",
                     async: me.defaults.async,
-                    data: {
+                    data: JSON.stringify({
                         q: me.base64 ? base64url.encode(sql): sql,
                         base64: me.base64,
                         srs: me.defaults.projection,
@@ -335,7 +335,7 @@ geocloud = (function () {
                         client_encoding: me.defaults.clientEncoding,
                         key: me.defaults.key,
                         custom_data: me.custom_data
-                    },
+                    }),
                     url: me.host + me.uri + '/' + me.db,
                     type: me.defaults.method,
                     timeout: timeout,
