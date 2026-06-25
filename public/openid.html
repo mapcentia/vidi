@@ -24,6 +24,7 @@
     const extractOidcConfig = () => {
         const oidc = window.gc2Options?.openIdConfig;
         const redirectUri = oidc?.redirectUris?.vidi ?? DEFAULTS.redirectUri;
+        // const redirectUri = "http://localhost:3000/openid.html";
         const clientId = oidc?.clientId ?? DEFAULTS.clientId;
         const host = oidc?.host ?? DEFAULTS.host;
         const tokenUri = oidc?.tokenUri ?? undefined;
