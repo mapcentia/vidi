@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2026.6.3] - 2026-29-6
+### Fixed
+- Print: headless browser pool now surfaces `factoryCreateError`/`factoryDestroyError` instead of
+  masking them as the misleading "ResourceRequest timed out" acquire error. The bundled Chromium can
+  be overridden via `PUPPETEER_EXECUTABLE_PATH` / `config.puppeteerProcesses.executablePath` (fixes
+  printing in Docker, where the bundled binary is absent), and `acquireTimeoutMillis` was raised from
+  500ms to a configurable 30s so a cold browser launch no longer times out before it is ready.
+
 ## [2026.6.2] - 2026-16-6
 ### Fixed
 - Add versioning check to filter out ended versions in downloads.
