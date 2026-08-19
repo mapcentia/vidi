@@ -142,13 +142,12 @@ module.exports = {
                                 }
                                 $('#layer-filter-container').css('pointer-events', 'auto').css('opacity', 1.0);
                                 $('.layer-loading-indicator').hide();
-                                if (data.data && data.data.length > 0) {
-                                    // data.data = data.data.filter(d => d.layergroup !== null)
+                                if (data.data) {
                                     me.addMetaData(data);
                                     ready = true;
                                     resolve(schemata);
                                 } else {
-                                    reject();
+                                    reject("Couldn't load meta data");
                                 }
                             })
                         }
