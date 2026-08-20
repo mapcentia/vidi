@@ -320,6 +320,7 @@ module.exports = {
                         pane: layerDescription.f_table_schema + "-" + layerDescription.f_table_name,
                         visibility: !(parsedMeta?.filter_required) || (parsedMeta?.filter_required && layerTree.getLayerFilterString(layerKey) !== ''),
                         loadEvent: function (e) {
+                            let error = !!event.currentTarget.classList.contains('invalid');
                             let canvasHasData = false;
                             if ((window.vidiConfig.mode & NO_VISIBILITY_CHECK) === 0) {
                                 if (!tiled) {
@@ -365,6 +366,10 @@ module.exports = {
                                 dataIsVisible: canvasHasData,
                                 shouldLegendReact: true
                             });
+                            backboneEvents.get().trigger("tileLayerError:layers", {
+                                id: e.target.id,
+                                error
+                            });
 
                             me.decrementCountLoading(layer);
                             backboneEvents.get().trigger("doneLoading:layers", layer);
@@ -373,6 +378,7 @@ module.exports = {
                             me.incrementCountLoading(layer);
                             backboneEvents.get().trigger("startLoading:layers", layer);
                         },
+                        tileErrorEvent: function (e) {},
                         subdomains: window.gc2Options.subDomainsForTiles
                     });
 

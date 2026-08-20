@@ -114,7 +114,9 @@ class MarkupGenerator {
                                                                        <div class="d-flex align-items-center gap-1">
                                                                        ${lockedLayer}
                                                                        <span class="js-tiles-contain-data" style="display: ${moduleState.tileContentCache[layerKey] ? "inline" : "none"};" data-toggle="tooltip" data-bs-placement="right"
-                                                                       title="${__("Layer is visible")}"><i class="bi bi-eye info-icon text-success"></i></span>
+                                                                       title="${__("Layer is visible")}"><i class="bi bi-eye info-icon text-success"></i></span> 
+                                                                       <span class="js-tiles-error" style="display: ${moduleState.tileError[layerKey] ? "inline" : "none"};" data-toggle="tooltip" data-bs-placement="right"
+                                                                       title="${__("Layer has error")}"><i class="bi bi-x info-icon text-danger"></i></span>
                                                                        <span class="js-layer-is-disabled" style="display: ${disableCheckBox ? "inline" : "none"};" data-toggle="tooltip" data-bs-placement="right"
                                                                        title="${__("Locked")}"><i class="bi bi-lock text-danger"></i></span>
                                                                        <span class="js-layer-has-parents info-icon" style="display: ${parentLayerKeys.length > 0 ? "inline" : "none"};" data-toggle="tooltip" data-bs-placement="right"

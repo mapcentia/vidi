@@ -97,6 +97,7 @@ let moduleState = {
     webGLStores: {},
     virtualLayers: [],
     tileContentCache: {},
+    tileError: {},
     editorFilters: {},
     editorFiltersActive: {},
     fitBoundsActiveOnLayers: {},
@@ -961,6 +962,15 @@ module.exports = {
                 };
                 poll.bind(this, data)();
             }
+        });
+
+        /**
+         * Listening to an event that indicates if a layer has an error (an invalid image)
+         * Display error icon in layertree
+         */
+        backboneEvents.get().on(`tileLayerError:layers`, (data) => {
+            moduleState.tileError[data.id] = data.error;
+            $(`[data-gc2-layer-key^="${data.id}."]`).find(`.js-tiles-error`).css(`display`, (data.error ? `inline` : `none`));
         });
 
         /**
