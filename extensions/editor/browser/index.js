@@ -1,12 +1,23 @@
 /*
  * @author     Alexander Shumilov
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2025 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
 
 import {LAYER, SYSTEM_FIELD_PREFIX} from '../../../browser/modules/layerTree/constants';
+import {GEOJSON_PRECISION} from '../../../browser/modules/constants';
+import dayjs from 'dayjs';
+import {withTheme} from '@rjsf/core';
+import {Theme} from '@rjsf/react-bootstrap';
+import validator from "@rjsf/validator-ajv8";
+import SelectWidget from "./SelectWidget.jsx";
+import TimeWidget from "./TimeWidget.jsx";
+import {coordAll} from "@turf/turf";
+import {createRoot} from "react-dom/client";
+import {flushSync} from "react-dom";
+import config from "../../../config/config";
 
 /**
  *
@@ -14,28 +25,36 @@ import {LAYER, SYSTEM_FIELD_PREFIX} from '../../../browser/modules/layerTree/con
  */
 let APIBridgeSingletone = require('../../../browser/modules/api-bridge');
 
-let PANEL_DOCKING_PARAMETER = 1024;
+const drawTooltip = config?.extensionConfig?.editor?.tooltip;
+const alwaysActivate = config?.extensionConfig?.editor?.alwaysActivate ?? true;
 
 /**
  *
  * @type {*|exports|module.exports}
  */
-let utils, backboneEvents, layerTree, meta, cloud, sqlQuery, layers;
+let utils, backboneEvents, layerTree, meta, cloud, sqlQuery, layers, editorFormRoot;
 
 let apiBridgeInstance = false;
 
 let multiply = require('geojson-multiply');
-let moment = require('moment');
 
-let JSONSchemaForm = require("react-jsonschema-form");
 
-let Form = JSONSchemaForm.default;
+const Form = withTheme(Theme);
 
 let markers = [];
 
 let editor;
 
 let editedFeature = false;
+let isVectorLayer = false;
+
+// Holder for the current edit session's state. The form's onSubmit closure
+// captures *this object* (a stable module-level reference) rather than the
+// per-call locals `e`/`eventFeatureCopy`, so when stopEdit() nulls the holder
+// the closure can no longer reach the Leaflet layer or its feature.properties.
+// React 18 sometimes retains the unmounted Form's onSubmit via alternate
+// fiber state; this indirection makes that retention harmless.
+let editSession = null;
 
 let featureWasEdited = false;
 
@@ -43,18 +62,35 @@ let nonCommitedEditedFeature = false;
 
 let switchLayer;
 
-let managePopups = [];
+let session;
 
-const ImageUploadWidget = require('./ImageUploadWidget');
+const FileUploadWidget = require('./FileUploadWidget');
 
-const widgets = {'imageupload': ImageUploadWidget};
+const widgets = {'fileupload': FileUploadWidget, 'time': TimeWidget, 'SelectWidget': SelectWidget};
 
 const MODULE_NAME = `editor`;
-const EDITOR_FORM_CONTAINER_ID = 'editor-attr-form';
-const EDITOR_CONTAINER_ID = 'editor-attr-dialog';
+const PLACEMENT = window.screen.width >= 768 ? "start" : "bottom"
+const EDITOR_OFFCANVAS_CONTAINER_ID = `offcanvas-edit-${PLACEMENT}`;
+const EDITOR_FORM_CONTAINER_ID = document.querySelector(`#${EDITOR_OFFCANVAS_CONTAINER_ID} .offcanvas-body`);
+const MAX_NODE_IN_FEATURE = 1000; // If number of nodes exceed this number, when the geometry editor is not enabled.
+const EDIT_STYLE = {
+    color: 'blue',
+    fillOpacity: 0,
+    weight: 4,
+    opacity: 0.6,
+    dashArray: null
+}
+const EDIT_MARKER = {
+    icon: L.AwesomeMarkers.icon({
+            icon: 'arrows-alt',
+            markerColor: 'blue',
+            prefix: 'fa'
+        }
+    )
+}
 
 const serviceWorkerCheck = () => {
-    if (('serviceWorker' in navigator) === false || !navigator.serviceWorker || !navigator.serviceWorker.controller) {
+    if (!('serviceWorker' in navigator) || !navigator.serviceWorker || !navigator.serviceWorker.controller) {
         const message = __(`The page was loaded without service workers enabled, features editing is not available (the page was loaded via plain HTTP or browser does not support service workers)`);
         console.warn(message);
         alert(message);
@@ -78,6 +114,18 @@ let _self = false;
 
 let vectorLayers;
 
+let bindEvent;
+
+let offcanvasEdit;
+
+const transformErrors = (errors, uiSchema) => {
+    return errors.map((error) => {
+        if (error.name === 'required') {
+            error.message = __(`Required`);
+        }
+        return error;
+    });
+}
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -98,6 +146,8 @@ module.exports = {
         layerTree = o.layerTree;
         switchLayer = o.switchLayer;
         backboneEvents = o.backboneEvents;
+        bindEvent = o.bindEvent;
+        session = o.extensions.session.index;
 
         _self = this;
         try {
@@ -111,10 +161,32 @@ module.exports = {
      *
      */
     init: function () {
+        const _self = this;
         if (`watsonc` in window.vidiConfig.enabledExtensions) {
             console.log(`Editor extension is disabled due to the enabled watsonc`);
             return;
         }
+        try {
+            editorFormRoot = createRoot(EDITOR_FORM_CONTAINER_ID);
+        } catch (e) {
+        }
+
+        if (drawTooltip) {
+            $("body").append(`<div id="editor-tooltip" style="position: fixed; float: left; display: none">${drawTooltip}</div>`);
+            $(document).on('mousemove', function (e) {
+                $('#editor-tooltip').css({
+                    left: e.pageX + 20,
+                    top: e.pageY
+                });
+            });
+            cloud.get().map.on("editable:drawing:clicked", function () {
+                $("#editor-tooltip").hide();
+            });
+        }
+
+        $("#editStopBtn").on("click", () => {
+            _self.stopEditWithConfirm();
+        })
 
         if (vidiConfig.enabledExtensions.indexOf(`embed`) !== -1) {
             embedIsEnabled = true;
@@ -122,48 +194,95 @@ module.exports = {
 
         apiBridgeInstance = APIBridgeSingletone();
 
+        try {
+            offcanvasEdit = new bootstrap.Offcanvas(`#${EDITOR_OFFCANVAS_CONTAINER_ID}`);
+            document.getElementById(EDITOR_OFFCANVAS_CONTAINER_ID).addEventListener('shown.bs.offcanvas', event => {
+                document.querySelector(".edit-attr-btn .bi-arrow-bar-left").classList.remove("d-none");
+                document.querySelector(".edit-attr-btn .bi-arrow-bar-right").classList.add("d-none");
+            })
+            document.getElementById(EDITOR_OFFCANVAS_CONTAINER_ID).addEventListener('hidden.bs.offcanvas', event => {
+                document.querySelector(".edit-attr-btn .bi-arrow-bar-right").classList.remove("d-none");
+                document.querySelector(".edit-attr-btn .bi-arrow-bar-left").classList.add("d-none");
+            })
+
+            document.getElementById("offcanvasEditBtn").addEventListener("click", () => offcanvasEdit.toggle());
+        } catch (e) {
+        }
+
         // Listen to arrival of add-feature buttons
         $(document).arrive('.gc2-add-feature', {
             existing: true
         }, function () {
             $(this).on("click", function (e) {
-                let isVectorLayer = false;
                 if ($(this).closest('.layer-item').find('.js-show-layer-control').data('gc2-layer-type') === LAYER.VECTOR) {
                     isVectorLayer = true;
                 }
 
-                var t = ($(this).data('gc2-key'));
-                _self.add(t, null, true, isVectorLayer);
+                let t = ($(this).data('gc2-key'));
+                _self.add(t, true, isVectorLayer);
                 e.stopPropagation();
             });
         });
 
-        // Listen to close of attr box
-        $(".editor-attr-dialog__close-hide").on("click", function (e) {
-            _self.stopEdit(editedFeature);
-            backboneEvents.get().trigger("sqlQuery:clear");
-        });
+        const getLayerById = (id) => {
+            let l;
+            cloud.get().map.eachLayer(layer => {
+                if (layer._leaflet_id === id) {
+                    l = layer;
+                }
+            })
+            return l;
+        }
 
-        $(".editor-attr-dialog__expand-less").on("click", function () {
-            $("#" + EDITOR_CONTAINER_ID).animate({
-                bottom: (($("#" + EDITOR_CONTAINER_ID).height() * -1) + 30) + "px"
-            }, 500, function () {
-                $(".editor-attr-dialog__expand-less").hide();
-                $(".editor-attr-dialog__expand-more").show();
+        // Listen to arrival of edit tools
+        $(document).arrive('.gc2-edit-tools', {
+            existing: true
+        }, function () {
+
+            if (!session.isAuthenticated() && !alwaysActivate) {
+                document.querySelectorAll('.gc2-edit-tools').forEach(e => e.classList.add('d-none'))
+            }
+
+            let id = parseInt(($(this).data('edit-layer-id')));
+            let name = ($(this).data('edit-layer-name'));
+            let vector = ($(this).data('edit-vector'));
+            $(this).find('.popup-edit-btn').on('click', function (e) {
+                isVectorLayer = vector;
+                _self.edit(getLayerById(id), name, isVectorLayer)
+                e.stopPropagation();
+            });
+            $(this).find('.popup-delete-btn').on('click', function (e) {
+                if (window.confirm(__(`Are you sure you want to delete the feature?`))) {
+                    isVectorLayer = vector;
+                    _self.delete(getLayerById(id), name, isVectorLayer)
+                    e.stopPropagation();
+                }
             });
         });
 
-        $(".editor-attr-dialog__expand-more").on("click", function () {
-            $("#" + EDITOR_CONTAINER_ID).animate({
-                bottom: "0"
-            }, 500, function () {
-                $(".editor-attr-dialog__expand-less").show();
-                $(".editor-attr-dialog__expand-more").hide();
-            });
+        backboneEvents.get().on("edit:editor", function (id, layerKey, isVector) {
+            _self.edit(getLayerById(parseInt(id)), layerKey, isVector);
+        });
+
+        backboneEvents.get().on("delete:editor", function (id, layerKey, isVector) {
+            _self.delete(getLayerById(parseInt(id)), layerKey, isVector);
         });
 
         backboneEvents.get().on("ready:meta", function () {
             _self.setHandlersForVectorLayers();
+            if (config?.extensionConfig?.editor?.addOnStart) {
+                function poll() {
+                    if (('serviceWorker' in navigator) && navigator?.serviceWorker?.controller) {
+                        _self.add(config?.extensionConfig?.editor?.addOnStart, true, true);
+                    } else {
+                        setTimeout(() => {
+                            poll();
+                        }, 200)
+                    }
+                }
+
+                poll();
+            }
         });
 
         /*
@@ -173,8 +292,15 @@ module.exports = {
         _self.setHandlersForVectorLayers();
     },
 
+    showOffcanvasEdit: () => {
+        offcanvasEdit.show();
+    },
+    hideOffcanvasEdit: () => {
+        offcanvasEdit.hide();
+    },
+
+
     setHandlersForVectorLayers: () => {
-        let metaDataKeys = meta.getMetaDataKeys();
         let metaData = meta.getMetaData();
         metaData.data.map(v => {
             let layerName = v.f_table_schema + "." + v.f_table_name;
@@ -188,7 +314,7 @@ module.exports = {
                 }
             }
 
-            if (layerMeta && layerMeta.vidi_layer_editable) {
+            if (layerMeta?.vidi_layer_editable) {
                 // Set popup with Edit and Delete buttons
                 layerTree.setOnEachFeature("v:" + layerName, (feature, layer) => {
                     if (feature.meta) {
@@ -203,7 +329,7 @@ module.exports = {
                             tooltipSettings.className = `api-bridge-popup-warning`;
 
                             content = `<div class="js-feature-notification-tooltip">
-                                <i class="fa fa-exclamation"></i> ${__(`Awaiting network`)}
+                                <i class="bi bi-exclamation"></i> ${__(`Awaiting network`)}
                                 <span class="js-tooltip-content"></span>
                             </div>`;
                         } else if (feature.meta.apiRecognitionStatus === 'rejected_by_server') {
@@ -212,13 +338,13 @@ module.exports = {
                             if (feature.meta.serverErrorType) {
                                 if (feature.meta.serverErrorType === `REGULAR_ERROR`) {
                                     content = `<div class="js-feature-notification-tooltip">
-                                        <i class="fa fa-exclamation"></i> ${__(`Error`)}
+                                        <i class="bi bi-exclamation"></i> ${__(`Error`)}
                                         <span class="js-tooltip-content"></span>
                                     </div>`;
                                 } else if (feature.meta.serverErrorType === `AUTHORIZATION_ERROR`) {
                                     tooltipSettings.className = `api-bridge-popup-warning`;
                                     content = `<div class="js-feature-notification-tooltip">
-                                        <i class="fa fa-exclamation"></i> ${__(`Awaiting login`)}
+                                        <i class="bi bi-exclamation"></i> ${__(`Awaiting login`)}
                                         <span class="js-tooltip-content"></span>
                                     </div>`;
                                 } else {
@@ -226,7 +352,7 @@ module.exports = {
                                 }
                             } else {
                                 content = `<div class="js-feature-notification-tooltip">
-                                    <i class="fa fa-exclamation"></i> ${__(`Error`)}
+                                    <i class="bi bi-exclamation"></i> ${__(`Error`)}
                                     <span class="js-tooltip-content"></span>
                                 </div>`;
                             }
@@ -234,15 +360,7 @@ module.exports = {
                             throw new Error(`Invalid API recognition status value`);
                         }
 
-                        layer.on("add", function (e) {
-                            let latLng = false;
-                            if (feature.geometry && feature.geometry.type === 'Point') {
-                                latLng = layer.getLatLng();
-                            } else {
-                                let bounds = layer.getBounds();
-                                latLng = bounds.getCenter()
-                            }
-
+                        layer.on("add", function () {
                             let tooltip = L.tooltip(tooltipSettings).setContent(content);
                             layer.bindTooltip(tooltip);
                         });
@@ -265,37 +383,55 @@ module.exports = {
 
     /**
      * Create the attribute form
+     * @param fields
      * @param fieldConf
      * @param pkey
      * @param f_geometry_column
+     * @param relType
      * @returns {{}}
      */
-    createFormObj: function (fields, pkey, f_geometry_column, fieldConf) {
+    createFormObj: function (fields, pkey, f_geometry_column, fieldConf, relType) {
         let required = [];
         let properties = {};
         let uiSchema = {};
 
         Object.keys(fields).map(function (key) {
-            if (key !== pkey && key !== f_geometry_column && (key.indexOf(SYSTEM_FIELD_PREFIX) !== 0 || (typeof fieldConf[key] !== "undefined" && fieldConf[key].querable === true))) {
+            if (key !== pkey && key !== f_geometry_column && (key.indexOf(SYSTEM_FIELD_PREFIX) !== 0 && !fieldConf[key]?.filter)) {
                 let title = key;
-                if (fieldConf[key] !== undefined && fieldConf[key].alias) {
+                if (fieldConf[key]?.alias) {
                     title = fieldConf[key].alias;
                 }
-
                 properties[key] = {title, type: `string`};
+                if (relType === 'TABLE' || relType === 'MATVIEW') {
 
-                if (fields[key].is_nullable !== true) {
-                    required.push(key);
+                    if (fields[key]?.is_nullable === false) {
+                        required.push(key);
+                    }
+                } else {
+                    if (fieldConf[key]?.is_nullable === false) {
+                        required.push(key);
+                    }
                 }
 
                 if (fields[key]) {
+                    uiSchema[key] = {};
                     switch (fields[key].type) {
-                        case `int`:
+                        case `smallint`:
                         case `integer`:
+                        case `bigint`:
                             properties[key].type = `integer`;
                             break;
+                        case `decimal`:
+                        case `numeric`:
+                        case `real`:
                         case `double precision`:
                             properties[key].type = `number`;
+                            break;
+                        case `time with time zone`:
+                        case `time without time zone`:
+                            uiSchema[key] = {
+                                'ui:widget': 'time'
+                            };
                             break;
                         case `date`:
                             uiSchema[key] = {
@@ -306,55 +442,73 @@ module.exports = {
                             uiSchema[key] = {
                                 'ui:widget': 'datetime'
                             };
-                            properties[key].default = moment().format("YYYY-MM-DDTHH:mm"); // Default is required in IOS Safari
                             break;
                         case `timestamp with time zone`:
                             uiSchema[key] = {
                                 'ui:widget': 'datetime'
                             };
-                            properties[key].default = moment().format("YYYY-MM-DDTHH:mmZ"); // Default is required in IOS Safari
                             break;
                         case `boolean`:
                             properties[key].type = `boolean`;
+                            properties[key].default = false; // Checkbox is either checked or unchecked
                             break;
                         case `bytea`:
                             uiSchema[key] = {
-                                'ui:widget': 'imageupload'
+                                'ui:widget': 'fileupload'
                             };
                             break;
+                        case `bytea[]`:
+                            properties[key].type = `array`;
+                            properties[key].items = {
+                                type: 'string',
+                            };
+                            uiSchema[key] = {
+                                items: {
+                                    'ui:widget': 'fileupload'
+                                }
+                            };
+                            break;
+                        case `integer[]`:
+                            properties[key].type = `array`;
+                            properties[key].items = {
+                                type: 'integer',
+                            };
+                            break;
+                        case `text`:
+                        case `json`:
+                        case `jsonb`:
+                            uiSchema[key] = {
+                                'ui:widget': 'textarea'
+                            };
+                            break;
+                        case `character varying`:
+                            if (fields[key].character_maximum_length > 1024) {
+                                uiSchema[key] = {
+                                    'ui:widget': 'textarea'
+                                };
+                            }
+                            break;
                     }
+                    uiSchema[key]["ui:placeholder"] = fieldConf[key]?.desc;
                 }
 
                 // Properties have priority over default types
-                if (fieldConf[key] && fieldConf[key].properties) {
-                    let parsedProperties = false;
-                    try {
-                        parsedProperties = JSON.parse(fieldConf[key].properties.replace(/'/g, '"'));
-                    } catch (e) {
-                        console.warn(`"properties" of the ${key} field is not a valid JSON`);
-                    }
-
-                    if (parsedProperties) {
-                        if (Array.isArray(parsedProperties) && parsedProperties.length > 0) {
-                            properties[key].enum = parsedProperties;
-                        } else {
-                            let enumNames = [];
-                            let enumValues = [];
-                            for (let enumName in parsedProperties) {
-                                enumNames.push(enumName);
-                                enumValues.push(parsedProperties[enumName]);
-                            }
-
-                            if (enumNames.length === enumValues.length) {
-                                properties[key].enumNames = enumNames;
-                                properties[key].enum = enumValues;
-                            }
-                        }
+                if (fields[key]?.restriction?.length > 0) {
+                    // Use enum + ui:enumNames rather than oneOf+const. AJV compiles oneOf into a
+                    // deeply nested else-chain (one level per branch) which overflows V8's stack
+                    // on large restriction lists (e.g. ~1000 postnumre).
+                    const restrictions = fields[key].restriction;
+                    properties[key].enum = restrictions.map(r => r.value);
+                    uiSchema[key] = {
+                        ...uiSchema[key],
+                        'ui:enumNames': restrictions.map(r => r.alias),
+                    };
+                    if (uiSchema[key]['ui:widget']) {
+                        delete uiSchema[key]['ui:widget'];
                     }
                 }
             }
         });
-
         return {
             schema: {
                 type: "object",
@@ -369,16 +523,26 @@ module.exports = {
     /**
      * Add new features to layer
      * @param k
-     * @param qstore
      * @param doNotRemoveEditor
+     * @param isVector
      */
-    add: function (k, qstore, doNotRemoveEditor, isVectorLayer = false) {
+    add: function (k, doNotRemoveEditor, isVector = false) {
+        if (editedFeature) {
+            alert("Ongoing edit. Please stop editing before starting a new one");
+            layerTree.getInfoOffCanvas().hide();
+            return;
+        }
+
+
+        isVectorLayer = isVector;
+        _self.stopEdit();
         editedFeature = false;
 
         let me = this, React = require('react'), ReactDOM = require('react-dom'),
             schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
             metaDataKeys = meta.getMetaDataKeys(),
-            type = metaDataKeys[schemaQualifiedName].type;
+            type = metaDataKeys[schemaQualifiedName].type,
+            relType = metaDataKeys[schemaQualifiedName].rel_type;
 
         let fields = false;
         if (metaDataKeys[schemaQualifiedName].fields) {
@@ -397,8 +561,13 @@ module.exports = {
 
             me.stopEdit();
 
+            if (drawTooltip && !utils.isTouchEnabled()) {
+                $("#editor-tooltip").show();
+            }
+
+            backboneEvents.get().trigger('block:infoClick');
             // Create schema for attribute form
-            let formBuildInformation = this.createFormObj(fields, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column, fieldconf);
+            let formBuildInformation = this.createFormObj(fields, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column, fieldconf, relType);
             const schema = formBuildInformation.schema;
             const uiSchema = formBuildInformation.uiSchema;
 
@@ -406,11 +575,11 @@ module.exports = {
 
             // Start editor with the right type
             if (type === "POLYGON" || type === "MULTIPOLYGON") {
-                editor = cloud.get().map.editTools.startPolygon();
+                editor = cloud.get().map.editTools.startPolygon(null, EDIT_STYLE);
             } else if (type === "LINESTRING" || type === "MULTILINESTRING") {
-                editor = cloud.get().map.editTools.startPolyline();
+                editor = cloud.get().map.editTools.startPolyline(null, EDIT_STYLE);
             } else if (type === "POINT" || type === "MULTIPOINT") {
-                editor = cloud.get().map.editTools.startMarker();
+                editor = cloud.get().map.editTools.startMarker(null, EDIT_MARKER);
             } else {
                 throw new Error(`Unable to detect type`);
             }
@@ -420,14 +589,26 @@ module.exports = {
              * @param formData
              */
             const onSubmit = function (formData) {
-                let featureCollection, geoJson = editor.toGeoJSON();
+                let featureCollection, geoJson = editor.toGeoJSON(GEOJSON_PRECISION);
+                if ((type === "POINT" || type === "MULTIPOINT") && !editor?.dragging) {
+                    alert(__("You need to plot a point"));
+                    return;
+                }
+                if ((type === "LINESTRING" || type === "MULTILINESTRING") && coordAll(geoJson).length < 2) {
+                    alert(__("You need to plot at least two points"));
+                    return;
+                }
+                if ((type === "POLYGON" || type === "MULTIPOLYGON") && coordAll(geoJson).length < 4) {
+                    alert(__("You need to plot at least three points"));
+                    return;
+                }
 
                 // Promote MULTI geom
                 if (type.substring(0, 5) === "MULTI") {
                     geoJson = multiply([geoJson]);
                 }
 
-                Object.keys(formData.formData).map(function (key, index) {
+                Object.keys(formData.formData).map(function (key) {
                     geoJson.properties[key] = formData.formData[key];
                     if (geoJson.properties[key] === undefined) {
                         geoJson.properties[key] = null;
@@ -444,15 +625,10 @@ module.exports = {
                 /**
                  * Feature saving callback
                  *
-                 * @param {Object} result Saving result
                  */
-                const featureIsSaved = (result) => {
+                const featureIsSaved = () => {
                     console.log('Editor: featureIsSaved, updating', schemaQualifiedName);
-
                     switchLayer.registerLayerDataAlternation(schemaQualifiedName);
-
-                    sqlQuery.reset(qstore);
-
                     me.stopEdit();
 
                     // Reloading only vector layers, as uncommited changes can be displayed only for vector layers
@@ -460,12 +636,12 @@ module.exports = {
                         layerTree.reloadLayer("v:" + schemaQualifiedName, true);
                     }
 
-                    $.snackbar({
-                        id: "snackbar-conflict",
-                        content: "Feature  stedfæstet",
-                        htmlAllowed: true,
-                        timeout: 5000
-                    });
+                    utils.showInfoToast(__("Feature added"));
+                    if (config?.extensionConfig?.editor?.repeatMode) {
+                        setTimeout(() => {
+                            _self.add(schemaQualifiedName, true, true)
+                        }, 1000);
+                    }
                 };
 
                 apiBridgeInstance.addFeature(featureCollection, db, metaDataKeys[schemaQualifiedName]).then(featureIsSaved).catch(error => {
@@ -474,23 +650,52 @@ module.exports = {
                 });
             };
 
-            // Slide panel with attributes in and render form component
-            ReactDOM.unmountComponentAtNode(document.getElementById(EDITOR_FORM_CONTAINER_ID));
-            ReactDOM.render((
-                <div style={{"padding": "15px"}}>
-                    <Form
-                        className="feature-attribute-editing-form"
-                        schema={schema}
-                        uiSchema={uiSchema}
-                        widgets={widgets}
-                        onSubmit={onSubmit}>
-                        <div className="buttons">
-                            <button type="submit" className="btn btn-info">Submit</button>
-                        </div>
-                    </Form>
-                </div>
-            ), document.getElementById(EDITOR_FORM_CONTAINER_ID));
+            const defaultValuesConf = window.vidiConfig?.extensionConfig?.editor?.defaultValues;
+            let defaultValues = {};
+            if (defaultValuesConf) {
+                for (const [key, value] of Object.entries(defaultValuesConf)) {
+                    let v;
+                    if (typeof value === 'string' && value.startsWith("$user.properties.")) {
+                        v = session.getProperties()?.[value.split(".")[2]];
+                    } else if (typeof value === 'string' && value.startsWith("$user.name")) {
+                        v = session.getUserName();
+                    } else {
+                        v = defaultValuesConf[key];
+                    }
+                    if (!v) {
+                        defaultValues[key] = "";
+                        console.warn(`No default value for ${key}`);
+                    } else {
+                        defaultValues[key] = v;
+                    }
 
+                }
+            }
+            // Slide panel with attributes in and render form component
+            if (!editorFormRoot) {
+                editorFormRoot = createRoot(EDITOR_FORM_CONTAINER_ID);
+            }
+            editorFormRoot.render(
+                <Form
+                    key={Date.now()}
+                    validator={validator}
+                    className="feature-attribute-editing-form"
+                    schema={schema} noHtml5Validate
+                    uiSchema={uiSchema}
+                    widgets={widgets}
+                    onSubmit={onSubmit}
+                    transformErrors={transformErrors}
+                    formData={defaultValues}
+                    experimental_defaultFormStateBehavior={{emptyObjectFields: 'skipEmptyDefaults', constAsDefaults: 'skipOneOf'}}
+                    focusOnFirstError={false}>
+                    <div className="buttons">
+                        <button type="submit"
+                                className="btn btn btn-success mb-2 mt-2 w-100 editor-save-btn">{__("Submit")}</button>
+                        <button type="button" onClick={_self.stopEditWithConfirm}
+                                className="btn btn btn-outline-secondary mb-2 mt-2 w-100">{__("Cancel")}</button>
+                    </div>
+                </Form>
+            );
             _self.openAttributesDialog();
         };
 
@@ -519,10 +724,9 @@ module.exports = {
      *
      * @param {String}  geometryType        Geometry type of created / edited feature
      * @param {Boolean} featureAlreadyExist Specifies if feature already exists
-     * @param {String}  enabledLayerName    Specifies what layer is enabled for snapping
-     * @param {String}  enabledFeatureId    Specifies what layer feature identifier is enabled for snapping
+     * @param enabledFeature
      */
-    enableSnapping: function (geometryType, featureAlreadyExist = true, enabledFeature = false) {
+    enableSnapping: function (geometryType, featureAlreadyExist = true, enabledFeature) {
         let guideLayers = [];
         layers.getMapLayers().map(layer => {
             if (`id` in layer && layer.id && layer.id.indexOf(`v:`) === 0 && guideLayers.indexOf(layer.id) === -1) {
@@ -545,11 +749,11 @@ module.exports = {
                     enabledFeature._snapping_active = true;
                 }
 
-                var snap = new L.Handler.MarkerSnap(cloud.get().map);
+                let snap = new L.Handler.MarkerSnap(cloud.get().map);
                 guideLayers.map(layer => {
                     snap.addGuideLayer(layer);
                 });
-                var snapMarker = L.marker(cloud.get().map.getCenter(), {
+                let snapMarker = L.marker(cloud.get().map.getCenter(), {
                     icon: cloud.get().map.editTools.createVertexIcon({className: 'leaflet-div-icon leaflet-drawing-icon'}),
                     opacity: 1,
                     zIndexOffset: 1000
@@ -575,18 +779,18 @@ module.exports = {
                     // so the event object we have here is not the one fired by
                     // Leaflet.Editable; it's not a deep copy though, so we can change
                     // the other objects that have a reference here.
-                    var latlng = snapMarker.getLatLng();
+                    let latlng = snapMarker.getLatLng();
                     e.latlng.lat = latlng.lat;
                     e.latlng.lng = latlng.lng;
                 });
 
-                snapMarker.on('snap', function (e) {
+                snapMarker.on('snap', function () {
                     snapMarker.addTo(cloud.get().map);
                 });
-                snapMarker.on('unsnap', function (e) {
+                snapMarker.on('unsnap', function () {
                     snapMarker.remove();
                 });
-                var followMouse = function (e) {
+                let followMouse = function (e) {
                     snapMarker.setLatLng(e.latlng);
                 }
             }
@@ -610,7 +814,7 @@ module.exports = {
             let hashTable = {};
             polygonCoordinates.map(coordinates => {
                 let key = (coordinates[0] + `:` + coordinates[1]);
-                if (key in hashTable === false) {
+                if (!(key in hashTable)) {
                     result.push(coordinates);
                     hashTable = {};
                     hashTable[key] = true;
@@ -627,22 +831,30 @@ module.exports = {
      * Change existing feature
      * @param e
      * @param k
-     * @param qstore
+     * @param isVector
      */
-    edit: function (e, k, qstore, isVectorLayer = false) {
+    edit: function (e, k, isVector = false) {
+        if (editedFeature) {
+            alert("Ongoing edit. Please stop editing before starting a new one");
+            layerTree.getInfoOffCanvas().hide();
+            return;
+        }
+        layerTree.getInfoOffCanvas().hide();
+        isVectorLayer = isVector;
+        _self.stopEdit();
         editedFeature = e;
         nonCommitedEditedFeature = {};
-        const editFeature = () => {
+        if (!isVector) {
+            e.setStyle(EDIT_STYLE)
+        }
+        const editFeature = async () => {
             serviceWorkerCheck();
-
             let React = require('react');
-
-            let ReactDOM = require('react-dom');
 
             let me = this, schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
                 metaDataKeys = meta.getMetaDataKeys(),
-                type = metaDataKeys[schemaQualifiedName].type,
-                properties;
+                relType = metaDataKeys[schemaQualifiedName].rel_type;
+
 
             let fields = false;
             if (metaDataKeys[schemaQualifiedName].fields) {
@@ -656,7 +868,6 @@ module.exports = {
                 fieldconf = JSON.parse(metaDataKeys[schemaQualifiedName].fieldconf);
             }
 
-            me.stopEdit();
 
             e.on(`editable:editing`, () => {
                 featureWasEdited = true;
@@ -667,7 +878,7 @@ module.exports = {
                 e.id = "v:" + e.id;
             }
 
-            e.initialFeatureJSON = e.toGeoJSON();
+            e.initialFeatureJSON = e.toGeoJSON(GEOJSON_PRECISION);
 
             featureWasEdited = false;
             // Hack to edit (Multi)Point layers
@@ -676,18 +887,10 @@ module.exports = {
                 case "Point":
                     markers[0] = L.marker(
                         e.getLatLng(),
-                        {
-                            icon: L.AwesomeMarkers.icon({
-                                    icon: 'arrows-alt',
-                                    markerColor: 'blue',
-                                    prefix: 'fa'
-                                }
-                            )
-                        }
+                        EDIT_MARKER
                     ).addTo(cloud.get().map);
                     sqlQuery.reset();
                     editor = markers[0].enableEdit();
-                    sqlQuery.reset(qstore);
                     break;
 
                 case "MultiPoint":
@@ -706,20 +909,79 @@ module.exports = {
                         editor = markers[i].enableEdit();
 
                     });
-                    sqlQuery.reset(qstore);
                     break;
 
                 default:
-                    editor = e.enableEdit();
+                    cloud.get().map.addLayer(e);
+                    let numberOfNodes = 0;
+                    const coors = editedFeature.feature.geometry.coordinates;
+                    const calculateCount = (arr) => {
+                        for (let i = 0; i < arr.length; i++) {
+                            if (Array.isArray(arr[i])) {
+                                calculateCount(arr[i]);
+                            } else {
+                                numberOfNodes++;
+                                if (numberOfNodes === MAX_NODE_IN_FEATURE) {
+                                    return;
+                                }
+                            }
+                        }
+                    };
+                    calculateCount(coors);
+                    numberOfNodes = numberOfNodes / 2;
+
+                    if (numberOfNodes <= MAX_NODE_IN_FEATURE) {
+                        editor = e.enableEdit();
+                    } else {
+                        editor = false;
+                        utils.showInfoToast(__("Editing of geometry is not possible when number of nodes exceed") + " " + MAX_NODE_IN_FEATURE);
+                    }
                     break;
             }
 
             _self.enableSnapping(e.feature.geometry.type, true, e);
-
-            // Delete some system attributes
-            let eventFeatureCopy = JSON.parse(JSON.stringify(e.feature));
+            // Check if there's a pending queue item for this feature (e.g. user already
+            // edited and submitted, but the request hasn't gone through to the server
+            // yet). Use the queue's snapshot in that case, so the user resumes editing
+            // their pending change instead of overwriting it with fresh DB data.
+            const pkeyField = (metaDataKeys[schemaQualifiedName].pkey) ? metaDataKeys[schemaQualifiedName].pkey : 'gid';
+            const pkeyValue = e.feature.properties?.[pkeyField];
+            let basisProperties = e.feature.properties;
+            if (pkeyValue !== undefined && pkeyValue !== null) {
+                try {
+                    const pendingItem = await apiBridgeInstance.findPendingItemByPkey(schemaQualifiedName, pkeyValue);
+                    if (pendingItem?.feature?.features?.[0]?.properties) {
+                        console.log('Editor: using pending queue item for re-edit', schemaQualifiedName, pkeyValue);
+                        basisProperties = pendingItem.feature.features[0].properties;
+                    }
+                } catch (err) {
+                    console.warn('Editor: failed to look up pending queue item, falling back to fresh data', err);
+                }
+            }
+            // Shallow copy: bytea/bytea[] payloads are referenced, not duplicated.
+            let eventFeatureCopy = {
+                geometry: e.feature.geometry,
+                properties: {...basisProperties}
+            };
+            // Stash on module-level holder so onSubmit reads via indirection.
+            // stopEdit() nulls the holder, breaking retention from React's
+            // potentially-leaked alternate fiber.
+            editSession = {
+                e,
+                eventFeatureCopy,
+                markers,
+                metaDataKeys,
+                schemaQualifiedName,
+                fields,
+                isVectorLayer,
+                me: this
+            };
             delete eventFeatureCopy.properties._vidi_content;
             delete eventFeatureCopy.properties._id;
+            delete eventFeatureCopy.properties._vidi_edit_layer_id;
+            delete eventFeatureCopy.properties._vidi_edit_layer_name;
+            delete eventFeatureCopy.properties._vidi_edit_vector;
+            delete eventFeatureCopy.properties._vidi_edit_display;
 
             // Set NULL values to undefined, because NULL is a type
             Object.keys(eventFeatureCopy.properties).map(key => {
@@ -731,11 +993,25 @@ module.exports = {
             // Transform field values according to their types
             Object.keys(fields).map(key => {
                 switch (fields[key].type) {
+                    case `decimal`:
+                    case `numeric`:
+                    case `real`:
                     case `double precision`:
                         if (eventFeatureCopy.properties[key]) {
                             eventFeatureCopy.properties[key] = parseFloat(eventFeatureCopy.properties[key]);
                         }
-                    default:
+                        break
+                    case `bytea[]`:
+                    case `integer[]`:
+                        if (typeof eventFeatureCopy.properties[key] !== 'undefined' && typeof eventFeatureCopy.properties[key] !== 'object') {
+                            eventFeatureCopy.properties[key] = "[" + eventFeatureCopy.properties[key].slice(1, -1) + "]";
+                        }
+                        break;
+                    case `json`:
+                    case `jsonb`:
+                        if (eventFeatureCopy.properties[key]) {
+                            eventFeatureCopy.properties[key] = JSON.stringify(eventFeatureCopy.properties[key]);
+                        }
                         break;
                 }
             });
@@ -745,20 +1021,31 @@ module.exports = {
              * @param formData
              */
             const onSubmit = (formData) => {
-                let GeoJSON = e.toGeoJSON(), featureCollection;
+                // Read state via the module-level holder so this closure does
+                // not directly capture `e` / `eventFeatureCopy` (Leaflet layer
+                // + shared properties incl. bytea). stopEdit() nulls the
+                // holder, allowing GC even if React 18 retains this onSubmit
+                // via an alternate fiber.
+                const s = editSession;
+                if (!s || !s.e) return; // session torn down
+                let GeoJSON = s.e.toGeoJSON(GEOJSON_PRECISION), featureCollection;
                 delete GeoJSON.properties._vidi_content;
                 delete GeoJSON.properties._id;
+                delete GeoJSON.properties._vidi_edit_layer_id;
+                delete GeoJSON.properties._vidi_edit_layer_name;
+                delete GeoJSON.properties._vidi_edit_vector;
+                delete GeoJSON.properties._vidi_edit_display;
 
                 // HACK to handle (Multi)Point layers
                 // Update the GeoJSON from markers
-                switch (eventFeatureCopy.geometry.type) {
+                switch (s.eventFeatureCopy.geometry.type) {
                     case "Point":
-                        GeoJSON.geometry.coordinates = [markers[0].getLatLng().lng, markers[0].getLatLng().lat];
+                        GeoJSON.geometry.coordinates = [s.markers[0].getLatLng().lng, s.markers[0].getLatLng().lat];
                         break;
 
                     case "MultiPoint":
-                        markers.map(function (v, i) {
-                            GeoJSON.geometry.coordinates[i] = [markers[i].getLatLng().lng, markers[i].getLatLng().lat];
+                        s.markers.map(function (v, i) {
+                            GeoJSON.geometry.coordinates[i] = [s.markers[i].getLatLng().lng, s.markers[i].getLatLng().lat];
                         });
                         break;
 
@@ -768,15 +1055,24 @@ module.exports = {
                 }
 
                 // Set GeoJSON properties from form values
-                Object.keys(eventFeatureCopy.properties).map(function (key) {
-                    GeoJSON.properties[key] = formData.formData[key];
-                    // Set undefined values back to NULL
-                    if (GeoJSON.properties[key] === undefined) {
-                        GeoJSON.properties[key] = null;
+                let fieldConf = false;
+                if (s.metaDataKeys[s.schemaQualifiedName].fieldconf) {
+                    fieldConf = JSON.parse(s.metaDataKeys[s.schemaQualifiedName].fieldconf);
+                }
+                Object.keys(s.fields).map(function (key) {
+                    if ((!key.startsWith("gc2_") && s.fields[key].type !== "geometry" && !fieldConf[key]?.filter) || s.metaDataKeys[s.schemaQualifiedName].pkey === key) {
+                        GeoJSON.properties[key] = formData.formData[key];
+                        // Set undefined values back to NULL
+                        if (GeoJSON.properties[key] === undefined) {
+                            GeoJSON.properties[key] = null;
+                        }
+                    } else {
+                        // Remove system fields, which should not be updated by the user
+                        delete GeoJSON.properties[key];
                     }
                 });
 
-                if (eventFeatureCopy.geometry.type === `Polygon`) {
+                if (s.eventFeatureCopy.geometry.type === `Polygon`) {
                     GeoJSON = _self.removeDuplicates(GeoJSON);
                 }
 
@@ -789,68 +1085,57 @@ module.exports = {
                     ]
                 };
 
+                const sIsVectorLayer = s.isVectorLayer;
+                const sSchemaQualifiedName = s.schemaQualifiedName;
+                const sMeta = s.metaDataKeys[s.schemaQualifiedName];
+                const sMe = s.me;
                 const featureIsUpdated = () => {
-                    console.log('Editor: featureIsUpdated, isVectorLayer:', isVectorLayer);
-
-                    switchLayer.registerLayerDataAlternation(schemaQualifiedName);
-
-                    sqlQuery.reset(qstore);
-                    me.stopEdit();
-
-                    // Reloading only vector layers, as uncommited changes can be displayed only for vector layers
-                    if (isVectorLayer) {
-                        layerTree.reloadLayer("v:" + schemaQualifiedName, true);
+                    sMe.stopEdit();
+                    if (sIsVectorLayer) {
+                        layerTree.reloadLayer("v:" + sSchemaQualifiedName, true);
                     }
                 };
 
-                apiBridgeInstance.updateFeature(featureCollection, db, metaDataKeys[schemaQualifiedName]).then(featureIsUpdated).catch(error => {
+                apiBridgeInstance.updateFeature(featureCollection, db, sMeta).then(featureIsUpdated).catch(error => {
                     console.log('Editor: error occured while performing updateFeature()');
                     throw new Error(error);
                 });
             };
 
             // Create schema for attribute form
-            let formBuildInformation = this.createFormObj(fields, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column, fieldconf);
+            let formBuildInformation = this.createFormObj(fields, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column, fieldconf, relType);
             const schema = formBuildInformation.schema;
             const uiSchema = formBuildInformation.uiSchema;
 
             cloud.get().map.closePopup();
-            ReactDOM.unmountComponentAtNode(document.getElementById(EDITOR_FORM_CONTAINER_ID));
-            for (let key in schema.properties) {
-                if (key in eventFeatureCopy.properties && eventFeatureCopy.properties[key]) {
-                    eventFeatureCopy.properties[key] = `` + eventFeatureCopy.properties[key];
-                }
+            if (!editorFormRoot) {
+                editorFormRoot = createRoot(EDITOR_FORM_CONTAINER_ID);
             }
-            let eventFeatureParsed = {};
-            for (let [key, value] of Object.entries(eventFeatureCopy.properties)) {
-                if (fields[key].type.includes("timestamp with time zone")) {
-                    value = value ? moment(value).format("YYYY-MM-DDTHH:mmZ") : moment().format("YYYY-MM-DDTHH:mmZ"); // Default is required in IOS Safari
-                    console.log(value);
-                } else if (fields[key].type.includes("timestamp without time zone")) {
-                    value = value ? moment(value).format("YYYY-MM-DDTHH:mm") : moment().format("YYYY-MM-DDTHH:mm"); // Default is required in IOS Safari
-                    console.log(value);
-                }
-                eventFeatureParsed[key] = value;
-            }
-            ReactDOM.render((
-                <div style={{"padding": "15px"}}>
-                    <Form
-                        className="feature-attribute-editing-form"
-                        schema={schema}
-                        widgets={widgets}
-                        uiSchema={uiSchema}
-                        formData={eventFeatureParsed}
-                        onSubmit={onSubmit}>
-                        <div className="buttons">
-                            <button type="submit" className="btn btn-info">Submit</button>
-                        </div>
-                    </Form>
-                </div>
-            ), document.getElementById(EDITOR_FORM_CONTAINER_ID));
-
+            editorFormRoot.render(
+                <Form
+                    key={Date.now()}
+                    validator={validator}
+                    className="feature-attribute-editing-form"
+                    schema={schema} noHtml5Validate
+                    widgets={widgets}
+                    uiSchema={uiSchema}
+                    formData={eventFeatureCopy.properties}
+                    onSubmit={onSubmit}
+                    transformErrors={transformErrors}
+                    experimental_defaultFormStateBehavior={{emptyObjectFields: 'skipDefaults', constAsDefaults: 'skipOneOf'}}
+                    focusOnFirstError={false}>
+                    <div className="buttons">
+                        <button type="submit" className="btn btn btn-success mb-2 mt-2 w-100 editor-save-btn d-flex align-items-center justify-content-center">
+                            <span className="editor-save-btn-label">{__("Submit")}</span>
+                            <span className="editor-save-btn-loading d-none">{__("Loading files")}<i className="spinner-border spinner-border-sm ms-1"></i></span>
+                        </button>
+                        <button type="button" onClick={_self.stopEditWithConfirm}
+                                className="btn btn btn-outline-secondary mb-2 mt-2 w-100">{__("Cancel")}</button>
+                    </div>
+                </Form>
+            );
             _self.openAttributesDialog();
         };
-
         let confirmMessage = __(`Application is offline, tiles will not be updated. Proceed?`);
         if (isVectorLayer) {
             editFeature();
@@ -866,6 +1151,8 @@ module.exports = {
             }).catch(() => {
                 if (confirm(confirmMessage)) {
                     editFeature();
+                } else {
+                    _self.stopEdit();
                 }
             });
         }
@@ -877,48 +1164,30 @@ module.exports = {
      * @returns {void}
      */
     openAttributesDialog: () => {
-        if (embedIsEnabled && ($(window).width() < PANEL_DOCKING_PARAMETER || $(window).height() < (PANEL_DOCKING_PARAMETER / 2))) {
-            $("#" + EDITOR_CONTAINER_ID).animate({
-                bottom: (($("#" + EDITOR_CONTAINER_ID).height() * -1) + 30) + "px"
-            }, 500, () => {
-                $(".editor-attr-dialog__expand-less").hide();
-                $(".editor-attr-dialog__expand-more").show();
-            });
-
-            $('#layer-slide').find('.close').trigger('click');
-        } else {
-            $("#" + EDITOR_CONTAINER_ID).animate({
-                bottom: "0"
-            }, 500, () => {
-                $(".editor-attr-dialog__expand-less").show();
-                $(".editor-attr-dialog__expand-more").hide();
-            });
-        }
+        $("#offcanvasEditBtn").trigger("click");
+        $("#edit-tool-group").removeClass("d-none")
     },
 
     /**
      * Delete feature from layer
      * @param e
      * @param k
-     * @param qstore
+     * @param isVector
      */
-    delete: function (e, k, qstore, isVectorLayer = false) {
+    delete: function (e, k, isVector = false) {
+        isVectorLayer = isVector;
+        _self.stopEdit();
         editedFeature = false;
-
-        let me = this;
 
         let schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
             metaDataKeys = meta.getMetaDataKeys(),
-            GeoJSON = e.toGeoJSON();
+            GeoJSON = e.toGeoJSON(GEOJSON_PRECISION);
 
         const deleteFeature = () => {
             serviceWorkerCheck();
 
             const featureIsDeleted = () => {
                 console.log('Editor: featureIsDeleted, isVectorLayer:', isVectorLayer);
-
-                sqlQuery.reset(qstore);
-
                 cloud.get().map.closePopup();
 
                 // Reloading only vector layers, as uncommited changes can be displayed only for vector layers
@@ -962,13 +1231,21 @@ module.exports = {
 
     /**
      * Stop editing and clean up
-     * @param e
      */
-    stopEdit: function (editedFeature) {
+    stopEdit: function () {
+        if (drawTooltip) {
+            $("#editor-tooltip").hide();
+        }
+        backboneEvents.get().trigger('unblock:infoClick');
         cloud.get().map.editTools.stopDrawing();
+        $("#edit-tool-group").addClass("d-none");
+        _self.hideOffcanvasEdit()
 
         if (editor) {
             cloud.get().map.removeLayer(editor);
+        }
+        if (editedFeature && !isVectorLayer) {
+            cloud.get().map.removeLayer(editedFeature);
         }
 
         // If feature was edited, then reload the layer
@@ -980,10 +1257,6 @@ module.exports = {
             // No need to reload layer if point feature was edited, as markers are destroyed anyway
             if (editedFeature.feature.geometry.type !== `Point` && editedFeature.feature.geometry.type !== `MultiPoint`) {
                 editedFeature.disableEdit();
-                if (featureWasEdited) {
-                    switchLayer.init(editedFeature.id, false);
-                    switchLayer.init(editedFeature.id, true);
-                }
             }
         }
 
@@ -996,20 +1269,55 @@ module.exports = {
 
         featureWasEdited = false;
 
-        // Close the attribute dialog
-        $("#" + EDITOR_CONTAINER_ID).animate({
-            bottom: "-100%"
-        }, 500, function () {
-            $(".editor-attr-dialog__expand-less").show();
-            $(".editor-attr-dialog__expand-more").hide();
-        });
+
+        editedFeature = false;
+        sqlQuery.resetAll();
+
+        // React 18 retains the previous tree via the fiber's `alternate` even
+        // after unmount() unless we commit a sentinel render first. The
+        // `render(null)` causes React to reconcile against an empty tree,
+        // committing unmounts for every child synchronously inside flushSync.
+        // Then unmount() can fully release the root including the alternate
+        // fiber's memoizedState (which holds RJSF's initialFormState).
+        if (editorFormRoot) {
+            try {
+                const rootToUnmount = editorFormRoot;
+                editorFormRoot = null;
+                flushSync(() => {
+                    rootToUnmount.render(null);
+                });
+                rootToUnmount.unmount();
+            } catch (e) {
+                console.warn('Editor: failed to unmount form tree', e);
+            }
+        }
+
+        // Null the edit session holder. The form's onSubmit closure reads via
+        // `editSession`; clearing it here means any retained closure (e.g.
+        // from a leaked React alternate fiber) can no longer reach the
+        // Leaflet layer or its feature.properties (bytea payloads).
+        if (editSession) {
+            editSession.e = null;
+            editSession.eventFeatureCopy = null;
+            editSession.markers = null;
+            editSession.metaDataKeys = null;
+            editSession.fields = null;
+            editSession.me = null;
+            editSession = null;
+        }
+    },
+
+    stopEditWithConfirm: () => {
+        if (window.confirm(__("Are you sure you want to cancel?"))) {
+            _self.stopEdit();
+        }
     },
 
     /**
      * Checks if application is online.
      */
     checkIfAppIsOnline: () => {
-        let result = new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             $.ajax({
                 method: 'GET',
                 url: '/connection-check.ico'
@@ -1024,9 +1332,10 @@ module.exports = {
                 }
             });
         });
-
-        return result;
     },
-};
 
+    getEditedFeature: () => {
+        return editedFeature;
+    }
+};
 

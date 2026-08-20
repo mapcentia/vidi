@@ -1,0 +1,77 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2023, MapCentia
+# This file is distributed under the same license as the Vidi package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Vidi 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-01-09 15:15+0100\n"
+"PO-Revision-Date: 2024-01-09 17:06+0100\n"
+"Last-Translator: \n"
+"Language-Team: en <LL@li.org>\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Generated-By: Babel 2.12.1\n"
+"X-Generator: Poedit 3.4\n"
+
+#: ../../index.rst:3 ab7f0f262e234a81ad5a4a8f2aeb7d31
+msgid "Vidi brugerdokumentation"
+msgstr "Vidi user documentation"
+
+#: ../../index.rst:5 9abe452ab0cb4408810b339435619e10
+msgid ""
+"Hvis du har brug for at komme i gang med Vidi fra bunden af, er her et "
+"godt sted at starte."
+msgstr ""
+"If you need to get started with Vidi from scratch, here is a good place "
+"to start."
+
+#: ../../index.rst:15 412751837d7d44d98622b1a59235b135
+msgid "Standardværktøjer"
+msgstr "Standard tools"
+
+#: ../../index.rst:17 54e20ba8f0a94efc943e3691d90e5540
+msgid ""
+"Vidi indeholder en del værktøjer som altid er slået til. Disse  "
+"værktøjer er lavet til at at gøre arbejdet nemmere. Du kan læse mere om "
+"de enkelse værktøjer herunder."
+msgstr ""
+"Vidi has a number of tools that are always on. These tools is made to "
+"make work easier. You can read more about the simpletools below."
+
+#: ../../index.rst:27 4870dabd37fc4fd4b82708d4d71dd301
+msgid "Extensions"
+msgstr "Extensions"
+
+#: ../../index.rst:29 97d94de39b164893a99cfc0e81dfda7c
+msgid ""
+"Ud over standardværktøjerne, er der udviddet funktionalitet som du kan "
+"læse mere om herunder."
+msgstr ""
+"In addition to the standard tools, there is extended functionality that "
+"you can read more about below."
+
+#: ../../_subs/GIT.rst:4 0a7e54ac6771451ea075086b5358ecd3
+msgid "Mere om Vidi-projektet"
+msgstr "More about the Vidi project"
+
+#: ../../_subs/GIT.rst:6 ea6dca4e8a724c94b5c514f930e531e5
+msgid "Her er links til mere generel information"
+msgstr "Here are links to more general information"
+
+#: ../../_subs/GIT.rst:8 cb198a5d4c064eb4bbf8ddb97e6a2232
+msgid ":ref:`README`"
+msgstr ""
+
+#: ../../_subs/GIT.rst:9 b3e33ee6495c4a0b80b5007ab42a06d0
+msgid ":ref:`CHANGELOG`"
+msgstr ""
+
+#: ../../_subs/GIT.rst:10 729bc4d657cb4c44b8ceea8a96439599
+msgid ":ref:`CONTRIBUTING`"
+msgstr ""

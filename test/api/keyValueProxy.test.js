@@ -5,7 +5,7 @@
 const { expect } = require(`chai`);
 const request = require(`request`);
 const helpers = require(`./../helpers`);
-const uuidv4 = require('uuid/v4');
+const { v4: uuidv4 } = require('uuid');
 
 const DATABASE_NAME = `test`;
 let createdKey = false;
@@ -18,8 +18,10 @@ describe('Key-value proxy', () => {
             method: 'POST',
             json: true,
             body: {
-                u: `aleksandrshumilov`,
-                p: `qewadszcx`
+                "database": "mydb",
+                "password": "hawk2000",
+                "schema": "public",
+                "user": "mydb"
             }
         }, (error, response) => {
             AUTH_COOKIE = response.headers[`set-cookie`][0].split(`;`)[0];

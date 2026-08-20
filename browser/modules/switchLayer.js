@@ -16,17 +16,20 @@ let layersAlternationHistory = {};
 
 let layersEnabledStatus = {};
 
-/**
- *
- * @type {*|exports|module.exports}
- */
-var backboneEvents, cloud, legend, layers, layerTree, meta;
+const urlparser = require('./../modules/urlparser');
+const urlVars = urlparser.urlVars;
 
 /**
  *
  * @type {*|exports|module.exports}
  */
-var pushState;
+let backboneEvents, cloud, legend, layers, layerTree, meta;
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
+let pushState;
 
 let _self = false;
 
@@ -45,6 +48,36 @@ module.exports = module.exports = {
         backboneEvents = o.backboneEvents;
 
         _self = this;
+
+        // Listen to messages send by the embed API
+        window.addEventListener("message", function (event) {
+            if (event.data?.method === "switchLayer") {
+                _self.init(event.data.layerId, event.data.state);
+            } else if (event.data?.method === "switchAllOff") {
+                let layers = _self.getLayersEnabledStatus();
+                for (const property in layers) {
+                    let prop = layers[property];
+                    if (prop.enabled) {
+                        _self.init(prop.fullLayerKey, false);
+                    }
+                }
+            }
+        });
+
+        // Expose init in global scope
+        api.turnOn = (l) => {
+            const status = _self.getLayersEnabledStatus();
+            if (!status?.[l] || !status[l].enabled) {
+                _self.init(l, true);
+            }
+        }
+        api.turnOff = (l) => {
+            const status = _self.getLayersEnabledStatus();
+            if (status[l].enabled) {
+                _self.init(l, false);
+            }
+        }
+
         return this;
     },
 
@@ -57,7 +90,7 @@ module.exports = module.exports = {
 
     /**
      * Loads missing meta for layer
-     * 
+     *
      * @returns {Promise}
      */
     loadMissingMeta: (gc2Id) => {
@@ -82,7 +115,6 @@ module.exports = module.exports = {
      */
     enableVector: (gc2Id, doNotLegend, setupControls, failedBefore) => {
         if (LOG) console.log(`switchLayer: enableVector ${gc2Id}`);
-
         let vectorLayerId = LAYER.VECTOR + `:` + gc2Id;
         return new Promise((resolve, reject) => {
             layers.incrementCountLoading(vectorLayerId);
@@ -96,15 +128,23 @@ module.exports = module.exports = {
                     layerTree.createStore(layerMeta);
                     vectorDataStores = layerTree.getStores();
                 }
-
-                cloud.get().layerControl.addOverlay(vectorDataStores[vectorLayerId].layer, vectorLayerId);
-                let existingLayer = cloud.get().getLayersByName(vectorLayerId);
-                cloud.get().map.addLayer(existingLayer);
-                vectorDataStores[vectorLayerId].load();
-
-                backboneEvents.get().trigger("startLoading:layers", vectorLayerId);
-
-                _self.checkLayerControl(vectorLayerId, doNotLegend, setupControls);
+                try {
+                    cloud.get().layerControl.addOverlay(vectorDataStores[vectorLayerId].layerHL, 'HL:' + vectorLayerId);
+                    cloud.get().layerControl.addOverlay(vectorDataStores[vectorLayerId].layer, vectorLayerId);
+                    let existingLayer = cloud.get().getLayersByName(vectorLayerId);
+                    let existingLayerHL = cloud.get().getLayersByName('HL:' + vectorLayerId);
+                    const parsedMeta = layerTree.parseLayerMeta(meta.getMetaDataKeys()[gc2Id]);
+                    if (!(parsedMeta?.filter_required) || (parsedMeta?.filter_required && layerTree.getLayerFilterString(gc2Id) !== '')) {
+                        cloud.get().map.addLayer(existingLayer);
+                        cloud.get().map.addLayer(existingLayerHL);
+                        vectorDataStores[vectorLayerId].load();
+                        backboneEvents.get().trigger("startLoading:layers", vectorLayerId);
+                    }
+                    _self.checkLayerControl(vectorLayerId, doNotLegend, setupControls);
+                    _self.enableCheckBoxesOnChildren(gc2Id);
+                } catch (e) {
+                    console.error(e)
+                }
                 resolve();
             } else if (failedBefore !== false) {
                 if (failedBefore.reason === `NO_VECTOR_DATA_STORE`) {
@@ -112,7 +152,6 @@ module.exports = module.exports = {
                 } else {
                     console.error(`Unknown switch layer failure for ${vectorLayerId}`, failedBefore);
                 }
-
                 resolve();
             } else {
                 _self.loadMissingMeta(gc2Id).then(() => {
@@ -129,6 +168,7 @@ module.exports = module.exports = {
                         _self.init(vectorLayerId, true, false, false, true, {
                             reason: `NO_VECTOR_DATA_STORE`
                         }).then(() => {
+                            _self.enableCheckBoxesOnChildren(gc2Id);
                             resolve();
                         });
                     });
@@ -151,7 +191,7 @@ module.exports = module.exports = {
         return new Promise((resolve, reject) => {
             layers.addUTFGridLayer(id).then(() => {
             }).catch((err) => {
-                console.error(`Could not add ${id} UTFGrid tile layer`);
+                console.log(`Could not add ${id} UTFGrid tile layer`);
                 resolve();
             });
         });
@@ -169,14 +209,21 @@ module.exports = module.exports = {
      */
     enableRasterTile: (gc2Id, forceReload, doNotLegend, setupControls) => {
         if (LOG) console.log(`switchLayer: enableRasterTile ${gc2Id}`);
-
         return new Promise((resolve, reject) => {
             // Only one layer at a time, so using the raster tile layer identifier
             layers.incrementCountLoading(gc2Id);
             layerTree.setSelectorValue(gc2Id, LAYER.RASTER_TILE);
-            layers.addLayer(gc2Id, [layerTree.getLayerFilterString(gc2Id)]).then(() => {
-                _self.checkLayerControl(gc2Id, doNotLegend, setupControls);
 
+            let layerTreeState = layerTree.getState();
+            let labelsEnabled;
+            if (typeof layerTreeState.labelSettings[gc2Id] !== "undefined" && (layerTreeState.labelSettings[gc2Id] === `false` || layerTreeState.labelSettings[gc2Id] === false)) {
+                labelsEnabled = "false";
+            } else {
+                labelsEnabled = "true";
+            }
+
+            layers.addLayer(gc2Id, [layerTree.getLayerFilterString(gc2Id), `labels=${labelsEnabled}`, `config=${urlVars['config']||''}`]).then(() => {
+                _self.checkLayerControl(gc2Id, doNotLegend, setupControls);
                 let cacheBuster = ``;
                 if (forceReload) {
                     cacheBuster = Math.random();
@@ -188,7 +235,6 @@ module.exports = module.exports = {
                         }
                     }
                 }
-
                 // The WMS tile layer and single-tiled at the same time creates the L.nonTiledLayer.wms
                 // which does not have the setUrl() method
                 let rasterTileLayer = cloud.get().getLayersByName(gc2Id, false);
@@ -199,6 +245,11 @@ module.exports = module.exports = {
                 // Enable the corresponding UTF grid layer
                 // TODO check "mouseover" properties in fieldConf. No need to switch on if mouse over is not wanted
                 _self.enableUTFGrid(gc2Id);
+                _self.enableCheckBoxesOnChildren(gc2Id);
+                let opacity = layerTreeState?.opacitySettings?.[gc2Id];
+                if (opacity) {
+                    layerTreeUtils.applyOpacityToLayer(opacity, gc2Id, cloud, backboneEvents);
+                }
                 resolve();
             }).catch(err => {
                 if (err) {
@@ -206,7 +257,7 @@ module.exports = module.exports = {
                 }
 
                 _self.loadMissingMeta(gc2Id).then(() => {
-                    // Trying to recreate the layer tree with updated meta and switch layer again                           
+                    // Trying to recreate the layer tree with updated meta and switch layer again
                     layerTree.create().then(() => {
                         // All layers are guaranteed to exist in meta
                         let currentLayers = layers.getLayers();
@@ -216,7 +267,10 @@ module.exports = module.exports = {
                             });
                         }
 
-                        _self.init(gc2Id, true).then(resolve);
+                        _self.init(gc2Id, true).then(() => {
+                            _self.enableCheckBoxesOnChildren(gc2Id);
+                            resolve();
+                        });
                     });
                 }).catch(() => {
                     console.error(`Could not add ${gc2Id} raster tile layer`);
@@ -295,7 +349,7 @@ module.exports = module.exports = {
                         console.error(`Could not add ${typedGc2Id} vector tile layer`);
                         layers.decrementCountLoading(typedGc2Id);
                         resolve();
-                    });                    
+                    });
                 });
             } catch (e) {
                 console.log(e);
@@ -416,13 +470,17 @@ module.exports = module.exports = {
             fullLayerKey: name
         };
 
-        let metaData = meta.getMetaData();
+        const metaData = meta.getMetaData();
+
+        let sortId;
         for (let j = 0; j < metaData.data.length; j++) {
             let layerKey = (metaData.data[j].f_table_schema + '.' + metaData.data[j].f_table_name);
             if (layerKey === layerTreeUtils.stripPrefix(name)) {
+                layerTree.toggleGroupCheckBoxes(metaData.data[j].layergroup, JSON.parse(metaData.data[j].meta)?.vidi_sub_group);
                 let layer = metaData.data[j];
                 let {isVectorLayer, isRasterTileLayer, isVectorTileLayer} = layerTreeUtils.getPossibleLayerTypes(layer);
                 let defaultLayerType = layerTreeUtils.getDefaultLayerType(layer);
+                sortId = metaData.data[j].sort_id;
 
                 if (LOG) console.log(`switchLayer: ${name}, according to meta, is vector (${isVectorLayer}), raster tile (${isRasterTileLayer}), vector tile (${isVectorTileLayer})`);
                 if (!isVectorLayer && name.startsWith(LAYER.VECTOR + `:`)
@@ -443,7 +501,7 @@ module.exports = module.exports = {
         let gc2Id = layerTreeUtils.stripPrefix(name);
         let applicationWideControls = $(`*[data-gc2-id="${gc2Id}"]`);
         applicationWideControls.prop('checked', enable);
-        let result = new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             let vectorDataStores = layerTree.getStores();
 
             let vectorLayerId = LAYER.VECTOR + `:` + gc2Id;
@@ -452,20 +510,29 @@ module.exports = module.exports = {
 
             let rasterTileLayer = cloud.get().getLayersByName(gc2Id, false);
             let vectorLayer = cloud.get().getLayersByName(vectorLayerId, false);
+            let vectorLayerHL = cloud.get().getLayersByName('HL:' + vectorLayerId, false);
             let vectorTileLayer = cloud.get().getLayersByName(vectorTileLayerId, false);
             let webGLLayer = cloud.get().getLayersByName(webGLLayerId, false);
 
-            if (rasterTileLayer) cloud.get().map.removeLayer(rasterTileLayer);
-            if (vectorLayer) cloud.get().map.removeLayer(vectorLayer);
-            if (vectorTileLayer) cloud.get().map.removeLayer(vectorTileLayer);
-            if (webGLLayer) cloud.get().map.removeLayer(webGLLayer);
+
 
             if (vectorDataStores[vectorLayerId]) {
                 vectorDataStores[vectorLayerId].abort();
                 vectorDataStores[vectorLayerId].reset();
             }
 
+            // Always trig tileLayerVisibility with false
+            backboneEvents.get().trigger("tileLayerVisibility:layers", {
+                id: gc2Id,
+                dataIsVisible: false,
+                shouldLegendReact: false
+            });
+
             if (enable) {
+                const pane = layerTreeUtils.stripPrefix(name).replace('.', '-');
+                if (!cloud.get().map.getPane(pane)) {
+                    cloud.get().map.createPane(pane);
+                }
                 if (LOG) console.log(`switchLayer: enabling ${name}`);
                 if (name.startsWith(LAYER.VECTOR + ':')) {
                     _self.enableVector(gc2Id, doNotLegend, setupControls, failedBefore).then(resolve);
@@ -476,17 +543,87 @@ module.exports = module.exports = {
                 } else {
                     _self.enableRasterTile(gc2Id, forceReload, doNotLegend, setupControls).then(resolve);
                 }
-
+                cloud.get().map.getPane(pane).style.zIndex = sortId + 10000;
                 layers.reorderLayers();
             } else {
+                if (rasterTileLayer) cloud.get().removeLayer(rasterTileLayer);
+                if (rasterTileLayer) cloud.get().map.removeLayer(rasterTileLayer);
+
+                if (vectorLayer) cloud.get().removeLayer(vectorLayer);
+                if (vectorLayer) cloud.get().map.removeLayer(vectorLayer);
+
+                if (vectorLayerHL) cloud.get().removeLayer(vectorLayerHL);
+                if (vectorLayerHL) cloud.get().map.removeLayer(vectorLayerHL);
+
+                if (vectorTileLayer) cloud.get().removeLayer(vectorTileLayer);
+                if (vectorTileLayer) cloud.get().map.removeLayer(vectorTileLayer);
+
+                if (webGLLayer) cloud.get().removeLayer(webGLLayer);
+                if (webGLLayer) cloud.get().map.removeLayer(webGLLayer);
+
+                if (name.startsWith(LAYER.VECTOR + ':')) {
+                    // Close any open feature popup for this layer first.
+                    // The popup's accordion DOM holds event listeners that
+                    // close over Leaflet features (incl. bytea payloads);
+                    // without explicit cleanup they survive layer destruction
+                    // via Bootstrap's static Collapse instance map.
+                    if (typeof layerTree.closeVectorPopup === 'function') {
+                        layerTree.closeVectorPopup();
+                    }
+                    let tables = layerTree.getTables();
+                    let stores = layerTree.getStores();
+                    stores[name].destroy();
+                    if (typeof tables[name] === "object") {
+                        try {
+                            $("#table_view-" + name.split(":")[1].replace('.', '_') + " .bootstrap-table").remove();
+                            tables[name].destroy();
+                            delete tables[name];
+                        } catch (e) {
+                            console.error(e)
+                        }
+                    }
+                    stores[name].geoJSON = null;
+                    // Also clear the Leaflet layer's _layers so features (and
+                    // any bytea payloads on their properties) become GC-able.
+                    // Don't delete the store entry itself — layerTree gates
+                    // store creation on `vectorStores[key]` being an object,
+                    // so removing it would force a full rebuild on layer re-on.
+                    try {
+                        if (stores[name].layer && typeof stores[name].layer.clearLayers === 'function') {
+                            stores[name].layer.clearLayers();
+                        }
+                        if (stores[name].layerHL && typeof stores[name].layerHL.clearLayers === 'function') {
+                            stores[name].layerHL.clearLayers();
+                        }
+                        // Reset the hash so the next load is not short-circuited
+                        // by "Hashes match. Not reloading" (the cached hash refers
+                        // to the now-cleared geoJSON).
+                        stores[name].currentGeoJsonHash = null;
+                    } catch (e) {
+                        console.warn('switchLayer: failed to clear vector store layers', e);
+                    }
+                    // If vector table is enabled for layer the remove and set pane with back to 100%
+                    const vectorTableEl = $(`*[data-vidi-vector-table-id="${name}"]`);
+                    if (vectorTableEl.length) {
+                        vectorTableEl.remove();
+                        const e = $("#pane");
+                        const o = $('.offcanvas')
+                        e.css("width", "100%");
+                        e.css("height", "100%");
+                        o.css("height", "100%");
+                        cloud.get().map.invalidateSize();
+                    }
+                }
+                if (name.startsWith(LAYER.WEBGL + ':')) {
+                    let webGLstores = layerTree.getWebGLStores();
+                    webGLstores[name].destroy();
+                }
                 _self.uncheckLayerControl(name, doNotLegend, setupControls);
                 //Remove UTF grid layer
                 _self._removeUtfGrid(name);
                 resolve();
             }
         });
-
-        return result;
     },
 
     /**
@@ -495,19 +632,19 @@ module.exports = module.exports = {
     _toggleLayerControl: (enable = false, layerName, doNotLegend, setupControls) => {
         if (setupControls) {
             if (layerName.indexOf(LAYER.VECTOR + `:`) === 0) {
-                layerTree.setLayerState(LAYER.VECTOR, layerName, true, enable);
+                layerTree.setLayerState(LAYER.VECTOR, layerName, true, enable, true);
             } else if (layerName.indexOf(LAYER.VECTOR_TILE + `:`) === 0) {
-                layerTree.setLayerState(LAYER.VECTOR_TILE, layerName, true, enable);
+                layerTree.setLayerState(LAYER.VECTOR_TILE, layerName, true, enable, true);
             } else if (layerName.indexOf(LAYER.WEBGL + `:`) === 0) {
-                layerTree.setLayerState(LAYER.WEBGL, layerName, true, enable);
+                layerTree.setLayerState(LAYER.WEBGL, layerName, true, enable, true);
             } else {
-                layerTree.setLayerState(LAYER.RASTER_TILE, layerName, true, enable);
+                layerTree.setLayerState(LAYER.RASTER_TILE, layerName, true, enable, true);
             }
         }
 
-        let controlElement = $('input[class="js-show-layer-control"][data-gc2-id="' + layerTreeUtils.stripPrefix(layerName) + '"]');
+        let controlElement = $('input[data-gc2-id="' + layerTreeUtils.stripPrefix(layerName) + '"].js-show-layer-control');
         if (controlElement.length === 1) {
-            var siblings = $(controlElement).parents(".accordion-body").find("input.js-show-layer-control"), c = 0;
+            let siblings = $(controlElement).parents(".accordion-body").find("input.js-show-layer-control"), c = 0;
 
             $.each(siblings, function (i, v) {
                 if (v.checked) {
@@ -515,7 +652,7 @@ module.exports = module.exports = {
                 }
             });
 
-            $(controlElement).parents(".panel-layertree").find("span:eq(0)").html(c);
+            $(controlElement).parents(".panel-layertree").find(".layer-count span:eq(0)").html(c);
         }
 
         pushState.init();
@@ -528,6 +665,8 @@ module.exports = module.exports = {
      * Checks the layer control
      *
      * @param {String} layerName Name of the layer
+     * @param doNotLegend
+     * @param setupControls
      */
     checkLayerControl: (layerName, doNotLegend, setupControls = true) => {
         _self._toggleLayerControl(true, layerName, doNotLegend, setupControls);
@@ -537,6 +676,8 @@ module.exports = module.exports = {
      * Unchecks the layer control
      *
      * @param {String} layerName Name of the layer
+     * @param doNotLegend
+     * @param setupControls
      */
     uncheckLayerControl: (layerName, doNotLegend, setupControls = true) => {
         _self._toggleLayerControl(false, layerName, doNotLegend, setupControls);
@@ -550,11 +691,44 @@ module.exports = module.exports = {
     _removeUtfGrid: (layerName) => {
         if (LOG) console.log(`switchLayer: _removeUtfGrid ${layerName}`);
         let id = "__hidden.utfgrid." + layerName;
-        cloud.get().map.eachLayer(function(layer){
-            if (layer.id === id) {
+        cloud.get().map.eachLayer(function (layer) {
+            if (id && layer.id === id) {
                 cloud.get().map.removeLayer(layer);
             }
         });
+    },
+
+    /**
+     * Finds child layers and enables their check boxes if the parent layer is filtered. Have only effect if the child layers have the disable_check_box GC2 property
+     *
+     * @param {string} layerKey Layer identifier
+     */
+    enableCheckBoxesOnChildren: (layerKey) => {
+        let childLayersThatShouldBeEnabled = layerTree.getChildLayersThatShouldBeEnabled();
+        let parsedMeta = meta.parseLayerMeta(layerKey);
+        let activeFilters = layerTree.getActiveLayerFilters(layerKey);
+        if (parsedMeta?.referenced_by && activeFilters.length > 0) {
+            JSON.parse(parsedMeta.referenced_by).forEach((i) => {
+                // Store keys in array, so when re-rendering the layer tree, it can pick up which layers to enable
+                if (childLayersThatShouldBeEnabled.indexOf(i.rel) === -1) {
+                    childLayersThatShouldBeEnabled.push(i.rel);
+                }
+                $(`*[data-gc2-id="${i.rel}"]`).prop(`disabled`, false);
+                $(`[data-gc2-layer-key^="${i.rel}."]`).find(`.js-layer-is-disabled`).css(`visibility`, `hidden`);
+
+            })
+        }
+        if (parsedMeta?.referenced_by && activeFilters.length === 0) {
+            JSON.parse(parsedMeta.referenced_by).forEach((i) => {
+                let parsedMetaChildLayer = meta.parseLayerMeta(i.rel);
+                if (parsedMetaChildLayer?.disable_check_box) {
+                    childLayersThatShouldBeEnabled = childLayersThatShouldBeEnabled.filter(item => item !== i.rel);
+                    _self.init(i.rel, false, true, false);
+                    $(`*[data-gc2-id="${i.rel}"]`).prop(`disabled`, true);
+                    $(`[data-gc2-layer-key^="${i.rel}"]`).find(`.js-layer-is-disabled`).css(`visibility`, `visible`);
+                }
+            })
+        }
+        layerTree.setChildLayersThatShouldBeEnabled(childLayersThatShouldBeEnabled);
     }
 };
-

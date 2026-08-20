@@ -1,0 +1,100 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2023, MapCentia
+# This file is distributed under the same license as the Vidi package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Vidi 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-09-01 13:41+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: ../../pages/standard/96_api.rst:5 8efa3f9836134fd7b93bc4d176372008
+msgid "Vidi API"
+msgstr ""
+
+#: ../../pages/standard/96_api.rst:5 1bdbdbb964e04b9b90fa07f4f5585d2c
+msgid "Overview"
+msgstr ""
+
+#: ../../pages/standard/96_api.rst 1a6b22563f8b4574a0ba48f1ffec8533
+msgid "Date"
+msgstr ""
+
+#: ../../pages/standard/96_api.rst:9 ea894d10c31a4543a9de4254b0e10624
+msgid "|today|"
+msgstr ""
+
+#: ../../pages/standard/96_api.rst 4d906772699346eb84e4a17804cf97e1
+msgid "Vidi-version"
+msgstr ""
+
+#: ../../pages/standard/96_api.rst:10 8ecb3fa423404dd693a2b35ff5d7f8c3
+msgid "MASTER"
+msgstr ""
+
+#: ../../pages/standard/96_api.rst 6d3c020a2343435f9c64d4ebf3b1c39e
+msgid "Forfattere"
+msgstr ""
+
+#: ../../pages/standard/96_api.rst:11 35be3a9095094f78b4dea35207065d75
+msgid "`mapcentia <https://github.com/mapcentia>`_"
+msgstr ""
+
+#: ../../pages/standard/96_api.rst:14 e5758809d7cf448fba23449a17c4b3f7
+msgid "Indhold"
+msgstr ""
+
+#: ../../pages/standard/96_api.rst:18 e189b332c937464988ec66eac32c0e7d
+msgid "Brug"
+msgstr ""
+
+#: ../../pages/standard/96_api.rst:20 ec320a5495fb4a32a959dce00bccf3ca
+msgid ""
+"APIet kan bruges i de forskellige templates og funktioner, der kan "
+"defineres forskellige steder i en Vidi opsætning. Fx i "
+":ref:`gc2mata_infopopup` templates og funktioner."
+msgstr ""
+
+#: ../../pages/standard/96_api.rst:23 f4aa3ebd3b304d5fb641a1166482c1cf
+msgid ""
+"APIet kan ikke bruges til indlejrede Vidi kort - dvs. på den webside som "
+"Vidi er indlejret på. Her henvises til :ref:`embed_api`"
+msgstr ""
+
+#: ../../pages/standard/96_api.rst:26 704be97e76794bf5956db98662d9a0f9
+msgid "Tænd lag (turnOn)"
+msgstr ""
+
+#: ../../pages/standard/96_api.rst:28 ../../pages/standard/96_api.rst:37
+#: 86aa4157a9e340c5802cf051cf8ee026 b2137c360ead451790c9b65b69676abe
+msgid ""
+"Med denne metode kan man tænde for et lag. Den tager et argument som er "
+"et fuldt lagnavn med evt. type præfiks:"
+msgstr ""
+
+#: ../../pages/standard/96_api.rst:35 09303283c7294c658d669bf9fb9f1713
+msgid "Sluk lag (turnOff)"
+msgstr ""
+
+#: ../../pages/standard/96_api.rst:44 361af6dd3a27440b841d0047fdf0a933
+msgid "Sæt filter på lag (filter)"
+msgstr ""
+
+#: ../../pages/standard/96_api.rst:46 676b6453d9aa4e0e83fb5b2b12800129
+msgid ""
+"Med denne metode kan der sættes et filter på et givnet lag. Første "
+"argument er et fuldt lagnavn (uden type præfiks) og andet argument er "
+"filter objektet:"
+msgstr ""
+

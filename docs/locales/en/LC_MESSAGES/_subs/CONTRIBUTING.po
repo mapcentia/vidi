@@ -1,0 +1,363 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2023, MapCentia
+# This file is distributed under the same license as the Vidi package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Vidi 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-01-09 12:34+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.12.1\n"
+
+#: ../../_subs/CONTRIBUTING.rst:5 8e9d67ea74da45e89fcd441346b53723
+msgid "Contributing"
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:3 a2c9a36827b9471bb1e09018824b59c7
+msgid "Contributing to MapCentia Vidi"
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:5 524f40db6e964b8fa6c80e026faa9f36
+msgid ""
+"Please note we have a code of conduct, please follow it in all your "
+"interactions with the project."
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:8 5ced93b6eda54b33a2d60752ed3dcf1f
+msgid "Submitting bugs"
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:11 6437634d55a240868048880114786a2c
+msgid "Due diligence"
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:13 d96630ce9f734c6296aa96acca83e610
+msgid "Before submitting a bug, please do the following:"
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:17 d3f3923ebe584f16b522f56bd0fb10f8
+msgid "Perform basic troubleshooting steps:"
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:21 e2a2db6dfe7945eab49f26c7ce977530
+msgid ""
+"Make sure you’re on the latest version (Master branch and a fresh 'npm "
+"install'). If you’re not on the most recent version, your problem may "
+"have been solved already! Upgrading is always the best first step."
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:24 000ec3e89f144cf9bca9a727b7b0ceb7
+msgid ""
+"`Search the issue tracker <https://github.com/mapcentia/vidi/issues>`_ to"
+" make sure it’s not a known issue."
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:27 f976f6f862074d60afbfa9f1317e959b
+msgid "What to put in your bug report"
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:29 ff4e524d757f4345a69c4484f8e72100
+msgid ""
+"Make sure your report gets the attention it deserves: bug reports with "
+"missing information may be ignored or punted back to you, delaying a fix."
+" The below constitutes a bare minimum; more info is almost always better:"
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:33 ce1d034dd6774e53ba95649ef5098d84
+msgid ""
+"Are you using the official Docker image? If not, which versions of "
+"Node.js and Npm are you using? Which browser are you using (Chrome 70, "
+"Firefox 62, Edge 17, etc.) and OS (Windows 10, MacOS, IOS, etc.)"
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:36 ddf27f51829f4dad829404a6ec688bb8
+msgid ""
+"How can the developers recreate the bug on their end? If possible, "
+"include a copy of your code, link to online Vidi with the bug, connection"
+" to the GC2 server used, and the full error output from Node.js (if "
+"applicable.)"
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:39 a448194299ce4857a128c44cea9cde84
+msgid ""
+"A common tactic is to pare down your code until a simple (but still bug-"
+"causing) “base case” remains. Not only can this help you identify "
+"problems which aren’t real bugs, but it means the developer can get to "
+"fixing the bug faster."
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:42 982f2880946344ffb87ba6e16d765226
+msgid "Contributing changes"
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:45 412dd112ed1e4d9b9d3921913642869f
+msgid "Licensing of contributed material"
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:47 ff35b1e1cf65466184ab1a11098b3a85
+msgid ""
+"Your contribution will be under our `license "
+"<https://github.com/mapcentia/vidi/blob/master/LICENSE>`_ as per GitHub's"
+" `terms of service <https://help.github.com/articles/github-terms-of-"
+"service/#6-contributions-under-repository-license>`_."
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:50 97502a43c15f44ae9c3e54160d1bb32a
+msgid "Version control branching"
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:54 58df8e3e7595462fb18bcb3f283b00b9
+msgid ""
+"Always make a new branch for your work, no matter how small. This makes "
+"it easy for others to take just that one set of changes from your "
+"repository, in case you have multiple unrelated changes floating around."
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:57 1314a2aa8f064508be7127a069d54620
+msgid ""
+"A corollary: don’t submit unrelated changes in the same branch/pull "
+"request! The maintainer shouldn’t have to reject your awesome bugfix "
+"because the feature you put in with it needs more review."
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:60 496ecdd3cbde46d9a36b2809e75f8a7b
+msgid "Base your new branch off of the appropriate branch on the main repository:"
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:64 fa30c59c20fe4c73b185bff97a491cbf
+msgid ""
+"Bug fixes should be based on the branch named after the oldest supported "
+"release line the bug affects."
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:68 f5b23d492bcd408e90d5523e6863bb09
+msgid ""
+"E.g. if a feature was introduced in 2018.1, the latest release line is "
+"2018.1.4, and a bug is found in that feature - make your branch based on "
+"2018.1. The maintainer will then forward-port it to 2018.1.4 and master."
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:71 c3f81d8040804e7cb42c5440cfd87e55
+msgid ""
+"Bug fixes requiring large changes to the code or which have a chance of "
+"being otherwise disruptive, may need to base off of master instead. This "
+"is a judgement call – ask the devs!"
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:74 71b039e0d94a49a0ba076308e7bd512a
+msgid "New features should branch off of the ‘master’ branch."
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:77 0b296a07e7dc4405b8c25ceeadd06c05
+msgid ""
+"Note that depending on how long it takes for the dev team to merge your "
+"patch, the copy of master you worked off of may get out of date! If you "
+"find yourself ‘bumping’ a pull request that’s been sidelined for a while,"
+" make sure you rebase or merge to latest master to ensure a speedier "
+"resolution."
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:80 c70a23f3e21941debbbe730758fce061
+msgid "Documentation isn’t optional"
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:82 ec9bd32919a24d4498649e19606ab026
+msgid ""
+"Pull requests without adequate documentation will be rejected. By "
+"\"documentation\" we mean:"
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:86 52d472e460814fefba88db83c5d1f5b7
+msgid "The pull request should be commented, so its clear what it does."
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:89 b69aa84763c44a4fa708ec320e5257eb
+msgid "Update the CHANGELOG.md with details of the changes."
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:92 b193d590c33d422aa6dd51a6e307ea4a
+msgid ""
+"Increase the version numbers in CHANGELOG.md to the new version that this"
+" Pull Request would represent. The versioning scheme we use is `CalVer "
+"<https://calver.org/>`_ using YYYY.MINOR.MICRO.MODIFIER."
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:95 97163bd35db844cc862cf8a11e7f5d5b
+msgid "Code formatting"
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:97 f989643631f242daaad89cb77c33d23e
+msgid ""
+"Follow the style you see used in the primary repository! Consistency with"
+" the rest of the project always trumps other considerations. It doesn’t "
+"matter if you have your own style or if the rest of the code breaks with "
+"the greater community - just follow along."
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:100 846f50221d31448eb56194d4c2950588
+msgid "Suggesting Enhancements"
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:102 ea5e3bb4ff0f42e79d2d2102f2d237b9
+msgid ""
+"We welcome suggestions for enhancements, but reserve the right to reject "
+"them if they do not follow future plans for Vidi."
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:105 f1642741717d4bad83d79dbb329d0a0f
+msgid "Code of Conduct"
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:108 504e0895527a41719318a927ba906fc4
+msgid "Our Pledge"
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:110 1f5f2df6b3714190993a64632a68460d
+msgid ""
+"In the interest of fostering an open and welcoming environment, we as "
+"contributors and maintainers pledge to making participation in our "
+"project and our community a harassment-free experience for everyone, "
+"regardless of age, body size, disability, ethnicity, gender identity and "
+"expression, level of experience, nationality, personal appearance, race, "
+"religion, or sexual identity and orientation."
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:118 a0da8c9a71ec487fbd92d77a5b29d5f6
+msgid "Our Standards"
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:120 f25aba3178014d0baa4809a4a1f7defd
+msgid ""
+"Examples of behavior that contributes to creating a positive environment "
+"include:"
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:124 0f58f846bb2d402c8a0e8ae66cb2d451
+msgid "Using welcoming and inclusive language"
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:125 b2eee2821dc54b8583bb2020ce33be04
+msgid "Being respectful of differing viewpoints and experiences"
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:126 6b10e67362a440c9b1a442a8ad714a60
+msgid "Gracefully accepting constructive criticism"
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:127 33ddffd863514e3ca89ba08f7defbec4
+msgid "Focusing on what is best for the community"
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:128 e781ad7dd51b4b5ca6402c78b0140e9b
+msgid "Showing empathy towards other community members"
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:130 728fc8262171424a9038a7b55ecf14eb
+msgid "Examples of unacceptable behavior by participants include:"
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:133 5f9c247e913949c988f2156c78438da8
+msgid ""
+"The use of sexualized language or imagery and unwelcome sexual attention "
+"or advances"
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:135 22a26183960242beb72d7d4a53a477ae
+msgid "Trolling, insulting/derogatory comments, and personal or political attacks"
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:136 bf6e8aa180674f8b8ec3ad357d0da4be
+msgid "Public or private harassment"
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:137 4fb576f7d9a54813bcf837267b2942d3
+msgid ""
+"Publishing others' private information, such as a physical or electronic "
+"address, without explicit permission"
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:139 f0dff60b86164cbc8c76210d4452a8f2
+msgid ""
+"Other conduct which could reasonably be considered inappropriate in a "
+"professional setting"
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:143 1d5bff7a4db94218b0dd3c6e679a7db2
+msgid "Our Responsibilities"
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:145 2f1d35a0bd5c4e958f60fc225dc00ca9
+msgid ""
+"Project maintainers are responsible for clarifying the standards of "
+"acceptable behavior and are expected to take appropriate and fair "
+"corrective action in response to any instances of unacceptable behavior."
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:149 a26bc9bd46c742c391def130e71115ce
+msgid ""
+"Project maintainers have the right and responsibility to remove, edit, or"
+" reject comments, commits, code, wiki edits, issues, and other "
+"contributions that are not aligned to this Code of Conduct, or to ban "
+"temporarily or permanently any contributor for other behaviors that they "
+"deem inappropriate, threatening, offensive, or harmful."
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:156 ef951319df904389bb01ec234d2224e4
+msgid "Scope"
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:158 53501c4c1d2b4473b3d9b8c973772a96
+msgid ""
+"This Code of Conduct applies both within project spaces and in public "
+"spaces when an individual is representing the project or its community. "
+"Examples of representing a project or community include using an official"
+" project e-mail address, posting via an official social media account, or"
+" acting as an appointed representative at an online or offline event. "
+"Representation of a project may be further defined and clarified by "
+"project maintainers."
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:166 93ad0d5d633c469eac15d222c657a8ea
+msgid "Enforcement"
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:168 7ca6d8b488b0469eabe9656b6cd1ff52
+msgid ""
+"Instances of abusive, harassing, or otherwise unacceptable behavior may "
+"be reported by contacting the project team at info@mapcentia.com. All "
+"complaints will be reviewed and investigated and will result in a "
+"response that is deemed necessary and appropriate to the circumstances. "
+"The project team is obligated to maintain confidentiality with regard to "
+"the reporter of an incident. Further details of specific enforcement "
+"policies may be posted separately."
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:175 e0f16854df8944adb9500f86ad1f87c3
+msgid ""
+"Project maintainers who do not follow or enforce the Code of Conduct in "
+"good faith may face temporary or permanent repercussions as determined by"
+" other members of the project's leadership."
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:180 9be300031a8743748b750ffe95cf14b8
+msgid "Attribution"
+msgstr ""
+
+#: ../../../CONTRIBUTING.md:182 727471ea7b3b453d8a45fda1a161dc0c
+msgid ""
+"This Code of Conduct is adapted from the `Contributor Covenant <http"
+"://contributor-covenant.org>`_\\ , version 1.4, available at `http"
+"://contributor-covenant.org/version/1/4 <http://contributor-"
+"covenant.org/version/1/4/>`_"
+msgstr ""
+

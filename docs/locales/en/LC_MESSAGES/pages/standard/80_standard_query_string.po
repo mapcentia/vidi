@@ -1,0 +1,107 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2023, MapCentia
+# This file is distributed under the same license as the Vidi package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Vidi 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-01-09 12:54+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.12.1\n"
+
+#: ../../pages/standard/80_standard_query_string.rst:5
+#: 9b96b09c120b4deda42972ac2a0830cf
+msgid "Standard query string"
+msgstr ""
+
+#: ../../pages/standard/80_standard_query_string.rst:5
+#: 0a2b81b7658e487098648c080eb9267c
+msgid "Overview"
+msgstr ""
+
+#: ../../pages/standard/80_standard_query_string.rst
+#: b7e505322b1f44839bf013c922f13256
+msgid "Date"
+msgstr ""
+
+#: ../../pages/standard/80_standard_query_string.rst:9
+#: d508bb6a4821486b920a61aee556659f
+msgid "|today|"
+msgstr ""
+
+#: ../../pages/standard/80_standard_query_string.rst
+#: 90ba44edf45b48598e6128cae0917b52
+msgid "Vidi-version"
+msgstr ""
+
+#: ../../pages/standard/80_standard_query_string.rst:10
+#: 85caf3dd0c804043a0b0a2ba5599d2e9
+msgid "2022.8.4"
+msgstr ""
+
+#: ../../pages/standard/80_standard_query_string.rst
+#: 5af13302a22e494a9f4188efed395caa
+msgid "Forfattere"
+msgstr ""
+
+#: ../../pages/standard/80_standard_query_string.rst:11
+#: d2ac76f0ead64223af0cee9fd37bd6ff
+msgid "`mapcentia <https://github.com/mapcentia>`_"
+msgstr ""
+
+#: ../../pages/standard/80_standard_query_string.rst:14
+#: 3917dd55190247009260cba5b9972ff1
+msgid "Indhold"
+msgstr ""
+
+#: ../../pages/standard/80_standard_query_string.rst:16
+#: 273c6f2412a74fabb091913e0096ca77
+msgid ""
+"Når Vidi starter kan man indsætte parametre i url'en som styre en række "
+"egenskaber."
+msgstr ""
+
+#: ../../pages/standard/80_standard_query_string.rst:19
+#: 57546a201839421482aac033b7e30bed
+msgid "initialFilter"
+msgstr ""
+
+#: ../../pages/standard/80_standard_query_string.rst:21
+#: 508f8071ba814a5da0f7edb186b92f64
+msgid ""
+"Denne parameter kan sætte filtre på lag således, at de er filtreret fra "
+"startet. Der kan sættes flere filtre på det samme lag og flere lag kan "
+"filtreres. Filtrede lag bliver aktiveret i vektor-udgave og der zoomes "
+"til filtrerede features på det sidst færdig-loadede lag. Hvis laget ikke "
+"er udgivet i vektor-udgave, vil tile-udgaven tænde og der zoomes ikke."
+msgstr ""
+
+#: ../../pages/standard/80_standard_query_string.rst:24
+#: 5046aa2d33ae471d9f4f42fdfc367956
+msgid "Et filter objekt ser sådeles ud:"
+msgstr ""
+
+#: ../../pages/standard/80_standard_query_string.rst:42
+#: ff3a36ce5849476b941d14cc1f8436fa
+msgid ""
+"Når det skal bruges i URL'en skal filter objektet Base64URL kodes. Det "
+"ligner dette:"
+msgstr ""
+
+#: ../../pages/standard/80_standard_query_string.rst:49
+#: 55b6daa6594843e89f87830ba25b11f7
+msgid ""
+"Base64URL er en afart af Base64, som ikke kan indeholde tegnene +=/ og er"
+" derfor \"url sikker\". https://www.npmjs.com/package/base64url"
+msgstr ""
+

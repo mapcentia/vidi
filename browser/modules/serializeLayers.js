@@ -1,12 +1,13 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2020 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 const MAX_RESOLUTION = 156543.03390625;
 const MAX_EXTENT = [-20037508.34, -20037508.34, 20037508.34, 20037508.34];
 const SRS ="EPSG:3857";
+import {GEOJSON_PRECISION} from './constants';
 
 /**
  * @type {*|exports|module.exports}
@@ -43,7 +44,7 @@ module.exports = module.exports = {
             "query_buffer": true,
             "query_result": true,
             "print": true,
-            "measurement": false,
+            "measurements": false,
             "draw": true
         }, strictMode);
 
@@ -70,8 +71,50 @@ module.exports = module.exports = {
             "query_buffer": true,
             "query_result": true,
             "print": true,
-            "measurement": true,
+            "measurements": true,
             "draw": false
+        }, strictMode);
+
+        $.each(e, (i, v) => {
+            if (v.type === "Vector") {
+                layerDraw.push({geojson: v.geoJson})
+            }
+        });
+
+        return layerDraw;
+    },
+    serializeQueryDrawnItems: (strictMode = false) => {
+        let layerDraw = [];
+
+        let e = _self.serialize({
+            "printHelper": true,
+            "query_draw": false,
+            "query_buffer": true,
+            "query_result": true,
+            "print": true,
+            "measurements": true,
+            "draw": true
+        }, strictMode);
+
+        $.each(e, (i, v) => {
+            if (v.type === "Vector") {
+                layerDraw.push({geojson: v.geoJson})
+            }
+        });
+
+        return layerDraw;
+    },
+    serializeQueryBufferItems: (strictMode = false) => {
+        let layerDraw = [];
+
+        let e = _self.serialize({
+            "printHelper": true,
+            "query_draw": true,
+            "query_buffer": false,
+            "query_result": true,
+            "print": true,
+            "measurements": true,
+            "draw": true
         }, strictMode);
 
         $.each(e, (i, v) => {
@@ -329,7 +372,7 @@ var _encoders = {
                     featureGeoJson = {_latlngs: feature._latlngs};
                     featureGeoJson.type = "Rectangle";
                     featureGeoJson.feature = feature.feature;
-                } else if (`feature` in feature && `properties` in feature.feature && feature.feature.properties.type === "circlemarker") {
+                } else if (feature?.feature?.properties?.type === "circlemarker") {
                     featureGeoJson = {_latlng: feature._latlng};
                     featureGeoJson.type = "CircleMarker";
                     featureGeoJson.feature = feature.feature;
@@ -341,16 +384,21 @@ var _encoders = {
                     featureGeoJson = {_latlng: feature._latlng};
                     featureGeoJson.type = "Marker";
                     featureGeoJson.feature = feature.feature;
-                    featureGeoJson._vidi_marker_text = feature._vidi_marker_text;
+                    if (feature?._vidi_awesomemarkers) {
+                        featureGeoJson._vidi_awesomemarkers = feature._vidi_awesomemarkers;
+                    }
                 } else {
-                    featureGeoJson = feature.toGeoJSON();
+                    featureGeoJson = feature.toGeoJSON(GEOJSON_PRECISION);
                     featureGeoJson.geometry.coordinates = _projectCoords(SRS, featureGeoJson.geometry.coordinates);
                     featureGeoJson.type = "Feature";
                 }
 
                 featureGeoJson.style = style;
                 featureGeoJson._vidi_type = feature._vidi_type;
-                featureGeoJson._vidi_extremities = feature._extremities;
+                featureGeoJson._vidi_id = feature._vidi_id;
+                if (feature._vidi_type === "draw" || feature._vidi_type === "measurements") {
+                    featureGeoJson._vidi_extremities = feature._extremities || feature.feature._vidi_extremities;
+                }
                 featureGeoJson._vidi_measurementLayer = feature._measurementLayer ? true : false;
                 featureGeoJson._vidi_measurementOptions = feature._measurementOptions;
 
@@ -486,7 +534,7 @@ var _circleGeoJSON = function (circle) {
         var shift = L.point(Math.cos(radian), Math.sin(radian));
         points.push(projection.unproject(cnt.add(shift.multiplyBy(circle.getRadius() * scale / earthRadius))));
     }
-    return L.polygon(points).toGeoJSON();
+    return L.polygon(points).toGeoJSON(GEOJSON_PRECISION);
 };
 
 /**

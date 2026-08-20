@@ -1,11 +1,16 @@
 /*
  * @author     Alexander Shumilov
- * @copyright  2013-2019 MapCentia ApS
+ * @copyright  2013-2021 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
-import { MODULE_NAME, LAYER, SQL_QUERY_LIMIT } from './constants';
-import { GROUP_CHILD_TYPE_LAYER, GROUP_CHILD_TYPE_GROUP } from './LayerSorting';
+
+import {MODULE_NAME, LAYER, SQL_QUERY_LIMIT} from './constants';
+import {GROUP_CHILD_TYPE_LAYER, GROUP_CHILD_TYPE_GROUP} from './LayerSorting';
+
+const utils = require('./../utils')
+
+import base64url from '../base64url.js';
 
 /**
  * Communicating with the service workied via MessageChannel interface
@@ -41,7 +46,11 @@ const applyOpacityToLayer = (opacity, layerKey, cloud, backboneEvents) => {
     for (let key in cloud.get().map._layers) {
         if (`id` in cloud.get().map._layers[key] && cloud.get().map._layers[key].id) {
             if (cloud.get().map._layers[key].id === layerKey) {
-                cloud.get().map._layers[key].setOpacity(opacity);
+                try {
+                    cloud.get().map._layers[key].setOpacity(opacity);
+                } catch (e) {
+                    // console.error(e)
+                }
                 backboneEvents.get().trigger(`${MODULE_NAME}:opacityChange`);
             }
         }
@@ -62,7 +71,7 @@ const calculateOrder = (currentOrder) => {
     $(`[id^="layer-panel-"]`).each((index, element) => {
         let id = $(element).attr(`id`).replace(`layer-panel-`, ``);
         let children = [];
-        let readableId = atob(id);
+        let readableId = base64url.decode(id);
 
         let correspondingOrderItem = false;
         if (currentOrder) {
@@ -72,7 +81,7 @@ const calculateOrder = (currentOrder) => {
                 }
             });
         }
-        
+
         if ($(`#${$(element).attr(`id`)}`).find(`#collapse${id}`).children().first().children().length > 0) {
             // Panel was opened
             const processLayerRecord = (layerElement) => {
@@ -127,10 +136,10 @@ const calculateOrder = (currentOrder) => {
             }
 
             if (children.length === 0) {
-                console.warn(`Unable to get children for the ${atob(id)} group`);
+                console.warn(`Unable to get children for the ${base64url.decode(id)} group`);
             }
         }
-        
+
         if (readableId) {
             layerTreeOrder.push({
                 id: readableId,
@@ -146,44 +155,23 @@ const calculateOrder = (currentOrder) => {
 
 /**
  * Setups the active / added layers indicator for group
- * 
+ *
  * @param {String} base64GroupName      Group name encoded in base64
  * @param {Number} numberOfActiveLayers Number of added layers
  * @param {Number} numberOfAddedLayers  Number of active layers
- * 
+ *
  * @returns {void}
  */
 const setupLayerNumberIndicator = (base64GroupName, numberOfActiveLayers, numberOfAddedLayers) => {
-    $("#layer-panel-" + base64GroupName + " span:eq(1)").html(numberOfAddedLayers);
-    if (numberOfActiveLayers > 0) {
-        $("#layer-panel-" + base64GroupName + " span:eq(0)").html(numberOfActiveLayers);
-    }
-};
-
-/**
- * Default template for feature popup
- */
-const getDefaultTemplate = () => {
-    return `<div class="cartodb-popup-content">
-        <div class="form-group gc2-edit-tools">
-            {{#_vidi_content.fields}}
-                {{#title}}<h4>{{title}}</h4>{{/title}}
-                {{#value}}
-                <p {{#type}}class="{{ type }}"{{/type}}>{{{ value }}}</p>
-                {{/value}}
-                {{^value}}
-                <p class="empty">null</p>
-                {{/value}}
-            {{/_vidi_content.fields}}
-        </div>
-    </div>`;
+    $("#layer-panel-" + base64GroupName + " .layer-count span:eq(1)").html(numberOfAddedLayers);
+    $("#layer-panel-" + base64GroupName + " .layer-count span:eq(0)").html(numberOfActiveLayers);
 };
 
 /**
  * Removes layer type prefix from the layer name
- * 
+ *
  * @param {String} layerName Initial layer name
- * 
+ *
  * @return {String}
  */
 const stripPrefix = (layerName) => {
@@ -224,9 +212,9 @@ const occurrences = (string, subString, allowOverlapping = false) => {
 
 /**
  * Checks if the current layer type is the vector tile one
- * 
+ *
  * @param {String} layerId Layer identifier
- * 
+ *
  * @returns {Promise}
  */
 const isVectorTileLayerId = (layerId) => {
@@ -240,9 +228,9 @@ const isVectorTileLayerId = (layerId) => {
 
 /**
  * Detects possible layer types for layer meta
- * 
+ *
  * @param {Object} layerDescription Layer description
- * 
+ *
  * @return {Object}
  */
 const getPossibleLayerTypes = (layerDescription) => {
@@ -254,7 +242,8 @@ const getPossibleLayerTypes = (layerDescription) => {
         }
     }
 
-    let isVectorLayer = false, isRasterTileLayer = false, isVectorTileLayer = false, isWebGLLayer = false, detectedTypes = 0, specifiers = [];
+    let isVectorLayer = false, isRasterTileLayer = false, isVectorTileLayer = false, isWebGLLayer = false,
+        detectedTypes = 0, specifiers = [];
     let usingLegacyNotation = true;
     if (layerTypeSpecifiers.indexOf(`,`) > -1) {
         // Using new layer type notation
@@ -321,33 +310,38 @@ const getPossibleLayerTypes = (layerDescription) => {
         specifiers.push(LAYER.RASTER_TILE);
     }
 
-    return { isVectorLayer, isRasterTileLayer, isVectorTileLayer, isWebGLLayer, detectedTypes, specifiers };
+    return {isVectorLayer, isRasterTileLayer, isVectorTileLayer, isWebGLLayer, detectedTypes, specifiers};
 };
 
 /**
  * Handler for store errors
- * 
+ *
+ * @param {Object} store SqlStore
  * @param {Object} response Response
- * 
+ *
  * @returns {void}
  */
-const storeErrorHandler = (response)=>{
-    if (response && response.statusText === `abort`) {
+const storeErrorHandler = (store, response) => {
+    if (response && response.statusText === `timeout`) {
+        utils.showInfoToast(__("Couldn't get the data. Trying again..."));
+        //try again
+        store.load();
+    } else if (response && response.statusText === `abort`) {
         // If the request was aborted, then it was sanctioned by Vidi, so no need to inform user
     } else if (response && response.responseJSON) {
-        alert(response.responseJSON.message);
         console.error(response.responseJSON.message);
+        utils.showInfoToast(response.responseJSON.message);
     } else {
-        alert(`Error occured`);
         console.error(response);
+        utils.showInfoToast('Error occurred');
     }
 };
 
 /**
  * Detects the query limit for layer
- * 
+ *
  * @param {Object} layerMeta Layer meta
- * 
+ *
  * @return {Number}
  */
 const getQueryLimit = (layerMeta) => {
@@ -362,15 +356,32 @@ const getQueryLimit = (layerMeta) => {
 };
 
 /**
+ * Detects if a vector should be clustered
+ *
+ * @param {Object} layerMeta Layer meta
+ *
+ * @return {Number}
+ */
+const getIfClustering = (layerMeta) => {
+    if (!layerMeta) throw new Error(`Invalid layer meta object`);
+
+    let useClustering = false;
+    if (layerMeta && `use_clustering` in layerMeta) {
+        useClustering = layerMeta.use_clustering;
+    }
+    return useClustering;
+};
+
+/**
  * Detects default (fallback) layer type
- * 
+ *
  * @param {Object} layerMeta  Layer meta
  * @param {Object} parsedMeta Parsed layer "meta" field
- * 
+ *
  * @return {Object}
  */
 const getDefaultLayerType = (layerMeta, parsedMeta = false) => {
-    let { isVectorLayer, isRasterTileLayer, isVectorTileLayer, isWebGLLayer } = getPossibleLayerTypes(layerMeta);
+    let {isVectorLayer, isRasterTileLayer, isVectorTileLayer, isWebGLLayer} = getPossibleLayerTypes(layerMeta);
     if (parsedMeta) {
         if (`default_layer_type` in parsedMeta && parsedMeta.default_layer_type) {
             if (isVectorLayer && parsedMeta.default_layer_type === LAYER.VECTOR) return LAYER.VECTOR;
@@ -397,7 +408,6 @@ module.exports = {
     queryServiceWorker,
     applyOpacityToLayer,
     calculateOrder,
-    getDefaultTemplate,
     storeErrorHandler,
     stripPrefix,
     getQueryLimit,
@@ -405,5 +415,6 @@ module.exports = {
     getDefaultLayerType,
     setupLayerNumberIndicator,
     isVectorTileLayerId,
-    occurrences
+    occurrences,
+    getIfClustering
 };

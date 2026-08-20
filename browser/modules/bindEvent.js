@@ -1,45 +1,39 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2021 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
 
-import { LAYER, LAYER_TYPE_DEFAULT } from './layerTree/constants';
-
-var mobile = require('is-mobile');
-
-/**
- *
- * @type {*|exports|module.exports}
- */
-var advancedInfo, cloud, switchLayer, meta, utils;
-
-/**
- *
- * @type {*|exports|module.exports}
- */
-let APIBridgeSingletone = require('./api-bridge');
-
-/**
- *
- * @type {APIBridge}
- */
-var apiBridgeInstance = false;
+import {LAYER_TYPE_DEFAULT} from './layerTree/constants';
+import legend from './legend';
+import {NO_GUI_FADE} from "./constants";
 
 require('dom-shims');
 require('arrive');
+const layerTreeUtils = require('./layerTree/utils');
+const APIBridgeSingletone = require('./api-bridge');
+const urlparser = require('./urlparser');
+let advancedInfo, cloud, switchLayer, meta, utils;
+let apiBridgeInstance = false;
+let backboneEvents;
+let pushState;
+let layerTree;
+let layers;
+let infoClick;
+let setting;
+let state;
+let sqlQuery;
+let applicationModules = false;
+let isStarted = false;
+let readyCallbackIsfired = false;
+let groupsIsOpened = false;
+let urlVars = urlparser.urlVars;
 
-var backboneEvents;
-var pushState;
-var layerTree;
-var layers;
-var infoClick;
-var setting;
-var state;
-var applicationModules = false;
-var isStarted = false;
+let mainLayerOffcanvas;
+let offcanvasInfo;
+
 
 /**
  *
@@ -61,47 +55,85 @@ module.exports = {
         setting = modules.setting;
         state = modules.state;
         utils = modules.utils;
+        sqlQuery = modules.sqlQuery;
         return this;
     },
-    init: function (str) {
+    init: function () {
         apiBridgeInstance = APIBridgeSingletone();
 
-        var doneL = false, doneB = false, loadingL = 0, loadingB = 0;
+        try {
+            mainLayerOffcanvas = new bootstrap.Offcanvas('#mainLayerOffcanvas');
+            offcanvasInfo = new bootstrap.Offcanvas('#offcanvasLayerDesc');
+            document.getElementById('mainLayerOffcanvas').addEventListener('shown.bs.offcanvas', event => {
+                document.querySelector("#offcanvasLayerControlBtn .bi-arrow-bar-left")?.classList.remove("d-none");
+                document.querySelector("#offcanvasLayerControlBtn .bi-arrow-bar-right")?.classList.add("d-none");
+            })
+            document.getElementById('mainLayerOffcanvas').addEventListener('hidden.bs.offcanvas', event => {
+                document.querySelector("#offcanvasLayerControlBtn .bi-arrow-bar-right").classList.remove("d-none");
+                document.querySelector("#offcanvasLayerControlBtn .bi-arrow-bar-left").classList.add("d-none");
+            })
+            $("#offcanvasLayerControlBtn").on("click", () => {
+                mainLayerOffcanvas.toggle()
+            });
+            if (window.vidiConfig.showOffcanvas === true ||
+                ((window.vidiConfig.showOffcanvas === 'mobile' || window.vidiConfig.showOffcanvas === 'mobil') && window.screen.width > 700)
+            ) {
+                mainLayerOffcanvas.show();
+            }
+        } catch (e) {
 
-        cloud.get().on("dragend", function () {
+        }
+
+        let doneL = false, doneB = false, loadingL = 0, loadingB = 0;
+        const fadeWhenDraggingClass = $(".fade-then-dragging");
+
+        cloud.get().on('dragend', function () {
             pushState.init();
         });
-        cloud.get().on("moveend", function () {
+        cloud.get().on('moveend', function () {
             pushState.init();
         });
-        cloud.get().on("move", function () {
-            $("#tail").fadeOut(100);
+        cloud.get().on('move', function () {
+            $('#tail').fadeOut(100);
         });
 
-        cloud.get().on("dragstart", function () {
-            $(".fade-then-dragging").animate({opacity: "0.3"}, 200);
-            $(".fade-then-dragging").css("pointer-events", "none");
-        });
+        // Define how we want the menu to fade out
+        let fadeOutMenu = function (fadeWhenDraggingClass) {
+            fadeWhenDraggingClass.animate({opacity: '0.3'}, 200);
+            fadeWhenDraggingClass.css('pointer-events', 'none');
+        }
 
-        cloud.get().on("dragend", function () {
-            $(".fade-then-dragging").animate({opacity: "1"}, 200);
-            $(".fade-then-dragging").css("pointer-events", "all");
+        // Define how we want the menu to fade in
+        let fadeInMenu = function (fadeWhenDraggingClass) {
+            fadeWhenDraggingClass.animate({opacity: '1'}, 200);
+            fadeWhenDraggingClass.css('pointer-events', 'all');
+        }
 
-        });
+        if ((window.vidiConfig.mode & NO_GUI_FADE) === 0) {
+            cloud.get().on('dragstart', function () {
+                fadeOutMenu(fadeWhenDraggingClass);
+            });
+
+            cloud.get().on('dragend', function () {
+                fadeInMenu(fadeWhenDraggingClass);
+            });
+        }
 
         /**
          * Triggered when the layer control is changed in any module
          */
         $(document).arrive('[data-gc2-id]', function (e, data) {
-            $(this).on("change", function (e) {
+            $(this).off('change');
+            $(this).on('change', function (e) {
                 let prefix = '';
                 let doNotLegend = false;
                 if ($(this).data(`gc2-layer-type`)) {
-                    prefix = $(e.target).data('gc2-layer-type') + `:`;
+                    const type = $(e.target).data('gc2-layer-type');
+                    prefix = type !== 't' ? type + ':' : '';
                     if (prefix === LAYER_TYPE_DEFAULT + `:`) {
                         prefix = ``;
                     }
-  
+
                     if (data) {
                         doNotLegend = data.doNotLegend;
                     }
@@ -114,39 +146,119 @@ module.exports = {
             });
         });
 
-        $("#searchclear").on("click", function () {
-            backboneEvents.get().trigger("clear:search");
+        $(document).arrive('[data-gc2-group-name]', function () {
+            $(this).on('change', function (e) {
+                let prefix;
+                let isChecked = $(e.target).prop(`checked`);
+                let groupName = $(this).data(`gc2-group-name`);
+                meta.getMetaData().data.filter((e) => {
+                    if (e.layergroup === groupName) {
+                        let parsedMeta = layerTree.parseLayerMeta(e);
+                        prefix = parsedMeta?.default_layer_type && parsedMeta.default_layer_type !== 't' ? parsedMeta.default_layer_type + ':' : '';
+                        setTimeout(() => {
+                            switchLayer.init(prefix + e.f_table_schema + "." + e.f_table_name, isChecked, true, false);
+                            legend.init();
+                        }, 1)
+                        return true;
+                    }
+                })
+                e.stopPropagation();
+                backboneEvents.get().trigger(`layerTree:activeLayersChange`);
+            });
+        });
+
+        $(document).arrive('[data-gc2-subgroup-name]', function () {
+            $(this).on('change', function (e) {
+                let prefix = '';
+                let isChecked = $(e.target).prop(`checked`);
+                let subGroupName = $(this).data(`gc2-subgroup-name`);
+                let subGroupLevel = $(this).data(`gc2-subgroup-level`);
+                let layerGroup = $(this).closest('.card-body').data('gc2-group-id');
+                meta.getMetaData().data.forEach(e => {
+                    let parsedMeta = layerTree.parseLayerMeta(e);
+                    if (parsedMeta?.vidi_sub_group?.split("|")[subGroupLevel] === subGroupName && e.layergroup === layerGroup) {
+                        prefix = parsedMeta?.default_layer_type && parsedMeta.default_layer_type !== 't' ? parsedMeta.default_layer_type + ':' : '';
+                        switchLayer.init(prefix + e.f_table_schema + "." + e.f_table_name, isChecked, false);
+                    }
+                })
+                e.stopPropagation();
+                backboneEvents.get().trigger(`layerTree:activeLayersChange`);
+            });
+        });
+
+        $('.searchclear').on('click', function () {
+            backboneEvents.get().trigger('clear:search');
+        });
+        $(document).arrive('.searchclear', function () {
+            $(this).on('click', function () {
+                backboneEvents.get().trigger('clear:search');
+            });
+        });
+
+        // Toggle top group checkboxes when layer tree is ready
+        backboneEvents.get().on("layerTree:ready", function () {
+            let groups = [];
+            meta.getMetaData().data.forEach(e => {
+                if (e.layergroup && !groups.includes(e.layergroup)) {
+                    groups.push(e.layergroup);
+                }
+            })
+            groups.forEach(e => {
+                layerTree.toggleGroupCheckBoxes(e, null)
+            })
         });
 
         backboneEvents.get().on("allDoneLoading:layers", function () {
+            const openFirstIfNotOpen = () => {
+                setTimeout(() => {
+                    const e = document.querySelector('.js-toggle-layer-panel');
+                    if (window.vidiConfig.expandFirstInLayerTree === true && e?.classList?.contains("collapsed")) {
+                        e.click();
+                    }
+                }, 0)
+            }
+            const openLayerTreeGroupsIfNotOpen = () => {
+                setTimeout(() => {
+                    if (window.vidiConfig.openLayerTreeGroups.length > 0) {
+                        window.vidiConfig.openLayerTreeGroups.forEach(g => {
+                            const e = document.querySelector(`[data-gc2-group-id="${g}"] .js-toggle-layer-panel`);
+                            if (e?.classList?.contains("collapsed")) {
+                                e.click();
+                            }
+                        })
+                    }
+                }, 0)
+            }
             if (!isStarted) {
-                if (mobile()) {
-                    $('ul[role="tablist"]:last-child').attr('style', 'padding-bottom: 100px');
-                }
-
                 isStarted = true;
-                setTimeout(
-                    function () {
-                        if ($(document).width() > 1024 && typeof window.vidiConfig.activateMainTab === "undefined") {
-                            $("#search-border").trigger("click");
-                        }
-                    }, 200
-                );
+                openFirstIfNotOpen();
+                openLayerTreeGroupsIfNotOpen();
 
-                setTimeout(
-                    function () {
-                        if (!window.vidiConfig.doNotCloseLoadScreen) {
-                            $("#loadscreen").fadeOut(200);
+            } else {
+                if (!groupsIsOpened) {
+                    openFirstIfNotOpen();
+                    openLayerTreeGroupsIfNotOpen();
+                    groupsIsOpened = true;
+                }
+                if (!readyCallbackIsfired && urlVars?.readyCallback) {
+                    try {
+                        if (state.activeLayersInSnapshot()) {
+                            window.parent.postMessage({
+                                type: "snapshotLayersCallback",
+                                method: urlVars.readyCallback
+                            }, "*");
+                            readyCallbackIsfired = true;
                         }
-                    }, 600
-                );
+                    } catch (e) {
+                    }
+                }
             }
         });
 
         // Clear all query layers and deactivate tools
         // ===========================================
-        backboneEvents.get().on("sqlQuery:clear", () => {
-            console.info("Resting SQL Query");
+        backboneEvents.get().on('sqlQuery:clear', () => {
+            console.info('Resting SQL Query');
             infoClick.reset();
             advancedInfo.reset();
             layerTree.resetSearch();
@@ -154,371 +266,189 @@ module.exports = {
 
         // Layer loading
         // =============
-        backboneEvents.get().on("startLoading:layers", function (e) {
-            console.log("Start loading: " + e);
+        backboneEvents.get().on('startLoading:layers', function (e) {
+            console.log('Start loading: ' + e);
             doneL = false;
             loadingL = true;
-            $(".loadingIndicator").fadeIn(200);
+            $('.loadingIndicator').fadeIn(200);
         });
 
-        backboneEvents.get().on("startLoading:setBaselayer", function (e) {
-            console.log("Start loading base layer: " + e);
+        backboneEvents.get().on('startLoading:setBaselayer', function (e) {
+            console.log('Start loading base layer: ' + e);
             doneB = false;
             loadingB = true;
-            $(".loadingIndicator").fadeIn(200);
+            $('.loadingIndicator').fadeIn(200);
         });
 
-        backboneEvents.get().on("doneLoading:layers", function (e) {
-            console.log("Done loading: " + e);
+        backboneEvents.get().on('doneLoading:layers', function (e) {
+            console.log('Done loading: ' + e);
             if (layers.getCountLoading() === 0) {
                 layers.resetCount();
                 doneL = true;
                 loadingL = false;
 
                 if ((doneL && doneB) || loadingB === false) {
-                    console.log("Setting timeout to " + window.vidiTimeout + "ms");
+                    console.log('Setting timeout to ' + window.vidiTimeout + 'ms');
                     setTimeout(function () {
-                        console.info("Layers all loaded L");
-                        backboneEvents.get().trigger("allDoneLoading:layers");
+                        console.info('Layers all loaded L');
+                        backboneEvents.get().trigger('allDoneLoading:layers');
                         doneB = doneL = false;
-                        $(".loadingIndicator").fadeOut(200);
+                        $('.loadingIndicator').fadeOut(200);
                     }, window.vidiTimeout)
                 }
             }
         });
 
-        backboneEvents.get().on("doneLoading:setBaselayer", function (e) {
-            console.log("Done loading base layer: " + e);
+        backboneEvents.get().on('doneLoading:setBaselayer', function (e) {
+            console.log('Done loading base layer: ' + e);
             doneB = true;
             loadingB = false;
 
             if ((doneL && doneB) || loadingL === false || layers.getCountLoading() === 0) {
-                console.log("Setting timeout to " + window.vidiTimeout + "ms");
+                console.log('Setting timeout to ' + window.vidiTimeout + 'ms');
                 setTimeout(function () {
-                    console.info("Layers all loaded B");
-                    backboneEvents.get().trigger("allDoneLoading:layers");
+                    console.info('Layers all loaded B');
+                    backboneEvents.get().trigger('allDoneLoading:layers');
                     doneB = doneL = false;
-                    $(".loadingIndicator").fadeOut(200);
+                    $('.loadingIndicator').fadeOut(200);
                 }, window.vidiTimeout)
             }
         });
 
-        $(document).bind('mousemove', function (e) {
+        $(document).on('mousemove.tail', function (e) {
             $('#tail').css({
                 left: e.pageX + 20,
                 top: e.pageY
             });
         });
 
-        backboneEvents.get().on("refresh:auth", function (response) {
+        backboneEvents.get().on('refresh:auth', function () {
             apiBridgeInstance.resubmitSkippedFeatures();
         });
 
         // Refresh browser state. E.g. after a session start
         // =================================================
-        backboneEvents.get().on("refresh:meta", function (response) {
-            meta.init().then(() => {
-                return setting.init();
-            }, (error) => {
-                console.log(error); // Stacktrace
-                //alert("Vidi is loaded without schema. Can't set extent or add layers");
-                backboneEvents.get().trigger("ready:meta");
-                state.init();
-            }).then(() => {
-                layerTree.create(false, [], true);
-                state.init();
-
-            });
+        backboneEvents.get().on('refresh:meta', function () {
+            meta.init(null, false, false).then(() => {
+                    backboneEvents.get().trigger('ready:meta');
+                    layerTree.create(false, [], true).then(() => {
+                        // Toggle active layers, so protected layers will be reevaluated
+                        layerTree.getActiveLayers().forEach(l => {
+                            switchLayer.init(l, false).then(() => {
+                                switchLayer.init(l, true);
+                            });
+                        })
+                        if (!urlVars.state) {
+                            if (window.vidiConfig?.activeLayers?.length > 0) {
+                                meta.getLayerNamesFromSchemata(window.vidiConfig.activeLayers.map(i => i.replace('v:', ''))).then(layers => {
+                                    window.vidiConfig.activeLayers.forEach(i => {
+                                        if (i.startsWith('v:')) {
+                                            layers.push(i);
+                                            const index = layers.indexOf(i.replace('v:', ''));
+                                            layers.splice(index, 1);
+                                        }
+                                    })
+                                    console.info('Activating layers:', layers)
+                                    layers.forEach((l) => {
+                                        // Don't activate layer already active
+                                        if (!layerTree.getActiveLayers().includes(l)) {
+                                            switchLayer.init(l, false).then(() => {
+                                                switchLayer.init(l, true);
+                                            });
+                                        }
+                                    })
+                                    backboneEvents.get().trigger(`layerTree:activeLayersChange`);
+                                })
+                            }
+                        }
+                    });
+                }
+            );
         });
 
         // Init some GUI stuff after modules are loaded
         // ============================================
-        $("[data-toggle=tooltip]").tooltip();
-        try {
-            $.material.init();
-        } catch (e) {
-            console.warn("Material Design could not be initiated");
-        }
+        $('[data-toggle=tooltip]').tooltip();
 
-        touchScroll(".tab-pane");
-        touchScroll("#info-modal-body-wrapper");
-        $("#loadscreentext").html(__("Loading data"));
+        touchScroll('.tab-pane');
+        touchScroll('#info-modal-body-wrapper');
+        $('#loadscreentext').html(__('Loading data'));
 
         backboneEvents.get().on(`extensions:initialized`, () => {
             if (window.vidiConfig.activateMainTab) {
-                setTimeout(function () {
-                    if ($('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]').length === 1) {
-                        $('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]').trigger('click');
-                    } else {
-                        console.warn(`Unable to locate specified activateMainTab ${window.vidiConfig.activateMainTab}`)
-                    }
-                }, 200);
+                // Activate tabs
+                const triggerTabList = document.querySelectorAll('#main-tabs a')
+                triggerTabList.forEach(triggerEl => {
+                    const tabTrigger = new bootstrap.Tab(triggerEl)
+                    triggerEl.addEventListener('click', event => {
+                        event.preventDefault()
+                        tabTrigger.show()
+                    })
+                })
+                const e = document.querySelector('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]');
+                if (e) {
+                    bootstrap.Tab.getInstance(e).show();
+                    setTimeout(() => {
+                        e.click();
+                    }, 100)
+                } else {
+                    console.warn(`Unable to locate specified activateMainTab ${window.vidiConfig.activateMainTab}`)
+                }
             }
-        });
+        })
 
         $(document).arrive('[data-toggle="tooltip"]', function () {
             $(this).tooltip()
         });
 
         $(document).arrive('[data-scale-ul]', function () {
-            $(this).on("click", function (e) {
-                $("#select-scale").val($(this).data('scale-ul')).trigger("change");
+            $(this).on('click', function () {
+                $('#select-scale').val($(this).data('scale-ul')).trigger('change');
             });
         });
 
-        // Set up the open/close functions for side panel
-        var searchPanelOpen, width, defaultCollapsedWidth = 260;
-
-        $("#main-tabs a").on("click", function (e) {
-            if ($(this).data(`module-ignore`) !== true && $(this).data(`module-ignore`) !== `true`) {
-                $("#module-container.slide-right").css("right", "0");
-                searchShowFull();
-            }
-        });
-
-        $(document).arrive("#main-tabs a", function () {
-            $(this).on("click", function (e) {
-                if ($(this).data(`module-ignore`) !== true && $(this).data(`module-ignore`) !== `true`) {
-                    $("#module-container.slide-right").css("right", "0");
-                    searchShowFull();
-                }
-            });
-        });
-
-        $("#info-modal .modal-header button").on("click", function () {
-            if (!$(this).data("extraClickHandlerIsEnabled")) {
-                infoModalHide();
-                // Ikke den
-            }
-        });
-
-        $("#module-container .modal-header button").on("click", function () {
-            searchShow();
-            if (!$(this).data("extraClickHandlerIsEnabled")) {
-                moduleContainerHide();
-                $("#side-panel ul li").removeClass("active");
-            }
-        });
-
-        let setWidth = function (width) {
-            $("#search-ribbon").css("width", width + "px").css("right", "-" + (width - 40) + "px");
-            $("#module-container").css("width", (width - 100) + "px");
-            $("#info-modal").css("width", (width - 100) + "px");
-            $(".navmenu").css("width", (width) + "px");
-            $(".slide-right").css("right", "-" + (width - 100) + "px");
-        };
-
-        var infoModalHide = function () {
-            $("#info-modal").css("right", "-" + (width - 100) + "px");
-        }
-
-        var moduleContainerHide = function () {
-            $("#module-container.slide-right").css("right", "-" + (width - 100) + "px");
-        }
-
-        var searchShow = function () {
-            let localCollapsedWidth = Math.max.apply(Math, $('#side-panel #main-tabs > li > a, #side-panel #main-tabs > li [role="tab"]').map(function(){ return $(this).width(); }).get());
-            if (localCollapsedWidth > 0) {
-                if (localCollapsedWidth < 170) localCollapsedWidth = 170;
-                localCollapsedWidth = localCollapsedWidth + 80;
+        const legendToast = document.getElementById('legend-toast');
+        const legendBtn = document.getElementById("btn-show-legend-in-map");
+        legendToast?.addEventListener('hidden.bs.toast', () => {
+            $('#legend-content').append($('#legend'));
+            legendBtn.classList.remove("btn-secondary");
+            legendBtn.classList.add("btn-outline-secondary");
+        })
+        legendToast?.addEventListener('shown.bs.toast', () => {
+            $('#legend-toast-body').append($('#legend'));
+            legendBtn.classList.add("btn-secondary");
+            legendBtn.classList.remove("btn-outline-secondary");
+        })
+        legendBtn?.addEventListener("click", (el) => {
+            const t = new bootstrap.Toast(legendToast, {autohide: false});
+            if (t.isShown()) {
+                t.hide();
             } else {
-                localCollapsedWidth = defaultCollapsedWidth + 80;
+                t.show();
             }
-
-            $("#search-ribbon").css("right", "-" + (width - localCollapsedWidth) + "px");
-            $("#pane").css("right", (localCollapsedWidth - 40) + "px");
-            $('#map').css("width", "calc(100% - " + (localCollapsedWidth / 2) + "px)");
-            searchPanelOpen = true;
-        }
-
-        var searchShowFull = function () {
-            $("#search-ribbon").css("right", "0");
-            $("#pane").css("right", (width - 40) + "px");
-            $('#map').css("width", "calc(100% - " + (width / 2) + "px");
-            searchPanelOpen = true;
-        }
-
-        var searchHide = function () {
-            $("#pane").css("right", "0");
-            $('#map').css("width", "100%");
-            $("#search-ribbon").css("right", "-" + (width - 40) + "px");
-            searchPanelOpen = false;
-            $("#side-panel ul li").removeClass("active");
-        };
-
-        var jRes = jRespond([
-            {
-                label: 'phone',
-                enter: 0,
-                exit: 500
-            },
-            {
-                label: 'tablet',
-                enter: 501,
-                exit: 1024
-            },
-            {
-                label: 'desktop',
-                enter: 1024,
-                exit: 10000
-            }
-        ]);
-
-        jRes.addFunc({
-            breakpoint: ['phone'],
-            enter: function () {
-                searchHide()
-                width = 400;
-                setWidth(width)
-            },
-            exit: function () {
-                console.log("Exit phone");
-
-            }
-        });
-        jRes.addFunc({
-            breakpoint: ['tablet'],
-            enter: function () {
-                searchHide()
-                width = 500;
-                setWidth(width)
-            },
-            exit: function () {
-                console.log("Exit tablet");
-
-            }
-        });
-        jRes.addFunc({
-            breakpoint: ['desktop'],
-            enter: function () {
-                searchHide()
-                width = 700;
-                setWidth(width)
-            },
-            exit: function () {
-                console.log("Exit desktop");
-
-            }
-        });
-
-        $('#search-border').click(function () {
-            let id = $("#search-border i");
-            if (searchPanelOpen) {
-                searchHide();
-                infoModalHide();
-                moduleContainerHide();
-                id.removeClass("fa-times");
-                id.addClass("fa-reorder");
-                id.css("padding-left", "12px")
-
-            } else {
-                searchShow();
-                id.removeClass("fa-reorder");
-                id.addClass("fa-times");
-                id.css("padding-left", "14px")
-            }
-        });
-
-        // Bottom dialog
-        $(".close-hide").on("click touchstart", function (e) {
-            var id = ($(this)).parent().parent().attr('id');
-
-            // If print when deactivate
-            if ($(this).data('module') === "print") {
-                backboneEvents.get().trigger(`off:print`);
-            }
-
-            // If legend when deactivate
-            if ($(this).data('module') === "legend") {
-                $("#legend-content").append($("#legend"));
-                $("#btn-show-legend-in-map").prop("disabled", false);
-            }
-
-            $("#" + id).animate({
-                bottom: "-100%"
-            }, 500, function () {
-                $(id + " .expand-less").show();
-                $(id + " .expand-more").hide();
-            });
-        });
-
-        $(".expand-less").on("click touchstart", function () {
-
-            var id = ($(this)).parent().parent().attr('id');
-
-            $("#" + id).animate({
-                bottom: (($("#" + id).height() * -1) + 10) + "px"
-            }, 500, function () {
-                $("#" + id + " .expand-less").hide();
-                $("#" + id + " .expand-more").show();
-            });
-        });
-
-        $(".expand-more").on("click touchstart", function () {
-
-            var id = ($(this)).parent().parent().attr('id');
-
-            $("#" + id).animate({
-                bottom: "0"
-            }, 500, function () {
-                $("#" + id + " .expand-less").show();
-                $("#" + id + " .expand-more").hide();
-            });
-        });
-
-        $(".map-tool-btn").on("click", function (e) {
-
-            e.preventDefault();
-
-            var id = ($(this)).attr('href');
-
-            if (id === "#full-screen"){
-                utils.toggleFullScreen();
-            }
-
-            // If print when activate
-            if ($(this).data('module') === "print") {
-                backboneEvents.get().trigger(`on:print`);
-            }
-
-            // If legend when deactivate
-            if ($(this).data('module') === "legend") {
-                $("#legend-dialog .modal-body").append($("#legend"));
-                $("#btn-show-legend-in-map").prop("disabled", true);
-            }
-
-            $(id).animate({
-                bottom: "0"
-            }, 500, function () {
-                $(id + " .expand-less").show();
-                $(id + " .expand-more").hide();
-            })
-        });
+        })
 
         // Hiding all panels with visible modules
-        backboneEvents.get().on(`hide:all`, () => {
-            if ($(`.modal-header > button[class="close"]`).is(`:visible`)) {
-                $(`.modal-header > button[class="close"]`).trigger(`click`);
+        backboneEvents.get().on('hide:all', () => {
+            const e = $('.modal-header > button[class="close"]');
+            if (e.is(':visible')) {
+                e.trigger(`click`);
             }
-        });
-
-        $(`.slide-right > .modal-header > button[class="close"]`).click(() => {
-            backboneEvents.get().trigger(`off:all`);
         });
 
         // Module icons
-        $("#side-panel ul li a").on("click", function (e) {
-            backboneEvents.get().trigger(`off:all`);
-
-            let moduleTitle = $(this).data(`module-title`);
-            $('#module-container').find(`.js-module-title`).text('');
-            if (moduleTitle) $('#module-container').find(`.js-module-title`).text(moduleTitle);
-
-            let moduleId = $(this).data(`module-id`);
-            let moduleIgnoreErrors = ($(this).data(`module-ignore-errors`) ? true : false);
-
+        $('#main-tabs a').on('click', function () {
+            backboneEvents.get().trigger('off:all');
+            let moduleTitle = $(this).data('module-title');
+            let e = $('#mainLayerOffcanvas');
+            e.find('.js-module-title').text('');
+            if (moduleTitle) {
+                e.find('.js-module-title').text(moduleTitle);
+            }
+            let moduleId = $(this).data('module-id');
+            let moduleIgnoreErrors = !!$(this).data('module-ignore-errors');
             setTimeout(() => {
-                if (moduleId && moduleId !== ``) {
+                if (moduleId && moduleId !== '') {
                     if (moduleId in applicationModules) {
                         backboneEvents.get().trigger(`on:${moduleId}`);
                     } else {
@@ -531,24 +461,24 @@ module.exports = {
                 }
             }, 100);
 
-            let id = ($(this));
-            $("#side-panel ul li").removeClass("active");
-            id.addClass("active");
-        });
-
-        $("#click-for-info-slide.slide-left .close").on("click", function () {
-            $("#click-for-info-slide.slide-left").animate({
-                left: "-100%"
-            }, 500)
+            // let id = ($(this));
+            // $('#side-panel ul li').removeClass('active');
+            // id.addClass('active');
         });
 
         // Listen for extensions
-        $(document).arrive("#side-panel ul li a", function (e, data) {
-            $(this).on("click", function (e) {
-                backboneEvents.get().trigger(`off:all`);
-                let moduleId = $(this).data(`module-id`);
+        $(document).arrive('#main-tabs a', function () {
+            $(this).on('click', function () {
+                backboneEvents.get().trigger('off:all');
+                const moduleId = $(this).data('module-id');
+                const moduleTitle = $(this).data('module-title');
+                const e = $('#mainLayerOffcanvas');
+                e.find('.js-module-title').text('');
+                if (moduleTitle) {
+                    e.find('.js-module-title').text(moduleTitle);
+                }
                 setTimeout(() => {
-                    if (moduleId && moduleId !== ``) {
+                    if (moduleId && moduleId !== '') {
                         if (moduleId in applicationModules.extensions) {
                             backboneEvents.get().trigger(`on:${moduleId}`);
                         } else {
@@ -556,20 +486,117 @@ module.exports = {
                         }
                     }
                 }, 100);
-
                 let id = ($(this));
-                $("#side-panel ul li").removeClass("active");
-                id.addClass("active");
+                $('#side-panel ul li').removeClass('active');
+                id.addClass('active');
             });
         })
 
-        // Listen for fullscreen changes
-        document.addEventListener("fullscreenchange", function(event) {
-            if (document.fullscreenElement) {
-                $("#full-screen-btn i").html("fullscreen_exit")
-            } else {
-                $("#full-screen-btn i").html("fullscreen")
+        // Check if active vector layers have max/min zoom values
+        let orginallayers = {};
+        const map = cloud.get().map;
+        const moveEndEvent = () => {
+            const layers = map._layers;
+            for (let key in layers) {
+                if (layers.hasOwnProperty(key)) {
+                    const layer = layers[key];
+                    if (layer?.id?.startsWith("v:") || layer?.id?.startsWith("HL:")) {
+                        orginallayers[layer.id] = jQuery.extend(true, {}, layer._layers);
+                        if (typeof layer?.minZoom === 'number' || typeof layer?.maxZoom === 'number') {
+                            if (map.getZoom() < layer.minZoom || map.getZoom() >= layer.maxZoom) {
+                                $.each(layer._layers, function (i, v) {
+                                    try {
+                                        map.removeLayer(v);
+                                    } catch (e) {
+                                        // console.error(e)
+                                    }
+                                })
+                            } else {
+                                $.each(orginallayers[layer.id], function (i, v) {
+                                    map.addLayer(v);
+                                })
+                            }
+                        }
+                    }
+                }
             }
-        });
+        }
+        map.on('moveend layeradd', moveEndEvent);
+
+        (() => {
+            const themeSwitcher = document.querySelector('#bd-theme')
+            if (!themeSwitcher) {
+                return
+            }
+            const getStoredTheme = () => localStorage.getItem('theme')
+            const setStoredTheme = theme => localStorage.setItem('theme', theme)
+
+            const getPreferredTheme = () => {
+                const storedTheme = getStoredTheme()
+                if (storedTheme) {
+                    return storedTheme
+                }
+
+                return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+            }
+
+            const setTheme = theme => {
+                if (theme === 'auto') {
+                    document.documentElement.setAttribute('data-bs-theme', (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'))
+                } else {
+                    document.documentElement.setAttribute('data-bs-theme', theme)
+                }
+            }
+
+            setTheme(getPreferredTheme())
+            const showActiveTheme = (theme, focus = false) => {
+                const themeSwitcherText = document.querySelector('#bd-theme-text')
+                const activeThemeIcon = document.querySelector('.theme-icon-active use')
+                const btnToActive = document.querySelector(`[data-bs-theme-value="${theme}"]`)
+                const svgOfActiveBtn = btnToActive.querySelector('svg use').getAttribute('href')
+                document.querySelectorAll('[data-bs-theme-value]').forEach(element => {
+                    element.classList.remove('active')
+                    element.setAttribute('aria-pressed', 'false')
+                })
+                btnToActive.classList.add('active')
+                btnToActive.setAttribute('aria-pressed', 'true')
+                activeThemeIcon.setAttribute('href', svgOfActiveBtn)
+                const themeSwitcherLabel = `${themeSwitcherText.textContent} (${btnToActive.dataset.bsThemeValue})`
+                themeSwitcher.setAttribute('aria-label', themeSwitcherLabel)
+
+                if (focus) {
+                    themeSwitcher.focus()
+                }
+            }
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+                const storedTheme = getStoredTheme()
+                if (storedTheme !== 'light' && storedTheme !== 'dark') {
+                    setTheme(getPreferredTheme())
+                }
+            })
+            showActiveTheme(getPreferredTheme())
+            document.querySelectorAll('[data-bs-theme-value]')
+                .forEach(toggle => {
+                    toggle.addEventListener('click', () => {
+                        const theme = toggle.getAttribute('data-bs-theme-value')
+                        setStoredTheme(theme)
+                        setTheme(theme)
+                        showActiveTheme(theme, true)
+                    })
+                })
+        })()
+    },
+    showOffcanvasLayers: () => {
+        mainLayerOffcanvas.show()
+    },
+    hideOffcanvasLayers: () => {
+        mainLayerOffcanvas.hide()
+    },
+    showOffcanvasInfo: () => {
+        offcanvasInfo.show();
+    },
+    hideOffcanvasInfo: () => {
+        offcanvasInfo.hide();
     }
-};
+
+}

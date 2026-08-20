@@ -1,0 +1,240 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2023, MapCentia
+# This file is distributed under the same license as the Vidi package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Vidi 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-01-09 12:54+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.12.1\n"
+
+#: ../../pages/standard/05_draw.rst:5 994cef044aff4633b833f0a6c393c925
+msgid "Tegn"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:5 6b9d6de4b8e9424ba3a169756a28e3d8
+msgid "Overview"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst c9af5d4d532a4de1b1f8f2a3c2c635c2
+msgid "Date"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:9 2fab732b615448379dc7645a2de91d03
+msgid "|today|"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst 04b5ddc3e7054f6cb1c12d1044849416
+msgid "Vidi-version"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:10 0a35ab8bd6b84b7682553bd97205de97
+msgid "2020.11.0"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst 0e335010cfc14d3196a8f3907a5f8687
+msgid "Forfatter"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:11 f202fbb52dc6433f9736eb13b28cd7ec
+msgid "`giovanniborella <https://github.com/giovanniborella>`_"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:15 e777e442997f4bb2ba54b9f46f965888
+msgid "Indhold"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:19 56aefbac958e4115a323c0914966a63e
+msgid "Tegn-værktøjet"
+msgstr ""
+
+#: ../../_subs/NOTE_GETTINGSTARTED.rst:4 8807da83fb9d4443b671180d54bf1362
+msgid ""
+"Hvis du er i tvivl om de forskellige UI-elementer, :ref:`kan du se mere "
+"her <gettingstarted>`"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:23 561d3fea7bc4412cbcc56cd1b1521e7f
+msgid "Elementer vil også fremgå på PDF-print."
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:26 0ed40d15cf7c485891835a3a79b5aea4
+msgid "Typer"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:28 25eb30bf25274b3fafe5219beb47998b
+msgid ""
+"Når værktøjet er tændt er det muligt at tegne elementer ind på kortet. "
+"Elementerne er bundet op på den geografiske placering, så de vil blive "
+"selv om man panorerer i kortet."
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:36 7e4397cd1b304b9ab426f12c1c047759
+msgid "Værktøjet er tændt, og klar til at lave elementer."
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:39 6e84e368258e42788b660b95ffd84de6
+msgid "Tegn elementer"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:41 5fff507dd4f84291a518146d840cb059
+msgid "For at tegne elementer, gøres følgende:"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:47 bb8e1e54ab634cfa8494080b3eee094e
+msgid "Linjer:"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:44 0dc1d9aded8d49f79ea578d04021c7cb
+msgid "Klik for at starte linje"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:45 ../../pages/standard/05_draw.rst:58
+#: 60785cd79db04a0f98ac1d1af0e5b51b 77f2bc2458e14254881151f2fba63c1e
+msgid "Tilføj mellempunkter"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:46 ../../pages/standard/05_draw.rst:59
+#: 4e3b6464c8154383af3815e545657d8a 97dea451ca0a43e180b58b10240145f8
+msgid "(Slet sidste punkt ved at bruge ``Slet sidste punkt``)"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:47 4729b22a2d2c40718d16e6a3098b62d6
+msgid "Klik på ``Afslut``, eller klik på det sidst tilføjede mellempunkt."
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:60 cfe09ecfec0244bca5fb5f82fd6b06d5
+msgid "Arealer/Flader:"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:57 42ce46f3373744428949790fd2c6a3d9
+msgid "Klik for at starte flade"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:60 76bf663092d24ffdb88ed2fd4055a616
+msgid "Klik på det første punkt for at afslutte"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:69 62c25fd6aafe4bf591b60df543cbbdf0
+msgid "Rektangel:"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:69 3057d531043d42c8abb5ed331e7b676a
+msgid "Klik og træk for at tegne et rektangel"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:72 719f956777c04563aa9b691e17d0ba24
+msgid "Cirkel:"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:72 8bf899fb850c4050ae96cce657d5e307
+msgid "Klik og træk for at slå cirkel"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:75 38dc35a28cbf4bd68e4ca8a829c8bb7a
+msgid "Punkt:"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:75 3e60a7bbb5464507a0e51d28f7643915
+msgid "Klik for placere punkt."
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:79 c25011c3163848d59c5fbfd32c1b26a4
+msgid "Annotation:"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:78 e67005c69a9c43468d5f89dae420e28b
+msgid "Klik for at placere"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:79 fed72169ba7a49eb87982762c2215387
+msgid "Indtast notat"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:82 c74c3cdf72fb4358bc99b7e9ad0283bd
+msgid "Ændre elementer"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:84 52ec886dbb9f453c989e68e38f0a50cd
+msgid ""
+"Når værktøjet aktiveres er det muligt at ændre knudepunkter mm. for de "
+"tegnede elementer."
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:92 d35aa470518344b4bc28ccc7f6332ddc
+msgid "Ændre elementerne ved at klikke og trække knudepunkterne (Hvide kasser)"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:94 ../../pages/standard/05_draw.rst:103
+#: 25a724cdcbc344d7b1758ec09ed5f828 9e34c5c671e94d94a8ae62a5edf086b8
+msgid "Klik for ``Gem`` for at gemme, ``Fortryd`` for at annulere alle ændringer."
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:97 693e091d8e90440988014804d9363cf2
+msgid "Slet elementer"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:99 7dcf7e6025934545a9bf3767016d3978
+msgid ""
+"Når værktøjet aktiveres er det muligt at fjerne elementer enkeltvis, "
+"eller alle på én gang."
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:101 ed9691696c754401a1234c511ddcb22a
+msgid "Udvælg et mål der skal fjernes."
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:105 a43b4723f798462cbbe9c2d94d5171be
+msgid "Klikker man på ``Slet alle`` kan handlingen ikke fortrydes"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:108 de52f8f3f52049fab71ed2894621e10a
+msgid "Stilart"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:110 ea833a78ad3c489198b7453cdd78ba38
+msgid "TBD"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:113 19550128097e46c99f59466aa29df4c9
+msgid "Linjer"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:115 4cef880171b940ae8d98afe60127733b
+msgid ""
+"Det er muligt at definere en ende på hver linje. Denne indstilling sættes"
+" inden man tegner sin linje."
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:117 688f7e4dec704fcdbaf62a6573d7e05d
+msgid "Der er også mulighed for at få vist mål på linjer, samt totalmål."
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:125 ../../pages/standard/05_draw.rst:138
+#: b728ee44d75d4e5db1924740bb0a5adc ce2ab2b5428e43618a0614e1ad6293f1
+msgid ""
+"Fra venstre mod højre: Pilehoved, Stop, firkant, punkt. Den sidste linje "
+"er sat op som vist i billedet."
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:128 8067aa5783e64ca1826043765ed49a6d
+msgid "Oversigt"
+msgstr ""
+
+#: ../../pages/standard/05_draw.rst:130 72954898e7204090bac5dbf48be3854b
+msgid ""
+"Nederst vil der være en tabel over de tegnede geometrier. Ved at klikke "
+"på en række vil kortet flyve over til den relevante geometri."
+msgstr ""
+

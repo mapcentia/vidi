@@ -35,7 +35,7 @@ class MapAreaList extends React.Component {
         return items;
     }
 
-    componentWillReceiveProps(nextProps) {
+    UNSAFE_componentWillReceiveProps(nextProps) {
         this.setState({ areaItems: this.itemsObjectToArray(nextProps.items) });
     }
 

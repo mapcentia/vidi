@@ -3,7 +3,7 @@
  */
 
 const { expect } = require("chai");
-const uuidv1 = require('uuid/v1');
+const { v1: uuidv1 } = require('uuid');
 const helpers = require("./../helpers");
 
 describe("State snapshots", () => {

@@ -8,57 +8,55 @@
  * Generates HTML chunks that are later used in layerTree module, no logic or any interaction
  * should be implemented here, only raw markup.
  *
- * @todo Rewrite layerTree using React or Angular
+ * @todo Rewrite layerTree using React
  */
 
-import { LAYER, ICONS} from './constants';
-const regularButtonStyle = `padding: 2px 10px 2px 10px; color: black; border-radius: 4px; height: 22px; margin: 0px;`;
+import {LAYER, ICONS} from './constants';
+
+const regularButtonStyle = ``;
 
 class MarkupGenerator {
     constructor() {
     }
 
     getAddButton(layerKeyWithGeom) {
-        let addButtonStyle = regularButtonStyle.replace(`padding: 2px 10px 2px 10px;`, `padding: 6px 10px 6px 10px;`);
-        return (`<button type="button" data-gc2-key="${layerKeyWithGeom}" style="${regularButtonStyle} visibility: hidden;" 
-            data-toggle="tooltip" data-placement="left" title="Add new feature to layer" data-layer-type="tile" class="btn gc2-add-feature gc2-edit-tools">
-            <i class="fa fa-plus"></i>
+        return (`<button type="button" data-gc2-key="${layerKeyWithGeom}" style="display: none;" 
+            data-toggle="tooltip" data-bs-placement="top" title="${__("Add new feature to layer")}" data-layer-type="tile" class="btn btn-secondary btn-sm gc2-add-feature gc2-edit-tools">
+            <i class="bi bi-plus-square"></i>
         </button>`);
     }
 
-    getGroupPanel(base64GroupName, name) {
-        return (`<div class="panel panel-default panel-layertree" id="layer-panel-${base64GroupName}">
-            <div class="panel-heading" role="tab" style="padding: 8px 0px 8px 15px;">
-                <h4 class="panel-title">
-                    <i style="float: right;" class="material-icons layer-move-vert">more_vert</i>
-                    <div class="layer-count badge">
-                        <span>0</span> / <span></span>
+    getGroupPanel(base64GroupName, name, addGroupCheckbox = false) {
+        return (`<div class="card panel-layertree" id="layer-panel-${base64GroupName}" xmlns="http://www.w3.org/1999/html">
+                <div class="card-body p-0" data-gc2-group-id="${name}">
+                    <div class="d-flex align-items-center p-3">
+                        <span style="display: ${addGroupCheckbox ? "flex" : "none"}" class="form-check align-items-center" id="group-check-box-${base64GroupName}">
+                            <input class="form-check-input" type="checkbox" data-gc2-group-name="${name}">
+                        </span>
+                        <div class="position-relative flex-fill layer-group-checkbox-wrapper">
+                            <button class="btn btn-link text-uppercase text-body-secondary stretched-link accordion-toggle js-toggle-layer-panel collapsed" data-bs-toggle="collapse" data-parent="#layers" href="#collapse${base64GroupName}">${name}</button>
+                        </div>
+                        <div class="layer-count badge bg-secondary">
+                            <span>0</span> / <span></span>
+                        </div>
+                        <i class="bi-grip-vertical layer-move-vert"></i>
                     </div>
-                    <a style="display: block" class="accordion-toggle js-toggle-layer-panel" data-toggle="collapse" data-parent="#layers" href="#collapse${base64GroupName}">${name}</a>
-                </h4>
-            </div>
-            <ul class="list-group" id="group-${base64GroupName}" role="tabpanel"></ul>
+                    <ul class="list-group clearfix" id="group-${base64GroupName}" role="tabpanel"></ul>
+                </div>
         </div>`);
     }
 
     getToggleOfflineModeSelectorEnabled() {
-        return (`<div class="panel panel-default">
-            <div class="panel-body">
-                ${__('Network status')}
-                <span class="badge js-app-is-pending-badge" style="background-color: #C0C0C0;">
-                    <i class="fa fa-ellipsis-h"></i> ${__('Pending')}
+        return (`
+            <div class="d-flex mb-3 gap-2">
+                <span class="badge text-bg-secondary js-app-is-pending-badge">
+                    <i class="bi bi-three-dots"></i> ${__('Pending')}
                 </span>
-                <span class="badge js-app-is-online-badge hidden" style="background-color: #28a745;">
-                    <i class="fa fa-signal"></i> Online
-                </span>
-                <span class="badge js-app-is-offline-badge hidden" style="background-color: #dc3545;">
-                    <i class="fa fa-times"></i> Offline
-                </span>
-                <span class="js-set-all-layer-offline-mode-container">
-                    ${__('Set all layers to be')}: <a href="javascript:void(0);" class="js-set-all-layer-to-be-online">${__('Online')}</a> | <a href="javascript:void(0);" class="js-set-all-layer-to-be-offline">${__('Offline')}</a>
-                </span>
+                <span class="badge text-bg-success js-app-is-online-badge d-none">
+                    <i class="bi bi-signal"></i>Online</span>
+                <span class="badge text-bg-danger js-app-is-offline-badge d-none">Offline</span>
             </div>
-        </div>`);
+        `);
     }
 
     getToggleOfflineModeSelectorDisabled() {
@@ -68,165 +66,208 @@ class MarkupGenerator {
         </div>`);
     }
 
-    getSubgroupControlRecord(base64SubgroupName, name) {
+    getSubgroupControlRecord(base64SubgroupName, name, level, addGroupCheckbox = false) {
         return (`<li
-        class="layer-item list-group-item"
-        data-gc2-subgroup-id="${name}"
-        style="min-height: 40px; margin-top: 10px; background-color: white; border-bottom: 1px solid #CCC;">
-            <div class="js-subgroup-id" style="padding-left: 14px;"></div>
-            <div class="js-subgroup-children" id="${base64SubgroupName}" style="padding-left: 20px;"></div>
+        class="layer-item list-group-item list-subgroup-item d-flex flex-column gap-1"
+        data-gc2-subgroup-id="${name}">
+            <div class="d-flex align-items-center gap-1">
+                <span style="display: ${addGroupCheckbox ? "inline" : "none"};" class="togglebutton">
+                    <label>
+                        <input class="form-check-input" type="checkbox" data-gc2-subgroup-name="${name}" data-gc2-subgroup-level="${level}">
+                    </label>
+                </span>
+                <button type="button" class="btn btn-outline-secondary btn-sm js-subgroup-toggle-button">
+                    <i class="bi bi-arrow-down"></i>
+                </button>
+                <div class="js-subgroup-id d-flex align-items-center flex-grow-1"></div>
+            </div>
+            <div class="js-subgroup-children" id="${base64SubgroupName}"></div>
         </li>`);
     }
 
-    getLayerControlRecord(layerKeyWithGeom, layerKey, layerIsActive, layer, layerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo, isSubLayer) {
-        let queueFailedButtonStyle = regularButtonStyle + ` background-color: orange; padding-left: 4px; padding-right: 4px;`;
-        let queueRejectedByServerButtonStyle = regularButtonStyle + ` background-color: red; padding-left: 4px; padding-right: 4px;`;
+    getLayerControlRecord(layerKeyWithGeom, layerKey, layerIsActive, layer, layerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo, isSubLayer, moduleState, disableCheckBox, parentLayerKeys, childLayerKeys, filterIsRequired) {
+        let queueFailedButtonStyle = regularButtonStyle + ` color: orange;`;
+        let queueRejectedByServerButtonStyle = regularButtonStyle + ` color: red;`;
         let tooltip = layer.f_table_abstract || ``;
+        const toolBtnClass = `btn btn-outline-secondary btn-sm`
 
         return (`
-        <li class="layer-item list-group-item" data-gc2-layer-key="${layerKeyWithGeom}" style="min-height: 36px; margin-top: 1px; border-bottom: 1px solid #CCC; background-color: white;">
-            <div>
-                <div style="display: flex; min-height: 40px; justify-content: space-between; flex-wrap: wrap;">
-                    <div style="margin-top: 4px;">
-                        <div style="display: inline-block;">
-                            <div class="checkbox" style="width: 34px; top: 2px">
-                                <label>
-                                    <input type="checkbox"
-                                        ${(layerIsActive ? `checked="checked"` : ``)}
-                                        class="js-show-layer-control"
-                                        id="${layer.f_table_name}"
-                                        data-gc2-id="${layer.f_table_schema}.${layer.f_table_name}"
-                                        data-gc2-layer-type="${layerType}">
-                                </label>
-                            </div>
-                        </div>
-        
-                        <div style="display: inline-block;">${layerTypeSelector}</div>
-        
-                        <div style="display: inline-block;">
-                            <span>
-                                ${text}${lockedLayer} 
-                                <span class="js-tiles-contain-data" style="visibility: hidden;"><i class="fa fa-eye" style="color: green;"></i></span>
-                                <span style="display: none" class="_gc2_layer_sort_id">(${layer.sort_id})</span>
-                            </span>
-                        </div>
-        
-                        <div style="display: inline-block;">
-                            <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-failed-add" style="${queueFailedButtonStyle}" disabled>
-                                <i class="fa fa-plus"></i> <span class="js-value"></span>
-                            </button>
-                            <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-failed-update" style="${queueFailedButtonStyle}" disabled>
-                                <i class="fa fa-edit"></i> <span class="js-value"></span>
-                            </button>
-                            <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-failed-delete" style="${queueFailedButtonStyle}" disabled>
-                                <i class="fa fa-minus-circle"></i> <span class="js-value"></span>
-                            </button>
-                            <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-rejectedByServer-add" style="${queueRejectedByServerButtonStyle}" disabled>
-                                <i class="fa fa-plus"></i> <span class="js-value"></span>
-                            </button>
-                            <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-rejectedByServer-update" style="${queueRejectedByServerButtonStyle}" disabled>
-                                <i class="fa fa-edit"></i> <span class="js-value"></span>
-                            </button>
-                            <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-rejectedByServer-delete" style="${queueRejectedByServerButtonStyle}" disabled>
-                                <i class="fa fa-minus-circle"></i> <span class="js-value"></span>
-                            </button>
-                            <button type="button" data-gc2-id="${layerKey}" class="hidden btn btn-sm btn-secondary js-clear" style="${regularButtonStyle}">
-                                <i class="fa fa-undo"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div style="text-align: right; flex-grow: 1;">
-                        <div style="display: inline-block;">
-                            <div class="btn-group" role="group" style="height: 23px; width: 1px; margin: 10px;"></div>
-                        </div>
-
-                        <div class="js-toggle-layer-offline-mode-container" style="display: none;">
-                            <div class="btn-group" role="group">
-                                <button type="button" data-layer-key="${layerKey}" class="btn btn-success btn-xs js-set-online" title="${__(`Fetch layer data from server`)}" style="padding: 4px" disabled>
-                                    <i class="fa fa-signal"></i>
-                                </button>
-                                <button type="button" data-layer-key="${layerKey}" class="btn btn-danger btn-xs js-set-offline" title="${__(`Fetch layer data from cache`)}" style="padding: 4px" disabled>
-                                    <i class="fas fa-database"></i>
-                                </button>
-                                <button type="button" data-layer-key="${layerKey}" class="btn btn-secondary btn-xs js-refresh" title="${__(`Refresh existing cache for layer`)}" style="padding: 4px" disabled>
-                                    <i class="fa fa-refresh"></i>
-                                </button>
-                                <button type="button" data-layer-key="${layerKey}" class="btn btn-secondary btn-xs js-bbox" title="${__(`Dynamic layer is cached only within the last requested bounding box`)}" style="padding: 4px; display: none;">
-                                    <i class="fa fa-exclamation"></i>
-                                </button>
-                            </div>
-                        </div>
-        
-                        <div class="js-toggles-container" style="display: none; padding-right: 10px; padding-left: 10px;">
-                            <a href="javascript:void(0);" class="js-toggle-search" >
-                                <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Search`)}" class="material-icons">search</i>
-                            </a>
-                            <a href="javascript:void(0);" class="js-toggle-opacity" style="padding-top: 10px;">
-                                <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Opacity`)}" class="material-icons">opacity</i>
-                            </a>
-                            <a href="javascript:void(0);" class="js-toggle-table-view">
-                                <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Table view`)}" class="material-icons">list</i>
-                            </a>
-                            <a href="javascript:void(0);" class="js-toggle-load-strategy">
-                                <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Load strategy`)}" class="material-icons">branding_watermark</i>
-                            </a>
-                            <a href="javascript:void(0);" class="js-toggle-filters">
-                                <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Filters`)}" class="material-icons">filter_list</i>
-                            </a><span class="js-toggle-filters-number-of-filters">0</span>
-                        </div>
-                        
-                        <i style="float: right; padding-top: 9px; font-size: 26px;" class="material-icons layer-move-vert">more_vert</i>
-        
-                        <div style="float: right; padding-top: 12px; padding-right: 10px;">${addButton}
-                            <a href="javascript:void(0);" data-toggle="tooltip" data-placement="left" title="${tooltip}" style="visibility: ${displayInfo};" class="info-label" data-gc2-id="${layerKey}">${__(`Info`)}</a>
-                        </div>
-                    </div>
+        <li class="layer-item list-group-item d-flex flex-column gap-1" data-gc2-layer-key="${layerKeyWithGeom}">
+            <div class="d-flex align-items-center">
+                <div class="d-flex w-100 align-items-center flex-wrap gap-1">
+                    <!-- switch and title-->
+                    <div class="d-flex align-items-center flex-grow-1 gap-1" style="min-height: 31px">
+                                                                       <div class="form-check form-switch d-flex align-items-center">
+                                                                       <label>
+                                                                       <input type="checkbox"
+                                                                       ${(layerIsActive ? `checked="checked"` : ``)}
+                                                                       ${(disableCheckBox ? `disabled` : ``)}
+                                                                       class="js-show-layer-control form-check-input"
+                                                                       id="${layer.f_table_name}"
+                                                                       data-gc2-id="${layer.f_table_schema}.${layer.f_table_name}"
+                                                                       data-gc2-layer-type="${layerType}">
+                                                                       ${text}
+                                                                       </label>
+                                                                       </div>
+                                                                       
+                                                                       <div id="layer-information">
+                                                                       <div class="d-flex align-items-center gap-1">
+                                                                       ${lockedLayer}
+                                                                       <span class="js-tiles-contain-data" style="display: ${moduleState.tileContentCache[layerKey] ? "inline" : "none"};" data-toggle="tooltip" data-bs-placement="right"
+                                                                       title="${__("Layer is visible")}"><i class="bi bi-eye info-icon text-success"></i></span> 
+                                                                       <span class="js-tiles-error" style="display: ${moduleState.tileError[layerKey] ? "inline" : "none"};" data-toggle="tooltip" data-bs-placement="right"
+                                                                       title="${__("Layer has error")}"><i class="bi bi-x info-icon text-danger"></i></span>
+                                                                       <span class="js-layer-is-disabled" style="display: ${disableCheckBox ? "inline" : "none"};" data-toggle="tooltip" data-bs-placement="right"
+                                                                       title="${__("Locked")}"><i class="bi bi-lock text-danger"></i></span>
+                                                                       <span class="js-layer-has-parents info-icon" style="display: ${parentLayerKeys.length > 0 ? "inline" : "none"};" data-toggle="tooltip" data-bs-placement="right"
+                                                                       title="${__("Parents")}: ${parentLayerKeys.length > 0 ? parentLayerKeys.join(", ") : ""}"><i class="bi bi-arrow-up"></i></span>
+                                                                       <span class="js-layer-has-children info-icon" style="display: ${childLayerKeys.length > 0 ? "inline" : "none"};" data-toggle="tooltip" data-bs-placement="right"
+                                                                       title="${__("Children")}: ${childLayerKeys.length > 0 ? childLayerKeys.join(", ") : ""}"><i class="bi bi-arrow-down"></i></span>
+                                                                       <span class="js-layer-filter-is-reqiered info-icon" style="display: ${filterIsRequired ? 'inline': 'none'}" data-toggle="tooltip" data-bs-placement="right"
+                                                                       title="${__("Filter is required for showing data")}"><i class="bi-exclamation-triangle-fill text-warning"></i></span>
+                                                                       <span style="display: none" class="_gc2_layer_sort_id">(${layer.sort_id})</span>
+                                                                       </div>
+                                                                       </div>
+                                                                       </div>
+                    <!-- tools -->
+                    <div class="d-flex align-items-center gap-1"> 
+                                                                        <div>${layerTypeSelector}</div>
+                                                                        ${addButton}
+                                                                        <button data-toggle="tooltip" data-bs-placement="top" title="${tooltip}" style="display: ${displayInfo};" class="btn btn-outline-secondary btn-sm info-label" data-gc2-id="${layerKey}"><i class="bi bi-info-square"></i></a></button>
+                                                    </div>
+     
                 </div>
-            </div>
-            <div class="js-rejectedByServerItems hidden" style="width: 100%; padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>
-            <div class="js-layer-settings-filters" style="display: none;"></div>
-            <div class="js-layer-settings-load-strategy" style="display: none;"></div>
-            <div class="js-layer-settings-opacity" style="display: none;"></div>
-            <div class="js-layer-settings-search" style="display: none;"></div>
-            <div class="js-layer-settings-table" id="table_view-${layerKey.replace(".", "_")}" style="display: none;"></div>
-            </div>
+                <div class="d-flex align-items-center align-self-baseline ms-1">
+                    <button data-toggle="tooltip" data-bs-placement="top" title="${__(`More tools`)}" disabled class="btn btn-secondary btn-sm js-settings-panel-btn" role="button" data-bs-toggle="collapse" id="settings-${layer.f_table_schema}-${layer.f_table_name}-btn" data-bs-target="#settings-${layer.f_table_schema}-${layer.f_table_name}" aria-expanded="false" aria-controls="collapseExample"><i class="bi bi-three-dots"></i></button>
+                    <i class="bi-grip-vertical ms-auto layer-move-vert"></i>
+                </div>
+            </div>  
+            <div class="collapse" id="settings-${layer.f_table_schema}-${layer.f_table_name}" style="transition-duration: 0s">
+                                                                                                  <div class="d-flex align-items-center gap-2 flex-wrap">
+                                                                                                  <div class="js-toggles-container" style="display: none;">
+                                                                                                  <div style="display: flex; align-items: center;" class="gap-1">
+                                                                                                  <span id="layer-tools-search">
+                                                                                                  <button href="javascript:void(0);" class="${toolBtnClass} js-toggle-search js-toggle-btn" data-toggle="tooltip" data-bs-placement="right" title="${__(`Search`)}">
+                                                                                                  <i data-container="body" class="bi bi-search"></i>
+                                                                                                  </button>
+                                                                                                  </span>
+                                                                                                  <span id="layer-tools-opacity">
+                                                                                                  <button href="javascript:void(0);" class="${toolBtnClass} js-toggle-opacity js-toggle-btn" data-toggle="tooltip" data-bs-placement="right" title="${__(`Opacity`)}">
+                                                                                                  <i data-container="body" class="bi bi-droplet"></i>
+                                                                                                  </button>
+                                                                                                  </span>
+                                                                                                  <span id="layer-tools-labels">
+                                                                                                  <button href="javascript:void(0);" class="${toolBtnClass} js-toggle-labels js-toggle-btn" data-toggle="tooltip" data-bs-placement="right" title="${__(`Labels`)}">
+                                                                                                  <i data-container="body" class="bi bi-tag"></i>
+                                                                                                  </button>
+                                                                                                  </span>
+                                                                                                  <span id="layer-tools-table">
+                                                                                                  <button href="javascript:void(0);" class="${toolBtnClass} js-toggle-table js-toggle-btn" data-toggle="tooltip" data-bs-placement="right" title="${__(`Table view`)}">
+                                                                                                  <i data-container="body" class="bi bi-table"></i>
+                                                                                                  </button>
+                                                                                                  </span>
+                                                                                                  <span id="layer-tools-style">
+                                                                                                  <button href="javascript:void(0);" class="${toolBtnClass} js-toggle-style js-toggle-btn" data-toggle="tooltip" data-bs-placement="right" title="${__(`Style function`)}">
+                                                                                                  <i data-container="body" class="bi bi-palette"></i>
+                                                                                                  </button>
+                                                                                                  </span>
+                                                                                                  <span id="layer-tools-load">
+                                                                                                  <button href="javascript:void(0);" class="${toolBtnClass} js-toggle-load-strategy js-toggle-btn" data-toggle="tooltip" data-bs-placement="right" title="${__(`Load strategy`)}">
+                                                                                                  <i data-container="body" class="bi bi-cloud"></i>
+                                                                                                  </button>
+                                                                                                  </span>
+                                                                                                  <span id="layer-tools-filters">
+                                                                                                  <button href="javascript:void(0);" class="${toolBtnClass} js-toggle-filters position-relative js-toggle-btn" data-toggle="tooltip" data-bs-placement="right" title="${__(`Filters`)}">
+                                                                                                  <i data-container="body" class="bi bi-filter"></i>
+                                                                                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none">
+                                                                                                  <span class="js-toggle-filters-number-of-filters">!</span>
+                                                                                                                    </span>
+                                                                                                  </button>
+                                                                                                  </span>
+                                                                                                  <span id="layer-tools-download">
+                                                                                                  <button href="javascript:void(0);" class="${toolBtnClass} js-toggle-download js-toggle-btn" data-toggle="tooltip" data-bs-placement="right" title="${__(`Download`)}">
+                                                                                                  <i data-container="body" class="bi bi-download"></i>
+                                                                                                  </button>
+                                                                                                  </span>
+                                                                                                  </div>
+                                                                                                  </div>
+                                                                                                  <div class="js-toggle-layer-offline-mode-container" style="display: none;">
+                                                                                                  <div class="d-flex align-items-center" role="group" id="layer-tools-offline">
+                                                                                                  <button type="button" data-layer-key="${layerKey}" class="btn btn-outline-secondary btn-sm js-set-online" title="${__(`Fetch layer data from server`)}" disabled>
+                                                                                                  <i class="bi bi-wifi"></i>
+                                                                                                  </button>
+                                                                                                  <button type="button" data-layer-key="${layerKey}" class="btn btn-outline-secondary btn-sm js-set-offline" title="${__(`Fetch layer data from cache`)}" disabled>
+                                                                                                  <i class="bi bi-database"></i>
+                                                                                                  </button>
+                                                                                                  <button type="button" data-layer-key="${layerKey}" class="btn btn-outline-secondary btn-sm js-refresh" title="${__(`Refresh existing cache for layer`)}" disabled>
+                                                                                                  <i class="bi bi-arrow-clockwise"></i>
+                                                                                                  </button>
+                                                                                                  <button type="button" data-layer-key="${layerKey}" class="btn btn-outline-secondary btn-sm js-bbox" title="${__(`Dynamic layer is cached only within the last requested bounding box`)}" style="padding: 4px; display: none;">
+                                                                                                  <i class="bi bi-exclamation"></i>
+                                                                                                  </button>
+                                                                                                  </div>
+                                                                                                  </div>
+                                                                                                  </div>
+                                                                                                  <div class="js-layer-settings js-layer-settings-filters" style="display: none;"></div>
+                                                                                                  <div class="js-layer-settings js-layer-settings-load-strategy" style="display: none;"></div>
+                                                                                                  <div class="js-layer-settings js-layer-settings-opacity" style="display: none;"></div>
+                                                                                                  <div class="js-layer-settings js-layer-settings-labels" style="display: none;"></div>
+                                                                                                  <div class="js-layer-settings js-layer-settings-search" style="display: none;"></div>
+                                                                                                  <div class="js-layer-settings js-layer-settings-style" style="display: none;"></div>
+                                                                                                  <div class="js-layer-settings js-layer-settings-download" style="display: none;"></div>
+                                                                                                  <div class="js-layer-settings js-layer-settings-table" id="table_view-${layerKey.replace(".", "_")}" style="display: none;"></div>
+                                                                                                  </div>
+        
+            <!-- queue -->
+           <div class="d-none align-items-center gap-1 js-failed-container">
+                                           <button type="button" class="d-none btn btn-sm btn-outline-secondary js-statistics-field js-failed-add" style="${queueFailedButtonStyle}" disabled>
+                                           <i class="bi bi-plus-square"></i> <span class="js-value"></span>
+                                           </button>
+                                           <button type="button" class="d-none btn btn-sm btn-outline-secondary js-statistics-field js-failed-update" style="${queueFailedButtonStyle}" disabled>
+                                           <i class="bi bi-pencil"></i> <span class="js-value"></span>
+                                           </button>
+                                           <button type="button" class="d-none btn btn-sm btn-outline-secondary js-statistics-field js-failed-delete" style="${queueFailedButtonStyle}" disabled>
+                                           <i class="fa bi-dash-square"></i> <span class="js-value"></span>
+                                           </button>
+                                           <button type="button" class="d-none btn btn-sm btn-outline-secondary js-statistics-field js-rejectedByServer-add" style="${queueRejectedByServerButtonStyle}" disabled>
+                                           <i class="bi bi-plus-square"></i> <span class="js-value"></span>
+                                           </button>
+                                           <button type="button" class="d-none btn btn-sm btn-outline-secondary js-statistics-field js-rejectedByServer-update" style="${queueRejectedByServerButtonStyle}" disabled>
+                                           <i class="bi bi-pencil"></i> <span class="js-value"></span>
+                                           </button>
+                                           <button type="button" class="d-none btn btn-sm btn-outline-secondary js-statistics-field js-rejectedByServer-delete" style="${queueRejectedByServerButtonStyle}" disabled>
+                                           <i class="bi bi-dash-square"></i> <span class="js-value"></span>
+                                           </button>
+                                           <button type="button" data-gc2-id="${layerKey}" class="d-none btn btn-sm btn-outline-secondary js-clear" style="${regularButtonStyle}">
+                                           <i class="bi bi-arrow-counterclockwise"></i>
+                                           </button>
+                                           </div>
+            <div class="js-rejectedByServerItems d-none"></div>
         </li>`);
-    }
-
-    getEditingButtons() {
-        return `<div class="cartodb-popup-content">
-                    <button class="btn btn-primary btn-xs ge-start-edit">
-                        <i class="fa fa-pencil-alt" aria-hidden="true" ></i>
-                    </button>
-                    <button class="btn btn-danger btn-xs ge-delete">
-                        <i class="fa fa-trash" aria-hidden="true"></i>
-                    </button>
-                </div>`;
     }
 
     getLayerTypeSelector(selectorLabel, allowedTypes) {
         let selectors = [];
         if (allowedTypes.indexOf(LAYER.VECTOR) > -1) {
-            selectors.push(`<li><a class="js-layer-type-selector-vector" href="javascript:void(0)">${ICONS[LAYER.VECTOR]} ${__('Vector')}</a></li>`);
+            selectors.push(`<li><a class="js-layer-type-selector dropdown-item" data-layer-type="vector" href="javascript:void(0)">${ICONS[LAYER.VECTOR]} ${__('Vector')}</a></li>`);
         }
 
         if (allowedTypes.indexOf(LAYER.RASTER_TILE) > -1) {
-            selectors.push(`<li><a class="js-layer-type-selector-tile" href="javascript:void(0)">${ICONS[LAYER.RASTER_TILE]} ${__('Raster tile')}</a></li>`);
+            selectors.push(`<li><a class="js-layer-type-selector dropdown-item" data-layer-type="tile" href="javascript:void(0)">${ICONS[LAYER.RASTER_TILE]} ${__('Raster tile')}</a></li>`);
         }
 
         if (allowedTypes.indexOf(LAYER.VECTOR_TILE) > -1) {
-            selectors.push(`<li><a class="js-layer-type-selector-vector-tile" href="javascript:void(0)">${ICONS[LAYER.VECTOR_TILE]} ${__('Vector tile')}</a></li>`);
+            selectors.push(`<li><a class="js-layer-type-selector dropdown-item" data-layer-type="vector-tile" href="javascript:void(0)">${ICONS[LAYER.VECTOR_TILE]} ${__('Vector tile')}</a></li>`);
         }
 
         if (allowedTypes.indexOf(LAYER.WEBGL) > -1) {
-            selectors.push(`<li><a class="js-layer-type-selector-webgl" href="javascript:void(0)">${ICONS[LAYER.WEBGL]} ${__('WebGL')}</a></li>`);
+            selectors.push(`<li><a class="js-layer-type-selector dropdown-item" data-layer-type="webgl" href="javascript:void(0)">${ICONS[LAYER.WEBGL]} ${__('WebGL')}</a></li>`);
         }
 
-        return (`<div class="dropdown">
-            <button style="padding: 2px; margin: 0px;" class="btn btn-default dropdown-toggle" type="button"
-                data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+        return (`<div class="dropdown" data-toggle="tooltip" data-bs-placement="top" title="${__(`Change layer type`)}">
+            <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button"
+                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                 <span class="js-dropdown-label">${selectorLabel}</span>
-                <span class="caret"></span>
             </button>
             <ul class="dropdown-menu">${selectors.join(``)}</ul>
         </div>`);

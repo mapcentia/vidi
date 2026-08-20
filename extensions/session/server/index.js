@@ -1,23 +1,22 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2021 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
-var express = require('express');
-var router = express.Router();
-var request = require('request');
-var config = require('../../../config/config.js');
-var autoLogin = false; // Auto login is insecure and sets cookie with login creds. DO NOT USE
-var autoLoginMaxAge = null;
+let express = require('express');
+let router = express.Router();
+let request = require('request');
+let config = require('../../../config/config.js');
+let autoLogin = false; // Auto login is insecure and sets cookie with login creds. DO NOT USE
+let autoLoginMaxAge = null;
 
-if (typeof config.autoLoginPossible !== "undefined" && config.autoLoginPossible === true)
-{
-    if (typeof config.extensionConfig !== "undefined" && typeof config.extensionConfig.session !== "undefined") {
-        if (typeof config.extensionConfig.session.autoLogin !== "undefined") {
+if (config?.autoLoginPossible === true) {
+    if (config?.extensionConfig?.session) {
+        if (config?.extensionConfig?.session?.autoLogin) {
             autoLogin = config.extensionConfig.session.autoLogin;
         }
-        if (typeof config.extensionConfig.session.autoLoginMaxAge !== "undefined") {
+        if (config?.extensionConfig?.session?.autoLoginMaxAge) {
             autoLoginMaxAge = config.extensionConfig.session.autoLoginMaxAge;
         }
     }
@@ -27,39 +26,44 @@ if (typeof config.autoLoginPossible !== "undefined" && config.autoLoginPossible 
  *
  * @type {module.exports.print|{templates, scales}}
  */
-var config = require('../../../config/config.js');
 
-var start = function (u, p, s, d, req, response, status) {
-    var postData = {
-        user: u,
-        password: p,
-        schema: s
-    };
+let start = function (dataToAuthorizeWith, req, response, status) {
 
-    if (d) {
-        postData.database = d;
+    let options;
+    if (dataToAuthorizeWith?.token) {
+        options = {
+            headers: {'content-type': 'application/json'},
+            method: 'POST',
+            uri: config.gc2.host + "/api/v2/session/token",
+            body: JSON.stringify({
+                token: dataToAuthorizeWith.token,
+                database: dataToAuthorizeWith.database,
+                superuser: dataToAuthorizeWith.superuser,
+            })
+        };
+    } else {
+        options = {
+            headers: {'content-type': 'application/json'},
+            method: 'POST',
+            uri: config.gc2.host + "/api/v2/session/start",
+            body: JSON.stringify(dataToAuthorizeWith)
+        };
+
     }
 
-    var options = {
-        headers: {'content-type': 'application/json'},
-        method: 'POST',
-        uri: config.gc2.host + "/api/v2/session/start",
-        body: JSON.stringify(postData)
-    };
-
     request(options, function (err, res, body) {
-        var data;
+        let data;
         response.header('content-type', 'application/json');
         response.header('Cache-Control', 'no-cache, no-store, must-revalidate');
         response.header('Expires', '0');
         response.header('X-Powered-By', 'MapCentia Vidi');
 
         if (err || res.statusCode !== 200) {
+            console.error(err);
             response.status(401).send({
                 success: false,
-                message: "Could not log in"
+                message: JSON.parse(body)
             });
-
             return;
         }
 
@@ -71,16 +75,14 @@ var start = function (u, p, s, d, req, response, status) {
                 message: "Could not parse response from GC2",
                 data: body
             });
-
             return;
         }
 
-        if (req.session.gc2SessionId) {
+        if (req?.session?.gc2SessionId) {
             response.status(200).send({
                 success: true,
                 message: "Already logged in"
             });
-
             return;
         }
 
@@ -96,7 +98,7 @@ var start = function (u, p, s, d, req, response, status) {
 
         console.log("Session started");
 
-        var resBody = {
+        let resBody = {
             success: true,
             message: "Logged in",
             screen_name: data.screen_name,
@@ -108,8 +110,8 @@ var start = function (u, p, s, d, req, response, status) {
         };
 
         if (autoLogin) {
-            resBody.password = postData.password;
-            resBody.schema = postData.schema;
+            resBody.password = dataToAuthorizeWith.password;
+            resBody.schema = dataToAuthorizeWith.schema;
             response.cookie('autoconnect.gc2', JSON.stringify(resBody), {
                 maxAge: autoLoginMaxAge,
                 httpOnly: true
@@ -122,18 +124,19 @@ var start = function (u, p, s, d, req, response, status) {
         }
         response.send(resBody);
     });
-
 };
 
 router.post('/api/session/start', function (req, response) {
-    if (req.body.u) {
-        start(req.body.u, req.body.p, req.body.s, req.body.d, req, response);
+    if (req.body) {
+        console.log(req.body);
+        start(req.body, req, response);
     }
 });
 
 router.get('/api/session/stop', function (req, response) {
     console.log("Session stopped");
-    req.session.destroy(function (err) {
+    req.session.destroy(function () {
+        response.cookie('connect.gc2', '', {maxAge: 1})
         response.status(200).send({
             success: true,
             message: "Logged out"
@@ -144,8 +147,14 @@ router.get('/api/session/stop', function (req, response) {
 router.get('/api/session/status', function (req, response) {
     let autoLoginCookie = req.cookies['autoconnect.gc2'];
     if (autoLogin && autoLoginCookie && !req.session.gc2SessionId) {
-        var creds = JSON.parse(autoLoginCookie);
-        start(creds.screen_name, creds.password, creds.schema, creds.parentdb, req, response,
+        let creds = JSON.parse(autoLoginCookie);
+        let credsForGc2 = {
+            "user": creds.screen_name,
+            "password": creds.password,
+            "schema": creds.schema,
+            "database": creds.parentdb
+        }
+        start(credsForGc2, req, response,
             {
                 screen_name: creds.screen_name,
                 email: creds.email,
@@ -156,14 +165,15 @@ router.get('/api/session/status', function (req, response) {
         response.status(200).send({
             success: true,
             status: {
-                authenticated: !!req.session.gc2SessionId,
-                screen_name: req.session.gc2UserName,
-                email: req.session.gc2Email,
-                subuser: req.session.subUser,
-                properties: req.session.properties
+                authenticated: !!req?.session?.gc2SessionId,
+                screen_name: req?.session?.gc2UserName,
+                email: req?.session?.gc2Email,
+                subuser: req?.session?.subUser,
+                properties: req?.session?.properties
             }
         });
     }
 });
+
 
 module.exports = router;

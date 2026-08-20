@@ -1,6 +1,6 @@
 /*
  * @author     Alexander Shumilov
- * @copyright  2013-2019 MapCentia ApS
+ * @copyright  2013-2023 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -22,11 +22,13 @@ class StringControl extends React.Component {
         } else {
             return (<input
                 id={this.props.id}
-                className="form-control"
+                className="form-control form-control-sm"
                 type="text"
                 placeholder="abc123"
                 value={this.props.value}
-                onChange={(event) => { this.props.onChange(event.target.value) }}/>);
+                onChange={(event) => {
+                    this.props.onChange(event.target.value)
+                }}/>);
         }
     }
 }

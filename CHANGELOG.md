@@ -1,26 +1,1551 @@
 # Changelog
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [Unreleased]
+## [UNRELEASED] - 2026-20-8
+### Added
+- Street View: in embed mode the street view options (Mapillary, Google Street View, Skråfoto, Google Maps
+  and COWI, when configured) are now selected via a drawer control on the map instead of the side panel.
+- Layer tree now shows an error icon on layers whose tiles fail to load. Tile loading errors are
+  broadcast on the `tileLayerError:layers` event, so the icon appears and disappears as errors occur and resolve.
+  Only works for non-tiled layers.
+
+### Changed
+- The screenshot button icon changed from a camera to an image icon (the camera icon is
+  now used by the street view drawer).
+
+## [2026.6.3] - 2026-29-6
+### Fixed
+- Print: headless browser pool now surfaces `factoryCreateError`/`factoryDestroyError` instead of
+  masking them as the misleading "ResourceRequest timed out" acquire error. The bundled Chromium can
+  be overridden via `PUPPETEER_EXECUTABLE_PATH` / `config.puppeteerProcesses.executablePath` (fixes
+  printing in Docker, where the bundled binary is absent), and `acquireTimeoutMillis` was raised from
+  500ms to a configurable 30s so a cold browser launch no longer times out before it is ready.
+
+## [2026.6.2] - 2026-16-6
+### Fixed
+- Add versioning check to filter out ended versions in downloads.
+
+## [2026.6.1] - 2026-10-6
+### Fixed
+- Editor: Boolean fields default to `false` again when creating new features. The `skipDefaults` form
+  option suppressed the schema's explicit `default: false`, so unchecked checkboxes were submitted as
+  `null`. Changed to `skipEmptyDefaults`, which still applies defaults explicitly defined in the schema.
+
+### Changed
+- Refactor(controllers): Replace deprecated `request` library with modern `fetch` across controllers (not extensions yet).
+- Integrate `express-async-errors` to forward async route rejections in controllers to a central error handler. 
+  Implemented a middleware-based error handler for consistent error responses.
+
+## [2026.6.0] - 2026-8-6
+### Fixed
+- Prevent redundant '?' when appending query parameters to WMTS URL.
+ 
+## [2026.5.9] - 2026-29-5
+### Fixed
+- Memory-leaks in Editor.
+
+## [2026.5.8] - 2026-20-5
+### Fixed
+- Editor: Optimize blob handling: reduce memory consumption by replacing base64 strings with blob URLs, 
+  clean up unused references, and prevent leaks. Enhance FileUploadWidget to efficiently manage 
+  data URLs and async HTTP URL conversion.
+
+## [2026.5.7] - 2026-19-5
+### Fixed
+- Strip query strings from URLs before passing them to the decoder in FileUploadWidget, as the deocoder doesn't use them.
+
+## [2026.5.6] - 2026-19-5
+### Fixed
+- Replaced FontAwesome with Bootstrap Icons for draw control icon.
+
+## [2026.5.5] - 2026-15-5
+### Added
+- New config options `minZoom` and `maxZoom`. Minimum and maximum zoom level of the map. If not set, the map will use the min/max zoom level of the active baselayer.
+
+## [2026.5.4] - 2026-13-5
+### Fixed
+- Back to use enum + ui:enumNames rather than oneOf+const. AJV compiles oneOf into a
+  deeply nested else-chain (one level per branch) which overflows V8's stack
+  on large restriction lists (e.g. ~1000 postnumre)
+
+## [2026.5.3] - 2026-13-5
+### Fixed
+- JSON types are noe strinhgified in the editor.
+
+## [2026.5.2] - 2026-8-5
+### Changed
+- Refactor Editor schema handling: replace `enum` with `oneOf` for restriction fields, preserve parent type, and improve select rendering.
+
+## [2026.5.1] - 2026-5-5
+### Fixed
+- Add support for danger toasts and fixed layertree download functionality with improved error handling and localized messages.
+
+## [2026.5.0] - 2026-4-5
+### Fixed
+- The download widget in layertree was broken and is fixed now. Also, Dowbload file name is set to the layer name.
+
+## [2026.4.2] - 2026-28-4
+### Fixed
+- Regressions in Symbols
+
+## [2026.4.1] - 2026-20-4
+### Fixed
+- Array property check i Editor, which without an array field will not work.
+- 
+## [2026.4.0] - 2026-15-4
+### Added
+- New config option `extensionConfig.conflictSearch.getParcelFromAddress` for setting how address search is working, when
+  `extensionConfig.conflictSearch.getProperty` is `false`. If set to `true` address search will seacrh with the parcel
+  instead of the address point.
+
+## [2026.3.5] - 2026-30-3
+### Added
+- Editor: Support for Postgres arrays types. For now only `bytea[]` is supported for image/file fields.
+
+### Changed
+- Update `@rjsf` dependencies to version 6.4.1 and migrate from `@rjsf/bootstrap-4` to `@rjsf/react-bootstrap`
+- Remove LESS assets and dependencies; migrate styling to SCSS.
+- Replace `base64url` package with custom module.
+- Build script is added (/build.mjs), which uses ESBuild instead of Browserify and can replace Grunt entirely. Minimum changes are done in source code to support ESBuild. Like removing `windowify` usage. 
+  Bundle is now built in about 300 ms. Browserify is still supported.
+  - npm run build — dev build (JS + CSS + templates, ~2s total)
+  - npm run build:production — production build (+ minification + cache bust + version hash)
+  - npm run build:css — only CSS
+  - npm run build:libs — minify libs, ~2s
+  - npm run watch — watch with livereload (JS + CSS + templates)
+- Show alert for unauthorized database access. If a user is not authorized to access the database, an alert is shown and layertree is not shown.
+  Anonymous access is still possible.
+- Signing out will now also sign out from GC2.
+- After auth, Vidi will not refresh the page.
+
+## [2026.3.4] - 2026-17-3
+### Changed
+- Refactor SQL query handling in `geocloud.js` and `sql.js` to switch from URL-encoded form data to JSON payloads. GC2 must be upgraded to latest version.
+
+## [2026.3.3] - 2026-12-3
+### Added
+- Re-try logic on error for non-tiled WMS layers. 1000 ms delay between 3 retries.
+
+## [2026.3.2] - 2026-10-3
+### Changed
+- New tag
+
+## [2026.3.1] - 2026-10-3
+### Changed
+- New tag
+
+## [2026.3.0] - 2026-10-3
+### Changed
+- Login now uses OAuth2. It might be necessary to set the `host` config in GC2, if behind a proxy. The `host` config is the URL of the GC2 instance.
+
+### Fixed
+- Printing now works with MapLibre GL base layers. MapLibre GL is fixed to version 5.7.x.
+- Side-by-side base layer switcher regression.
+
+## [2026.2.1] - 2026-9-2
+### Added
+- Support for not scaling images when uploading to editor using the config option `editor.doNotScaleImages`.
+
+## [2026.2.0] - 2026-2-2
+### Fixed
+- It could happen that the 'More tools' was not activated when using the 'activateLayers' config option.
+
+## [2026.1.4] - 2026-28-1
+### Added
+- Symbols module: Support for deleting symbols in storage and tracking deletions in state sync.
+
+## [2026.1.3] - 2026-22-1
+### Fixed
+- Dynamically added layer would not be filtered on print. E.g., from a snapshot where the layer was not in the layer tree before.
+
+## [2026.1.2] - 2026-19-1
+### Fixed
+- Print now always waits for legend to load.
+- `api.filter` will not try to set widget state, if the widget is not rendered yet in the layer tree. This resulted in an error.
+
+## [2026.1.1] - 2026-15-1
+### Fixed
+- Regressions in print.
+
+## [2026.1.0] - 2026-6-1
+### Added
+- Added retry logic with exponential backoff to SQL requests in `geocloud.js` and improve error handling.
+
+### Fixed
+- Make editor form re-render again between adding/editing features. This was an unwanted effect from upgrading Reactjs to 18 and use of createRoot.
+
+## [2025.12.1] - 2025-12-12
+### Added
+- WMS base layers can now be configured with a `singleTile` option. If set to `true`, the layer will be fetched as a single tile.
+
+## [2025.12.0] - 2025-9-12
+### Added
+- New config option `layerTreeFilterPlaceholder` for setting the placeholder text in the layer tree filter input field.
+- Editor: New config option for setting default values in newly created objects. A value can be set directly or from a user property:
+```json
+{
+    "extensionConfig": {
+        "editor": {
+            "defaultValues": {
+                "my_dynamic_field": "$user.properties.my_property",
+                "my_static_field": "some value"
+            }
+        }
+    }
+}
+```
+- Editor: If a `character varying` field has max length > 255, then a `textarea` widget is used instead of `input`.
+
+### Fixed
+- Tooltips in embed template are now above the layer tree and can be seen.
+- Missing tooltips added.
+
+## [2025.11.3] - 2025-24-11
+### Fixed
+- Print now always waits for overlay to load, instead of relying on the timeout.
+
+## [2025.11.2] - 2025-21-11
+### Added
+- Opacity control for base layers with sliders and manage state persistence
+
+### Fixed
+- Printing and screenshotting now works with MapLibre GL base layers.
+
+## [2025.11.1] - 2025-13-11
+### Changed
+- Upgrade `react` dependencies to version 18.3.1.
+- Replace `ReactDOM.render` with `createRoot` for React 18 compatibility across modules.
+
+## [2025.11.0] - 2025-7-11
+### Fixed
+- Add dynamic placeholder support for the conflict search input field.
+- Assign unique IDs (`_vidi_id`) to drawings created from the search module.
+- Update button style to `btn-outline-warning` in conflict Info section for improved visibility.
+
+_## [2025.10.3] - 2025-22-10
+### Changed_
+- Upgrade React and ReactDOM to v17.0.2.
+- Replace react-autocomplete with react-widgets Combobox in layer tree controls to support React 17.
+- Remove unused packages from package.json (react-addons, react-button, rc-slider, react-color, mutationobserver-shim, grunt-bower-task, esmify, install, npm).
+
+## [2025.10.2] - 2025-21-10
+### Changed
+- Support for GC2 setting `convertDataUrlsToHttp`. Vector layers, editor and feature-info can now deal with both
+  data and http urls. 
+
+## [2025.10.1] - 2025-14-10
+### Changed
+- Support for GC2 setting `convertDataUrlsToHttp`. Vector layers, editor and feature-info can now deal with both
+  data and http urls.  
+
+## [2025.10.0] - 2025-2-10
+### Added
+- New config option `mode` for setting different optimization modes with bitmask flags:
+  - 1: No transparency fade animation in GUI
+  - 2: No visibility check of tile layers
+  - 4: No map animations
+
+### Changed
+- Remove `jrespond` dependency and related code.
+- Remove `bower.json` and its dependencies as it's no longer used
+- Update `@maplibre/maplibre-gl-leaflet` to v0.1.3 and `maplibre-gl` to v5.7.2.
+- Replace `grunt-contrib-uglify` with `grunt-terser`.
+- Update `browserify` to v17.0.1
+
+## [2025.9.0] - 2025-27-8
+### Fixed
+- Changing Snapshot tags will now not update the whole snapshot. Only the tags that are changed will be updated.
+
+## [2025.8.2] - 2025-27-8
+### Added
+- A 30-second timeout to handle cases where Vidi fails to load, ensuring the "Vidi is now loaded" console message is sent to prevent lockups in print. Clears timeout on successful loading. The timeout can be changed with `config.loadingTimeout` in build-time config.
+- A 15-second interval to check if Vidi is loaded. If the interval is reached and Vidi is not loaded, a 'toast' is shown which enables the user to clear cache storage and refresh the browser. The interval Can be changed with `config.loadCheckingInterval` in build-time config. 
+
+## [2025.8.1] - 2025-19-8
+### Fixed
+- Added `min-width: 0` to `.main-content`, so content is propper sized if wider than the parent container.
+
+## [2025.8.0] - 2025-11-8
+### Added
+- New config `crs` for setting the coordinate system. The default is `EPSG:3857`. Only alternative is for now `EPSG:25832`. Background layers must be configured accordingly.
+
+### Changed
+- The print border rectangle is now created with a `polygon` object instead of a `rectangle` so it aligns with choosen coordinate system. This means that the rectangle edit handles are not available anymore. Scale can only be changed with the `scale` dialog.
+- The analysis function in `conflictSearch` will format distance to `km` when above 100.000 instead of 1.000.
+- The analysis function now has a GC2 Meta option `sql_conflict_header` for setting the header of the fist column in the analysis result table.
+
+## [2025.7.0] - 2025-2-7
+### Fixed
+- The "Clear map" button now clears symbols and resets the state for drawings (before drawings were cleared but state not proper reset).  
+
+## [2025.6.2] - 2025-19-6
+
+### Added
+- New "Download MS Excel" button in Advanced Query. This function will download one Excel Workbook with a sheet containing results for every queried layer.
+
+### Fixed
+- The Virtual layer in Advanced Query is fixed
+
+## [2025.6.1] - 2025-4-6
+
+### Changed
+
+- The JavaScript libs are now loaded in sync, because the app had to poll for them anyway. This doesn't change performance and the Chrome [violation] regarding setTimeout is gone.
+
+### Fixed
+
+- Removed redundant console traces and improved error handling in multiple modules. Added safeguards for modal initialization to prevent runtime issues when the login modal is unavailable.
+
+
+## [2025.6.0] - 2025-2-6
+
+### Added
+
+- A `tileMatrixTransform` function can now be passed to WMTS layers. The function takes the current zoom number and must return a valid tilematrix. The example will pad the zoom number with `0` and prefix with `L`. If the `tileMatrixTransform` is not set, the zoom number will be used directly for tilematrix.
+
+```json
+{
+  "type": "WMTS",
+  "url": "https://api.dataforsyningen.dk/wmts/forvaltning2?",
+  "tileMatrixSet": "View1",
+  "layer": "forvaltning2",
+  "id": "forvaltning2",
+  "name": "Forvaltning2 (UTM)",
+  "tileMatrixTransform": "(zoom) => {return 'L' + zoom.padStart(2, '0').toString()}"
+}
+```
+
+### Fixed
+- In print the EPSG:32632 projection is replaced with EPSG:3857 for consistency and improved accuracy. Introduced a correction factor to adjust for latitude distortions in dimensions. Refactored related calculations to ensure proper map scaling and alignment.
+
+## [2025.5.2] - 2025-20-5
+
+### Added
+
+- Implemented a feature to copy extra tables to the clipboard as HTML, making it compatible with Excel formatting. Added animations to indicate successful copying and updated table rendering to include copy buttons.
+- Add callback handling for symbol changes. This ensures external systems can respond to changes via the `symbolIsChanged` event and corresponding embed API callbacks.
+
+## [2025.5.1] - 2025-13-5
+
+### Changed
+ 
+- Adjust file upload limits in FileUploadWidget.js
+
+## [2025.5.0] - 2025-6-5
+
+### Added
+
+- A new config `print.timeout` controls the timeout of the headless browser. Defaults to `60000` which equals the previously hardcoded value.
+
+### Changed
+
+- The minimum scale available for print has been changed from a fixed `200` to the lowest value of `config.print.scales`.
+
+### Fixed
+
+- Multipage print in conflictSearch now works.
+
+## [2025.4.1] - 2025-24-4
+
+### Fixed
+
+- Added a null check to prevent potential errors when accessing undefined objects during layer sorting.
+
+## [2025.4.0] - 2025-10-4
+
+- Danish search with `sortByScore` is improved so more relevant hits get ranked higher. `sortByScore` is now default.
+
+## [2025.3.2] - 2025-28-3
+
+### Added
+
+- A new config `extensionConfig.editor.alwaysActivate`. If set to `false` the editor controls will be hidden until the user sign in. Default is `true`.
+- Configuration for grouping base layers:
+```json
+{
+  "baseLayerGroups": [
+    {
+      "groupName": "Hexagon DDO ortofoto",
+      "layers": [
+        "DK-DDOland2022_125mm_UTM32ETRS89",
+        ...,
+        ...
+      ]
+    },
+    {
+      "groupName": "GeoDanmark ortofoto",
+      "layers": [
+        "ortofoto_foraar_temp_DF",
+        "ortofoto_foraar_2023",
+        ...,
+        ...
+      ]
+    }
+  ]
+}
+```
+- Draw module can now be set to stateless with config `statelessDraw: true`. This means that drawings are not recreated on browser refresh.
+- Symbol extension can now set to stateless with config `extensionConfig.symbols.stateless: true`. This means that symbols are not recreated on browser refresh.
+- Opening layer groups at startup can now be done with config `openLayerTreeGroups`, which value must be an array with group names:
+```json
+{
+  "openLayerTreeGroups": ["Group1", "Group2"]
+}
+```
+- Custom map projections can now be used. One is added: The Danish UTM32 grid. It can be set with config:
+```json
+  {
+    "crs": "EPSG25832"
+  }
+```
+
+### Fixed
+
+- Better handling of vector layers in `activeLayers`. If `activeLayers` only had vector layers, they wouldn't be activated.
+- Fail-over for base layers is now working in embed mode with both base layer toggle and drawer. 
+- Fail-over for base layer module is improved, so its cycles from the top and starts over.
+
+## [2025.3.1] - 2025-10-3
+
+### Added
+
+- Added Handlebars helper 'formatDecimalNumber', which converts a decimal number to the chosen locale (either decimal separator '.' or ',').
+
+## [2025.3.0] - 2025-7-3
+
+### Added
+- Added information on building the documentation.
+- Fixed some typos in changelog.
+- The default coordinate system can now be set in Coordinates module:
+
+```json
+{
+  "extensionConfig": {
+    "coordinates": {
+      "default": "utm",
+      "lockUtmZoneTo": 32
+    }
+  }
+}
+```
+
+- Google Maps added to Coordinates module and COWI Gadefoto will not be shown if not configured.
+- New module `directions`, which adds a map control button. After activating the control the user can click in map and
+  Google Maps with directions to that point will start. The geolocation control must be active for to use the directions
+  control.
+- New "More" handle on symbols with a Copy function, which clones the symbol to a new one. It can be configured like the
+  other handles and is called `extra`. Here it's disabled:
+```json
+{
+  "extensionConfig": {
+    "symbols": {
+      "files": [
+        {
+          "file": "symbol_set.json",
+          "title": "My symbols"
+        }
+      ],
+      "symbolOptions": {
+        "extra": false
+      }
+    }
+  }
+}
+```
+- Symbol handles are now using Bootstrap icons.
+- Config option 'activateLayers' can now be set to the same kind of values as 'schemata' (including tag: and schema name).
+  A new method meta::getLayerNamesFromSchemata will convert the schemata to an array of layer names.
+- A global variable `decimalSeparator` is now set from current locale. It's used in conflictSearch.
+
+### Changed
+
+- Auto hide login modal after successful login.
+- When using `featureInfoTableOnMap` closing the popup wil clear selected features in the map.
+- Config option 'activeLayers' will now be evaluated when signing in, so protected layers will be switched on.
+
+### Fixed
+
+- When signin out active layers will be toggled so protected layers are efficient removed from the map.
+- Bug regrading removal of empty groups in conflictSearch.
+
+## [2025.2.1] - 2025-7-2
+
+### Added
+
+- In ConflictSearch modul the total length and area is calculated for intersections with lines and polygons and
+  reported.
+- Individual buffer for layers. The buffer for a layer is set with the GC2 Meta option `buffer_conflict`, which is added
+  to the buffer on the search polygon. In the result report the Individual set buffers are shown.
+- It's now possible to use the helper function `formatDate` in templates like this:
+  ```handlebars
+  {{formatDate date "D. MMMM YYYY" "YYYYMMDD"}}
+  ```
+  Where first argument is output format and the second is input format (if needed).
+- And template helper function `replaceNull` is also added, which replace null with a value:
+  ```handlebars
+  {{replaceNull date "No date"}}
+  ```
+  The function will not return a value, if input is not null.
+
+## [2025.2.0] - 2025-4-2
+
+### Added
+
+- Editor 'Edit' and 'Delete' buttons in feature table, so editing can be started without pop-up.
+
+### Fixed
+
+- The "Show table" is now given space, so it doesn't overlap other elements like off canvases.
+
+## [2025.1.5] - 2025-28-1
+
+### Fixed
+
+- The annotation tool in Draw is fixed. After upgrading 'marked' module, the code had to be adjusted.
+
+## [2025.1.4] - 2025-22-1
+
+### Fixed
+
+- The "Show table" table widget was on reload of layer duplicated in the DOM.
+- When disabling layer the table was not removed in other templates than embed.tmpl.
+- Styles regarding tables were adjusted.
+
+## [2025.1.3] - 2025-16-1
+
+### Fixed
+
+- Update Leaflet CSS path to use node_modules source. It was using an old CSS sheet.
+
+## [2025.1.2] - 2025-15-1
+
+### Fixed
+
+- Refs in configs now works again. And they also works in external configs.
+
+## [2025.1.1] - 2025-13-1
+### Fixed
+- After editing raster layer, the layer was added again. Now it's only reloaded.
+
+## [2025.1.0] - 2025-8-1
+### Fixed
+- The removal of tke session parameter from URL after setting cookie caused an error in print. This is now fixed.
+
+## [2024.12.2] - 2024-17-12
+### Fixed
+- If `navigator.clipboard` is not available (e.g. on an unsecure connection), the Snapshot module will fall back to a
+  hacky method with `document.execCommand` for copying to the clipboard.
+
+## [2024.12.1] - 2024-16-12
+### Changed
+- Use a button instead of a link for layer panel toggle
+
+### Security
+- Remove session parameter from URL after setting cookie. This change ensures the session parameter is removed from the URL after it is used to set the cookie. It improves user privacy by preventing sensitive session data from lingering in the URL.
+
+## [2024.12.0] - 2024-11-12
+### Added
+- New option for setting the zoom-level of custom searches. default is level 18. The value can be set in the config, using the key `zoom`:
+```json
+{
+    "searchConfig": {
+        "size": 4,
+        "komkode": "*",
+        "esrSearchActive": true,
+        "sfeSearchActive": true,
+        "extraSearches": [{
+            "name": "stednavne_search",
+            "db": "dk",
+            "host": "https://dk.gc2.io",
+            "heading": "Stednavne",
+            "zoom": 20,
+            "index": {
+                "name": "stednavne/navne_samlet",
+                "field": "string",
+                "key": "gid"
+
+            },
+            "relation": {
+                "name": "stednavne.navne_samlet_geom",
+                "key": "gid",
+                "geom": "the_geom"
+            }
+        }]
+    }
+}
+```
+
+### Fixed
+
+- Bug in editor caused layers with restrictions to be output as textareas. Now the editor will correctly output a select
+  with the values setup in GC2.
+- On mobile, it was possible for the menu to get into a stuck transparent state. This has been fixed.
+- A bug caused the defaults not to load in the `conflictSearch` module. This has been fixed.
+- Attributions and zoom-settings are now correctly passed onto WMTS layers.
+
+## [2024.11.1] - 2024-21-11
+
+### Fixed
+
+- Editor now handles JSON fields, which before rendered a syntax error in the decoding.
+
+## [2024.11.0] - 2024-21-11
+
+### Added
+
+- Themes selector in default template. Choose between Dark, Light or Auto. Is set to the same theme as the OS (if
+  supported). Auto will change the theme according to the OS.
+- It's now possible to set up MapLibre layers as base layers (overlays will come later). Setup like this:
+```json
+{
+  "type": "MVT",
+  "url": "https://api.maptiler.com/maps/topo/style.json?key=xxx",
+  "id": "mvt",
+  "name": "Open Street Map (Vektor)",
+  "description": "Kort fra mvt",
+  "attribution": "mvt",
+  "minZoom": 8,
+  "maxZoom": 20,
+  "maxNativeZoom": 19
+}
+```
+
+- Also, WMTS layer support is added for base layers:
+
+```json
+{
+  "type": "WMTS",
+  "url": "https://api.dataforsyningen.dk/orto_foraar_webm_DAF?token=xxx&",
+  "tileMatrixSet": 'DFD_GoogleMapsCompatible',
+  "layer": 'orto_foraar_webm',
+  "id": "wmts",
+  "name": "Ortofoto (wmts)",
+  "description": "Kort fra wmts",
+  "attribution": "wmts",
+  "minZoom": 8,
+  "maxZoom": 20,
+  "maxNativeZoom": 19
+}
+```
+
+###
+- Leaflet is updated to latest: 1.9.4
+
+### Fixed
+- Symbols (Symbol extension) is now up-scaled in print to counter the down-scale of the actual map.
+- Fixed issue with JSON types in Editor.
+- Session cookies set through the URL is now Secure and sameSite: none.
+
+## [2024.10.0] - 2024-4-10
+### Fixed
+- Conflict search module: Non ascii characters in SELECT statements caused a low level un-catchable error. Now statements are base64url encoded.   
+
+## [2024.9.0] - 2024-19-9
+### Changed
+- Incorporated handling for `text` type fields with a new `textarea` UI widget in Editor.
+- Updated the js/embed.js script to handle 'data-vidi-title' attribute, which will set the 'title' attribute for iframes.
+
+## [2024.8.1] - 2024-29-8
+### Fixed
+- Remove Polyfill.js from Service Worker cache
+- Fixes in Conflict search: If response from GC2 is not JSON, the search will proceed and the raw body text is shown in errors dialog. 
+
+## [2024.8.0] - 2024-12-8
+### Fixed
+- Group check boxes now works with vector layers.
+- Reverse sorting in groups. This was a regression from last version.
+- Multi select tag widgets will now close on blur.
+
+## [2024.6.1] - 2024-25-6
+### Changed
+- The config `showOffcanvas` now has a third option `"mobile"` (besides `true` and `false`), which means that the off canvas menu is only shown if the screen is wider than 720px.
+
+### Fixed
+- Huge performance increase in the layer switcher. Switching a layer on now takes ~20ms comparing to ~500ms before. This is gained by caching the cloned metadata object during a single event.
+- Layers are removed from the Leaflet layer control when turned off. Turning on/off a lot of layers could hog down performance before.
+
+## [2024.6.0] - 2024-21-6
+### Added
+- `infoCallback` and `emptyInfoCallback` can be used in configs. The value should be a stringified function. The former callback is fired when feature info hits and an array of layers with hits is passed to the callback. The latter callback is fired when feature info hits nothing.
+```json
+{
+  "infoCallback": "function(layers){console.log('You hit:', layers)}"
+}
+```
+```json
+{
+  "emptyInfoCallback": "function(){console.log('You hit nothing')}"
+}
+```
+- The parameter `config=...` is added to WMS url, so better analytics can be performed on the usages of configs and layers.
+- A new api method `api.turOff('schema.layer')` which turns the passed layer off.  
+
+### Changed
+- The snapshot tag list is now sorted alphanumeric.
+- Hits in accordion popup are now sorted according to layer 'sort id'.
+- A class attribute `vidi-draw-tooltip` is added to the label tool in Draw. This kan be used to change the style of the content in e.g. print.
+
+### Fixed
+- UTFgrids are now requested with filter, so mouseover doesn't catch filtered features (require GC2 2024.6.1 or later).
+- The dropdown menu (three vertical dots) now aligned to left.
+
+## [2024.5.2] - 2024-29-5
+### Changed
+- Layer group checkboxes now reflects the state of the layer tree. An indeterminate state is shown when some layer but not all are active in a group. 
+
+## [2024.5.1] - 2024-22-5
+### Added
+- Support for 'data-vidi-schemata' attribute in embedded maps. When this attribute is set to a schemata text string, auto retrieval of matching layers alongside any specified in the config is enabled.
+
+## [2024.5.0] - 2024-15-5
+### Added
+- Display filter for snapshots. Free test filtering of snapshots titles, so it becomes easier to manage long lists of snapshots
+- Tagging system for snapshots. A snapshot can be tagged and used for filtering snapshots.
+- New native API for getting configs from GC2 instead of using the requestProxy API.
+
+### Fixed
+- Module title is now set for extensions.
+
+## [2024.2.2] - 2024-20-2
+### Changed
+- Added the `dfi` url parameter, which if set, will disable fast init regardless other evaluated parameters.
+- Set the default boolean property to false in the extensions/editor/browser/index.js. This pertains to user interface properties where a checkbox is either checked or unchecked.
+- The polyfill script for IE compatibility was removed from the index.html.default file.
+- The repetitive code in Gruntfile.js related to browserify options and transformations have been extracted to constants.
+
+## [2024.2.1] - 2024-7-2
+### Changed
+- New config option `themes`, which will set the Bootstrap theme. `light` and `dark` are build in and custom ones can be added to `/scss/themes.scss`.
+
+## [2024.2.0] - 2024-2-2
+### Changed
+- The entire GUI is rewritten in Bootstrap 5.3.
+
+### Added
+- New startup modal with config-switcher, which will show if Vidi is started with database in URL.
+
+### Fixed
+- A lot!
+
+## [2024.1.0] - 2024-4-1
+### Fixed
+- Small fix to conflict.tmpl
+
+## [2023.12.0] - 2023-15-12
+### Added
+- Errors in conflict module will now be shown on reports.
+
+## [2023.11.0] - 2023-2-11
+### Fixed
+- Bug in ConflictSearch when stateless mode is enabled.
+
+## [2023.6.0] - 2023-20-6
+### Fixed
+- Bug: The GC2 Open tools meta setting didn't work after tools were moved into at collapsable element.
+
+## [2023.3.0] - 2023-6-3
+### Fixed
+- Regression bug: Zoom to default extent when using a state didn't zoom to state extent but to config extent.
+
+## [2023.2.1] - 2023-21-2
+### Fixed
+- Use "geography" distance when doing feature info on points and lines stored in EPSG:4326. Otherwise the distance will be in degrees and capture anything inside the map extent.
+
+## [2023.2.0] - 2023-14-2
+### Added
+- New config option `title` which will set the HTML document title. The title is set dynamically after Vidi has started and therefore the title will be set to the standard text for a moment during start-up.
+
+## [2023.1.0] - 2023-18-1
+### Fixed
+- Update to new Skråfoto viewer in Streetview module.
+
+## [2022.12.0] - 2022-8-12
+### Changed
+- Cookie set in URL are now set with Expires. Also code moved from init.js to extensions/session.
+- Redesign of layer element in layer tree. Extensive use of flex-boxes.
+- Merge of WebGL layer branch.
+
+## [2022.11.3] - 2022-22-11
+### Changed
+- Removed Jsts as a dependency. Now using Turf in `advancedInfo` and `conflict`.
+- Upgrade of Grunt.
+- Upgrade to bullseye in Dockerfile.
+
+### Fixed
+- Bug in `conflict` module after change to native range input slider.
+
+## [2022.11.2] - 2022-17-11
+### Changed
+- Changed from noUiSlider to native HTML range input in these modules. noUiSlider packages is no longer installed:
+  - Base layers
+  - Advanced info
+  - Conflict
+- jQuery upgraded to 3.6.1
+
+## [2022.11.1] - 2022-16-11
+### Changed
+- Reworked editor tools in popups. Now a central listner in the Editor module will invoke editing. Vector and raster now use the same markup definition for the editor tools.
+- Editing can now be invoked from the accordion popup.
+- The editor geometry for raster is now blue.
+- The same marker is now used for both editing and adding points.
+- Geometry from Draw module is no longer dashed when selected.
+
+## [2022.11.0] - 2022-8-11
+### Added
+- The url parameter `dps=1` will prevent browser state from being pushed to history. This parameter will be set by embed.js, so the browser history will not be pushed to the parent frame. Snapshot links will also have this parameter set.
+- A new faster init process is implemented which cuts about 50% of startup time for Vidi. This new init process will automatic be invoked unless a URL achor is used - when the old process will be invoked.
+
+### Changed
+- When using `crossMultiSelect` the geometry for the open accordion panel will now get the 'selected' style.
+- When using `featureInfoTableOnMap` the Back button will reset the 'selected' style.
+- When clicking/tapping on the map, geometry with 'selected' style will be reset if any.
+
+### Fixed
+- Update the editor queue statistics when group panel is opened in case of the layer tree component is not rendered yet. Before the queue statistics was not shown after a refresh.
+- Click on set default extent button will now set initZoomCenter if present.
+- It's now possible to use WMS overlays in base layer definitions. Before is was only possible to use GC2 layers for this.
+- Komkode filter on esr/sfe search.
+
+## [2022.10.0] - 2022-5-10
+### Changed
+- Session cookie is now set with an `Expires` attribute, which can be set in `config/config.js`. Before it was set as a non-persistent cookie, which was deleted on exiting the web browser. Defaults to 86400 seconds.
+```json
+{
+  "sessionMaxAge": 86400
+}
+```
+### Fixed
+- When Vidi was started with URL layers in offline mode, the layers was not set to offline because the layertree was yet not created. Now offline mode is retrived form state on upstart.
+
+## [2022.9.2] - 2022-19-9
+### Added
+- New config option added `popupDraggable`. Makes feature-info popups draggable. Can be set in run-tim config.
+```json
+{
+  "popupDraggable": true
+}
+```
+- Geometry created by feature-info module now stick after the module is swtiched off. So now it's possible to print maps with feature-info results. To clear the map the "Clear map" tool button can be used.
+- A sort-by-score mode is added to Danish search module. The setting will sort the address list by a calculated score, so most relavant suggestions will be a the top. If switched off the list will be sorted alphanumeric. For now only works for address not cadastre.
+```json
+{
+  "searchConfig": {
+    "komkode": "*",
+    "sortByScore": true
+  }
+}
+```
+
+## [2022.9.1] - 2022-7-9
+### Changed
+- The url parameter `initialFilter` must now be Base64URL encoded, which is safe to use in urls. If filter can't be decoded a alert will tell the user. https://base64.guru/standards/base64url
+
+## [2022.9.0] - 2022-5-9
+### Added
+- In addition to the embed attributes `data-vidi-search` and `data-vidi-history` some more attributes are added to hide the buttons the embed-template. The attrubutes can be set to `none`:
+* data-vidi-legend
+* data-vidi-layer
+* data-vidi-background
+* data-vidi-fullscreen
+* data-vidi-about
+* data-vidi-location
+
+## [2022.8.4] - 2022-31-8
+### Changed
+- conflictSearch now prints with concurrency when selecting a multiple page report.
+
+## [2022.8.3] - 2022-29-8
+### Fixed
+- State loaded from snapshot now is set in localforage. This was a regression bug.
+- Drawings made in Measurements now is stored in state and will stick between refreshes and in snapshots.
+
+## [2022.8.2] - 2022-17-8
+### Added
+- New runtime config `initZoomCenter`, which will locks Vidi to a specific zoom/center. This will override zoom/center in URL and snapshot link.
+
+## [2022.8.1] - 2022-10-8
+### Changed
+- Lazy load of snapshot data. The loaded snapshot list now only includes metadata - not the snapshot data itself. When activating a snapshot the data is fetched. This way a long snapshot list will load faster and not fill the memory.
+- Added config options to the symbol module.
+
+## [2022.8.0] - 2022-2-8
+### Added
+- New GC2 meta settings for controlling zoom level visibility for vector layers: `vector_min_zoom` and `vector_max_zoom`. The values must be tile set zoom levels.
+- New GC2 meta setting for bind a tooltip to vector layers: `tooltip_template`. This is a mustache/handlebars template where feature properties can be uses:
+```handlebars
+This is a label for feature <b>{{gid}}</b>
+```
+
+### Changed
+- For each activated layer there is now created a map pane named `[schema]-[layer]` and the layer is added to this. The sort layer function will work on the panes instead on layers. This way both tile and vector layers can be sorted between each other.
+
+### Fixed
+- Issue regarding side-by-side base layers: https://github.com/digidem/leaflet-side-by-side/issues/43
+- Issue regarding `featureInfoTableOnMap` and pop-up error when single feature is selected.
+
+## [2022.6.1] - 2022-28-6
+### Added
+- In pop-ups and vector tables values are now replaced with rendered mustache template if provided through GC2.
+
+### Changed
+- Legend moved to upper right corner in embed.tmpl, so it doesn't coflict with the bottom aligned vector table.
+- Pop-ups are not longer opened when selecting a row in table, because this will let gc2table control the pop-up and here editing tools are not supported.
+
+### Fixed
+- Full Danish translation of `coordinates` module.
+- Bug regarding nested double mark-up in pop-ups links fixed.
+- Links in pop-ups and tables will not be generated if value is null or empty string.
+
+## [2022.6.0] - 2022-15-6
+### Added
+- The URL parameters `var_matrikelnr` and `var_landsejerlavskode` will trigger search on the specified cadastral number using `danish` module. These parameters are already used in module `conflictSearch`.
+
+### Changed
+- UTFgrids are now single tiled for better performance due to fewer network reqeusts. But MapCache can't "untile" raw data, so the GC2 Meta setting `cache_utf_grid` will be ignorred.
+- Upgraded to Leafletjs 1.8 and Bootstrap Table 1.2.0.
+
+## [2022.5.2] - 2022-27-5
+### Changed
+- `crossMultiSelect` on vector features now used `@turf/boolean-intersects` instead of comparing the bounds of features with Leafletjs. This gives the expected result when clicking on stacked vector features.
+
+### Fixed
+- When signed in as a sub-user, cached tile layers wouldn't work but give a 404 error. Vidi changed the 'db' URI part to 'user@db' but the URI for cached layers can't be dynamic.
+- Added some auto-pan-padding to accordion popups, so they don't open up outside the map.
+- When selecting a vector feature it will now get the below shown style. Colors will not be changed. Get Feature info on raster tile layer will use the same style, but get a red outline.
+```json
+{
+    "opacity": 1,
+    "weight": 5,
+    "dashArray": "8 5",
+    "lineCap": "butt"
+}
+```
+- If all cookies are blocked in the browser, Vidi will now still startup, but with a blank state.
+
+## [2022.5.1] - 2022-12-5
+### Added
+- The layer tree now has a "Layer filter" function. This makes it possible to filter layers according to inputted text in a form field above the layer tree. The layer tree will re-render as the user types ahead leaving only layers which matches the text. The matching is done as a case-insentive substring search.
+
+### Fixed
+- When editing a raster tile layer the altered properties for the feature-info template is also send to the editor. So e.g. HTML tags for links and images are rendered in the editor form. Now an unaltered clone is send instead.
+- A block/unblock event is added in `infoClick` module, så other modules can block feature-info clicks from happening. This is implemented in `editor`, so feature-info clicks are blocked while creating new features.
+
+## [2022.5.0] - 2022-5-5
+### Changed
+- In conflictSearch requests to the GC2 SQL API now happens concurrently. This is done by implementing a promise pool. The default size of the pool is 30, but this can be set in the build config. Note that this setting can't be changed in a run-time config.
+- conflictSearch now has a `stateless` option, which can be set in both build and run-time config. In stateless mode the state of the module will not be kept. Default `false`.
+```json
+{
+  "extensionConfig": {
+    "conflictSearch": {
+      "poolSize": 40,
+      "stateless": true
+    }
+  }
+}
+```
+
+### Fixed
+- Tile layer opacity state now is kept betweens browser refreshes.
+
+## [2022.4.0] - 2022-8-4
+### Fixed
+- Now uses sfe_ejendomsnummer instead of esr_ejendomsnummer in search of 'adresser' and 'matrikel'.
+
+## [2022.3.3] - 2022-24-3
+### Fixed
+- Regression bug, which kept the right side-panel closed after load of app.
+- The Leaflet method `toGeoJSON` rounds of coordinates with 6 decimals by default. But this may result in up to 10 cm on the map (tested at about 57 degrees north). This makes the editor and snapping very unprecise. So all `toGeoJSON` calls are now done with a precision argument of 14 through out the app.
+
+## [2022.3.2] - 2022-18-3
+### Fixed
+- Bug in sqlQuery.js, which rendered feature-info inoperable.
+- Added `geolocation` to the `allow` attribut on the created iframe in embed.js.
+
+## [2022.3.1] - 2022-15-3
+### Added
+- Added GC2 Meta option for tiled raster layer: `tiled`. If set to `true` the layer will be fetched in tiles instead of
+  one big single tile, which is default. The layer visibility detection still works, but will be more inaccurate because
+  of the nature of tile loading. But it will always be false visible.
+- A new option in embed.js: `data-vidi-no-tracking`, which will disable the Vidi tracking cookie used for advanced
+  functions like state-snapshots and printing.
+
+### Changed
+- Tracking cookie will now be set as `secure=true` and `sameSite=none` if env var NODE_ENV is set to 'production'. This
+  will fix issues with embeding Vidi and setting the cookie.
+- Vector feature table can now be placed to the right or at the bottom of the screen. The table is removed when layer is
+  switched off. Only one table can be displayed at a time. New config for setting position and width/height. `width`
+  only has effect then postion is `right` and `height` only when position is `bottom`. `width` can be both relative `%`
+  and absolute `px. `height` can only be absolute:
+```json
+{
+  "vectorTable": {
+    "position": "right",
+    "width": "30%",
+    "height": "250px"
+  }
+}
+```
+
+### Fixed
+- Some bugs regarding vector feature table and dynamic load.
+
+## [2022.3.0] - 2022-4-3
+### Added
+- Added config setting for auto panning the map when pop-up's opens, so they don't stay outside the map: `autoPanPopup: false|true`
+
+### Changed
+- Pop-ups on vector layers will use simple pop-ups when `crossMultiSelect` is `false` instead of the accordion template. This make pop-up behaviours similar on tile and vector layers.
+
+### Fixed
+- Some issues regarding pop-up behaviours when `crossMultiSelect` is `true` and editor is enabled: `crossMultiSelect` will be set to `false` when editor is enabled.
+- Config defaults are now handle one place in the source and all settings have defaults. No longer need for testing if a setting is undefined.
+
+## [2022.2.2] - 2022-18-2
+### Fixed
+- Better support for special characters and upper case in layer names. Fixes a UTF8 error in WMS requests and quotes schema/relation names in feature info requests.
+- In the editor the counting of vertices in LineString features failed with NaN and it was impossible to edit. This is fixed with implementing a proper counting rutine.
+
+## [2022.2.1] - 2022-3-2
+### Fixed
+- Use UTM instead of web-mercator when projeting/unprojecting the print frame or the different will be to big.
+
+## [2022.2.0] - 2022-3-2
+### Fixed
+- Fix for buggy print recreation from state. The print frame was re-calculated each time the state was applied making a small change in latitude coords. This made the frame drift south-east and rendered errors on big geographical frames.
+
+## [2021.12.1] - 2021-29-12
+### Changed
+- The `df` extension is changed, so it can use both Dataforsyningen and Datafordeler. New setup (token has precedence):
+```json
+{
+  "df" : {
+    "datafordeler" : {
+      "username": "...",
+      "password": "...",
+      "token": "..."
+    },
+    "dataforsyningen" : {
+      "username": "...",
+      "password": "...",
+      "token": "..."
+    }
+  },
+  "baseLayers": [
+    {
+      "type": "wms",
+      "url": "/api/datafordeler/GeoDanmarkOrto/orto_foraar/1.0.0/WMS",
+      "layers": [
+        "geodanmark_2020_12_5cm"
+      ],
+      "id": "geodanmark_2020_12_5cm",
+      "name": "TEST geodanmark_2020_12_5cm",
+      "description": "geodanmark_2020_12_5cm",
+      "attribution": "Styrelsen for Dataforsyning og Effektivisering",
+      "minZoom": 8,
+      "maxZoom": 22,
+      "maxNativeZoom": 22
+    },
+    {
+      "type": "wms",
+      "url": "/api/dataforsyningen/topo_skaermkort_DAF",
+      "layers": [
+        "dtk_skaermkort"
+      ],
+      "id": "dtk_skaermkort",
+      "name": "Skærmkort",
+      "description": "DTK/Skærmkort",
+      "attribution": "Styrelsen for Dataforsyning og Effektivisering",
+      "minZoom": 8,
+      "maxZoom": 22,
+      "maxNativeZoom": 22
+    }
+  ]
+}
+```
+
+### Added
+- Field ignore setting from GC2 will now exclude the field from being queried in sqlQuery module (feature info).
+
+## [2021.12.0] - 2021-6-12
+### Changed
+- The location circle marker is now orange in follow-mode and blue when not following. Location now works the same in both embed and default templates.
+- The legend toast dialog in embed template will now be pushed to the right when sliding out the layer tree. This way the elements will not be stacked.
+- The search-result element in `conflict.tmpl` now has a dynamic height, so it will fit the parent window.
+
+### Fixed
+- `slideOutLayerTree` is now inwoked after vidi is ready making it more stable.
+
+## [2021.11.2] - 2021-17-11
+### Fixed
+- `layerTree` state was not updated when Vidi was initiated with layers in URL anchor, resulting in no active layers in state until some changes was done by user afterward.
+
+## [2021.11.1] - 2021-16-11
+### Changed
+- Hit count added to the "Data fra konflikter" tab in `conflictSearch` module.
+- Some changes in `conflict.tmpl`, so it's easier to customize it.
+
+### Added
+- API endpoint for proxify base layer requests to Datafordeler.dk. The API rewrites the URL and adds `username` and `password`. The base layer url follows this pattern: `/api/df/[Datafordeler URI]`. Example Setup in `config/config.js`:
+
+```json
+{
+  "df" : {
+    "userName" : "QMO.....",
+    "password" : "3Ps....."
+  },
+  "baseLayers": [
+    {
+      "type": "wms",
+      "url": "/api/df/GeoDanmarkOrto/orto_foraar/1.0.0/WMS",
+      "layers": [
+        "geodanmark_2020_12_5cm"
+      ],
+      "id": "geodanmark_2020_12_5cm",
+      "name": "TEST geodanmark_2020_12_5cm",
+      "description": "geodanmark_2020_12_5cm",
+      "attribution": "Styrelsen for Dataforsyning og Effektivisering",
+      "minZoom": 8,
+      "maxZoom": 22,
+      "maxNativeZoom": 22,
+      "transparent": true
+    }
+  ]
+}
+```
+
+## [2021.11.0] - 2021-3-11
+### Changed
+- Draw tool bar will now be positioned beside the main tools, if screen height is below 700px.
+
+### Fixed
+- Vector table now only shows in `embed.tmpl`.
+
+## [2021.10.3] - 2021-11-10
+### Changed
+- Session cookie (connect.gc2) will now be set as `secure=true` and `sameSite=none` if enviromental variable NODE_ENV is set to 'production'. This will fix issues with embeding Vidi and protected layers. To set NODE_ENV in docker-compose file, use this:
+  ```yaml
+    environment:
+      - NODE_ENV=production
+  ```
+
+## [2021.10.2] - 2021-7-10
+### Fixed
+- Intended code error removed from `conflict` module in excel function.
+
+## [2021.10.1] - 2021-7-10
+### Added
+- A new config `initFunction`, which holds a JavaScript function as a string. When Vidi is fully loaded this function will be run:
+  ```json
+  {
+      "initFunction": "function(){alert(\"Hello\")}"
+  }
+  ```
+
+### Fixed
+- The `reportRender` issue in `conflict` module regarding state resolving is fixed.
+- The alternative `reportRenderAlt` module for `conflictSearch` can now be set in config:
+  ```json
+    {  
+      "extensions": {
+        "browser": [
+            {"conflictSearch": ["index", "reportRenderAlt", "infoClick", "controller"]}
+        ]
+      }
+    }
+  ```
+
+## [2021.10.0] - 2021-6-10
+### Changed
+- Legend added in blank.tmpl (which is used in static maps). Also the legend checkboxes are removed from legends in blank.tmpl and print.tmpl.
+- Extensions are initiated before state resolves, so extensions work in state urls.
+- Measurement tooltip will now show one decimal instead of none when showing meters.
+
+### Fixed
+- Serialization of line extremities was buggy when lines was recreated after applying state causing extremities not to be drawn.
+
+## [2021.9.0] - 2021-22-9
+### Changed
+- Links in pop-ups now gets the primary color of the theme instead of the fixed cyan color.
+
+### Fixed
+- Serveral smaller fixes for the Editor extension.
+- embed.js API: Only fire snapshotLayersCallback once.
+- Excel write erors in conflict module is now handled, so Vidi doesn't crash.
+
+## [2021.8.3] - 2021-30-8
+### Fixed
+- Regression bug regarding print. The metadata object was stripped from the payload in ealier release, but was necessary for recreation of layers. Now a slim downed version of meta are send.
+
+## [2021.8.2] - 2021-30-8
+### Added
+- The layer-group-checkboxes now have id's, so it's easier to apply css rules. Ids follow this pattern: `group-check-box-[group-id]`. Use the dev tool inspector to get the id.
+
+## [2021.8.1] - 2021-25-8
+### Changed
+- Docker base image update to debian:bullseye-slim.
+
+### Added
+- Callback functions in embed.js. Two functions kan be defined in the parent page like this (with ``data-vidi-frame-name="map1"``):
+  - When Vidi is ready:
+  ```JavaScript
+    embedApi.vidiReady["map1"] = () => {
+        console.log("Vidi is ready")
+    }
+  ```
+  - When active layers from the snapshot is ready:
+  ```JavaScript
+    embedApi.activeLayersReady["map1"] = () => {
+        console.log("Active layers are ready")
+    }
+  ```
+
+### Fixed
+- In conflictSearch module, the adding of sheets to excel is now in a try/catch so invalid sheet names won't crash the Node process.
+
+## [2021.8.0] - 2021-12-8
+### Changed
+- `select_function` is now called when opening a panel in a accordion pop-up.
+
+### Fixed
+- Print and Conflict modules will not longer keep unnecessary Meta data in state. This reduce the data volume.
+- Layer tree will now build with all valid layers. Before it would start building as soon an invalid layer was proccess leaving out the rest.
+
+## [2021.7.1] - 2021-8-7
+### Fixed
+- Regression bug. Draw module labels are now again serialized as labels - not markers.
+
+## [2021.7.0] - 2021-5-7
+### Fixed
+- Conflict Excel output: Two sheets can't have the same name, which will result in error. In case of same names, the last char is changed to a number.
+- Conflict report will now default to "Compact" if none is choosen.
+
+## [2021.6.0] - 2021-2-7
+### Changed
+- No MapCentia logo in default and conflict print template. Logo can be set with external css sheet. Some thing like this:
+```css
+#print-header-logo{
+  background-image: url('https://.....');
+  background-repeat: no-repeat;
+  background-position: 50% 50%;
+  background-size: 80%;
+}
+```
+- embed.js: If host in token is http, then make it protocol relative, so tokens created on http still works when embedded on https sites.
+- It's now possible to switch all layers on/off in a layer (sub)group. Enable the checkboxes with the `showLayerGroupCheckbox` conflig.
+- Some visual improvements to the display of sub-groups in the layer tree.
+- Editing of geometry is not possible when number of nodes exceed 1.000. But attribut data can still be edited. A high amount of nodes will hog down the browser and it can crash.
+- The Snapshot module will now use base64url encoded body for getting, creating and updating snapshots. This way will a JSON value `ILIKE '%12'` not mess things up when decoded server side. This requires an update of GC2.
+- Snapshot list is now ordered by update date/time and this is also what's displayed instead of create date/time.
+- Frame number on prints will not be shown when only one frame is printed. Custom print needs an update:
+```
+{{#showFrameNumber}}#{{printFrame}}{{/showFrameNumber}}
+```
+- Frame numbers starts with 1 instead of 0.
+- New format for setting redis host. Now the database number can be set:
+```JSON
+{
+  "redis": {
+    "host": "127.0.0.1:6379",
+    "db": 2
+  }
+}
+```
+
+### Added
+- An API loaded with the `embed.js` script. Two methods are available: `embedApi.switchLayer` and `embedApi.allOff`. See docs for details.
+- Mouse over on vector and raster tile layers. The latter using UTF Grid. These GC2 Meta properties are controling the mouse over:
+- `hover_active` Boolean. Should mouse over be switch on?
+- `info_template_hover` String. Handlebars template to use in label. If not set a default template will be used, which loops through fields with the `Show in mouse-over` property checked.
+- `cache_utf_grid` Boolean. Wether to cache UTF grid tiles. Only apply to raster tile layers.
+- Excel report is now available in conflict module. Each layer with hits will have its own sheet. For for sheets to get populated with hits the "Show in conflict" option must be checked for a least one field in the Structur tab in GC2 Admin.
+- New config option `activeLayers`. This option is a array of schema qualified layers with any type prefix (:v, :mvt, :w), which should be switch on from the start. If a snapshot link is used for starting Vidi, this option will be ignored.
+```json
+{
+  "activeLayers": [
+    "schema.layer1",
+    "v:schema.layer2"
+  ]
+}
+```
+
+### Fixed
+- Feature info click wouldn't open the pop-up if multiple layers was switch on.
+- Drawings are not longer dashed, when selected.
+- Conflict search module will now search protected layers if user is signed in.
+- On `zoomToExtentOfgeoJsonStore` in geocloud.js pan map one pixel to defeat a strange bug, which causes a browser freeze.
+- Layer filter auto complete menu is now postioned absolute instead of fixed, so it will not hang in the same place when scrolling layer tree.
+- Composit QGIS Layers now work. They are not longer bypassed by MapServer where the merge request is done.
+
+## [2021.5.0] - 2021-4-5
+### Changed
+- Node >= 14 er required.
+- Docker files are added to the project.
+- It's now possible to set `gc2.host` through the environment variable `GC2_HOST`. If set in `config/config.js` it will have precedence.
+- ConflictSearch is now controlled by state module. It will keep state between on/off and browser refreshes. State in conflictSearch is also applied when running a state-snapshot.
+- Changes in Snapshot UI. The UI is now more clean.
+- When the `session=[id]` URL key/value is used, it will now reset the `connect.gc2` session cookie, even if it's set through the sign-in UI. To do that the HttpOnly cookie flag is removed, which will aggravate the risk of client side script accessing the cookie. The cookie is also removed when sign-out is done through the UI.
+- CSS and templates files can now be placed in a sub-folder on the `configUrl` host. Only one level deep like `styles/custom.css`.
+- Layer tools in the layer tree now have parent span elements with theese ids, so it's easier to to set a css display rule on them:
+  - `#layer-tools-offline`
+  - `#layer-tools-search`
+  - `#layer-tools-opacity`
+  - `#layer-tools-labels`
+  - `#layer-tools-tables`
+  - `#layer-tools-load`
+  - `#layer-tools-filters`
+- `repeatMode` is set to `true` for tools in Draw, so tools stay active.
+
+### Added
+- It's possible to lock UTM zone in coordinate module, so it's possible to project to a specific zone outside the actual zone. Useful for e.g. Denmark, which are using zone 32 for the whole country but is located in both 32 and 33.
+```JSON
+{
+    "coordinates": {
+      "lockUtmZoneTo": 32
+    }
+}
+```
+- A new build configuration for setting widths for the left slide-out panel in default template.
+  - ```json
+    "leftSlideWidths": [300, 400, 550]
+    ```
+- Under filters in the layer tree it's now possible to download the layer as either: GeoJSON, Excel or CSV
+
+### Fixed
+- Base64url are now used to encode filters instead of base64, so + and / sign doesn't mess things up.
+- Changes to Snapshot UI, which fixes an issue with wrong URLs in input fields.
+- Drawing is stored in state, but was not recreated after refresh of browser. This could get "invisible" drawings stored in snapshots.
+- If a layer in a state snapshot is for some reason not available (protected, deleted), the build of the layer tree was ever resolved. Now it'll resolve.
+- The queueStatisticsWatcher and Service Worker now uses 3. party module for base64 decoding, because windows.btoa fails on non-latin characters.
+- COWI Gade foto named properly in Streetview module.
+- A lot of fixes in the Editor module.
+
+## [2020.12.0] - 2020-8-12
+### Changed
+- The standard template for feature info is changed, so empty fields are omitted. It's now:
+```handlebars
+<div class="vidi-popup-content">
+    <h3 class="popup-title">{{_vidi_content.title}}</h3>
+    {{#_vidi_content.fields}}
+        {{#if value}}
+            <h4>{{title}}</h4>
+            <p {{#if type}}class="{{type}}"{{/if}}>{{{value}}}</p>
+        {{/if}}
+    {{/_vidi_content.fields}}
+</div>
+```  
+
+### Added
+- `searchConfig.placeholderText` added to config, so the search placeholder can be customized.
+- A callback function can now be added to interval reload of vector layers. The callback will be fires when layer changes. Meta option is `reload_callback`:
+```javascript
+function(store, map) {
+  var audio = new Audio('https://ccrma.stanford.edu/~jos/mp3/gtr-nylon22.mp3');
+  audio.play();
+  var latest;
+  store.geoJsonLayer.eachLayer(function (layer) {
+    latest = layer
+  })
+  map.setView(latest.getLatLng(), 18)
+}
+```
+- The max zoom level when selecting a row in a layer table can be with `setmax_zoom_level_table_click`. If not set or is NaN the max zoom level will default to 17.
+
+### Fixed
+- MapCache layers now work. Both raster and vector tiles.
+- Timeout (10.000ms) on sqlStore. Feature info will now handle errors or cancels (e.g. due to timeout) on SQL requests and a "toast" will inform the user. If timeout happens the request will be re-tried.
+- `crossMultiSelect` will always show vector feature info if a simultaneous raster SQL request fails or timeouts.
+- Memory leak fixed when reloading vector layers.
+- Interval reload of vector layers are now done with the `load` method instead of switching the layer off and on.
+- Update of interval reloaded vector layers happens only if data has changed.
+- Use native URL API instead of uriJs module.
+- Still resolve promise in `localforage.setItem`, to avoid a net:ERR_FAILED in the browser when e.g. getting feature info. The issue about error on setItem persist.
+- Some fixes regarding Internet Explorer.
+
+## [2020.11.0] - 2020-18-11
+### Added
+- The awesome Leaflet plugin Leaflet.markercluster is added, so by setting the meta property `use_clustering` to `true` clustering can be enabled on single point vector layers. No other setting for Leaflet.markercluster is available for now.
+- With the `cssFiles` config it's possible to load external css file from the `configUrl`. E.g.:
+```json
+{
+  "cssFiles": [
+       "myStyles1.css",
+       "myStyles2.css"
+  ]
+}
+```
+- Conflict is now using `sqlQuery.js` to show info-click result. So now are multiple results possible. The `sqlQuery.js` module now has a Simple mode, a prefix for DOM elements to render in and callback for when selecting a row.
+- New config setting `dontUseAdvancedBaseLayerSwitcher` which will disable the 'Display two layers at once' option in the base layer switcher.
+- New GC2 Meta properties `select_function` which adds an onSelect callback to the result list in click-for-info.
+- It now possible to render an image carousel in popups from a click-for-info. Create a JSON field with a value like this and set Content to Image:
+```json
+[
+  {
+    "src": "https://image1.jpeg",
+    "att": "It's an image!"
+  },
+  {
+    "src": "https://image1.jpeg",
+    "att": "It's another image!!"
+  }
+]
+```
+- URL's can now be ignored for caching in Service Worker by using the `urlsIgnoredForCaching` setting in `config/config.js`. This setting can only be set in build time. E.g.:
+```json
+{
+    "urlsIgnoredForCaching": [
+        {
+            "regExp": true,
+            "requested": "part_of_the_url"
+        }
+    ]
+}
+```
+- Print setup can now be "sticky" (by using the state module), so it will not reset when re-activating the module. Stickiness can be toggled and off. Off is default.
+- Print setup is now stored in state snapshots. After state snapshot is activated the print setup will use the stored settings. The sticky toggle must be set to on or else the default print settings will be used.
+- New print API `/api/print/[database]/?state=[state id]` which will return the stored print from a snapshot as PNG (PDF is coming). The print will be created on the fly.
+- `embed.js` has two new attributes: `data-vidi-use-config` and `data-vidi-use-schema`. These will trigger the use of schema and/or config from the token if present.
+- New GC2 Meta property which automatically can open a layer tool when the layer is switched on:
+  - *default_open_tools*: JSON array with tools to open. Available options: `["filters","opacity","load-strategy","search"]` ("table" are not supported)
+- New GC2 Meta properties:
+  - *disable_check_box*: boolean, disables the layer check box:
+    - When filtering a layer all its child layers with this property set to true will have their check boxes enabled. And when the filters are disabled again all child layers will be turned off and have their check boxes disabled again.
+    - This makes it possible to setup child layers, which can only be viewed when filtered by its parent layer.
+  - *filter_immutable*: boolean, makes the filter setup immutable.
+    - Then set, the arbitrary filter setup can't be changes. Only values can. Should be used together with `filter_config`.
+  - *reload_interval* integer, set a reload interval for vector layers. Can be used to autoload fresh data from live data sources. Units are milliseconds.
+  - *show_table_on_side*: boolean, render the vector list of the layer in an injected element with id `vector-side-table`, so you get a map and list side-by-side.
+  - *zoom_on_table_click*: boolean, whether the map should zoom to vector feature or not when clicked in table. Is set on both vector layer tables and feature info result tables.
+- A Reset filter button is added, which will reset the filter to the original state.
+- The `infoClickCursorStyle` setting will set cursor style when using feature info click. Can be set to `pointer` or `crosshair`. The setting can be set in `config/config.js` or in a runtime config.
+- New Autocomplete control in filters. The control will fetch distinct values from PostgreSQL for use in the autocomplete field. All distinct values are fetch at once. 100.000 distinct values can be handle without problems. Only works on text fields and must be enabled in GC2 Structure tab.
+- The attribute `data-vidi-host` is added to `embed.js`, so it's possible to override the host from the token. This makes it possible to generate tokens on one setup and use them on others. E.g. on mirrored internal/external setups.
+- The Coordinate module now has a Pan To input field. The user can input a coordinate in the chosen system and the map will pan to the point.
+- Modules now has title headings.
+- Added boolean config `vectorMultiSelect` in `config/config.js`. This will enable multi select on vector layers. Works cross layer too. Can be set in runtime config.
+- Added boolean config `featureInfoTableOnMap` in `config/config.js`. This is a shortcut to set `info_template`, `info_element_selector` and `info_function`, so the single feature info pops up on the map instead of the right slide panel. Great for the `embed.tmpl`
+- New button "Fit bounds to filter" in layer filters, which will set the view extent to the bounds of the filtered layer.
+- New "Labels" panel for raster tile layers with a checkbox for hiding/showing labels on the layer. Works for both MapServer and QGIS back-end (GC2 must support this).
+- Added boolean config `crossMultiSelect` in `config/config.js`. This will enable cross multi select on both vector and raster tile layers. This will result in a unified feature info experience, which are well suited for informative maps using the `embed.tmpl` template. All feature info results will be displayed in an accordion widget. The accordion summary is default layer title, but can be set to an attribute value with the meta config `accordion_summery`. Can be set in runtime config.
+- WMS layers can now be added directly as base layers. A WMS base layer example:
+```json
+{
+    "type": "wms",
+    "url": "https://services.kortforsyningen.dk/service?SERVICENAME=forvaltning2&",
+    "layers": ["Basis_kort","Navne_basis_kort","Husnummer"],
+    "id": "Basis_kort",
+    "name": "Basiskort",
+    "description": "Basiskort fra kortforsyningen",
+    "attribution": "Kortforsyningen",
+    "minZoom": 4,
+    "maxZoom": 22,
+    "maxNativeZoom": 22
+}
+```
+- XYZ layer can be added as base layer like this (old feature but was undocumented and buggy):
+```json
+{
+    "type": "XYZ",
+    "url": "https://m3.mapserver.mapy.cz/base-m/{z}-{x}-{y}?s=0.3&dm=Luminosity",
+    "id": "mapy",
+    "name": "Mapy",
+    "description": "Map from Mapy",
+    "attribution": "Mapy",
+    "minZoom": 1,
+    "maxZoom": 20,
+    "maxNativeZoom": 19
+}
+```
+
+### Changed
+- `public\js\vidi.js`is now required instead of loaded in a script tag. This way it's transpiled and can contain new JavaScript syntax.
+- A lot of improvements in the `conflictSearch` module:
+  - Results are now alpha sorted within layers groups (which is also sorted). Both in web and PDF.
+  - A short and long description can be added for each layer, which is shown the result list. Use GC2 Meta properties: `short_conflict_meta_desc and `long_conflict_meta_desc`.
+  - The styling of both web and PDF results is better. Tables can't overflow the PDF page.
+  - Ellipsis is used both in web and PDF when fields names / results are too long.
+  - Empty link fields will now just be blank.
+  - Layers with only one report column will be printed as a `|` separated string and not a table with one column.
+  - New button for setting the print extent before creating a PDF.
+  - Mouse click when releasing a rectangle/circle drag is suppressed.
+  - Multiple results from a Select-Object-To-Search-With is now possible. The standard `sqlQuery` is used to create list.
+
+- Indicator in layer tree showing if a tile layer (MapServer or QGIS Server) is visible in the view extent. The Leaflet layer canvas element is being checked for colored pixels. Be aware of the canvas being bigger than the view extent because of the buffer. A event is triggered when a layer changes visibility called `tileLayerVisibility:layers` with a payload like this:
+```json
+{
+    "id": "schema.layer.geom",
+    "dataIsVisible": true
+}
+```
+- Handlebars are now use instead of Mustache for rendering click-for-info templates. Handlebars is more feature rich than Mustache.
+- The load screen is now being dismissed on `ready:meta` instead of `allDoneLoading:layers`. This makes the application interactive sooner.
+- Predefined filters are now processes as one string. Instead of sending something like this `["foo=1","foo=2"]` to GC2, it is now `["(foo=1 OR foo=2)"]`. This is how arbitrary filters work and both kind of filters are now being processed together in one string like `"(foo=1 OR foo=2) AND (bar=1 OR bar=2)"`. Vidi can therefore now set the operator between the predefined and arbitrary filters.
+- The filters from the layer tree are now set on the Click-For-Info module, so you only get filtered hits.
+- The applied filters will now be shown as a WHERE clause in an Ace editor under the filter widgets. It's possible to mutate the clause and apply the altered filters. When doing that, the filter widgets will be disabled until the editor is disabled. All filters settings are stored in state.
+- In arbitrary filters, the field alias is now being used if set.
+- Limits for puppeteer processes can now be set with this in `config/config.js`:
+```json
+{
+  "puppeteerProcesses": {
+        "min": 1,
+        "max": 5
+    }
+}
+```
+- The `Enable filtering` property of the Structure tab in GC2 is now called `Disable filtering` and will if check omit the field in Vidi filtering. The property was not used before.
+- Babel bumped to version 7
+- Local GC2 config files are now fetched through the server back-end.
+- `embed.tmpl` will now show login button if session module is enabled.
+- The WMS requests now has a `qgs` parameter for QGIS backed layers. The value is path to the qgs file for the layer (base64 encoded). In GC2 the path will be used to send the request directly to qgis_serv instead of cascading it through MapServer.
+- Raster tile layers without pixels (invisible in the map) are now not queried by feature info.
+- Turning on a vector layer will now load the legend of the raster tile representation of the layer
+
+### Fixed
+- Using `indexOf` instead of `includes`, because the latter is not transpiled in Babel. It's an Internet Explorer issue.
+- `embed.js` now works in IE11.
+- Accept 'da' locale in request headers. Only da-DK worked so far.
+- If the Service Worker doesn't get registered when Vidi will now start anyways without the Service Worker. On a hard refresh (Ctrl-f5) the Service Worker will claim the clients, so a hard refresh will not unregister Service Worker, but the cache will be deleted.
+- Text in editor is now url encoded.
+- Quotes are now escaped for text in the editor.
+- All numeric Postgres types are now handled correct in the editor.
+- Puppeteer processes are now destroyed, if an exception is thrown during print. This prevents leak of processes.
+- Re-acquirement of a Puppeteer process is done if timeout, so the print will eventual be finished.
+- Puppeteer processes will be destroyed after 60 seconds. This prevents hanging processes, which blocks further prints.
+
+## [2020.2.0]
 ### Added
 - Custom user data from GC2 is now added to session the object.
 - Handling of invalid JSON configs.
 
 ### Changed
+- CalVer is now used with month identifier like this: YYYY.MM.Minor.Modifier
 - Custom searches can now be added to danish search module.
-- `embed.js` will wait with loading Vidi until target element is visible in the DOM. This way, Vidi can be embedded in a element with `display:none`.
-- Its now possible to add custom extra searches to `danish.js`. A search needs a Elasticsearch index, which must have a id and string property. The latter is the search string. Also a look-up table/view with geometries is required. An example of a setup:
+- `embed.js` will wait with loading Vidi until target element is visible in the DOM. This way, Vidi can be embedded in a
+  element with `display:none`.
+- Its now possible to add custom extra searches to `danish.js`. A search needs an Elasticsearch index, which must have
+  an id and string property. The latter is the search string. Also a look-up table/view with geometries is required. An
+  example of a setup:
+
 ```javascript
 {
     searchConfig: {
         size: 4,
-        komkode: "*",
-        esrSearchActive: true,
-        sfeSearchActive: true, // Example of config for danish search
-        extraSearches: [,{
+            komkode
+    :
+        "*",
+            esrSearchActive
+    :
+        true,
+            sfeSearchActive
+    :
+        true, // Example of config for danish search
+            extraSearches
+    :
+        [, {
             name: "stednavne_search",
             db: "dk",
             host: "https://dk.gc2.io",
@@ -41,14 +1566,14 @@ and this project adheres to [CalVer](https://calver.org/).
 }
 ``` 
 - New GC2 Meta properties which controls the info pop-up and styling of vector layers:
-    - *info_template*: Mustache template for use in pop-up.
-    - *info_element_selector*: Which element to render info template in? Defaults to pop-up.
-    - *info_function*: Function which is run when clicking on a vector feature. Takes three args: feature, layer and layer key.
-    - *point_to_layer*: Leaflet pointToLayer function.
-    - *vector_style*: Leaflet vector styling function.
-    
+  - *info_template*: Mustache template for use in pop-up.
+  - *info_element_selector*: Which element to render info template in? Defaults to pop-up.
+  - *info_function*: Function which is run when clicking on a vector feature. Takes five args: feature (Leaflet), layer (Leaflet), layer key (Vidi), SQL store (Vidi) and map (Leaflet).
+  - *point_to_layer*: Leaflet pointToLayer function.
+  - *vector_style*: Leaflet vector styling function.
+
 - The help buttons now work like toggles, so a second click will close the help box.
-    
+
 ### Fixed
 - Handling of invalid JSON configs, so Node doesn't crash.
 
@@ -67,7 +1592,7 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ### Fixed
 - The startup message set by `startUpModal` is ever shown in print.
-- Images in pop-ups will now open in new tab when using Chrome.  
+- Images in pop-ups will now open in new tab when using Chrome.
 
 ## [2019.1.0.rc3] - 2019-06-11
 ### Added
@@ -77,7 +1602,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - Comment with version in index.html
 - Support of time, date and datetime fields in editor. Only time will be handled in a text field.
 - Auto login. WARNING: Insecure and sets cookie with login creds. A build time setting `autoLoginPossible` must be set to `true` to make activation possible. Activation is done in:
-    - `extensionConfig.session.autoLogin = true` and optional `extensionConfig.session.autoLoginMaxAge = 3600 * 1000`. The latter defaults to `null`
+  - `extensionConfig.session.autoLogin = true` and optional `extensionConfig.session.autoLoginMaxAge = 3600 * 1000`. The latter defaults to `null`
 - Static Map API. Generate PNGs of state snapshot. URL to PNG is available from the Snapshot module.
 - Possible to set a welcome message by using `startUpModal` in a config. The user can dismiss the message by either `Close` or `Close and do not show in future`. The latter choise is stored in a cookie.
 
@@ -95,7 +1620,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - Better wrapping of layer tools when side panel is narrow.
 - Snapping bugs.
 - SELECT statements like `SELECT * FROM foo WHERE bar LIKE '%foo'` will not longer give problems.
-- All Postgres types are now recognized in editor. 
+- All Postgres types are now recognized in editor.
 
 ## [2019.1.0.rc2] - 2019-01-03
 ### Added
@@ -103,7 +1628,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - Support of MVT base layers.
 
 ### Changed
-- Optimized rendering of layer tree. Implemented lazy rendering of layer groups and tools. 
+- Optimized rendering of layer tree. Implemented lazy rendering of layer groups and tools.
 - Hide login button if session module is disabled.
 
 ## [2019.1.0.rc1] - 2019-14-02
@@ -112,7 +1637,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - Touch drag enabled in layer tree.
 - Config `activateMainTab` added, which tells Vidi to activate a tab on startup.
 - Visual grouping of map tools in GUI.
-- Tentative support of Mapbox Vector Tiles (MVT). Needs latest version of GC2 with MVT support. 
+- Tentative support of Mapbox Vector Tiles (MVT). Needs latest version of GC2 with MVT support.
 - Cross hair cursor when info click is on.
 - When drawing or editing with the Editor module, snapping to other vector layers is added.
 - Unify filter methods for vector and tile layers.
@@ -164,14 +1689,14 @@ module.exports = {
 ### Added
 - Specific vector layers can be set to offline. If offline the cached version of the vector layer is always used. Also if browser is reloaded.
 - Control to switch all vector layers on and off. See above.
-- Vector layers can now be set to two different load strategies: Static and Dynamic. The former is default and will load the entire layer at once. The latter will load only whats inside the view port (plus a buffer) and fetch new data when needed (when zoom/pan occurs). The load strategy is controlled by the GC2 `load_strategy` meta setting. Can be either `s` or `d`.  
-- New map controls: Reset zoom, set previous/next extent and box-zoom. The latter now has a button, before this could only be achieved by holding shift down and drag the zoom box. 
+- Vector layers can now be set to two different load strategies: Static and Dynamic. The former is default and will load the entire layer at once. The latter will load only whats inside the view port (plus a buffer) and fetch new data when needed (when zoom/pan occurs). The load strategy is controlled by the GC2 `load_strategy` meta setting. Can be either `s` or `d`.
+- New map controls: Reset zoom, set previous/next extent and box-zoom. The latter now has a button, before this could only be achieved by holding shift down and drag the zoom box.
 - Opacity slider for all tile layers.
 
 ### Fixed
 - Preset base layer in URL will not longer change to `undefined` when resizing browser during refresh.
 - System field with prefix `gc2_` is no longer displayed in Editor attribute form.
-- Stalling of print is fixed. 
+- Stalling of print is fixed.
 
 
 ## [2018.1.0.RC1] - 2018-10-9
@@ -179,18 +1704,18 @@ module.exports = {
 - Drag'n'drop sorting of layers in layer tree. Sorting can be done between layers in a group and groups between groups. Sorting sticks after refresh of browser.
 - Third level in layer tree. The third sub-group is set with the `vidi_sub_group` Meta property in GC2.
 - Vector layers are now treated equally with tile layers. With the `vidi_layer_type` Meta property set GC2 a layer can be displayed as either tile or vector. Its also possible to switch between tile and vector directly in the layer tree.
-- Vector layers can be filtered. An arbitrary number of filter expressions can be applied. 
+- Vector layers can be filtered. An arbitrary number of filter expressions can be applied.
 - Table view of vector layers. See the attributes and link to the geometry on the map.
 - Service Workers. Vidi is becoming a Progressive Web App (PWA).
-    - Vidi starts without network. And always starts quick.
-    - Vector layers are cached, so they can be used without network.
-    - A change in source code will generated a new version hash, which will trigger the Service Workers to re-install the application.
-    - Offline base layers. Base layers can be partial caches in browser for use without network.
-    - Editor. Both tile and vector layers can be edited. Edits can be done without network.
+  - Vidi starts without network. And always starts quick.
+  - Vector layers are cached, so they can be used without network.
+  - A change in source code will generated a new version hash, which will trigger the Service Workers to re-install the application.
+  - Offline base layers. Base layers can be partial caches in browser for use without network.
+  - Editor. Both tile and vector layers can be edited. Edits can be done without network.
 - Side-by-side base layers. Swipe between two base layers.
-- Save, restore and share projects. A project comprises the extent of the map, which background map is visible and which layers are turned on, which filters are applied as well as your drawings. You can share a project by sharing a URL. If you are not logged in, projects will be linked to the browser you are using. Otherwise, they will be stored under your user login. It is possible to transfer projects from browser to login.  
+- Save, restore and share projects. A project comprises the extent of the map, which background map is visible and which layers are turned on, which filters are applied as well as your drawings. You can share a project by sharing a URL. If you are not logged in, projects will be linked to the browser you are using. Otherwise, they will be stored under your user login. It is possible to transfer projects from browser to login.
 - New Kepler.gl module. Select layers in Vidi and start Kepler.gl with them. Kepler.gl is embedded in Vidi.
-- Proper implementation of non-tiled layers, which is well suited for layer with live data and heat- and cluster maps. 
+- Proper implementation of non-tiled layers, which is well suited for layer with live data and heat- and cluster maps.
 
 ### Changed
 - New user interface layout in default template. Where are now more space for the module dialogs.

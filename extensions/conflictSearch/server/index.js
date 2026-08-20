@@ -1,193 +1,320 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2022 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
-var express = require('express');
-var request = require("request");
-var router = express.Router();
-var http = require('http');
-var fs = require('fs');
-var moment = require('moment');
-var config = require('../../../config/config.js');
-
+const express = require('express');
+const request = require("request");
+const router = express.Router();
+const fs = require('fs');
+const dayjs = require('dayjs');
+const XLSX = require('xlsx');
+const config = require('../../../config/config.js');
+const {PromisePool} = require('@supercharge/promise-pool');
+const POOL_SIZE = config?.extensionConfig?.conflictSearch?.poolSize || 30;
+const utf8 = require('utf8');
 // Set locale for date/time string
-moment.locale("da_DK");
-
-var BACKEND = config.backend;
+dayjs.locale("da_DK");
+const base64url = require('../../../browser/modules/base64url');
 
 router.post('/api/extension/conflictSearch', function (req, response) {
     req.setTimeout(0); // no timeout
-    var db = req.body.db;
-    var schema = req.body.schema;
-    var wkt = req.body.wkt;
-    var socketId = req.body.socketId;
-    var buffer = req.body.buffer;
-    var text = req.body.text;
-    var fileName = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    let db = req.body.db;
+    let schema = req.body.schema;
+    let wkt = req.body.wkt;
+    let socketId = req.body.socketId;
+    let text = req.body.text;
+    let fileName = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        let r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
     });
-    var url = "http://127.0.0.1:3000/api/meta/" + db + "/" + schema, count = 0, table, sql, geomField, srid,
-        startTime, hits = {}, hit, metaDataFinal = {data: []}, metaDataKeys = [], queryables = [];
+    let addedSchemata = typeof config.addedSchemata !== "undefined" ? "," + config.addedSchemata : "";
+    let url = config.gc2.host + "/api/v1/meta/" + db + "/" + utf8.encode(schema) + addedSchemata;
+    let count = 0,
+        metaDataFinal = {data: []}, metaDataKeys = [];
+    let options = {
+        uri: url,
+        encoding: 'utf8',
+        headers: {
+            Cookie: "PHPSESSID=" + req?.session?.gc2SessionId + ";" // GC2's Meta API is session based
+        }
+    };
+    request.get(options, function (err, res, body) {
+        if (err) {
+            console.log(err);
+            return;
+        }
+        let emptyReport = {
+            hits: {},
+            file: null,
+            text: null,
+            dateTime: dayjs().format('MMMM Do YYYY, H:mm')
+        };
+        let metaData;
 
-    request.get(url, function (err, res, body) {
-        if (!err) {
-            var emptyReport = {
-                hits: {},
-                file: null,
-                text: null,
-                dateTime: moment().format('MMMM Do YYYY, H:mm')
-            };
-
-            try {
-                var metaData = JSON.parse(body);
-            } catch (e) {
-                response.send(emptyReport);
-                return;
+        try {
+            metaData = JSON.parse(body);
+        } catch (e) {
+            response.send(emptyReport);
+            return;
+        }
+        if (metaData.data === undefined || metaData.data.length === 0) {
+            response.send(emptyReport);
+            return;
+        }
+        // Count layers
+        for (let i = 0; i < metaData.data.length; i = i + 1) {
+            if (metaData.data[i].type !== "RASTER" &&
+                metaData.data[i].baselayer !== true &&
+                metaData.data[i].skipconflict !== true) {
+                metaDataFinal.data.push(metaData.data[i]);
+                metaDataKeys[metaData.data[i].f_table_schema + '.' + metaData.data[i].f_table_name] = metaData.data[i];
             }
+        }
+        const createPool = async function () {
+            const {results, errors} = await PromisePool
+                .withConcurrency(POOL_SIZE)
+                .for(metaDataFinal.data)
+                .process(async (data, index, pool) => {
+                    return await makeSearch(data);
+                });
+
             // Sort alpha by layer title. This only works in Node v12+ with stable sort
-            metaData.data.sort((a,b) => (a.f_table_title > b.f_table_title) ? 1 : ((b.f_table_title > a.f_table_title) ? -1 : 0));
-            metaData.data.reverse();
-            metaData.data.sort((a,b) => (a.layergroup > b.layergroup) ? 1 : ((b.layergroup > a.layergroup) ? -1 : 0));
-            metaData.data.reverse();
-
-            if (metaData.data === undefined || metaData.data.length === 0) {
-                response.send(emptyReport);
-                return;
-            }
-
-            // Count layers
-            for (var i = 0; i < metaData.data.length; i = i + 1) {
-                if (metaData.data[i].type !== "RASTER" &&
-                    metaData.data[i].baselayer !== true &&
-                    metaData.data[i].skipconflict !== true) {
-                    metaDataFinal.data.push(metaData.data[i]);
-                    metaDataKeys[metaData.data[i].f_table_name] = metaData.data[i];
+            results.sort((a, b) => (a.title > b.title) ? 1 : ((b.title > a.title) ? -1 : 0));
+            results.reverse();
+            results.sort((a, b) => (a.group > b.group) ? 1 : ((b.group > a.group) ? -1 : 0));
+            results.reverse();
+            let report = {
+                hits: results,
+                file: fileName,
+                text: text,
+                dateTime: dayjs().format('MMMM Do YYYY, H:mm')
+            };
+            response.send(report);
+            // Add meta data and date/time to report before writing to file
+            report.metaData = metaDataFinal;
+            fs.writeFile(__dirname + "/../../../tmp/" + fileName, JSON.stringify(report, null, 4), function (err) {
+                if (err) {
+                    console.log(err);
+                } else {
+                    console.log("Report saved");
+                }
+            });
+            // Create Excel workbook with hits
+            let wb = XLSX.utils.book_new();
+            let dataAdded = false;
+            let names = [];
+            let postfixNumber = 1;
+            const obj = report.hits;
+            for (const hit in obj) {
+                if (obj.hasOwnProperty(hit)) {
+                    if (obj[hit].hits > 0) {
+                        let data = [];
+                        let name = obj[hit].title || obj[hit].table;
+                        name = name.slice(0, 30); // TODO also strip invalid characters
+                        if (names.includes(name)) {
+                            name = name.slice(0, -1) + postfixNumber;
+                            postfixNumber++;
+                            names.push(name);
+                        }
+                        names.push(name);
+                        if (obj[hit].data.length > 0) {
+                            let header = obj[hit].data[0].map((cell) => {
+                                return cell.alias
+                            });
+                            data = obj[hit].data.map((row) => {
+                                return row.map((cell) => {
+                                    if (!cell.key) {
+                                        return cell.value
+                                    }
+                                })
+                            });
+                            data.unshift(header)
+                        }
+                        let ws = XLSX.utils.aoa_to_sheet(data);
+                        dataAdded = true;
+                        try {
+                            XLSX.utils.book_append_sheet(wb, ws, name);
+                        } catch (e) {
+                            console.log(e.message);
+                        }
+                    }
                 }
             }
-            (function iter() {
+            if (!dataAdded) {
+                XLSX.utils.book_append_sheet(wb, [[]]);
+            }
+            try {
+                XLSX.writeFile(wb, __dirname + "/../../../public/tmp/excel/" + fileName + ".xlsb");
+            } catch (e) {
+                console.log(e.message, "Could not create excel file. Check if folder exists.")
+            }
 
-                startTime = new Date().getTime();
-                table = metaDataFinal.data[count].f_table_schema + "." + metaDataFinal.data[count].f_table_name;
+        };
+        const makeSearch = (data) => {
+            const startTime = new Date().getTime();
+            const table = data.f_table_schema + "." + data.f_table_name;
+            const geomField = data.f_geometry_column;
+            const srid = data.srid;
+            const fields = data.fields;
+            const fieldConf = data?.fieldconf ? JSON.parse(data.fieldconf) : null;
 
-                geomField = metaDataFinal.data[count].f_geometry_column;
-                srid = metaDataFinal.data[count].srid;
-
-                console.log(table);
-
-                sql = "SELECT * FROM " + table + " WHERE  ST_intersects(" + geomField + ", ST_Transform(ST_geomfromtext('" + wkt + "',4326)," + srid +"))";
-
-                queryables = JSON.parse(metaDataKeys[table.split(".")[1]].fieldconf);
-
-                var postData = "client_encoding=UTF8&srs=4326&lifetime=0&q=" + sql,
-
-
-                    options = {
-                        uri: "http://127.0.0.1:3000/api/sql/" + db,
-                        encoding: 'utf8',
-                        body: postData,
-                        headers: {
-                            "Content-Type": 'application/x-www-form-urlencoded',
-                            'Content-Length': postData.length,
-                        }
-                    };
-
-                request.post(options, function (err, res, body) {
-
-                    var jsfile, message = null, result, time;
-
-                    try {
-                        jsfile = JSON.parse(body);
-                    } catch (e) {
-                        response.status(500).send({
-                            success: false,
-                            message: "Could not parse response from GC2 SQL API",
-                            data: body,
-                            query: postData
-                        });
-                        return;
+            let fieldStr, fieldNames = [];
+            if (fields) {
+                for (const [i, v] of Object.entries(fields)) {
+                    if (v.type !== "geometry" && fieldConf?.[i]?.ignore !== true) {
+                        fieldNames.push("\"" + i + "\"");
                     }
+                }
+                fieldStr = fieldNames.join(",");
+            } else {
+                fieldStr = "*";
+            }
 
-                    result = jsfile;
-                    message = result.message;
-                    time = new Date().getTime() - startTime, data = [], tmp = [];
-
-                    count++;
-                    if (result.features) {
-                        for (var i = 0; i < result.features.length; i++) {
-
-                            for (var prop in queryables) {
-                                if (queryables.hasOwnProperty(prop)) {
-                                    if (queryables[prop].conflict || (BACKEND === "cartodb" && queryables[prop].querable)) {
-                                        tmp.push({
-                                            name: prop,
-                                            alias: queryables[prop].alias || prop,
-                                            value: result.features[i].properties[prop],
-                                            sort_id: queryables[prop].sort_id,
-                                            link: queryables[prop].link,
-                                            linkprefix: queryables[prop].linkprefix,
-                                            key: false
-                                        })
+            let quotedTableName;
+            const split = table.split('.');
+            if (split.length > 1) {
+                quotedTableName = `"${split[0]}"."${split[1]}"`;
+            } else {
+                quotedTableName = `"${table}"`;
+            }
+            let bufferValue = JSON.parse(metaDataKeys[table].meta)?.buffer_conflict;
+            bufferValue = bufferValue && bufferValue !== '' && !isNaN(parseInt(bufferValue)) ? parseInt(bufferValue) : 0;
+            let searchBuffer
+            if (bufferValue > 0) {
+                searchBuffer = "ST_Buffer(ST_geomfromtext('" + wkt + "',4326)::geography, " + bufferValue + ")::geometry";
+            } else {
+                searchBuffer = "ST_geomfromtext('" + wkt + "',4326)";
+            }
+            const where = "ST_intersects(" + geomField + ", ST_Transform(" + searchBuffer + "," + srid + "))";
+            const $sqlConflict = JSON.parse(metaDataKeys[table].meta)?.sql_conflict ? "(" + JSON.parse(metaDataKeys[table].meta)?.sql_conflict?.replace("@WHERE@", where) + ") as _extra," : "";
+            const sql = "SELECT " + $sqlConflict + fieldStr + ", ST_AsGeoJSON(" + searchBuffer + ") as _buffer, ST_LENGTH(ST_Intersection(" + geomField + ", ST_Transform(" + searchBuffer + "," + srid + "))) as _length, ST_AREA(ST_Intersection(" + geomField + ", ST_Transform(" + searchBuffer + "," + srid + "))) as _area FROM " + quotedTableName + " WHERE " + where;
+            const queryables = JSON.parse(metaDataKeys[table].fieldconf);
+            let postData = {
+                    client_encoding: 'UTF8',
+                    srs: 4326,
+                    lifetime: 0,
+                    base64: true,
+                    q: base64url.encode(sql),
+                    key: (typeof req.session.gc2ApiKey !== "undefined" ? req.session.gc2ApiKey : "xxxxx" /*Dummy key is sent to prevent start of session*/)
+                },
+                options = {
+                    method: 'POST',
+                    body: JSON.stringify(postData),
+                    headers: {
+                        "Content-Type": 'application/json; charset=utf-8'
+                    }
+                },
+                uri = config.gc2.host + "/api/v2/sql/" + (req.session.subUser ? req.session.screenName + "@" + req.session.parentDb : db);
+            return new Promise((resolve, reject) => {
+                try {
+                    fetch(uri, options)
+                        .then(response => response.json())
+                        .then(result => {
+                            let time, data = [], tmp = [], error;
+                            if (result.code !== 200) {
+                                error = result.message;
+                            }
+                            time = new Date().getTime() - startTime;
+                            let totalLength = 0;
+                            let totalArea = 0;
+                            let buffer;
+                            let extra;
+                            if (result?.features) {
+                                for (let i = 0; i < result.features.length; i++) {
+                                    for (let prop in queryables) {
+                                        if (queryables.hasOwnProperty(prop)) {
+                                            if (queryables[prop].conflict) {
+                                                tmp.push({
+                                                    name: prop,
+                                                    alias: queryables[prop].alias || prop,
+                                                    value: result.features[i].properties[prop],
+                                                    sort_id: queryables[prop].sort_id,
+                                                    link: queryables[prop].link,
+                                                    linkprefix: queryables[prop].linkprefix,
+                                                    template: queryables[prop].template,
+                                                    key: false
+                                                })
+                                            }
+                                        }
                                     }
+                                    totalLength += parseFloat(result.features[i].properties._length);
+                                    totalArea += parseFloat(result.features[i].properties._area);
+                                    buffer = JSON.parse(result.features[i].properties._buffer);
+                                    extra = JSON.parse(result.features[i].properties?._extra || "[]");
+
+                                    if (tmp.length > 0) {
+                                        tmp.push({
+                                            name: metaDataKeys[table].pkey,
+                                            alias: queryables[metaDataKeys[table].pkey]?.alias || metaDataKeys[table].pkey,
+                                            value: result.features[i].properties[metaDataKeys[table].pkey],
+                                            sort_id: null,
+                                            key: true
+                                        });
+                                        data.push(tmp);
+                                    }
+                                    tmp = [];
                                 }
                             }
-
-                            if (tmp.length > 0) {
-                                tmp.push({
-                                    name: metaDataKeys[table.split(".")[1]].pkey,
-                                    alias: null,
-                                    value: result.features[i].properties[metaDataKeys[table.split(".")[1]].pkey],
-                                    sort_id: null,
-                                    key: true
-                                });
-                                data.push(tmp);
-                            }
-                            tmp = [];
-                        }
-                    }
-                    hit = {
-                        table: table,
-                        title: metaDataKeys[table.split(".")[1]].f_table_title,
-                        group: metaDataKeys[table.split(".")[1]].layergroup,
-                            hits: (typeof result.features !== "undefined" && result.features !== null) ? result.features.length : 0,
-                        data: data,
-                        num: count + "/" + metaDataFinal.data.length,
-                        time: time,
-                        id: socketId,
-                        error: res.statusCode !== 200 ? JSON.parse(body).message : null,
-                        message: message,
-                        sql: metaDataKeys[table.split(".")[1]].sql,
-                        meta: metaDataKeys[table.split(".")[1]]
-                    };
-                    hits[table] = hit;
-                    io.emit(socketId, hit);
-                    if (metaDataFinal.data.length === count) {
-                        var report = {
-                            hits: hits,
-                            file: fileName,
-                            text: text,
-                            dateTime: moment().format('MMMM Do YYYY, H:mm')
-                        };
-                        response.send(report);
-                        // Add meta data and date/time to report before writing to file
-                        report.metaData = metaDataFinal;
-                        fs.writeFile(__dirname + "/../../../tmp/" + fileName, JSON.stringify(report, null, 4), function (err) {
-                            if (err) {
-                                console.log(err);
-                            } else {
-                                console.log("Report saved");
-                            }
+                            let meta = metaDataKeys[table];
+                            let hit = {
+                                table: table,
+                                title: metaDataKeys[table].f_table_title || metaDataKeys[table].f_table_name,
+                                group: metaDataKeys[table].layergroup,
+                                hits: result?.features?.length || 0,
+                                data: data,
+                                num: ++count + "/" + metaDataFinal.data.length,
+                                time: time,
+                                id: socketId,
+                                error: error || (res.statusCode !== 200 ? result.message : null),
+                                message: result?.message,
+                                sql: meta.sql,
+                                meta: {
+                                    meta: meta.meta,
+                                    layergroup: meta.layergroup,
+                                    f_table_name: meta.f_table_name,
+                                    f_table_title: meta.f_table_title || meta.f_table_name,
+                                    meta_url: meta.meta_url,
+                                },
+                                totalLength,
+                                totalArea,
+                                buffer,
+                                bufferValue,
+                                extra
+                            };
+                            io.emit(socketId, hit);
+                            resolve(hit)
                         });
-                        return;
-                    }
-                    iter();
-                });
-            })();
-        } else {
-            console.log(err);
+                } catch (e) {
+                    let meta = metaDataKeys[table];
+                    let hit = {
+                        table: table,
+                        title: metaDataKeys[table].f_table_title || metaDataKeys[table].f_table_name,
+                        group: metaDataKeys[table].layergroup,
+                        hits: 0,
+                        data: data,
+                        num: ++count + "/" + metaDataFinal.data.length,
+                        time: null,
+                        id: socketId,
+                        error: "Network connection error",
+                        message: "Network connection error",
+                        sql: meta.sql,
+                        meta: {
+                            meta: meta.meta,
+                            layergroup: meta.layergroup,
+                            f_table_name: meta.f_table_name,
+                            f_table_title: meta.f_table_title || meta.f_table_name,
+                            meta_url: meta.meta_url,
+                        }
+                    };
+                    io.emit(socketId, hit);
+                    resolve(hit)
+                }
+            });
         }
+        createPool().then(r => {
+        });
     });
 });
 module.exports = router;

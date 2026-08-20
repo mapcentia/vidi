@@ -1,24 +1,41 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2021 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
 
-/**
- *
- */
-var cloud;
+import {getProjection} from './crs'
+import {NO_MAP_ANIMATION} from "./constants";
+
+let cloud;
+let lc;
 
 module.exports = {
 
     /**
      *
-     * @param o
      * @returns {exports}
      */
     set: function (o) {
+        const _self = this;
+        // Expose the functions
+        api.setView = (latLng, z) => {
+            cloud.map.setView(latLng, z);
+        }
+
+        // Listen to messages send by the embed API
+        window.addEventListener("message", function (event) {
+            if (event.data?.method === "setView") {
+                cloud.map.setView(event.data?.latLng, event.data?.z);
+            }
+
+            if (event.data?.method === "setVar") {
+                window[event.data.name] = event.data?.value;
+            }
+        });
+
         return this;
     },
 
@@ -26,11 +43,16 @@ module.exports = {
      *
      */
     init: function () {
-        var me = this;
+        const me = this;
         try {
             geocloud.setHost(window.gc2host);
         } catch (e) {
             console.info(e.message);
+        }
+
+        let mapAnimation = false
+        if ((window.vidiConfig.mode & NO_MAP_ANIMATION) === 0 && window.vidiTimeout === 0) {
+            mapAnimation = true;
         }
 
         /**
@@ -41,25 +63,39 @@ module.exports = {
             el: "map",
             zoomControl: false,
             numZoomLevels: 21,
-            // Set CSS animation true if not print
-            fadeAnimation: (window.vidiTimeout === 0),
-            zoomAnimation: (window.vidiTimeout === 0),
+            fadeAnimation: mapAnimation,
+            zoomAnimation: mapAnimation, // https://github.com/Leaflet/Leaflet/issues/3249
             editable: true,
-            maxBoundsViscosity: 1.0
+            maxBoundsViscosity: 1.0,
+            preferCanvas: false,
+            crs: getProjection(window.vidiConfig.crs),
         });
+        if (window.vidiConfig.minZoom) {
+            cloud.map.setMinZoom(window.vidiConfig.minZoom);
+        }
+        if (window.vidiConfig.maxZoom) {
+            cloud.map.setMaxZoom(window.vidiConfig.maxZoom);
+        }
 
-        /**
-         *
-         */
-        var map = cloud.map;
+        let map = cloud.map;
 
-        var zoomControl = L.control.zoom({
+        map.createPane('base');
+        map.getPane('base').style.zIndex = 210;
+
+        map.getPane('overlayPane').style.zIndex = 1000000;
+        map.getPane('shadowPane').style.zIndex = 1001000;
+        map.getPane('markerPane').style.zIndex = 1002000;
+        map.getPane('tooltipPane').style.zIndex = 1003000;
+        map.getPane('popupPane').style.zIndex = 1003000;
+
+
+        let zoomControl = L.control.zoom({
             position: 'topright'
         });
 
         cloud.map.addControl(zoomControl);
 
-        var scaleControl = L.control.scale({
+        let scaleControl = L.control.scale({
             position: "bottomright",
             imperial: false
         });
@@ -68,81 +104,29 @@ module.exports = {
         /**
          *
          */
-        L.control.locate({
+        lc = L.control.locate({
             position: 'topright',
             strings: {
-                title: "Find me"
+                title: __("Find me")
             },
-            icon: "fa fa-location-arrow",
-            iconLoading: "fa fa-circle-o-notch fa-spin",
             keepCurrentZoomLevel: true,
             drawCircle: false,
             locateOptions: {
                 enableHighAccuracy: true
-            }
+            },
+            followMarkerStyle: {
+                fillColor: '#EF9600'
+            },
+            markerStyle: {
+                fillColor: '#004998',
+            },
+            /** Compass */
+            compassStyle: {
+                fillColor: '#004998',
+            },
+            icon: "bi bi-geo-alt",
         }).addTo(map);
-
-        /**
-         *
-         */
-            // var graphicScale = L.control.graphicScale({
-            //       doubleLine: false,
-            //       fill: 'hollow',
-            //       showSubunits: false,
-            //       position: "bottomleft"
-            //   }).addTo(map);
-            //
-            //   /**
-            //    *
-            //    * @type {div}
-            //    */
-            //   var scaleText = L.DomUtil.create('div', 'scaleText');
-            //   graphicScale._container.insertBefore(scaleText, graphicScale._container.firstChild);
-            //
-            //   /**
-            //    *
-            //    */
-            //   var styleChoices = scaleText.querySelectorAll('.choice');
-            //
-            //   for (var i = 0; i < styleChoices.length; i++) {
-            //       styleChoices[i].addEventListener('click', function (e) {
-            //           graphicScale._setStyle({fill: e.currentTarget.innerHTML});
-            //       });
-            //   }
-
-        var localization;
-        if (window._vidiLocale === "da_DK") {
-            localization = "da";
-        }
-        if (window._vidiLocale === "en_US") {
-            localization = "en";
-        }
-
-        /*
-        var measureControl = new L.Control.Measure({
-            position: 'topright',
-            primaryLengthUnit: 'kilometers',
-            secondaryLengthUnit: 'meters',
-            primaryAreaUnit: 'hectares',
-            secondaryAreaUnit: 'sqmeters',
-            localization: localization,
-            units: {
-                meters: {
-                    factor: 1,
-                    display: 'meters',
-                    decimals: 1
-                },
-                sqmeters: {
-                    factor: 1,
-                    display: 'sqmeters',
-                    decimals: 1
-                }
-            }
-
-
-        });
-        measureControl.addTo(map);
-        */
+        L.DomEvent.disableClickPropagation(lc._link);
 
         L.Edit.Poly = L.Edit.Poly.extend({
             options: {
@@ -161,14 +145,20 @@ module.exports = {
                 resizeIcon: me.iconMedium
             }
         });
+
+
     },
 
     /**
      * Return the cloud object
      * @returns {*}
      */
-    get: function () {
+    get: () => {
         return cloud;
+    },
+
+    getLc: () => {
+        return lc;
     },
 
     iconSmall: new L.DivIcon({

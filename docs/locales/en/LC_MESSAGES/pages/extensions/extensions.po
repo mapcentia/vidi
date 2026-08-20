@@ -1,0 +1,104 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2023, MapCentia
+# This file is distributed under the same license as the Vidi package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Vidi 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-09-01 13:41+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: ../../pages/extensions/extensions.rst:9 1c666cc6d3664f56a5e1991546f13739
+msgid "Extensions"
+msgstr ""
+
+#: ../../pages/extensions/extensions.rst:9 d2bd8a5262db4288a719c65cdf2788d7
+msgid "Overview"
+msgstr ""
+
+#: ../../pages/extensions/extensions.rst 1d7543cba11d4c2eb2a0ade10539cb7c
+msgid "Date"
+msgstr ""
+
+#: ../../pages/extensions/extensions.rst:13 19f399b1d6484cb18268cc852ddfbf14
+msgid "|today|"
+msgstr ""
+
+#: ../../pages/extensions/extensions.rst eb155679e23d422190f16a689e9c70da
+msgid "Vidi-version"
+msgstr ""
+
+#: ../../pages/extensions/extensions.rst:14 f898e0473a534c688974b41889a26158
+msgid "UNRELEASED"
+msgstr ""
+
+#: ../../pages/extensions/extensions.rst f0e4ac4bca964d39beddff2561445027
+msgid "Forfattere"
+msgstr ""
+
+#: ../../pages/extensions/extensions.rst:15 434c9baf4ddb4a4b9c3421b1bda530f5
+msgid "`mapcentia <https://github.com/mapcentia>`_"
+msgstr ""
+
+#: ../../pages/extensions/extensions.rst:18 cd328c0843fa4b8b9cb5067f2fe02447
+msgid "Indhold"
+msgstr ""
+
+#: ../../pages/extensions/extensions.rst:23 573956d8542742e2bf52812fa74fdc43
+msgid "Rutevejledning"
+msgstr ""
+
+#: ../../pages/extensions/extensions.rst:25 00646f96492f416aaabf51c1bc050c44
+msgid ""
+"``directions`` er en udvidelse til vidi der giver mulighed for at lave "
+"rutevejledning i kortet. Der laves en rutevejledning fra brugerens "
+"position til et punkt på kortet. Det er i øjeblikket kun muligt at lave "
+"rutevejledning med Google Maps."
+msgstr ""
+
+#: ../../pages/extensions/extensions.rst:28 b7a93125af7b40fe8aad3d912ce0b3d6
+msgid "Intallation"
+msgstr ""
+
+#: ../../pages/extensions/extensions.rst:30 538c326e154a484da186dc345d4c53f1
+msgid "Funktionen skal medtages i :ref:`configjs_extensions`"
+msgstr ""
+
+#: ../../pages/extensions/extensions.rst:42 b41832a37260424b884182bdecbb0be6
+msgid "Brug"
+msgstr ""
+
+#: ../../pages/extensions/extensions.rst:48 4ecc7e2c38bc40a7bfd4e6b4cfaa03c8
+msgid "ikon i :ref:`gettingstarted_controls`"
+msgstr ""
+
+#: ../../pages/extensions/extensions.rst:50 948a2da003e04841bf11ed1ee908c7af
+msgid ""
+"Start med at aktivere geolokation i :ref:`gettingstarted_controls` og "
+"klik på ikonet. Derefter klik på kortet for at vælge destinationen. "
+"Rutevejledningen vil åbne i et nyt vindue."
+msgstr ""
+
+#~ msgid "Editering"
+#~ msgstr ""
+
+#~ msgid "Introduktion"
+#~ msgstr ""
+
+#~ msgid "meow"
+#~ msgstr ""
+
+#~ msgid "figure are like images but with a caption"
+#~ msgstr ""
+

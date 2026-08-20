@@ -24,6 +24,7 @@ public/css/build
 
 ## Directory-based project format:
 .idea/
+.fleet/
 # if you remove the above rule, at least ignore the following:
 
 # User-specific stuff:
@@ -116,3 +117,7 @@ config/_variables.less
 
 # Environment variables
 .env
+
+# Ignore the docs build folder
+docs/_build
+/venv/

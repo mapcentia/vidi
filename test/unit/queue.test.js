@@ -32,7 +32,12 @@ const localforageMock = {
 	getItem: (data, callback) => {
 		callback(false, false);
 	},
-	setItem: () => {}
+	setItem: (key, value, callback) => {
+		if (callback) callback(null);
+	},
+	removeItem: (key, callback) => {
+		if (callback) callback(null);
+	}
 };
 global.localforage = localforageMock;
 
@@ -184,16 +189,16 @@ describe("Queue", () => {
 			return result;
 		});
 
-		// Adding add feature request
-		queue.pushAndProcess(helpers.duplicate(dummyRequest));
+		await queue.ready();
 
-		await helpers.sleep(1000);
+		// Adding add feature request
+		await queue.push(helpers.duplicate(dummyRequest));
 
 		expect(queue.length).to.equal(1);
-		queue.removeByLayerId('another_schema.table');
-		expect(queue.getItems().length).to.equal(1);
-		queue.removeByLayerId('schema.table');
-		expect(queue.getItems().length).to.equal(0);
+		await queue.removeByLayerId('another_schema.table');
+		expect(queue.length).to.equal(1);
+		await queue.removeByLayerId('schema.table');
+		expect(queue.length).to.equal(0);
 		queue.terminate();
 	});
 
@@ -214,14 +219,14 @@ describe("Queue", () => {
 
 		await helpers.sleep(1000);
 
-		expect(queue.getItems().length).to.equal(1);
-		expect(queue.getItems()[0].skip).to.equal(true);
-		expect(queue.getItems()[0].serverErrorMessage).to.equal('Test rejection message');
+		expect(queue.getMetadataLength()).to.equal(1);
+		expect(queue.getMetadataItems()[0].skip).to.equal(true);
+		expect(queue.getMetadataItems()[0].serverErrorMessage).to.equal('Test rejection message');
 
-		queue.resubmitSkippedFeatures();
+		await queue.resubmitSkippedFeatures();
 
-		expect(queue.getItems().length).to.equal(1);
-		expect(queue.getItems()[0].skip).to.equal(false);
+		expect(queue.getMetadataLength()).to.equal(1);
+		expect(queue.getMetadataItems()[0].skip).to.equal(false);
 
 		queue.terminate();
 	});
@@ -255,7 +260,7 @@ describe("Queue", () => {
 
 		await helpers.sleep(8000);
 
-		expect(queue.getItems().length).to.equal(0);
+		expect(queue.length).to.equal(0);
 		queue.terminate();
 	});
 
@@ -386,8 +391,8 @@ describe("Queue", () => {
 
             await helpers.sleep(1000);
 
-            expect(queue.getItems().length).to.equal(1);
-			expect(queue.getItems()[0].feature.features[0].properties.gid).to.equal(-1);
+            expect(queue.getMetadataLength()).to.equal(1);
+			expect((await queue.getFullItem(queue.getMetadataItems()[0].id)).feature.features[0].properties.gid).to.equal(-1);
 
 			// Adding update feature request
 			let updateRequest = helpers.duplicate(dummyRequest);
@@ -398,9 +403,9 @@ describe("Queue", () => {
 
 			await helpers.sleep(1000);
 
-			expect(queue.getItems().length).to.equal(1);
-			expect(queue.getItems()[0].type).to.equal(Queue.ADD_REQUEST);
-			expect(queue.getItems()[0].feature.features[0].properties.name).to.equal('test_test_test');
+			expect(queue.getMetadataLength()).to.equal(1);
+			expect(queue.getMetadataItems()[0].type).to.equal(Queue.ADD_REQUEST);
+			expect((await queue.getFullItem(queue.getMetadataItems()[0].id)).feature.features[0].properties.name).to.equal('test_test_test');
 
 			await helpers.sleep(1000);
 
@@ -414,8 +419,8 @@ describe("Queue", () => {
 			deleteRequest.feature.features[0].properties.gid = 2;
 			queue.pushAndProcess(deleteRequest);
 
-			expect(queue.getItems().length).to.equal(2);
-			expect(queue.getItems()[1].type).to.equal(Queue.DELETE_REQUEST);
+			expect(queue.getMetadataLength()).to.equal(2);
+			expect(queue.getMetadataItems()[1].type).to.equal(Queue.DELETE_REQUEST);
 
 			queue.terminate();
 		});
@@ -437,8 +442,8 @@ describe("Queue", () => {
 
             await helpers.sleep(1000);
 
-            expect(queue.getItems().length).to.equal(1);
-			expect(queue.getItems()[0].feature.features[0].properties.gid).to.equal(1);
+            expect(queue.getMetadataLength()).to.equal(1);
+			expect((await queue.getFullItem(queue.getMetadataItems()[0].id)).feature.features[0].properties.gid).to.equal(1);
 
 			// Adding update feature request
 			let updateRequest = helpers.duplicate(dummyRequest);
@@ -450,9 +455,9 @@ describe("Queue", () => {
 
 			await helpers.sleep(1000);
 
-			expect(queue.getItems().length).to.equal(1);
-			expect(queue.getItems()[0].type).to.equal(Queue.UPDATE_REQUEST);
-			expect(queue.getItems()[0].feature.features[0].properties.name).to.equal('test_test_test');
+			expect(queue.getMetadataLength()).to.equal(1);
+			expect(queue.getMetadataItems()[0].type).to.equal(Queue.UPDATE_REQUEST);
+			expect((await queue.getFullItem(queue.getMetadataItems()[0].id)).feature.features[0].properties.name).to.equal('test_test_test');
 			queue.terminate();
 		});
 		
@@ -477,7 +482,7 @@ describe("Queue", () => {
 
 			await helpers.sleep(1000);
 
-			expect(queue.getItems().length).to.equal(0);
+			expect(queue.length).to.equal(0);
 			queue.terminate();
 		});
 
@@ -506,9 +511,75 @@ describe("Queue", () => {
 
 			await helpers.sleep(1000);
 
-			expect(queue.getItems().length).to.equal(1);
-			expect(queue.getItems()[0].type).to.equal(Queue.DELETE_REQUEST);
+			expect(queue.getMetadataLength()).to.equal(1);
+			expect(queue.getMetadataItems()[0].type).to.equal(Queue.DELETE_REQUEST);
 			queue.terminate();
 		});
 	});
+
+    it("push() persists to storage and exposes metadata synchronously", async () => {
+        const store = new Map();
+        global.localforage = {
+            getItem: (k, cb) => setTimeout(() => cb(null, store.has(k) ? store.get(k) : null), 0),
+            setItem: (k, v, cb) => setTimeout(() => { store.set(k, v); cb && cb(null, v); }, 0),
+            removeItem: (k, cb) => setTimeout(() => { store.delete(k); cb && cb(null); }, 0),
+        };
+
+        const queue = new Queue(() => new Promise((resolve) => resolve()));
+        await queue.ready();
+
+        await queue.push(dummyRequest);
+
+        expect(queue.getMetadataLength()).to.equal(1);
+        const md = queue.getMetadataItems()[0];
+        expect(md.type).to.equal(Queue.ADD_REQUEST);
+        expect(md.table).to.equal('schema.table');
+        // The full item is in storage, not in the metadata projection
+        expect(md.feature).to.equal(undefined);
+
+        const fullItem = await queue.getFullItem(md.id);
+        expect(fullItem.feature.features[0].properties.id).to.equal('1');
+    });
+
+    it("removeByPrimaryKeys deletes the storage record and the metadata entry", async () => {
+        const store = new Map();
+        global.localforage = {
+            getItem: (k, cb) => setTimeout(() => cb(null, store.has(k) ? store.get(k) : null), 0),
+            setItem: (k, v, cb) => setTimeout(() => { store.set(k, v); cb && cb(null, v); }, 0),
+            removeItem: (k, cb) => setTimeout(() => { store.delete(k); cb && cb(null); }, 0),
+        };
+
+        const queue = new Queue(() => new Promise((resolve) => resolve()));
+        await queue.ready();
+        await queue.push(dummyRequest);
+        const id = queue.getMetadataItems()[0].id;
+
+        await queue.removeByPrimaryKeys([-1]);
+
+        expect(queue.getMetadataLength()).to.equal(0);
+        expect([...store.keys()].some(k => k.startsWith('queueItem:'))).to.equal(false);
+    });
+
+    it("push → process → success removes both metadata and storage record", async () => {
+        const store = new Map();
+        global.localforage = {
+            getItem: (k, cb) => setTimeout(() => cb(null, store.has(k) ? store.get(k) : null), 0),
+            setItem: (k, v, cb) => setTimeout(() => { store.set(k, v); cb && cb(null, v); }, 0),
+            removeItem: (k, cb) => setTimeout(() => { store.delete(k); cb && cb(null); }, 0),
+        };
+
+        // Processor that always resolves (simulating successful POST).
+        const queue = new Queue((item, q) => Promise.resolve());
+        await queue.ready();
+
+        await queue.pushAndProcess(dummyRequest);
+
+        // Wait for the queue's periodic dispatch interval (QUEUE_PROCESSING_INTERVAL = 5000ms)
+        // plus a buffer for the async processor and storage cleanup to complete.
+        await new Promise(r => setTimeout(r, 6000));
+
+        // After successful processing, metadata and storage should both be empty.
+        expect(queue.getMetadataLength()).to.equal(0);
+        expect([...store.keys()].some(k => k.startsWith('queueItem:'))).to.equal(false);
+    });
 });

@@ -1,154 +1,184 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2023 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
 
-import {state} from "../../../public/js/leaflet-easybutton/easy-button";
+import React from 'react';
+import {useState, useEffect, useRef} from "react";
+import ReactDOM from 'react-dom';
+import styled from "styled-components";
+import {createRoot} from "react-dom/client";
 
-/**
- *
- */
-var measurements;
 
-var backboneEvents;
+let backboneEvents;
+let meta;
+let state;
+let layers;
+let layerTree;
+let altRoot;
 
-var oplevsyddjurs;
-
-var cloud;
-
-var setting;
-
-var print;
-
-var meta;
-var anchor;
-
-var legend;
-
-var metaDataKeys;
-
-var showdown = require('showdown');
-var converter = new showdown.Converter();
-
-/**
- *
- * @returns {*}
- */
 module.exports = {
+
+    /**
+     *
+     * @param o
+     * @returns {exports}
+     */
     set: function (o) {
-        measurements = o.measurements;
         backboneEvents = o.backboneEvents;
-        cloud = o.cloud;
-        setting = o.setting;
-        print = o.print;
         meta = o.meta;
-        legend = o.legend;
-        anchor = o.anchor;
+        state = o.state;
+        layers = o.layers;
+        layerTree = o.layerTree;
         return this;
     },
+
+    /**
+     *
+     */
     init: function () {
-        backboneEvents.get().trigger(`on:infoClick`);
+        backboneEvents.get().trigger('off:all');
+        backboneEvents.get().trigger('on:infoClick');
+        const imageSize = 36;
+        const alt = window.vidiConfig?.extensionConfig?.embed?.useAltLayerTree;
+        const Label = styled.label`
+          cursor: pointer;
+          display: flex;
+          position: relative;
+          width: ${imageSize}px;
+          height: ${imageSize}px;
+          box-sizing: unset;
+          align-items: center;
 
-        let id = "#legend-dialog";
-        $(id).animate({
-            bottom: ("-233px")
-        }, 500, function () {
-            $(id + " .expand-less").hide();
-            $(id + " .expand-more").show();
-        });
+          &:before {
+            content: '';
+            width: ${imageSize}px;
+            height: ${imageSize}px;
+            position: absolute;
+            left: 0;
+            box-sizing: border-box;
+            background: url(${props => props.url}) left center no-repeat;
+            background-size: cover;
+          }
+        `;
 
-        let map = cloud.get().map, showInfo = function (e) {
-            let t = ($(this).data('gc2-id')), html,
-                meta = metaDataKeys[t] ? $.parseJSON(metaDataKeys[t].meta) : null,
-                name = metaDataKeys[t] ? metaDataKeys[t].f_table_name : null,
-                title = metaDataKeys[t] ? metaDataKeys[t].f_table_title : null,
-                abstract = metaDataKeys[t] ? metaDataKeys[t].f_table_abstract : null;
+        const Input = styled.input`
+          display: none;
 
-            html = (meta !== null
-                && typeof meta.meta_desc !== "undefined"
-                && meta.meta_desc !== "") ?
-                converter.makeHtml(meta.meta_desc) : abstract;
+          &:checked + label {
+            box-shadow: 0 0 2px 3px rgba(255, 0, 0, .6);
+          }
+        `;
 
-            moment.locale('da');
+        const Checkbox = styled.div`
+          width: ${imageSize + 3}px;
+          height: ${imageSize + 3}px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        `;
 
-            for (let key in  metaDataKeys[t]) {
-                if (metaDataKeys[t].hasOwnProperty(key)) {
-                    console.log(key + " -> " + metaDataKeys[t][key]);
-                    if (key === "lastmodified") {
-                        metaDataKeys[t][key] = moment(metaDataKeys[t][key]).format('LLLL');
+        const Text = styled.div`
+          min-width: 90px;
+          font-size: 0.8em;
+        `;
+
+        const createId = () => (+new Date * (Math.random() + 1)).toString(36).substr(2, 5);
+
+        const LayerGroup = (props) => {
+            const id = 'a' + createId();
+            return (
+                <div className="accordion-item">
+                    <h2 className="accordion-header">
+                        <button className="accordion-button text-uppercase" type="button" data-bs-toggle="collapse"
+                                data-bs-target={"#" + id} aria-expanded="true" aria-controls="collapseOne">
+                            {props.title}
+                        </button>
+                    </h2>
+
+                    <div id={id} className="accordion-collapse collapse show">
+                        <div className="accordion-body">
+                            <div className="row row-cols-2 row-cols-md-3 gy-4">
+                                {props.layerContols}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )
+        }
+
+        const LayerControl = (props) => {
+            const [checked, setChecked] = useState(props.checked);
+            const toggleLayer = (e) => {
+                setChecked(!checked);
+            }
+            return (
+                <div className="d-flex align-items-center">
+                    <Checkbox><Input onChange={toggleLayer} type={"checkbox"}
+                                     checked={checked} data-gc2-id={props.id}
+                                     id={'_ran_' + props.id}
+                    />
+                        <Label htmlFor={'_ran_' + props.id} url={props.url}>
+                            <Text className="ms-5">{props.title}</Text>
+                        </Label>
+                    </Checkbox>
+                </div>
+
+            )
+        }
+
+        if (alt) {
+            document.getElementById("layers").classList.add("d-none");
+        }
+
+        backboneEvents.get().on('layerTree:ready', () => {
+            setTimeout(() => {
+                const metaData = meta.getMetaDataKeys();
+                let activeLayers = layerTree.getActiveLayers().map(e => e.split(':').reverse()[0]);
+                const latestFullTreeStructure = layerTree.getLatestFullTreeStructure();
+                let l = latestFullTreeStructure.map(g => {
+                    return {
+                        id: g.id, children: g.children.map(l => {
+                            if (l.layer?.f_table_schema)
+                                return {id: l.layer.f_table_schema + '.' + l.layer.f_table_name, type: 'layer'}
+                        })
                     }
+                })
+                let groupsComps = []
+                for (let i = 0; i < l.length; i++) {
+                    let layerControls = l[i].children.map((e) => {
+                            if (e) {
+                                const title = metaData[e.id]?.f_table_title && metaData[e.id].f_table_title !== '' ? metaData[e.id].f_table_title : metaData[e.id]?.f_table_name;
+                                return <LayerControl key={e.id} id={e.id} url={metaData[e.id].legend_url}
+                                                     checked={activeLayers.includes(e.id)}
+                                                     title={title}></LayerControl>
+                            }
+                        }
+                    )
+                    groupsComps.push(<LayerGroup key={l[i].id} title={l[i].id}
+                                                 layerContols={layerControls}></LayerGroup>)
                 }
-            }
 
-            html = html ? Mustache.render(html, metaDataKeys[t]) : "";
-            $("#info-modal-top.slide-left").show();
-            $("#info-modal-top.slide-left").animate({left: "0"}, 200);
-            $("#info-modal-top .modal-title").html(title || name);
-            $("#info-modal-top .modal-body").html(html + '<div id="info-modal-legend" class="legend"></div>');
-            legend.init([t], "#info-modal-legend");
-            e.stopPropagation();
-        };
-
-        metaDataKeys = meta.getMetaDataKeys();
-
-        // Unbind default
-        $(document).unbindArrive(".info-label");
-
-        // Set custom
-        $(document).arrive('.info-label', function () {
-            $(this).on("click", showInfo);
-        });
-
-        $('.info-label').on("click", showInfo);
-
-        $("#btn-about").on("click", function (e) {
-            $("#about-modal").modal({});
-
-        });
-
-        $("#burger-btn").on("click", function () {
-            $("#layer-slide.slide-left").animate({
-                left: "0"
-            }, 500)
-        });
-
-
-        $("#layer-slide.slide-left .close").on("click", function () {
-            $("#layer-slide.slide-left").animate({
-                left: "-100%"
-            }, 500)
-        });
-
-        $("#info-modal-top.slide-left .close").on("click", function () {
-            $("#info-modal-top.slide-left").animate({
-                left: "-100%"
-            }, 500)
-        });
-
-
-        $("#zoom-in-btn").on("click", function () {
-            map.zoomIn();
-        });
-
-        $("#zoom-out-btn").on("click", function () {
-            map.zoomOut();
-        });
-
-        $("#zoom-default-btn").on("click", function () {
-            let parameters = anchor.getInitMapParameters();
-            if (parameters) {
-                cloud.get().setView(new L.LatLng(parseFloat(parameters.y), parseFloat(parameters.x)), parameters.zoom);
-            } else {
-                cloud.get().zoomToExtent(setting.getExtent());
-            }
-
-        });
-
-        $("#measurements-module-btn").on("click", function () {
-            measurements.toggleMeasurements(true);
-        });
+                if (alt) {
+                    const altNode = document.getElementById("layersAlt");
+                    if (!altRoot) {
+                        altRoot = createRoot(altNode);
+                    }
+                    try {
+                        altRoot.render(
+                            <div className="accordion">{groupsComps}</div>
+                        );
+                    } catch (e) {
+                        console.error(e)
+                    }
+                    backboneEvents.get().on("layerTree:ready", () => {
+                        altRoot.render(<div className="accordion">{groupsComps}</div>)
+                    })
+                }
+            }, 0)
+        })
     }
-};
+}

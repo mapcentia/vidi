@@ -18,7 +18,7 @@ beforeEach(async () => {
     global.expect = expect;
     global.localforage = localforage;
     global.browser = await puppeteer.launch(opts);
-    let response = await axios.get(`https://swarm.gc2.io/api/v2/keyvalue/aleksandrshumilov`);
+    let response = await axios.get(`https://swarm.gc2.io/api/v2/keyvalue/demo`);
     response.data.data.map(item => {
         axios.delete(`http://swarm.gc2.io/api/v2/keyvalue/aleksandrshumilov/${item.key}`);
     });

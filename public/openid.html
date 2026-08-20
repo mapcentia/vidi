@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="da">
+<head>
+    <title>Vidi signin</title>
+    <script src="/api/baselayer"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@centia-io/sdk@0.0.57/dist/centia-io-sdk.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+            crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+<body>
+<div id="container">
+
+</div>
+<script>
+    // Deafult to GC2 OAuth2 configuration
+    const DEFAULTS = {
+        redirectUri: window.location.origin + '/openid.html',
+        clientId: 'gc2-cli',
+        host: window.gc2Options.host,
+    };
+    const extractOidcConfig = () => {
+        const oidc = window.gc2Options?.openIdConfig;
+        const redirectUri = oidc?.redirectUris?.vidi ?? DEFAULTS.redirectUri;
+        // const redirectUri = "http://localhost:3000/openid.html";
+        const clientId = oidc?.clientId ?? DEFAULTS.clientId;
+        const host = oidc?.host ?? DEFAULTS.host;
+        const tokenUri = oidc?.tokenUri ?? undefined;
+        const authUri = oidc?.authUri ?? undefined;
+        const logoutUri = oidc?.logoutUri ?? undefined;
+        const scope = oidc?.scope ?? DEFAULTS.scope;
+        return {redirectUri, clientId, host, tokenUri, authUri, scope, logoutUri};
+    }
+
+    const oidcConfig = extractOidcConfig()
+    const codeFlow = new CentiaSDK.CodeFlow(oidcConfig)
+
+    // Minimal JWT decoder (payload only)
+    function jwtDecode(token) {
+        try {
+            const base64Url = token.split('.')[1];
+            if (!base64Url) return {};
+            let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const pad = base64.length % 4;
+            if (pad) base64 += '='.repeat(4 - pad);
+            const json = atob(base64);
+            // Decode UTF-8 safely
+            const utf8 = decodeURIComponent(
+                Array.prototype.map.call(json, c => '%' + c.charCodeAt(0).toString(16).padStart(2, '0')).join('')
+            );
+            return JSON.parse(utf8);
+        } catch (e) {
+            console.warn('jwtDecode failed', e);
+            return {};
+        }
+    }
+    // Proceed with chosen options: persist and close popup
+    function proceed(token, nonce, selectedDb, superuserLogin) {
+        if (selectedDb) {
+            localStorage.setItem('gc2_selected_db', selectedDb);
+        }
+        if (typeof superuserLogin !== 'undefined') {
+            localStorage.setItem('gc2_selected_superuser', superuserLogin ? '1' : '0');
+        }
+
+        fetch('/api/session/start', {
+            method: 'POST',
+            headers: {"Content-Type": "application/json;charset=UTF-8",},
+            body: JSON.stringify({nonce, token, database: selectedDb, superuser: superuserLogin}),
+        }).then(res => res.json()).then(data => {
+            codeFlow.clear()
+            document.querySelector('#container').innerHTML = 'Signed in'
+            try {
+                // Notify opener if present
+                if (window.opener) {
+                    window.opener.postMessage({type: 'gc2-auth-complete', data}, '*');
+                }
+            } catch (e) {
+                console.error(e.message)
+            }
+        })
+    }
+    function renderSelectionUI(allowedDatabases, databasesWithSuperuser, token, nonce, preselectedDb) {
+        const container = document.getElementById('container');
+        container.innerHTML = '';
+        const wrap = document.createElement('div');
+        wrap.className = 'container p-3';
+        const title = document.createElement('h5');
+        title.textContent = 'Select database';
+        wrap.appendChild(title);
+
+        const form = document.createElement('form');
+        const list = document.createElement('div');
+        list.className = 'list-group mb-3';
+        let current = preselectedDb && allowedDatabases.includes(preselectedDb) ? preselectedDb : allowedDatabases[0];
+
+        allowedDatabases.forEach(db => {
+            const id = 'db_' + db.replace(/[^a-zA-Z0-9_-]/g, '_');
+            const label = document.createElement('label');
+            label.className = 'list-group-item d-flex align-items-center';
+            const radio = document.createElement('input');
+            radio.type = 'radio';
+            radio.name = 'db';
+            radio.className = 'form-check-input me-2';
+            radio.id = id;
+            radio.value = db;
+            if (db === current) radio.checked = true;
+            radio.addEventListener('change', () => {
+                current = db;
+                updateSuperuserVisibility();
+            });
+            const span = document.createElement('span');
+            span.textContent = db;
+            label.appendChild(radio);
+            label.appendChild(span);
+            list.appendChild(label);
+        });
+        form.appendChild(list);
+
+        const suWrap = document.createElement('div');
+        suWrap.className = 'form-check mb-3';
+        const suChk = document.createElement('input');
+        suChk.type = 'checkbox';
+        suChk.className = 'form-check-input';
+        suChk.id = 'superuserChk';
+        const suLbl = document.createElement('label');
+        suLbl.className = 'form-check-label';
+        suLbl.setAttribute('for', 'superuserChk');
+        suLbl.textContent = 'Log in as superuser';
+        suWrap.appendChild(suChk);
+        suWrap.appendChild(suLbl);
+        form.appendChild(suWrap);
+
+        function updateSuperuserVisibility() {
+            const allowed = databasesWithSuperuser.includes(current);
+            suWrap.style.display = allowed ? '' : 'none';
+            if (!allowed) suChk.checked = false;
+        }
+        updateSuperuserVisibility();
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn btn-primary';
+        btn.textContent = 'Continue';
+        btn.addEventListener('click', () => {
+            proceed(token, nonce, current, suChk.checked);
+        });
+        form.appendChild(btn);
+
+        wrap.appendChild(form);
+        container.appendChild(wrap);
+    }
+
+    codeFlow.redirectHandle().then(async isSignedIn => {
+        if (isSignedIn) {
+            const token = JSON.parse(localStorage.getItem('gc2_tokens') || '{}')['accessToken']
+            //const token = JSON.parse(localStorage.getItem('gc2_tokens') || '{}')['accessToken']
+            const nonce = localStorage.getItem('gc2_nonce')
+            const {database, superuser} = jwtDecode(token)
+            if (!database) {
+                alert(`No database set in token. Please contact the administrator.`)
+                if (typeof codeFlow.clear === 'function') codeFlow.clear()
+                return
+            }
+            let allowedDatabases
+            let databasesWithSuperuser
+
+            if (database === '*') {
+                allowedDatabases = await getDatabases()
+            } else {
+                allowedDatabases = database.split(',').map(d => d.trim()).filter(Boolean)
+            }
+
+            if (superuser === '*') {
+                databasesWithSuperuser = allowedDatabases
+            } else {
+                databasesWithSuperuser = (superuser ? superuser.split(',') : []).map(d => d.trim()).filter(Boolean)
+            }
+
+            const overlap = allowedDatabases.filter(d => databasesWithSuperuser.includes(d))
+
+            // Try to use a previously saved selection
+            const savedDbLocal = localStorage.getItem('gc2_selected_db')
+            let selectedDb
+            if (savedDbLocal && allowedDatabases.includes(savedDbLocal)) {
+                selectedDb = savedDbLocal
+                // If selected saved DB supports superuser, ask for role selection
+                if (overlap.includes(selectedDb)) {
+                    const savedSuperuser = localStorage.getItem('gc2_selected_superuser')
+                    if (savedSuperuser !== null) {
+                        proceed(token, nonce, selectedDb, savedSuperuser === '1' || savedSuperuser === 'true')
+                        return
+                    }
+                    // Ask for role selection for this single DB
+                    renderSelectionUI([selectedDb], databasesWithSuperuser, token, nonce, selectedDb)
+                    return
+                }
+            } else {
+                // If more than one database is allowed, ask the user to pick one
+                selectedDb = allowedDatabases[0]
+                if (allowedDatabases.length > 1) {
+                    renderSelectionUI(allowedDatabases, databasesWithSuperuser, token, nonce, allowedDatabases[0])
+                    return
+                }
+                // Persist the choice for future sign-ins/refreshes (only database)
+                if (selectedDb) {
+                    localStorage.setItem('gc2_selected_db', selectedDb)
+                }
+            }
+
+            // If only a single DB and it supports superuser, ask for role selection
+            if (selectedDb && overlap.includes(selectedDb)) {
+                const savedSuperuser = localStorage.getItem('gc2_selected_superuser')
+                if (savedSuperuser !== null) {
+                    proceed(token, nonce, selectedDb, savedSuperuser === '1' || savedSuperuser === 'true')
+                    return
+                }
+                renderSelectionUI([selectedDb], databasesWithSuperuser, token, nonce, selectedDb)
+                return
+            }
+
+            proceed(token, nonce, selectedDb, false)
+
+        } else {
+            // If nonce is not set, get it from the server, so it can be used in the sign-in request
+            if (!localStorage.getItem('gc2_nonce')) {
+                fetch(oidcConfig.host + '/api/v2/session/nonce').then(res => res.json()).then(data => {
+                    const nonce = data.nonce
+                    localStorage.setItem('gc2_nonce', nonce)
+                    codeFlow.signIn()
+                })
+            } else {
+                codeFlow.signIn()
+            }
+        }
+    }).catch(err => {
+        alert(err)
+        // location.reload()
+    })
+    const getDatabases = () => {
+        return fetch(oidcConfig.host + '/api/v2/database/search?userIdentifier=*').then(res => res.json()).then(data =>
+            data.databases.map(item => item.screenname)
+        )
+    }
+</script>
+</body>
+
+</html>

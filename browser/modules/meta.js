@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2022 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -10,57 +10,53 @@
  *
  * @type {*|exports|module.exports}
  */
-var urlparser = require('./urlparser');
+const urlparser = require('./urlparser');
+const urlVars = urlparser.urlVars;
 
 /**
  * @type {string}
  */
-var db = urlparser.db;
+const db = urlparser.db;
 
 /**
- * @type {string}
- */
-var urlVars = urlparser.urlVars;
-
-/**
- * The full meta dat object
+ * The full meta data object
  * @type {{data: Array}}
  */
-window.metaData = {data: []};
+let metaData = {data: []};
+
+let metaDataClone;
+
+let metaDataCloneTimer;
 
 /**
  * Object that holds the latest loaded meta data
  * @type {{data: Array}}
  */
-var metaDataLatestLoaded;
+let metaDataLatestLoaded;
+
+let metaDataKeys = [];
 
 /**
  *
  * @type {Array}
  */
-var metaDataKeys = [];
-
-/**
- *
- * @type {Array}
- */
-var metaDataKeysTitle = [];
+let metaDataKeysTitle = [];
 
 /**
  *
  * @type {boolean}
  */
-var ready = false;
+let ready = false;
 
 /**
  * @type {string}
  */
-var host;
+let host;
 
 /**
  *
  */
-var backboneEvents, stateSnapshots;
+let backboneEvents, stateSnapshots, utils;
 
 let _self = false;
 
@@ -84,6 +80,7 @@ module.exports = {
     set: function (o) {
         backboneEvents = o.backboneEvents;
         stateSnapshots = o.stateSnapshots;
+        utils = o.utils;
 
         _self = this;
         return this;
@@ -93,101 +90,84 @@ module.exports = {
      *
      * @param str
      * @param doNotLoadExisting
+     * @param doNotReset
      * @returns {Promise<any>}
      */
     init: function (str, doNotLoadExisting, doNotReset) {
-        var me = this,
-            schemataStr = urlparser.schema;
-
+        let me = this;
+        let schemataStr = urlparser.schema;
+        let schemataArr = []; // Temp ver
+        if (str) {
+            schemataArr = str.split(",");
+        }
+        if (schemataStr !== "") {
+            schemataArr = schemataStr.split(",").concat(schemataArr);
+        }
+        if (urlVars.sch) {
+            schemataArr = urlVars.sch.split(",").concat(schemataArr);
+        }
+        // Meta from the url and dynamic added meta will be added to config.schemata array so it will get refreshed
+        window.vidiConfig.schemata = utils.removeDuplicates(window.vidiConfig.schemata.concat(schemataArr));
+        schemataStr = window.vidiConfig.schemata.join(",");
         // Reset
         ready = false;
-
-        /*
-            Reset, otherwise it gets duplicated via addMetaData() - adding same meta
-            to the array which already contains this meta
-        */
+        // Reset, otherwise it gets duplicated via addMetaData() -
+        // adding same meta to the array which already contains this meta
         if (!doNotReset) {
-            window.metaData = {data: []};
+            metaData = {data: []};
         }
 
         return new Promise(function (resolve, reject) {
 
+            // Set load indicator
+            $('#layer-filter-container').css('pointer-events', 'none').css('opacity', 0.2);
+            $('.layer-loading-indicator').show();
+
             try {
 
-            /**
-             * Loads meta objects from the backend Meta API
-             * 
-             * @param {String} schemataStr Schemata string
-             * 
-             * @returns {void}
-             */
-            const loadMeta = (schemataStr) => {
-                $.ajax({
-                    url: '/api/meta/' + db + '/' + schemataStr,
-                    scriptCharset: "utf-8",
-                    success: function (response) {
-                        if (response.data && response.data.length > 0) {
-                            me.addMetaData(response);
-                            ready = true;
-                            resolve(schemataStr);
-                        } else {
-                            reject();
-                        }
-                    },
-                    error: function (response) {
-                        reject();
-                        alert(JSON.parse(response.responseText).message);
-                    }
-                });
+                /**
+                 * Loads meta objects from the backend Meta API
+                 *
+                 * @param {String} schemata Schemata string
+                 *
+                 * @returns {void}
+                 */
+                const loadMeta = (schemata) => {
+                    fetch('/api/meta/' + db + '/' + schemata).then(
+                        response => {
 
-            };
-
-            var schemata;
-            if (!doNotLoadExisting) {
-                if (`snapshot` in window.vidiConfig && window.vidiConfig.snapshot && window.vidiConfig.snapshot.indexOf(`state_snapshot_`) === 0) {
-                    stateSnapshots.getSnapshotByID(window.vidiConfig.snapshot).then(snapshot => {
-                        if (snapshot && snapshot.schema) {
-                            loadMeta(snapshot.schema);
-                        } else {
-                            console.warn(`Unable to get "schema" from snapshot, loading the fallback schemata "${str}"`);
-                            loadMeta(str);
+                            response.json().then(data => {
+                                if (!response.ok) {
+                                    reject(data.message);
+                                }
+                                $('#layer-filter-container').css('pointer-events', 'auto').css('opacity', 1.0);
+                                $('.layer-loading-indicator').hide();
+                                if (data.data) {
+                                    me.addMetaData(data);
+                                    ready = true;
+                                    resolve(schemata);
+                                } else {
+                                    reject("Couldn't load meta data");
+                                }
+                            })
                         }
-                    }).catch(error => {
-                        console.error(`Error occured when getting state snapshot ${window.vidiConfig.snapshot} instead of schemata`);
-                        console.error(error);
-                        loadMeta(str);
+                    ).catch((error) => {
+                        reject(error)
                     });
-                } else {
-                    if (str) {
-                        schemataStr = str;
-                    } else {
-                        schemataStr = (window.gc2Options.mergeSchemata === null ? "" : window.gc2Options.mergeSchemata.join(",") + ',') + (typeof urlVars.i === "undefined" ? "" : urlVars.i.split("#")[1] + ',') + schemataStr;
-                    }
+                };
 
-                    if (typeof window.vidiConfig.schemata === "object" && window.vidiConfig.schemata.length > 0) {
-                        if (schemataStr !== "") {
-                            schemata = schemataStr.split(",").concat(window.vidiConfig.schemata);
-                        } else {
-                            schemata = window.vidiConfig.schemata;
-                        }
-                        schemataStr = schemata.join(",")
-                    }
-
+                if (!doNotLoadExisting) {
                     if (!schemataStr) {
-                        reject(new Error('No schemata'));
+                        reject('No schemata');
                         return;
                     }
-
                     loadMeta(schemataStr);
+                } else {
+                    loadMeta(str);
                 }
-            } else {
-                loadMeta(str);
-            }
-
-            } catch(e) {
+            } catch (e) {
                 console.error(e);
             }
-
         });
     },
 
@@ -199,9 +179,9 @@ module.exports = {
         let parsedMeta = false;
         if (`meta` in data && data.meta) {
             try {
-                let localMeta = JSON.parse(data.meta);
-                parsedMeta = localMeta;
-            } catch(e) {}
+                parsedMeta = JSON.parse(data.meta);
+            } catch (e) {
+            }
         }
 
         return parsedMeta;
@@ -230,7 +210,7 @@ module.exports = {
             }
         });
 
-        for (var i = 0; i < data.data.length; i++) {
+        for (let i = 0; i < data.data.length; i++) {
             metaDataKeys[data.data[i].f_table_schema + "." + data.data[i].f_table_name] = data.data[i];
             metaDataKeysTitle[data.data[i].f_table_title] = data.data[i].f_table_title ? data.data[i] : null;
         }
@@ -266,9 +246,10 @@ module.exports = {
 
     /**
      * Returns meta object for the specified layer idenfitier
-     * 
+     *
      * @param {String} layerKey Layer identifier
-     * 
+     *
+     * @param throwException
      * @throws {Exception} If layer with provided key does not exist
      */
     getMetaByKey: (layerKey, throwException = true) => {
@@ -308,19 +289,61 @@ module.exports = {
     },
 
     /**
-     * Get a clone of the full meta data object
+     * Get a clone of the full metadata object
      * @returns {Object}
      */
-    getMetaData: function () {
-        return $.extend(true, {}, metaData);
+    getMetaData: function (filter = null) {
+        if (!metaDataCloneTimer) {
+            metaDataClone = $.extend(true, {}, metaData);
+            metaDataCloneTimer = setTimeout(function () {
+                metaDataCloneTimer = undefined;
+            }, 0);
+        }
+        let tmp = {};
+        if (filter) {
+            tmp.data = metaDataClone.data.filter((e) => {
+                if (e.f_table_title && e.f_table_title !== "") {
+                    if (e.f_table_title.toLowerCase().includes(filter.toLowerCase())) return true;
+                } else {
+                    if (e.f_table_name.toLowerCase().includes(filter.toLowerCase())) return true;
+                }
+            })
+        }
+        return tmp?.data ? tmp : metaDataClone;
     },
 
     /**
-     * Get a clone of meta data from latest loaded
+     * Get a clone of metadata from latest loaded
      * @returns {Object}
      */
     getMetaDataLatestLoaded: function () {
         return $.extend(true, {}, metaDataLatestLoaded);
+    },
+
+    getLayerNamesFromSchemata: function (schemata) {
+        return new Promise(function (resolve, reject) {
+            fetch('/api/meta/' + db + '/' + schemata).then(
+                response => {
+                    if (!response.ok) {
+                        throw new Error("Not 2xx response", {cause: response});
+                    }
+                    response.json().then(data => {
+                        if (data.data && data.data.length > 0) {
+                            const layerNames = data.data.map((l) => l.f_table_schema + '.' + l.f_table_name);
+                            resolve(layerNames);
+                        } else {
+                            reject();
+                        }
+                    })
+                }
+            ).catch((error) => {
+                reject(error)
+                console.error(error);
+            })
+        })
+    },
+    resetMetaDataCloneTimer: function () {
+        metaDataCloneTimer = undefined;
     }
 };
 

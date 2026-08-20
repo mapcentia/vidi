@@ -9,27 +9,38 @@ var fs = require('fs');
 module.exports = function (grunt) {
     "use strict";
 
-    // Detecting optional theme
-    let theme = false;
-    process.argv.forEach(val => {
-        if (val.indexOf(`--theme=`) !== -1) {
-            theme = val.replace(`--theme=`, ``);
-        }
-    });
-
-    // Default build parameters
-    let copyBootstrapVariablesCommand = 'cp ./config/_variables.less ./public/js/lib/bootstrap-material-design/less';
-    let lessConfig = {"public/css/styles.css": "public/less/styles.default.less"};
-    if (theme && theme === 'watsonc') {
-        copyBootstrapVariablesCommand = 'cp ./extensions/' + theme + '/config/_variables.less ./public/js/lib/bootstrap-material-design/less';
-        lessConfig = {"public/css/styles.css": "public/less/styles." + theme + ".less"};
-    }
+    const transform = [['babelify', {
+        presets: ["@babel/preset-env", "@babel/preset-react"],
+        plugins: ["@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread"]
+    }], ['babelify', {
+        presets: ["@babel/preset-env", "@babel/preset-react"],
+        plugins: ["@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread"],
+        global: true,
+        only: [/node_modules\/@x0k/, /node_modules\/fast-uri/, /node_modules\/@rjsf/]
+    }], 'require-globify', 'windowify', 'envify', ['browserify-css', {global: true}]];
+    const transform_sw = [['babelify', {
+        presets: ["@babel/preset-env", "@babel/preset-react"],
+        plugins: ["@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread", "@babel/plugin-proposal-optional-chaining"]
+    }], 'require-globify'];
+    const browserifyOptions = {
+        debug: true,
+        fullPaths: true
+    };
+    const files = {
+        'public/js/bundle.js': ['browser/index.js'],
+    };
+    const files_sw = {
+        'public/service-worker.bundle.js': ['browser/service-worker/index.js']
+    };
 
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
         env: {
             prod: {
                 NODE_ENV: 'production'
+            },
+            dev: {
+                NODE_ENV: 'development'
             }
         },
         version: {
@@ -40,60 +51,32 @@ module.exports = function (grunt) {
                 src: ['public/version.json']
             }
         },
-        less: {
-            publish: {
-                options: {
-                    compress: false,
-                    optimization: 2
-                },
-                files: [
-                    lessConfig,
-                    {
-                        expand: true,        // Enable dynamic expansion.
-                        cwd: 'extensions',  // Src matches are relative to this path.
-                        src: ['**/less/*.less',],     // Actual pattern(s) to match.
-                        dest: 'public/css/extensions',  // Destination path prefix.
-                        ext: '.css',         // Dest filepaths will have this extension.
-                    }
-                ]
-            }
-        },
         cssmin: {
             build: {
                 options: {
                     target: "./build",
-                    rebase: true
+                    rebase: true,
                 },
                 files: {
                     'public/css/build/all.min.css': [
-                        // Material Design fonts
-                        'public/fonts/fonts.css',
-                        'public/icons/material-icons.css',
-                        // jQuery UI
-                        'public/js/lib/jquery-ui/jquery-ui.min.css',
-                        // Font Awesome
-                        'public/css/font-awesome.min.css',
-                        'public/css/font-awesome.v520.solid.css',
-                        'public/css/font-awesome.v520.regular.css',
-                        'public/css/font-awesome.v520.css',
+                        // Bootstrap icons
+                        'node_modules/bootstrap-icons/font/bootstrap-icons.css',
                         // Leaflet
-                        'public/js/lib/leaflet/leaflet.css',
+                        'node_modules/leaflet/dist/leaflet.css',
                         'public/js/lib/leaflet-draw/leaflet.draw.css',
                         'public/js/lib/leaflet.locatecontrol/L.Control.Locate.css',
                         'public/js/lib/leaflet.toolbar/leaflet.toolbar.css',
                         'public/js/lib/leaflet-measure-path/leaflet-measure-path.css',
                         'public/js/lib/leaflet-history/leaflet-history.css',
                         'public/js/lib/leaflet-boxzoom/leaflet-boxzoom.css',
+                        'public/js/lib/Leaflet.extra-markers/css/leaflet.extra-markers.css',
                         'public/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.css',
+                        'public/js/lib/Leaflet.markercluster/MarkerCluster.css',
+                        'public/js/lib/Leaflet.markercluster/MarkerCluster.Default.css',
                         // Bootstrap
-                        'public/js/lib/bootstrap/dist/css/bootstrap.css',
-                        'public/js/lib/snackbarjs/snackbar.min.css',
-                        'public/js/lib/bootstrap-material-design/dist/css/ripples.css',
-                        'public/js/lib/bootstrap-material-datetimepicker/bootstrap-material-datetimepicker.css',
-                        'public/js/lib/bootstrap-select/bootstrap-select.css',
-                        'public/js/lib/bootstrap-table/bootstrap-table.css',
-                        'public/js/lib/bootstrap-material-design/dist/css/bootstrap-material-design.css',
-                        'public/js/lib/bootstrap-colorpicker/css/bootstrap-colorpicker.css',
+                        'node_modules/bootstrap-select/dist/css/bootstrap-select.css',
+                        'node_modules/bootstrap-table/dist/bootstrap-table.css',
+                        'scss/main.css',
                         //custom
                         'public/css/styles.min.css'
                     ]
@@ -106,7 +89,7 @@ module.exports = function (grunt) {
                 },
                 files: {
                     'public/css/styles.min.css': [
-                        'public/css/styles.css',
+                        'scss/main.css',
                         'public/css/extensions/**/less/*.css'
                     ]
                 }
@@ -163,72 +146,106 @@ module.exports = function (grunt) {
         },
         browserify: {
             publish: {
-                files: {
-                    'public/js/bundle.js': ['browser/index.js'],
-                },
+                files,
                 options: {
-                    browserifyOptions: {
-                        debug: false
-                    },
-                    transform: [['babelify', {
-                        presets: [['es2015'], ['react'], ['stage-0']],
-                        plugins: ["transform-object-rest-spread"]
-                    }], 'require-globify', 'windowify', 'envify']
+                    transform,
+                    alias: {
+                        react: 'react',
+                        'react-dom': 'react-dom',
+                        '@rjsf/core': './node_modules/@rjsf/core/dist/index.cjs',
+                        '@rjsf/react-bootstrap': './node_modules/@rjsf/react-bootstrap/lib/index.js',
+                        '@rjsf/validator-ajv8': './node_modules/@rjsf/validator-ajv8/dist/index.cjs',
+                        '@rjsf/utils': './node_modules/@rjsf/utils/dist/index.cjs',
+                        '@x0k/json-schema-merge/lib/array': './node_modules/@x0k/json-schema-merge/dist/lib/array.js',
+                        '@x0k/json-schema-merge/dist/lib/array.js': './node_modules/@x0k/json-schema-merge/dist/lib/array.js',
+                        '@x0k/json-schema-merge': './node_modules/@x0k/json-schema-merge/dist/index.js'
+                    }
+                }
+            },
+            debug: {
+                files,
+                options: {
+                    browserifyOptions,
+                    transform,
+                    alias: {
+                        react: 'react',
+                        'react-dom': 'react-dom',
+                        '@rjsf/core': './node_modules/@rjsf/core/dist/index.cjs',
+                        '@rjsf/react-bootstrap': './node_modules/@rjsf/react-bootstrap/lib/index.js',
+                        '@rjsf/validator-ajv8': './node_modules/@rjsf/validator-ajv8/dist/index.cjs',
+                        '@rjsf/utils': './node_modules/@rjsf/utils/dist/index.cjs',
+                        '@x0k/json-schema-merge/lib/array': './node_modules/@x0k/json-schema-merge/dist/lib/array.js',
+                        '@x0k/json-schema-merge/dist/lib/array.js': './node_modules/@x0k/json-schema-merge/dist/lib/array.js',
+                        '@x0k/json-schema-merge': './node_modules/@x0k/json-schema-merge/dist/index.js'
+                    }
                 }
             },
             publish_sw: {
-                files: {
-                    'public/service-worker.bundle.js': ['browser/service-worker/index.js']
-                },
+                files: files_sw,
                 options: {
                     alias: {
                         'urls-to-cache': './browser/service-worker/cache.production.js'
                     },
-                    transform: [['babelify', {
-                        presets: [['es2015'], ['react'], ['stage-0']],
-                        plugins: ["transform-object-rest-spread"]
-                    }], 'require-globify']
+                    transform: transform_sw
                 }
             },
             publish_sw_dev: {
-                files: {
-                    'public/service-worker.bundle.js': ['browser/service-worker/index.js']
-                },
+                files: files_sw,
                 options: {
                     alias: {
                         'urls-to-cache': './browser/service-worker/cache.development.js'
                     },
-                    transform: [['babelify', {
-                        presets: [['es2015'], ['react'], ['stage-0']],
-                        plugins: ["transform-object-rest-spread"]
-                    }], 'require-globify']
+                    transform: transform_sw
                 }
             },
             watch: {
-                files: {
-                    'public/js/bundle.js': ['browser/index.js']
-                },
+                files,
                 options: {
-                    transform: [['babelify', {
-                        presets: [['es2015'], ['react'], ['stage-0']],
-                        plugins: ["transform-object-rest-spread"]
-                    }], 'require-globify', 'windowify'],
+                    browserifyOptions,
+                    transform,
                     watch: true,
                     keepAlive: true,
-                    browserifyOptions: {
-                        debug: true
+                    alias: {
+                        react: 'react',
+                        'react-dom': 'react-dom',
+                        '@rjsf/core': './node_modules/@rjsf/core/dist/index.cjs',
+                        '@rjsf/react-bootstrap': './node_modules/@rjsf/react-bootstrap/lib/index.js',
+                        '@rjsf/validator-ajv8': './node_modules/@rjsf/validator-ajv8/dist/index.cjs',
+                        '@rjsf/utils': './node_modules/@rjsf/utils/dist/index.cjs',
+                        '@x0k/json-schema-merge/lib/array': './node_modules/@x0k/json-schema-merge/dist/lib/array.js',
+                        '@x0k/json-schema-merge/dist/lib/array.js': './node_modules/@x0k/json-schema-merge/dist/lib/array.js',
+                        '@x0k/json-schema-merge': './node_modules/@x0k/json-schema-merge/dist/index.js'
                     }
                 }
             }
         },
-        uglify: {
+        watch: {
+            reload: {
+                files: ['public/js/bundle.js', 'public/js/templates.js', 'public/css/build/all.min.css'],
+                options: {
+                    livereload: true,
+                },
+            },
+            hogan: {
+                files: [
+                    'public/templates/**/*.tmpl',
+                    'extensions/**/templates/*.tmpl'
+                ],
+                tasks: 'hogan'
+            },
+            css: {
+                files: ['scss/styles.scss'],
+                tasks: 'css'
+            }
+        },
+        terser: {
             publish: {
                 options: {
                     sourceMap: true,
-                    sourceMapIncludeSources: true,
+                    mangle: true,
                     compress: {
-                        dead_code: true,
-                        drop_debugger: true,
+                        dead_code: false,
+                        drop_debugger: false,
                         global_defs: {
                             "DEBUG": false
                         },
@@ -236,48 +253,55 @@ module.exports = function (grunt) {
                 },
                 files: {
                     'public/js/build/all.min.js': [
-                        'public/js/lib/leaflet/leaflet-src.js',
+                        'node_modules/leaflet/dist/leaflet-src.js',
+                        'node_modules/proj4/dist/proj4.js',
+                        'node_modules/proj4leaflet/src/proj4leaflet.js',
+                        'public/js/bundle.js',
+                    ],
+                    'public/js/build/libs.min.js': [
+                        'public/js/lib/localforage/localforage.js',
                         'public/js/lib/leaflet-history/leaflet-history.js',
                         'public/js/lib/leaflet-boxzoom/leaflet-boxzoom.js',
                         'public/js/lib/leaflet-draw/leaflet.draw.js',
                         'public/js/lib/leaflet.locatecontrol/L.Control.Locate.js',
-                        'public/js/lib/Leaflet.utfgrid/L.UTFGrid.js',
+                        'public/js/lib/Leaflet.utfgrid/L.NonTiledUTFGrid.js',
                         'public/js/lib/leaflet-plugins/Bing.js',
                         'public/js/lib/Leaflet.GridLayer.GoogleMutant/Leaflet.GoogleMutant.js',
-                        'public/js/lib/Leaflet.NonTiledLayer/NonTiledLayer.js',
-                        //'public/js/lib/leaflet-glify/glify.js',
                         'public/js/lib/leaflet-vector-grid/Leaflet.VectorGrid.bundled.min.js',
-                        'public/js/lib/localforage/localforage.js',
+                        'public/js/lib/Leaflet.markercluster/leaflet.markercluster.js',
+                        'public/js/lib/Leaflet.extra-markers/leaflet.extra-markers.js',
+                        'public/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.js',
+                        'public/js/lib/leaflet-simple-map-screenshoter/dist/leaflet-simple-map-screenshoter.js',
+                        'public/js/lib/leaflet.tilelayer.wmts/leaflet.tilelayer.wmts.src.js',
 
-                        'public/js/lib/jquery/jquery-3.4.1.min.js',
-                        'public/js/lib/jrespond/jRespond.js',
-                        'public/js/lib/mustache.js/mustache.js',
-                        'public/js/lib/underscore/underscore.js',
-                        'public/js/lib/backbone/backbone.js',
-                        'public/js/lib/proj4/proj4-combined.js',
-
-                        'public/js/lib/typeahead.js/typeahead.jquery.js',
-                        'public/js/lib/bootstrap-material-design/dist/js/ripples.js',
-                        'public/js/lib/bootstrap-material-design/dist/js/material.js',
-                        'public/js/lib/bootstrap-colorpicker/js/bootstrap-colorpicker.js',
-
-                        'public/js/bundle.js',
-                        'public/js/vidi.js',
-                    ],
-                    'public/js/build/all.async.min.js': [
                         'public/js/lib/jquery.canvasResize.js/jquery.canvasResize.js',
                         'public/js/lib/jquery.canvasResize.js/jquery.exif.js',
                         'public/js/lib/leaflet-snap/leaflet.snap.js',
                         'public/js/lib/leaflet-measure-path/leaflet-measure-path.js',
                         'public/js/lib/leaflet.editable/Leaflet.Editable.js',
-                        'public/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.js',
                         'public/js/lib/leaflet-geometryutil/leaflet.geometryutil.js',
                         'public/js/lib/Path.Drag.js/src/Path.Drag.js',
-                        'public/js/lib/leaflet-side-by-side/leaflet-side-by-side.min.js',
-                        'public/js/lib/jquery-ui/jquery-ui.min.js',
-                        'public/js/lib/jquery-ui-touch/jquery.ui.touch-punch.min.js',
-                        'public/js/lib/snackbarjs/snackbar.min.js',
-                        'public/js/lib/jsts/jsts.min.js',
+                        'public/js/lib/leaflet-side-by-side/leaflet-side-by-side.js',
+                        'public/js/lib/Leaflet.NonTiledLayer/NonTiledLayer.js',
+
+                        'node_modules/jquery-ui/dist/jquery-ui.js',
+                        'node_modules/jquery-ui-touch-punch-c/jquery.ui.touch-punch.js',
+                        'node_modules/handlebars/dist/handlebars.js',
+
+                        'public/js/lib/leaflet-dash-flow/L.Path.DashFlow.js',
+
+                        'public/js/lib/typeahead.js/typeahead.jquery.js',
+                        'node_modules/bootstrap/dist/js/bootstrap.bundle.js',
+
+                        'node_modules/leaflet.glify/dist/glify-browser.js',
+                        'node_modules/maplibre-gl/dist/maplibre-gl.js',
+                        'node_modules/@maplibre/maplibre-gl-leaflet/leaflet-maplibre-gl.js',
+                        'node_modules/bootstrap-table/dist/bootstrap-table.js',
+                        'node_modules/bootstrap-table/dist/bootstrap-table-locale-all.js',
+                        'node_modules/bootstrap-table/dist/extensions/export/bootstrap-table-export.js',
+
+                        'public/js/lib/tableExport.jquery.plugin/tableExport.js',
+
                     ]
                 }
             }
@@ -289,29 +313,23 @@ module.exports = function (grunt) {
                 }
             }
         },
-        gitpull: {
-            production: {
-                options: {}
-            }
-        },
-        gitreset: {
-            production: {
-                options: {
-                    mode: 'hard'
-                }
-            }
-        },
         shell: {
-            default: {
-                command: [
-                    copyBootstrapVariablesCommand,
-                    'grunt --gruntfile ./public/js/lib/bootstrap-material-design/Gruntfile.js dist-less'
-                ].join('&&')
+            buildDocs: {
+                command: '. ./venv/bin/activate && sphinx-build ./docs ./docs/_build/html/da'
+            },
+            gettext: {
+                command: '. ./venv/bin/activate && sphinx-build ./docs -b gettext ./docs/_build/gettext'
+            },
+            updateEn: {
+                command: '. ./venv/bin/activate && cd ./docs && sphinx-intl update -p _build/gettext -l en'
+            },
+            buildEn: {
+                command: '. ./venv/bin/activate && sphinx-build -b html -D language=en ./docs ./docs/_build/html/en'
             }
         },
         cacheBust: {
             options: {
-                assets: ['js/build/all.min.js', 'js/build/all.async.min.js', 'css/build/all.min.css', 'js/templates.js'],
+                assets: ['js/build/all.min.js', 'js/build/libs.min.js', 'css/build/all.min.css', 'js/templates.js'],
                 queryString: false,
                 baseDir: './public/',
                 jsonOutput: false,
@@ -325,28 +343,21 @@ module.exports = function (grunt) {
                 }]
             }
         },
-        bower: {
-            install: {
-                //just run 'grunt bower:install' and you'll see files from your Bower packages in lib directory
-                options: {
-                    targetDir: "./public/js/lib",
-                    copy: true,
-                    install: true,
-                    cleanTargetDir: false,
-                    verbose: true,
+        sass: {
+            dist: {                            // Target
+                options: {                       // Target options
+                    style: 'expanded'
+                },
+                files: {
+                    'scss/main.css': 'scss/main.scss'       // 'destination': 'source'
                 }
             }
         }
     });
 
     grunt.registerTask('prepareAssets', 'Updates assets if specific modules are enabled', function () {
-        if (theme && theme === 'watsonc') {
-            fs.createReadStream('./extensions/watsonc/public/index.html').pipe(fs.createWriteStream('./public/index.html'));
-            fs.createReadStream('./extensions/watsonc/public/favicon.ico').pipe(fs.createWriteStream('./public/favicon.ico'));
-        } else {
-            fs.createReadStream('./public/index.html.default').pipe(fs.createWriteStream('./public/index.html'));
-            fs.createReadStream('./public/favicon.ico.default').pipe(fs.createWriteStream('./public/favicon.ico'));
-        }
+        fs.createReadStream('./public/index.html.default').pipe(fs.createWriteStream('./public/index.html'));
+        fs.createReadStream('./public/favicon.ico.default').pipe(fs.createWriteStream('./public/favicon.ico'));
     });
 
     grunt.registerTask('appendBuildHashToVersion', 'Appends the build hash to the application version', function () {
@@ -370,22 +381,20 @@ module.exports = function (grunt) {
 
     grunt.loadNpmTasks('grunt-templates-hogan');
     grunt.loadNpmTasks('grunt-browserify');
-    grunt.loadNpmTasks('grunt-git');
     grunt.loadNpmTasks('grunt-shell');
-    grunt.loadNpmTasks('grunt-contrib-less');
-    grunt.loadNpmTasks('grunt-contrib-uglify-es');
+    grunt.loadNpmTasks('grunt-terser');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-processhtml');
     grunt.loadNpmTasks('grunt-cache-bust');
     grunt.loadNpmTasks('grunt-env');
     grunt.loadNpmTasks('grunt-contrib-handlebars');
     grunt.loadNpmTasks('grunt-contrib-watch');
-    grunt.loadNpmTasks('grunt-bower-task');
-    grunt.loadNpmTasks('grunt-watchify');
     grunt.loadNpmTasks('grunt-version');
+    grunt.loadNpmTasks('grunt-contrib-sass');
 
-    grunt.registerTask('default', ['prepareAssets', 'browserify:publish', 'browserify:publish_sw_dev', 'extension-css', 'shell', 'hogan', 'version']);
-    grunt.registerTask('production', ['env:prod', 'gitreset', 'hogan', 'prepareAssets', 'browserify:publish', 'browserify:publish_sw', 'extension-css', 'shell', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust', 'version', 'appendBuildHashToVersion']);
-    grunt.registerTask('production-test', ['env:prod', 'hogan', 'browserify:publish', 'browserify:publish_sw', 'extension-css', 'shell', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust', 'version', 'appendBuildHashToVersion']);
-    grunt.registerTask('extension-css', ['less', 'cssmin:extensions']);
+
+    grunt.registerTask('default', ['prepareAssets', 'browserify:publish', 'browserify:publish_sw_dev', 'css', 'hogan', 'version']);
+    grunt.registerTask('production', ['env:prod', 'hogan', 'prepareAssets', 'browserify:publish', 'browserify:publish_sw', 'css', 'terser', 'processhtml', 'cssmin:build', 'cacheBust', 'version', 'appendBuildHashToVersion']);
+    grunt.registerTask('production-test', ['env:prod', 'browserify:publish']);
+    grunt.registerTask('css', ['sass', 'cssmin']);
 };

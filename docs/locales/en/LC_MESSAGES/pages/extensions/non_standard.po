@@ -1,0 +1,95 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2023, MapCentia
+# This file is distributed under the same license as the Vidi package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Vidi 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-01-09 12:54+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.12.1\n"
+
+#: ../../pages/extensions/non_standard.rst:9 8079a7d5a24b463cb585739f60d83f9c
+msgid "Ikke-standard extensions"
+msgstr ""
+
+#: ../../pages/extensions/non_standard.rst:9 db034f9cf8b94187b0457de8daca3e9b
+msgid "Overview"
+msgstr ""
+
+#: ../../pages/extensions/non_standard.rst 9f01ead5eb7f454495f101ed3300d9f5
+msgid "Date"
+msgstr ""
+
+#: ../../pages/extensions/non_standard.rst:13 3d7b07fabbea4b9388f4b835012f9db1
+msgid "|today|"
+msgstr ""
+
+#: ../../pages/extensions/non_standard.rst e17af7319322488bb03749fd85b616f3
+msgid "Author"
+msgstr ""
+
+#: ../../pages/extensions/non_standard.rst:14 e028a84cde784c868fd138035fe6091f
+msgid "`mapcentia <https://github.com/mapcentia>`_"
+msgstr ""
+
+#: ../../pages/extensions/non_standard.rst:17 b53f109a33d444029479acecb2ad3733
+msgid "Indhold"
+msgstr ""
+
+#: ../../pages/extensions/non_standard.rst:21 720853734e644c6a820291b58a3ab8cb
+msgid "Introduktion"
+msgstr ""
+
+#: ../../pages/extensions/non_standard.rst:23 17dab0863aaf4fa2919c0cf26e3e19e6
+msgid ""
+"Herunder findes dokumentation på nogle af de extensions, som ikke følger "
+"med Vidi som standard. Skal en af disse anvendes kræves det, at den "
+"bliver installeret."
+msgstr ""
+
+#: ../../pages/extensions/non_standard.rst:27 e6fb93009cd8454085eec355bf4204f6
+msgid "Rejsetid (otp)"
+msgstr ""
+
+#: ../../pages/extensions/non_standard.rst:29 bc887977e4814b40b0c417f5ddf5b1be
+msgid ""
+"Rejsetid extensionen opsættes i en kørselskonfiguration (config) under "
+":ref:`configjs_extensionconfig`"
+msgstr ""
+
+#: ../../pages/extensions/non_standard.rst:31 c120972029da43518c860fda0c7688d8
+msgid ""
+"``routes`` er en liste med de grafer, som brugeren skal kunne vælge "
+"imellem i Vidi."
+msgstr ""
+
+#: ../../pages/extensions/non_standard.rst:33 f0c09769ad774194917d0a36cf4347ed
+msgid ""
+"``default`` angiver start-værdier for de forskellige indstillinger i "
+"Vidi. Alle behøves ikke udfyldes. Hvis der undlades indstillinger, bliver"
+" der anvendt værdier, som svarer til de nedenunser viste."
+msgstr ""
+
+#: ../../pages/extensions/non_standard.rst:35 f7bdab30a2494a28907940864a36ebd0
+msgid ""
+"``parameters`` angiver ekstra URL parametre, som skal sendes med til OTP "
+"serveren. Default bliver ingen parametre sat."
+msgstr ""
+
+#: ../../pages/extensions/non_standard.rst:37 f2aa4440fb9d438099f408627a2232f3
+msgid ""
+"``helpText`` angiver den tekst, som skal vises i modulets hjælpefunktion."
+" Default er en tom tekst."
+msgstr ""
+

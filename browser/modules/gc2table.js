@@ -1,0 +1,533 @@
+/*
+ * @author     Martin Høgh <mh@mapcentia.com>
+ * @copyright  2013-2025 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
+ */
+
+/*global $:false */
+/*global jQuery:false */
+/*global Backbone:false */
+/*global window:false */
+/*global console:false */
+/*global _:false */
+import {
+    SELECTED_STYLE
+} from './layerTree/constants';
+
+var Backbone = require('backbone');
+var debounce = require('lodash/debounce');
+const marked = require('marked');
+const mustache = require('mustache');
+var gc2table = (function () {
+    "use strict";
+    var isLoaded, object, init;
+    isLoaded = function () {
+        return true;
+    };
+    object = {};
+    init = function (conf) {
+        var defaults = {
+                el: "#table",
+                autoUpdate: false,
+                height: 300,
+                tableBodyHeight: null,
+                setSelectedStyle: true,
+                openPopUp: false,
+                onPopupClose: false,
+                onPopupCloseButtonClick: false,
+                setViewOnSelect: true,
+                responsive: true,
+                autoPan: false,
+                setZoom: false,
+                locale: 'en-US',
+                callCustomOnload: true,
+                ns: "",
+                template: null,
+                usingCarto: false,
+                pkey: "gid",
+                checkBox: false,
+                assignFeatureEventListenersOnDataLoad: true,
+                onSelect: function () {
+                },
+                onMouseOver: function () {
+                },
+                styleSelected: {
+                    fillOpacity: 0.5,
+                    opacity: 0.5,
+                    fillColor: 'red'
+                },
+                renderInfoIn: null,
+                key: null,
+                caller: null,
+                maxZoom: 17
+            }, prop,
+            uid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        if (conf) {
+            for (prop in conf) {
+                defaults[prop] = conf[prop];
+            }
+        }
+        var data,
+            m = defaults.geocloud2,
+            store = defaults.store,
+            cm = defaults.cm,
+            autoUpdate = defaults.autoUpdate,
+            height = defaults.height,
+            tableBodyHeight = defaults.tableBodyHeight,
+            assignFeatureEventListenersOnDataLoad = defaults.assignFeatureEventListenersOnDataLoad,
+            styleSelected = defaults.styleSelected,
+            el = defaults.el, click, loadDataInTable, getUncheckedIds, moveEndOff, moveEndOn,
+            setSelectedStyle = defaults.setSelectedStyle,
+            setViewOnSelect = defaults.setViewOnSelect,
+            onSelect = defaults.onSelect,
+            onMouseOver = defaults.onMouseOver,
+            openPopUp = defaults.openPopUp,
+            onPopupClose = defaults.onPopupClose,
+            onPopupCloseButtonClick = defaults.onPopupCloseButtonClick,
+            autoPan = defaults.autoPan,
+            setZoom = defaults.setZoom,
+            responsive = defaults.responsive,
+            callCustomOnload = defaults.callCustomOnload,
+            locale = defaults.locale,
+            ns = defaults.ns,
+            template = defaults.template,
+            pkey = defaults.pkey,
+            checkBox = defaults.checkBox,
+            renderInfoIn = defaults.renderInfoIn,
+            key = defaults.key,
+            caller = defaults.caller,
+            maxZoom = parseInt(defaults.maxZoom) || 17;
+
+        var customOnLoad = false, destroy, assignEventListeners, clickedFlag = false;
+
+        $(el).parent("div").addClass("gc2map");
+
+        var originalLayers, filters, filterControls, uncheckedIds = [];
+
+        let extend = require('lodash/extend');
+        extend(object, Backbone.Events);
+
+        /**
+         * Clearing existing feature selection
+         */
+        var clearSelection = function () {
+            $(el + ' tr').removeClass("selected");
+            $.each(store.layer._layers, function (i, v) {
+                let databaseIdentifier = getDatabaseIdForLayerId(v._leaflet_id);
+                if (uncheckedIds.indexOf(databaseIdentifier) === -1) {
+                    try {
+                        v.closePopup();
+                        if (store.layer && store.layer.resetStyle) {
+                            store.layer.resetStyle(v);
+                        }
+                    } catch (e) {
+                        console.log(e);
+                    }
+                }
+            });
+        };
+
+        object.on("clearSelection_" + uid, function () {
+            clearSelection();
+        });
+
+        object.on("selected" + "_" + uid, function (id) {
+            const layer = m.map._layers[id];
+            clearSelection();
+            if (id === undefined) return;
+            let row = $('*[data-uniqueid="' + id + '"]');
+            row.addClass("selected");
+            try {
+                if (setSelectedStyle) {
+                    layer.setStyle(selectedStyle);
+                }
+            } catch (e) {
+                console.warn("Can't set style on marker")
+            }
+
+            try {
+                onSelect(id, layer, key, store);
+            } catch (e) {
+                console.info("Error in select function for: " + store.id, e.message);
+            }
+
+            if (openPopUp) {
+                let str = "<table>", renderedText;
+                layer.feature.properties._vidi_edit_layer_id = layer._leaflet_id;
+                layer.feature.properties._vidi_edit_layer_name = key;
+                layer.feature.properties._vidi_edit_vector = false;
+                $.each(cm, function (i, v) {
+                    if (typeof v.showInPopup === "undefined" || (typeof v.showInPopup === "boolean" && v.showInPopup === true)) {
+                        str = str + "<tr><td>" + v.header + "</td><td>" + layer.feature.properties[v.dataIndex] + "</td></tr>";
+                    }
+                });
+                str = str + "</table>";
+
+                if (template) {
+                    renderedText = Handlebars.compile(template)(layer.feature.properties);
+                }
+                if (!renderInfoIn) {
+                    layer.bindPopup(renderedText || str, {
+                        className: "custom-popup gc2table-custom-popup",
+                        autoPan: autoPan,
+                        closeButton: true,
+                        minWidth: 300,
+                    }).openPopup();
+                } else {
+                    $(renderInfoIn).html(renderedText);
+                }
+
+                layer.on('popupclose', function (e) {
+                    // Removing the selectedStyle from feature
+                    let databaseIdentifier = getDatabaseIdForLayerId(id);
+                    if (uncheckedIds.indexOf(databaseIdentifier) > -1) {
+                        store.layer._layers[id].setStyle(uncheckedStyle);
+                    } else {
+                        store.layer.resetStyle(store.layer._layers[id]);
+                    }
+                    if (onPopupClose) {
+                        onPopupClose(id);
+                    }
+                });
+
+                object.trigger("openpopup" + "_" + uid, layer);
+            }
+        });
+
+        click = function (e) {
+            if (uncheckedIds.indexOf(e.target._leaflet_id) === -1) {
+                var row = $('*[data-uniqueid="' + e.target._leaflet_id + '"]');
+                try {
+                    $(ns + " .fixed-table-body").animate({
+                        scrollTop: $(ns + " .fixed-table-body").scrollTop() + (row.offset().top - $(ns + " .fixed-table-body").offset().top)
+                    }, 300);
+                } catch (e) {
+                }
+                object.trigger("selected" + "_" + uid, e.target._leaflet_id, m);
+            }
+        };
+        click.byGC2Table = true;
+
+        $(el).append("<thead><tr></tr></thead>");
+
+        if (checkBox) {
+            $(el + ' thead tr').append("<th data-field='" + pkey + "' data-checkbox='true'></th>");
+        }
+
+        $.each(cm, function (i, v) {
+            $(el + ' thead tr').append("<th data-filter-control=" + (v.filterControl || "false") + " data-field='" + v.dataIndex + "' data-sortable='" + (v.sortable || "false") + "' data-editable='false' data-formatter='" + (v.formatter || "") + "' data-events='" + (v.events || "") + "'>" + v.header + "</th>");
+        });
+        var filterMap =
+            debounce(function () {
+                let visibleRows = [];
+                $.each(store.layer._layers, function (i, v) {
+                    m.map.removeLayer(v);
+                });
+                $.each(originalLayers, function (i, v) {
+                    m.map.addLayer(v);
+                });
+                filters = {};
+                filterControls = {};
+                $.each(cm, function (i, v) {
+                    if (v.filterControl) {
+                        filters[v.dataIndex] = $(".bootstrap-table-filter-control-" + v.dataIndex).val();
+                        filterControls[v.dataIndex] = v.filterControl;
+                    }
+                });
+                $.each($(el + " tbody").children(), function (x, y) {
+                    visibleRows.push($(y).attr("data-uniqueid"));
+                });
+                $.each(store.layer._layers, function (i, v) {
+                    if (visibleRows.indexOf(v._leaflet_id + "") === -1) {
+                        m.map.removeLayer(v);
+                    }
+                });
+                bindEvent();
+            }, 500);
+
+        var getDatabaseIdForLayerId = function (layerId) {
+            if (!store.geoJSON) return false;
+
+            var databaseIdentifier = false;
+            store.geoJSON.features.map(item => {
+                if (parseInt(item.properties._id) === parseInt(layerId)) {
+                    databaseIdentifier = item.properties[pkey];
+                    return false;
+                }
+            });
+
+            if (databaseIdentifier === false) {
+                console.error("Unable to find primary key value for layer with identifier " + layerId);
+            }
+
+            return databaseIdentifier;
+        };
+
+        var bindEvent = function (e) {
+            setTimeout(function () {
+                $(el + ' > tbody > tr').on("click", function (e) {
+                    var id = $(this).data('uniqueid');
+                    var databaseIdentifier = getDatabaseIdForLayerId(id);
+                    if (uncheckedIds.indexOf(databaseIdentifier) === -1 || checkBox === false) {
+                        clickedFlag = true;
+                        object.trigger("selected" + "_" + uid, id, m);
+                        var layer = m.map._layers[id];
+                        setTimeout(function () {
+                            if (setViewOnSelect) {
+                                try {
+                                    if (setZoom) {
+                                        m.map.fitBounds(layer.getBounds(), {maxZoom: maxZoom});
+                                    } else {
+                                        m.map.panTo(layer.getBounds().getCenter());
+                                    }
+                                } catch (e) {
+                                    if (setZoom) {
+                                        m.map.setView(layer.getLatLng(), maxZoom);
+                                    } else {
+                                        m.map.panTo(layer.getLatLng());
+                                    }
+                                }
+                            }
+                        }, 100);
+                    }
+                });
+
+                $(el + ' > tbody > tr').on("mouseover", function (e) {
+                    if ($(this).hasClass('no-records-found') === false) {
+                        var id = $(this).data('uniqueid');
+                        var layer = m.map._layers[id];
+                        var databaseIdentifier = getDatabaseIdForLayerId(id);
+                        if (uncheckedIds.indexOf(databaseIdentifier) === -1 && checkBox === true) {
+                            store.layer._layers[id].setStyle({
+                                opacity: 0.5,
+                                fillOpacity: 0.5
+                            });
+                            onMouseOver(id, layer);
+                        }
+                    }
+                });
+
+                $(el + ' > tbody > tr').on("mouseout", function (e) {
+                    if ($(this).hasClass('no-records-found') === false) {
+                        var id = $(this).data('uniqueid');
+                        var databaseIdentifier = getDatabaseIdForLayerId(id);
+                        if (uncheckedIds.indexOf(databaseIdentifier) === -1 && checkBox === true) {
+                            if (store.layer && store.layer.resetStyle) {
+                                if (!clickedFlag) {
+                                    store.layer.resetStyle(store.layer._layers[id]);
+                                } else {
+                                    clickedFlag = false;
+                                }
+                            }
+                        }
+                    }
+                });
+            }, 100);
+        };
+        var selectedStyle = SELECTED_STYLE;
+
+        var uncheckedStyle = {
+            fillOpacity: 0.0,
+            opacity: 0.0
+        };
+
+        $(el).bootstrapTable({
+            uniqueId: "_id",
+            height: height,
+            locale: locale,
+            onToggle: bindEvent,
+            onSort: bindEvent,
+            onColumnSwitch: bindEvent,
+            onSearch: filterMap
+        });
+
+        $(el).on('check-all.bs.table', function (e, m) {
+            m.map(function (checkedRowItem) {
+                if (store.layer && store.layer.resetStyle) {
+                    store.layer.resetStyle(store.layer._layers[checkedRowItem._id]);
+                }
+            });
+
+            uncheckedIds = [];
+        });
+
+        $(el).on('uncheck-all.bs.table', function (e, m) {
+            m.map(function (uncheckedRowItem) {
+                var databaseIdentifier = getDatabaseIdForLayerId(uncheckedRowItem._id);
+                uncheckedIds.push(parseInt(databaseIdentifier));
+
+                store.layer._layers[uncheckedRowItem._id].setStyle(uncheckedStyle);
+
+                store.layer._layers[uncheckedRowItem._id].closePopup()
+            });
+        });
+
+        $(el).on('check.bs.table uncheck.bs.table', function (e, m) {
+            var databaseIdentifier = getDatabaseIdForLayerId(m._id);
+            if (m[pkey] === false) {
+                uncheckedIds.push(parseInt(databaseIdentifier));
+
+                store.layer._layers[m._id].setStyle(uncheckedStyle);
+
+                store.layer._layers[m._id].closePopup()
+            } else {
+                uncheckedIds = uncheckedIds.filter(function (item) {
+                    return item !== parseInt(databaseIdentifier);
+                });
+
+                if (store.layer && store.layer.resetStyle) {
+                    store.layer.resetStyle(store.layer._layers[m._id]);
+                }
+            }
+        });
+
+        /**
+         * Destroys events and popups for vector layer features, as
+         * well as restoring the regular store onLoad() method.
+         *
+         * @returns {void}
+         */
+        destroy = function () {
+            $.each(store.layer._layers, function (i, v) {
+                v.off('click', click);
+                // Hack for removing irrelevant popups
+                v._events.click.map(function (item, index) {
+                    if ('name' in item.fn && item.fn.name === '_openPopup') {
+                        v._events.click.splice(index, 1);
+                    }
+                });
+            });
+            moveEndOff();
+
+            if (customOnLoad) {
+                store.onLoad = customOnLoad;
+            }
+
+            // Unbind event so no references are left to object
+            object.unbind("clearSelection_" + uid);
+            object.unbind("selected_" + uid);
+
+            $(el).bootstrapTable('removeAll')
+            $(el).bootstrapTable('destroy')
+            originalLayers = null;
+        };
+
+        assignEventListeners = function () {
+            $.each(store.layer._layers, function (i, v) {
+                v.on('click', click);
+            });
+        };
+
+        // Define a callback for when the SQL returns
+        customOnLoad = store.onLoad;
+        store.onLoad = function () {
+            loadDataInTable();
+        };
+
+        loadDataInTable = function (doNotCallCustomOnload = false, forceDataLoad = false) {
+            data = [];
+            $.each(store.layer._layers, function (i, v) {
+                v.feature.properties._id = i;
+                // Shallow copy: we only overwrite top-level keys with rendered HTML
+                // below; nested objects (including bytea payloads) are referenced.
+                let layerClone = {...v.feature.properties};
+                $.each(layerClone, function (n, m) {
+                    $.each(cm, function (j, k) {
+                        if (k.dataIndex === n && (k?.template && k?.template !== '') && (layerClone[n] && layerClone[n] !== '')) {
+                            const fieldTmpl = k.template;
+                            const fieldHtml = mustache.render(fieldTmpl, layerClone);
+                            layerClone[n] = fieldHtml;
+                        } else if (k.dataIndex === n && (k?.link === true || typeof k?.link === "string") && (layerClone[n] && layerClone[n] !== '')) {
+                            layerClone[n] = "<a style='text-decoration: underline' target='_blank' rel='noopener' href='" + layerClone[n] + "'>" + (typeof k.link === "string" ? k.link : "Link") + "</a>";
+                        } else if (k.dataIndex === n && (k?.content === 'image' && (layerClone[n] && layerClone[n] !== ''))) {
+                            const srcVal = layerClone[n];
+                            if (Array.isArray(srcVal)) {
+                                // bytea[]: avoid stringifying the array which would inline
+                                // every base64 entry into the HTML.
+                                layerClone[n] = `<span class="text-muted small">${srcVal.length} file(s)</span>`;
+                            } else {
+                                layerClone[n] = `<div style="cursor: pointer" onclick="window.open('${srcVal}')">
+                                        <img style='width:25px' src="${srcVal}"/>
+                                     </div>`;
+                            }
+                        }
+                    });
+                });
+                data.push(layerClone);
+
+                if (assignFeatureEventListenersOnDataLoad) {
+                    assignEventListeners();
+                }
+            });
+
+            // Shallow copy of the layers map; we only iterate values to re-add to
+            // the map after filtering — never mutate the Leaflet layers themselves.
+            originalLayers = {...store.layer._layers};
+
+            if ($(el).is(':visible') || forceDataLoad) {
+                $(el).bootstrapTable("load", data);
+            }
+
+            bindEvent();
+
+            if (callCustomOnload && !doNotCallCustomOnload) {
+                customOnLoad(store);
+            }
+
+            $(".fixed-table-body").css("overflow", "auto");
+            if (tableBodyHeight) {
+                if (!isNaN(tableBodyHeight)) {
+                    $(".fixed-table-body").css("max-height", tableBodyHeight + "px");
+                    $(".fixed-table-body").css("height", tableBodyHeight + "px");
+                } else {
+                    $(".fixed-table-body").css("max-height", tableBodyHeight);
+                    $(".fixed-table-body").css("height", tableBodyHeight);
+                }
+            }
+        };
+
+        getUncheckedIds = function () {
+            return uncheckedIds;
+        }
+
+        var moveEndEvent = function () {
+            store.reset();
+            store.load();
+        };
+
+        moveEndOff = function () {
+            m.map.off("moveend", moveEndEvent);
+        };
+
+        moveEndOn = function () {
+            m.on("moveend", moveEndEvent);
+        };
+
+        if (autoUpdate) {
+            m.on("moveend", moveEndEvent);
+        }
+
+        return {
+            loadDataInTable: loadDataInTable,
+            destroy: destroy,
+            assignEventListeners: assignEventListeners,
+            getUncheckedIds: getUncheckedIds,
+            object: object,
+            uid: uid,
+            store: store,
+            moveEndOff: moveEndOff,
+            moveEndOn: moveEndOn,
+            bootStrapTable: $(el).bootstrapTable
+        };
+    };
+    return {
+        init: init,
+        isLoaded: isLoaded
+    };
+}());
+
+// Expose gc2table on window (replaces windowify)
+if (typeof window !== "undefined") window.gc2table = gc2table;

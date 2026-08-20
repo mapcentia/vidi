@@ -12,7 +12,6 @@ let urlsToCache = [
     '/index.html',
     'https://netdna.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css',
     'https://netdna.bootstrapcdn.com/font-awesome/4.5.0/fonts/fontawesome-webfont.woff2?v=4.5.0',
-    'https://cdn.polyfill.io/v2/polyfill.min.js?features=Element.prototype.classList,WeakMap,MutationObserver,URL,Array.from',
     '/fonts/roboto-v18-latin-italic.ttf',
     '/fonts/roboto-v18-latin-regular.ttf',
     '/fonts/roboto-v18-latin-500.ttf',
@@ -37,11 +36,8 @@ let urlsToCache = [
     '/icons/MaterialIcons-Regular.ttf',
     '/icons/material-icons.css',
     '/js/templates.js',
-    '/js/leaflet-easybutton/easy-button.css',
     '/locale',
-    '/api/config/vidi.json',
-    `/js/build/all.min.js`,
-    `/css/build/all.min.css`
+    '/api/config/vidi.json'
 ];
 
 module.exports = urlsToCache;

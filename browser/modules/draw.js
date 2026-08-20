@@ -1,66 +1,34 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2021 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
 
 const MODULE_NAME = `draw`;
+import {GEOJSON_PRECISION} from './constants';
 
 const drawTools = require(`./drawTools`);
-
 const fileSaver = require(`file-saver`);
-
-/**
- * @type {*|exports|module.exports}
- */
-var cloud, utils, state, serializeLayers;
-
-/**
- *
- * @type {boolean}
- */
-var drawOn = false;
-
-/**
- *
- * @type {L.FeatureGroup}
- */
-var drawnItems = new L.FeatureGroup();
-
-/**
- * @type {*|exports|module.exports}
- */
-var drawControl;
-
-/**
- * @type {gc2table}
- */
-var table;
-
-/**
- *
- * @type {geocloud.get().sqlStore}
- */
-var store = new geocloud.sqlStore({
+const marked = require('marked').parse;
+let cloud, utils, state, serializeLayers;
+let drawOn = false;
+let drawnItems = new L.FeatureGroup();
+let drawControl;
+let table;
+const store = new geocloud.sqlStore({
     clickable: true
 });
-
-/**
- *
- * @type {Array}
- */
-var destructFunctions = [];
-
-/**
- * @type {*|exports|module.exports}
- */
-var backboneEvents;
-
-var editing = false;
-
+let destructFunctions = [];
+let backboneEvents;
+let editing = false;
 let _self = false;
+let conflictSearch;
+let selectedDrawing;
+let isStarted = false;
+const createId = () => (+new Date * (Math.random() + 1)).toString(36).substr(2, 5);
+const EMPTY_TOOLTIP = "-";
 
 module.exports = {
     set: function (o) {
@@ -88,11 +56,19 @@ module.exports = {
             _self.off();
         });
 
-        backboneEvents.get().on(`on:${MODULE_NAME}`, () => { _self.control(true); });
-        backboneEvents.get().on(`off:${MODULE_NAME}`, () => { _self.control(false); });
+        backboneEvents.get().on(`on:${MODULE_NAME}`, () => {
+            _self.control(true);
+        });
+        backboneEvents.get().on(`off:${MODULE_NAME}`, () => {
+            _self.control(false);
+        });
 
         state.listenTo(MODULE_NAME, _self);
         state.listen(MODULE_NAME, `update`);
+
+        state.getModuleState(MODULE_NAME).then(initialState => {
+            _self.applyState(initialState)
+        });
 
         $("#draw-line-extremity").on("change", function () {
             var b = $("#draw-line-extremity").val() === "none";
@@ -108,10 +84,7 @@ module.exports = {
 
         cloud.get().map.addLayer(drawnItems);
         store.layer = drawnItems;
-        $("#draw-colorpicker").colorpicker({
-            container: $("#draw-colorpicker")
-        });
-        $("#draw-table").append("<table class='table'></table>");
+        $("#draw-table").append("<table class='table table-sm'></table>");
         (function poll() {
             if (gc2table.isLoaded()) {
                 table = gc2table.init({
@@ -144,10 +117,54 @@ module.exports = {
                     openPopUp: false
                 });
 
+                $("#_draw_make_conflict_with_selected").on("click", () => {
+                    _self.makeConflictSearchWithSelected();
+                })
+                $("#_draw_make_conflict_with_all").on("click", () => {
+                    _self.makeConflictSearchWithAll();
+                })
+                table.object.on("selected_" + table.uid, (e) => {
+                    selectedDrawing = drawnItems._layers[e]._vidi_id;
+                })
             } else {
                 setTimeout(poll, 30);
             }
         }());
+    },
+
+    showConflictSearch: () => {
+        const e = document.querySelector('#main-tabs a[href="#conflict-content"]');
+        if (e) {
+            bootstrap.Tab.getInstance(e).show();
+            e.click();
+        } else {
+            console.warn(`Unable to locate #conflict-content`)
+        }
+
+    },
+    makeConflictSearchWithSelected: () => {
+        if (!selectedDrawing) {
+            alert("Vælg en tegning")
+            return;
+        }
+        state.resetState(['conflict']).then(() => {
+            _self.showConflictSearch();
+            setTimeout(() =>
+                conflictSearch.makeSearch("Fra tegning", null, selectedDrawing, true), 200
+            )
+        });
+    },
+
+    makeConflictSearchWithAll: () => {
+        if (store.layer.getLayers().length === 0) {
+            alert(__("No drawings in the map"));
+            return;
+        }
+        state.resetState(['conflict']).then(() => {
+            _self.showConflictSearch();
+            setTimeout(() =>
+                conflictSearch.makeSearch("Fra tegning", null, null, true), 200);
+        });
     },
 
     off: () => {
@@ -160,7 +177,6 @@ module.exports = {
         cloud.get().map.off('draw:deletestart');
         cloud.get().map.off('draw:deletestop');
         cloud.get().map.off('draw:deleted');
-        cloud.get().map.off('draw:created');
         cloud.get().map.off('draw:edited');
 
         // Call destruct functions
@@ -190,22 +206,18 @@ module.exports = {
                 draw: {
                     polygon: {
                         allowIntersection: true,
-                        shapeOptions: {
-                        },
+                        shapeOptions: {},
                         showArea: true
                     },
                     polyline: {
                         metric: true,
-                        shapeOptions: {
-                        }
+                        shapeOptions: {}
                     },
                     rectangle: {
-                        shapeOptions: {
-                        }
+                        shapeOptions: {}
                     },
                     circle: {
-                        shapeOptions: {
-                        }
+                        shapeOptions: {}
                     },
                     marker: true,
                     circlemarker: true
@@ -219,21 +231,28 @@ module.exports = {
 
             drawControl.setDrawingOptions({
                 polygon: {
+                    repeatMode: true,
                     icon: cloud.iconSmall
                 },
                 polyline: {
-                    icon: cloud.iconSmall
+                    repeatMode: true,
+                    icon: cloud.iconSmall,
                 },
                 rectangle: {
+                    repeatMode: true,
                     icon: cloud.iconSmall
                 },
                 circle: {
+                    repeatMode: true,
                     icon: cloud.iconSmall
+                },
+                marker: {
+                    repeatMode: true
                 }
             });
 
             cloud.get().map.addControl(drawControl);
-            $(".leaflet-draw-draw-circlemarker").append('<i class="fa fa-comment" aria-hidden="true"></i>').css("background-image", "none");
+            $(".leaflet-draw-draw-circlemarker").append('<i class="bi bi-chat-left-text" aria-hidden="true"></i>').css("background-image", "none");
 
             drawOn = true;
 
@@ -246,24 +265,38 @@ module.exports = {
             cloud.get().map.off('draw:deletestart');
             cloud.get().map.off('draw:deletestop');
             cloud.get().map.off('draw:deleted');
-            cloud.get().map.off('draw:created');
             cloud.get().map.off('draw:edited');
 
             // Bind events
-            cloud.get().map.on('draw:editstart', function (e) {
+            cloud.get().map.on('draw:editstart', function () {
+                drawnItems.eachLayer((l) => {
+                    if (l?._tooltip) {
+                        const id = createId();
+                        const html = `<textarea rows="2" class="form-control pe-auto" style="width: 150px" id="${id}">${l._vidi_marker_text}</textarea>`;
+                        l._tooltip.setContent(html)
+                        $(`#${id}`).on("keyup", (e) => {
+                            l._vidi_marker_text = e.target.value.trim().length ? e.target.value : EMPTY_TOOLTIP;
+                        })
+                    }
+                })
                 editing = true;
             });
 
-            cloud.get().map.on('draw:editstop', function (e) {
+            cloud.get().map.on('draw:editstop', function () {
+                drawnItems.eachLayer((l) => {
+                    if (l?._tooltip) {
+                        l._tooltip.setContent(marked(l._vidi_marker_text));
+                    }
+                })
                 editing = false;
                 backboneEvents.get().trigger(`${MODULE_NAME}:update`);
             });
 
-            cloud.get().map.on('draw:deletestart', function (e) {
+            cloud.get().map.on('draw:deletestart', function () {
                 editing = true;
             });
 
-            cloud.get().map.on('draw:deletestop', function (e) {
+            cloud.get().map.on('draw:deletestop', function () {
                 editing = false;
                 backboneEvents.get().trigger(`${MODULE_NAME}:update`);
             });
@@ -278,14 +311,11 @@ module.exports = {
 
                 if (type === 'circlemarker') {
                     drawLayer._vidi_marker = true;
-
-                    var text = prompt(__("Enter a text for the marker or cancel to add without text"), "");
-                    if (text !== null) {
-                        drawLayer.bindTooltip(text, {permanent: true}).on("click", () => {}).openTooltip();
-                        drawLayer._vidi_marker_text = text;
-                    } else {
-                        drawLayer._vidi_marker_text = null;
-                    }
+                    let text = prompt(__("Enter a text for the marker or cancel to add without text"), "");
+                    text = text.trim().length ? text : EMPTY_TOOLTIP
+                    drawLayer.bindTooltip(marked(text), {permanent: true, className: 'vidi-draw-tooltip'}).on("click", () => {
+                    }).openTooltip();
+                    drawLayer._vidi_marker_text = text;
                 }
 
                 drawnItems.addLayer(drawLayer);
@@ -301,7 +331,6 @@ module.exports = {
 
                 if (type === "polygon" || type === "rectangle") {
                     area = drawTools.getArea(drawLayer);
-                    //distance = getDistance(drawLayer);
                 }
                 if (type === 'polyline') {
                     distance = drawTools.getDistance(drawLayer);
@@ -313,6 +342,7 @@ module.exports = {
                 }
 
                 drawLayer._vidi_type = "draw";
+                drawLayer._vidi_id = createId();
 
                 drawLayer.feature = {
                     properties: {
@@ -325,7 +355,7 @@ module.exports = {
                 backboneEvents.get().trigger(`${MODULE_NAME}:update`);
                 table.loadDataInTable(false, true);
             });
-            cloud.get().map.on('draw:deleted', function (e) {
+            cloud.get().map.on('draw:deleted', function () {
                 backboneEvents.get().trigger(`${MODULE_NAME}:update`);
                 table.loadDataInTable(false, true);
             });
@@ -337,14 +367,12 @@ module.exports = {
                         v.feature.properties.distance = L.GeometryUtil.readableDistance(v._mRadius, true);
                         v.updateMeasurements();
 
-                    }
-                    else if (typeof v._icon !== "undefined") {
+                    } else if (typeof v._icon !== "undefined") {
                     } else if (v.feature.properties.distance !== null) {
                         v.feature.properties.distance = drawTools.getDistance(v);
                         v.updateMeasurements();
 
-                    }
-                    else if (v.feature.properties.area !== null) {
+                    } else if (v.feature.properties.area !== null) {
                         v.feature.properties.area = drawTools.getArea(v);
                         v.updateMeasurements();
 
@@ -355,13 +383,21 @@ module.exports = {
                 table.loadDataInTable(false, true);
             });
 
-            var po1 = $('.leaflet-draw-section:eq(0)').popover({content: __("Use these tools for creating markers, lines, areas, squares and circles."), placement: "left"});
+            var po1 = $('.leaflet-draw-section:eq(0)').popover({
+                content: __("Use these tools for creating markers, lines, areas, squares and circles."),
+                placement: "left",
+                customClass: "d-none d-lg-inline"
+            });
             po1.popover("show");
             setTimeout(function () {
                 po1.popover("hide");
             }, 2500);
 
-            var po2 = $('.leaflet-draw-section:eq(1)').popover({content: __("Use these tools for editing existing drawings."), placement: "left"});
+            var po2 = $('.leaflet-draw-section:eq(1)').popover({
+                content: __("Use these tools for editing existing drawings."),
+                placement: "left",
+                customClass: "d-none d-lg-inline"
+            });
             po2.popover("show");
             setTimeout(function () {
                 po2.popover("hide");
@@ -387,9 +423,13 @@ module.exports = {
      * Resets state to default value
      */
     resetState: () => {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             _self.control(false);
             _self.removeFeatures();
+            table.loadDataInTable(false, true);
+            setTimeout(() => {
+                backboneEvents.get().trigger(`${MODULE_NAME}:update`);
+            }, 0);
             resolve();
         });
     },
@@ -398,24 +438,29 @@ module.exports = {
      * Returns current module state
      */
     getState: () => {
-        let drawnItems = false;
-        if (_self.getDrawOn()) {
-            drawnItems = JSON.stringify(serializeLayers.serializeDrawnItems(true));
-        }
-
-        return { drawnItems };
+        let drawnItems = serializeLayers.serializeDrawnItems(true);
+        return {drawnItems};
     },
 
     /**
      * Applies externally provided state
      */
     applyState: (newState) => {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
+            store.reset();
             _self.control(false);
-            _self.removeFeatures();
-            if (newState.drawnItems && newState.drawnItems !== `false`) {
+            if (window.vidiConfig.statelessDraw && !isStarted) {
                 setTimeout(() => {
-                    _self.recreateDrawnings(JSON.parse(newState.drawnItems), false);
+                    _self.resetState();
+                    backboneEvents.get().trigger(`${MODULE_NAME}:update`);
+                    isStarted = true;
+                }, 0);
+                resolve();
+                return;
+            }
+            if (newState.drawnItems && newState.drawnItems.length > 0) {
+                setTimeout(() => {
+                    _self.recreateDrawnings(newState.drawnItems, false);
                     resolve();
                 }, 100);
             } else {
@@ -424,12 +469,11 @@ module.exports = {
         });
     },
 
-
     /**
      * Recreates drawnings on the map
-     * 
+     *
      * @param {Object} parr Features to draw
-     * 
+     * @param enableControl
      * @return {void}
      */
     recreateDrawnings: (parr, enableControl = true) => {
@@ -453,6 +497,7 @@ module.exports = {
 
                     // Adding vidi-specific properties
                     g._vidi_type = m._vidi_type;
+                    g._vidi_id = m._vidi_id;
 
                     l.addLayer(g);
                 }
@@ -465,6 +510,7 @@ module.exports = {
 
                     // Adding vidi-specific properties
                     g._vidi_type = m._vidi_type;
+                    g._vidi_id = m._vidi_id;
 
                     l.addLayer(g);
                 }
@@ -477,6 +523,7 @@ module.exports = {
 
                     // Adding vidi-specific properties
                     g._vidi_type = m._vidi_type;
+                    g._vidi_id = m._vidi_id;
 
                     l.addLayer(g);
                 }
@@ -489,12 +536,14 @@ module.exports = {
 
                     // Add label
                     if (m._vidi_marker_text) {
-                        g.bindTooltip(m._vidi_marker_text, {permanent: true}).on("click", () => {}).openTooltip();
+                        g.bindTooltip(marked(m._vidi_marker_text), {permanent: true, className: 'vidi-draw-tooltip'}).on("click", () => {
+                        }).openTooltip();
                     }
 
                     // Adding vidi-specific properties
                     g._vidi_marker = true;
                     g._vidi_type = m._vidi_type;
+                    g._vidi_id = m._vidi_id;
                     g._vidi_marker_text = m._vidi_marker_text;
 
                     l.addLayer(g);
@@ -515,6 +564,7 @@ module.exports = {
                     // Adding vidi-specific properties
                     g._vidi_marker = true;
                     g._vidi_type = m._vidi_type;
+                    g._vidi_id = m._vidi_id;
                     g._vidi_marker_text = null;
 
                     l.addLayer(g);
@@ -523,6 +573,7 @@ module.exports = {
 
                     // Add measure
                     if (m._vidi_measurementLayer) {
+                        m._vidi_measurementOptions.formatArea = utils.formatArea;
                         g.showMeasurements(m._vidi_measurementOptions);
                     }
 
@@ -542,7 +593,6 @@ module.exports = {
         }
 
         t.loadDataInTable(false, true);
-
         if (enableControl) {
             _self.control(true);
         }
@@ -554,10 +604,12 @@ module.exports = {
             return;
         }
 
-        var popup = L.popup();
+        var popup = L.popup({
+            className: "custom-popup"
+        });
 
         popup.setLatLng(event.latlng)
-            .setContent('<p style="width: 200px">' + __("Apply default style settings for this drawing?") + '</p><a href="javascript:void(0)" id="btn-draw-apply-style-cancel" class="btn btn-raised btn-default btn-xs">' + __("Cancel") + '</a><a href="javascript:void(0)" id="btn-draw-apply-style-ok" class="btn btn-raised btn-primary btn-xs">' + __("Ok") + '</a>')
+            .setContent('<p style="width: 200px">' + __("Apply default style settings for this drawing?") + '</p><button type="button" id="btn-draw-apply-style-ok" class="btn btn btn-outline-secondary btn-sm w-100">' + __("Ok") + '</button>')
             .openOn(cloud.get().map);
 
         $("#btn-draw-apply-style-ok").on("click", function () {
@@ -584,7 +636,7 @@ module.exports = {
                 formatArea: utils.formatArea
             });
         } else {
-            if (type !== 'marker' && type !== 'circlemarker' ) {
+            if (type !== 'marker' && type !== 'circlemarker') {
                 l.hideMeasurements();
             }
         }
@@ -596,6 +648,8 @@ module.exports = {
 
             l.setStyle({color: $("#draw-colorpicker-input").val()});
 
+            l.setStyle({fillColor: $("#draw-colorpicker-input").val()});
+
             l.setStyle({weight: $("#draw-line-weight").val()});
 
             l.setStyle({opacity: "1.0"});
@@ -603,19 +657,13 @@ module.exports = {
 
         if (type === 'polyline') {
 
-            window.lag = l.showExtremities($("#draw-line-extremity").val(), $("#draw-line-extremity-size").val(), $("#draw-line-extremity-where").val());
+            l.showExtremities($("#draw-line-extremity").val(), $("#draw-line-extremity-size").val(), $("#draw-line-extremity-where").val());
 
             l._extremities = {
                 pattern: $("#draw-line-extremity").val(),
                 size: $("#draw-line-extremity-size").val(),
                 where: $("#draw-line-extremity-where").val()
             };
-
-            console.log({
-                pattern: $("#draw-line-extremity").val(),
-                size: $("#draw-line-extremity-size").val(),
-                where: $("#draw-line-extremity-where").val()
-            });
         }
 
         if (type === 'circlemarker') {
@@ -640,12 +688,20 @@ module.exports = {
         return store.layer;
     },
 
+    getDrawItems: function () {
+        return drawnItems;
+    },
+
     /**
      *
      * @returns {gc2table}
      */
     getTable: function () {
         return table;
+    },
+
+    getStore: function () {
+        return store;
     },
 
     /**
@@ -666,12 +722,16 @@ module.exports = {
             "features": []
         };
         store.layer.eachLayer(function (layer) {
-            let feature = layer.toGeoJSON();
+            let feature = layer.toGeoJSON(GEOJSON_PRECISION);
             feature.type = "Feature"; // Is for some reason not set in Leaflet. QGIS needs this.
             geojson.features.push(feature);
         });
         let blob = new Blob([JSON.stringify(geojson)], {type: "text/plain;charset=utf-8"});
         fileSaver.saveAs(blob, "drawings.geojson");
+    },
+
+    setConflictSearch: function (o) {
+        conflictSearch = o;
     }
 };
 
@@ -777,22 +837,6 @@ module.exports = {
                 return this;
             }
 
-            var svg = this._map._pathRoot;
-
-            // Check if the defs node is already created
-            /* var defsNode;
-             if (L.DomUtil.hasClass(svg, 'defs')) {
-                 defsNode = svg.getElementById('defs');
-             } else {
-                 L.DomUtil.addClass(svg, 'defs');
-                 defsNode = L.Path.prototype._createElement('defs');
-                 defsNode.setAttribute('id', 'defs');
-                 var svgFirstChild = svg.childNodes[0];
-                 svg.insertBefore(defsNode, svgFirstChild);
-             }*/
-
-            //
-
             var svg = this._map._renderer._container;
 
             // Check if the defs node is already created
@@ -800,7 +844,7 @@ module.exports = {
             if (L.DomUtil.hasClass(svg, 'defs')) {
                 defsNode = svg.getElementById('defs');
 
-            } else{
+            } else {
                 L.DomUtil.addClass(svg, 'defs');
                 defsNode = L.SVG.create('defs');
                 defsNode.setAttribute('id', 'defs');
@@ -827,7 +871,7 @@ module.exports = {
             // Create the markers definition
             markersNode.setAttribute('id', id);
             for (var attr in symbol) {
-                if (attr != 'path') {
+                if (attr !== 'path') {
                     markersNode.setAttribute(attr, symbol[attr]);
                 } else {
                     markerPath.setAttribute('d', symbol[attr]);
@@ -885,6 +929,3 @@ module.exports = {
     });
 
 })();
-
-
-

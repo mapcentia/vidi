@@ -38,6 +38,12 @@ module.exports = {
         "From drawing": "Fra tegning",
         "From object in layer": "Fra objekt i lag",
         "Waiting to start": "Venter på at starte",
+        "Error or timeout on": "Fejl eller timeout på",
+        "Couldn't get the data. Trying again...": "Kunne ikke hente data. Prøver igen...",
+        "Sign in": "Log ind",
+        "Update": "Opdater",
+        "New version available": "Ny version er tilgængelig",
+        "Vidi takes a long time to load. Update to clear caches and refresh. Cancel to wait.": "Vidi tager lang tid om at starte. Opdater for at rydde cache og genstart. Afbryd for at vente.",
 
         // Drawing
         "Cancel drawing": " Afbryd tegning",
@@ -73,26 +79,39 @@ module.exports = {
         "Clear all": "Slet alle",
         "Clear all drawings.": "Slet alle tegninger.",
         "No drawings in the map": "Ingen tegninger i kortet",
+        "Click map to place circle marker": "Klik for at placere markør",
 
+        "polygon": "polygon",
+        "rectangle": "rektangel",
+        "polyline": "linje",
+        "circle": "cirkel",
+        "marker": "markør",
 
         // Report
         "Get as PDF": "Hent som PDF",
         "Conflicts": "Konflikter",
         "No Conflicts": "Ingen konflikter",
+        "Conflict with selected": "Konflikt med valgte",
+        "Conflict with all": "Konflikt med alle",
+        "Prints completed": "Antal print udført",
 
         "Print": "Print",
         "Search places": "Søg på steder",
         "Activate advanced query": "Aktivér avanceret forespørgsel",
-        "Help text overlays": "Slå  overlejringskort til og fra. Tændte kort bliver forspørgbare.",
-        "Help text baselayers": "Vælg baggrundskort. Det er muligt at sammenligne to baggrundskort. Her kan man vælge om de to baggrundskort skal vises ved siden af hinanden eller om de skal lægges ovenpå hinanden. Ved førstnævnte kan man \\'swipe\\' mellem de to kort og ved sidstnævnte kan man ændre det øverste korts gennemsigtighed.",
+        "Get result as MS Excel": "Hent resultat som MS Excel",
+        "Help text overlays": "Slå overlejringslag til og fra. Viste lag vil være spørgbare.",
+        "Help text baselayers": "Vælg baggrundskort. Det er muligt at sammenligne to baggrundskort. Her kan man vælge om de to baggrundskort skal vises ved siden af hinanden eller om de skal lægges ovenpå hinanden. Ved førstnævnte kan man \\'slide\\' mellem de to kort og ved sidstnævnte kan man ændre det øverste korts gennemsigtighed.",
         "Help text legend": "Signatur for tændte overlejringskort",
         "Help text draw": "Tegn dit eget kort. Brug markører, linjer, flader, firkanter og cirkler. Under \\'Standard stilart for tegninger\\' kan du sætte farve, linjetyper, pilehoveder mm. Alle nye tegninger får disse indstillinger. Klik på en allerede tegnet figur for at tilføje standardindstillingerne.",
         "Help text print": "Lav skaleret PDF kort. Juster den orange firkant i kortet for at sætte udsnittets omfang og skala.",
         "Activate drawing tools": "Aktivér tegneværktøjer",
         "Activate print tools": "Aktivér printværktøjer",
+        "Make": "Lav",
         "Make PDF": "Lav PDF",
+        "Make PNG": "Lav PNG",
         "Download": "Download",
         "Open PDF": "Åben PDF",
+        "Open": "Åben",
         "Open HTML page": "Åben HTML side",
         "Scale": "Skala",
         "Template": "Skabelon",
@@ -101,6 +120,9 @@ module.exports = {
         "Title": "Titel",
         "Comment": "Kommentar",
         "The comment will be placed on the PDF": "Kommentaren vil blive placeret på PDF'en",
+        "Sticky": "Husk indstillinger",
+        "Add new box": "Tilføj ny boks",
+        "Remove last box": "Fjern seneste boks",
 
         "Draw a line": "Tegn en linje",
         "Draw an area": "Tegn en flade",
@@ -158,11 +180,11 @@ module.exports = {
         "Total distance": "Totalmål",
         "Color": "Farve",
         "Enter a text for the marker or cancel to add without text": "Indtast en tekst til markøren eller annuller for at tilføje uden tekst",
-        "Cancel": "Cancel",
+        "Cancel": "Afbryd",
         "Ok": "Ok",
         "Apply default style settings for this drawing?": "Anvend standard stilindstillinger til denne tegning?",
 
-        "Not a valid scale. Must be over 200.": "Ikke en gyldig målestok. Den skal være over 200.",
+        "Not a valid scale. Must be over ": "Ikke en gyldig målestok. Den skal være over ",
 
         "Languages": "Sprog",
 
@@ -191,9 +213,10 @@ module.exports = {
         "Cancel feature changes": "Afvis ændringer",
         "This browser does not support Service Workers, some features may be unavailable": "Denne browser understøtter ikke Service Workers, nogle funktioner kan være utilgængelige.",
         "Match": "Match",
-        "of the following": "af følgende",
-        "any": "enhver",
-        "all": "alle",
+        "Match the following using operator": "Match følgende. Operator",
+        "any": "OR",
+        "all": "AND",
+        "not": "NOT",
         "Select": "Vælg",
         "Opacity": "Gennemsigtighed",
         "Filters": "Filtre",
@@ -210,13 +233,31 @@ module.exports = {
         "Refresh existing cache for layer": "Genindlæs eksisterende cache for lag",
         "Dynamic layer is cached only within the last requested bounding box": "Dynamiske lag er kun cached inden for det sidst ønskede udsnit",
         "Apply": "Anvend",
+        "Reset filter": "Nulstil",
+        "Filter editor": "Filter editor",
+        "Layer is visible": "Laget er synligt",
+        "Layer has error": "Laget har fejl",
+        "Parents": "Forældre",
+        "Children": "Børn",
+        "Back": "Tilbage",
+        "Fit bounds to filter": "Vis kortudsnit af valgte",
+        "Labels": "Labels",
+        "Show labels": "Vis labels",
+        "Filter": "Filter",
+        "New block": "Ny blok",
+        "Filter is required for showing data": "Filter skal anvendes før data vises",
+        "More tools": "Flere værktøjer",
+        "Change layer type": "Skift lagtype",
+        "Creating download file": "Skaber download fil",
+        "File was downloaded": "Fil blev downloaded",
 
         // Base layers
         "Side-by-side mode": "Dobbelt baggrundskort",
         "Display two layers at once": "Vis to baggrundskort på en gang",
-        "Side-by-side": "Swipe",
+        "Side-by-side": "Slider",
         "Overlap": "Overlap",
         "Display layers": "Vis baggrundskort som",
+        "The selected map has no content in the current map extent": "Det valgte kort har intet indhold i det aktuelle kortudsnit",
 
         // Map controls
         "Map controls": "Kort knapper",
@@ -224,15 +265,32 @@ module.exports = {
         "Default map extent": "Går tilbage til start udsnittet",
         "Previous extent": "Forrige udsnit",
         "Next extent": "Næste udsnit",
-        "Click here then draw a square on the map, to zoom in to an area": "Klik her og træk derefter et firkant på kortet for at zoome til et område område",
+        "Click here then draw a square on the map, to zoom in to an area": "Klik her og træk derefter en firkant på kortet for at zoome til et område",
+        "Create a screenshot of the map. The screenshot is downloaded as a PNG file": "Lav et screenshot af kortet. Screenshot'et bliver downloaded som en PNG fil",
+        "Screenshot is ready": "Screenshot er klar",
 
         // APIBridge
         "Not authorized to perform this action": "Ikke autoriseret til at udføre denne handling.",
 
-        //Editor
+        // Editor
         "Application is offline, tiles will not be updated. Proceed?": "App'en er offline og kortlaget vil ikke blive opdateret. Fortsæt?",
         "Are you sure you want to delete the feature?": "Er du sikker på, at du vil slette objektet?",
         "The page was loaded without service workers enabled, features editing is not available (the page was loaded via plain HTTP or browser does not support service workers)": "Siden blev indlæst uden Service Workers aktiveret. Redigering er ikke tilgængelig (siden blev indlæst via almindelig HTTP eller browseren understøtter ikke Service Workers. Brug evt. en moderne browser)",
+        "Editing of geometry is not possible when number of nodes exceed": "Ændring af geometri er ikke mulig, når antallet af knækpunkter overstiger",
+        "Submit": "Gem",
+        "Are you sure you want to cancel?": "Er du sikker på, at du vil afbryde?",
+        "Feature added": "Feature stedfæstet",
+        "You need to plot a point": "Du skal plotte et punkt",
+        "You need to plot at least two points": "Du skal plotte mindst to punkter",
+        "You need to plot at least three points": "Du skal plotte mindst tre punkter",
+        "Required": "Skal udfyldes",
+        "Add new feature to layer": "Tiføj nyt objekt til lag",
+
+        // Editor - ImageUploadWidget
+        "Drop file here, or click to select file to upload": "Slip fil her, eller klik for at vælge fil, der skal uploades",
+        "The file type can't be shown but you can download it": "Filtypen kan ikke vises, men du kan downloade den",
+        "Download the file": "Download filen",
+        "File is too big! Maximum size is": "Fil er for stor! Maksimum størrelse er",
 
         // OfflineMap
         "tiles failed to load": "fliser mangler at indlæse",
@@ -279,13 +337,19 @@ module.exports = {
         "Delete state snapshot": "Slet projekt",
         "Add local state snapshots to user's ones": "Overfør lokale projekter til bruger",
         "Add local state snapshot to user's ones": "Overfør lokal projekter til bruger",
-        "Copy token": "Kopier token",
-        "Copy Vidi link": "Kopier Vidi link",
-        "Copy PNG link": "Kopier PNG link",
-        "copy link": "Kopier link",
-        "copy token": "Kopier token",
+        "Copy token": "Token",
+        "Copy Vidi link": "Vidi link",
+        "Copy PNG link": "PNG link",
+        "copy link": "Link",
+        "copy token": "Token",
         "New title": "Ny titel",
         "StateSnapshots description": "Gem, genskab og del projekter. Et projekt indeholder kortets udstrækning, hvilket baggrundskort er tændt og hvilke lag er vist, hvilke filtre er aktive samt dine tegninger. Du kan dele et projekt ved at dele den viste URL. Hvis du ikke er logget ind, vil projekter blive knyttet den den browser du bruger. Ellers vil de blive gemt under dit bruger login. Det er muligt at overføre projekter fra browser til login",
+        "Copied": "Kopieret",
+        "There is no tags in the list": "Der er ingen tags i listen",
+        "Create tag": "Opret tag",
+        "The filter returned no results": "Filteret gav ingen resultater",
+        "All on": "Tænd alle",
+        "All off": "Sluk alle",
 
         //Measurements
         "Measure distance": "Mål afstand",
@@ -302,11 +366,11 @@ module.exports = {
         "No layers available": "Ingen synlige lag",
 
         //ConfigSwitcher
-        "Configuration is not published yet": "# Configuration is not published yet",
-        "Total configurations": "# Total configurations",
-        "No configurations to display": "# No configurations to display",
-        "Configurations source": "# Configurations source",
-        "Config switcher": "# Config switcher",
+        "Configurations": "Konfigurationer",
+        "Configuration is not published yet": "Konfigurationen er ikke offentlig endnu",
+        "Total configurations": "Antal konfigurationer",
+        "No configurations to display": "Ingen konfigurationer",
+        "Config switcher": "Config switcher",
         "Config switcher block description": "# Config switcher block description",
 
         //WatsonC
@@ -421,6 +485,19 @@ module.exports = {
         "Similarity": "Similarity",
         "Tsvector": "Tsvector",
         "No searchable fields on layer": "Ingen søgbare felter på laget",
-        "Method": "Metode"
+        "Method": "Metode",
+        "Find me": "Find mig",
+
+        "Symbols": "Symboler",
+        "Copy symbol": "Kopiere symbol",
+
+        // Sign in
+        "User name": "Brugernavn",
+        "Password": "Kodeord",
+        "Wrong user name or password": "Forkert brugernavn eller kodeord",
+        "Signed in as": "Logget ind som",
+        "Not signed in": "Ikke logget ind",
+        "Sign out": "Log ud"
+
     }
 };

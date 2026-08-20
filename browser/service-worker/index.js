@@ -1,8 +1,8 @@
 /*
- * @author     Alexander Shumilov
- * @copyright  2013-2018 MapCentia ApS
- * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
- */
+* @author     Alexander Shumilov
+* @copyright  2013-2018 MapCentia ApS
+* @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
+*/
 
 const CACHE_NAME = 'vidi-static-cache';
 const API_ROUTES_START = 'api';
@@ -10,16 +10,14 @@ const LOG = false;
 const LOG_FETCH_EVENTS = false;
 const LOG_OFFLINE_MODE_EVENTS = false;
 
+const CONFIG = require('../../config/config.js');
+
+
 /**
  * Browser detection
  */
 const {detect} = require('detect-browser');
 const browser = detect();
-
-/**
- * Parsing URLs
- */
-const uriJs = require('urijs');
 
 const localforage = require('localforage');
 
@@ -48,7 +46,8 @@ let ignoredExtensionsRegExps = [];
  */
 let forceIgnoredExtensionsCaching = false;
 
-let urlsToCache = require(`urls-to-cache`);
+const urlsToCache = require(`urls-to-cache`);
+import base64url from "../modules/base64url.js";
 
 const urlSubstitution = [{
     requested: 'https://netdna.bootstrapcdn.com/font-awesome/4.5.0/fonts/fontawesome-webfont.ttf?v=4.5.0',
@@ -76,7 +75,7 @@ const urlSubstitution = [{
     local: '/js/nr-1071.min.js'
 }, {
     regExp: true,
-    requested: '/[\\w]*/[\\w]*/[\\w]*/#',
+    requested: '^/app/',
     local: '/index.html'
 }, {
     regExp: true,
@@ -88,7 +87,7 @@ const urlSubstitution = [{
     local: '/js/lib/leaflet/images/marker-shadow.png'
 }];
 
-let extensionsIgnoredForCaching = ['JPEG', 'PNG', 'TIFF', 'BMP'];
+let extensionsIgnoredForCaching = ['JPEG', 'jpeg', 'jpg', 'PNG', 'TIFF', 'BMP'];
 
 let urlsIgnoredForCaching = [{
     regExp: true,
@@ -116,11 +115,36 @@ let urlsIgnoredForCaching = [{
     requested: 'google'
 }, {
     regExp: true,
-    requested: '/api/v1/'
+    requested: '/api/feature'
 }, {
     regExp: true,
-    requested: '/api/v2/'
+    requested: '/api/elasticsearch'
+}, {
+    regExp: true,
+    requested: '/wms/'
+}, {
+    regExp: true,
+    requested: '/api/v2/(?!configuration)'
+}, {
+    regExp: true,
+    requested: '/api/v1/decodeimg'
+}, {
+    regExp: true,
+    requested: '/mapcache/'
+}, {
+    regExp: true,
+    requested: '/api/df'
+}, {
+    regExp: true,
+    requested: 'socket\.io'
+}, {
+    regExp: true,
+    requested: "/oauth"
 }];
+
+if (typeof CONFIG.urlsIgnoredForCaching === "object") {
+    urlsIgnoredForCaching = urlsIgnoredForCaching.concat(CONFIG.urlsIgnoredForCaching);
+}
 
 /**
  * Broadcasting service messages to clients, mostly used for debugging and validation
@@ -170,7 +194,7 @@ class Keeper {
                             resolve();
                         } else {
                             let timeout = 300;
-                            console.warn(`Value was not really saved in localforage (${storedValue.created} vs ${initialCreated}), trying again in ${timeout} ms`, JSON.stringify(value));
+                            console.error(`Value was not really saved in localforage (${storedValue.created} vs ${initialCreated}), trying again in ${timeout} ms`, JSON.stringify(value));
                             setTimeout(() => {
                                 localforage.setItem(this._cacheKey, valueCopy).then(() => {
                                     // Checking if value was really saved second time
@@ -179,7 +203,7 @@ class Keeper {
                                             resolve();
                                         } else {
                                             console.error(`Still unable to save the value`);
-                                            reject();
+                                            resolve(); // We still resolve, because otherwise we ge a net:ERR_FAILED in browser
                                         }
                                     });
                                 });
@@ -188,11 +212,11 @@ class Keeper {
                     });
                 }).catch(error => {
                     console.error(`localforage failed to perform operation`, error);
-                    reject();
+                    resolve(); // We still resolve, because otherwise we ge a net:ERR_FAILED in browser
                 });
             }).catch(error => {
                 console.error(`localforage failed to perform operation`, error);
-                reject();
+                resolve(); // We still resolve, because otherwise we ge a net:ERR_FAILED in browser
             });
         });
     }
@@ -225,7 +249,7 @@ class Keeper {
             });
         });
     }
-};
+}
 
 /**
  * Key-value store for keeping extracted POST data for the specific URL
@@ -261,9 +285,9 @@ let cacheSettingsKeeper = new Keeper(`VIDI_CACHE_SETTINGS_KEY`, (key, value) => 
  */
 const normalizeTheURL = (URL) => {
     let cleanedRequestURL = URL;
-    if (URL.indexOf('_=') !== -1) {
+    // Use app URL without parameters
+    if (URL.includes('=') && URL.includes('/app/')) {
         cleanedRequestURL = URL.split("?")[0];
-
         if (LOG) console.log(`Service worker: URL was cleaned up: ${cleanedRequestURL} (${URL})`);
     }
 
@@ -271,19 +295,14 @@ const normalizeTheURL = (URL) => {
         if (item.regExp) {
             let re = new RegExp(item.requested);
             if (re.test(URL)) {
-
                 if (LOG) console.log(`Service worker: Requested the ${cleanedRequestURL} but fetching the ${item.local} (regular expression)`);
-
                 cleanedRequestURL = item.local;
             }
         } else if (item.requested.indexOf(cleanedRequestURL) === 0 || cleanedRequestURL.indexOf(item.requested) === 0) {
-
             if (LOG) console.log(`Service worker: Requested the ${cleanedRequestURL} but fetching the ${item.local} (normal string rule)`);
-
             cleanedRequestURL = item.local;
         }
     });
-
     return cleanedRequestURL;
 };
 
@@ -296,9 +315,9 @@ const normalizeTheURL = (URL) => {
  * @return {Promise}
  */
 const normalizeTheURLForFetch = (event) => {
-    let URL = event.request.url;
+    let _URL = event.request.url;
     let result = new Promise((resolve, reject) => {
-        let cleanedRequestURL = normalizeTheURL(URL);
+        let cleanedRequestURL = normalizeTheURL(_URL);
         if (event && event.request.url.indexOf('/api/sql') !== -1) {
             let clonedRequest = event.request.clone();
 
@@ -324,8 +343,7 @@ const normalizeTheURLForFetch = (event) => {
                             if (`q` in mappedObject && mappedObject.q) {
                                 if (method === `POST`) {
                                     let cleanedString = mappedObject.q.replace(/%3D/g, '');
-                                    decodedQuery = atob(cleanedString);
-                                    ;
+                                    decodedQuery = base64url.decode(cleanedString);
                                 } else if (method === `GET`) {
                                     decodedQuery = mappedObject.q;
                                 } else {
@@ -351,7 +369,7 @@ const normalizeTheURLForFetch = (event) => {
                                 record.cleanedRequestURL = cleanedRequestURL;
                                 record.bbox = false;
                                 if (decodedQuery.indexOf(`ST_Intersects`) !== -1 && decodedQuery.indexOf(`ST_Transform`) && decodedQuery.indexOf(`ST_MakeEnvelope`)) {
-                                    let bboxCoordinates = decodeURIComponent(decodedQuery.substring((decodedQuery.indexOf(`(`, decodedQuery.indexOf(`ST_MakeEnvelope`)) + 1), decodedQuery.indexOf(`)`, decodedQuery.indexOf(`ST_MakeEnvelope`)))).split(`,`).map(a => a.trim());
+                                    let bboxCoordinates = decodedQuery.substring((decodedQuery.indexOf(`(`, decodedQuery.indexOf(`ST_MakeEnvelope`)) + 1), decodedQuery.indexOf(`)`, decodedQuery.indexOf(`ST_MakeEnvelope`))).split(`,`).map(a => a.trim());
                                     if (bboxCoordinates.length === 5) {
                                         record.bbox = {
                                             north: parseFloat(bboxCoordinates[3]),
@@ -397,32 +415,27 @@ const normalizeTheURLForFetch = (event) => {
              */
             const processGETRequest = (clonedRequest) => {
                 let mappedObject = {};
-                let parsedQuery = new uriJs(clonedRequest.url);
-                let queryParameters = parsedQuery.search(true);
-                if (`q` in queryParameters && queryParameters.q) {
-                    mappedObject.q = queryParameters.q;
+                let url = new URL(clonedRequest.url)
+                let searchParams = new URLSearchParams(url.search);
+                let urlVars = {};
+                for (let p of searchParams) {
+                    urlVars[p[0]] = p[1];
                 }
-
+                console.log("GET in SW", urlVars);
+                if (`q` in urlVars && urlVars.q) {
+                    mappedObject.q = urlVars.q;
+                }
                 proceedWithRequestData(clonedRequest.method, mappedObject, cleanedRequestURL);
             };
 
             if (browser.name === 'edge') {
                 if (clonedRequest.method === `POST`) {
-                    clonedRequest.text().then(data => {
-                        let mappedObject = {};
-                        let splitDecodeData = data.split(`&`);
-                        if (splitDecodeData.length > 0) {
-                            splitDecodeData.map(item => {
-                                if (item.indexOf(`=`) !== -1) {
-                                    let splitParameter = item.split(`=`);
-                                    if (splitParameter.length === 2) {
-                                        mappedObject[splitParameter[0]] = splitParameter[1];
-                                    }
-                                }
-                            });
-                        }
+                    clonedRequest.json().then(json => {
+                        let mappedObject = json;
+                        let payload = JSON.stringify(json);
 
-                        cleanedRequestURL += '/' + btoa(data);
+                        cleanedRequestURL += '/' + btoa(payload);
+
                         proceedWithRequestData(clonedRequest.method, mappedObject, cleanedRequestURL);
 
                         return;
@@ -438,39 +451,18 @@ const normalizeTheURLForFetch = (event) => {
                 }
             } else if (browser.name === 'safari' || browser.name === 'ios') {
                 if (clonedRequest.method === `POST`) {
-                    let rawResult = ``;
-                    let data = false;
-                    let reader = clonedRequest.body.getReader();
-                    reader.read().then(function processText({done, value}) {
-                        if (done) {
-                            const DecodeUInt8arr = (uint8array) => {
-                                return new TextDecoder("utf-8").decode(uint8array);
-                            };
+                    clonedRequest.json().then(json => {
+                        let mappedObject = json;
+                        let payload = JSON.stringify(json);
 
-                            let mappedObject = {};
-                            let decodedData = DecodeUInt8arr(data);
-                            let splitDecodeData = decodedData.split(`&`);
-                            if (splitDecodeData.length > 0) {
-                                splitDecodeData.map(item => {
-                                    if (item.indexOf(`=`) !== -1) {
-                                        let splitParameter = item.split(`=`);
-                                        if (splitParameter.length === 2) {
-                                            mappedObject[splitParameter[0]] = splitParameter[1];
-                                        }
-                                    }
-                                });
-                            }
+                        cleanedRequestURL += '/' + btoa(payload);
 
-                            cleanedRequestURL += '/' + btoa(rawResult);
-                            proceedWithRequestData(clonedRequest.method, mappedObject, cleanedRequestURL);
+                        proceedWithRequestData(clonedRequest.method, mappedObject, cleanedRequestURL);
 
-                            return;
-                        }
-
-                        data = value;
-                        rawResult += value;
-
-                        return reader.read().then(processText);
+                        return;
+                    }).catch(error => {
+                        console.error(`Unable to read POST data`);
+                        reject();
                     });
                 } else if (clonedRequest.method === `GET`) {
                     processGETRequest(clonedRequest);
@@ -480,23 +472,15 @@ const normalizeTheURLForFetch = (event) => {
                 }
             } else {
                 if (clonedRequest.method === `POST`) {
-                    clonedRequest.formData().then(formdata => {
-                        let mappedObject = {};
-                        let payload = '';
-                        for (var p of formdata) {
-                            let splitParameter = p.toString().split(',');
-                            if (splitParameter.length === 2) {
-                                mappedObject[splitParameter[0]] = splitParameter[1];
-                            }
-
-                            payload += p.toString();
-                        }
+                    clonedRequest.json().then(json => {
+                        let mappedObject = json;
+                        let payload = JSON.stringify(json);
 
                         cleanedRequestURL += '/' + btoa(payload);
 
                         proceedWithRequestData(clonedRequest.method, mappedObject, cleanedRequestURL);
                     }).catch(() => {
-                        console.error(`Unable to get the formData() for request`);
+                        console.error(`Unable to get the JSON for request`);
                         reject();
                     });
                 } else if (clonedRequest.method === `GET`) {
@@ -521,7 +505,7 @@ self.addEventListener('install', event => {
     if (LOG) console.log('Service worker: is being installed, caching specified resources');
 
     extensionsIgnoredForCaching.map(item => {
-        let localRegExp = new RegExp(`.${item}[\?]?`, 'i');
+        let localRegExp = new RegExp(`${item}[\?]?`, 'i');
         ignoredExtensionsRegExps.push(localRegExp);
     });
 
@@ -576,7 +560,13 @@ self.addEventListener('activate', event => {
  * "message" event handler
  */
 self.addEventListener('message', (event) => {
-    if (`force` in event.data) {
+    if (event.data === "claimMe") {
+        if (LOG) console.log('Service worker: clients claimed after a hard refresh');
+        caches.delete("vidi-static-cache").then(() => {
+            self.clients.claim();
+            console.log('Service worker: vidi-static-cache deleted');
+        });
+    } else if (`force` in event.data) {
         if (event.data && event.data.force) {
 
             if (LOG) console.log('Service worker: forcing caching of files with ignored extensions');
@@ -962,7 +952,7 @@ self.addEventListener('fetch', (event) => {
 
     if (requestShouldBeBypassed) {
         if (LOG_FETCH_EVENTS) console.log(`Service worker: bypassing the ${event.request.url} request`);
-        return fetch(event.request);
+        //return fetch(event.request);
     } else {
         if (LOG_FETCH_EVENTS) console.log(`Service worker: not bypassing the ${event.request.url} request`);
 
@@ -992,7 +982,7 @@ self.addEventListener('fetch', (event) => {
                     if (apiCallDetectionRegExp.test(cleanedRequestURL)) {
                         return queryAPI(cleanedRequestURL, event, response);
                     } else {
-                        // Checking if the request is eligible for caching 
+                        // Checking if the request is eligible for caching
                         let requestHasToBeCached = true;
                         if (forceIgnoredExtensionsCaching === false) {
                             ignoredExtensionsRegExps.map(item => {

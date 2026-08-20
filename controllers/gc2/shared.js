@@ -5,12 +5,12 @@ const throwError = (response, error, data) => {
     if (data) console.error(`Error details: ${JSON.stringify(data)}`);
 
     response.status(400);
-    response.json({ error });
+    response.json({error});
 };
 
 /**
  * Return identifiers of the currently authenticated user
- * 
+ *
  * @returns {Object}
  */
 const getCurrentUserIdentifiers = (request) => {
@@ -20,11 +20,11 @@ const getCurrentUserIdentifiers = (request) => {
     }
 
     let userId = false;
-    if (`gc2UserName` in request.session && request.session.gc2UserName) {
+    if (request?.session?.gc2UserName) {
         userId = request.session.gc2UserName;
     }
 
-    return { browserId, userId };
+    return {browserId, userId};
 };
 
 module.exports = {

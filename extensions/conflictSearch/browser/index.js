@@ -6,6 +6,8 @@
 
 'use strict';
 
+import {GEOJSON_PRECISION} from "../../../browser/modules/constants";
+
 /**
  *
  * @type {*|exports|module.exports}
@@ -36,6 +38,8 @@ var search;
  */
 var backboneEvents;
 
+var serializeLayers;
+
 /**
  *
  * @type {*|exports|module.exports}
@@ -43,20 +47,9 @@ var backboneEvents;
 var urlparser = require('./../../../browser/modules/urlparser');
 
 /**
- *
- * @type {*|exports|module.exports}
- */
-var reproject = require('reproject');
-
-/**
  * @type {string}
  */
 var db = urlparser.db;
-
-/**
- * @type {*|exports|module.exports}
- */
-var noUiSlider = require('nouislider');
 
 /**
  * @type {*|exports|module.exports}
@@ -67,13 +60,14 @@ var io = require('socket.io-client');
  *
  * @type {Element}
  */
-var bufferSlider;
+var sliderEl;
 
 /**
  *
  * @type {Element}
  */
 var bufferValue;
+var currentBufferValue;
 
 /**
  * @type {*|exports|module.exports}
@@ -117,12 +111,6 @@ var config = require('../../../config/config.js');
 
 /**
  *
- * @type {string}
- */
-var BACKEND = config.backend;
-
-/**
- *
  */
 var dataStore;
 
@@ -153,19 +141,24 @@ var searchStr = "";
 
 var searchLoadedLayers = true;
 
-/**
- *
- */
-var Terraformer = require('terraformer-wkt-parser');
+var debounce = require('lodash/debounce');
 
-var _result;
+var _result = {};
+
+import {buffer as turfBuffer, dissolve as turDissolve, multiPolygon as turfMultiPolygon} from '@turf/turf'
+
+const wicket = require('wicket');
+const TOAST_ID = "conflict-toast";
+
+let isCurrentFromDrawing = false;
+let currentFromDrawingId = null;
 
 /**
  *
  * @private
  */
-var _clearDrawItems = function () {
-    drawnItems.clearLayers();
+var _clearDrawItems = function (clearOnlyBuffer = false) {
+    if (!clearOnlyBuffer) drawnItems.clearLayers();
     bufferItems.clearLayers();
 };
 
@@ -235,6 +228,52 @@ var _zoomToFeature = function (table, key, fid) {
     dataStore.load();
 };
 
+const tableToText = (el) => {
+    let html = el.outerHTML;
+    html = html
+        .replaceAll('\n', '<br style="mso-data-placement:same-cell;"/>')  // new lines inside html cells => Alt+Enter in Excel
+        .replaceAll('<td', '<td style="vertical-align: top;"');  // align top
+    el.classList.add("table-copy");
+    setTimeout(() => el.classList.remove("table-copy"), 1000);
+    return html;
+}
+
+
+const copyTableToClipboard = (id) => {
+    let el = document.querySelector(`#extra-table-${id}`);
+    const text = tableToText(el);
+    navigator.clipboard.writeText(text).then(
+        () => {},
+        (e) => console.log("error", e),
+    );
+}
+
+const copyAllTablesToClipboard = () => {
+    let text = '';
+    document.querySelectorAll(".extra-table").forEach(el => {
+        text = text + tableToText(el);
+    })
+    navigator.clipboard.writeText(text).then(
+        () => {},
+        (e) => console.log("error", e),
+    );
+}
+
+var hitsTable;
+var hitsData;
+var noHitsTable;
+var errorTable;
+var extraTable;
+var visibleLayers;
+var projWktWithBuffer;
+/**
+ * Draw module
+ */
+var draw;
+
+let getPlaceStore;
+let fromVarsIsDone = false;
+
 /**
  *
  * @type set: module.exports.set, init: module.exports.init
@@ -249,9 +288,11 @@ module.exports = module.exports = {
     set: function (o) {
         cloud = o.cloud.get();
         utils = o.utils;
+        draw = o.draw;
         meta = o.meta;
         backboneEvents = o.backboneEvents;
         socketId = o.socketId;
+        serializeLayers = o.serializeLayers;
         print = o.print;
 
         // Hack to compile Glob files. Don´t call this function!
@@ -268,83 +309,86 @@ module.exports = module.exports = {
      * Initiates the module
      */
     init: function () {
-        var metaData, me = this, startBuffer, getProperty;
+        var metaData, me = this, startBuffer, getProperty, searchTxt;
 
-        try {
-            startBuffer = config.extensionConfig.conflictSearch.startBuffer;
-        } catch (e) {
-            startBuffer = 40;
-        }
+        // Set Defaults
+        startBuffer = config.extensionConfig?.conflictSearch?.startBuffer ?? 0;
+        getProperty = config.extensionConfig?.conflictSearch?.getProperty ?? false;
+        searchStr = config.extensionConfig?.conflictSearch?.searchString ?? "";
+        searchLoadedLayers = config.extensionConfig?.conflictSearch?.searchLoadedLayers ?? true;
 
-        try {
-            getProperty = config.extensionConfig.conflictSearch.getProperty;
-        } catch (e) {
-            getProperty = false;
-        }
-
-        try {
-            searchStr = config.extensionConfig.conflictSearch.searchString;
-            if (searchStr === undefined) {
-                searchStr = "";
-            }
-        } catch (e) {
-            searchStr = "";
-        }
-
-        try {
-            searchLoadedLayers = config.extensionConfig.conflictSearch.searchLoadedLayers;
-            if (searchLoadedLayers === undefined) {
-                searchLoadedLayers = true;
-            }
-        } catch (e) {
-            searchLoadedLayers = true;
-        }
+        // Set up draw module for conflict
+        draw.setConflictSearch(this);
+        $("#_draw_make_conflict_with_selected").show();
+        $("#_draw_make_conflict_with_all").show();
 
         cloud.map.addLayer(drawnItems);
         cloud.map.addLayer(bufferItems);
         cloud.map.addLayer(dataItems);
 
+
+
         // Create a new tab in the main tab bar
-        utils.createMainTab("conflict", "Konfliktsøgning", "Lav en konfliktsøgning ned igennem alle lag. Der kan søges med en adresse/matrikelnr., en tegning eller et objekt fra et lag. Det sidste gøres ved at klikke på et objekt i et tændt lag og derefter på \'Søg med dette objekt\'", require('./../../../browser/modules/height')().max, "check_circle", false, "conflictSearch");
+        utils.createMainTab("conflict", "Konfliktsøgning", "Lav en konfliktsøgning ned igennem alle lag. Der kan søges med en adresse/matrikelnr., en tegning eller et objekt fra et lag. Det sidste gøres ved at klikke på et objekt i et tændt lag og derefter på \'Søg med dette objekt\'", require('./../../../browser/modules/height')().max, "bi-check2-square", false, "conflictSearch");
         $("#conflict").append(dom);
 
-        // DOM created
+        // adjust search text
+        let placeholder = window.vidiConfig?.searchConfig?.placeholderText ?? "Adresse eller matrikelnr.";
+        $(".custom-search-conflict.typeahead.form-control:not(.tt-hint)").attr("placeholder", placeholder);
+        $("body").append(`
+            <div class="toast-container bottom-0 end-0 p-3 me-5">
+            <div id="${TOAST_ID}" class="toast align-items-center text-bg-primary border-0" role="alert" aria-live="assertive"
+                 aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body" id="conflict-toast-body"></div>
+                </div>
+            </div>
+            </div>
+        `)
 
+        // DOM created
+        $('#searchclear2').on('click', function () {
+            backboneEvents.get().trigger('clear:search');
+        });
         // Init search with custom callback
-        search.init(function () {
+        getPlaceStore = search.init(function () {
             _clearDrawItems();
             _clearDataItems();
+            this.layer._layers[Object.keys(this.layer._layers)[0]]._vidi_type = "query_draw"; // Tag it, so it serialized
             drawnItems.addLayer(this.layer._layers[Object.keys(this.layer._layers)[0]]);
             cloud.zoomToExtentOfgeoJsonStore(this, 17);
-            me.makeSearch($("#conflict-custom-search").val());
-        }, id, false, getProperty);
+            me.makeSearch($(".custom-search-conflict")[1].value);
+        }, ".custom-search-conflict", false, getProperty);
 
-        bufferSlider = document.getElementById('conflict-buffer-slider');
+
+        sliderEl = $('#conflict-buffer-slider');
         bufferValue = document.getElementById('conflict-buffer-value');
-        try {
-            noUiSlider.create(bufferSlider, {
-                start: startBuffer,
-                connect: "lower",
-                step: 0.01,
-                range: {
-                    min: -5,
-                    max: 500
-                }
-            });
-            bufferSlider.noUiSlider.on('update', _.debounce(function (values, handle) {
-                bufferValue.value = values[handle];
-                bufferItems.clearLayers();
-                me.makeSearch()
-
-            }, 300));
-            // When the input changes, set the slider value
-            bufferValue.addEventListener('change', function () {
-                bufferSlider.noUiSlider.set([this.value]);
-            });
-        } catch (e) {
+        if (bufferValue) {
+            bufferValue.value = currentBufferValue = startBuffer;
         }
+        sliderEl.append(`<div class="range"">
+                                            <input type="range"  min="-5" max="500" value="${startBuffer}" class="js-info-buffer-slider form-range">
+                                            </div>`);
+        let slider = sliderEl.find('.js-info-buffer-slider');
+        slider.on('input change', debounce(function (values) {
+            bufferValue.value = parseFloat(values.target.value);
+            currentBufferValue = bufferValue.value;
+            if (isCurrentFromDrawing) {
+                bufferItems.clearLayers();
+                me.makeSearch("HEJ", null, id = currentFromDrawingId, true)
+            } else if (typeof bufferItems?._layers?.[Object.keys(bufferItems._layers)[0]]?._leaflet_id !== "undefined") {
+                bufferItems.clearLayers();
+                me.makeSearch("1")
+            }
 
-        // TODO extensios are are initiated AFTER "ready:meta", so below is newer reached
+        }, 300));
+        // When the input changes, set the slider value
+        if (bufferValue) {
+            bufferValue.addEventListener('change', function () {
+                slider.val(this.value);
+                slider.trigger('change');
+            });
+        }
         backboneEvents.get().on("ready:meta", function () {
             metaData = meta.getMetaData();
         })
@@ -354,26 +398,33 @@ module.exports = module.exports = {
      * Handle for GUI toggle button
      */
     control: function () {
-        var me = this;
-
-
+        let me = this;
+        hitsTable = $("#hits-content tbody");
+        hitsData = $("#hits-data");
+        noHitsTable = $("#nohits-content tbody");
+        errorTable = $("#error-content tbody");
+        extraTable = $("#extra");
+        let c = 0;
+        backboneEvents.get().on("end:conflictSearch", () => {
+            c = 0;
+        })
         // Start listen to the web socket
         io.connect().on(socketId.get(), function (data) {
             if (typeof data.num !== "undefined") {
-                $("#conflict-progress").html(data.num + " " + (data.title || data.table));
+                $("#conflict-progress").html(data.num);
                 if (data.error === null) {
-                    $("#conflict-console").append(data.num + " table: " + data.table + ", hits: " + data.hits + " , time: " + data.time + "\n");
+                    $("#conflict-console").append("table: " + data.table + ", hits: " + data.hits + " , time: " + data.time + "\n");
                 } else {
                     $("#conflict-console").append(data.table + " : " + data.error + "\n");
                 }
             }
         });
 
+
         backboneEvents.get().trigger("on:conflictInfoClick");
 
         // Emit "on" event
         backboneEvents.get().trigger("on:conflict");
-
 
         // Show DOM elements
         $("#conflict-buffer").show();
@@ -421,7 +472,8 @@ module.exports = module.exports = {
                         fillOpacity: 0
                     }
                 },
-                marker: true
+                marker: true,
+                circlemarker: false
             },
             edit: {
                 featureGroup: drawnItems,
@@ -453,8 +505,10 @@ module.exports = module.exports = {
         });
         cloud.map.on('draw:drawstop', function (e) {
             me.makeSearch(fromDrawingText);
-            // Switch info click on again
-            backboneEvents.get().trigger("on:conflictInfoClick");
+            // Switch info click on again, but wait a bit, so drag n drop of rec and circle doesn't trigger a click
+            setTimeout(() => {
+                backboneEvents.get().trigger("on:conflictInfoClick");
+            }, 300);
         });
         cloud.map.on('draw:editstop', function (e) {
             me.makeSearch(fromDrawingText);
@@ -477,6 +531,29 @@ module.exports = module.exports = {
             po.popover("hide");
         }, 2500);
 
+        if (urlparser.urlVars?.var_landsejerlavskode && urlparser.urlVars?.var_matrikelnr) {
+            setTimeout(() => {
+                if (!fromVarsIsDone) {
+                    let placeStore = getPlaceStore();
+                    placeStore.db = search.getMDB();
+                    placeStore.host = search.getMHOST();
+                    placeStore.sql = `SELECT sfe_ejendomsnummer,
+                                             ST_Multi(ST_Union(the_geom)),
+                                             ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)), 4326)) as geojson
+                                      FROM matrikel.jordstykke
+                                      WHERE sfe_ejendomsnummer = (SELECT sfe_ejendomsnummer
+                                                                  FROM matrikel.jordstykke
+                                                                  WHERE landsejerlavskode = ${urlparser.urlVars.var_landsejerlavskode}
+                                                                    AND matrikelnummer = '${urlparser.urlVars.var_matrikelnr.toLowerCase()}')
+                                      group by sfe_ejendomsnummer`;
+                    placeStore.load();
+                    fromVarsIsDone = true;
+                }
+            }, 200);
+        } else {
+            fromVarsIsDone = true;
+        }
+
     },
 
     /**
@@ -498,6 +575,7 @@ module.exports = module.exports = {
         $("#hits-data").empty();
         $("#nohits-content tbody").empty();
         $("#error-content tbody").empty();
+        $("#extra").empty();
 
         $('#conflict-result-content a[href="#hits-content"] span').empty();
         $('#conflict-result-content a[href="#nohits-content"] span').empty();
@@ -516,19 +594,26 @@ module.exports = module.exports = {
 
     /**
      * Makes a conflict search
+     * @param text
      * @param callBack
+     * @param id Set specific layer id to use. Else the first in drawnItems will be used
+     * @param fromDrawing
      */
-    makeSearch: function (text, callBack) {
-
+    makeSearch: function (text, callBack, id = null, fromDrawing = false) {
+        isCurrentFromDrawing = fromDrawing;
+        currentFromDrawingId = id;
         var primitive, coord,
             layer, buffer = parseFloat($("#conflict-buffer-value").val()), bufferValue = buffer,
             hitsTable = $("#hits-content tbody"),
             noHitsTable = $("#nohits-content tbody"),
             errorTable = $("#error-content tbody"),
+            extraTable = $("#extra"),
             hitsData = $("#hits-data"),
             row, fileId, searchFinish, geomStr,
-            metaDataKeys = meta.getMetaDataKeys(),
             visibleLayers = cloud.getAllTypesOfVisibleLayers().split(";");
+
+        let _self = this;
+        visibleLayers = cloud.getAllTypesOfVisibleLayers().split(";");
         if (text) {
             currentFromText = text;
         }
@@ -536,15 +621,46 @@ module.exports = module.exports = {
         hitsTable.empty();
         noHitsTable.empty();
         errorTable.empty();
+        extraTable.empty();
         hitsData.empty();
 
         try {
             xhr.abort();
         } catch (e) {
         }
-        for (var prop in drawnItems._layers) {
-            layer = drawnItems._layers[prop];
-            break;
+
+        if (fromDrawing) {
+            layer = draw.getStore().layer;
+            if (id) {
+                layer.eachLayer(l => {
+                    if (l._vidi_id === id) {
+                        layer = l;
+                    }
+                })
+            } else {
+                let collection = {
+                    "type": "GeometryCollection",
+                    "geometries": [],
+                    "properties": layer._layers[Object.keys(layer._layers)[0]].feature.properties
+                }
+                layer.eachLayer((l) => {
+                    // We use a buffer to recreate a circle from the GeoJSON point
+                    if (typeof l._mRadius !== "undefined") {
+                        let buffer = l._mRadius;
+                        let primitive = l.toGeoJSON(GEOJSON_PRECISION).geometry;
+                        const bufferPolygon = turfBuffer(primitive, buffer, {units: 'meters'}).geometry;
+                        collection.geometries.push(bufferPolygon)
+                    } else {
+                        let primitive = l.toGeoJSON(GEOJSON_PRECISION).geometry;
+                        collection.geometries.push(primitive);
+                    }
+                })
+                layer = L.geoJSON(collection);
+            }
+        } else {
+            for (var prop in drawnItems._layers) {
+                layer = drawnItems._layers[prop];
+            }
         }
         if (typeof layer === "undefined") {
             return;
@@ -554,36 +670,19 @@ module.exports = module.exports = {
                 buffer = buffer + layer._mRadius;
             }
         }
-        primitive = layer.toGeoJSON();
+        primitive = layer.toGeoJSON(GEOJSON_PRECISION);
         if (typeof primitive.features !== "undefined") {
             primitive = primitive.features[0];
         }
         if (primitive) {
-            if (typeof layer.getBounds !== "undefined") {
-                coord = layer.getBounds().getSouthWest();
+            let geom;
+            if (primitive.geometry.type === 'GeometryCollection') {
+                // We dissolve the buffer and turn the GeometryCollection into a MultiPolygon
+                geom = turfMultiPolygon(turDissolve(turfBuffer(primitive.geometry, buffer, {units: 'meters'})).features.map((e) => e.geometry.coordinates));
             } else {
-                coord = layer.getLatLng();
+                geom = turfBuffer(primitive.geometry, buffer, {units: 'meters'});
             }
-            // Get utm zone
-            var zone = require('./../../../browser/modules/utmZone.js').getZone(coord.lat, coord.lng);
-            var crss = {
-                "proj": "+proj=utm +zone=" + zone + " +ellps=WGS84 +datum=WGS84 +units=m +no_defs",
-                "unproj": "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
-            };
-            var reader = new jsts.io.GeoJSONReader();
-            var writer = new jsts.io.GeoJSONWriter();
-            var geom = reader.read(reproject.reproject(primitive, "unproj", "proj", crss));
-
-            var buffer4326 = reproject.reproject(writer.write(geom.geometry.buffer(buffer)), "proj", "unproj", crss);
-
-            var projWktWithBuffer;
-            if (buffer === 0) {
-                projWktWithBuffer = Terraformer.convert(writer.write(geom.geometry));
-            } else {
-                projWktWithBuffer = Terraformer.convert(writer.write(geom.geometry.buffer(buffer)));
-            }
-
-            var l = L.geoJson(buffer4326, {
+            let l = L.geoJson(geom, {
                 "color": "#ff7800",
                 "weight": 1,
                 "opacity": 1,
@@ -592,12 +691,7 @@ module.exports = module.exports = {
             }).addTo(bufferItems);
             l._layers[Object.keys(l._layers)[0]]._vidi_type = "query_buffer";
 
-            $.snackbar({
-                id: "snackbar-conflict",
-                content: "<span id='conflict-progress'>" + __("Waiting to start") + "....</span>",
-                htmlAllowed: true,
-                timeout: 1000000
-            });
+            utils.showInfoToast("<span id='conflict-progress'>" + __("Waiting to start") + "....</span>", {autohide: false}, TOAST_ID);
 
             var schemata = [];
             var schemataStr = urlparser.schema;
@@ -610,179 +704,377 @@ module.exports = module.exports = {
                 }
                 schemataStr = schemata.join(",");
             }
-
             preProcessor({
-                "projWktWithBuffer": projWktWithBuffer
-
+                // "projWktWithBuffer": projWktWithBuffer
             }).then(function () {
                 xhr = $.ajax({
                     method: "POST",
                     url: "/api/extension/conflictSearch",
-                    data: "db=" + db + "&schema=" + (searchLoadedLayers ? schemataStr : "") + (searchStr !== "" ? "," + searchStr : "") + "&socketId=" + socketId.get() + "&layers=" + visibleLayers.join(",") + "&buffer=" + bufferValue + "&text=" + currentFromText + "&wkt=" + Terraformer.convert(buffer4326),
+                    data: "db=" + db + "&schema=" + (searchLoadedLayers ? schemataStr : "") + (searchStr !== "" ? "," + searchStr : "") + "&socketId=" + socketId.get() + "&layers=" + visibleLayers.join(",") + "&buffer=" + bufferValue + "&text=" + currentFromText + "&wkt=" + new wicket.Wkt().read(JSON.stringify(geom)).write(),
                     scriptCharset: "utf-8",
-                    success: function (response) {
-                        var hitsCount = 0, noHitsCount = 0, errorCount = 0, resultOrigin, groups = [];
-                        _result = response;
-                        setTimeout(function () {
-                            $("#snackbar-conflict").snackbar("hide");
-                        }, 200);
-                        $("#spinner span").hide();
-                        $("#result-origin").html(response.text);
-                        $('#conflict-main-tabs a[href="#conflict-result-content"]').tab('show');
-                        $('#conflict-result-content a[href="#hits-content"]').tab('show');
-                        $('#conflict-result .btn:first-child').attr("href", "/html?id=" + response.file)
-                        fileId = response.file;
-                        searchFinish = true;
-                        resultOrigin = response.text || "Na";
-
-                        $.each(response.hits, function (i, v) {
-                            v.meta.layergroup = v.meta.layergroup != null ? v.meta.layergroup : "Ungrouped";
-                            groups.push(v.meta.layergroup);
-                        });
-                        groups = array_unique(groups.reverse());
-                        for (let i = 0; i < groups.length; ++i) {
-                            row = "<tr><td><h4 style='font-weight: 400'>" + groups[i] + "</h4></td><td></td><td></td></tr>";
-                            hitsTable.append(row);
-                            let count = 0;
-                            $.each(response.hits, function (u, v) {
-                                if (v.hits > 0) {
-                                    let metaData = v.meta;
-                                    if (metaData.layergroup === groups[i]) {
-                                        count++;
-                                        let title = (typeof metaData.f_table_title !== "undefined" && metaData.f_table_title !== "" && metaData.f_table_title !== null) ? metaData.f_table_title : u;
-                                        row = "<tr><td>" + title + "</td><td>" + v.hits + "</td><td><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + u + "' " + ($.inArray(u, visibleLayers) > -1 ? "checked" : "") + "></label></div></td></tr>";
-                                        hitsTable.append(row);
-                                    }
-                                }
-                            });
-                            // Remove empty groups
-                            if (count === 0) {
-                                hitsTable.find("tr").last().remove();
-                            }
-                        }
-                        ;
-
-
-                        for (let u = 0; u < groups.length; ++u) {
-                            row = "<h4 style='font-weight: 400'>" + groups[u] + "</h4><hr style='margin-top: 2px; border-top: 1px solid #aaa'>";
-                            hitsData.append(row);
-                            let count = 0;
-                            $.each(response.hits, function (i, v) {
-                                var table = i, table1, table2, tr, td, title, metaData = v.meta;
-                                if (metaData.layergroup === groups[u]) {
-                                    title = (typeof metaData.f_table_title !== "undefined" && metaData.f_table_title !== "" && metaData.f_table_title !== null) ? metaData.f_table_title : table;
-                                    if (v.error === null) {
-                                        if (metaData.meta_url) {
-                                            title = "<a target='_blank' href='" + metaData.meta_url + "'>" + title + "</a>";
-                                        }
-                                        row = "<tr><td>" + title + "</td><td>" + v.hits + "</td><td><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + i + "' " + ($.inArray(i, visibleLayers) > -1 ? "checked" : "") + "></label></div></td></tr>";
-                                        if (v.hits > 0) {
-                                            count++;
-                                            hitsCount++;
-                                            table1 = $("<table class='table table-data'/>");
-                                            hitsData.append("<h5>" + title + " (" + v.hits + ")<div class='checkbox' style='float: right; margin-top: 25px'><label><input type='checkbox' data-gc2-id='" + i + "' " + ($.inArray(i, visibleLayers) > -1 ? "checked" : "") + "></label></div></h5>");
-                                            let conflictForLayer = metaData.meta !== null ? JSON.parse(metaData.meta) : null;
-                                            if (conflictForLayer !== null && 'short_conflict_meta_desc' in conflictForLayer) {
-                                                hitsData.append("<p style='margin: 0'>" + conflictForLayer.short_conflict_meta_desc + "</p>");
-                                            }
-                                            if (conflictForLayer !== null && 'long_conflict_meta_desc' in conflictForLayer && conflictForLayer.long_conflict_meta_desc !== '') {
-                                                $(`<i style="cursor: pointer; color: #999999">Beskrivelse&hellip;</i>`).appendTo(hitsData).on("click", function () {
-                                                    let me = this;
-                                                    if ($(me).next().children().length === 0) {
-                                                        $(me).next().html(`<div class="alert alert-dismissible alert-info" role="alert" style="background-color: #d4d4d4; color: #333; padding: 7px 30px 7px 7px">
-                                                                            <button type="button" class="close" data-dismiss="alert">×</button>${conflictForLayer.long_conflict_meta_desc}
-                                                                        </div>`);
-                                                    } else {
-                                                        $(me).next().find(".alert").alert('close');
-                                                    }
-                                                });
-                                                $(`<div></div>`).appendTo(hitsData);
-                                            }
-                                            if (v.data.length > 0) {
-                                                $.each(v.data, function (u, row) {
-                                                    var key = null, fid = null;
-                                                    tr = $("<tr style='border-top: 0px solid #eee'/>");
-                                                    td = $("<td/>");
-                                                    table2 = $("<table style='margin-bottom: 5px; margin-top: 5px;' class='table'/>");
-                                                    row.sort((a, b) => (a.sort_id > b.sort_id) ? 1 : ((b.sort_id > a.sort_id) ? -1 : 0));
-                                                    $.each(row, function (n, field) {
-                                                        if (!field.key) {
-                                                            if (!field.link) {
-                                                                table2.append("<tr><td class='conflict-heading-cell' '>" + field.alias + "</td><td class='conflict-value-cell'>" + field.value + "</td></tr>");
-                                                            } else {
-                                                                table2.append("<tr><td class='conflict-heading-cell'>" + field.alias + "</td><td class='conflict-value-cell'>" + "<a target='_blank' rel='noopener' href='" + (field.linkprefix ? field.linkprefix : "") + field.value + "'>Link</a>" + "</td></tr>")
-                                                            }
-                                                        } else {
-                                                            key = field.name;
-                                                            fid = field.value;
-                                                        }
-                                                    });
-                                                    td.append(table2);
-                                                    tr.append("<td style='width: 60px'><button type='button' class='btn btn-default btn-xs zoom-to-feature' data-gc2-sf-table='" + i + "' data-gc2-sf-key='" + key + "' data-gc2-sf-fid='" + fid + "'>#" + (u + 1) + " <i class='fa fa-search'></i></button></td>");
-                                                    tr.append(td);
-                                                    table1.append(tr);
-                                                });
-                                            }
-                                            hitsData.append(table1);
-                                        } else {
-                                            noHitsTable.append(row);
-                                            noHitsCount++;
-                                        }
-                                    } else {
-                                        row = "<tr><td>" + title + "</td><td>" + v.error + "</td></tr>";
-                                        errorTable.append(row);
-                                        errorCount++;
-                                    }
-                                    $('#conflict-result-content a[href="#hits-content"] span').html(" (" + hitsCount + ")");
-                                    $('#conflict-result-content a[href="#nohits-content"] span').html(" (" + noHitsCount + ")");
-                                    $('#conflict-result-content a[href="#error-content"] span').html(" (" + errorCount + ")");
-                                    $('#conflict-result-origin').html(`Søgning foretaget med: <b>${resultOrigin}</b>`);
-                                }
-
-                            });
-
-                            // Remove empty groups
-                            if (count === 0) {
-                                hitsData.find("h4").last().remove();
-                                hitsData.find("hr").last().remove();
-                            }
-
-                        }
-                        $(".zoom-to-feature").click(function (e) {
-                            _zoomToFeature($(this).data('gc2-sf-table'), $(this).data('gc2-sf-key'), $(this).data('gc2-sf-fid'));
-                            e.stopPropagation();
-                        });
-
-                        backboneEvents.get().trigger("end:conflictSearch", {
-                            "projWktWithBuffer": projWktWithBuffer,
-                            "file": response.file
-                        });
-
-                        L.geoJson(response.geom, {
-                            "color": "#ff7800",
-                            "weight": 1,
-                            "opacity": 0.65,
-                            "dashArray": '5,3'
-                        });
-                        geomStr = response.geom;
-                        if (callBack) {
-                            callBack();
-                        }
-                    },
+                    success: _self.handleResult,
                     error: function () {
-                        $("#snackbar-conflict").snackbar("hide");
+                        utils.hideInfoToast(TOAST_ID);
                     }
                 })
             })
         }
     },
+    recreateDrawings: (parr, l) => {
+        let GeoJsonAdded = false;
+        let v = parr;
+
+        if (parr.length === 1) {
+            $.each(v[0].geojson.features, function (n, m) {
+                // If polyline or polygon
+                // ======================
+                if (m.type === "Feature" && GeoJsonAdded === false) {
+                    var json = L.geoJson(m, {
+                        style: function (f) {
+                            return f.style;
+                        }
+                    });
+
+                    var g = json._layers[Object.keys(json._layers)[0]];
+
+                    // Adding vidi-specific properties
+                    g._vidi_type = m._vidi_type;
+
+                    l.addLayer(g);
+                }
+
+                // If circle
+                // =========
+                if (m.type === "Circle") {
+                    g = L.circle(m._latlng, m._mRadius, m.style);
+                    g.feature = m.feature;
+
+                    // Adding vidi-specific properties
+                    g._vidi_type = m._vidi_type;
+
+                    l.addLayer(g);
+                }
+
+                // If rectangle
+                // ============
+                if (m.type === "Rectangle") {
+                    g = L.rectangle([m._latlngs[0], m._latlngs[2]], m.style);
+                    g.feature = m.feature;
+
+                    // Adding vidi-specific properties
+                    g._vidi_type = m._vidi_type;
+
+                    l.addLayer(g);
+                }
+
+                // If circle marker
+                // ================
+                if (m.type === "CircleMarker") {
+                    g = L.circleMarker(m._latlng, m.options);
+                    g.feature = m.feature;
+
+                    // Add label
+                    if (m._vidi_marker_text) {
+                        g.bindTooltip(m._vidi_marker_text, {permanent: true}).on("click", () => {
+                        }).openTooltip();
+                    }
+
+                    // Adding vidi-specific properties
+                    g._vidi_marker = true;
+                    g._vidi_type = m._vidi_type;
+                    g._vidi_marker_text = m._vidi_marker_text;
+
+                    l.addLayer(g);
+                }
+
+                // If marker
+                // =========
+                if (m.type === "Marker") {
+                    g = L.marker(m._latlng, m.style);
+                    g.feature = m.feature;
+
+                    // Add label
+                    if (m._vidi_marker_text) {
+                        g.bindTooltip(m._vidi_marker_text, {permanent: true}).on("click", function () {
+                        }).openTooltip();
+                    }
+
+                    // Adding vidi-specific properties
+                    g._vidi_marker = true;
+                    g._vidi_type = m._vidi_type;
+                    g._vidi_marker_text = null;
+
+                    l.addLayer(g);
+                }
+            });
+        }
+    },
+    handleResult: function (response) {
+        let _self = this;
+
+        visibleLayers = cloud.getAllTypesOfVisibleLayers().split(";"); // Must be set here also, if result is coming from state
+        let hitsCount = 0, noHitsCount = 0, errorCount = 0, extraCount = 0, resultOrigin, groups = [];
+        _result = response;
+        setTimeout(function () {
+            utils.hideInfoToast(TOAST_ID);
+        }, 200);
+        $("#spinner span").hide();
+        $("#result-origin").html(response.text);
+        $('#conflict-main-tabs a[href="#conflict-result-content"]').tab('show');
+        if (window.vidiConfig.template === "conflict.tmpl") {
+            $('#conflict-result-content a[href="#hits-data-content"]').tab('show');
+        } else {
+            $('#conflict-result-content a[href="#hits-content"]').tab('show');
+        }
+        $('#conflict-open-pdf').attr("href", "/html?id=" + response.file)
+        $("#conflict-download-pdf").prop("download", `Søgning foretaget med ${response.text} d. ${response.dateTime}.pdf`);
+
+        if ('bufferItems' in response) {
+            this.recreateDrawings(JSON.parse(response.bufferItems), bufferItems);
+        }
+        if ('drawnItems' in response) {
+            this.recreateDrawings(JSON.parse(response.drawnItems), drawnItems);
+        }
+
+        resultOrigin = response.text || "Na";
+
+        response.hits.forEach(function (v, i) {
+            v.meta.layergroup = v.meta.layergroup != null ? v.meta.layergroup : "Ungrouped";
+            groups.push(v.meta.layergroup);
+        });
+        groups = array_unique(groups.reverse());
+        for (let i = 0; i < groups.length; ++i) {
+            let row = "<tr><td><h5>" + groups[i] + "</h5></td><td></td><td></td><td></td><td></td></tr>";
+            hitsTable.append(row);
+            let count = 0;
+            $.each(response.hits, function (u, v) {
+                if (v.hits > 0) {
+                    let metaData = v.meta;
+                    let bufferValue = '';
+                    if (v.bufferValue > 0) {
+                        bufferValue = "<span class='text-secondary'>Buffer</span> " + readableDistance(v.bufferValue, true, false, false, {m: 1});
+                    }
+                    if (metaData.layergroup === groups[i]) {
+                        count++;
+                        row = "<tr><td>" + v.title + "</td><td>" + v.hits + "</td><td>" + bufferValue + "</td><td>" + (v.totalLength > 0 ? "<span class='text-secondary'>Total</span> " + readableDistance(v.totalLength, true, false, false, {m: 1}) : v.totalArea > 0 ? "<span class='text-secondary'>Total</span> " + L.GeometryUtil.readableArea(v.totalArea, true) : '') + "</td><td><div class='form-check form-switch text-end'><label class='form-check-label'><input class='form-check-input' type='checkbox' data-gc2-id='" + v.table + "' " + (visibleLayers.includes(v.table) ? "checked" : "") + "></label></div></td></tr>";
+                        hitsTable.append(row);
+                    }
+                }
+            });
+            // Remove empty groups
+            if (count === 0) {
+                hitsTable.find("tr").last().remove();
+            }
+        }
+
+        for (let u = 0; u < groups.length; ++u) {
+            let row = "<h5 class='hits-data-h'>" + groups[u] + "</h5><hr class='mt-1 border-top'>";
+            hitsData.append(row);
+            let count = 0;
+            response.hits.forEach(function (v, i) {
+                let table = v.table, table1, table2, tr, td, title, metaData = v.meta;
+                if (metaData.layergroup === groups[u]) {
+                    title = (typeof metaData.f_table_title !== "undefined" && metaData.f_table_title !== "" && metaData.f_table_title !== null) ? metaData.f_table_title : table;
+                    if (v.error === null) {
+                        if (metaData.meta_url) {
+                            title = "<a target='_blank' href='" + metaData.meta_url + "'>" + title + "</a>";
+                        }
+                        row = "<tr><td>" + title + "</td><td><div class='form-check form-switch text-end'><label class='form-check-label'><input class='form-check-input' type='checkbox' data-gc2-id='" + v.table + "' " + (visibleLayers.includes(v.table) ? "checked" : "") + "></label></div></td></tr>";
+                        if (v.hits > 0) {
+                            count++;
+                            hitsCount++;
+                            table1 = $("<table class='table table-data'/>");
+                            hitsData.append("<div class='d-flex align-items-center'><div class='flex-grow-1 fw-bold'>" + title + " (" + v.hits + ")</div><div class='form-check form-switch text-end float-end'><label class='form-check-label'><input class='form-check-input' type='checkbox' data-gc2-id='" + v.table + "' " + (visibleLayers.includes(v.table) ? "checked" : "") + "></label></div></div>");
+                            let conflictForLayer = metaData.meta !== null ? JSON.parse(metaData.meta) : null;
+                            if (conflictForLayer !== null && 'short_conflict_meta_desc' in conflictForLayer) {
+                                hitsData.append("<p>" + conflictForLayer.short_conflict_meta_desc + "</p>");
+                            }
+                            if (conflictForLayer !== null && 'long_conflict_meta_desc' in conflictForLayer && conflictForLayer.long_conflict_meta_desc !== '') {
+                                $(`<div class="mb-2"><i style="cursor: pointer" class="text-info">Lagbeskrivelse - klik her</i></div>`).appendTo(hitsData).on("click", function () {
+                                    let me = this;
+                                    if ($(me).next().children().length === 0) {
+                                        $(me).next().html(`<div class="alert alert-info alert-dismissible fade show" role="alert">
+                                                                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>${conflictForLayer.long_conflict_meta_desc}
+                                                                        </div>`);
+                                    } else {
+                                        $(me).next().find(".alert").alert('close');
+                                    }
+                                });
+                                $(`<div></div>`).appendTo(hitsData);
+                            }
+                            if (v.data.length > 0) {
+                                v.data.forEach((row, u) => {
+                                    const properties = {};
+                                    row.forEach(r => properties[r.name] = r.value);
+                                    let key = null, fid = null;
+                                    tr = $("<tr class='border-top'/>");
+                                    td = $("<td/>");
+                                    table2 = $("<table class='table mt-1 mb-1'/>");
+                                    row.sort((a, b) => (a.sort_id > b.sort_id) ? 1 : ((b.sort_id > a.sort_id) ? -1 : 0));
+                                    row.forEach(field => {
+                                        let value = field.value;
+                                        if (field.template) {
+                                            value = Handlebars.compile(field.template)(properties);
+                                        }
+                                        if (!field.key) {
+                                            if (!field.link) {
+                                                table2.append("<tr><td class='conflict-heading-cell' '>" + field.alias + "</td><td class='conflict-value-cell'>" + (value !== null ? value : "&nbsp;") + "</td></tr>");
+                                            } else {
+                                                let link = "&nbsp;";
+                                                if (value && field !== "") {
+                                                    link = "<a target='_blank' rel='noopener' href='" + (field.linkprefix ? field.linkprefix : "") + value + "'>Link</a>"
+                                                }
+                                                table2.append("<tr><td class='conflict-heading-cell'>" + field.alias + "</td><td class='conflict-value-cell'>" + link + "</td></tr>")
+                                            }
+                                        } else {
+                                            key = field.name;
+                                            fid = field.value;
+                                        }
+                                    });
+                                    td.append(table2);
+                                    tr.append("<td style='width: 60px'><button type='button' class='btn btn-outline-secondary btn-sm zoom-to-feature' data-gc2-sf-table='" + v.table + "' data-gc2-sf-key='" + key + "' data-gc2-sf-fid='" + fid + "'>#" + (u + 1) + " <i class='bi bi-search'></i></button></td>");
+                                    tr.append(td);
+                                    table1.append(tr);
+                                });
+                            }
+                            hitsData.append(table1);
+                        } else {
+                            noHitsTable.append(row);
+                            noHitsCount++;
+                        }
+                        if (v.extra !== null && typeof v.extra === 'object' && Object.keys(v.extra).length > 0) {
+                            let parsedMeta = metaData.meta !== null ? JSON.parse(metaData.meta) : null;
+                            extraCount++;
+                            const el = $(`<table class="extra-table" data-extra-table-id="${extraCount}" id="extra-table-${extraCount}" data-show-columns="true" data-show-fullscreen="false"></table>`); // Add bootstrap classes for basic styling
+                            const thead = $("<thead></thead>");
+                            const tbody = $("<tbody></tbody>");
+                            const tcaption = $("<caption></caption>");
+                            const headerRow = $("<tr></tr>");
+
+                            // --- Determine all possible headers from inner objects ---
+                            const allHeadersSet = new Set();
+                            for (const categoryKey in v.extra) {
+                                // Ensure it's an own property and the value is an object
+                                if (Object.hasOwnProperty.call(v.extra, categoryKey) && v.extra[categoryKey] && typeof v.extra[categoryKey] === 'object') {
+                                    const rowData = v.extra[categoryKey];
+                                    for (const headerKey in rowData) {
+                                        if (Object.hasOwnProperty.call(rowData, headerKey)) {
+                                            allHeadersSet.add(headerKey); // Add unique keys to the Set
+                                        }
+                                    }
+                                }
+                            }
+                            const headers = Array.from(allHeadersSet); // Convert Set to Array for consistent order
+
+                            // --- Build Header Row ---
+                            headerRow.append(`<th data-sortable="true">${parsedMeta?.sql_conflict_header || 'Header'}</th>`); // First column for the main key (e.g., 'solidFuels')
+                            headers.forEach(header => {
+                                // Simple capitalization for headers (optional)
+                                const displayHeader = header.charAt(0).toUpperCase() + header.slice(1);
+                                headerRow.append(`<th data-sortable=\"true\">${displayHeader}</th>`);
+                            });
+                            thead.append(headerRow);
+
+                            // --- Build Data Rows ---
+                            for (const categoryKey in v.extra) {
+                                if (Object.hasOwnProperty.call(v.extra, categoryKey)) {
+                                    const rowData = v.extra[categoryKey];
+                                    const dataRow = $("<tr></tr>");
+
+                                    dataRow.append(`<td>${categoryKey}</td>`); // Add the category key cell
+
+                                    // Check if rowData is an object before trying to access its properties
+                                    if (rowData && typeof rowData === 'object') {
+                                        headers.forEach(header => {
+                                            // Get the value if the key exists in this specific row's data, otherwise use an empty string
+                                            const value = Object.hasOwnProperty.call(rowData, header) ? rowData[header] : '';
+                                            dataRow.append(`<td>${value}</td>`);
+                                        });
+                                    } else {
+                                        // If rowData is not an object (e.g., null, string, number), add empty cells for all headers
+                                        headers.forEach(() => {
+                                            dataRow.append(`<td></td>`);
+                                        });
+                                    }
+                                    tbody.append(dataRow);
+                                }
+                            }
+
+                            // --- Assemble and Append Table ---
+                            el.append(thead);
+                            el.append(tbody);
+                            if (v.totalLength || v.totalArea) {
+                                tcaption.append((v.totalLength > 0 ? "<span class='text-secondary'>Total</span> " + readableDistance(v.totalLength, true, false, false, {m: 1}) : v.totalArea > 0 ? "<span class='text-secondary'>Total</span> " + L.GeometryUtil.readableArea(v.totalArea, true) : '') );
+                                el.append(tcaption);
+                            }
+                            extraTable.append("<h4 class='mb-0 mt-3'>" + title + "</h4>");
+                            extraTable.append(el);
+                            extraTable.append($(`<button class="btn btn-outline-success btn-sm mt-1 w-100" data-extra-id="${extraCount}">Kopier '${title}' til udklipsholderen</button>`));
+                            $(`*[data-extra-id="${extraCount}"]`).click((e) => copyTableToClipboard(e.target.dataset.extraId));
+                            $(el).bootstrapTable({
+                                uniqueId: "_id"
+                            });
+                        }
+
+                    } else {
+                        row = "<tr><td>" + title + "</td><td>" + v.error + "</td></tr>";
+                        errorTable.append(row);
+                        errorCount++;
+                    }
+
+                    $('#conflict-result-content a[href="#hits-content"] span').html(" (" + hitsCount + ")");
+                    $('#conflict-result-content a[href="#hits-data-content"] span').html(" (" + hitsCount + ")");
+                    $('#conflict-result-content a[href="#nohits-content"] span').html(" (" + noHitsCount + ")");
+                    $('#conflict-result-content a[href="#error-content"] span').html(" (" + errorCount + ")");
+                    $('#conflict-result-content a[href="#extra-content"] span').html(" (" + extraCount + ")");
+                    $('#conflict-result-origin').html(`Søgning foretaget med: <b>${resultOrigin}</b>`);
+                }
+
+            });
+
+            // Remove empty groups
+            if (count === 0) {
+                hitsData.find(".hits-data-h").last().remove();
+                hitsData.find("hr").last().remove();
+            }
+
+        }
+        $(".zoom-to-feature").click(function (e) {
+            _zoomToFeature($(this).data('gc2-sf-table'), $(this).data('gc2-sf-key'), $(this).data('gc2-sf-fid'));
+            e.stopPropagation();
+        });
+
+        backboneEvents.get().trigger("end:conflictSearch", {
+            // "projWktWithBuffer": projWktWithBuffer,
+            "file": response.file
+        });
+
+        L.geoJson(response.geom, {
+            "color": "#ff7800",
+            "weight": 1,
+            "opacity": 0.65,
+            "dashArray": '5,3'
+        });
+        let geomStr = response.geom;
+        if (callBack) {
+            callBack();
+        }
+    },
+
     addDrawing: function (layer) {
         drawnItems.addLayer(layer);
     },
-    clearDrawing: function () {
-        _clearDrawItems();
+    clearDrawing: function (clearOnlyBuffer = false) {
+        _clearDrawItems(clearOnlyBuffer);
     },
     getResult: function () {
+        let drawnItems = JSON.stringify(serializeLayers.serializeQueryDrawnItems(true));
+        let bufferItems = JSON.stringify(serializeLayers.serializeQueryBufferItems(true));
+        _result.drawnItems = drawnItems;
+        _result.bufferItems = bufferItems;
+        _result.bufferValue = parseFloat(currentBufferValue);
+        _result.isCurrentFromDrawing = isCurrentFromDrawing
+        _result.currentFromDrawingId = currentFromDrawingId
         return _result;
     },
     setPreProcessor: function (fn) {
@@ -790,59 +1082,176 @@ module.exports = module.exports = {
     },
     setSearchStr: function (str) {
         searchStr = str;
-    }
+    },
+    getBufferItems: function () {
+        return bufferItems;
+    },
+    getDrawItems: function () {
+        return drawnItems;
+    },
+    setValueForSlider: function (v) {
+        if (v) {
+            let slider = sliderEl.find('.js-info-buffer-slider');
+            slider.val(v);
+            bufferValue.value = currentBufferValue = v;
+        }
+    },
+    getFromVarsIsDone: function () {
+        return fromVarsIsDone;
+    },
+    setIsCurrentFromDrawing: (i) => {
+        isCurrentFromDrawing = i;
+    },
+    setCurrentFromDrawingId: (i) => {
+        currentFromDrawingId = i;
+    },
+    TOAST_ID,
 };
 
-var dom = `
+const readableDistance = function (distance, isMetric, isFeet, isNauticalMile, precision) {
+    const defaultPrecision = {
+        km: 2,
+        ha: 2,
+        m: 0,
+        mi: 2,
+        ac: 2,
+        yd: 0,
+        ft: 0,
+        nm: 2
+    };
+
+    const formattedNumber = function (n, precision) {
+        const formatted = Math.round(n * Math.pow(10, precision)) / Math.pow(10, precision);
+        const local = _vidiLocale.replace(/_/g, '-');
+        return formatted.toLocaleString(local);
+    };
+
+    let distanceStr;
+    let units;
+
+    precision = L.Util.extend({}, defaultPrecision, precision);
+
+    if (isMetric) {
+        units = typeof isMetric == 'string' ? isMetric : 'metric';
+    } else if (isFeet) {
+        units = 'feet';
+    } else if (isNauticalMile) {
+        units = 'nauticalMile';
+    } else {
+        units = 'yards';
+    }
+
+    switch (units) {
+        case 'metric':
+            // show metres when distance is < 1km, then show km
+            if (distance > 100000) {
+                distanceStr = L.GeometryUtil.formattedNumber(distance / 1000, precision['km']) + ' km';
+            } else {
+                distanceStr = formattedNumber(distance, precision['m']) + ' m';
+            }
+            break;
+        case 'feet':
+            distance *= 1.09361 * 3;
+            distanceStr = L.GeometryUtil.formattedNumber(distance, precision['ft']) + ' ft';
+
+            break;
+        case 'nauticalMile':
+            distance *= 0.53996;
+            distanceStr = L.GeometryUtil.formattedNumber(distance / 1000, precision['nm']) + ' nm';
+            break;
+        case 'yards':
+        default:
+            distance *= 1.09361;
+
+            if (distance > 1760) {
+                distanceStr = L.GeometryUtil.formattedNumber(distance / 1760, precision['mi']) + ' miles';
+            } else {
+                distanceStr = L.GeometryUtil.formattedNumber(distance, precision['yd']) + ' yd';
+            }
+            break;
+    }
+    return distanceStr;
+}
+
+let dom = `
 <div role="tabpanel">
-    <div id="conflict-buffer" style="display: none">
-        <div>
-            <label for="conflict-buffer-value" class="control-label">Buffer</label>
-            <input id="conflict-buffer-value" class="form-control">
-            <div id="conflict-buffer-slider" class="slider shor"></div>
+    <div class="d-flex flex-column gap-4 mb-4">
+        <div id="conflict-places" class="places" style="display: none">
+            <div class="input-group mb-3">
+                <input class="typeahead form-control custom-search-conflict" type="text" placeholder="">
+                <button class="btn btn-outline-secondary searchclear" type="button">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+        </div>
+        <div id="conflict-buffer" style="display: none">
+            <div>
+                <label for="conflict-buffer-value" class="control-label">Buffer</label>
+                <input id="conflict-buffer-value" class="form-control">
+                <div id="conflict-buffer-slider"></div>
+            </div>
         </div>
     </div>
-    <div id="conflict-places" class="places" style="margin-bottom: 20px; display: none">
-        <input id="${id}" class="${id} typeahead" type="text" placeholder="Adresse eller matrikelnr.">
-    </div>
     <div id="conflict-main-tabs-container" style="display: none">
-        <ul class="nav nav-tabs" role="tablist" id="conflict-main-tabs">
-            <li role="presentation" class="active"><a href="#conflict-result-content" aria-controls="" role="tab" data-toggle="tab">Resultat</a></li>
-            <li role="presentation"><a href="#conflict-info-content" aria-controls="" role="tab" data-toggle="tab">Info</a></li>
-            <li role="presentation"><a href="#conflict-log-content" aria-controls="" role="tab" data-toggle="tab">Log</a></li>
+        <ul class="nav nav-pills nav-fill" role="tablist" id="conflict-main-tabs">
+            <li role="presentation" class="nav-item"><a class="nav-link active" href="#conflict-result-content" aria-controls="" role="tab" data-bs-toggle="tab">Resultat</a></li>
+            <li role="presentation" class="nav-item"><a class="nav-link" href="#conflict-info-content" aria-controls="" role="tab" data-bs-toggle="tab">Info</a></li>
+            <li role="presentation" class="nav-item"><a class="nav-link" href="#conflict-log-content" aria-controls="" role="tab" data-bs-toggle="tab">Log</a></li>
         </ul>
         <!-- Tab panes -->
         <div class="tab-content" style="display: none">
             <div role="tabpanel" class="tab-pane active" id="conflict-result-content">
-                <div id="conflict-result">
-                    <div><span id="conflict-result-origin"></span></div>
-
-                    <div class="btn-toolbar bs-component" style="margin: 0;">
-                        <div class="btn-group">
-                            <button disabled class="btn btn-raised" id="conflict-print-btn" data-loading-text="<i class='fa fa-cog fa-spin fa-lg'></i> PDF rapport"><i class='fa fa-cog fa-lg'></i> Print rapport</button>
+                <div id="conflict-result" class="d-flex flex-column gap-2">
+                    <div class="d-flex flex-column gap-4 form-control mt-2">
+                        <span id="conflict-result-origin" class="mt-2"></span>
+           
+                        <div class="d-flex gap-2 justify-content-start">
+                            <button disabled class="btn btn-sm btn-outline-success start-print-btn" id="conflict-print-btn">
+                                <span class="spinner-border spinner-border-sm"
+                                          role="status" aria-hidden="true" style="display: none">
+                                </span> Print rapport
+                            </button>
+                            <button disabled class="btn btn-sm btn-outline-secondary" id="conflict-set-print-area-btn"><i class='bi bi-fullscreen'></i></button>
+                            <fieldset disabled id="conflict-get-print-fieldset">
+                                <div class="input-group">
+                                    <a target="_blank" href="javascript:void(0)" class="btn btn-sm btn-outline-success" id="conflict-open-pdf">Åben PDF</a>
+                                    <a href="javascript:void(0)"
+                                       class="btn btn-outline-success btn-sm dropdown-toggle"
+                                       data-bs-toggle="dropdown"
+                                       id="conflict-open-pdf"
+                                    ></a>
+                                    <ul class="dropdown-menu get-print-btn">
+                                        <li><a class="dropdown-item" href="javascript:void(0)"
+                                               id="conflict-download-pdf">Download</a></li>
+                                    </ul>
+                                </div>
+                            </fieldset>
+                            <a href="" target="_blank" class="btn btn-sm btn-outline-secondary" id="conflict-excel-btn">Excel</a>
                         </div>
-                        <div class="btn-group">
-                            <button disabled class="btn btn-raised" id="conflict-set-print-area-btn"><i class='fas fa-expand'></i></button>
-                        </div>
-                        <fieldset disabled id="conflict-get-print-fieldset">
-                            <div class="btn-group">
-                                <a target="_blank" href="javascript:void(0)" class="btn btn-primary btn-raised" id="conflict-open-pdf">Åben PDF</a>
-                                <a href="bootstrap-elements.html" class="btn btn-primary btn-raised dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></a>
-                                <ul class="dropdown-menu">
-                                    <li><a href="javascript:void(0)" id="conflict-download-pdf">Download PDF</a></li>
-                                    <li><a target="_blank" href="javascript:void(0)" id="conflict-open-html">Open HTML page</a></li>
-                                </ul>
-                            </div>
-                        </fieldset>
+                          <span class="btn-group">
+                            <input class="btn-check" type="radio" name="conflict-report-type" id="conflict-report-type-1" value="1" checked>
+                            <label for="conflict-report-type-1" class="btn btn-sm btn-outline-secondary">
+                                Kompakt
+                            </label>
+                            <input class="btn-check" type="radio" name="conflict-report-type" id="conflict-report-type-2" value="2">
+                            <label for="conflict-report-type-2" class="btn btn-sm btn-outline-secondary">
+                                Lang, kun hits
+                            </label>
+                            <input class="btn-check" type="radio" name="conflict-report-type" id="conflict-report-type-3" value="3">
+                            <label for="conflict-report-type-3" class="btn btn-sm btn-outline-secondary">
+                                Lang, alle
+                            </label>
+                        </span>
                     </div>
 
                     <div role="tabpanel">
                         <!-- Nav tabs -->
-                        <ul class="nav nav-tabs" role="tablist">
-                            <li role="presentation" class="active"><a href="#hits-content" aria-controls="hits-content" role="tab" data-toggle="tab">Med konflikter<span></span></a></li>
-                            <li role="presentation"><a href="#hits-data-content" aria-controls="hits-data-content" role="tab" data-toggle="tab">Data fra konflikter<span></span></a></li>
-                            <li role="presentation"><a href="#nohits-content" aria-controls="nohits-content" role="tab" data-toggle="tab">Uden konflikter<span></span></a></li>
-                            <li role="presentation"><a href="#error-content" aria-controls="error-content" role="tab" data-toggle="tab">Fejl<span></span></a></li>
+                        <ul class="nav nav-pills nav-fill" role="tablist">
+                            <li role="presentation" class="active nav-item"><a class="nav-link" href="#hits-content" aria-controls="hits-content" role="tab" data-bs-toggle="tab">Med konflikter<span></span></a></li>
+                            <li role="presentation" class="nav-item"><a class="nav-link" href="#hits-data-content" aria-controls="hits-data-content" role="tab" data-bs-toggle="tab">Data fra konflikter<span></span></a></li>
+                            <li role="presentation" class="nav-item"><a class="nav-link" href="#nohits-content" aria-controls="nohits-content" role="tab" data-bs-toggle="tab">Uden konflikter<span></span></a></li>
+                            <li role="presentation" class="nav-item"><a class="nav-link" href="#error-content" aria-controls="error-content" role="tab" data-bs-toggle="tab">Fejl<span></span></a></li>
+                            <li role="presentation" class="nav-item"><a class="nav-link" href="#extra-content" aria-controls="error-content" role="tab" data-bs-toggle="tab">Analyse<span></span></a></li>
                         </ul>
                         <div class="tab-content">
                             <div role="tabpanel" class="tab-pane active conflict-result-content" id="hits-content">
@@ -869,20 +1278,27 @@ var dom = `
                                     </table>
                                 </div>
                             </div>
+                            <div role="tabpanel" class="tab-pane conflict-result-content" id="extra-content">
+                                <button class="btn btn-outline-success mt-1 w-100 mt-3" onclick="copyAllTablesToClipboard()">Kopier alt til udklipsholderen</button>
+                                <div id="extra"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
             <div role="tabpanel" class="tab-pane" id="conflict-info-content">
-                <div id="conflict-info-box">
-                    <div id="conflict-modal-info-body">
-                        <ul class="nav nav-tabs" id="conflict-info-tab"></ul>
-                        <div class="tab-content" id="conflict-info-pane"></div>
-                    </div>
+            <div class="d-grid gap-2 mt-2 mb-2">
+                <button style="display: none" class="btn btn-outline-warning btn-block" id="conflict-search-with-feature">Søg med valgte</button>
+            </div>
+            <div id="conflict-info-box">
+                <div id="conflict-modal-info-body">
+                    <ul class="nav nav-pills mb-2" id="conflict-info-tab"></ul>
+                    <div class="tab-content" id="conflict-info-pane"></div>
                 </div>
             </div>
+            </div>
             <div role="tabpanel" class="tab-pane" id="conflict-log-content">
-                <textarea style="width: 100%" rows="8" id="conflict-console"></textarea>
+                <textarea class="mt-2 w-100 form-control" rows="8" id="conflict-console"></textarea>
             </div>
         </div>
     </div>

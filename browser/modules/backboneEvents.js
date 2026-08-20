@@ -6,6 +6,9 @@
 
 'use strict';
 
+let Backbone = require('backbone');
+let extend = require('lodash/extend');
+
 /**
  *
  * @type {{}}
@@ -17,7 +20,7 @@ module.exports = {
         return this;
     },
     init: function () {
-        _.extend(object, Backbone.Events);
+        extend(object, Backbone.Events);
 
     },
     get: function () {

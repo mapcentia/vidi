@@ -35,7 +35,7 @@ describe('Layer tree common', () => {
         // Reload page
         await page.reload(helpers.PAGE_LOAD_TIMEOUT);
         page = await helpers.waitForPageToLoad(page);
-        
+
         await page.evaluate(`$('[href="#layer-content"]').trigger('click')`);
         await page.evaluate(`$('[href="#collapseUHVibGljIGdyb3Vw"]').trigger('click')`);
         await helpers.sleep(4000);
@@ -69,7 +69,7 @@ describe('Layer tree common', () => {
         await page.setRequestInterception(true);
         page.on('request', interceptedRequest => {
             if (interceptedRequest.url().indexOf(`api/sql/aleksandrshumilov`) !== -1) {
-                if (Buffer.from(interceptedRequest._postData.split(`&`)[0].split(`=`)[1], 'base64').toString().indexOf(`ST_Transform(ST_MakeEnvelope`) !== -1) {
+                if (Buffer.from(JSON.parse(interceptedRequest.postData()).q, 'base64').toString().indexOf(`ST_Transform(ST_MakeEnvelope`) !== -1) {
                     layerWasRequestedDynamically = true;
                 } else {
                     layerWasRequestedDynamically = false;
@@ -164,7 +164,7 @@ describe('Layer tree common', () => {
                 messageChannel.port1.onmessage = (event) => {
                     resolve(JSON.stringify(event.data));
                 };
-        
+
                 navigator.serviceWorker.controller.postMessage({ action: `getListOfCachedRequests` }, [messageChannel.port2]);
             });
         };
@@ -173,7 +173,7 @@ describe('Layer tree common', () => {
         await helpers.sleep(2000);
         expect(reply.layerKey).to.equal(`public.test`);
         expect(reply.offlineMode).to.equal(false);
-        
+
         await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-set-offline').trigger('click')`);
         await helpers.sleep(3000);
 

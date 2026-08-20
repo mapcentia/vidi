@@ -38,6 +38,12 @@ module.exports = {
         "From drawing": "From drawing",
         "From object in layer": "From object in layer",
         "Waiting to start": "Waiting to start",
+        "Error or timeout on": "Error or timeout on",
+        "Couldn't get the data. Trying again...": "Couldn't get the data. Trying again...",
+        "Sign in": "Sign in",
+        "Update": "Update",
+        "New version available": "New version available",
+        "Vidi takes a long time to load. Update to clear caches and refresh. Cancel to wait.": "Vidi takes a long time to load. Update to clear caches and refresh. Cancel to wait.",
 
         // Drawing
         "Cancel drawing": "Cancel drawing",
@@ -72,15 +78,27 @@ module.exports = {
         "Click on a drawing to remove": "Click on a drawing to remove",
         "Clear all": "Clear all",
         "Clear all drawings.": "Clear all drawings.",
+        "No drawings in the map": "Ingen tegninger i kortet",
+        "Click map to place circle marker": "Click map to place circle marker",
+
+        "polygon": "polygon",
+        "rectangle": "rectangle",
+        "polyline": "polyline",
+        "circle": "circle",
+        "marker": "marker",
 
         // Report
         "Get as PDF": "Get as PDF",
         "Conflicts": "Conflicts",
         "No Conflicts": "No Conflicts",
+        "Conflict with selected": "Conflict with selected",
+        "Conflict with all": "Conflict with all",
+        "Prints completed": "Prints completed",
 
         "Print": "Print",
         "Search places": "Search places",
         "Activate advanced query": "Activate advanced query",
+        "Get result as MS Excel": "Get result as MS Excel",
         "Help text overlays": "Turn overlay maps on and off. Visible overlays becomes queryable.",
         "Help text baselayers": "Choose base layer.",
         "Help text legend": "Legend for visible overlay maps.",
@@ -88,9 +106,12 @@ module.exports = {
         "Help text print": "Make scaled PDF map. Tweak the orange square in the map to set view extent and scale.",
         "Activate drawing tools": "Activate drawing tools",
         "Activate print tools": "Activate print tools",
+        "Make": "Make",
         "Make PDF": "Make PDF",
+        "Make PNG": "Make PNG",
         "Download": "Download",
         "Open PDF": "Open PDF",
+        "Open": "Open",
         "Open HTML page": "Open HTML page",
         "Scale": "Scale",
         "Template": "Template",
@@ -99,6 +120,9 @@ module.exports = {
         "Title": "Title",
         "Comment": "Comment",
         "The comment will be placed on the PDF": "The comment will be placed on the PDF",
+        "Sticky": "Sticky",
+        "Add new box": "Add new box",
+        "Remove last box": "Remove last box",
 
         "Draw a line": "Draw a line",
         "Draw an area": "Draw an area",
@@ -159,9 +183,8 @@ module.exports = {
         "Cancel": "Cancel",
         "Ok": "Ok",
         "Apply default style settings for this drawing?": "Apply default style settings for this drawing?",
-        "No drawings in the map": "No drawings in the map",
 
-        "Not a valid scale. Must be over 200.": "Not a valid scale. Must be over 200.",
+        "Not a valid scale. Must be over ": "Not a valid scale. Must be over ",
 
         "Languages": "Languages",
 
@@ -190,9 +213,10 @@ module.exports = {
         "Cancel feature changes": "Cancel feature changes",
         "This browser does not support Service Workers, some features may be unavailable": "This browser does not support Service Workers, some features may be unavailable",
         "Match": "Match",
-        "of the following": "of the following",
-        "any": "any",
-        "all": "all",
+        "Match the following using operator": "Match the following using operator",
+        "any": "OR",
+        "all": "AND",
+        "not": "NOT",
         "Select": "Select",
         "Opacity": "Opacity",
         "Filters": "Filters",
@@ -209,6 +233,23 @@ module.exports = {
         "Refresh existing cache for layer": "Refresh existing cache for layer",
         "Dynamic layer is cached only within the last requested bounding box": "Dynamic layer is cached only within the last requested bounding box",
         "Apply": "Apply",
+        "Reset filter": "Reset filter",
+        "Filter editor": "Filter editor",
+        "Layer is visible": "Layer is visible",
+        "Layer has error": "Layer has error",
+        "Parents": "Parents",
+        "Children": "Children",
+        "Back": "Back",
+        "Fit bounds to filter": "Fit bounds to filter",
+        "Labels": "Labels",
+        "Show labels": "Show labels",
+        "Layer filter": "Layer filter",
+        "New block": "New block",
+        "Filter is required for showing data": "Filter is required for showing data",
+        "More tools": "More tools",
+        "Change layer type": "Change layer type",
+        "Creating download file": "Creating download file",
+        "File was downloaded": "File was downloaded",
 
         // Base layers
         "Side-by-side mode": "Side-by-side mode",
@@ -216,6 +257,7 @@ module.exports = {
         "Side-by-side": "Side-by-side",
         "Overlap": "Overlap",
         "Display layers": "Display layers as",
+        "The selected map has no content in the current map extent": "The selected map has no content in the current map extent",
 
         // Map controls
         "Map controls": "Map controls",
@@ -224,14 +266,31 @@ module.exports = {
         "Previous extent": "Previous extent",
         "Next extent": "Next extent",
         "Click here then draw a square on the map, to zoom in to an area": "Click here then draw a square on the map, to zoom in to an area",
+        "Create a screenshot of the map. The screenshot is downloaded as a PNG file": "Create a screenshot of the map. The screenshot is downloaded as a PNG file",
+        "Screenshot is ready": "Screenshot is ready",
 
         // APIBridge
         "Not authorized to perform this action": "Not authorized to perform this action",
 
-        //Editor
+        // Editor
         "Application is offline, tiles will not be updated. Proceed?": "Application is offline, tiles will not be updated. Proceed?",
         "Are you sure you want to delete the feature?": "Are you sure you want to delete the feature?",
         "The page was loaded without service workers enabled, features editing is not available (the page was loaded via plain HTTP or browser does not support service workers)": "The page was loaded without service workers enabled, features editing is not available (the page was loaded via plain HTTP or browser does not support service workers)",
+        "Editing of geometry is not possible when number of nodes exceed": "Editing of geometry is not possible when number of nodes exceed",
+        "Submit": "Submit",
+        "Are you sure you want to cancel?": "Are you sure you want to cancel?",
+        "Feature added": "Feature added",
+        "You need to plot a point": "You need to plot a point",
+        "You need to plot at least two points": "You need to plot at least two points",
+        "You need to plot at least three points": "You need to plot at least three points",
+        "Required": "Required",
+        "Add new feature to layer": "Add new feature to layer",
+
+        // Editor - ImageUploadWidget
+        "Drop file here, or click to select file to upload": "Drop file here, or click to select file to upload",
+        "The file type can't be shown but you can download it": "The file type can't be shown but you can download it",
+        "Download the file": "Download the file",
+        "File is too big! Maximum size is": "File is too big! Maximum size is",
 
         // OfflineMap
         "tiles failed to load": "tiles failed to load",
@@ -285,6 +344,12 @@ module.exports = {
         "copy token": "Copy token",
         "New title": "New title",
         "StateSnapshots description": "Save, restore and share projects. A project contains the extent of the map, which background map is visible and which layers are turned on, which filters are active as well as your drawings. You can share a project by sharing the displayed URL. If you are not logged in, projects will be linked to the browser you are using. Otherwise, they will be stored under your user login. It is possible to transfer projects from browser to login.",
+        "Copied": "Copied",
+        "There is no tags in the list": "There is no tags in the list",
+        "Create tag": "Create tag",
+        "The filter returned no results": "The filter returned no results",
+        "All on": "All on",
+        "All off": "All off",
 
         //Measurements
         "Expand measurements control": "Activate measurements control",
@@ -301,6 +366,7 @@ module.exports = {
         "No layers available": "No layers available",
 
         //ConfigSwitcher
+        "Configurations": "Configurations",
         "Configuration is not published yet": "Configuration is not published yet",
         "Total configurations": "Total configurations",
         "No configurations to display": "No configurations to display",
@@ -420,6 +486,18 @@ module.exports = {
         "Similarity": "Similarity",
         "Tsvector": "Tsvector",
         "No searchable fields on layer": "No searchable fields on layer",
-        "Method": "Method"
+        "Method": "Method",
+        "Find me": "Find me",
+
+        "Symbols": "Symbols",
+        "Copy symbol": "Copy symbol",
+
+        // Sign in
+        "User name": "User name",
+        "Password": "Password",
+        "Wrong user name or password": "Wrong user name or password",
+        "Signed in as": "Signed in as",
+        "Not signed in": "Not signed in",
+        "Sign out": "Sign out"
     }
 };
