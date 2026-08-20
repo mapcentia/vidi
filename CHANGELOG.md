@@ -6,10 +6,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
 ## [UNRELEASED] - 2026-20-8
-### Changed
+### Added
 - Street View: in embed mode the street view options (Mapillary, Google Street View, Skråfoto, Google Maps
   and COWI, when configured) are now selected via a drawer control on the map instead of the side panel.
+- Layer tree now shows an error icon on layers whose tiles fail to load. Tile loading errors are
+  broadcast on the `tileLayerError:layers` event, so the icon appears and disappears as errors occur and resolve.
+  Only works for non-tiled layers.
 
+### Changed
 - The screenshot button icon changed from a camera to an image icon (the camera icon is
   now used by the street view drawer).
 
