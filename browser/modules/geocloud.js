@@ -784,6 +784,9 @@ geocloud = (function () {
                 if (defaults.loadingEvent) {
                     l.on("loading", defaults.loadingEvent);
                 }
+                if (defaults.tileErrorEvent) {
+                    l.on("tileerror", defaults.tileErrorEvent);
+                }
 
                 break;
         }

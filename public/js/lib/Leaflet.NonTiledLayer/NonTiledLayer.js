@@ -531,7 +531,7 @@ L.NonTiledLayer = (L.Layer || L.Class).extend({
 			return;
 		}
 
-		this.fire('error', e);
+		this.fire('tileerror', e);
 		L.DomUtil.addClass(img, 'invalid');
 		if (img.src !== this.options.errorImageUrl) { // prevent error loop if error image is not valid
 			img.src = this.options.errorImageUrl;
