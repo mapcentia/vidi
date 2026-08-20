@@ -6,6 +6,8 @@
 
 'use strict';
 
+import React from "react";
+
 /**
  *
  * @type {*|exports|module.exports}
@@ -47,11 +49,13 @@ let clicktimer;
 let mapObj;
 
 
-
 let config = require('../../../config/config.js');
 
 let cowiUrl = config?.extensionConfig?.streetView?.cowi;
-let mapillaryUrl = config?.extensionConfig?.streetView?.mapillary ||"https://www.mapillary.com/app/?z=17";
+let mapillaryUrl = config?.extensionConfig?.streetView?.mapillary || "https://www.mapillary.com/app/?z=17";
+const defaultSelectedOption = config?.extensionConfig?.streetView?.default || "google";
+let selectedOption;
+
 
 import {createRoot} from "react-dom/client";
 
@@ -147,7 +151,7 @@ module.exports = {
 
                 this.state = {
                     active: false,
-                    selectedOption: config?.extensionConfig?.streetView?.default || "google"
+                    selectedOption: defaultSelectedOption
                 };
 
                 this.onChange = this.onChange.bind(this);
@@ -188,7 +192,6 @@ module.exports = {
 
                 // Handle click events on map
                 // ==========================
-
                 mapObj.on("dblclick", function () {
                     clicktimer = undefined;
                 });
@@ -200,36 +203,7 @@ module.exports = {
                         if (me.state.active === false) {
                             return;
                         }
-
-                        clicktimer = setTimeout(function () {
-                            let coords = event.getCoordinate(), p, pUtm, url;
-                            p = utils.transform("EPSG:3857", "EPSG:4326", JSON.parse(JSON.stringify(coords)));
-                            pUtm = utils.transform("EPSG:3857", "+proj=utm +zone=32 +ellps=WGS84 +datum=WGS84 +units=m +no_defs", JSON.parse(JSON.stringify(coords)));
-                            clicktimer = undefined;
-
-                            switch (me.state.selectedOption) {
-                                case "google":
-                                    url = "http://maps.google.com/maps?q=&layer=c&cbll=" + p.y + "," + p.x + "&cbp=11,0,0,0,0";
-                                    break;
-
-                                case "mapillary":
-                                    url = mapillaryUrl + "&lat=" + p.y + "&lng=" + p.x;
-                                    break;
-
-                                case "skraafoto":
-                                    url = `https://skraafoto.dataforsyningen.dk/viewer.html?center=${pUtm.x},${pUtm.y}&orientation=north`;
-                                    break;
-                                case "maps":
-                                    url = `https://www.google.dk/maps/@${p.y},${p.x},17z`;
-                                    break;
-
-                                case "cowi":
-                                    url = cowiUrl + "&srid=4326&x=" + p.x + "&y=" + p.y;
-                                    break;
-                            }
-                            parentThis.callBack(url);
-
-                        }, 250);
+                        parentThis.click(event, me.state.selectedOption);
                     }
                 });
             }
@@ -292,9 +266,121 @@ module.exports = {
 
         // Append to DOM
         //==============
-        try {
-            createRoot(document.getElementById(exId)).render(<Streetview/>);
-        } catch (e) {}
+
+        if (!utils.isEmbedEnabled()) {
+            try {
+                createRoot(document.getElementById(exId)).render(<Streetview/>);
+            } catch (e) {
+            }
+        } else {
+            // Start of drawer
+            let active = false;
+            let drawerControl;
+            let drawerItems = [];
+            let template;
+            drawerItems.push(`
+                            <a style="width: 70px" href="#" title="Mapillary" class="position-relative street-view-drawer-item leaflet-bar-part leaflet-bar-part-single overflow-hidden d-flex ps-1">
+                            <div data-vidi-street-view-id="mapillary" data-vidi-street-view-num="1" class="text-center w-100">Mapillary</div>
+                            <div class="${selectedOption !== 'mapillary' ? 'd-none' : ''} baselayer-drawer-item-shadow w-100"></div>
+                            </a>
+                            `
+            );
+            drawerItems.push(`
+                            <a style="width: 75px" href="#" title="Google" class="position-relative street-view-drawer-item leaflet-bar-part leaflet-bar-part-single overflow-hidden d-flex ps-1">
+                            <div data-vidi-street-view-id="google" data-vidi-street-view-num="1" class="text-center w-100">Street View</div>
+                            <div class="${selectedOption !== 'google' ? 'd-none' : ''} baselayer-drawer-item-shadow w-100"></div>
+                            </a>
+                            `
+            );
+            drawerItems.push(`
+                            <a style="width: 65px" href="#" title="Skråfoto" class="position-relative street-view-drawer-item leaflet-bar-part leaflet-bar-part-single overflow-hidden d-flex ps-1">
+                            <div data-vidi-street-view-id="skraafoto" data-vidi-street-view-num="1" class="text-center w-100">Skråfoto</div>
+                            <div class="${selectedOption !== 'skraafoto' ? 'd-none' : ''} baselayer-drawer-item-shadow w-100"></div>
+                            </a>
+                            `
+            );
+            drawerItems.push(`
+                            <a style="width: 50px" href="#" title="Maps" class="position-relative street-view-drawer-item leaflet-bar-part leaflet-bar-part-single overflow-hidden d-flex ps-1">
+                            <div data-vidi-street-view-id="maps" data-vidi-street-view-num="1" class="text-center w-100">Maps</div>
+                            <div class="${selectedOption !== 'maps' ? 'd-none' : ''} baselayer-drawer-item-shadow w-100"></div>
+                            </a>
+                            `
+            );
+            if (cowiUrl) drawerItems.push(`
+                            <a style="width: 50px" href="#" title="COWI" class="position-relative street-view-drawer-item leaflet-bar-part leaflet-bar-part-single overflow-hidden d-flex ps-1">
+                            <div data-vidi-street-view-id="cowi" data-vidi-street-view-num="1" class="text-center w-100">COWI</div>
+                            <div class="${selectedOption !== 'cowi' ? 'd-none' : ''} baselayer-drawer-item-shadow w-100"></div>
+                            </a>
+                            `
+            );
+
+            template = `<div class="d-flex">
+                        <div class="street-view-drawer-container d-flex d-none">${drawerItems.join('')}</div>
+                        <a href="#" title="wdds" class="leaflet-bar-part leaflet-bar-part-single street-view-drawer">
+                            <span class="bi bi-camera street-view-drawer"></span> 
+                        </a>
+                    </div>`;
+            let drawerOptions = {
+                template: template,
+                onclick: (e) => {
+                    const cl = document.querySelector('.street-view-drawer-container').classList;
+                    if (e.target.classList.contains('street-view-drawer')) {
+                        if (cl.contains('d-none')) {
+                            cl.remove('d-none')
+                            active = true;
+                            console.log(active)
+                            if (selectedOption === undefined && defaultSelectedOption !== undefined) {
+                                parentThis.setDrawerItem(defaultSelectedOption)
+                            }
+                        } else {
+                            cl.add('d-none');
+                            active = false;
+                            console.log(active)
+                        }
+                    } else {
+                        parentThis.setDrawerItem(e.target.dataset.vidiStreetViewId)
+                    }
+                }
+            };
+            drawerControl = L.Control.extend({
+                options: {position: 'topright'},
+                onAdd: () => {
+                    let container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom street-view-drawer street-view-tool');
+                    let el = $(container).append(drawerOptions.template)[0];
+                    L.DomEvent.disableClickPropagation(el);
+                    el.onclick = drawerOptions.onclick;
+                    return container;
+                }
+            })
+
+            drawerControl = new drawerControl();
+            cloud.get().map.addControl(drawerControl);
+
+            // Handle click events on map
+            // ==========================
+            mapObj.on("dblclick", function () {
+                clicktimer = undefined;
+            });
+            mapObj.on("click", function (e) {
+                let event = new geocloud.clickEvent(e, cloud);
+                if (clicktimer) {
+                    clearTimeout(clicktimer);
+                } else {
+                    if (active === false) {
+                        return;
+                    }
+                    parentThis.click(event, selectedOption);
+                }
+            });
+        }
+
+    },
+
+    setDrawerItem: (id) => {
+        selectedOption =id;
+        console.log(selectedOption)
+        document.querySelectorAll('.baselayer-drawer-item-shadow').forEach(node => node.classList.add('d-none'))
+        document.querySelector(`[data-vidi-street-view-id="${id}"]`).nextElementSibling.classList.remove('d-none')
     },
 
     callBack: function (url) {
@@ -303,9 +389,40 @@ module.exports = {
 
     setCallBack: function (fn) {
         this.callBack = fn;
+    },
+
+    click: function (event, selectedOption) {
+        const parentThis = this
+        clicktimer = setTimeout(function () {
+            let coords = event.getCoordinate(), p, pUtm, url;
+            p = utils.transform("EPSG:3857", "EPSG:4326", JSON.parse(JSON.stringify(coords)));
+            pUtm = utils.transform("EPSG:3857", "+proj=utm +zone=32 +ellps=WGS84 +datum=WGS84 +units=m +no_defs", JSON.parse(JSON.stringify(coords)));
+            clicktimer = undefined;
+
+            switch (selectedOption) {
+                case "google":
+                    url = "https://maps.google.com/maps?q=&layer=c&cbll=" + p.y + "," + p.x + "&cbp=11,0,0,0,0";
+                    break;
+
+                case "mapillary":
+                    url = mapillaryUrl + "&lat=" + p.y + "&lng=" + p.x;
+                    break;
+
+                case "skraafoto":
+                    url = `https://skraafoto.dataforsyningen.dk/viewer.html?center=${pUtm.x},${pUtm.y}&orientation=north`;
+                    break;
+                case "maps":
+                    url = `https://www.google.dk/maps/@${p.y},${p.x},17z`;
+                    break;
+
+                case "cowi":
+                    url = cowiUrl + "&srid=4326&x=" + p.x + "&y=" + p.y;
+                    break;
+            }
+            parentThis.callBack(url);
+
+        }, 250);
     }
-
-
 };
 
 
