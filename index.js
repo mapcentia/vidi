@@ -88,7 +88,7 @@ if (typeof config?.redis?.host === "string") {
 }
 let sess = {
     store: store,
-    secret: 'keyboard cat',
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     name: "connect.gc2",
