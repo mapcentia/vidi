@@ -271,7 +271,7 @@ module.exports = {
         // Without href, the button will get en blinking cursor in Edge!
         printBtnEl.setAttribute('href', '#')
         printBtnEl.title = __("Create a screenshot of the map. The screenshot is downloaded as a PNG file");
-        const resetPrintBtn = () => printBtnEl.innerHTML = "<span class='bi bi-camera'></span>";
+        const resetPrintBtn = () => printBtnEl.innerHTML = "<span class='bi bi-image'></span>";
         resetPrintBtn();
 
         new L.HistoryControl({
