@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [UNRELEASED] - 2026-20-8
+### Changed
+- Street View: in embed mode the street view options (Mapillary, Google Street View, Skråfoto, Google Maps
+  and COWI, when configured) are now selected via a drawer control on the map instead of the side panel.
+
+- The screenshot button icon changed from a camera to an image icon (the camera icon is
+  now used by the street view drawer).
+
 ## [2026.6.3] - 2026-29-6
 ### Fixed
 - Print: headless browser pool now surfaces `factoryCreateError`/`factoryDestroyError` instead of

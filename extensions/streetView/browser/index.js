@@ -328,14 +328,12 @@ module.exports = {
                         if (cl.contains('d-none')) {
                             cl.remove('d-none')
                             active = true;
-                            console.log(active)
                             if (selectedOption === undefined && defaultSelectedOption !== undefined) {
                                 parentThis.setDrawerItem(defaultSelectedOption)
                             }
                         } else {
                             cl.add('d-none');
                             active = false;
-                            console.log(active)
                         }
                     } else {
                         parentThis.setDrawerItem(e.target.dataset.vidiStreetViewId)
@@ -378,7 +376,6 @@ module.exports = {
 
     setDrawerItem: (id) => {
         selectedOption =id;
-        console.log(selectedOption)
         document.querySelectorAll('.baselayer-drawer-item-shadow').forEach(node => node.classList.add('d-none'))
         document.querySelector(`[data-vidi-street-view-id="${id}"]`).nextElementSibling.classList.remove('d-none')
     },
