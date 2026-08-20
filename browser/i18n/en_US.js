@@ -236,6 +236,7 @@ module.exports = {
         "Reset filter": "Reset filter",
         "Filter editor": "Filter editor",
         "Layer is visible": "Layer is visible",
+        "Layer has error": "Layer has error",
         "Parents": "Parents",
         "Children": "Children",
         "Back": "Back",
