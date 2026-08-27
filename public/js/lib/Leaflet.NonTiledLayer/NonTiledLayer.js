@@ -415,13 +415,20 @@ L.NonTiledLayer = (L.Layer || L.Class).extend({
 	},
 
 	_getClippedBounds: function () {
-		var wgsBounds = this._map.getBounds();
+        // Use the viewport's actual top-left/bottom-right corners instead of
+        // map.getBounds() (built from the bottom-left/top-right corners). In
+        // projected CRS where the lat/lng grid is rotated relative to the screen
+        // (e.g. UTM / EPSG:25832) the synthesized NW/SE corners give a bbox that
+        // is vertically smaller than the viewport, cutting off top and bottom.
+		var pixelBounds = this._map.getPixelBounds();
+		var nwCorner = this._map.unproject(pixelBounds.getTopLeft());
+		var seCorner = this._map.unproject(pixelBounds.getBottomRight());
 
         // truncate bounds to valid wgs bounds
-		var mSouth = wgsBounds.getSouth();
-		var mNorth = wgsBounds.getNorth();
-		var mWest = wgsBounds.getWest();
-		var mEast = wgsBounds.getEast();
+		var mSouth = seCorner.lat;
+		var mNorth = nwCorner.lat;
+		var mWest = nwCorner.lng;
+		var mEast = seCorner.lng;
 
 		var lSouth = this.options.bounds.getSouth();
 		var lNorth = this.options.bounds.getNorth();

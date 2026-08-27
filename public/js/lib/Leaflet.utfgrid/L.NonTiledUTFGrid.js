@@ -139,12 +139,19 @@
             return this.options.detectRetina && leaflet.Browser.retina ? 2 : 1;
         },
         _getClippedBounds: function getClippedBounds() {
-            const wgsBounds = this._map.getBounds();
+            // Use the viewport's actual top-left/bottom-right corners instead of
+            // map.getBounds() (built from the bottom-left/top-right corners). In
+            // projected CRS where the lat/lng grid is rotated relative to the screen
+            // (e.g. UTM / EPSG:25832) the synthesized NW/SE corners give a bbox that
+            // is vertically smaller than the viewport, cutting off top and bottom.
+            const pixelBounds = this._map.getPixelBounds();
+            const nwCorner = this._map.unproject(pixelBounds.getTopLeft());
+            const seCorner = this._map.unproject(pixelBounds.getBottomRight());
             // truncate bounds to valid wgs bounds
-            let mSouth = wgsBounds.getSouth();
-            let mNorth = wgsBounds.getNorth();
-            let mWest = wgsBounds.getWest();
-            let mEast = wgsBounds.getEast();
+            let mSouth = seCorner.lat;
+            let mNorth = nwCorner.lat;
+            let mWest = nwCorner.lng;
+            let mEast = seCorner.lng;
             const lSouth = this.options.bounds.getSouth();
             const lNorth = this.options.bounds.getNorth();
             const lWest = this.options.bounds.getWest();

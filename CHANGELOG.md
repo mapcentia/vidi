@@ -17,6 +17,15 @@ and this project adheres to [CalVer](https://calver.org/).
 - The screenshot button icon changed from a camera to an image icon (the camera icon is
   now used by the street view drawer).
 
+### Fixed
+- Non-tiled overlays no longer get their top and bottom cut off when the map runs in a
+  projected CRS such as EPSG:25832. `Leaflet.NonTiledLayer` (and the derived
+  `L.NonTiledUTFGrid`) computed the request bbox from `map.getBounds()`, whose synthesized
+  NW/SE corners shrink vertically when the lat/lng grid is rotated relative to the screen
+  (UTM meridian convergence). The bbox is now derived from the viewport's actual
+  top-left/bottom-right corners. This also fixes the vertical offset in UTF-grid
+  hover/click hit-testing in EPSG:25832.
+
 ## [2026.6.3] - 2026-29-6
 ### Fixed
 - Print: headless browser pool now surfaces `factoryCreateError`/`factoryDestroyError` instead of
