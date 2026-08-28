@@ -345,13 +345,22 @@ module.exports = {
             if (popupEl) {
                 popupEl.querySelectorAll('.accordion-collapse').forEach(el => {
                     if (typeof bootstrap !== 'undefined' && bootstrap.Collapse) {
-                        try { bootstrap.Collapse.getInstance(el)?.dispose(); } catch (e) {}
+                        try {
+                            bootstrap.Collapse.getInstance(el)?.dispose();
+                        } catch (e) {
+                        }
                     }
                     el.replaceWith(el.cloneNode(false));
                 });
             }
-            try { vectorPopUp.off(); } catch (e) {}
-            try { vectorPopUp.closePopup(); } catch (e) {}
+            try {
+                vectorPopUp.off();
+            } catch (e) {
+            }
+            try {
+                vectorPopUp.closePopup();
+            } catch (e) {
+            }
             vectorPopUp = undefined;
         }
     },
@@ -3965,12 +3974,33 @@ module.exports = {
     },
     onApplyDownloadHandler: (layerKey, format) => {
         let whereClause = _self.getActiveLayerFilters(layerKey)[0] ?? '1=1';
-        const versioning = meta.getMetaByKey(layerKey)['versioning'];
+        const metaByKey = meta.getMetaByKey(layerKey);
+        const versioning = metaByKey['versioning'];
         if (versioning) {
-            whereClause+=` AND gc2_version_end_date is null`;
+            whereClause += ` AND gc2_version_end_date is null`;
         }
-        let sql = `SELECT *
-                   FROM ${layerKey}`
+        const cols = [];
+        let colsStr = '';
+        const fieldConf = JSON.parse(metaByKey['fieldconf']);
+        const pkey = metaByKey['pkey'];
+        if (fieldConf) {
+            Object.entries(metaByKey.fields).forEach(([i, val]) => {
+                if ( (fieldConf?.[i]?.querable === true ||
+                    (fieldConf?.[i]?.type === 'geometry' || i === pkey))
+                    && fieldConf?.[i]?.ignore !== true
+                ) {
+                    cols.push(i);
+                }
+            });
+            cols.sort((a, b) => {
+                return fieldConf[a].sort_id - fieldConf[b].sort_id;
+            });
+            colsStr = '"' + cols.join('","') + '"';
+        } else {
+            colsStr = '*';
+        }
+
+        let sql = `SELECT ${colsStr} FROM ${layerKey}`
         if (whereClause) {
             sql += ` WHERE ${whereClause}`;
         }
