@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [UNRELEASED] - 2026-20-8
+## [2026.9.0] - 2026-22-9
 ### Added
 - Street View: in embed mode the street view options (Mapillary, Google Street View, Skråfoto, Google Maps
   and COWI, when configured) are now selected via a drawer control on the map instead of the side panel.
