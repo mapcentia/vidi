@@ -2606,7 +2606,7 @@ module.exports = {
                                     if (column.value === `true`) value = `TRUE`;
                                     if (column.value === `false`) value = `FALSE`;
 
-                                    block = `${column.fieldname} ${column.expression} ${value}`;
+                                    block = `"${column.fieldname}" ${column.expression} ${value}`;
                                     break;
                                 case `date`:
                                 case `timestamp with time zone`:
@@ -2617,7 +2617,7 @@ module.exports = {
                                         throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layerDescription.fields[key].type} type)`);
                                     }
 
-                                    block = `${column.fieldname} ${column.expression} '${column.value}'`;
+                                    block = `"${column.fieldname}" ${column.expression} '${column.value}'`;
                                     break;
                                 case `text`:
                                 case `string`:
@@ -2629,9 +2629,9 @@ module.exports = {
                                     }
 
                                     if (column.expression === 'like') {
-                                        block = `${column.fieldname} ILIKE '%${column.value}%'`;
+                                        block = `"${column.fieldname}" ILIKE '%${column.value}%'`;
                                     } else {
-                                        block = `${column.fieldname} ${column.expression} '${column.value}'`;
+                                        block = `"${column.fieldname}" ${column.expression} '${column.value}'`;
                                     }
 
                                     break;
