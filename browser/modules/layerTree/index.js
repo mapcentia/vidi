@@ -2646,7 +2646,7 @@ module.exports = {
                                         throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layerDescription.fields[key].type} type)`);
                                     }
 
-                                    block = `${column.fieldname} ${column.expression} ${column.value}`;
+                                    block = `"${column.fieldname}" ${column.expression} ${column.value}`;
                                     break;
                                 default:
                                     console.error(`Unable to process filter with type '${layerDescription.fields[key].type}'`);
