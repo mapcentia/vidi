@@ -1,7 +1,7 @@
 ###############################################################################
 # Base image
 ###############################################################################
-FROM debian:bookworm-slim AS base
+FROM debian:trixie AS base
 LABEL maintainer="Martin Høgh <mh@mapcentia.com>"
 
 # Non-interactive mode for apt
