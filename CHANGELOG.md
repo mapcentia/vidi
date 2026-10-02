@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2026.9.1] - 2026-2-10
+### Fixed
+- Screenshots no longer fail with "May be map size very big on that zoom level" when a single-tiled
+  (`L.NonTiledLayer`) WMS layer, e.g. a base layer, is on the map. The layer drew its image into a
+  `<canvas>`, which became tainted when the WMS was cross-origin, so `toDataURL()` in dom-to-image threw a
+  `SecurityError`. Non-tiled WMS layers now render with `<img>` (`useCanvas: false`) like tiled layers.
+
 ## [2026.9.0] - 2026-22-9
 ### Added
 - Street View: in embed mode the street view options (Mapillary, Google Street View, Skråfoto, Google Maps
