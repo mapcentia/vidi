@@ -137,6 +137,32 @@ module.exports = {
             }
         }
 
+        api.sqlFilter = (l, f) => {
+            moduleState.editorFilters[l] = [f];
+            moduleState.editorFiltersActive[l] = true;
+            _self.onApplyEditorFiltersHandler({"layerKey": l});
+            if (typeof filterComp[l] === "object") {
+                filterComp[l].setState({"editorFilters": [f]});
+                filterComp[l].setState({"editorFiltersActive": true});
+            }
+        }
+
+        api.resetFilters = (l) => {
+            const empty = {
+                    match: `any`,
+                    columns: [{
+                        fieldname: `null`,
+                        expression: `null`,
+                        value: ``
+                    }]
+                }
+            api.filter(l, empty);
+            api.sqlFilter(l, '');
+            filterComp[l].setState({"editorFiltersActive": false});
+            moduleState.editorFiltersActive[l] = false;
+            _self.onDisableArbitraryFiltersHandler(l)
+        }
+
         return this;
     },
 
