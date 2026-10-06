@@ -250,6 +250,7 @@ module.exports = {
         "Change layer type": "Skift lagtype",
         "Creating download file": "Skaber download fil",
         "File was downloaded": "Fil blev downloaded",
+        "No fields to export": "Ingen felter at eksportere",
 
         // Base layers
         "Side-by-side mode": "Dobbelt baggrundskort",
