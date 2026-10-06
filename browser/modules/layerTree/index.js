@@ -4008,17 +4008,18 @@ module.exports = {
         const cols = [];
         let colsStr = '';
         const fieldConf = JSON.parse(metaByKey['fieldconf']);
-        const pkey = metaByKey['pkey'];
         if (fieldConf) {
             Object.entries(metaByKey.fields).forEach(([i, val]) => {
-                if ( (fieldConf?.[i]?.querable === true ||
-                    (fieldConf?.[i]?.type === 'geometry' || i === pkey))
-                    && fieldConf?.[i]?.ignore !== true
-                ) {
+                if (!fieldConf?.[i]?.not_exportable === true && fieldConf?.[i]?.ignore !== true) {
                     cols.push(i);
                 }
             });
+            if (cols.length === 0) {
+                utils.showDangerToast(__('No fields to export'), {delay: 1000, autohide: true});
+                return;
+            }
             cols.sort((a, b) => {
+                if (!fieldConf[a]?.sort_id || !fieldConf[b]?.sort_id) return 1;
                 return fieldConf[a].sort_id - fieldConf[b].sort_id;
             });
             colsStr = '"' + cols.join('","') + '"';
