@@ -741,6 +741,7 @@ module.exports = module.exports = {
                         maxNativeZoom: BLmaxNativeZoom,
                         singleTile: bl?.singleTile,
                         version: bl?.version ?? '1.1.1',
+                        crossOrigin: bl?.crossOrigin,
                     });
                 } else {
                     result = cloud.get().addBaseLayer(bl.id, bl.db, {

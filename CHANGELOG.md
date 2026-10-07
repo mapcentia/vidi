@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2026.10.1] - 2026-7-10
+### Changed
+- Single-tiled (`L.NonTiledLayer`) WMS layers render with `<canvas>` again. The 2026.10.0 change to
+  `<img>` (`useCanvas: false`) was reverted because the data visibility check in the layer tree reads
+  the layer's canvas. Instead the WMS image is now loaded with `crossOrigin: 'anonymous'`, so a
+  cross-origin WMS with CORS headers (GC2, Dataforsyningen, Datafordeler) no longer taints the canvas,
+  and screenshots work. For a WMS server without CORS headers set `"crossOrigin": false` on the base
+  layer in `config.js`.
+
 ## [2026.10.0] - 2026-5-10
 ### Fixed
 - Screenshots no longer fail with "May be map size very big on that zoom level" when a single-tiled

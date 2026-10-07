@@ -289,6 +289,11 @@ Opsætning af tilgængelige base layers kan ske på fire forskellige metoder:
 
 De to egenskaber ``inDrawer`` og ``thumbnail`` anvendes til baggrundskort "skuffe" og toggle knap. Se mere på :ref:`configjs_baselayerdrawer`
 
+WMS baggrundskort har desuden disse egenskaber:
+
+* ``singleTile`` Hvis true hentes kortet som ét billede i stedet for tiles. Default er false.
+* ``crossOrigin`` Hvis ``singleTile`` er true, hentes billedet med CORS (``"anonymous"``), så det kan indgå i screenshots. Sæt til ``false`` hvis WMS-serveren ikke sender CORS-headers, da billedet ellers ikke kan hentes. Default er ``"anonymous"``.
+
 Til WMS baggrundskort fra Datafordeler og Dataforsyningen kan der anvendes en proxy, som til dels fixer et problem med Datafordeler og til dels kan forsyne kaldene med brugernavn/kodeord eller token, så disse ikke bliver eksponeret til Vidi brugerne.
 
 Se hvordan bruger-information opsættes i Systemkonfigurationen :ref:`configjs_df`
