@@ -97,12 +97,13 @@ To add an extension `foo`:
 ## Testing
 
 ```
-npm test                              # full suite: unit + api + puppeteer (slow, ~minutes)
+npm test                              # full suite: unit + api + puppeteer smoke (~2 min)
 npx mocha -t 100000 --recursive test/unit
 npx mocha -t 100000 --recursive test/api
+npx mocha test/puppeteer/bootstrap.js -t 100000 test/puppeteer/smoke.test.js
 ```
 
-Puppeteer tests bootstrap via `test/puppeteer/bootstrap.js` and historically expected specific staging deployments (`vidi.alexshumilov.ru`); see `test/README.md` for the deployment expectations before relying on them. Don't assume they pass in a vanilla clone.
+API and puppeteer tests expect a local Vidi on `http://127.0.0.1:3000` backed by a GC2 with the `mydb` test database (override with `VIDI_TEST_URL`, `VIDI_TEST_DATABASE`, `VIDI_TEST_LAYER`). The old puppeteer suite written for the 2019–2020 UI is in `test/puppeteer-legacy` (`npm run test_legacy`) and does not pass. See `test/README.md`.
 
 ## Things that look broken but aren't
 

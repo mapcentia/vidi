@@ -7,7 +7,7 @@ const request = require(`request`);
 const helpers = require(`./../helpers`);
 const { v4: uuidv4 } = require('uuid');
 
-const DATABASE_NAME = `test`;
+const DATABASE_NAME = `mydb`;
 let createdKey = false;
 
 describe('Key-value proxy', () => {

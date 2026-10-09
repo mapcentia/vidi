@@ -28,18 +28,17 @@ const dummyRequest = {
 };
 
 // Mocks
-const localforageMock = {
-	getItem: (data, callback) => {
-		callback(false, false);
-	},
-	setItem: (key, value, callback) => {
-		if (callback) callback(null);
-	},
-	removeItem: (key, callback) => {
-		if (callback) callback(null);
-	}
+// In-memory localforage mock. Queue stores full items in localforage and only keeps
+// metadata in memory, so the mock has to actually persist what is written.
+const makeLocalforageMock = () => {
+	const store = new Map();
+	return {
+		getItem: (key, callback) => setTimeout(() => callback(null, store.has(key) ? store.get(key) : null), 0),
+		setItem: (key, value, callback) => setTimeout(() => { store.set(key, value); if (callback) callback(null, value); }, 0),
+		removeItem: (key, callback) => setTimeout(() => { store.delete(key); if (callback) callback(null); }, 0)
+	};
 };
-global.localforage = localforageMock;
+global.localforage = makeLocalforageMock();
 
 const jQueryAJAXMock = () => {
 	return {
@@ -58,6 +57,10 @@ global.$ = {};
 global.$.ajax = jQueryAJAXMock;
 
 describe("Queue", () => {
+	beforeEach(() => {
+		global.localforage = makeLocalforageMock();
+	});
+
     it("throws an Error if no processor() is specified", async () => {
         try {
 			let queue = new Queue();
@@ -81,7 +84,7 @@ describe("Queue", () => {
 		});
 
 		// Checking if queue restores itself on initialization
-		global.localforage = localforageMock;
+		global.localforage = makeLocalforageMock();
 		expect(queueWasRestoredOnStartup).to.be.true;
 		queue.terminate();
 	});
@@ -98,7 +101,7 @@ describe("Queue", () => {
 			// Adding add feature request
 			item = helpers.duplicate(dummyRequest);
 			item.type = 100;
-			queue.pushAndProcess(item);
+			await queue.pushAndProcess(item);
         } catch(e) {
             expect(e.message.indexOf('Queue: item has to have a certain type')).to.equal(0);
 		}
@@ -117,12 +120,12 @@ describe("Queue", () => {
 			// Adding delete feature request
 			item = helpers.duplicate(dummyRequest);
 			item.type = Queue.DELETE_REQUEST;
-			queue.pushAndProcess(item);
+			await queue.pushAndProcess(item);
 
 			// Adding update feature request
 			item = helpers.duplicate(dummyRequest);
 			item.type = Queue.UPDATE_REQUEST;
-			queue.pushAndProcess(item);
+			await queue.pushAndProcess(item);
 
         } catch(e) {
             expect(e.message.indexOf('Queue: erroneous queue item pairs')).to.equal(0);
@@ -143,13 +146,13 @@ describe("Queue", () => {
 			item = helpers.duplicate(dummyRequest);
 			item.type = Queue.UPDATE_REQUEST;
 			item.feature.features[0].properties.gid = -2;
-			queue.pushAndProcess(item);
+			await queue.pushAndProcess(item);
 
 			// Adding update feature request
 			item = helpers.duplicate(dummyRequest);
 			item.type = Queue.UPDATE_REQUEST;
 			item.feature.features[0].properties.gid = -2;
-			queue.pushAndProcess(item);
+			await queue.pushAndProcess(item);
         } catch(e) {
             expect(e.message.indexOf('Queue: cannot update item that does not exists on backend')).to.equal(0);
 		}
@@ -177,9 +180,14 @@ describe("Queue", () => {
 		let item = helpers.duplicate(dummyRequest);
 		item.type = Queue.UPDATE_REQUEST;
 		item.feature.features[0].properties.gid = -2;
-		queue.pushAndProcess(item);
+		let error = false;
+		try {
+			await queue.pushAndProcess(item);
+		} catch (e) {
+			error = e;
+		}
 
-		global.localforage = localforageMock;
+		expect(error).to.deep.equal({ status: 'error' });
 		queue.terminate();
 	});
 
@@ -412,12 +420,13 @@ describe("Queue", () => {
 			updateRequest = helpers.duplicate(dummyRequest);
 			updateRequest.type = Queue.UPDATE_REQUEST;
 			updateRequest.feature.features[0].properties.gid = 2;
-			queue.pushAndProcess(updateRequest);
+			await queue.pushAndProcess(updateRequest);
 
 			let deleteRequest = helpers.duplicate(dummyRequest);
 			deleteRequest.type = Queue.DELETE_REQUEST;
 			deleteRequest.feature.features[0].properties.gid = 2;
-			queue.pushAndProcess(deleteRequest);
+			// Merging of items with the same identifier is asynchronous
+			await queue.pushAndProcess(deleteRequest);
 
 			expect(queue.getMetadataLength()).to.equal(2);
 			expect(queue.getMetadataItems()[1].type).to.equal(Queue.DELETE_REQUEST);
@@ -539,6 +548,7 @@ describe("Queue", () => {
 
         const fullItem = await queue.getFullItem(md.id);
         expect(fullItem.feature.features[0].properties.id).to.equal('1');
+        queue.terminate();
     });
 
     it("removeByPrimaryKeys deletes the storage record and the metadata entry", async () => {
@@ -558,6 +568,7 @@ describe("Queue", () => {
 
         expect(queue.getMetadataLength()).to.equal(0);
         expect([...store.keys()].some(k => k.startsWith('queueItem:'))).to.equal(false);
+        queue.terminate();
     });
 
     it("push → process → success removes both metadata and storage record", async () => {
@@ -581,5 +592,6 @@ describe("Queue", () => {
         // After successful processing, metadata and storage should both be empty.
         expect(queue.getMetadataLength()).to.equal(0);
         expect([...store.keys()].some(k => k.startsWith('queueItem:'))).to.equal(false);
+        queue.terminate();
     });
 });

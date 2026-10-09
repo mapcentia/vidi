@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2026.10.2] - 2026-8-10
+### Fixed
+- A vector layer without a GC2 `meta` field no longer stops Vidi from loading when it is filtered with
+  `?initialFilter=`, so `/api/static` (PNG of a filtered map) no longer hangs for such layers. The layer
+  tree threw "Invalid layer meta object" instead of using the default query limit and no clustering.
+
+### Changed
+- Tests run against a local Vidi (`http://127.0.0.1:3000`) instead of `vidi.swarm.gc2.io`, set with
+  `VIDI_TEST_URL`, `VIDI_TEST_DATABASE` and `VIDI_TEST_LAYER`. Unit and API tests were updated for the
+  current Queue and API, and `test/puppeteer` now holds smoke tests for the current UI. The old puppeteer
+  suite is in `test/puppeteer-legacy` (`npm run test_legacy`). See `test/README.md`.
+
 ## [2026.10.1] - 2026-7-10
 ### Changed
 - Single-tiled (`L.NonTiledLayer`) WMS layers render with `<canvas>` again. The 2026.10.0 change to

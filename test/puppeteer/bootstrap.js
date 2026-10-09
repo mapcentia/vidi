@@ -1,5 +1,4 @@
 const puppeteer = require("puppeteer");
-const axios = require("axios");
 const localforage = require("localforage");
 const { expect } = require("chai");
 const _ = require("lodash");
@@ -18,10 +17,6 @@ beforeEach(async () => {
     global.expect = expect;
     global.localforage = localforage;
     global.browser = await puppeteer.launch(opts);
-    let response = await axios.get(`https://swarm.gc2.io/api/v2/keyvalue/demo`);
-    response.data.data.map(item => {
-        axios.delete(`http://swarm.gc2.io/api/v2/keyvalue/aleksandrshumilov/${item.key}`);
-    });
 });
 
 // close browser and reset global variables

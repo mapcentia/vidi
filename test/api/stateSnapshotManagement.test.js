@@ -5,7 +5,7 @@
 const {expect} = require(`chai`);
 const request = require(`request`);
 const helpers = require(`./../helpers`);
-const base64url = require("base64url");
+const base64url = require("./../../browser/modules/base64url.js");
 
 let AUTH_COOKIE = false;
 const TRACKER_COOKIE = `vidi-state-tracker=789e6095-cf85-4435-a095-e1311bb9d215`;
@@ -363,7 +363,6 @@ describe('State snapshot management API', () => {
                 Cookie: cookie,
                 'Content-type': 'text/plain'
             },
-            json: true,
             body: base64url.encode(JSON.stringify({
                         host: `https://example.com`,
                         database: `database`,
@@ -385,7 +384,7 @@ describe('State snapshot management API', () => {
 
         request(options, (error, response, body) => {
             expect(response.statusCode).to.equal(200);
-            let id = body.id;
+            let id = JSON.parse(body).id;
 
             getAllSnapshots(true).then(stateSnapshots => {
                 let foundItem = false;
@@ -494,12 +493,11 @@ describe('State snapshot management API', () => {
                         Cookie: failingCookie,
                         'Content-type': 'text/plain'
                     },
-                    json: true,
                     body: base64url.encode(JSON.stringify(foundItem))
                 };
 
                 request(options, (error, response, body) => {
-                    expect(response.body.error).to.equal(`ACCESS_DENIED`);
+                    expect(JSON.parse(body).error).to.equal(`ACCESS_DENIED`);
                     expect(response.statusCode).to.equal(400);
                     done();
                 });

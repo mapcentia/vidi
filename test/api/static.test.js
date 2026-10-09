@@ -9,10 +9,10 @@ const helpers = require(`./../helpers`);
 describe('Static PNG API', () => {
     it('should generate PNG image according to provided filters', (done) => {
         let buff = new Buffer.from(JSON.stringify({
-            "test.city_center": {
+            "public.planer": {
                 "match":"any",
                 "columns":[{
-                    "fieldname":"id",
+                    "fieldname":"gid",
                     "expression":">",
                     "value":"6",
                     "restriction":false
@@ -20,7 +20,7 @@ describe('Static PNG API', () => {
             }
         }));
 
-        const url = `${helpers.API_URL}/static/mydb/test?filter=${buff.toString('base64')}&width=600&height=600`;
+        const url = `${helpers.API_URL}/static/mydb/public?filter=${buff.toString('base64')}&width=600&height=600`;
         request({
             method: `GET`,
             url

@@ -5,18 +5,25 @@ const sleepFunction = (ms) => {
     return new Promise(resolve => setTimeout(resolve, ms));
 };
 
+// The tests run against a local Vidi (default http://127.0.0.1:3000) backed by a GC2 that holds
+// the test database. Override with VIDI_TEST_URL and VIDI_TEST_DATABASE.
+const BASE_URL = (process.env.VIDI_TEST_URL || `http://127.0.0.1:3000`).replace(/\/$/, ``);
+const DATABASE = process.env.VIDI_TEST_DATABASE || `mydb`;
+const PAGE_URL = `${BASE_URL}/app/${DATABASE}/public/#osm/13/39.2963/-6.8335/`;
+
 module.exports = {
-    API_URL: `http://127.0.0.1:3000/api`,
+    API_URL: `${BASE_URL}/api`,
     // Base instance URL
-    PAGE_URL_BASE: `http://127.0.0.1:3000/`,
+    PAGE_URL_BASE: `${BASE_URL}/`,
+    DATABASE,
     // Vidi instance with default template
-    PAGE_URL_DEFAULT: `https://vidi.swarm.gc2.io/app/aleksandrshumilov/public/#osm/13/39.2963/-6.8335/`,
-    // Vidi instance that works with newest backend (swarm.gc2.io testing:aDvvi9802dmosd)
-    PAGE_URL_LATEST_GC2: `https://vidi.swarm.gc2.io/app/testing/public/#osm/13/39.2963/-6.8335/`,
+    PAGE_URL_DEFAULT: PAGE_URL,
+    // Vidi instance that works with newest backend
+    PAGE_URL_LATEST_GC2: PAGE_URL,
     // Vidi instance with default template without SSL
-    PAGE_URL_DEFAULT_NO_SSL: `http://vidi.swarm.gc2.io/app/aleksandrshumilov/public/#osm/13/39.2963/-6.8335/`,
+    PAGE_URL_DEFAULT_NO_SSL: PAGE_URL,
     // Vidi instance with embedded template
-    PAGE_URL_EMBEDDED: `https://vidi.swarm.gc2.io/app/aleksandrshumilov/public/#osm/13/39.2963/-6.8335/`,
+    PAGE_URL_EMBEDDED: PAGE_URL,
     PAGE_LOAD_TIMEOUT: 1000,
     EMULATED_SCREEN: {
         viewport: {

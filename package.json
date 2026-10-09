@@ -10,7 +10,7 @@
     "build:libs": "node build.mjs --libs",
     "watch": "node build.mjs --watch",
     "test": "nyc mocha -t 100000 --recursive test/unit && nyc mocha -t 100000 --recursive test/api && nyc mocha test/puppeteer/bootstrap.js -t 100000 --recursive test/puppeteer",
-    "test_custom": "nyc mocha test/puppeteer/bootstrap.js -t 100000 -b --recursive test/puppeteer --grep \"Layer tree layer types\"",
+    "test_legacy": "nyc mocha test/puppeteer/bootstrap.js -t 100000 --recursive test/puppeteer-legacy",
     "build_docs": "sphinx-build ./docs ./docs/_build/html/da",
     "gettext": "sphinx-build ./docs -b gettext ./docs/_build/gettext",
     "update_en": "cd ./docs && sphinx-intl update -p _build/gettext -l en",
