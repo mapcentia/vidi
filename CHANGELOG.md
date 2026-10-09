@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [2026.10.2] - 2026-8-10
+## [UNRELEASED] - 2026-8-10
 ### Fixed
 - A vector layer without a GC2 `meta` field no longer stops Vidi from loading when it is filtered with
   `?initialFilter=`, so `/api/static` (PNG of a filtered map) no longer hangs for such layers. The layer
