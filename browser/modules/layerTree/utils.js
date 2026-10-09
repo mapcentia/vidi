@@ -345,8 +345,7 @@ const storeErrorHandler = (store, response) => {
  * @return {Number}
  */
 const getQueryLimit = (layerMeta) => {
-    if (!layerMeta) throw new Error(`Invalid layer meta object`);
-
+    // Layers without a "meta" field get the default limit
     let layerSpecificQueryLimit = SQL_QUERY_LIMIT;
     if (layerMeta && `max_features` in layerMeta && parseInt(layerMeta.max_features) > 0) {
         layerSpecificQueryLimit = parseInt(layerMeta.max_features);
@@ -363,8 +362,7 @@ const getQueryLimit = (layerMeta) => {
  * @return {Number}
  */
 const getIfClustering = (layerMeta) => {
-    if (!layerMeta) throw new Error(`Invalid layer meta object`);
-
+    // Layers without a "meta" field are not clustered
     let useClustering = false;
     if (layerMeta && `use_clustering` in layerMeta) {
         useClustering = layerMeta.use_clustering;
