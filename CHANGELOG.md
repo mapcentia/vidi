@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
 ## [UNRELEASED] - 2026-8-10
+### Added
+- Feature info (pop-up and table) shows the text of a code instead of the raw value when the field has
+  allowed values in GC2's field Properties (`{"_rel": ..., "_value": ..., "_text": ...}` or a value-text
+  list), e.g. "i drift" instead of `2`. Until now these texts were only used in the editor and filters.
+  A value of `0` (often "Unknown") is looked up like any other value.
+
 ### Fixed
 - A vector layer without a GC2 `meta` field no longer stops Vidi from loading when it is filtered with
   `?initialFilter=`, so `/api/static` (PNG of a filtered map) no longer hangs for such layers. The layer
