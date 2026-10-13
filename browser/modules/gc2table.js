@@ -453,6 +453,13 @@ var gc2table = (function () {
                                         <img style='width:25px' src="${srcVal}"/>
                                      </div>`;
                             }
+                        } else if (k.dataIndex === n && k?.restrictions && layerClone[n] !== null && layerClone[n] !== undefined && layerClone[n] !== '') {
+                            // Show the text for the value from the field's restrictions (see sqlQuery.js).
+                            // 0 is a valid code (e.g. id 0 = "Unknown" in a code list), so it is not skipped.
+                            const restriction = k.restrictions.find(r => r.value === layerClone[n]);
+                            if (restriction) {
+                                layerClone[n] = restriction.alias;
+                            }
                         }
                     });
                 });

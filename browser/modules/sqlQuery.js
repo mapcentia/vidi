@@ -845,6 +845,9 @@ module.exports = {
                     $.each(sortObject(fieldConf), (name, property) => {
                         if (property.value.querable) {
                             let value = feature.properties[property.key];
+                            // Allowed values of the field with their texts, from the field's Properties in GC2
+                            // (e.g. {"_rel": "schema.table", "_value": "id", "_text": "name"}). Used to show a code's text.
+                            const restrictions = metaDataKeys[keyWithOutPrefix].fields?.[property.key]?.restriction;
                             // Only set field template if property is set or not empty string OR if 'replaceNull' helper is used, which will replace nulls
                             if ((property.value.template && feature.properties[property.key] && feature.properties[property.key] !== '') || property.value?.template?.includes('replaceNull')) {
                                 const fieldTmpl = property.value.template;
@@ -985,11 +988,17 @@ module.exports = {
                                     `
                                     }
                                 }
+                            } else if (Array.isArray(restrictions)) {
+                                // Show the text for the value instead of the raw value (e.g. "i drift" instead of 2)
+                                const restriction = restrictions.find(r => r.value === value);
+                                if (restriction) {
+                                    value = restriction.alias;
+                                }
                             }
                             fields.push({title: property.value.alias || property.key, value});
                             fieldLabel = (property.value.alias !== null && property.value.alias !== "") ? property.value.alias : property.key;
                             if (feature.properties[property.key] !== undefined) {
-                                out.push([property.key, property.value.sort_id, fieldLabel, property.value.link, property.value.template, property.value.content]);
+                                out.push([property.key, property.value.sort_id, fieldLabel, property.value.link, property.value.template, property.value.content, Array.isArray(restrictions) ? restrictions : null]);
                             }
                         }
                     });
@@ -1017,6 +1026,7 @@ module.exports = {
                             link: property[3],
                             template: property[4],
                             content: property[5],
+                            restrictions: property[6],
                         })
                     });
                     first = false;
