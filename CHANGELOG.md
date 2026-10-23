@@ -5,11 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [UNRELEASED] - 2026-8-10
+## [2026-10-2] - 2026-23-10
 ### Fixed
 - A vector layer without a GC2 `meta` field no longer stops Vidi from loading when it is filtered with
   `?initialFilter=`, so `/api/static` (PNG of a filtered map) no longer hangs for such layers. The layer
   tree threw "Invalid layer meta object" instead of using the default query limit and no clustering.
+- A regression. Without the length check on metadata, Vidi will go into a loop trying to fetch metadata from 
+  missing but none-existing layer and will never start up.
 
 ### Changed
 - Tests run against a local Vidi (`http://127.0.0.1:3000`) instead of `vidi.swarm.gc2.io`, set with
