@@ -142,7 +142,7 @@ module.exports = {
                                 }
                                 $('#layer-filter-container').css('pointer-events', 'auto').css('opacity', 1.0);
                                 $('.layer-loading-indicator').hide();
-                                if (data.data) {
+                                if (data.data && data.data.length > 0) {
                                     me.addMetaData(data);
                                     ready = true;
                                     resolve(schemata);
