@@ -1,9 +1,7 @@
-version: '3'
-
 services:
   base:
     build: ./base
-    image: mapcentia/vidi:base
+    image: mapcentia/vidi:node14-bookworm-1
   vidi:
     build: ./stable
     image: mapcentia/vidi
