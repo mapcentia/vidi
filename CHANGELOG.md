@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [UNRELEASED] - 2026-29-10
+## [2026-10-3] - 2026-29-10
 ### Fixed
 - Vector layers no longer flood the SQL API with requests when it fails. A failed request was retried
   immediately with no delay, and the last retry got a timeout of `Infinity` (`9000 / 0`), so the browser
