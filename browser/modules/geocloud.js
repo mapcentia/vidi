@@ -241,7 +241,7 @@ geocloud = (function () {
     };
 
     geoJsonStore = sqlStore = function (config) {
-        var prop, me = this, map, sql, xhr = {
+        var prop, me = this, map, sql, retryTimer, xhr = {
             abort: function () {/* stub */
             }
         };
@@ -321,7 +321,9 @@ geocloud = (function () {
             let retries = 3;
             let timeoutBase = 9000;
             const makeRequest = function () {
-                const timeout = timeoutBase / retries;
+                // Guard against division by zero on the last attempt: a timeout of
+                // Infinity makes jQuery abort the request immediately.
+                const timeout = timeoutBase / Math.max(retries, 1);
                 let isRetrying = false;
                 xhr = $.ajax({
                     dataType: 'json',
@@ -412,11 +414,14 @@ geocloud = (function () {
                         if (t === 'abort') {
                             return;
                         }
-                        if (retries > 0) {
+                        // Client errors (e.g. invalid SQL) will not succeed on retry
+                        const isClientError = x && x.status >= 400 && x.status < 500;
+                        if (retries > 0 && !isClientError) {
                             retries--;
                             isRetrying = true;
                             console.warn("SQL request failed, retrying... (" + retries + " retries left)");
-                            makeRequest();
+                            // Back off before retrying, so a failing API isn't hammered
+                            retryTimer = setTimeout(makeRequest, 1000 * Math.pow(2, 2 - retries));
                         } else {
                             me.defaults.error.apply(me, [me, x, t, e]);
                         }
@@ -428,10 +433,12 @@ geocloud = (function () {
         };
 
         this.abort = function () {
+            clearTimeout(retryTimer);
             xhr.abort();
         }
         this.destroy = function () {
             this.reset();
+            clearTimeout(retryTimer);
             xhr = {
                 abort: function () {/* stub */
                 }
