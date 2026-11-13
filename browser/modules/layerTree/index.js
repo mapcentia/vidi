@@ -2156,13 +2156,17 @@ module.exports = {
                 }, LAYER.VECTOR)
             }
 
+            // Rows without geometry have no Leaflet layer, so the feature itself is handed to the editor
+            const getFeatureWithoutGeometry = (row) => {
+                return moduleState.vectorStores[LAYER.VECTOR + ':' + layerKey]?.geoJSON?.features?.find(f => !f.geometry && f.properties?._id === row._id);
+            }
             const edit = (row) => {
                 console.log(layerKey, row._id.toString());
-                backboneEvents.get().trigger("edit:editor", row._id, layerKey, true);
+                backboneEvents.get().trigger("edit:editor", row._id, layerKey, true, getFeatureWithoutGeometry(row));
             }
             const _delete = (row) => {
                 if (window.confirm(__(`Are you sure you want to delete the feature?`))) {
-                    backboneEvents.get().trigger("delete:editor", row._id, layerKey, true);
+                    backboneEvents.get().trigger("delete:editor", row._id, layerKey, true, getFeatureWithoutGeometry(row));
                 }
             }
 

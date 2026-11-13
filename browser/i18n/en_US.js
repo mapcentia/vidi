@@ -499,6 +499,7 @@ module.exports = {
         "Wrong user name or password": "Wrong user name or password",
         "Signed in as": "Signed in as",
         "Not signed in": "Not signed in",
-        "Sign out": "Sign out"
+        "Sign out": "Sign out",
+        "No geometry": "No geometry"
     }
 };

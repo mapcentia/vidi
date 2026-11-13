@@ -260,12 +260,30 @@ module.exports = {
             });
         });
 
-        backboneEvents.get().on("edit:editor", function (id, layerKey, isVector) {
-            _self.edit(getLayerById(parseInt(id)), layerKey, isVector);
+        // Features without geometry have no layer in the map. A stand-in with the
+        // parts of the Leaflet layer API the editor uses makes attribute-only
+        // editing and deleting possible.
+        const getEditTarget = (id, feature) => {
+            const layer = getLayerById(parseInt(id));
+            if (layer || !feature) {
+                return layer;
+            }
+            return {
+                feature,
+                toGeoJSON: () => ({type: "Feature", properties: {...feature.properties}, geometry: null}),
+                on: () => {
+                },
+                off: () => {
+                }
+            };
+        }
+
+        backboneEvents.get().on("edit:editor", function (id, layerKey, isVector, feature) {
+            _self.edit(getEditTarget(id, feature), layerKey, isVector);
         });
 
-        backboneEvents.get().on("delete:editor", function (id, layerKey, isVector) {
-            _self.delete(getLayerById(parseInt(id)), layerKey, isVector);
+        backboneEvents.get().on("delete:editor", function (id, layerKey, isVector, feature) {
+            _self.delete(getEditTarget(id, feature), layerKey, isVector);
         });
 
         backboneEvents.get().on("ready:meta", function () {
@@ -883,7 +901,12 @@ module.exports = {
             featureWasEdited = false;
             // Hack to edit (Multi)Point layers
             // Create markers, which can be dragged
-            switch (e.feature.geometry.type) {
+            switch (e.feature.geometry?.type) {
+                case undefined:
+                    // Feature without geometry: only attributes can be edited
+                    editor = false;
+                    break;
+
                 case "Point":
                     markers[0] = L.marker(
                         e.getLatLng(),
@@ -939,7 +962,9 @@ module.exports = {
                     break;
             }
 
-            _self.enableSnapping(e.feature.geometry.type, true, e);
+            if (e.feature.geometry) {
+                _self.enableSnapping(e.feature.geometry.type, true, e);
+            }
             // Check if there's a pending queue item for this feature (e.g. user already
             // edited and submitted, but the request hasn't gone through to the server
             // yet). Use the queue's snapshot in that case, so the user resumes editing
@@ -1038,7 +1063,7 @@ module.exports = {
 
                 // HACK to handle (Multi)Point layers
                 // Update the GeoJSON from markers
-                switch (s.eventFeatureCopy.geometry.type) {
+                switch (s.eventFeatureCopy.geometry?.type) {
                     case "Point":
                         GeoJSON.geometry.coordinates = [s.markers[0].getLatLng().lng, s.markers[0].getLatLng().lat];
                         break;
@@ -1072,7 +1097,7 @@ module.exports = {
                     }
                 });
 
-                if (s.eventFeatureCopy.geometry.type === `Polygon`) {
+                if (s.eventFeatureCopy.geometry?.type === `Polygon`) {
                     GeoJSON = _self.removeDuplicates(GeoJSON);
                 }
 
@@ -1255,7 +1280,7 @@ module.exports = {
             }
 
             // No need to reload layer if point feature was edited, as markers are destroyed anyway
-            if (editedFeature.feature.geometry.type !== `Point` && editedFeature.feature.geometry.type !== `MultiPoint`) {
+            if (editedFeature.feature.geometry && editedFeature.feature.geometry.type !== `Point` && editedFeature.feature.geometry.type !== `MultiPoint`) {
                 editedFeature.disableEdit();
             }
         }

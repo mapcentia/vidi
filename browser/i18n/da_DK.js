@@ -498,7 +498,8 @@ module.exports = {
         "Wrong user name or password": "Forkert brugernavn eller kodeord",
         "Signed in as": "Logget ind som",
         "Not signed in": "Ikke logget ind",
-        "Sign out": "Log ud"
+        "Sign out": "Log ud",
+        "No geometry": "Ingen geometri"
 
     }
 };

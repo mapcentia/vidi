@@ -141,18 +141,23 @@ var gc2table = (function () {
             let row = $('*[data-uniqueid="' + id + '"]');
             row.addClass("selected");
             try {
-                if (setSelectedStyle) {
+                if (setSelectedStyle && layer) {
                     layer.setStyle(selectedStyle);
                 }
             } catch (e) {
                 console.warn("Can't set style on marker")
             }
 
+            // Rows without geometry have no layer, so the feature is passed as well
+            let feature = layer ? layer.feature : getFeatureWithoutGeometry(id);
             try {
-                onSelect(id, layer, key, store);
+                onSelect(id, layer, key, store, feature);
             } catch (e) {
                 console.info("Error in select function for: " + store.id, e.message);
             }
+
+            // Row without geometry: nothing to open a popup on
+            if (!layer) return;
 
             if (openPopUp) {
                 let str = "<table>", renderedText;
@@ -250,7 +255,6 @@ var gc2table = (function () {
 
         var getDatabaseIdForLayerId = function (layerId) {
             if (!store.geoJSON) return false;
-
             var databaseIdentifier = false;
             store.geoJSON.features.map(item => {
                 if (parseInt(item.properties._id) === parseInt(layerId)) {
@@ -266,6 +270,13 @@ var gc2table = (function () {
             return databaseIdentifier;
         };
 
+        var getFeatureWithoutGeometry = function (id) {
+            if (!store.geoJSON || !store.geoJSON.features) return undefined;
+            return store.geoJSON.features.find(function (item) {
+                return !item.geometry && item.properties && parseInt(item.properties._id) === parseInt(id);
+            });
+        };
+
         var bindEvent = function (e) {
             setTimeout(function () {
                 $(el + ' > tbody > tr').on("click", function (e) {
@@ -276,7 +287,7 @@ var gc2table = (function () {
                         object.trigger("selected" + "_" + uid, id, m);
                         var layer = m.map._layers[id];
                         setTimeout(function () {
-                            if (setViewOnSelect) {
+                            if (setViewOnSelect && layer) {
                                 try {
                                     if (setZoom) {
                                         m.map.fitBounds(layer.getBounds(), {maxZoom: maxZoom});
@@ -300,7 +311,7 @@ var gc2table = (function () {
                         var id = $(this).data('uniqueid');
                         var layer = m.map._layers[id];
                         var databaseIdentifier = getDatabaseIdForLayerId(id);
-                        if (uncheckedIds.indexOf(databaseIdentifier) === -1 && checkBox === true) {
+                        if (layer && uncheckedIds.indexOf(databaseIdentifier) === -1 && checkBox === true) {
                             store.layer._layers[id].setStyle({
                                 opacity: 0.5,
                                 fillOpacity: 0.5
@@ -314,7 +325,7 @@ var gc2table = (function () {
                     if ($(this).hasClass('no-records-found') === false) {
                         var id = $(this).data('uniqueid');
                         var databaseIdentifier = getDatabaseIdForLayerId(id);
-                        if (uncheckedIds.indexOf(databaseIdentifier) === -1 && checkBox === true) {
+                        if (store.layer._layers[id] && uncheckedIds.indexOf(databaseIdentifier) === -1 && checkBox === true) {
                             if (store.layer && store.layer.resetStyle) {
                                 if (!clickedFlag) {
                                     store.layer.resetStyle(store.layer._layers[id]);
@@ -338,6 +349,13 @@ var gc2table = (function () {
             uniqueId: "_id",
             height: height,
             locale: locale,
+            // Rows without geometry have a negative _id (see loadDataInTable) and get a small marker
+            rowStyle: function (row) {
+                return Number(row._id) < 0 ? {classes: "gc2table-no-geometry"} : {};
+            },
+            rowAttributes: function (row) {
+                return Number(row._id) < 0 ? {title: typeof window.__ === "function" ? window.__("No geometry") : "No geometry"} : {};
+            },
             onToggle: bindEvent,
             onSort: bindEvent,
             onColumnSwitch: bindEvent,
@@ -346,7 +364,7 @@ var gc2table = (function () {
 
         $(el).on('check-all.bs.table', function (e, m) {
             m.map(function (checkedRowItem) {
-                if (store.layer && store.layer.resetStyle) {
+                if (store.layer && store.layer.resetStyle && store.layer._layers[checkedRowItem._id]) {
                     store.layer.resetStyle(store.layer._layers[checkedRowItem._id]);
                 }
             });
@@ -359,9 +377,11 @@ var gc2table = (function () {
                 var databaseIdentifier = getDatabaseIdForLayerId(uncheckedRowItem._id);
                 uncheckedIds.push(parseInt(databaseIdentifier));
 
-                store.layer._layers[uncheckedRowItem._id].setStyle(uncheckedStyle);
+                if (store.layer._layers[uncheckedRowItem._id]) {
+                    store.layer._layers[uncheckedRowItem._id].setStyle(uncheckedStyle);
 
-                store.layer._layers[uncheckedRowItem._id].closePopup()
+                    store.layer._layers[uncheckedRowItem._id].closePopup()
+                }
             });
         });
 
@@ -370,15 +390,17 @@ var gc2table = (function () {
             if (m[pkey] === false) {
                 uncheckedIds.push(parseInt(databaseIdentifier));
 
-                store.layer._layers[m._id].setStyle(uncheckedStyle);
+                if (store.layer._layers[m._id]) {
+                    store.layer._layers[m._id].setStyle(uncheckedStyle);
 
-                store.layer._layers[m._id].closePopup()
+                    store.layer._layers[m._id].closePopup()
+                }
             } else {
                 uncheckedIds = uncheckedIds.filter(function (item) {
                     return item !== parseInt(databaseIdentifier);
                 });
 
-                if (store.layer && store.layer.resetStyle) {
+                if (store.layer && store.layer.resetStyle && store.layer._layers[m._id]) {
                     store.layer.resetStyle(store.layer._layers[m._id]);
                 }
             }
@@ -429,11 +451,10 @@ var gc2table = (function () {
 
         loadDataInTable = function (doNotCallCustomOnload = false, forceDataLoad = false) {
             data = [];
-            $.each(store.layer._layers, function (i, v) {
-                v.feature.properties._id = i;
+            var buildRow = function (properties) {
                 // Shallow copy: we only overwrite top-level keys with rendered HTML
                 // below; nested objects (including bytea payloads) are referenced.
-                let layerClone = {...v.feature.properties};
+                let layerClone = {...properties};
                 $.each(layerClone, function (n, m) {
                     $.each(cm, function (j, k) {
                         if (k.dataIndex === n && (k?.template && k?.template !== '') && (layerClone[n] && layerClone[n] !== '')) {
@@ -456,12 +477,30 @@ var gc2table = (function () {
                         }
                     });
                 });
-                data.push(layerClone);
+                return layerClone;
+            };
+
+            $.each(store.layer._layers, function (i, v) {
+                v.feature.properties._id = i;
+                data.push(buildRow(v.feature.properties));
 
                 if (assignFeatureEventListenersOnDataLoad) {
                     assignEventListeners();
                 }
             });
+
+            // Features without geometry are skipped by Leaflet and have no layer.
+            // They still get a row, with a negative _id so it can't collide with
+            // a Leaflet layer id.
+            if (store.geoJSON && store.geoJSON.features) {
+                $.each(store.geoJSON.features, function (i, feature) {
+                    if (!feature.geometry) {
+                        feature.properties = feature.properties || {};
+                        feature.properties._id = -(i + 1);
+                        data.push(buildRow(feature.properties));
+                    }
+                });
+            }
 
             // Shallow copy of the layers map; we only iterate values to re-add to
             // the map after filtering — never mutate the Leaflet layers themselves.

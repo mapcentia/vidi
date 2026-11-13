@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2026.11.0] - 2026-12-11
+### Changed
+- The table of a vector layer now also lists features without geometry. Leaflet skips such features,
+  so they have no layer in the map, and the table was built from the map layers only. Clicking such a
+  row selects it, but there is nothing to zoom to, highlight or open a pop-up on.
+- The `select_function` of a layer is also called for table rows without geometry. `layer` is then
+  `undefined`, and the feature is passed as a new fifth argument: `function(id, layer, key, store, feature)`.
+- The inline Editor buttons in the table work for rows without geometry. Only the attributes can be
+  edited (no geometry can be added), and the feature can be deleted. Before, the buttons threw an error
+  because the editor could not find a map layer for the row.
+- Table rows without geometry are marked with a small crossed-out map pin in the first cell and a
+  "No geometry" tooltip, so it is clear why nothing happens in the map when the row is clicked.
+
 ## [2026-10-3] - 2026-29-10
 ### Fixed
 - Vector layers no longer flood the SQL API with requests when it fails. A failed request was retried

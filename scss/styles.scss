@@ -239,6 +239,19 @@ form.feature-attribute-editing-form img {
   background-color: var(--bs-body-bg);
 }
 
+/* Table rows of features without geometry: a small crossed-out map pin in the first cell */
+.bootstrap-table tr.gc2table-no-geometry > td:first-child::before {
+  font-family: "bootstrap-icons";
+  content: "\f3e8"; /* bi-geo-alt */
+  display: inline-block;
+  margin-right: .35em;
+  font-size: .85em;
+  line-height: 1;
+  vertical-align: -.1em;
+  color: var(--bs-secondary-color);
+  background: linear-gradient(to top right, transparent calc(50% - 1px), currentColor calc(50% - 1px), currentColor calc(50% + 1px), transparent calc(50% + 1px));
+}
+
 @keyframes target-fade {
   from { background-color: var(--bs-primary); } /* [1] */
   to { background-color: transparent; }
