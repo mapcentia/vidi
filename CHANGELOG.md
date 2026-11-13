@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [2026.11.0] - 2026-12-11
+## [2026.11.0] - 2026-13-11
 ### Changed
 - The table of a vector layer now also lists features without geometry. Leaflet skips such features,
   so they have no layer in the map, and the table was built from the map layers only. Clicking such a
