@@ -1015,6 +1015,7 @@ module.exports = module.exports = {
                                 uniqueId: "_id"
                             });
                         }
+                        $(`#copy-all-tables-to-clipboard-btn`).click((e) => copyAllTablesToClipboard());
 
                     } else {
                         row = "<tr><td>" + title + "</td><td>" + v.error + "</td></tr>";
@@ -1056,7 +1057,7 @@ module.exports = module.exports = {
             "dashArray": '5,3'
         });
         let geomStr = response.geom;
-        if (callBack) {
+        if (typeof callBack === "function") {
             callBack();
         }
     },
@@ -1279,7 +1280,7 @@ let dom = `
                                 </div>
                             </div>
                             <div role="tabpanel" class="tab-pane conflict-result-content" id="extra-content">
-                                <button class="btn btn-outline-success mt-1 w-100 mt-3" onclick="copyAllTablesToClipboard()">Kopier alt til udklipsholderen</button>
+                                <button class="btn btn-outline-success mt-1 w-100 mt-3" id="copy-all-tables-to-clipboard-btn">Kopier alt til udklipsholderen</button>
                                 <div id="extra"></div>
                             </div>
                         </div>
