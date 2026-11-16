@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2026.11.1] - 2026-16-11
+### Fixed
+- Fix(conflictSearch): bind copy button handler and guard callback. The inline "onclick" didn't work after the build system upgrade.
+
 ## [2026.11.0] - 2026-13-11
 ### Changed
 - The table of a vector layer now also lists features without geometry. Leaflet skips such features,
