@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [2026.11.2] - 2026-17-11
+### CHANGE
+- Fix(init): warn instead of alerting on empty metadata.
+
 ## [2026.11.1] - 2026-16-11
 ### Fixed
 - Fix(conflictSearch): bind copy button handler and guard callback. The inline "onclick" didn't work after the build system upgrade.
