@@ -147,7 +147,7 @@ module.exports = {
                                     ready = true;
                                     resolve(schemata);
                                 } else {
-                                    reject("Couldn't load meta data");
+                                    reject("Couldn't load any meta data.");
                                 }
                             })
                         }

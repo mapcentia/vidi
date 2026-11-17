@@ -636,18 +636,18 @@ module.exports = {
                             });
                         })
                     }).catch((error) => {
-                        alert(error)
+                        console.warn(error);
                     })
                 }
             }).catch((error) => {
-                console.error(error)
+                console.warn(error)
             })
         } else {
             console.log("Disable fast init")
             modules.meta.init().then((schemataStr) => {
                 return modules.setting.init(schemataStr);
             }).catch(error => {
-                alert(error)
+                console.warn(error);
             }).then(() => {
                 initExtensions();
                 return modules.layerTree.create();
